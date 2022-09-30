@@ -268,7 +268,7 @@ namespace GSC.Respository.InformConcent
             //if (!File.Exists(FullPath))
             //    return null;
             GC.Collect();
-            FileStream stream = new FileStream(FullPath, FileMode.Open, FileAccess.ReadWrite);
+            FileStream stream = new FileStream(FullPath, FileMode.Open);
             return new FileStreamResult(stream, "application/pdf");
         }
         public List<DashboardDto> GetEconsentMyTaskList(int ProjectId)
@@ -772,6 +772,7 @@ namespace GSC.Respository.InformConcent
                 //docStream.Dispose();
             }
 
+
             //add signature
             //pdfDocument = CreateSignature(pdfDocument, Id);
 
@@ -799,67 +800,70 @@ namespace GSC.Respository.InformConcent
             format.MeasureTrailingSpaces = true;
             format.WordWrap = PdfWordWrapType.Word;
 
-            //graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
-            //graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
-            AddString(reviewdetails.IsLAR == true ? "LAR" : "Volunteer Initial:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-            result = AddString(reviewdetails.IsLAR == true ? $"{randomization.LegalFirstName + " " + randomization.LegalLastName}" : $"{randomization.ScreeningNumber + " " + randomization.Initial}", result.Page, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
-
-            //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
-            //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
-            result = AddString(reviewdetails.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-            result.Page.Graphics.DrawImage(image, new PointF(70, result.Bounds.Y + 20), new SizeF(400f, 100f));
-
-            //graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
-            //graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
-
-            AddString("DateTime:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-            result = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result.Page, new Syncfusion.Drawing.RectangleF(140, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
-
-            if (AllDoc != null && AllDoc.IsReviewedByPatient)
+            if (isWithdraw == false)
             {
-                //add signature
-                //pdfDocument = CreateSignature(pdfDocument, Id);
-
-                PdfPage page1 = pdfDocument.Pages.Add();
-
-                RectangleF bounds1 = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-                PdfLayoutResult result1 = new PdfLayoutResult(page1, bounds1);
-
-                PdfLayoutFormat layoutFormat1 = new PdfLayoutFormat();
-                layoutFormat1.Layout = PdfLayoutType.Paginate;
-                layoutFormat1.Break = PdfLayoutBreakType.FitElement;
-                PdfGraphics graphics1 = page1.Graphics;
-                //Load the image from the disk
-                FileStream logoinputstream1 = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{AllDoc.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
-                PdfImage image1 = new PdfBitmap(logoinputstream1);
-                logoinputstream1.Close();
-                logoinputstream1.Dispose();
-                //Draw the image   
-
-                PdfFont fontbold1 = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
-                PdfFont regular1 = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
-                PdfStringFormat format1 = new PdfStringFormat();
-                //format.Alignment = PdfTextAlignment.Left;
-                //format.LineAlignment = PdfVerticalAlignment.Top;
-                format1.MeasureTrailingSpaces = true;
-                format1.WordWrap = PdfWordWrapType.Word;
-
                 //graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
                 //graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
-                AddString(AllDoc.IsLAR == true ? "LAR" : "Volunteer Initial:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Bottom + 20, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
-                result1 = AddString(AllDoc.IsLAR == true ? $"{randomization.LegalFirstName + " " + randomization.LegalLastName}" : $"{randomization.ScreeningNumber + " " + randomization.Initial}", result1.Page, new Syncfusion.Drawing.RectangleF(170, result1.Bounds.Bottom + 20, 500, result1.Page.GetClientSize().Height), PdfBrushes.Black, regular1, layoutFormat1);
+                AddString(reviewdetails.IsLAR == true ? "LAR" : "Volunteer Initial:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
+                result = AddString(reviewdetails.IsLAR == true ? $"{randomization.LegalFirstName + " " + randomization.LegalLastName}" : $"{randomization.ScreeningNumber + " " + randomization.Initial}", result.Page, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
                 //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
                 //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
-                result1 = AddString(AllDoc.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Bottom + 20, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
-                result1.Page.Graphics.DrawImage(image1, new PointF(70, result1.Bounds.Y + 20), new SizeF(400f, 100f));
+                result = AddString(reviewdetails.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
+                result.Page.Graphics.DrawImage(image, new PointF(70, result.Bounds.Y + 20), new SizeF(400f, 100f));
 
                 //graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
                 //graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
 
-                AddString("DateTime:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Y + 180, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
-                result1 = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result1.Page, new Syncfusion.Drawing.RectangleF(140, result1.Bounds.Y + 180, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, regular1, layoutFormat1);
+                AddString("DateTime:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
+                result = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result.Page, new Syncfusion.Drawing.RectangleF(140, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
+                //if (AllDoc != null && AllDoc.IsReviewedByPatient)
+                //{
+                //    //add signature
+                //    //pdfDocument = CreateSignature(pdfDocument, Id);
+
+                //    PdfPage page1 = pdfDocument.Pages.Add();
+
+                //    RectangleF bounds1 = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
+                //    PdfLayoutResult result1 = new PdfLayoutResult(page1, bounds1);
+
+                //    PdfLayoutFormat layoutFormat1 = new PdfLayoutFormat();
+                //    layoutFormat1.Layout = PdfLayoutType.Paginate;
+                //    layoutFormat1.Break = PdfLayoutBreakType.FitElement;
+                //    PdfGraphics graphics1 = page1.Graphics;
+                //    //Load the image from the disk
+                //    FileStream logoinputstream1 = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{AllDoc.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
+                //    PdfImage image1 = new PdfBitmap(logoinputstream1);
+                //    logoinputstream1.Close();
+                //    logoinputstream1.Dispose();
+                //    //Draw the image   
+
+                //    PdfFont fontbold1 = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
+                //    PdfFont regular1 = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
+                //    PdfStringFormat format1 = new PdfStringFormat();
+                //    //format.Alignment = PdfTextAlignment.Left;
+                //    //format.LineAlignment = PdfVerticalAlignment.Top;
+                //    format1.MeasureTrailingSpaces = true;
+                //    format1.WordWrap = PdfWordWrapType.Word;
+
+                //    //graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
+                //    //graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
+                //    AddString(AllDoc.IsLAR == true ? "LAR" : "Volunteer Initial:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Bottom + 20, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
+                //    result1 = AddString(AllDoc.IsLAR == true ? $"{randomization.LegalFirstName + " " + randomization.LegalLastName}" : $"{randomization.ScreeningNumber + " " + randomization.Initial}", result1.Page, new Syncfusion.Drawing.RectangleF(170, result1.Bounds.Bottom + 20, 500, result1.Page.GetClientSize().Height), PdfBrushes.Black, regular1, layoutFormat1);
+
+                //    //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
+                //    //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
+                //    result1 = AddString(AllDoc.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Bottom + 20, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
+                //    result1.Page.Graphics.DrawImage(image1, new PointF(70, result1.Bounds.Y + 20), new SizeF(400f, 100f));
+
+                //    //graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
+                //    //graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
+
+                //    AddString("DateTime:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Y + 180, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
+                //    result1 = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result1.Page, new Syncfusion.Drawing.RectangleF(140, result1.Bounds.Y + 180, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, regular1, layoutFormat1);
+
+                //}
             }
 
             if (isWithdraw == true)

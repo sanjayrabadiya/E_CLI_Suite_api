@@ -96,6 +96,7 @@ namespace GSC.Respository.Screening
                  PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  StudyVersion = t.StudyVersion ?? 1,
+                 IsEconsentCompleted = _context.EconsentReviewDetails.Where(b => b.RandomizationId == t.Id && b.DeletedDate == null).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                  {
                      LevelNo = x.LevelNo
@@ -171,6 +172,7 @@ namespace GSC.Respository.Screening
                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 StudyVersion = x.Randomization.StudyVersion ?? 1,
+                IsEconsentCompleted = _context.EconsentReviewDetails.Where(b => b.RandomizationId == x.RandomizationId && b.DeletedDate == null).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.IsScheduleTerminate == true || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
                     ScreeningVisitId = a.Id,
@@ -185,8 +187,8 @@ namespace GSC.Respository.Screening
                     IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == true) ? true : false,
                     StudyVersion = a.ProjectDesignVisit.StudyVersion
                 }).OrderBy(b => b.DesignOrder).ToList()
-                
-        }).ToListAsync();
+
+            }).ToListAsync();
 
             //await Task.WhenAll(projectDesignVisitTask, randomizationDataTask, templateTask, queryTask, screeningDataTask);
 
