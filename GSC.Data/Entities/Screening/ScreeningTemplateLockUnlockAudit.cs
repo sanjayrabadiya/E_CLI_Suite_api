@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.Screening
         public int ScreeningTemplateId { get; set; }
         public int CreatedRoleBy { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
         public int AuditReasonId { get; set; }

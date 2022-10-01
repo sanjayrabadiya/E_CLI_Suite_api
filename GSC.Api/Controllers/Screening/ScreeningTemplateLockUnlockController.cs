@@ -99,6 +99,7 @@ namespace GSC.Api.Controllers.Screening
                 var screeningTemplateLockUnlock = _mapper.Map<ScreeningTemplateLockUnlockAudit>(item);
                 _screeningTemplateLockUnlockRepository.Insert(screeningTemplateLockUnlock);
                 screeningTemplate.IsLocked = item.IsLocked;
+                screeningTemplate.IsHardLocked = item.IsHardLocked;
                 _screeningTemplateRepository.Update(screeningTemplate);
 
                 _uow.Save();

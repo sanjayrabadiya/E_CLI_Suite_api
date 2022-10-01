@@ -320,7 +320,7 @@ namespace GSC.Respository.Screening
             {
                 ScreeningEntryId = x.Id,
                 VolunteerId = x.Attendance.VolunteerId,
-                VolunteerName = string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{ x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName } {x.Attendance.Volunteer.LastName }" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
+                VolunteerName = string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName} {x.Attendance.Volunteer.LastName}" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
                 ProjectDesignId = x.ProjectDesignId,
                 ScreeningNo = x.ScreeningNo,
                 VolunteerNumber = x.Attendance.Volunteer.VolunteerNo,
@@ -416,7 +416,7 @@ namespace GSC.Respository.Screening
             {
                 ScreeningEntryId = x.Id,
                 VolunteerId = x.Attendance.VolunteerId,
-                VolunteerName = string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{ x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName } {x.Attendance.Volunteer.LastName }" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
+                VolunteerName = string.IsNullOrEmpty(x.Attendance.Volunteer.FullName) ? $"{x.Attendance.Volunteer.FirstName} {x.Attendance.Volunteer.MiddleName} {x.Attendance.Volunteer.LastName}" : x.Attendance.Volunteer.FullName, // Change by Tinku Mahato for null full name (28/06/2022)
                 ProjectDesignId = x.ProjectDesignId,
                 ScreeningNo = x.ScreeningNo,
                 VolunteerNumber = x.Attendance.Volunteer.VolunteerNo,
@@ -581,7 +581,7 @@ namespace GSC.Respository.Screening
 
         }
 
-        public IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isParent)
+        public IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isHardLock, bool isParent)
         {
             //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
             var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
@@ -591,7 +591,7 @@ namespace GSC.Respository.Screening
                 Where(a => a.DeletedDate == null && !isParent ? a.ProjectId == projectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                ).ToList();
 
-            subject = subject.Where(x => x.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !isLock).Count() > 0 && z.ScreeningTemplates != null).Count() > 0
+            subject = subject.Where(x => x.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == isLock && t.IsHardLocked == isHardLock).Count() > 0 && z.ScreeningTemplates != null).Count() > 0
                         && x.ScreeningVisit != null).ToList();
 
             return subject.Select(x => new DropDownDto
@@ -606,7 +606,7 @@ namespace GSC.Respository.Screening
                         : Convert.ToString(
                             Convert.ToString(x.Attendance.ProjectSubject != null
                                 ? x.Attendance.ProjectSubject.Number
-                                : "") + " - " + x.Attendance.Volunteer.FullName),
+                                : "") + " - " + x.Attendance.Volunteer?.FullName),
                 Code = "Screening",
             }).Distinct().ToList();
         }
@@ -620,7 +620,7 @@ namespace GSC.Respository.Screening
                  .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId > 0 ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 && (lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(a.Id))).ToList();
 
-            Period = Period.Where(a => a.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == !lockUnlockDDDto.IsLock).Count() > 0
+            Period = Period.Where(a => a.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == lockUnlockDDDto.IsLocked && t.IsHardLocked == lockUnlockDDDto.IsHardLocked).Count() > 0
                   && z.ScreeningTemplates != null).Count() > 0
                 && a.ScreeningVisit != null).ToList();
 
@@ -633,10 +633,10 @@ namespace GSC.Respository.Screening
 
 
         // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
-        public List<ProjectDropDown> GetSiteByLockUnlock(int parentProjectId, bool isLock)
+        public List<ProjectDropDown> GetSiteByLockUnlock(int parentProjectId, bool isLock, bool isHardLock)
         {
             var sites = _projectRepository.GetChildProjectDropDown(parentProjectId).Select(s => s.Id).ToList();
-            var siteIds = _context.ScreeningTemplate.Where(q => sites.Contains(q.ScreeningVisit.ScreeningEntry.ProjectId) && q.IsLocked == (!isLock))
+            var siteIds = _context.ScreeningTemplate.Where(q => sites.Contains(q.ScreeningVisit.ScreeningEntry.ProjectId) && q.IsLocked == isLock && q.IsHardLocked == isHardLock)
                 .Select(s => s.ScreeningVisit.ScreeningEntry.ProjectId).Distinct().ToList();
 
             var resultSites = _projectRepository.GetChildProjectDropDown(parentProjectId).Where(q => siteIds.Contains(q.Id)).ToList();

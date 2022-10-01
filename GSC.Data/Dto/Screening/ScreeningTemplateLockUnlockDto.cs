@@ -39,7 +39,8 @@ namespace GSC.Data.Dto.Screening
         public int?[] TemplateIds { get; set; }
         public int?[] DataEntryStatus { get; set; }
         public int?[] DataEntryReviewStatus { get; set; }
-        public bool Status { get; set; }
+        public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
     }
 
     public class LockUnlockDDDto
@@ -48,7 +49,8 @@ namespace GSC.Data.Dto.Screening
         public int ProjectId { get; set; }
         public int ChildProjectId { get; set; }
         public int?[] SubjectIds { get; set; }
-        public bool IsLock { get; set; }
+        public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
     }
 
     public class ScreeningTemplateLockUnlockAuditDto
@@ -60,6 +62,7 @@ namespace GSC.Data.Dto.Screening
         public int AuditReasonId { get; set; }
         public string AuditReasonComment { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
         public string DataEntryStatus { get; set; }
 
     }
@@ -75,7 +78,8 @@ namespace GSC.Data.Dto.Screening
         public string VisitName { get; set; }
         public string PeriodName { get; set; }
         public string TemplateName { get; set; }
-        public bool Status { get; set; }
+        public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
         public ScreeningTemplateStatus ScreeningTemplateStatus { get; set; }
         public string StatusName { get; set; }
         public int ScreeningTemplateId { get; set; }
@@ -95,7 +99,6 @@ namespace GSC.Data.Dto.Screening
         public int PeriodCount { get; set; }
         public List<LockUnlockListDto> lstTemplate { get; set; }
         public bool IsElectronicSignature { get; set; }
-        public bool IsLocked { get; set; }
         public int ProjectDesignId { get; set; }
         public int ProjectId { get; set; }
         public int? ParentProjectId { get; set; }
@@ -125,6 +128,7 @@ namespace GSC.Data.Dto.Screening
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
         public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
         public string Locked { get; set; }
         public int? CreatedBy { get; set; }
         public string CreatedByName { get; set; }

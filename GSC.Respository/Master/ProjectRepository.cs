@@ -6,6 +6,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -302,6 +303,52 @@ namespace GSC.Respository.Master
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
 
+        public List<LockUnlockProject> GetParentStaticProject()
+        {
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+            var projects = All.Where(x =>
+                  (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                  && x.ParentProjectId == null && x.IsStatic == true
+                  && x.ProjectCode != null
+                  && projectList.Contains(x.Id))
+              .Select(c => new LockUnlockProject
+              {
+                  ProjectId = c.Id,
+                  CreatedDate = c.CreatedDate.Value
+              }).Distinct().ToList();
+
+            projects.ForEach(item =>
+            {
+                var temCountries = new List<string>();
+
+                var countries = _context.Project
+               .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
+               {
+                   Id = (int)r.ManageSite.City.State.CountryId,
+                   CountryName = r.ManageSite.City.State.Country.CountryName,
+                   CountryCode = r.ManageSite.City.State.Country.CountryCode
+               }).Distinct().OrderBy(o => o.CountryCode).ToList();
+
+
+                var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
+                    ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
+                foreach (var country in countries)
+                {
+                    temCountries.Add(country.CountryName);
+                }
+
+                item.CountriesName = temCountries.Distinct().ToList();
+                item.CountCountry = temCountries.Distinct().Count();
+                item.projectCode = project.ProjectCode;
+                item.Project = project;
+            });
+
+            return projects;
+        }
+
+
+
         public IList<ProjectDropDown> GetProjectsForDataEntry()
         {
             var projectIds = _projectRightRepository.GetProjectRightIdList();
@@ -489,7 +536,7 @@ namespace GSC.Respository.Master
 
             siteDetailsDto.NoofSite = GetNoOfSite(projectId);
             siteDetailsDto.NoofCountry = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).GroupBy(x => x.ManageSite.City.State.Country.Id).Select(t => t.Key).Count();
-            
+
             projectDetailsDto.Sites = All.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null && x.ManageSite != null).Select(t => new BasicSiteDto
             {
                 SiteCode = t.ProjectCode,
@@ -500,7 +547,7 @@ namespace GSC.Respository.Master
             var project = Find(projectId);
             projectDetailsDto.SendSMS = project.IsSendSMS ? "Yes" : "No";
             projectDetailsDto.SendEmail = project.IsSendEmail ? "Yes" : "No";
-           // projectDetailsDto.RandomizationAutomatic = project.IsManualScreeningNo == true ? "No" : "Yes";
+            // projectDetailsDto.RandomizationAutomatic = project.IsManualScreeningNo == true ? "No" : "Yes";
 
             siteDetailsDto.MarkAsCompleted = All.Any(x => x.ParentProjectId == projectId && x.DeletedDate == null);
 

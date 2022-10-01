@@ -410,9 +410,9 @@ namespace GSC.Respository.Screening
                     {
                         if (Convert.ToString(r.ScreeningValue ?? "") != Convert.ToString(singleResult.Value ?? ""))
                         {
-                           var newValueId= _editCheckImpactRepository.InsertScreeningValue(projectDesignTemplateDto.ScreeningTemplateId,
-                                                          (int)r.ProjectDesignVariableId, singleResult.Value, singleResult.Note, singleResult.IsSoftFetch, r.CollectionSource, singleResult.EditCheckDisable);
-                            
+                            var newValueId = _editCheckImpactRepository.InsertScreeningValue(projectDesignTemplateDto.ScreeningTemplateId,
+                                                           (int)r.ProjectDesignVariableId, singleResult.Value, singleResult.Note, singleResult.IsSoftFetch, r.CollectionSource, singleResult.EditCheckDisable);
+
                             if (newValueId > 0 && r.ScreeningTemplateValueId == 0)
                                 r.ScreeningTemplateValueId = newValueId;
                         }
@@ -898,7 +898,9 @@ namespace GSC.Respository.Screening
                 ProjectDesignId = x.ProjectDesignId,
                 ParentProjectId = x.Project.ParentProjectId,
                 ProjectCode = ProjectCode,
-                Status = lockUnlockParams.Status,
+                //Status = lockUnlockParams.Status,
+                IsHardLocked = lockUnlockParams.IsHardLocked,
+                IsLocked = lockUnlockParams.IsLocked,
                 ProjectName = x.Project.ProjectCode,
                 PeriodName = x.ProjectDesignPeriod.DisplayName,
                 ScreeningNo = x.ScreeningNo,
@@ -908,27 +910,27 @@ namespace GSC.Respository.Screening
                 IsElectronicSignature = workflowlevel.IsElectricSignature,
                 PeriodCount = All.Where(g => g.ScreeningVisit.ScreeningEntryId == x.Id && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
-                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && g.DeletedDate == null && g.IsLocked == lockUnlockParams.IsLocked && g.IsHardLocked == lockUnlockParams.IsHardLocked
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
                                     .Select(a => a.ScreeningVisit.ProjectDesignVisit.ProjectDesignPeriodId).Distinct().Count(),
                 TemplateCount = All.Where(g => g.ScreeningVisit.ScreeningEntryId == x.Id && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
-                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && g.DeletedDate == null && g.IsLocked == lockUnlockParams.IsLocked && g.IsHardLocked == lockUnlockParams.IsHardLocked
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status)))).Count(),
                 VisitCount = All.Where(g => g.ScreeningVisit.ScreeningEntryId == x.Id && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
-                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && g.DeletedDate == null && g.IsLocked == lockUnlockParams.IsLocked && g.IsHardLocked == lockUnlockParams.IsHardLocked
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
                                     .Select(a => a.ScreeningVisit.Id).Distinct().Count(),
                 lstTemplate = All.Where(g => g.ScreeningVisit.ScreeningEntryId == x.Id && (lockUnlockParams.VisitIds == null || lockUnlockParams.VisitIds.Contains(g.ProjectDesignTemplate.ProjectDesignVisitId))
                                 && (lockUnlockParams.TemplateIds == null || lockUnlockParams.TemplateIds.Contains(g.ProjectDesignTemplateId))
-                                && g.DeletedDate == null && g.IsLocked != lockUnlockParams.Status
+                                && g.DeletedDate == null && g.IsLocked == lockUnlockParams.IsLocked && g.IsHardLocked == lockUnlockParams.IsHardLocked
                                 && (lockUnlockParams.DataEntryStatus != null && lockUnlockParams.DataEntryReviewStatus != null ? lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel)
                                   || lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status) : (lockUnlockParams.DataEntryStatus == null || lockUnlockParams.DataEntryStatus.Contains(g.ReviewLevel))
                                   && (lockUnlockParams.DataEntryReviewStatus == null || lockUnlockParams.DataEntryReviewStatus.Contains((int)g.Status))))
@@ -1017,7 +1019,7 @@ namespace GSC.Respository.Screening
             if (lockUnlockDDDto.Id != null)
                 Templates = Templates.Where(a => lockUnlockDDDto.Id.Contains(a.ScreeningVisit.ProjectDesignVisitId)).ToList();
 
-            Templates = Templates.Where(a => a.IsLocked == !lockUnlockDDDto.IsLock).ToList();
+            Templates = Templates.Where(a => a.IsLocked == lockUnlockDDDto.IsLocked && a.IsHardLocked == lockUnlockDDDto.IsHardLocked).ToList();
 
             return Templates.GroupBy(w => w.ProjectDesignTemplateId).Select(x => new DropDownDto
             {
