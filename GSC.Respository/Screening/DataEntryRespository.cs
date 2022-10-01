@@ -85,6 +85,8 @@ namespace GSC.Respository.Screening
                 InActiveVersion = t.InActiveVersion
             }).ToListAsync();
 
+            var EconsentReviewDetails = _context.EconsentReviewDetails.Where(b => b.DeletedDate == null).ToList();
+
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
              && x.PatientStatusId == ScreeningPatientStatus.Screening && x.ScreeningEntry == null).Select(t => new DataCaptureGridData
              {
@@ -96,7 +98,7 @@ namespace GSC.Respository.Screening
                  PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  StudyVersion = t.StudyVersion ?? 1,
-                 IsEconsentCompleted = _context.EconsentReviewDetails.Where(b => b.RandomizationId == t.Id && b.DeletedDate == null).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
+                 IsEconsentCompleted = EconsentReviewDetails.Where(b => b.RandomizationId == t.Id).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                  {
                      LevelNo = x.LevelNo
@@ -172,7 +174,7 @@ namespace GSC.Respository.Screening
                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 StudyVersion = x.Randomization.StudyVersion ?? 1,
-                IsEconsentCompleted = _context.EconsentReviewDetails.Where(b => b.RandomizationId == x.RandomizationId && b.DeletedDate == null).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
+                IsEconsentCompleted = x.RandomizationId != null ? EconsentReviewDetails.Where(b => b.RandomizationId == x.RandomizationId).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true) : true,
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.IsScheduleTerminate == true || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
                     ScreeningVisitId = a.Id,
