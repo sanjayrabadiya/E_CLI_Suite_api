@@ -1098,7 +1098,19 @@ namespace GSC.Report
 
                                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
                                         textBoxField.Bounds = new RectangleF(350, result.Bounds.Y, 100, 20);
-                                        textBoxField.Text = variable.ScreeningValue == null ? "" : variable.ScreeningValue;
+                                        if (!string.IsNullOrEmpty(variable.ScreeningValue))
+                                        {
+                                            var space = variable.ScreeningValue.Split(" ").ToArray();
+                                            if (space.Length > 0)
+                                            {
+                                                var slash = space[0].ToString().Split("/").ToArray();
+                                                var date1 = Convert.ToDateTime(slash[2] + "-" + slash[0] + "-" + slash[1] + " " + space[1]);
+                                                textBoxField.Text = date1.ToString("hh:mm tt");
+                                            }
+
+                                        }
+                                        else
+                                            textBoxField.Text = "";
                                         textBoxField.ReadOnly = true;
                                         document.Form.Fields.Add(textBoxField);
                                         // AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(460, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfontmini, layoutFormat);
@@ -1142,7 +1154,7 @@ namespace GSC.Report
                                     {
                                         result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(300, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 }
                                 else
                                 {
@@ -1157,7 +1169,7 @@ namespace GSC.Report
                                             result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                                 //data
-                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                             }
 
@@ -1584,7 +1596,19 @@ namespace GSC.Report
 
                                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, "Time");
                                         textBoxField.Bounds = new RectangleF(50, result.Bounds.Y, 100, 20);
-                                        textBoxField.Text = variable.ScreeningValue;
+                                        if (!string.IsNullOrEmpty(variable.ScreeningValue))
+                                        {
+                                            var space = variable.ScreeningValue.Split(" ").ToArray();
+                                            if (space.Length > 0)
+                                            {
+                                                var slash = space[0].ToString().Split("/").ToArray();
+                                                var date1 = Convert.ToDateTime(slash[2] + "-" + slash[0] + "-" + slash[1] + " " + space[1]);
+                                                textBoxField.Text = date1.ToString("hh:mm tt");
+                                            }
+
+                                        }
+                                        else
+                                            textBoxField.Text = "";
                                         textBoxField.ReadOnly = true;
                                         document.Form.Fields.Add(textBoxField);
                                         // AddString(GeneralSettings.TimeFormat.ToUpper(), result.Page, new Syncfusion.Drawing.RectangleF(460, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfontmini, layoutFormat);
@@ -1624,9 +1648,7 @@ namespace GSC.Report
                                     {
                                         result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 300, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                     }
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 40, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 }
                                 else
                                 {
@@ -1641,7 +1663,7 @@ namespace GSC.Report
                                             result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                                 //data
-                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                             }
 
@@ -2544,7 +2566,7 @@ namespace GSC.Report
 
         private void DesignDosierReportDocumentShowPdf(DossierReportDto Docdata, PdfDocument document)
         {
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var documentPath = _uploadSettingRepository.GetDocumentPath();
             PdfMergeOptions mergeOptions = new PdfMergeOptions();
             List<Stream> pdfStreams = new List<Stream>();
             foreach (var Period in Docdata.Period)
@@ -2557,7 +2579,7 @@ namespace GSC.Report
                         {
                             string pathname = string.Empty;
 
-                            pathname = documentUrl + variable.DocPath;
+                            pathname = documentPath + variable.DocPath;
                             Stream stream2 = File.OpenRead(pathname);
                             pdfStreams.Add(stream2);
 
