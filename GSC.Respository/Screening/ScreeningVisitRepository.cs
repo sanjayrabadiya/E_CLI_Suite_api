@@ -486,7 +486,7 @@ namespace GSC.Respository.Screening
 
             var Visit = _context.ScreeningVisit.Include(a => a.ScreeningEntry).Include(a => a.ProjectDesignVisit)
                 .Include(a => a.ScreeningTemplates)
-                .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId>0 ? a.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningEntry.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+                .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId > 0 ? a.ScreeningEntry.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ScreeningEntry.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 ).ToList();
 
             if (lockUnlockDDDto.SubjectIds != null)
@@ -495,7 +495,7 @@ namespace GSC.Respository.Screening
             if (lockUnlockDDDto.Id != null)
                 Visit = Visit.Where(a => lockUnlockDDDto.Id.Contains(a.ProjectDesignVisit.ProjectDesignPeriodId)).ToList();
 
-            Visit = Visit.Where(a => a.ScreeningTemplates.Where(t => t.IsLocked == !lockUnlockDDDto.IsLock).Count() > 0
+            Visit = Visit.Where(a => a.ScreeningTemplates.Where(t => t.IsLocked == lockUnlockDDDto.IsLocked && t.IsHardLocked == lockUnlockDDDto.IsHardLocked).Count() > 0
                   && a.ScreeningTemplates != null).ToList();
 
             return Visit.GroupBy(x => x.ProjectDesignVisitId).Select(x => new DropDownDto
@@ -521,7 +521,7 @@ namespace GSC.Respository.Screening
         //Add by Tinku Mahato for voleenter screening on 21-06-2022
         public List<int> GetScreeningVisitList(int screeningEntryId)
         {
-            return All.Where(q => q.ScreeningEntryId==screeningEntryId && q.Status== ScreeningVisitStatus.NotStarted).Select(s => s.Id).ToList();
+            return All.Where(q => q.ScreeningEntryId == screeningEntryId && q.Status == ScreeningVisitStatus.NotStarted).Select(s => s.Id).ToList();
         }
     }
 }

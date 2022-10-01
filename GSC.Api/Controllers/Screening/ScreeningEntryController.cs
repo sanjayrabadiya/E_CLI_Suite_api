@@ -202,10 +202,10 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetSubjectByProjecIdLocked/{projectId}/{isLock}/{isParent}")]
-        public IActionResult GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isParent)  // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+        [Route("GetSubjectByProjecIdLocked/{projectId}/{isLock}/{isHardLock}/{isParent}")]
+        public IActionResult GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isHardLock, bool isParent)  // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
         {
-            return Ok(_screeningEntryRepository.GetSubjectByProjecIdLocked(projectId, isLock, isParent));
+            return Ok(_screeningEntryRepository.GetSubjectByProjecIdLocked(projectId, isLock, isHardLock, isParent));
         }
 
         [HttpGet]
@@ -234,10 +234,10 @@ namespace GSC.Api.Controllers.Screening
 
         // Change by Tinku for add separate dropdown for parent project (24/06/2022)
         [HttpGet]
-        [Route("GetSitesByLockUnlock/{parentProjectId}/{isLock}")]
-        public IActionResult GetSitesByLockUnlock(int parentProjectId, bool isLock)
+        [Route("GetSitesByLockUnlock/{parentProjectId}/{isLock}/{isHardLock}")]
+        public IActionResult GetSitesByLockUnlock(int parentProjectId, bool isLock, bool isHardLock)
         {
-            var sites = _screeningEntryRepository.GetSiteByLockUnlock(parentProjectId, isLock);
+            var sites = _screeningEntryRepository.GetSiteByLockUnlock(parentProjectId, isLock, isHardLock);
             return Ok(sites);
         }
 

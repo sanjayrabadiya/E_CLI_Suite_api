@@ -49,5 +49,7 @@ namespace GSC.Respository.Master
         void CloneStudy(int cloneProjectId, Data.Entities.Master.Project project);//Clone Study Tinku Mahato (01-04-2022)
 
         List<ProjectDropDown> GetParentProjectDropDownForAddProjectNo();//prakash for volunteer screening project no add
+
+        List<LockUnlockProject> GetParentStaticProject();
     }
 }

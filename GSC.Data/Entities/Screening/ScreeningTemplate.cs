@@ -39,6 +39,7 @@ namespace GSC.Data.Entities.Screening
             set => _actualeDate = value?.UtcDateTime();
         }
         public bool IsLocked { get; set; }
+        public bool IsHardLocked { get; set; }
         public bool IsCompleteReview { get; set; }
         public bool IsDisable { get; set; }
         public int? RepeatSeqNo { get; set; }
