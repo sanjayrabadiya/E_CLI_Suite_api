@@ -3,13 +3,14 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.ProjectRight;
 
 namespace GSC.Respository.Master
 {
     public interface IProjectRepository : IGenericRepository<Data.Entities.Master.Project>
     {
         List<ProjectDropDown> GetParentProjectDropDown();
-        IList<ProjectGridDto> GetProjectList(bool isDeleted);
+        IList<DashboardProject> GetProjectList(bool isDeleted);
         void Save(Data.Entities.Master.Project project);
         string Duplicate(Data.Entities.Master.Project objSave);
         string CheckAttendanceLimitPost(Data.Entities.Master.Project objSave);

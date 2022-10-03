@@ -5,6 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
@@ -71,13 +72,47 @@ namespace GSC.Respository.Master
             _siteTeamRepository = siteTeamRepository;
         }
 
-        public IList<ProjectGridDto> GetProjectList(bool isDeleted)
+        public IList<DashboardProject> GetProjectList(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return new List<ProjectGridDto>();
+            if (projectList == null || projectList.Count == 0) return new List<DashboardProject>();
 
-            var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && projectList.Contains(x.Id) && x.ParentProjectId == null).
-                 ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var projects = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && projectList.Contains(x.Id) && x.ParentProjectId == null)
+                .Select(c => new DashboardProject
+                {
+                    ProjectId = c.Id,
+                    CreatedDate = c.CreatedDate.Value
+                }).OrderByDescending(x => x.ProjectId).ToList();
+
+            // ProjectTo<DashboardProject>(_mapper.ConfigurationProvider).OrderByDescending(x => x.ProjectId).ToList();
+
+
+            projects.ForEach(item =>
+            {
+                var temCountries = new List<string>();
+
+                var countries = _context.Project
+               .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
+               {
+                   Id = (int)r.ManageSite.City.State.CountryId,
+                   CountryName = r.ManageSite.City.State.Country.CountryName,
+                   CountryCode = r.ManageSite.City.State.Country.CountryCode
+               }).Distinct().OrderBy(o => o.CountryCode).ToList();
+
+                //var countries = _context.Project.Include(i => i.Country).Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null);
+
+                var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
+                    ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
+                foreach (var country in countries)
+                {
+                    temCountries.Add(country.CountryName);
+                }
+
+                item.CountriesName = temCountries.Distinct().ToList();
+                item.CountCountry = temCountries.Distinct().Count();
+                item.projectCode = project.ProjectCode;
+                item.Project = project;
+            });
 
 
             return projects;
