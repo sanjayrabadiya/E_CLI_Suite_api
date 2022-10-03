@@ -103,6 +103,9 @@ namespace GSC.Data.Dto.Master
         public List<BasicSiteDto> Sites { get; set; }
         public List<BasicWorkFlowDetailsDto> WorkFlowDetail { get; set; }
         public EditCheckDetailsDto EditCheckDetails { get; set; }
+        public string CountryName { get; set; }
+        public string TrialTypeName { get; set; }
+        public string RegulatoryTypeName { get; set; }
     }
 
     public class SiteDetailsDto
