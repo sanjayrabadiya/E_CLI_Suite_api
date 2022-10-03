@@ -98,7 +98,8 @@ namespace GSC.Respository.Screening
                  PatientStatusName = t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  StudyVersion = t.StudyVersion ?? 1,
-                 // IsEconsentCompleted = EconsentReviewDetails.Where(b => b.RandomizationId == t.Id).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
+                 //IsEconsentCompleted = EconsentReviewDetails.Where(b => b.RandomizationId == t.Id).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true),
+                 IsEconsentCompleted = true,
                  TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                  {
                      LevelNo = x.LevelNo
@@ -175,6 +176,7 @@ namespace GSC.Respository.Screening
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 StudyVersion = x.Randomization.StudyVersion ?? 1,
                 //IsEconsentCompleted = x.RandomizationId != null ? EconsentReviewDetails.Where(b => b.RandomizationId == x.RandomizationId).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true) : true,
+                IsEconsentCompleted = true,
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.IsScheduleTerminate == true || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
                     ScreeningVisitId = a.Id,
