@@ -306,7 +306,8 @@ namespace GSC.Respository.Volunteer
             return query.Select(t => new DropDownDto
             {
                 Id = t.Id,
-                Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
+                Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName,
+                ExtraData = t.RegisterDate
             }).ToList();
         }
 
