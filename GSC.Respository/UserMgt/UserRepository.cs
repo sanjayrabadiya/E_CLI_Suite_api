@@ -85,10 +85,14 @@ namespace GSC.Respository.UserMgt
             _mapper = mapper;
         }
 
-        public List<UserGridDto> GetUsers(bool isDeleted)
+        public async Task<List<UserGridDto>> GetUsers(bool isDeleted)
         {
 
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.UserType != UserMasterUserType.Patient).
+            var result = await _centreUserService.GetLockedUsers($"{_environmentSetting.Value.CentralApi}User/GetLockedUsers/{_jwtTokenAccesser.CompanyId}");
+
+            var lockUserIds = result.Data.Select(s => s.UserName);
+
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null && !lockUserIds.Contains(x.UserName)) && x.UserType != UserMasterUserType.Patient).
                    ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 

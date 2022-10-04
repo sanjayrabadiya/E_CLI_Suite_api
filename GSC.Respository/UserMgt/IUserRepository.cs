@@ -14,7 +14,7 @@ namespace GSC.Respository.UserMgt
         
         string DuplicateUserName(User objSave);
         List<DropDownDto> GetUserName();
-        List<UserGridDto> GetUsers(bool isDeleted);
+        Task<List<UserGridDto>> GetUsers(bool isDeleted);
         List<DropDownDto> GetUserNameDropdown();
         List<UserGridDto> GetPatients(PatientDto userDto);
         LoginResponseDto GetLoginDetails();

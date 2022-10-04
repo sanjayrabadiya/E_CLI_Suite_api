@@ -79,9 +79,9 @@ namespace GSC.Api.Controllers.UserMgt
 
 
         [HttpGet("{isDeleted:bool?}")]
-        public IActionResult Get(bool isDeleted)
+        public async Task<IActionResult> Get(bool isDeleted)
         {
-            var usersDto = _userRepository.GetUsers(isDeleted);
+            var usersDto = await _userRepository.GetUsers(isDeleted);
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
             usersDto.ForEach(t => t.ProfilePicPath = imageUrl + (t.ProfilePic ?? DocumentService.DefulatProfilePic));
 
