@@ -509,65 +509,72 @@ namespace GSC.Report.Common
         //blank report query
         public List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting)
         {
-
-            var finaldata = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).Select(x => new DossierReportDto
+            try
             {
-                ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId, ProjectDesignId = x.Id },
-                Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
+                var finaldata = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).Select(x => new DossierReportDto
                 {
-                    DisplayName = a.DisplayName,
-                    Visit = a.VisitList.Where(b => b.DeletedDate == null
-                    && ((reportSetting.CRFType == CRFTypes.CRF && !b.IsNonCRF)
-                    || (reportSetting.CRFType == CRFTypes.NonCRF && b.IsNonCRF)
-                    || (reportSetting.CRFType == CRFTypes.Both && (b.IsNonCRF || !b.IsNonCRF))
-                    ) && (reportSetting.VisitIds == null || (reportSetting.VisitIds != null && reportSetting.VisitIds.Contains(b.Id)))
-                    ).Select(b => new ProjectDesignVisitList
+                    ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId, ProjectDesignId = x.Id },
+                    Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
                     {
-                        DisplayName = b.DisplayName,
-                        DesignOrder = b.DesignOrder,
-                        ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null
-                        && (reportSetting.TemplateIds == null || (reportSetting.TemplateIds != null && reportSetting.TemplateIds.Contains(n.Id))
-                        )).Select(n => new ProjectDesignTemplatelist
+                        DisplayName = a.DisplayName,
+                        Visit = a.VisitList.Where(b => b.DeletedDate == null
+                        && ((reportSetting.CRFType == CRFTypes.CRF && !b.IsNonCRF)
+                        || (reportSetting.CRFType == CRFTypes.NonCRF && b.IsNonCRF)
+                        || (reportSetting.CRFType == CRFTypes.Both && (b.IsNonCRF || !b.IsNonCRF))
+                        ) && (reportSetting.VisitIds == null || (reportSetting.VisitIds != null && reportSetting.VisitIds.Contains(b.Id)))
+                        ).Select(b => new ProjectDesignVisitList
                         {
-                            TemplateCode = n.TemplateCode,
-                            TemplateName = n.TemplateName,
-                            DesignOrder = n.DesignOrder,
-                            Label = n.Label,
-                            PreLabel = n.PreLabel,
-                            Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
-                            TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
-                            TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
-
-                            ProjectDesignVariable = n.Variables.Where(v => v.DeletedDate == null).Select(v => new ProjectDesignVariableReportDto
+                            DisplayName = b.DisplayName,
+                            DesignOrder = b.DesignOrder,
+                            ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null
+                            && (reportSetting.TemplateIds == null || (reportSetting.TemplateIds != null && reportSetting.TemplateIds.Contains(n.Id))
+                            )).Select(n => new ProjectDesignTemplatelist
                             {
-                                Id = v.Id,
-                                VariableName = v.VariableName,
-                                VariableCode = v.VariableCode,
-                                DesignOrder = v.DesignOrder,
-                                IsNa = v.IsNa,
-                                CollectionSource = v.CollectionSource,
-                                Annotation = v.Annotation,
-                                CollectionAnnotation = v.CollectionAnnotation,
-                                Note = v.Note,
-                                DefaultValue = v.DefaultValue,
-                                LowRangeValue = v.LowRangeValue,
-                                HighRangeValue = v.HighRangeValue,
-                                LargeStep = v.LargeStep,
-                                Unit = new UnitReportDto
+                                TemplateCode = n.TemplateCode,
+                                TemplateName = n.TemplateName,
+                                DesignOrder = n.DesignOrder,
+                                Label = n.Label,
+                                PreLabel = n.PreLabel,
+                                Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
+                                TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
+                                TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
+
+                                ProjectDesignVariable = n.Variables.Where(v => v.DeletedDate == null).Select(v => new ProjectDesignVariableReportDto
                                 {
-                                    UnitName = v.Unit.UnitName,
-                                    UnitAnnotation = v.UnitAnnotation
-                                },
-                                Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
-                                VariableCategoryName = v.VariableCategory.CategoryName,
-                                Label = v.Label,
-                                PreLabel = v.PreLabel
+                                    Id = v.Id,
+                                    VariableName = v.VariableName,
+                                    VariableCode = v.VariableCode,
+                                    DesignOrder = v.DesignOrder,
+                                    IsNa = v.IsNa,
+                                    CollectionSource = v.CollectionSource,
+                                    Annotation = v.Annotation,
+                                    CollectionAnnotation = v.CollectionAnnotation,
+                                    Note = v.Note,
+                                    DefaultValue = v.DefaultValue,
+                                    LowRangeValue = v.LowRangeValue,
+                                    HighRangeValue = v.HighRangeValue,
+                                    LargeStep = v.LargeStep,
+                                    Unit = new UnitReportDto
+                                    {
+                                        UnitName = v.Unit.UnitName,
+                                        UnitAnnotation = v.UnitAnnotation
+                                    },
+                                    Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
+                                    VariableCategoryName = v.VariableCategory.CategoryName,
+                                    Label = v.Label,
+                                    PreLabel = v.PreLabel,
+                                    IsLevelNo = v.IsLevelNo
+                                }).ToList()
                             }).ToList()
-                        }).ToList()
-                    }).OrderBy(d => d.DesignOrder).ToList()
-                }).ToList()
-            }).ToList();
-            return finaldata;
+                        }).OrderBy(d => d.DesignOrder).ToList()
+                    }).ToList()
+                }).ToList();
+                return finaldata;
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
         }
         //data query
         public List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting)
@@ -618,7 +625,7 @@ namespace GSC.Report.Common
                         Notes = n.Note, IsPreview = n.IsPreview,IsBottom = n.IsBottom
                       }).Where(tn => tn.IsBottom == true).ToList(),
                       ProjectDesignVariable = a.ScreeningTemplateValues.Where(s => s.DeletedDate == null && s.ProjectDesignVariable.DeletedDate == null).Select(s => new ProjectDesignVariableReportDto {
-                        Id = s.ProjectDesignVariable.Id,
+                          Id = s.ProjectDesignVariable.Id,
                           VariableName = s.ProjectDesignVariable.VariableName,
                           VariableCode = s.ProjectDesignVariable.VariableCode,
                           DesignOrder = s.ProjectDesignVariable.DesignOrder,
@@ -632,18 +639,32 @@ namespace GSC.Report.Common
                             UnitAnnotation = s.ProjectDesignVariable.UnitAnnotation
                           },
                           Values = s.ProjectDesignVariable.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto {
-                            Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label
+                            Id = vd.Id,
+                            ValueName = vd.ValueName,
+                            SeqNo = vd.SeqNo,
+                            ValueCode = vd.ValueCode,
+                            Label = vd.Label,
+                            TableCollectionSource = vd.TableCollectionSource
+
                           }).ToList(),
                           ScreeningValue= s.Value,
                           ScreeningIsNa=s.IsNa,
                           ScreeningTemplateValueId=s.Id,
-                          ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList(),
+                          ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{
+                              Value=c.Value,
+                              ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,
+                              ScreeningTemplateValueId=c.ScreeningTemplateValueId,
+                              ValueName=c.ProjectDesignVariableValue.ValueName,
+                              LevelNo = c.LevelNo,
+                              DeletedDate = c.DeletedDate
+                          }).ToList(),
                           VariableCategoryName = s.ProjectDesignVariable.VariableCategory.CategoryName,
                           Label = s.ProjectDesignVariable.Label,
                           PreLabel = s.ProjectDesignVariable.PreLabel,
                           IsDocument =  s.ProjectDesignVariable.IsDocument,
                           DocPath =  s.DocPath,
-                          MimeType = s.MimeType
+                          MimeType = s.MimeType,
+                          IsLevelNo = s.ProjectDesignVariable.IsLevelNo
                       }).ToList(),
                       ScreeningTemplateReview=a.ScreeningTemplateReview.Where(r=>r.DeletedDate==null).Select(r=>new ScreeningTemplateReviewReportDto{
                       ScreeningTemplateId=r.ScreeningTemplateId,

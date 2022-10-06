@@ -1,4 +1,5 @@
 ﻿using GSC.Helper;
+using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,7 +19,7 @@ namespace GSC.Data.Dto.Report.Pdf
     {
         public string ProjectCode { get; set; }
         public string ProjectName { get; set; }
-        public int ClientId { get; set; } 
+        public int ClientId { get; set; }
         public int ProjectDesignId { get; set; }
     }
 
@@ -56,7 +57,7 @@ namespace GSC.Data.Dto.Report.Pdf
         public List<ProjectDesignTemplateNoteReportDto> TemplateNotesBottom { get; set; }
         public List<ProjectDesignVariableReportDto> ProjectDesignVariable { get; set; }
         public List<ScreeningTemplateReviewReportDto> ScreeningTemplateReview { get; set; }
-      
+
     }
 
     public class DomainReportDto
@@ -105,6 +106,7 @@ namespace GSC.Data.Dto.Report.Pdf
 
         public bool IsDocument { get; set; }
 
+        public bool? IsLevelNo { get; set; }
         public string DocPath { get; set; }
         public string MimeType { get; set; }
     }
@@ -123,6 +125,8 @@ namespace GSC.Data.Dto.Report.Pdf
         public int SeqNo { get; set; }
         public string ValueCode { get; set; }
         public string Label { get; set; }
+
+        public TableCollectionSource? TableCollectionSource { get; set; }
     }
 
     public class ScreeningTemplateValueChildReportDto
@@ -131,6 +135,14 @@ namespace GSC.Data.Dto.Report.Pdf
         public int ProjectDesignVariableValueId { get; set; }
         public string Value { get; set; }
         public string ValueName { get; set; }
+
+        public short? LevelNo { get; set; }
+        public DateTime? DeletedDate
+        {
+            get => _deletedDate?.UtcDateTime();
+            set => _deletedDate = value?.UtcDateTime();
+        }
+        private DateTime? _deletedDate;
     }
 
     public class ScreeningTemplateReviewReportDto
@@ -142,6 +154,6 @@ namespace GSC.Data.Dto.Report.Pdf
         public DateTime? CreatedDate { get; set; }
         public string RoleName { get; set; }
     }
+   
 
-  
 }
