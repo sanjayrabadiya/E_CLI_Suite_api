@@ -388,8 +388,8 @@ namespace GSC.Respository.Screening
 
         public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
         {
-            var details = _screeningTemplateRepository.All.Include(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod).Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null).FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId;
-            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == details && x.DeletedDate == null).FirstOrDefault();
+            var details = _context.ScreeningTemplate.Where(s => s.ScreeningVisitId == screeningVisitId).Include(d => d.ScreeningVisit).ThenInclude(d => d.ScreeningEntry).FirstOrDefault();
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == details.ScreeningVisit.ScreeningEntry.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
 
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ReviewLevel == reviewLevel)
                     .Select(t => new DataEntryTemplateCountDisplayTree
