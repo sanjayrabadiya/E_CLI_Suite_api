@@ -103,6 +103,13 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetDashboardPatientStatus/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardPatientStatus(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetDashboardPatientStatus(projectId, countryId, siteId));
+        }
+
+        [HttpGet]
         [Route("GetDashboardVisitGraph/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult GetDashboardVisitGraph(int projectId, int countryId, int siteId)
         {

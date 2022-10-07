@@ -70,5 +70,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         {
             return Ok(_projectSettingsRepository.GetParentProjectDropDownEicf());
         }
+
+        [HttpGet]
+        [Route("GetParentProjectDropDownScreening")]
+        public IActionResult GetParentProjectDropDownScreening()
+        {
+            return Ok(_projectSettingsRepository.GetParentProjectDropDownScreening());
+        }
     }
 }

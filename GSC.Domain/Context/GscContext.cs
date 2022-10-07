@@ -424,6 +424,7 @@ namespace GSC.Domain.Context
 
         public DbSet<ScreeningEntryStudyHistory> ScreeningEntryStudyHistory { get; set; }
         public DbSet<EconsentGlossary> EconsentGlossary { get; set; }
+        public DbSet<ScreeningSetting> ScreeningSetting { get; set; }
     }
 
 

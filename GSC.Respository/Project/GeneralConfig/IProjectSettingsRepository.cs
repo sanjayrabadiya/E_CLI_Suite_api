@@ -10,5 +10,6 @@ namespace GSC.Respository.Project.GeneralConfig
     public interface IProjectSettingsRepository : IGenericRepository<ProjectSettings>
     {
         List<ProjectDropDown> GetParentProjectDropDownEicf();
+        List<ProjectDropDown> GetParentProjectDropDownScreening();
     }
 }

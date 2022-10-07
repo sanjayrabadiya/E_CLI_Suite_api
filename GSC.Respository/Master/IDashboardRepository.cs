@@ -7,6 +7,7 @@ namespace GSC.Respository.Master
 {
     public interface IDashboardRepository
     {
+        dynamic GetDashboardPatientStatus(int projectId, int countryId, int siteId);
         dynamic GetDashboardVisitGraph(int projectId, int countryId, int siteId);
         dynamic ScreenedToRandomizedGraph(int projectId, int countryId, int siteId);
         dynamic GetRandomizedProgressGraph(int projectId, int countryId, int siteId);

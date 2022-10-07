@@ -62,6 +62,51 @@ namespace GSC.Respository.Master
         }
 
 
+        public dynamic GetDashboardPatientStatus(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            int total = 0;
+            if (countryId == 0 && siteId == 0)
+            {
+                var project = _projectRepository.All.Where(x => projectIds.Contains(x.Id)).ToList();
+                 total = (int)project.Sum(item => item.AttendanceLimit);
+
+
+            }
+            else if (countryId > 0 && siteId == 0)
+            {
+                var project = _projectRepository.All.Include(x => x.ManageSite).Where(x => projectIds.Contains(x.Id)
+                                                          && x.ManageSite.City.State.CountryId == countryId
+                                                          && x.DeletedDate == null).ToList();
+                total = (int)project.Sum(item => item.AttendanceLimit);
+            }
+            else
+            {
+                var project = _projectRepository.All.Include(x => x.ManageSite).Where(x => projectIds.Contains(x.Id)
+                                                         && x.ManageSite.City.State.CountryId == countryId
+                                                         && x.Id == siteId
+                                                         && x.DeletedDate == null).ToList();
+                total = (int)project.Sum(item => item.AttendanceLimit);
+            }
+
+            var patientStatus = _randomizationRepository.All
+                .Include(x => x.Project).Where(x => projectIds.Contains(x.Project.Id) && x.DeletedDate == null).ToList()
+                .GroupBy(g => g.Project.ParentProjectId).Select(s => new
+                {
+                    parent = s.Key,
+                    EnrolledTotal = total,
+                    Screened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Screening).Count(),
+                    Ontrial = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.OnTrial).Count(),
+                    Randomized = s.Where(q => q.RandomizationNumber != null).Count(),
+                    ScreeningFailure = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.ScreeningFailure).Count(),
+                    Withdrawal = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Withdrawal).Count(),
+                });
+
+            return patientStatus;
+        }
+
+
 
         public dynamic GetDashboardVisitGraph(int projectId, int countryId, int siteId)
         {
