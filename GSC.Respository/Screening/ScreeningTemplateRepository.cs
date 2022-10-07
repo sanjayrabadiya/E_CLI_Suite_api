@@ -595,7 +595,7 @@ namespace GSC.Respository.Screening
             var result = All.Where(z => Templates.Select(x => x.ScreeningTemplateId).Contains(z.Id))
                 .Select(t => new TemplateStatusList
                 {
-                    ProjectDesignTemplateId = t.Id,
+                    ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                     DesignOrder = t.ProjectDesignTemplate.DesignOrder,
                     Status = t.Status.GetDescription(),
                     StatusId = (int)t.Status

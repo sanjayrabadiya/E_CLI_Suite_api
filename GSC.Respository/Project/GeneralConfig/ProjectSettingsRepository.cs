@@ -49,5 +49,28 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return ProjectList;
         }
+
+        public List<ProjectDropDown> GetParentProjectDropDownScreening()
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var ProjectList = All.Include(c => c.Project).Where(x =>
+                      (x.Project.CompanyId == null || x.Project.CompanyId == _jwtTokenAccesser.CompanyId)
+                      && x.Project.ParentProjectId == null
+                      && projectList.Any(c => c == x.ProjectId) && x.IsScreening == true && x.DeletedDate == null)
+                  .Select(c => new ProjectDropDown
+                  {
+                      Id = c.ProjectId,
+                      Value = c.Project.ProjectCode + " - " + c.Project.ProjectName,
+                      Code = c.Project.ProjectCode,
+                      IsStatic = c.Project.IsStatic,
+                      IsDeleted = c.DeletedDate != null,
+                      ParentProjectId = c.Project.ParentProjectId ?? c.ProjectId,
+                      AttendanceLimit = c.Project.AttendanceLimit ?? 0
+                  }).Distinct().OrderBy(o => o.Value).ToList();
+
+            return ProjectList;
+        }
     }
 }

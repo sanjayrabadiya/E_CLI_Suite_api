@@ -392,6 +392,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementKITDetailRepository, SupplyManagementKITDetailRepository>();
 
             services.AddScoped<IEconsentGlossaryRepository, EconsentGlossaryRepository>();
+            services.AddScoped<IScreeningSettingRepository, ScreeningSettingRepository>();
 
         }
     }
