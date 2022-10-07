@@ -845,10 +845,18 @@ namespace GSC.Report
                                     if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                                     {
                                         PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
-                                        checkField.Bounds = new RectangleF(410, result.Bounds.Y + 10, 10, 10);
+                                        if (!string.IsNullOrEmpty(variable.Unit.UnitName))
+                                            checkField.Bounds = new RectangleF(410, result.Bounds.Y - 10, 10, 10);
+                                        else
+                                            checkField.Bounds = new RectangleF(410, result.Bounds.Y - 5, 10, 10);
                                         checkField.Style = PdfCheckBoxStyle.Check;
                                         document.Form.Fields.Add(checkField);
-                                        AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                       
+                                        if (!string.IsNullOrEmpty(variable.Unit.UnitName))
+                                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y - 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                        else
+                                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y - 5, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+
                                     }
                                     else
                                     {
@@ -859,7 +867,10 @@ namespace GSC.Report
                                             checkField.Checked = true;
                                         checkField.ReadOnly = true;
                                         document.Form.Fields.Add(checkField);
-                                        AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y + 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                        if (!string.IsNullOrEmpty(variable.Unit.UnitName))
+                                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y - 10, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
+                                        else
+                                            AddString("Na", result.Page, new Syncfusion.Drawing.RectangleF(425, result.Bounds.Y - 5, 50, result.Page.GetClientSize().Height), PdfBrushes.Black, smallfont, layoutFormat);
 
                                     }
                                 }
@@ -2040,20 +2051,23 @@ namespace GSC.Report
                     var workflowlevel = _context.ProjectWorkflow.Where(x => x.ProjectDesignId == ProjectDesignId).Include(x => x.Levels).ToList();
                     foreach (var workflow in workflowlevel)
                     {
-                        var levels = workflow.Levels;
+                        var levels = workflow.Levels.Where(x => x.DeletedDate == null).ToList();
                         foreach (var level in levels)
                         {
                             if (level.IsElectricSignature)
                             {
-                                var signature = designt.ScreeningTemplateReview.Where(s => s.ReviewLevel > level.LevelNo - 1 && s.RoleId == level.SecurityRoleId).LastOrDefault();
-                                if (signature != null)
+                                if (designt.ScreeningTemplateReview != null)
                                 {
-                                    result = AddString($"{ signature.CreatedByUser}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
-                                    result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                    if (result.Bounds.Bottom + 30 >= 770)
-                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    var signature = designt.ScreeningTemplateReview.Where(s => s.ReviewLevel > level.LevelNo - 1 && s.RoleId == level.SecurityRoleId).LastOrDefault();
+                                    if (signature != null)
+                                    {
+                                        result = AddString($"{ signature.CreatedByUser}  ({signature.RoleName})", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
+                                        result = AddString(Convert.ToDateTime(signature.CreatedDate).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat), result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        result = AddString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent to utilising my hand written signature", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 400, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Bottom, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        if (result.Bounds.Bottom + 30 >= 770)
+                                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 30, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                    }
                                 }
                             }
                         }
