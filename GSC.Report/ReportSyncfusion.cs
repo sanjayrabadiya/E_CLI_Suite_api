@@ -2361,12 +2361,12 @@ namespace GSC.Report
                     {
                         if (reportSetting.AnnotationType == true)
                         {
-                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                         else
                         {
-                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                     }
@@ -2374,12 +2374,12 @@ namespace GSC.Report
                     {
                         if (reportSetting.AnnotationType == true)
                         {
-                            result = AddString($"{repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                         else
                         {
-                            result = AddString($"{repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                         }
                     }
 
@@ -2778,7 +2778,7 @@ namespace GSC.Report
                                         result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                             //data
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y+10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                         }
 
