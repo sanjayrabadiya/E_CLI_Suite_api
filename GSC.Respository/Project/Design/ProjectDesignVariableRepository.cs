@@ -161,11 +161,12 @@ namespace GSC.Respository.Project.Design
                 x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId && x.DeletedDate == null))
                 return "Duplicate Variable code : " + objSave.VariableCode;
 
-            if (All.Any(x => x.Id != objSave.Id && x.VariableName == objSave.VariableName &&
-                             x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
-                             x.DomainId == objSave.DomainId && x.AnnotationTypeId == objSave.AnnotationTypeId &&
-                             x.DeletedDate == null))
-                return "Duplicate Record : " + objSave.VariableName;
+            // discuss
+            //if (All.Any(x => x.Id != objSave.Id && x.VariableName == objSave.VariableName &&
+            //                 x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
+            //                 x.DomainId == objSave.DomainId && x.AnnotationTypeId == objSave.AnnotationTypeId &&
+            //                 x.DeletedDate == null))
+            //    return "Duplicate Record : " + objSave.VariableName;
 
             if (All.Any(x =>
                 x.Id != objSave.Id && x.DomainId == objSave.DomainId &&

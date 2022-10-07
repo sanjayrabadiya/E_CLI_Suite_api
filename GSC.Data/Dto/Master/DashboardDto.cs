@@ -57,7 +57,7 @@ namespace GSC.Data.Dto.Master
     {
         public int SiteId { get; set; }
         public string SiteName { get; set; }
-        public int AvgDayDiff { get; set; }
+        public decimal AvgDayDiff { get; set; }
     }
 
     public class RandomizedProgress
