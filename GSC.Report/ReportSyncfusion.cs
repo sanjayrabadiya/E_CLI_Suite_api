@@ -2495,12 +2495,12 @@ namespace GSC.Report
                     {
                         if (reportSetting.AnnotationType == true)
                         {
-                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                         else
                         {
-                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{designt.DesignOrder.ToString()} {repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                     }
@@ -2508,12 +2508,12 @@ namespace GSC.Report
                     {
                         if (reportSetting.AnnotationType == true)
                         {
-                            result = AddString($"{repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{repeatSeqno} {designt.TemplateName} -{designt.Domain.DomainName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
 
                         }
                         else
                         {
-                            result = AddString($"{repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
+                            result = AddString($"{repeatSeqno} {designt.TemplateName}", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, largeheaderfont, layoutFormat);
                         }
                     }
 
@@ -2537,7 +2537,7 @@ namespace GSC.Report
                     PdfPen pen = new PdfPen(Color.Gray, 1f);
                     result.Page.Graphics.DrawLine(pen, 0, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Bounds.Y + 20);
 
-                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 5, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
 
                     //}
@@ -2550,7 +2550,9 @@ namespace GSC.Report
 
                         if (!string.IsNullOrEmpty(category))
                         {
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             result = AddStringCategory($"{category}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, 400, 15), PdfBrushes.Black, categoryfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                         }
                         foreach (var variable in variableList)
                         {
@@ -2565,7 +2567,7 @@ namespace GSC.Report
                             if (!string.IsNullOrEmpty(variable.Label))
                             {
                                 result = AddString($"{variable.Label}", result.Page, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y + 5, 290, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-                                result = AddString($" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 5, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString($" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                             }
                             if (reportSetting.AnnotationType == true)
@@ -2750,7 +2752,7 @@ namespace GSC.Report
                                 {
                                     foreach (var value in variable.Values)
                                     {
-                                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y + 5, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                        result = AddString(value.ValueName, result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                         PdfCheckBoxField checkField = new PdfCheckBoxField(result.Page, "singlecheckbox");
                                         checkField.Bounds = new RectangleF(350, result.Bounds.Y, 15, 15);
                                         checkField.Style = PdfCheckBoxStyle.Check;
@@ -2867,14 +2869,15 @@ namespace GSC.Report
                                 if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
                                 {
                                     List<string> _points = new List<string>();
-                                    int lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToInt32(variable.LowRangeValue);
-                                    int highragnevalue = Convert.ToInt32(variable.HighRangeValue);
+                                    double lowrangevalue = String.IsNullOrEmpty(variable.LowRangeValue) ? 0 : Convert.ToDouble(variable.LowRangeValue);
+                                    double highragnevalue = Convert.ToDouble(variable.HighRangeValue);
                                     double stepvalue = String.IsNullOrEmpty(variable.DefaultValue) ? 1.0 : Convert.ToDouble(variable.DefaultValue);
                                     //logic
-                                    for (int i = lowrangevalue; i <= highragnevalue; i++)
+                                    for (double i = lowrangevalue; i <= highragnevalue;)
                                     {
-                                        if ((i % stepvalue) == 0)
-                                            _points.Add(i.ToString());
+                                        //if ((i % variable.LargeStep) == 0)
+                                        _points.Add(i.ToString());
+                                        i = i + (double)variable.LargeStep;
                                     }
                                     float xPos = 350;
                                     result.Page.Graphics.DrawLine(PdfPens.Black, new PointF(xPos, result.Bounds.Y + 20), new PointF(xPos + 180, result.Bounds.Y + 20));
@@ -2894,7 +2897,182 @@ namespace GSC.Report
                                 {
                                     result = AddString(variable.ScreeningValue, result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                 }
-                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(350, result.Bounds.Y + 5, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            }
+                            else if (variable.CollectionSource == CollectionSources.Table)
+                            {
+                                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+                                {
+                                    //Create a PdfGrid
+                                    PdfGrid pdfGrid = new PdfGrid();
+
+                                    //Create a DataTable
+                                    DataTable dataTable = new DataTable();
+
+                                    if (variable.IsLevelNo == true)
+                                    {
+                                        dataTable.Columns.Add("Sr.No.");
+                                    }
+                                    //Include columns to the DataTable
+                                    foreach (var columnname in variable.Values)
+                                    {
+                                        dataTable.Columns.Add(columnname.ValueName);
+                                    }
+                                    List<string> list = new List<string>();
+                                    if (variable.IsLevelNo == true)
+                                    {
+                                        list.Add(" ");
+                                    }
+                                    foreach (var row in variable.Values)
+                                    {
+                                        list.Add(" ");
+                                    }
+                                    dataTable.Rows.Add(list.ToArray());
+
+                                    //Assign data source
+                                    pdfGrid.DataSource = dataTable;
+
+                                    //Apply the built-in table style
+                                    pdfGrid.ApplyBuiltinStyle(PdfGridBuiltinStyle.GridTable4Accent1);
+                                    if (variable.Values != null && variable.Values.Count <= 3)
+                                        pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(200, result.Bounds.Y, 570, result.Page.GetClientSize().Height));
+                                    else
+                                        pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Y, 610, result.Page.GetClientSize().Height));
+
+
+                                }
+                                else
+                                {
+                                    if (variable.Values != null)
+                                    {
+                                        var ScreeningTemplateValueChild = _context.ScreeningTemplateValueChild.Where(x => x.ScreeningTemplateValueId == variable.ScreeningTemplateValueId).ToList();
+                                        var MaxLevel = ScreeningTemplateValueChild.Max(x => x.LevelNo);
+                                        var ValuesList = new List<ScreeningVariableValueDto>();
+
+                                        variable.Values.ToList().ForEach(val =>
+                                        {
+                                            var notExistLevel = Enumerable.Range(1, (int)MaxLevel).ToArray();
+
+                                            var childValue = variable.ValueChild.Where(v => v.ProjectDesignVariableValueId == val.Id).GroupBy(x => x.LevelNo)
+                                            .Select(x => new ScreeningTemplateValueChild
+                                            {
+
+                                                ScreeningTemplateValueId = x.FirstOrDefault().ScreeningTemplateValueId,
+                                                ProjectDesignVariableValueId = x.FirstOrDefault().ProjectDesignVariableValueId,
+                                                Value = x.FirstOrDefault().Value,
+                                                LevelNo = x.FirstOrDefault().LevelNo,
+                                                DeletedDate = x.FirstOrDefault().DeletedDate
+                                            }).ToList();
+
+                                            var Levels = notExistLevel.Where(x => !childValue.Select(y => (int)y.LevelNo).Contains(x)).ToList();
+
+                                            Levels.ForEach(x =>
+                                            {
+                                                ScreeningTemplateValueChild obj = new ScreeningTemplateValueChild();
+                                                obj.Id = 0;
+                                                obj.ScreeningTemplateValueId = variable.ScreeningTemplateValueId;
+                                                obj.ProjectDesignVariableValueId = val.Id;
+                                                obj.Value = null;
+                                                obj.LevelNo = (short)x;
+                                                childValue.Add(obj);
+                                            });
+                                            if (childValue.Count() == 0 && Levels.Count() == 0)
+                                            {
+                                                ScreeningTemplateValueChild obj = new ScreeningTemplateValueChild();
+                                                obj.Id = 0;
+                                                obj.ScreeningTemplateValueId = variable.ScreeningTemplateValueId;
+                                                obj.ProjectDesignVariableValueId = val.Id;
+                                                obj.Value = null;
+                                                obj.LevelNo = 1;
+                                                childValue.Add(obj);
+                                            }
+
+                                            childValue.ForEach(child =>
+                                            {
+                                                ScreeningVariableValueDto obj = new ScreeningVariableValueDto();
+
+                                                obj.Id = child.ProjectDesignVariableValueId;
+                                                obj.ScreeningValue = child.Value;
+                                                obj.ScreeningValueOld = child.Value;
+                                                obj.ScreeningTemplateValueChildId = child.Id;
+                                                obj.LevelNo = child.LevelNo;
+                                                obj.ValueName = val.ValueName;
+                                                obj.IsDeleted = child.DeletedDate == null ? false : true;
+                                                obj.TableCollectionSource = val.TableCollectionSource;
+                                                ValuesList.Add(obj);
+                                            });
+                                        });
+
+                                        var Values = ValuesList.Where(x => x.IsDeleted == false).ToList();
+
+                                        if (Values != null && Values.Count > 0)
+                                        {
+                                            var finaldata = Values.GroupBy(x => x.ValueName).Select(z => z.Key).ToList();
+
+                                            //Create a PdfGrid
+                                            PdfGrid pdfGrid = new PdfGrid();
+
+                                            //Create a DataTable
+                                            DataTable dataTable = new DataTable();
+
+                                            if (variable.IsLevelNo == true)
+                                            {
+                                                dataTable.Columns.Add("Sr.No.");
+                                            }
+                                            //Include columns to the DataTable
+                                            foreach (var columnname in finaldata)
+                                            {
+                                                dataTable.Columns.Add(columnname);
+                                            }
+
+                                            var rowdata = Values.GroupBy(x => x.LevelNo).Select(z => z.Key).ToList();
+
+                                            foreach (var row in rowdata)
+                                            {
+                                                List<string> list = new List<string>();
+                                                if (variable.IsLevelNo == true)
+                                                {
+                                                    list.Add(row.ToString());
+                                                }
+                                                var row1 = Values.Where(x => x.LevelNo == row).ToList();
+                                                foreach (var finalrow in row1)
+                                                {
+                                                    var value = string.Empty;
+                                                    if (finalrow.TableCollectionSource == TableCollectionSource.DateTime)
+                                                    {
+                                                        value = !string.IsNullOrEmpty(finalrow.ScreeningValue) ? DateTime.TryParse(finalrow.ScreeningValue, out dDate) ? DateTime.Parse(finalrow.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + "hh:mm tt") : finalrow.ScreeningValue : "";
+                                                    }
+                                                    else if (finalrow.TableCollectionSource == TableCollectionSource.Date)
+                                                    {
+                                                        value = !string.IsNullOrEmpty(finalrow.ScreeningValue) ? DateTime.TryParse(finalrow.ScreeningValue, out dDate) ? DateTime.Parse(finalrow.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat) : finalrow.ScreeningValue : "";
+                                                    }
+                                                    else if (finalrow.TableCollectionSource == TableCollectionSource.Time)
+                                                    {
+                                                        value = !string.IsNullOrEmpty(finalrow.ScreeningValue) ? DateTime.TryParse(finalrow.ScreeningValue, out dDate) ? DateTime.Parse(finalrow.ScreeningValue).UtcDateTime().ToString("hh:mm tt") : finalrow.ScreeningValue : "";
+                                                    }
+                                                    else
+                                                        value = finalrow.ScreeningValue;
+                                                    list.Add(value);
+                                                }
+                                                dataTable.Rows.Add(list.ToArray());
+                                            }
+
+                                            //Assign data source
+                                            pdfGrid.DataSource = dataTable;
+
+                                            //Apply the built-in table style
+                                            pdfGrid.ApplyBuiltinStyle(PdfGridBuiltinStyle.GridTable4Accent1);
+                                            if (finaldata != null && finaldata.Count <= 3)
+                                                pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(200, result.Bounds.Y, 570, result.Page.GetClientSize().Height));
+                                            else
+                                                pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Y, 610, result.Page.GetClientSize().Height));
+
+
+                                        }
+
+                                    }
+                                }
+                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                             }
                             else
                             {
@@ -2909,7 +3087,7 @@ namespace GSC.Report
                                         result = AddString(" ", secondresult.Page, new Syncfusion.Drawing.RectangleF(0, secondresult.Bounds.Bottom, secondresult.Page.GetClientSize().Width, secondresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                             //data
-                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y+10, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                         }
 

@@ -806,12 +806,19 @@ namespace GSC.Report.Common
                                                     UnitAnnotation = s.ProjectDesignVariable.UnitAnnotation
                                                   },
                                                   Values = s.ProjectDesignVariable.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto {
-                                                    Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label
+                                                    Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label,TableCollectionSource = vd.TableCollectionSource
                                                   }).ToList(),
                                                   ScreeningValue= s.Value,
                                                   ScreeningIsNa=s.IsNa,
                                                   ScreeningTemplateValueId=s.Id,
-                                                  ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{Value=c.Value,ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,ScreeningTemplateValueId=c.ScreeningTemplateValueId,ValueName=c.ProjectDesignVariableValue.ValueName }).ToList(),
+                                                  ValueChild=s.Children.Where(c=>c.DeletedDate==null).Select(c=>new ScreeningTemplateValueChildReportDto{
+                                                      Value=c.Value,
+                                                      ProjectDesignVariableValueId=c.ProjectDesignVariableValueId,
+                                                      ScreeningTemplateValueId=c.ScreeningTemplateValueId,
+                                                      ValueName=c.ProjectDesignVariableValue.ValueName,
+                                                      LevelNo = c.LevelNo,
+                                                      DeletedDate = c.DeletedDate
+                                                  }).ToList(),
                                                   VariableCategoryName = s.ProjectDesignVariable.VariableCategory.CategoryName,
                                                   Label = s.ProjectDesignVariable.Label
                                               }).ToList(),

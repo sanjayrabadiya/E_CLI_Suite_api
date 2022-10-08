@@ -113,7 +113,7 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var screeningVisits = _screeningVisitRepository.All
-                .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningEntry.ProjectId) && (!x.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null).ToList()
+                .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite):true) && x.DeletedDate == null).ToList()
                 .GroupBy(g => g.ProjectDesignVisitId).Select(s => new
                 {
                     Name = _projectDesignVisitRepository.All.FirstOrDefault(m => m.Id == s.Key).DisplayName,
@@ -129,7 +129,6 @@ namespace GSC.Respository.Master
         public dynamic ScreenedToRandomizedGraph(int projectId, int countryId, int siteId)
         {
             var projectList = GetProjectIds(projectId, countryId, siteId);
-
             var DaysDiffList = new List<DashboardDaysScreenedToRandomized>();
 
             foreach (var project in projectList)
@@ -142,13 +141,17 @@ namespace GSC.Respository.Master
                     }).ToList().GroupBy(g => g.ProjectId)
                     .Select(m => new DashboardDaysScreenedToRandomized
                     {
-                        AvgDayDiff = m.Sum(s => s.DayDiff) / m.Count(),
+                        AvgDayDiff = (m.Sum(s => s.DayDiff)),
                         SiteName = project.ProjectCode,
                         SiteId = m.Key
                     });
 
                 DaysDiffList.AddRange(randomizes);
             }
+
+            DaysDiffList.ForEach(t => {
+                t.AvgDayDiff = decimal.Round((t.AvgDayDiff / _randomizationRepository.All.Where(q => q.ProjectId == t.SiteId && q.DeletedDate == null && q.DateOfScreening != null).Count()), 2, MidpointRounding.AwayFromZero);
+            });
             return DaysDiffList;
         }
         public dynamic GetRandomizedProgressGraph(int projectId, int countryId, int siteId)
@@ -257,7 +260,7 @@ namespace GSC.Respository.Master
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesign.Id);
 
             var screnningTemplates = _screeningTemplateRepository.All.Include(x => x.ScreeningVisit)
-                .Include(x => x.ScreeningVisit.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null && x.ScreeningVisit.DeletedDate == null);
+                .Include(x => x.ScreeningVisit.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null && x.ScreeningVisit.DeletedDate == null);
 
             var formGrpah = new List<FormsGraphModel>();
 
@@ -341,8 +344,8 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var queries = _screeningTemplateValueRepository.All.Where(r => projectIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) &&
-            (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) &&
+            var queries = _screeningTemplateValueRepository.All.Where(r => projectIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) 
+           && (siteId == 0 ? (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) &&
             r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
                  GroupBy(c => new
                  {
@@ -360,7 +363,6 @@ namespace GSC.Respository.Master
 
             queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
-
             if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
                 queries.Add(new DashboardQueryStatusDto
                 {
@@ -375,7 +377,7 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             var queries = _screeningTemplateValueRepository.All.Where(r => projectIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) &&
-                (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) && r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
+                (siteId == 0 ? (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
                 Select(s => new
                 {
                     VisitName = s.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName,
@@ -401,7 +403,8 @@ namespace GSC.Respository.Master
         public dynamic GetQueryManagementRoleWiseQuery(int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var result = _screeningTemplateValueQueryRepository.All.Where(x => projectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && (!x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite)
+            var result = _screeningTemplateValueQueryRepository.All.Where(x => projectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) &&
+            (siteId == 0 ? (!x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true)
               && (x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.SelfCorrection
               || x.QueryStatus == QueryStatus.Acknowledge) && x.UserRole != null).GroupBy(
               t => new { t.UserRole, t.QueryStatus }).Select(g => new DashboardQueryStatusDto
