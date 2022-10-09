@@ -21,6 +21,7 @@ namespace GSC.Data.Dto.Project.Design
         public List<EditCheckMessage> EditCheckMsg { get; set; }
         public EditCheckInfoType InfoType { get; set; }
         public bool HasQueries { get; set; }
+        public bool IsHide { get; set; }
     }
 
 

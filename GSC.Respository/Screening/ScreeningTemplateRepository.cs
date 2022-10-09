@@ -427,6 +427,7 @@ namespace GSC.Respository.Screening
                     r.EditCheckValidation.EditCheckMsg = singleResult.EditCheckMsg;
                     r.EditCheckValidation.InfoType = singleResult.InfoType;
                     r.EditCheckValidation.EditCheckDisable = singleResult.EditCheckDisable;
+                    r.EditCheckValidation.IsHide = singleResult.IsHide;
                 }
                 r.editCheckIds = GetEditCheckIds(result, (int)r.ProjectDesignVariableId, screeningTemplateBasic.ProjectDesignTemplateId);
             });
