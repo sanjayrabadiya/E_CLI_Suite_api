@@ -380,6 +380,13 @@ namespace GSC.Respository.EditCheckImpact
                         editCheckTarget.IsSoftFetch = true;
                         editCheckTarget.Note = note;
                     }
+                    else if (r.Operator == Operator.Hide)
+                    {
+                        editCheckTarget.IsHide = r.ValidateType == EditCheckValidateType.Passed;
+                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
+                        if (isQueryRaise)
+                            CloseQueryIfHide(r.ScreeningTemplateId, r.ProjectDesignVariableId, editCheckTarget.IsHide);
+                    }
                     else
                     {
                         if (isQueryRaise) editCheckTarget.HasQueries = r.ValidateType == EditCheckValidateType.Failed;
@@ -387,8 +394,7 @@ namespace GSC.Respository.EditCheckImpact
                     }
 
 
-                    if (((r.Operator == Operator.SoftFetch && string.IsNullOrEmpty(r.ScreeningTemplateValue)) 
-                    || r.Operator == Operator.HardFetch) && r.FetchingProjectDesignVariableId != null)
+                    if (((r.Operator == Operator.SoftFetch && string.IsNullOrEmpty(r.ScreeningTemplateValue)) || r.Operator == Operator.HardFetch) && r.FetchingProjectDesignVariableId != null)
                     {
                         if (r.ValidateType == EditCheckValidateType.ReferenceVerifed || r.ValidateType == EditCheckValidateType.Passed)
                         {
@@ -720,7 +726,7 @@ namespace GSC.Respository.EditCheckImpact
                             var singleTarget = validateResult.Target.FirstOrDefault(a => a.Id == t.EditCheckDetailId);
                             if (singleTarget != null)
                             {
-                                if (t.Operator != Operator.Enable && t.Operator!= Operator.SoftFetch && t.Operator != Operator.HardFetch)
+                                if (t.Operator != Operator.Enable && t.Operator != Operator.SoftFetch && t.Operator != Operator.HardFetch)
                                     t.ScreeningTemplateValue = singleTarget.Result;
 
                                 t.SampleResult = singleTarget.SampleText + " " + validateResult.SampleText;
@@ -740,6 +746,29 @@ namespace GSC.Respository.EditCheckImpact
             });
 
             return result;
+        }
+
+        void CloseQueryIfHide(int screeningTemplateId, int projectDesignVariableId, bool isHide)
+        {
+            var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x =>
+                x.ProjectDesignVariableId == projectDesignVariableId &&
+                x.ScreeningTemplateId == screeningTemplateId).FirstOrDefault();
+
+            if (screeningTemplateValue == null || screeningTemplateValue.IsHide == isHide)
+                return;
+
+            screeningTemplateValue.IsHide = isHide;
+            
+            if (isHide && screeningTemplateValue.QueryStatus != null)
+                screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+
+            if (isHide)
+                screeningTemplateValue.Value = null;
+
+            _screeningTemplateValueRepository.Update(screeningTemplateValue);
+            _context.Save();
+            _context.DetachAllEntities();
+
         }
 
         public int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource, bool isDisable)

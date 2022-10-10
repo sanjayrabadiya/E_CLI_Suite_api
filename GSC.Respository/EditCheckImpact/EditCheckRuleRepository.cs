@@ -285,7 +285,7 @@ namespace GSC.Respository.EditCheckImpact
                 _operator == Operator.Required ||
                 _operator == Operator.Warning ||
                 _operator == Operator.Optional ||
-                _operator == Operator.Visible;
+                _operator == Operator.Hide;
         }
 
         private EditCheckResult GetDifferentValue(List<EditCheckValidate> editCheck, bool isFromValidate)

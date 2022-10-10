@@ -370,7 +370,7 @@ namespace GSC.Helper
         [Description("Optional")] Optional = 16,
         [Description("Enable")] Enable = 17,
         [Description("Warning")] Warning = 18,
-        [Description("Visible")] Visible = 19,
+        [Description("Hide")] Hide = 19,
         [Description("Between")] Between = 20,
         [Description("Not Between")] NotBetween = 21,
         [Description("Filter")] Filter = 22,
