@@ -171,7 +171,7 @@ namespace GSC.Respository.Screening
             {
                 return;
             }
-            var verifyuploadsheetdata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.ProjectId == projectdata.ProjectId && x.RandomizationNo == Convert.ToInt32(projectdata.RandomizationNo) && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+            var verifyuploadsheetdata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.ProjectId == projectdata.ProjectId && x.RandomizationNo.ToString() == Convert.ToString(projectdata.RandomizationNo) && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
 
             if (RandomizationSetting.IsIGT && verifyuploadsheetdata != null)
             {
