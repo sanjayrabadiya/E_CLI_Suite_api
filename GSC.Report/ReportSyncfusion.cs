@@ -990,7 +990,7 @@ namespace GSC.Report
                                             variblevaluename = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).SingleOrDefault();
                                         foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
                                         {
-                                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
                                             document.Form.Fields.Add(radioList);
 
@@ -1000,7 +1000,7 @@ namespace GSC.Report
                                             radioList.ReadOnly = true;
                                             if (value.ValueName == variblevaluename)
                                                 radioList.SelectedIndex = 0;
-                                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Bottom + 10, 200, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Bottom + 10, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                         }
                                     }
                                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -1255,6 +1255,7 @@ namespace GSC.Report
                                         else
                                             pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Y, 600, result.Page.GetClientSize().Height));
 
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + (11 * dataTable.Rows.Count), 600, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                                     }
                                     else
@@ -1389,12 +1390,13 @@ namespace GSC.Report
                                                 else
                                                     pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Y, 600, result.Page.GetClientSize().Height));
 
+                                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + (11 * dataTable.Rows.Count), 600, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
                                             }
 
                                         }
                                     }
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 10, 800, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                   
                                 }
                                 else
                                 {
@@ -2002,6 +2004,7 @@ namespace GSC.Report
                                         pdfGrid.ApplyBuiltinStyle(PdfGridBuiltinStyle.GridTable4Accent1);
 
                                         pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 600, result.Page.GetClientSize().Height));
+                                        result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + (11 * dataTable.Rows.Count), 600, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
 
 
                                     }
@@ -2135,12 +2138,12 @@ namespace GSC.Report
 
                                                 pdfGrid.Draw(result.Page.Graphics, new Syncfusion.Drawing.RectangleF(50, result.Bounds.Y, 600, result.Page.GetClientSize().Height));
 
-
+                                                result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + (11 * dataTable.Rows.Count), 600, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                             }
 
                                         }
                                     }
-                                    result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y + 20, 800, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                   
                                 }
                                 else
                                 {
