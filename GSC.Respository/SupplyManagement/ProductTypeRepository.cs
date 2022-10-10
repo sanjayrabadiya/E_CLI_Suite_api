@@ -31,7 +31,7 @@ namespace GSC.Respository.SupplyManagement
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.ProductTypeName, Code = c.ProductTypeCode, IsDeleted = c.DeletedDate != null })
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.ProductTypeCode + " - " + c.ProductTypeName, Code = c.ProductTypeCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
 

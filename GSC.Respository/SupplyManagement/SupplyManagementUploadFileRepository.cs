@@ -242,9 +242,9 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "Visit name should not be duplicate.";
             }
-            var visitcount = visitcheck.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count();
-            if (projectDesignVisits.Count() != (visitcount - 2))
-                return "Visit name not match with design visit.";
+            //var visitcount = visitcheck.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count();
+            //if (projectDesignVisits.Count() != (visitcount - 2))
+            //    return "Visit name not match with design visit.";
 
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
@@ -273,36 +273,36 @@ namespace GSC.Respository.SupplyManagement
                 DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
                 if (dr.Length != 0)
                     return "Please fill required randomization details!";
-                else
-                {
-                    for (int i = 5; i < results.Tables[0].Rows.Count; i++)
-                    {
-                        if (Convert.ToString(results.Tables[0].Rows[i][1]).Contains(','))
-                        {
-                            var arr2 = Convert.ToString(results.Tables[0].Rows[i][1]).Split(',').ToArray();
-                            var arr1 = results.Tables[0].Rows[i].ItemArray;
-                            var arr3 = results.Tables[0].Rows[i].ItemArray.Count();
+                //else
+                //{
+                //    for (int i = 5; i < results.Tables[0].Rows.Count; i++)
+                //    {
+                //        if (Convert.ToString(results.Tables[0].Rows[i][1]).Contains(','))
+                //        {
+                //            var arr2 = Convert.ToString(results.Tables[0].Rows[i][1]).Split(',').ToArray();
+                //            var arr1 = results.Tables[0].Rows[i].ItemArray;
+                //            var arr3 = results.Tables[0].Rows[i].ItemArray.Count();
 
-                            if (arr2.Length != (arr3 - 2))
-                            {
-                                return "Product code with visit sequence not matched";
+                //            if (arr2.Length != (arr3 - 2))
+                //            {
+                //                return "Product code with visit sequence not matched";
 
-                            }
+                //            }
 
-                            for (var k = 0; k < arr2.Length; k++)
-                            {
-                                if (arr1[2 + k].ToString().ToLower() != arr2[k].ToLower())
-                                {
-                                    return "Product code with visit sequence not matched at row no " + (i + 1).ToString();
-                                }
-                            }
+                //            for (var k = 0; k < arr2.Length; k++)
+                //            {
+                //                if (arr1[2 + k].ToString().ToLower() != arr2[k].ToLower())
+                //                {
+                //                    return "Product code with visit sequence not matched at row no " + (i + 1).ToString();
+                //                }
+                //            }
 
 
-                        }
+                //        }
 
-                    }
-                    return "";
-                }
+                //    }
+                //    return "";
+                //}
             }
             else
                 return "Please fill required randomization details.";
