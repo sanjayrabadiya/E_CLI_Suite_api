@@ -104,11 +104,7 @@ namespace GSC.Respository.EditCheckImpact
                     }
                 }
 
-                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !r.IsSkip && r.CollectionSource != CollectionSources.NumericScale)
-                {
-                    r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
-                    r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
-                }
+
 
                 if (r.CollectionSource == CollectionSources.NumericScale && !r.IsSkip && !string.IsNullOrEmpty(r.ScreeningTemplateValue))
                 {
@@ -137,6 +133,12 @@ namespace GSC.Respository.EditCheckImpact
                                 r.NumberScale = _impactService.NumericCollectionValue(r.ScreeningTemplateValue);
                         }
                     }
+                }
+
+                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !r.IsSkip)
+                {
+                    r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
+                    r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
 
             });
@@ -266,14 +268,18 @@ namespace GSC.Respository.EditCheckImpact
                         }
                     }
                 }
-                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && r.CollectionSource != CollectionSources.NumericScale && !isRepated)
+
+                if (r.CollectionSource == CollectionSources.NumericScale && !string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.NumberScale == 0)
+                    r.NumberScale = _impactService.NumericCollectionValue(r.ScreeningTemplateValue);
+
+                if (r.CheckBy == EditCheckRuleBy.ByVariableAnnotation && !isRepated)
                 {
                     r.CollectionValue = _impactService.CollectionValueAnnotation(r.CollectionValue, r.CollectionSource);
                     r.ScreeningTemplateValue = _impactService.ScreeningValueAnnotation(r.ScreeningTemplateValue, r.CheckBy, r.CollectionSource);
                 }
 
-                if (r.CollectionSource == CollectionSources.NumericScale && !string.IsNullOrEmpty(r.ScreeningTemplateValue) && r.NumberScale == 0)
-                    r.NumberScale = _impactService.NumericCollectionValue(r.ScreeningTemplateValue);
+
+
             });
 
             var targetResult = TargetValidateProcess(result).Where(r => r.IsTarget && r.ScreeningTemplateId > 0).ToList();
@@ -758,7 +764,7 @@ namespace GSC.Respository.EditCheckImpact
                 return;
 
             screeningTemplateValue.IsHide = isHide;
-            
+
             if (isHide && screeningTemplateValue.QueryStatus != null)
                 screeningTemplateValue.QueryStatus = QueryStatus.Closed;
 
