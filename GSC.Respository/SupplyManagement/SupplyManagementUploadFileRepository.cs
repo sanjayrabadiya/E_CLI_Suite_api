@@ -462,26 +462,26 @@ namespace GSC.Respository.SupplyManagement
         public string matchVisitWithOlderUpload(DataSet results, int projectId, SupplyManagementUploadFile supplyManagementUploadFile)
         {
             // get last upload sheet data
-            var supplyManagementUploadDetail = _supplyManagementUploadFileDetailRepository.All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id)
-            .OrderByDescending(x => x.Id).FirstOrDefault();
+            //var supplyManagementUploadDetail = _supplyManagementUploadFileDetailRepository.All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id)
+            //.OrderByDescending(x => x.Id).FirstOrDefault();
 
-            var supplyManagementUploadDetailVisit = _supplyManagementUploadFileVisitRepository.All.Include(x => x.ProjectDesignVisit).Where(x => x.SupplyManagementUploadFileDetailId == supplyManagementUploadDetail.Id)
-                .Select(x => x.ProjectDesignVisit.DisplayName)
-            .ToList();
+            //var supplyManagementUploadDetailVisit = _supplyManagementUploadFileVisitRepository.All.Include(x => x.ProjectDesignVisit).Where(x => x.SupplyManagementUploadFileDetailId == supplyManagementUploadDetail.Id)
+            //    .Select(x => x.ProjectDesignVisit.DisplayName)
+            //.ToList();
 
-            if (supplyManagementUploadDetailVisit.Count() != results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count() - 2)
-                return "visit not match with previous upload file.";
+            //if (supplyManagementUploadDetailVisit.Count() != results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count() - 2)
+            //    return "visit not match with previous upload file.";
 
-            var j = 0;
-            foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
-            {
-                if (j >= 2)
-                {
-                    if (!supplyManagementUploadDetailVisit.Contains(item.ToString(), StringComparer.InvariantCultureIgnoreCase))
-                        return "visit not match with previous upload file.";
-                }
-                j++;
-            }
+            //var j = 0;
+            //foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
+            //{
+            //    if (j >= 2)
+            //    {
+            //        if (!supplyManagementUploadDetailVisit.Contains(item.ToString(), StringComparer.InvariantCultureIgnoreCase))
+            //            return "visit not match with previous upload file.";
+            //    }
+            //    j++;
+            //}
             return "";
         }
     }

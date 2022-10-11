@@ -621,10 +621,10 @@ namespace GSC.Respository.EmailSender
 
         private string ReplaceBodyForVariableEmail(string body, ScreeningTemplateValueDto email)
         {
-            var screeningdata = _context.ScreeningEntry.Include(x => x.Project).Where(x => x.Id == email.ScreeningEntryId).FirstOrDefault();
+            var screeningdata = _context.ScreeningEntry.Include(x => x.Randomization).ThenInclude(x => x.Project).ThenInclude(x => x.ManageSite).Include(x => x.Project).Where(x => x.Id == email.ScreeningEntryId).FirstOrDefault();
             if (screeningdata != null)
             {
-                body = Regex.Replace(body, "##ScreeningNo##", screeningdata.ScreeningNo, RegexOptions.IgnoreCase);
+                body = Regex.Replace(body, "##ScreeningNo##", screeningdata.Randomization.ScreeningNumber, RegexOptions.IgnoreCase);
 
                 if (screeningdata.Project != null)
                 {
@@ -633,14 +633,29 @@ namespace GSC.Respository.EmailSender
                     {
                         body = Regex.Replace(body, "##StudyCode##", projectdata.ProjectCode, RegexOptions.IgnoreCase);
 
+                        if (screeningdata.Project != null)
+                        {
+                            var managesite = _context.ManageSite.Where(x => x.DeletedDate == null && x.Id == screeningdata.Project.ManageSiteId).FirstOrDefault();
+                            if (managesite != null)
+                                body = Regex.Replace(body, "##SiteName##", screeningdata.Project.ProjectCode + " - " + managesite.SiteName, RegexOptions.IgnoreCase);
+                        }
                     }
                 }
             }
-            var variable = _context.ProjectDesignVariable.Where(x => x.Id == email.ProjectDesignVariableId).FirstOrDefault();
+            var variable = _context.ProjectDesignVariable.Include(x => x.ProjectDesignTemplate).ThenInclude(x => x.ProjectDesignVisit).Where(x => x.Id == email.ProjectDesignVariableId).FirstOrDefault();
 
             if (variable != null)
             {
                 body = Regex.Replace(body, "##VariableName##", variable.VariableName, RegexOptions.IgnoreCase);
+                if (variable.ProjectDesignTemplate != null)
+                {
+                    body = Regex.Replace(body, "##TemplateName##", variable.ProjectDesignTemplate.TemplateName, RegexOptions.IgnoreCase);
+                    if (variable.ProjectDesignTemplate.ProjectDesignVisit != null)
+                    {
+                        body = Regex.Replace(body, "##VisitName##", variable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, RegexOptions.IgnoreCase);
+                    }
+
+                }
 
             }
 
