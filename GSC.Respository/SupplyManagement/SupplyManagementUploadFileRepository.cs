@@ -273,6 +273,8 @@ namespace GSC.Respository.SupplyManagement
                 DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
                 if (dr.Length != 0)
                     return "Please fill required randomization details!";
+                else
+                   return "";
                 //else
                 //{
                 //    for (int i = 5; i < results.Tables[0].Rows.Count; i++)
