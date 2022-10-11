@@ -149,7 +149,7 @@ namespace GSC.Respository.Attendance
                 randomization.ScreeningNumber = randomizationNumberDto.ScreeningNumber;
 
             randomization.DateOfScreening = randomizationDto.DateOfScreening;
-            if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening)
+            if (randomization.PatientStatusId == ScreeningPatientStatus.PreScreening || randomization.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
                 randomization.PatientStatusId = ScreeningPatientStatus.Screening;
 
             randomization.StudyVersion = randomizationDto.StudyVersion;
