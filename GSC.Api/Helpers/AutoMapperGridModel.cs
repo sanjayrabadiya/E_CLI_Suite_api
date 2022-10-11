@@ -529,7 +529,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ProjectDesignVisit, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                .ForMember(x => x.ProjectDesignTemplate, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.TemplateName))
                .ForMember(x => x.ProjectDesignVariable, a => a.MapFrom(m => m.ProjectDesignVariable.VariableName))
-               .ForMember(x => x.CollectionValue, a => a.MapFrom(m => m.CollectionValue))
+              // .ForMember(x => x.CollectionValue, a => a.MapFrom(m => string.Join(", ", m.ProjectDesignVariable.Values.Where(z=> m.CollectionValue.Contains(z.ValueName)).Select(x => x.ValueName))))
                .ForMember(x => x.Email, a => a.MapFrom(m => m.Email))
                .ForMember(x => x.EmailTemplate, a => a.MapFrom(m => m.EmailTemplate))
                .ReverseMap();
