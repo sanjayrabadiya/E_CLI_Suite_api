@@ -27,8 +27,24 @@ namespace GSC.Respository.Project.GeneralConfig
 
         public List<SendEmailOnVariableChangeSettingGridDto> GetList(int ProjectDesignId)
         {
-            return All.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == ProjectDesignId).
+            var result= All.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == ProjectDesignId).
    ProjectTo<SendEmailOnVariableChangeSettingGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+        result.ForEach(x =>
+            {
+                var CollectionValueList = x.CollectionValue.Split(',').Select(c => int.Parse(c));
+               
+                x.CollectionValue =
+                         string.IsNullOrEmpty(x.CollectionValue)
+                             ? ""
+                             :
+                               string.Join(", ", _context.ProjectDesignVariableValue
+                                                   .Where(t => CollectionValueList.Contains(t.Id)).
+                                                   Select(a => a.ValueName).ToList());
+            });
+
+            return result;
+
 
         }
 
