@@ -158,6 +158,16 @@ namespace GSC.Api.Controllers.Master
                     _variableTemplateDetailRepository.Add(variableTemplate.VariableTemplateDetails[i]);
             }
 
+            var notes = _variableTemplateNoteRepository.All.Where(x => x.VariableTemplateId == variableTemplateDto.Id).ToList();
+            if (notes.Any())
+            {
+                foreach (var item in notes)
+                {
+                    _variableTemplateNoteRepository.Delete(item);
+                    _uow.Save();
+                }
+            }
+
             for (var i = 0; i < variableTemplate.Notes.Count; i++)
             {
                 if (variableTemplate.Notes[i].Id > 0)
