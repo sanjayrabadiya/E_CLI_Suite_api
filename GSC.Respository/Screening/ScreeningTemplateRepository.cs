@@ -1447,7 +1447,7 @@ namespace GSC.Respository.Screening
                 if (screeningTemplateValueDto.ProjectDesignVariableId > 0)
                 {
                     var data = _context.SendEmailOnVariableChangeSetting.Where(x => x.ProjectDesignVariableId == screeningTemplateValueDto.ProjectDesignVariableId
-                    && x.CollectionValue.Contains(screeningTemplateValueDto.Value)).FirstOrDefault();
+                    && x.DeletedDate == null && x.CollectionValue.Contains(screeningTemplateValueDto.Value)).FirstOrDefault();
                     if (data != null)
                     {
                         if (data.Email.Contains(","))
