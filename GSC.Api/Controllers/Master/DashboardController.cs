@@ -216,5 +216,14 @@ namespace GSC.Api.Controllers.Master
             var queries = _dashboardRepository.GetDashboardInformConsentChart(projectId, countryId, siteId);
             return Ok(queries);
         }
+
+        //Add By Tinku on 07/06/2022 for dasboard tranning data
+        [HttpGet]
+        [Route("GetNewDashboardQueryGraphData/{projectid}")]
+        public IActionResult GetNewDashboardQueryGraphData(int projectid)
+        {
+            return Ok(_projectDocumentReviewRepository.GetNewDashboardQueryGraphData(projectid));
+        }
+
     }
 }

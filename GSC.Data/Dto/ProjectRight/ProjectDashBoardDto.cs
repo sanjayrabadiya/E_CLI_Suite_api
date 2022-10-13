@@ -200,5 +200,19 @@ namespace GSC.Data.Dto.ProjectRight
         public int? Total { get; set; }
         public string DisplayName { get; set; }
     }
+    public class DashboardQueryGraphDto
+    {
+        public int Id { get; set; }
+        public int ScreeningTemplateValueId { get; set; }
+        public string Lable { get; set; }
 
+        public int week { get; set; }
+    }
+    public class DashboardQueryGraphFinalDto
+    {
+        public int Count { get; set; }
+        public string Lable { get; set; }
+
+       
+    }
 }

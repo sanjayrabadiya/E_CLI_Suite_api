@@ -990,7 +990,7 @@ namespace GSC.Report
                                             variblevaluename = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).SingleOrDefault();
                                         foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
                                         {
-                                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
                                             document.Form.Fields.Add(radioList);
 

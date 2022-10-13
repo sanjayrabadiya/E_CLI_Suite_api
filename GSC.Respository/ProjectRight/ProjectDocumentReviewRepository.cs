@@ -630,6 +630,95 @@ namespace GSC.Respository.ProjectRight
             return countTraining;
         }
 
+        public List<DashboardQueryGraphFinalDto> GetNewDashboardQueryGraphData(int projectId)
+        {
+            try
+            {
+                List<DashboardQueryGraphDto> list = new List<DashboardQueryGraphDto>();
+                List<DashboardQueryGraphFinalDto> finallist = new List<DashboardQueryGraphFinalDto>();
+                var query = _context.ScreeningTemplateValueQuery.Where(x => x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId
+                && (x.QueryStatus == Helper.QueryStatus.Open || x.QueryStatus == Helper.QueryStatus.Closed)
+                ).OrderBy(x => x.CreatedDate).ToList();
+                if (query != null && query.Count > 0)
+                {
+                    var opendata = query.Where(x => x.QueryStatus == Helper.QueryStatus.Open).ToList();
+                    var closedata = query.Where(x => x.QueryStatus == Helper.QueryStatus.Closed).ToList();
+                    foreach (var item in opendata)
+                    {
+                        var multiplrecord = query.Where(x => x.ScreeningTemplateValueId == item.ScreeningTemplateValueId).OrderBy(x => x.CreatedDate).ToList();
+                        if (multiplrecord != null && multiplrecord.Count > 2)
+                        {
+                            int count = 1;
+                            foreach (var item1 in multiplrecord)
+                            {
+                                if (item1.QueryStatus == Helper.QueryStatus.Open && count != multiplrecord.Count)
+                                {
+                                    var next = multiplrecord.SkipWhile(x => !x.Equals(item1)).Skip(1).First();
+                                    if (next != null && next.QueryStatus == Helper.QueryStatus.Closed)
+                                    {
+                                        DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
+                                        obj.ScreeningTemplateValueId = item1.ScreeningTemplateValueId;
+                                        double week = ((DateTime)next.CreatedDate - (DateTime)item1.CreatedDate).TotalDays / 7;
+                                        obj.Lable = Convert.ToInt32(week + 1) + " Week";
+                                        obj.Id = item1.Id;
+                                        obj.week = Convert.ToInt32(week + 1);
+                                        if (list != null && list.Count > 0)
+                                        {
+                                            var recordduplicate = list.Where(x => x.Id == item1.Id).FirstOrDefault();
+                                            if (recordduplicate == null)
+                                                list.Add(obj);
+                                        }
+                                        else
+                                            list.Add(obj);
+                                    }
+                                }
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            if (closedata != null)
+                            {
+                                var data = closedata.Where(x => x.ScreeningTemplateValueId == item.ScreeningTemplateValueId).FirstOrDefault();
+                                if (data != null)
+                                {
+                                    DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
+                                    obj.ScreeningTemplateValueId = data.ScreeningTemplateValueId;
+                                    double week = ((DateTime)data.CreatedDate - (DateTime)item.CreatedDate).TotalDays / 7;
+                                    obj.Lable = Convert.ToInt32(week + 1) + " Week";
+                                    obj.Id = item.Id;
+                                    obj.week = Convert.ToInt32(week + 1);
+                                    if (list != null && list.Count > 0)
+                                    {
+                                        var recordduplicate = list.Where(x => x.Id == item.Id).FirstOrDefault();
+                                        if (recordduplicate == null)
+                                            list.Add(obj);
+                                    }
+                                    else
+                                        list.Add(obj);
+                                }
+                            }
+                        }
+                    }
+                    if (list != null && list.Count > 0)
+                    {
+                        finallist = list.OrderBy(x => x.week).GroupBy(x => x.Lable).Select(x => new DashboardQueryGraphFinalDto
+                        {
+                            Lable = x.Key,
+                            Count = x.ToList().Count
+                        }).ToList();
+                    }
+
+                }
+
+                return finallist;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception();
+            }
+        }
+
 
     }
 }
