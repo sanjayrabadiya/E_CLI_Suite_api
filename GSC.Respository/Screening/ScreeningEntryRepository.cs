@@ -631,6 +631,22 @@ namespace GSC.Respository.Screening
             }).Distinct().ToList();
         }
 
+        public List<ProjectDropDown> GetParentProjectDropdown(bool isLock, bool isHardLock)
+        {
+            if (isLock == false && isHardLock == false)
+            {
+                var projectDropdowns = _projectRepository.GetParentStaticProjectDropDown();
+                return projectDropdowns;
+            }
+
+            var projects = _context.ScreeningTemplate.Include(x => x.ScreeningVisit)
+                .Include(x => x.ScreeningVisit.ScreeningEntry)
+                .Include(x => x.ScreeningVisit.ScreeningEntry.Project).Where(x => x.IsLocked == isLock && x.IsHardLocked == isHardLock).Select(s => s.ScreeningVisit.ScreeningEntry.Project.ParentProjectId).ToList();
+
+            var parentProject = _projectRepository.GetParentStaticProjectDropDown().Where(x => projects.Contains(x.Id)).ToList();
+
+            return parentProject;
+        }
 
         // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
         public List<ProjectDropDown> GetSiteByLockUnlock(int parentProjectId, bool isLock, bool isHardLock)

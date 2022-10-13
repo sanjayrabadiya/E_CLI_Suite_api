@@ -27,5 +27,6 @@ namespace GSC.Respository.Screening
         List<ScreeningEntryStudyHistoryDto> GetVolunteerProjectHistory(int ScreeningEntryId);
         List<VolunteerAttendanceDto> GetVolunteerByProjectId(int projectId);
         List<VolunteerAttendanceDto> GetVolunteerScreeningList(int projectId, int volunteerId);
+        List<ProjectDropDown> GetParentProjectDropdown(bool isLock, bool isHardLock);
     }
 }
