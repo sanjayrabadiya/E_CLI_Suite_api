@@ -217,7 +217,7 @@ namespace GSC.Api.Controllers.Master
             return Ok(queries);
         }
 
-        //Add By Tinku on 07/06/2022 for dasboard tranning data
+        //Add By prakash on 13/10/2022 for dasboard query graph data
         [HttpGet]
         [Route("GetNewDashboardQueryGraphData/{projectid}")]
         public IActionResult GetNewDashboardQueryGraphData(int projectid)
