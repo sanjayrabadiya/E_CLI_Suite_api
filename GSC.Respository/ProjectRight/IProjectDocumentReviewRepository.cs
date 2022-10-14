@@ -24,6 +24,5 @@ namespace GSC.Respository.ProjectRight
         ProjectDashBoardDto GetNewDashboardTranningData(int projectId, int countryId, int siteId);
         int CountTranningNotification();
 
-        List<DashboardQueryGraphFinalDto> GetNewDashboardQueryGraphData(int projectId);
     }
 }

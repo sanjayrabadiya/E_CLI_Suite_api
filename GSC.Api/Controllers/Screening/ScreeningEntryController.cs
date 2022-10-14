@@ -240,6 +240,13 @@ namespace GSC.Api.Controllers.Screening
             var sites = _screeningEntryRepository.GetSiteByLockUnlock(parentProjectId, isLock, isHardLock);
             return Ok(sites);
         }
+        [HttpGet]
+        [Route("GetProjectByLockUnlock/{isLock}/{isHardLock}")]
+        public IActionResult GetProjectByLockUnlock(bool isLock, bool isHardLock)
+        {
+            var projects = _screeningEntryRepository.GetParentProjectDropdown(isLock, isHardLock);
+            return Ok(projects);
+        }
 
         [HttpPost]
         [Route("SaveVolunteerProject")]
@@ -290,5 +297,7 @@ namespace GSC.Api.Controllers.Screening
             var volunteerList = _screeningEntryRepository.GetVolunteerScreeningList(projectId, volunteerId);
             return Ok(volunteerList);
         }
+
+
     }
 }

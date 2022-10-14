@@ -218,11 +218,12 @@ namespace GSC.Api.Controllers.Master
         }
 
         //Add By prakash on 13/10/2022 for dasboard query graph data
+        //Change by vipul on 14/10/2022 for add filter country and studyid
         [HttpGet]
-        [Route("GetNewDashboardQueryGraphData/{projectid}")]
-        public IActionResult GetNewDashboardQueryGraphData(int projectid)
+        [Route("GetNewDashboardQueryGraphData/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetNewDashboardQueryGraphData(int projectId, int countryId, int siteId)
         {
-            return Ok(_projectDocumentReviewRepository.GetNewDashboardQueryGraphData(projectid));
+            return Ok(_dashboardRepository.GetNewDashboardQueryGraphData(projectId, countryId, siteId));
         }
 
     }
