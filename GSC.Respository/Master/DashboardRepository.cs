@@ -70,7 +70,7 @@ namespace GSC.Respository.Master
             if (countryId == 0 && siteId == 0)
             {
                 var project = _projectRepository.All.Where(x => projectIds.Contains(x.Id)).ToList();
-                 total = (int)project.Sum(item => item.AttendanceLimit);
+                total = (int)project.Sum(item => item.AttendanceLimit);
 
 
             }
@@ -96,7 +96,7 @@ namespace GSC.Respository.Master
                 {
                     parent = s.Key,
                     EnrolledTotal = total,
-                    PreScreeened= s.Where(q => q.PatientStatusId == ScreeningPatientStatus.PreScreening).Count(),
+                    PreScreeened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.PreScreening).Count(),
                     Screened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Screening).Count(),
                     Ontrial = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.OnTrial).Count(),
                     Randomized = s.Where(q => q.RandomizationNumber != null).Count(),
@@ -114,7 +114,7 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var screeningVisits = _screeningVisitRepository.All
-                .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite):true) && x.DeletedDate == null).ToList()
+                .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).ToList()
                 .GroupBy(g => g.ProjectDesignVisitId).Select(s => new
                 {
                     Name = _projectDesignVisitRepository.All.FirstOrDefault(m => m.Id == s.Key).DisplayName,
@@ -150,7 +150,8 @@ namespace GSC.Respository.Master
                 DaysDiffList.AddRange(randomizes);
             }
 
-            DaysDiffList.ForEach(t => {
+            DaysDiffList.ForEach(t =>
+            {
                 t.AvgDayDiff = decimal.Round((t.AvgDayDiff / _randomizationRepository.All.Where(q => q.ProjectId == t.SiteId && q.DeletedDate == null && q.DateOfScreening != null).Count()), 2, MidpointRounding.AwayFromZero);
             });
             return DaysDiffList;
@@ -345,7 +346,7 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var queries = _screeningTemplateValueRepository.All.Where(r => projectIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) 
+            var queries = _screeningTemplateValueRepository.All.Where(r => projectIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
            && (siteId == 0 ? (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) &&
             r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
                  GroupBy(c => new
@@ -432,62 +433,19 @@ namespace GSC.Respository.Master
                 if (query != null && query.Count > 0)
                 {
                     var opendata = query.Where(x => x.QueryStatus == Helper.QueryStatus.Open).ToList();
-                    var closedata = query.Where(x => x.QueryStatus == Helper.QueryStatus.Closed).ToList();
+
                     foreach (var item in opendata)
                     {
-                        var multiplrecord = query.Where(x => x.ScreeningTemplateValueId == item.ScreeningTemplateValueId).OrderBy(x => x.CreatedDate).ToList();
-                        if (multiplrecord != null && multiplrecord.Count > 2)
+                        var data = query.Where(x => x.QueryParentId == item.Id).FirstOrDefault();
+                        if (data != null && data.QueryStatus == QueryStatus.Closed)
                         {
-                            int count = 1;
-                            foreach (var item1 in multiplrecord)
-                            {
-                                if (item1.QueryStatus == Helper.QueryStatus.Open && count != multiplrecord.Count)
-                                {
-                                    var next = multiplrecord.SkipWhile(x => !x.Equals(item1)).Skip(1).First();
-                                    if (next != null && next.QueryStatus == Helper.QueryStatus.Closed)
-                                    {
-                                        DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
-                                        obj.ScreeningTemplateValueId = item1.ScreeningTemplateValueId;
-                                        double week = ((DateTime)next.CreatedDate - (DateTime)item1.CreatedDate).TotalDays / 7;
-                                        obj.Lable = Convert.ToInt32(week + 1) + " Week";
-                                        obj.Id = item1.Id;
-                                        obj.week = Convert.ToInt32(week + 1);
-                                        if (list != null && list.Count > 0)
-                                        {
-                                            var recordduplicate = list.Where(x => x.Id == item1.Id).FirstOrDefault();
-                                            if (recordduplicate == null)
-                                                list.Add(obj);
-                                        }
-                                        else
-                                            list.Add(obj);
-                                    }
-                                }
-                                count++;
-                            }
-                        }
-                        else
-                        {
-                            if (closedata != null)
-                            {
-                                var data = closedata.Where(x => x.ScreeningTemplateValueId == item.ScreeningTemplateValueId).FirstOrDefault();
-                                if (data != null)
-                                {
-                                    DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
-                                    obj.ScreeningTemplateValueId = data.ScreeningTemplateValueId;
-                                    double week = ((DateTime)data.CreatedDate - (DateTime)item.CreatedDate).TotalDays / 7;
-                                    obj.Lable = Convert.ToInt32(week + 1) + " Week";
-                                    obj.Id = item.Id;
-                                    obj.week = Convert.ToInt32(week + 1);
-                                    if (list != null && list.Count > 0)
-                                    {
-                                        var recordduplicate = list.Where(x => x.Id == item.Id).FirstOrDefault();
-                                        if (recordduplicate == null)
-                                            list.Add(obj);
-                                    }
-                                    else
-                                        list.Add(obj);
-                                }
-                            }
+                            DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
+                            obj.ScreeningTemplateValueId = data.ScreeningTemplateValueId;
+                            double week = ((DateTime)data.CreatedDate - (DateTime)item.CreatedDate).TotalDays / 7;
+                            obj.Lable = Convert.ToInt32(week + 1) + " Week";
+                            obj.Id = item.Id;
+                            obj.week = Convert.ToInt32(week + 1);
+                            list.Add(obj);
                         }
                     }
                     if (list != null && list.Count > 0)
