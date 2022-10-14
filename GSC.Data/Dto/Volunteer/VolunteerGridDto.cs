@@ -58,6 +58,7 @@ namespace GSC.Data.Dto.Volunteer
         public bool IsBlockDisplay { get; set; }
         public bool IsScreeningHisotry { get; set; }
         public bool IsDeleteRole { get; set; }
+        public bool IsEditRole { get; set; }
         public bool IsScreening { get; set; }
 
         public string ContactNo { get; set; }
