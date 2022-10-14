@@ -169,15 +169,13 @@ namespace GSC.Api.Controllers.Master
                     _context.Entry(item).State = EntityState.Detached;
                 }
             }
-           
+
             for (var i = 0; i < variableTemplate.Notes.Count; i++)
             {
                 _context.Entry(variableTemplate.Notes[i]).State = EntityState.Detached;
                 variableTemplate.Notes[i].Id = 0;
-                //if (variableTemplate.Notes[i].Id > 0)
-                //    _variableTemplateNoteRepository.Update(variableTemplate.Notes[i]);
-                //else
-                    _variableTemplateNoteRepository.Add(variableTemplate.Notes[i]);
+                variableTemplate.Notes[i].VariableTemplateId = variableTemplateDto.Id;
+                _variableTemplateNoteRepository.Add(variableTemplate.Notes[i]);
             }
 
             if (_uow.Save() <= 0) throw new Exception("Updating Variable Template failed on save.");
