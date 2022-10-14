@@ -19,5 +19,7 @@ namespace GSC.Respository.Master
         dynamic GetQueryManagementRoleWiseQuery(int projectId, int countryId, int siteId);
         DashboardInformConsentStatusDto GetDashboardInformConsentCount(int projectId, int countryId, int siteId);
         List<DashboardInformConsentStatusDto> GetDashboardInformConsentChart(int projectId, int countryId, int siteId);
+
+        List<DashboardQueryGraphFinalDto> GetNewDashboardQueryGraphData(int projectId, int countryId, int siteId);
     }
 }
