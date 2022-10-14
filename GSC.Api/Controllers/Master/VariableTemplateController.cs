@@ -15,6 +15,7 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -163,16 +164,19 @@ namespace GSC.Api.Controllers.Master
             {
                 foreach (var item in notes)
                 {
-                    _variableTemplateNoteRepository.Delete(item);
+                    _variableTemplateNoteRepository.Remove(item);
                     _uow.Save();
+                    _context.Entry(item).State = EntityState.Detached;
                 }
             }
-
+           
             for (var i = 0; i < variableTemplate.Notes.Count; i++)
             {
-                if (variableTemplate.Notes[i].Id > 0)
-                    _variableTemplateNoteRepository.Update(variableTemplate.Notes[i]);
-                else
+                _context.Entry(variableTemplate.Notes[i]).State = EntityState.Detached;
+                variableTemplate.Notes[i].Id = 0;
+                //if (variableTemplate.Notes[i].Id > 0)
+                //    _variableTemplateNoteRepository.Update(variableTemplate.Notes[i]);
+                //else
                     _variableTemplateNoteRepository.Add(variableTemplate.Notes[i]);
             }
 
