@@ -89,7 +89,7 @@ namespace GSC.Api.Controllers.Location
             _cityRepository.Add(city);
             _uow.Save();
 
-            return Ok();
+            return Ok(city.Id);
         }
 
         [HttpPut]

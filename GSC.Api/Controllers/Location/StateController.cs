@@ -107,7 +107,7 @@ namespace GSC.Api.Controllers.Location
             _stateRepository.Add(state);
             _uow.Save();
 
-            return Ok();
+            return Ok(state.Id);
         }
 
         [HttpPut]
