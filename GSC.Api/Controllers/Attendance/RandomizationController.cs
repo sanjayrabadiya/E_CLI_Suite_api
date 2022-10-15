@@ -231,7 +231,7 @@ namespace GSC.Api.Controllers.Attendance
             user.Id = userdetails.Id;
             _userRepository.Update(user);
 
-            if (randomization.LegalFirstName != null)
+            if (!String.IsNullOrEmpty(randomization.LegalFirstName))
             {
                 var userLARDetail = _userRepository.FindBy(x => x.Id == details.LARUserId).FirstOrDefault();
                 userLARDetail.FirstName = RandomizationDto.LegalFirstName;

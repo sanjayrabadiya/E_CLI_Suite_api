@@ -69,14 +69,14 @@ namespace GSC.Respository.Master
             int total = 0;
             if (countryId == 0 && siteId == 0)
             {
-                var project = _projectRepository.All.Where(x => projectIds.Contains(x.Id)).ToList();
+                var project = _projectRepository.All.Where(x => projectIds.Contains(x.Id) && (siteId == 0 ? (!x.IsTestSite) : true)).ToList();
                 total = (int)project.Sum(item => item.AttendanceLimit);
 
 
             }
             else if (countryId > 0 && siteId == 0)
             {
-                var project = _projectRepository.All.Include(x => x.ManageSite).Where(x => projectIds.Contains(x.Id)
+                var project = _projectRepository.All.Include(x => x.ManageSite).Where(x => projectIds.Contains(x.Id) && (siteId == 0 ? (!x.IsTestSite) : true)
                                                           && x.ManageSite.City.State.CountryId == countryId
                                                           && x.DeletedDate == null).ToList();
                 total = (int)project.Sum(item => item.AttendanceLimit);
@@ -91,13 +91,13 @@ namespace GSC.Respository.Master
             }
 
             var patientStatus = _randomizationRepository.All
-                .Include(x => x.Project).Where(x => projectIds.Contains(x.Project.Id) && x.DeletedDate == null).ToList()
+                .Include(x => x.Project).Where(x => projectIds.Contains(x.Project.Id) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).ToList()
                 .GroupBy(g => g.Project.ParentProjectId).Select(s => new
                 {
                     parent = s.Key,
                     EnrolledTotal = total,
-                    PreScreeened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.PreScreening).Count(),
-                    Screened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Screening).Count(),
+                    PreScreeened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.PreScreening || (int)q.PatientStatusId > 1).Count(),
+                    Screened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Screening || (int)q.PatientStatusId > 2).Count(),
                     Ontrial = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.OnTrial).Count(),
                     Randomized = s.Where(q => q.RandomizationNumber != null).Count(),
                     ScreeningFailure = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.ScreeningFailure).Count(),
@@ -134,7 +134,7 @@ namespace GSC.Respository.Master
 
             foreach (var project in projectList)
             {
-                var randomizes = _randomizationRepository.All.Where(q => q.ProjectId == project.Id && q.DeletedDate == null && q.DateOfRandomization != null && q.DateOfScreening != null).ToList()
+                var randomizes = _randomizationRepository.All.Where(q => q.ProjectId == project.Id && (siteId == 0 ? (!q.Project.IsTestSite) : true) && q.DeletedDate == null && q.DateOfRandomization != null && q.DateOfScreening != null).ToList()
                     .Select(s => new
                     {
                         DayDiff = s.DateOfRandomization.Value.Subtract(s.DateOfScreening.Value).Days,
@@ -150,8 +150,7 @@ namespace GSC.Respository.Master
                 DaysDiffList.AddRange(randomizes);
             }
 
-            DaysDiffList.ForEach(t =>
-            {
+            DaysDiffList.ForEach(t => {
                 t.AvgDayDiff = decimal.Round((t.AvgDayDiff / _randomizationRepository.All.Where(q => q.ProjectId == t.SiteId && q.DeletedDate == null && q.DateOfScreening != null).Count()), 2, MidpointRounding.AwayFromZero);
             });
             return DaysDiffList;
@@ -239,17 +238,22 @@ namespace GSC.Respository.Master
 
             foreach (var project in projectList)
             {
-                var randomizeCount = _randomizationRepository.All.Where(x => x.DateOfRandomization != null && x.DeletedDate == null && x.ProjectId == project.Id).Count();
-                var screeningCount = _randomizationRepository.All.Where(x => x.DateOfScreening != null && x.DeletedDate == null && x.ProjectId == project.Id).Count();
+                var randomizeCount = _randomizationRepository.All.Where(x => x.DateOfRandomization != null && x.DeletedDate == null && x.ProjectId == project.Id && (siteId == 0 ? (!x.Project.IsTestSite) : true)).Count();
+                var screeningCount = _randomizationRepository.All.Where(x => x.DateOfScreening != null && x.DeletedDate == null && x.ProjectId == project.Id && (siteId == 0 ? (!x.Project.IsTestSite) : true)).Count();
 
-                labelGraphs.Add(new LabelGraph()
+                var isTestSite = _projectRepository.Find(project.Id).IsTestSite;
+
+                if ((!isTestSite && siteId == 0) || ((isTestSite && siteId != 0)))
                 {
-                    RandomizedCount = randomizeCount,
-                    ScreeningCount = screeningCount,
-                    TargetCount = project.AttendanceLimit.Value,
-                    SiteId = project.Id,
-                    SiteName = project.ProjectCode
-                });
+                    labelGraphs.Add(new LabelGraph()
+                    {
+                        RandomizedCount = randomizeCount,
+                        ScreeningCount = screeningCount,
+                        TargetCount = project.AttendanceLimit.Value,
+                        SiteId = project.Id,
+                        SiteName = project.ProjectCode
+                    });
+                }
             }
             return labelGraphs;
         }

@@ -83,7 +83,7 @@ namespace GSC.Api.Controllers.Location
 
             _uow.Save();
 
-            return Ok();
+            return Ok(country.Id);
         }
 
         [HttpPut]
