@@ -605,11 +605,11 @@ namespace GSC.Respository.ProjectRight
                     if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
                 }
 
-                if (!projectDocumentReview.IsReview)
-                {
+                //if (!projectDocumentReview.IsReview)
+                //{
                     var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
                     projectDocumentReview.DocumentPath = documentUrl + projectDocumentReview.DocumentPath;
-                }
+                //}
             });
 
             return projectDashBoardDto;

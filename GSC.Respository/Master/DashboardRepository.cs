@@ -96,8 +96,8 @@ namespace GSC.Respository.Master
                 {
                     parent = s.Key,
                     EnrolledTotal = total,
-                    PreScreeened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.PreScreening).Count(),
-                    Screened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Screening).Count(),
+                    PreScreeened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.PreScreening || (int)q.PatientStatusId > 1).Count(),
+                    Screened = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.Screening || (int)q.PatientStatusId > 2).Count(),
                     Ontrial = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.OnTrial).Count(),
                     Randomized = s.Where(q => q.RandomizationNumber != null).Count(),
                     ScreeningFailure = s.Where(q => q.PatientStatusId == ScreeningPatientStatus.ScreeningFailure).Count(),
