@@ -1430,15 +1430,11 @@ namespace GSC.Respository.Screening
                 {
                     screeningTemplateValueDto.Value = screeningTemplateValueQueryDto.Value;
                     screeningTemplateValueDto.CollectionSource = screeningTemplateValueQueryDto.CollectionSource;
-                    var data = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit).Where(x => x.Id == screeningTemplateValueQueryDto.ScreeningTemplateValueId).FirstOrDefault();
+                    screeningTemplateValueDto.Id = screeningTemplateValueQueryDto.ScreeningTemplateValueId;
+                    var data = _context.ScreeningTemplateValue.Where(x => x.Id == screeningTemplateValueQueryDto.ScreeningTemplateValueId).FirstOrDefault();
                     if (data != null)
-                    {
                         screeningTemplateValueDto.ProjectDesignVariableId = data.ProjectDesignVariableId;
-                        if (data.ScreeningTemplate != null && data.ScreeningTemplate.ScreeningVisit != null)
-                        {
-                            screeningTemplateValueDto.ScreeningEntryId = data.ScreeningTemplate.ScreeningVisit.ScreeningEntryId;
-                        }
-                    }
+
 
                 }
             }

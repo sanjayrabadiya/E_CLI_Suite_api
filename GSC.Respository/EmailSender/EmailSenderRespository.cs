@@ -621,23 +621,39 @@ namespace GSC.Respository.EmailSender
 
         private string ReplaceBodyForVariableEmail(string body, ScreeningTemplateValueDto email)
         {
-            var screeningdata = _context.ScreeningEntry.Include(x => x.Randomization).ThenInclude(x => x.Project).ThenInclude(x => x.ManageSite).Include(x => x.Project).Where(x => x.Id == email.ScreeningEntryId).FirstOrDefault();
+            int screeningentryid = 0;
+
+            if (email.ScreeningEntryId == 0)
+            {
+                var data = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit).Where(x => x.Id == email.Id).FirstOrDefault();
+                if (data != null)
+                {
+                    if (data.ScreeningTemplate != null && data.ScreeningTemplate.ScreeningVisit != null)
+                        screeningentryid = data.ScreeningTemplate.ScreeningVisit.ScreeningEntryId;
+                }
+            }
+            else
+            {
+                screeningentryid = email.ScreeningEntryId;
+            }
+            var str = "<p>Study code: ##StudyCode##<br></p><p>Site code : ##SiteName##<br></p><p>Visit : ##VisitName##<br></p><p>Template : ##TemplateName##<br></p><p>Screening No : ##ScreeningNo##<br></p><p>SAE Term : ##VariableName##<br></p>";
+            var screeningdata = _context.ScreeningEntry.Include(x => x.Randomization).ThenInclude(x => x.Project).ThenInclude(x => x.ManageSite).Include(x => x.Project).Where(x => x.Id == screeningentryid).FirstOrDefault();
             if (screeningdata != null)
             {
-                body = Regex.Replace(body, "##ScreeningNo##", screeningdata.Randomization.ScreeningNumber, RegexOptions.IgnoreCase);
+                str = Regex.Replace(str, "##ScreeningNo##", screeningdata.Randomization.ScreeningNumber, RegexOptions.IgnoreCase);
 
                 if (screeningdata.Project != null)
                 {
                     var projectdata = _context.Project.Where(x => x.Id == screeningdata.Project.ParentProjectId).FirstOrDefault();
                     if (projectdata != null)
                     {
-                        body = Regex.Replace(body, "##StudyCode##", projectdata.ProjectCode, RegexOptions.IgnoreCase);
+                        str = Regex.Replace(str, "##StudyCode##", projectdata.ProjectCode, RegexOptions.IgnoreCase);
 
                         if (screeningdata.Project != null)
                         {
                             var managesite = _context.ManageSite.Where(x => x.DeletedDate == null && x.Id == screeningdata.Project.ManageSiteId).FirstOrDefault();
                             if (managesite != null)
-                                body = Regex.Replace(body, "##SiteName##", screeningdata.Project.ProjectCode + " - " + managesite.SiteName, RegexOptions.IgnoreCase);
+                                str = Regex.Replace(str, "##SiteName##", screeningdata.Project.ProjectCode + " - " + managesite.SiteName, RegexOptions.IgnoreCase);
                         }
                     }
                 }
@@ -646,20 +662,20 @@ namespace GSC.Respository.EmailSender
 
             if (variable != null)
             {
-                body = Regex.Replace(body, "##VariableName##", variable.VariableName, RegexOptions.IgnoreCase);
+                str = Regex.Replace(str, "##VariableName##", variable.VariableName, RegexOptions.IgnoreCase);
                 if (variable.ProjectDesignTemplate != null)
                 {
-                    body = Regex.Replace(body, "##TemplateName##", variable.ProjectDesignTemplate.TemplateName, RegexOptions.IgnoreCase);
+                    str = Regex.Replace(str, "##TemplateName##", variable.ProjectDesignTemplate.TemplateName, RegexOptions.IgnoreCase);
                     if (variable.ProjectDesignTemplate.ProjectDesignVisit != null)
                     {
-                        body = Regex.Replace(body, "##VisitName##", variable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, RegexOptions.IgnoreCase);
+                        str = Regex.Replace(str, "##VisitName##", variable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, RegexOptions.IgnoreCase);
                     }
 
                 }
 
             }
 
-            return body;
+            return str + body;
         }
         //for variable email .prakash chauhan 14-05-2022
         private EmailMessage ConfigureEmailForVariable()
