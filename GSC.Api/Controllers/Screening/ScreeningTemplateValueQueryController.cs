@@ -119,7 +119,8 @@ namespace GSC.Api.Controllers.Screening
             _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
 
             //for variable email .prakash chauhan 14-05-2022
-            _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
+            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.RadioButton)
+                _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
             _uow.Save();
 
             return Ok(screeningTemplateValueQuery.Id);
@@ -252,7 +253,8 @@ namespace GSC.Api.Controllers.Screening
             _screeningVisitRepository.AutomaticStatusUpdate(screeningTemplate.Id);
 
             //for variable email .prakash chauhan 14-05-2022
-            _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
+            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.RadioButton)
+                _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
             _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
             _uow.Save();
 
