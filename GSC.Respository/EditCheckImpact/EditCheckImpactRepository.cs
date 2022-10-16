@@ -63,6 +63,7 @@ namespace GSC.Respository.EditCheckImpact
         {
 
             var result = _impactService.GetEditCheck(screeningTemplateBasic);
+
             _templateScreeningVariableDtos = new List<TemplateScreeningVariableDto>();
             if (!isQuery)
             {
@@ -158,6 +159,10 @@ namespace GSC.Respository.EditCheckImpact
             _context.DetachAllEntities();
 
             var editCheckResult = _impactService.GetEditCheckByVaiableId(projectDesignTemplateId, projectDesignVariableId, editCheckIds);
+
+            var skipIds = editCheckResult.Where(x => x.ProjectDesignVariableId == 0).Select(r => r.EditCheckId).ToList();
+
+            editCheckResult = editCheckResult.Where(x => !skipIds.Contains(x.EditCheckId)).ToList();
 
             if (!isQueryRaise)
             {
@@ -779,6 +784,9 @@ namespace GSC.Respository.EditCheckImpact
 
         public int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource, bool isDisable)
         {
+            if (projectDesignVariableId == 0)
+                return projectDesignVariableId;
+
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x =>
                 x.ProjectDesignVariableId == projectDesignVariableId &&
                 x.ScreeningTemplateId == screeningTemplateId).FirstOrDefault();
