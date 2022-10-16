@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
@@ -150,7 +151,8 @@ namespace GSC.Respository.Master
                 DaysDiffList.AddRange(randomizes);
             }
 
-            DaysDiffList.ForEach(t => {
+            DaysDiffList.ForEach(t =>
+            {
                 t.AvgDayDiff = decimal.Round((t.AvgDayDiff / _randomizationRepository.All.Where(q => q.ProjectId == t.SiteId && q.DeletedDate == null && q.DateOfScreening != null).Count()), 2, MidpointRounding.AwayFromZero);
             });
             return DaysDiffList;
@@ -433,23 +435,28 @@ namespace GSC.Respository.Master
                 var query = _screeningTemplateValueQueryRepository.All.Where(x => projectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) &&
             (siteId == 0 ? (!x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true)
                 && (x.QueryStatus == Helper.QueryStatus.Open || x.QueryStatus == Helper.QueryStatus.Closed)
-                ).OrderBy(x => x.CreatedDate).ToList();
+               ).OrderBy(x => x.CreatedDate).ToList();
                 if (query != null && query.Count > 0)
                 {
                     var opendata = query.Where(x => x.QueryStatus == Helper.QueryStatus.Open).ToList();
 
                     foreach (var item in opendata)
                     {
-                        var data = query.Where(x => x.QueryParentId == item.Id).FirstOrDefault();
-                        if (data != null && data.QueryStatus == QueryStatus.Closed)
+                        var slist = new List<ScreeningTemplateValueQuery>();
+                        var data1 = FindClosedData(item, slist);
+                        if (data1 != null && data1.Count > 0)
                         {
-                            DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
-                            obj.ScreeningTemplateValueId = data.ScreeningTemplateValueId;
-                            double week = ((DateTime)data.CreatedDate - (DateTime)item.CreatedDate).TotalDays / 7;
-                            obj.Lable = Convert.ToInt32(week + 1) + " Week";
-                            obj.Id = item.Id;
-                            obj.week = Convert.ToInt32(week + 1);
-                            list.Add(obj);
+                            var finaldata = data1.Where(x => x != null && x.QueryStatus == QueryStatus.Closed).FirstOrDefault();
+                            if (finaldata != null)
+                            {
+                                DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
+                                obj.ScreeningTemplateValueId = finaldata.ScreeningTemplateValueId;
+                                double week = ((DateTime)finaldata.CreatedDate - (DateTime)item.CreatedDate).TotalDays / 7;
+                                obj.Lable = Convert.ToInt32(week + 1) + " Week";
+                                obj.Id = item.Id;
+                                obj.week = Convert.ToInt32(week + 1);
+                                list.Add(obj);
+                            }
                         }
                     }
                     if (list != null && list.Count > 0)
@@ -469,6 +476,22 @@ namespace GSC.Respository.Master
             {
                 throw new Exception();
             }
+        }
+
+        public List<ScreeningTemplateValueQuery> FindClosedData(ScreeningTemplateValueQuery obj, List<ScreeningTemplateValueQuery> list)
+        {
+            list.Add(obj);
+            var data = _screeningTemplateValueQueryRepository.All.Where(x => x.QueryParentId == obj.Id).FirstOrDefault();
+            if (data != null && data.QueryStatus != QueryStatus.Closed)
+            {
+                FindClosedData(data, list);
+            }
+            else
+            {
+                list.Add(data);
+            }
+
+            return list.ToList();
         }
 
         public DashboardInformConsentStatusDto GetDashboardInformConsentCount(int projectId, int countryId, int siteId)
