@@ -32,9 +32,11 @@ namespace GSC.Respository.Client
 
         public List<DropDownDto> GetClientDropDown()
         {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.ClientName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto {Id = c.Id, Value = c.ClientName, ExtraData= c.Logo ==null?documentUrl+ "2\\Client\\Logo\\Original\\uploadClientLogo.png" : documentUrl + c.Logo, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
         public string DuplicateClient(Data.Entities.Client.Client objSave)
