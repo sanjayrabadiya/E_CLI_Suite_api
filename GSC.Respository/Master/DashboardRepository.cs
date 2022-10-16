@@ -92,7 +92,7 @@ namespace GSC.Respository.Master
             }
 
             var patientStatus = _randomizationRepository.All
-                .Include(x => x.Project).Where(x => projectIds.Contains(x.Project.Id) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).ToList()
+                .Include(x => x.Project).Where(x => projectIds.Contains(x.Project.Id) && (siteId == 0 ? (!x.Project.IsTestSite) : true) && x.DeletedDate == null).ToList()
                 .GroupBy(g => g.Project.ParentProjectId).Select(s => new
                 {
                     parent = s.Key,
@@ -246,6 +246,18 @@ namespace GSC.Respository.Master
                 var isTestSite = _projectRepository.Find(project.Id).IsTestSite;
 
                 if ((!isTestSite && siteId == 0) || ((isTestSite && siteId != 0)))
+                {
+                    labelGraphs.Add(new LabelGraph()
+                    {
+                        RandomizedCount = randomizeCount,
+                        ScreeningCount = screeningCount,
+                        TargetCount = project.AttendanceLimit.Value,
+                        SiteId = project.Id,
+                        SiteName = project.ProjectCode
+                    });
+                }
+
+                else if (!isTestSite && siteId != 0)
                 {
                     labelGraphs.Add(new LabelGraph()
                     {

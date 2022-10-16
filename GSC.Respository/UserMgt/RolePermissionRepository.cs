@@ -163,7 +163,7 @@ namespace GSC.Respository.UserMgt
         //Code by Mayur to fetch Sidebar
         public List<SidebarMenuRolePermissionDto> GetSidebarMenuByRoleId()
         {
-            var permissions = _context.AppScreen.Where(t => t.IsPermission && t.DeletedDate == null && (t.IsTab == null || t.IsTab == false)).Select(t =>
+            var permissions = _context.AppScreen.Where(t => t.IsPermission && t.DeletedDate == null && (t.IsTab == null || t.IsTab == false) && t.ScreenCode != "mnu_dashboard").Select(t =>
                  new SidebarMenuRolePermissionDto
                  {
                      AppScreenId = t.Id,

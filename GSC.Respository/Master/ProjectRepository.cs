@@ -872,6 +872,25 @@ namespace GSC.Respository.Master
             _context.ProjectDesign.Add(projectDesign);
             _context.Save();
 
+            var sequence = _context.TemplateVariableSequenceNoSetting.FirstOrDefault(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null);
+            if (sequence != null)
+            {
+                sequence.Id = 0;
+                sequence.ProjectDesignId = projectDesign.Id;
+                _context.TemplateVariableSequenceNoSetting.Add(sequence);
+            }
+            else
+            {
+                var sequences = new TemplateVariableSequenceNoSetting()
+                {
+                    Id = 0,
+                    ProjectDesignId = projectDesign.Id,
+                    IsTemplateSeqNo = true,
+                    IsVariableSeqNo = true
+                };
+                _context.TemplateVariableSequenceNoSetting.Add(sequences);
+            }
+
             var studyVersions = _context.StudyVersion.Where(q => q.ProjectId == cloneProjectId && q.ProjectDesignId == projectDesignId && q.DeletedDate == null);
             foreach (var version in studyVersions)
             {
