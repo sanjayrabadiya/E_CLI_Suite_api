@@ -13,6 +13,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
+using GSC.Respository.Project.Design;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
@@ -41,6 +42,7 @@ namespace GSC.Respository.Master
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly ISiteTeamRepository _siteTeamRepository;
+        private readonly IStudyVersionRepository _studyVersionRepository;
 
         public ProjectRepository(IGSCContext context,
             IUserRepository userRepository,
@@ -54,7 +56,8 @@ namespace GSC.Respository.Master
             IAttendanceRepository attendanceRepository,
             IVolunteerRepository volunteerRepository,
             IMapper mapper,
-            ISiteTeamRepository siteTeamRepository)
+            ISiteTeamRepository siteTeamRepository,
+            IStudyVersionRepository studyVersionRepository)
             : base(context)
         {
             _numberFormatRepository = numberFormatRepository;
@@ -70,6 +73,7 @@ namespace GSC.Respository.Master
             _mapper = mapper;
             _context = context;
             _siteTeamRepository = siteTeamRepository;
+            _studyVersionRepository = studyVersionRepository;
         }
 
         public IList<DashboardProject> GetProjectList(bool isDeleted)
@@ -82,9 +86,7 @@ namespace GSC.Respository.Master
                 {
                     ProjectId = c.Id,
                     CreatedDate = c.CreatedDate.Value
-                }).OrderByDescending(x => x.ProjectId).ToList();
-
-            // ProjectTo<DashboardProject>(_mapper.ConfigurationProvider).OrderByDescending(x => x.ProjectId).ToList();
+        }).OrderByDescending(x => x.ProjectId).ToList();
 
 
             projects.ForEach(item =>
@@ -98,9 +100,6 @@ namespace GSC.Respository.Master
                    CountryName = r.ManageSite.City.State.Country.CountryName,
                    CountryCode = r.ManageSite.City.State.Country.CountryCode
                }).Distinct().OrderBy(o => o.CountryCode).ToList();
-
-                //var countries = _context.Project.Include(i => i.Country).Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null);
-
                 var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
                     ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
                 foreach (var country in countries)
@@ -108,10 +107,16 @@ namespace GSC.Respository.Master
                     temCountries.Add(country.CountryName);
                 }
 
+                project.LiveVersion = _studyVersionRepository.All.Where(x => x.ProjectId == item.ProjectId && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
+                project.AnyLive = _studyVersionRepository.All.Any(x => x.ProjectId == item.ProjectId && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive);
+                project.TrialVersion = _studyVersionRepository.All.Where(x => x.ProjectId == item.ProjectId && x.DeletedDate == null && x.VersionStatus == VersionStatus.OnTrial).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
+
                 item.CountriesName = temCountries.Distinct().ToList();
                 item.CountCountry = temCountries.Distinct().Count();
                 item.projectCode = project.ProjectCode;
                 item.Project = project;
+                
+
             });
 
 
