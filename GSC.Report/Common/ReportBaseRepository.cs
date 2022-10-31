@@ -785,10 +785,10 @@ namespace GSC.Report.Common
                                               Domain = new DomainReportDto {
                                                 DomainCode = a.ProjectDesignTemplate.Domain.DomainCode, DomainName = a.ProjectDesignTemplate.Domain.DomainName
                                               },
-                                              TemplateNotes = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
+                                              TemplateNotes = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Where(n=>n.DeletedDate == null).Select(n => new ProjectDesignTemplateNoteReportDto {
                                                 Notes = n.Note, IsPreview = n.IsPreview,IsBottom=n.IsBottom
                                               }).Where(tn => tn.IsBottom == false || tn.IsBottom == null).ToList(),
-                                              TemplateNotesBottom = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Select(n => new ProjectDesignTemplateNoteReportDto {
+                                              TemplateNotesBottom = a.ProjectDesignTemplate.ProjectDesignTemplateNote.Where(n=>n.DeletedDate == null).Select(n => new ProjectDesignTemplateNoteReportDto {
                                                 Notes = n.Note, IsPreview = n.IsPreview,IsBottom = n.IsBottom
                                               }).Where(tn => tn.IsBottom == true).ToList(),
                                               ProjectDesignVariable = a.ScreeningTemplateValues.Where(s => s.DeletedDate == null && s.ProjectDesignVariable.DeletedDate == null).Select(s => new ProjectDesignVariableReportDto {
