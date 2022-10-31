@@ -95,6 +95,9 @@ namespace GSC.Respository.Screening
                     VolunteerName = t.RandomizationId != null
                         ? t.Randomization.Initial
                         : t.Attendance.Volunteer.AliasName,
+                    VolunteerNo = t.RandomizationId != null
+                        ? t.Randomization.RandomizationNumber
+                        : t.Attendance.Volunteer.VolunteerNo,
                     IsFitnessFit = t.IsFitnessFit,
                     IsEnrolled = t.IsEnrolled,
                     ProjectNo = t.Project.ProjectCode,
