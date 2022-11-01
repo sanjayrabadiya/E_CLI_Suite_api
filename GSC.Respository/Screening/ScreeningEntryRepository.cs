@@ -697,12 +697,27 @@ namespace GSC.Respository.Screening
                     var ProjectDesignVariableValue = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningTemplateValueDto.Value)).FirstOrDefault();
                     if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.FitnessFit.GetDescription())
                     {
-                        screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        if (ProjectDesignVariableValue != null)
+                        {
+                            screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        }
+                        else
+                        {
+                            screeningEntry.IsFitnessFit = null;
+                        }
                     }
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
                     {
-                        screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
-                        ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        if (ProjectDesignVariableValue != null)
+                        {
+                            screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                            ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        }
+                        else
+                        {
+                            screeningEntry.IsEnrolled = null;
+                            ScreeningHistory.Enrolled = null;
+                        }
                     }
                 }
 
