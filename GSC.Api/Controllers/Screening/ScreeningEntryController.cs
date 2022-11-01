@@ -259,6 +259,12 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
+            if (data.IsFitnessFit == false)
+            {
+                ModelState.AddModelError("Message", "Subject is not fit in screening.");
+                return BadRequest(ModelState);
+            }
+
             data.StudyId = volunteerProject.ProjectId;
             data.Notes = volunteerProject.Notes;
             _screeningEntryRepository.Update(data);
