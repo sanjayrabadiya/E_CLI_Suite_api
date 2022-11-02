@@ -259,9 +259,9 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
-            if (data.IsFitnessFit == false)
+            if (data.IsFitnessFit == false || data.IsEnrolled == false)
             {
-                ModelState.AddModelError("Message", "Subject is not fit in screening.");
+                ModelState.AddModelError("Message", "Subject is not fit, You cannot assign project number.");
                 return BadRequest(ModelState);
             }
 

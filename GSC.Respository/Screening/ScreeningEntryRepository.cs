@@ -700,6 +700,11 @@ namespace GSC.Respository.Screening
                         if (ProjectDesignVariableValue != null)
                         {
                             screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+
+                            if (screeningEntry.IsFitnessFit == true)
+                            {
+                                screeningEntry.FitnessNotes = "";
+                            }
                         }
                         else
                         {
@@ -712,6 +717,11 @@ namespace GSC.Respository.Screening
                         {
                             screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
                             ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+
+                            if (screeningEntry.IsEnrolled == true)
+                            {
+                                screeningEntry.FitnessNotes = "";
+                            }
                         }
                         else
                         {
