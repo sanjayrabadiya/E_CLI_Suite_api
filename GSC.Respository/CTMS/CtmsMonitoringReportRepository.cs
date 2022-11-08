@@ -123,7 +123,7 @@ namespace GSC.Respository.CTMS
                                        && x.CtmsMonitoring.DeletedDate == null).ToList();
 
             if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
-                return "Please Approve Previous Site.";
+                return "Please Approve " + CtmsActivity.ActivityName + " .";
 
             return "";
         }

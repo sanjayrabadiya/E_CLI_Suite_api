@@ -176,5 +176,79 @@ namespace GSC.Respository.CTMS
 
             return "";
         }
+
+        public string ImportTaskMasterDataFromTaskMaster(StudyPlan studyplan, int id)
+        {
+
+            var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
+            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
+            WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
+
+            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
+
+            var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == id
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+                .Select(t => new StudyPlanTask
+                {
+                    StudyPlanId = studyplan.Id,
+                    TaskId = t.Id,
+                    TaskName = t.TaskName,
+                    ParentId = t.ParentId,
+                    isMileStone = t.IsMileStone,
+                    TaskOrder = t.TaskOrder,
+                    Duration = t.Duration,
+                    StartDate = studyplan.StartDate,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
+                    DependentTaskId = t.DependentTaskId,
+                    ActivityType = t.ActivityType,
+                    OffSet = t.OffSet,
+                    RefrenceType = t.RefrenceType
+                }).ToList();
+
+            tasklist.ForEach(t =>
+            {
+                var tasklist1 = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == t.DependentTaskId
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+                .Select(t => new StudyPlanTask
+                {
+                    StudyPlanId = studyplan.Id,
+                    TaskId = t.Id,
+                    TaskName = t.TaskName,
+                    ParentId = t.ParentId,
+                    isMileStone = t.IsMileStone,
+                    TaskOrder = t.TaskOrder,
+                    Duration = t.Duration,
+                    StartDate = studyplan.StartDate,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
+                    DependentTaskId = t.DependentTaskId,
+                    ActivityType = t.ActivityType,
+                    OffSet = t.OffSet,
+                    RefrenceType = t.RefrenceType
+                }).ToList();
+
+                var data = UpdateDependentTaskDate(t, ref tasklist1);
+                if (data != null)
+                {
+                    t.StartDate = data.StartDate;
+                    t.EndDate = data.EndDate;
+                    t.Parent = t;
+                    t.DependentTask = tasklist1.FirstOrDefault(d => d.TaskId == t.DependentTaskId);
+                    t.DependentTaskId = null;
+                }
+
+                if (t.ParentId > 0)
+                {
+                    t.Parent = tasklist1.FirstOrDefault(x => x.TaskId == t.ParentId);
+                    t.ParentId = null;
+                }
+            });
+
+            _context.StudyPlanTask.AddRange(tasklist);
+            _context.Save();
+
+            return "";
+        }
     }
 }
