@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
@@ -25,9 +20,7 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class EConsentVideoController : BaseController
     {
-        //note: messagehub not accessible in repository so all the messagehub related logic written in this class
         private readonly IEConsentVideoRepository _EConsentVideoRepository;
-        //private readonly IHubContext<MessageHub> _hubContext;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IUserRepository _userRepository;
@@ -37,7 +30,6 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
 
         public EConsentVideoController(IEConsentVideoRepository EConsentVideoRepository,
-                                        //IHubContext<MessageHub> hubContext,
                                         IUnitOfWork uow,
                                         IMapper mapper,
                                         ICentreUserService centreUserService,
@@ -70,7 +62,7 @@ namespace GSC.Api.Controllers.InformConcent
             data.SenderUserName = _userRepository.Find(data.SenderUserId).UserName;
             data.ReceiverUserName = _userRepository.Find(data.ReceiverUserId).UserName;
 
-            await _centreUserService.GenerateVideoSessionandToken($"{_environmentSetting.Value.CentralApi}Video/GenerateVideoSessionandToken", data);
+            //await _centreUserService.GenerateVideoSessionandToken($"{_environmentSetting.Value.CentralApi}Video/GenerateVideoSessionandToken", data);
 
             //if (ConnectedUser.Ids.Where(x => x.userId == ReceiverUserId).FirstOrDefault() != null)
             //{
@@ -99,7 +91,7 @@ namespace GSC.Api.Controllers.InformConcent
             eConsentVideoDto.ReceiverUserName = _userRepository.Find(eConsentVideoDto.ReceiverUserId).UserName;
             eConsentVideoDto.ApiKey = _VideoAPISettings.Value.API_KEY;
 
-            await _centreUserService.DeliverFlagUpdate($"{_environmentSetting.Value.CentralApi}Video/DeliverFlagUpdate", eConsentVideoDto);
+            //await _centreUserService.DeliverFlagUpdate($"{_environmentSetting.Value.CentralApi}Video/DeliverFlagUpdate", eConsentVideoDto);
             //if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.SenderUserId).ToList().FirstOrDefault() != null)
             //{
             //    var connectionId = ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.SenderUserId).ToList().FirstOrDefault().connectionId;
@@ -119,13 +111,13 @@ namespace GSC.Api.Controllers.InformConcent
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
 
-            await _centreUserService.CallDeclined($"{_environmentSetting.Value.CentralApi}Video/CallDeclined", eConsentVideo);
+            //await _centreUserService.CallDeclined($"{_environmentSetting.Value.CentralApi}Video/CallDeclined", eConsentVideo);
             //if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.SenderUserId).ToList().FirstOrDefault() != null)
             //{
             //    var connectionId = ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.SenderUserId).ToList().FirstOrDefault().connectionId;
             //    //await _hubContext.Clients.Client(connectionId).SendAsync("CallDeclinedNotifysendBacktoSender", id);
             //}
-            return Ok();
+            return Ok(eConsentVideo);
         }
 
         [HttpPut]
@@ -137,13 +129,13 @@ namespace GSC.Api.Controllers.InformConcent
             eConsentVideo.CallStatus = VideoCallStatus.NotAnswered;
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
-            await _centreUserService.CallNotAnswered($"{_environmentSetting.Value.CentralApi}Video/CallNotAnswered", eConsentVideo);
+            //await _centreUserService.CallNotAnswered($"{_environmentSetting.Value.CentralApi}Video/CallNotAnswered", eConsentVideo);
             //if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.ReceiverUserId).ToList().FirstOrDefault() != null)
             //{
             //    var connectionId = ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.ReceiverUserId).ToList().FirstOrDefault().connectionId;
             //    //await _hubContext.Clients.Client(connectionId).SendAsync("CallNotAnsweredNotifysendBacktoReceiver", id);
             //}
-            return Ok();
+            return Ok(eConsentVideo);
         }
 
         [HttpPut]
@@ -156,13 +148,13 @@ namespace GSC.Api.Controllers.InformConcent
             eConsentVideo.EndCallBy = VideoCallStatusCallEndBy.Sender;
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
-            await _centreUserService.CallEndBySenderBeforeConnecting($"{_environmentSetting.Value.CentralApi}Video/CallEndBySenderBeforeConnecting", eConsentVideo);
+            //await _centreUserService.CallEndBySenderBeforeConnecting($"{_environmentSetting.Value.CentralApi}Video/CallEndBySenderBeforeConnecting", eConsentVideo);
             //if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.ReceiverUserId).ToList().FirstOrDefault() != null)
             //{
             //    var connectionId = ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.ReceiverUserId).ToList().FirstOrDefault().connectionId;
             //    //await _hubContext.Clients.Client(connectionId).SendAsync("CallEndBySenderBeforeConnectingNotifytoReceiver", id);
             //}
-            return Ok();
+            return Ok(eConsentVideo);
         }
 
         [HttpPut]
@@ -189,7 +181,7 @@ namespace GSC.Api.Controllers.InformConcent
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
 
-            await _centreUserService.CallEndsuccessfullyafterconnecting($"{_environmentSetting.Value.CentralApi}Video/CallEndsuccessfullyafterconnecting", eConsentVideo);
+            //await _centreUserService.CallEndsuccessfullyafterconnecting($"{_environmentSetting.Value.CentralApi}Video/CallEndsuccessfullyafterconnecting", eConsentVideo);
             //if (eConsentVideo.EndCallBy == VideoCallStatusCallEndBy.Sender)
             //{
             //    if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.ReceiverUserId).ToList().FirstOrDefault() != null)
@@ -206,7 +198,7 @@ namespace GSC.Api.Controllers.InformConcent
             //        //await _hubContext.Clients.Client(connectionId).SendAsync("CallEndsuccessfullyafterconnecting", id);
             //    }
             //}
-            return Ok();
+            return Ok(eConsentVideo);
         }
     }
 }

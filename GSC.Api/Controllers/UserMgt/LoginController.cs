@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.UserMgt;
 using GSC.Respository.Configuration;
@@ -28,7 +27,6 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
-        // private readonly IHubContext<MessageHub> _hubContext;
         private readonly IConfiguration _configuration;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
@@ -40,7 +38,6 @@ namespace GSC.Api.Controllers.UserMgt
             IUserRepository userRepository,
             IUserLoginReportRespository userLoginReportRepository,
             IUnitOfWork uow,
-            // IHubContext<MessageHub> hubContext,
             IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService, IMapper mapper,
