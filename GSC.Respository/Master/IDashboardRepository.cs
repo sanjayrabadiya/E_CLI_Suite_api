@@ -21,5 +21,7 @@ namespace GSC.Respository.Master
         List<DashboardInformConsentStatusDto> GetDashboardInformConsentChart(int projectId, int countryId, int siteId);
 
         List<DashboardQueryGraphFinalDto> GetNewDashboardQueryGraphData(int projectId, int countryId, int siteId);
+
+        dynamic GetCTMSMonitoringChart(int projectId, int countryId, int siteId);
     }
 }

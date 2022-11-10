@@ -215,4 +215,14 @@ namespace GSC.Data.Dto.ProjectRight
 
        
     }
+    public class CtmsMonitoringStatusChartDto
+    {
+        public MonitoringSiteStatus? Status { get; set; }
+        public string StatusName { get; set; }
+        public string ActivityName { get; set; }
+        public int ACount { get; set; }
+        public int RCount { get; set; }
+
+        public int EntrollCount { get; set; }
+    }
 }

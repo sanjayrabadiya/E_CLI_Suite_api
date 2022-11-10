@@ -226,5 +226,12 @@ namespace GSC.Api.Controllers.Master
             return Ok(_dashboardRepository.GetNewDashboardQueryGraphData(projectId, countryId, siteId));
         }
 
+        [HttpGet]
+        [Route("GetCTMSMonitoringChart/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetCTMSMonitoringChart(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetCTMSMonitoringChart(projectId, countryId, siteId);
+            return Ok(queries);
+        }
     }
 }
