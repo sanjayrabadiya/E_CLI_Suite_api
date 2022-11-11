@@ -101,12 +101,14 @@ namespace GSC.Api.Controllers.Screening
             screeningTemplateValue.Id = 0;
 
             var randomization = _context.Randomization.Include(x => x.ScreeningEntry).FirstOrDefault(x => x.UserId == _jwtTokenAccesser.UserId);
-
-            var dbLock = _context.ScreeningTemplate.FirstOrDefault(x => x.ProjectDesignTemplateId == screeningTemplateValue.ScreeningTemplateId && x.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
-            if (dbLock.IsLocked || dbLock.IsHardLocked)
+            if (randomization != null)
             {
-                ModelState.AddModelError("Message", "Template is locked");
-                return BadRequest(ModelState);
+                var dbLock = _context.ScreeningTemplate.FirstOrDefault(x => x.ProjectDesignTemplateId == screeningTemplateValue.ScreeningTemplateId && x.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
+                if (dbLock.IsLocked || dbLock.IsHardLocked)
+                {
+                    ModelState.AddModelError("Message", "Template is locked");
+                    return BadRequest(ModelState);
+                }
             }
 
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
