@@ -93,7 +93,7 @@ namespace GSC.Respository.AdverseEvent
 
         public AdverseEventSettingsListDto GetData(int projectId)
         {
-            var adverseEventSettingsDto = _context.AdverseEventSettings.Where(x => x.ProjectId == projectId)
+            var adverseEventSettingsDto = _context.AdverseEventSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                 .Select(x => new AdverseEventSettingsListDto
                 {
                     Id = x.Id,
@@ -123,7 +123,7 @@ namespace GSC.Respository.AdverseEvent
             if (data != null)
             {
                 _context.AdverseEventSettingsDetails.RemoveRange(data);
-                _context.Save();
+                //_context.Save();
             }
         }
 
