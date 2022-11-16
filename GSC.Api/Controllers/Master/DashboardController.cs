@@ -78,7 +78,7 @@ namespace GSC.Api.Controllers.Master
             objdashboard.eAdverseEventData = _aEReportingRepository.GetAEReportingMyTaskList(ProjectId, (int)(SiteId != null ? SiteId : ProjectId));
             objdashboard.manageMonitoringReportSendData = _ctmsMonitoringReportReviewRepository.GetSendTemplateList(ProjectId, SiteId > 0 ? SiteId : 0);
             objdashboard.manageMonitoringReportSendBackData = _ctmsMonitoringReportReviewRepository.GetSendBackTemplateList(ProjectId, SiteId > 0 ? SiteId : 0);
-           
+
             return Ok(objdashboard);
         }
 
@@ -240,6 +240,20 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId)
         {
             var queries = _dashboardRepository.GetCTMSMonitoringPIChart(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetCTMSMonitoringPlanDashboard/{ProjectId}/{SiteId}")]
+        public IActionResult getCTMSMonitoringPlanDashboard(int projectId, int siteId)
+        {
+            var queries = _dashboardRepository.getCTMSMonitoringPlanDashboard(projectId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetCTMSMonitoringActionPointChartDashboard/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.getCTMSMonitoringActionPointChartDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
     }

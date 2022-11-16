@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -697,6 +698,97 @@ namespace GSC.Respository.Master
                     }
                 }
                 return list;
+            }
+            return null;
+        }
+
+        public List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+
+            var list = _context.CtmsMonitoring.Where(x => x.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                        && x.DeletedDate == null)
+                .Select(b => new CtmsMonitoringPlanDashoardDto
+                {
+                    Id = b.Id,
+                    Activity = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    ScheduleStartDate = b.ScheduleStartDate,
+                    ActualStartDate = b.ActualStartDate
+
+                }).ToList();
+            if (list.Count > 0)
+            {
+                foreach (var item in list)
+                {
+                    item.Status = GetMonitoringStatus(item);
+                }
+            }
+
+
+
+            return list;
+        }
+
+        public string GetMonitoringStatus(CtmsMonitoringPlanDashoardDto obj)
+        {
+            var data = _context.CtmsMonitoringReportReview.Include(x => x.CtmsMonitoringReport).Where(x => x.CtmsMonitoringReport.CtmsMonitoringId == obj.Id).FirstOrDefault();
+            if (obj.ScheduleStartDate != null && data == null)
+            {
+                return "In Progress";
+            }
+            if (obj.ScheduleStartDate != null && data != null && !data.IsApproved)
+            {
+                return "In signature pending review";
+            }
+            if (obj.ScheduleStartDate != null && data != null && data.IsApproved)
+            {
+                return "Final";
+            }
+            return "";
+        }
+
+        public dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+
+            var asd = _context.CtmsMonitoring.Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                        && x.DeletedDate == null)
+                .Select(b => new
+                {
+                    ProjectId = b.ProjectId,
+
+                }).ToList();
+
+
+            if (asd.Count > 0)
+            {
+                var result = _context.CtmsActionPoint
+                .Where(x => asd.Select(z => z.ProjectId).Contains(x.CtmsMonitoring.ProjectId))
+                .GroupBy(g => g.Status).Select(n => new
+                {
+                    Status = n.Key.GetDescription(),
+                    Count = n.ToList().Count()
+                }).ToList();
+                return result;
             }
             return null;
         }

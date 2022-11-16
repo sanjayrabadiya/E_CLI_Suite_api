@@ -234,4 +234,12 @@ namespace GSC.Data.Dto.ProjectRight
 
         public string Status { get; set; }
     }
+    public class CtmsMonitoringPlanDashoardDto
+    {
+        public int Id { get; set; }
+        public string Activity { get; set; }
+        public DateTime? ScheduleStartDate { get; set; }
+        public DateTime? ActualStartDate { get; set; }
+        public string Status { get; set; }
+    }
 }

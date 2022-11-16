@@ -25,5 +25,9 @@ namespace GSC.Respository.Master
         dynamic GetCTMSMonitoringChart(int projectId, int countryId, int siteId);
 
         dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId);
+
+        List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int siteId);
+
+        dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId);
     }
 }

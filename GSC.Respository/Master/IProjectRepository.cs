@@ -52,5 +52,7 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetParentProjectDropDownForAddProjectNo();//prakash for volunteer screening project no add
 
         List<LockUnlockProject> GetParentStaticProject();
+
+        List<ProjectDropDown> GetParentProjectCTMSDropDown();
     }
 }

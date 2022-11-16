@@ -203,7 +203,7 @@ namespace GSC.Respository.CTMS
                         .Include(z => z.CtmsMonitoringReport).ThenInclude(c => c.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
 
                         .Where(t => t.DeletedDate == null && projectIds.Contains(t.CtmsMonitoringReport.CtmsMonitoring.ProjectId)
-                        && t.UserId == _jwtTokenAccesser.UserId && t.IsSendBack == false && t.CtmsMonitoringReport.DeletedDate == null)
+                        && t.UserId == _jwtTokenAccesser.UserId && t.IsApproved == false && t.CtmsMonitoringReport.DeletedDate == null)
                         .Select(s => new DashboardDto
                         {
                             Id = s.Id,
