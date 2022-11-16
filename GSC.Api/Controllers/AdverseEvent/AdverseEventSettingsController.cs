@@ -50,7 +50,7 @@ namespace GSC.Api.Controllers.AdverseEvent
         public IActionResult Post([FromBody] AdverseEventSettingsDto adverseEventSettingsDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var existingdata = _adverseEventSettingsRepository.All.Where(x => x.ProjectId == adverseEventSettingsDto.ProjectId).ToList();
+            var existingdata = _adverseEventSettingsRepository.All.Where(x => x.ProjectId == adverseEventSettingsDto.ProjectId && x.DeletedDate == null).ToList();
             if (existingdata != null && existingdata.Count > 0)
             {
                 throw new Exception("Error to save Adverse Event settings.");
@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.AdverseEvent
         {
             if (adverseEventSettingsDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var existingdata = _aEReportingRepository.All.Where(x => x.AdverseEventSettingsId == adverseEventSettingsDto.Id).FirstOrDefault();
+            var existingdata = _aEReportingRepository.All.Where(x => x.AdverseEventSettingsId == adverseEventSettingsDto.Id && x.DeletedDate == null).FirstOrDefault();
             if (existingdata != null)
             {
                 throw new Exception("Patient already reported.You can not modify the data!");
