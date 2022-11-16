@@ -22,6 +22,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
         private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
+        private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly IAEReportingRepository _aEReportingRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectDocumentReviewRepository _projectDocumentReviewRepository;
@@ -40,10 +41,9 @@ namespace GSC.Api.Controllers.Master
             IProjectRepository projectRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
             IDashboardRepository dashboardRepository,
-
-
             IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser
+            IJwtTokenAccesser jwtTokenAccesser,
+            ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository
             )
         {
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
@@ -53,11 +53,12 @@ namespace GSC.Api.Controllers.Master
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
             _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
             _aEReportingRepository = aEReportingRepository;
-            _projectRepository=projectRepository;
-            _projectDocumentReviewRepository= projectDocumentReviewRepository;
-            _dashboardRepository=dashboardRepository;
+            _projectRepository = projectRepository;
+            _projectDocumentReviewRepository = projectDocumentReviewRepository;
+            _dashboardRepository = dashboardRepository;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
         }
 
         #region Dashboard Overview Code
@@ -75,8 +76,9 @@ namespace GSC.Api.Controllers.Master
             objdashboard.eTMFSubSecSendBackData = _projectSubSecArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId);
             objdashboard.eConsentData = _econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId);
             objdashboard.eAdverseEventData = _aEReportingRepository.GetAEReportingMyTaskList(ProjectId, (int)(SiteId != null ? SiteId : ProjectId));
-            objdashboard.manageMonitoringReportSendData = _manageMonitoringReportReviewRepository.GetSendTemplateList((int)(SiteId != null ? SiteId : ProjectId));
-            objdashboard.manageMonitoringReportSendBackData = _manageMonitoringReportReviewRepository.GetSendBackTemplateList((int)(SiteId != null ? SiteId : ProjectId));
+            objdashboard.manageMonitoringReportSendData = _ctmsMonitoringReportReviewRepository.GetSendTemplateList(ProjectId, SiteId > 0 ? SiteId : 0);
+            objdashboard.manageMonitoringReportSendBackData = _ctmsMonitoringReportReviewRepository.GetSendBackTemplateList(ProjectId, SiteId > 0 ? SiteId : 0);
+           
             return Ok(objdashboard);
         }
 
@@ -87,7 +89,7 @@ namespace GSC.Api.Controllers.Master
         {
             DashboardMyTaskDto objdashboard = new DashboardMyTaskDto()
             {
-                MyTaskList=new List<DashboardDto>()
+                MyTaskList = new List<DashboardDto>()
             };
             objdashboard.MyTaskList.AddRange(_projectArtificateDocumentApproverRepository.GetEtmfMyTaskList(ProjectId));
             objdashboard.MyTaskList.AddRange(_projectWorkplaceArtificateDocumentReviewRepository.GetSendDocumentList(ProjectId));
@@ -97,8 +99,8 @@ namespace GSC.Api.Controllers.Master
             objdashboard.MyTaskList.AddRange(_projectSubSecArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId));
             objdashboard.MyTaskList.AddRange(_econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId));
             objdashboard.MyTaskList.AddRange(_aEReportingRepository.GetAEReportingMyTaskList(ProjectId, (int)(SiteId != null ? SiteId : ProjectId)));
-            objdashboard.MyTaskList.AddRange(_manageMonitoringReportReviewRepository.GetSendTemplateList((int)(SiteId != null ? SiteId : ProjectId)));
-            objdashboard.MyTaskList.AddRange(_manageMonitoringReportReviewRepository.GetSendBackTemplateList((int)(SiteId != null ? SiteId : ProjectId)));
+            objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));
+            objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendBackTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));
             return Ok(objdashboard);
         }
 
@@ -231,6 +233,13 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetCTMSMonitoringChart(int projectId, int countryId, int siteId)
         {
             var queries = _dashboardRepository.GetCTMSMonitoringChart(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetCTMSMonitoringPIChart/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetCTMSMonitoringPIChart(projectId, countryId, siteId);
             return Ok(queries);
         }
     }

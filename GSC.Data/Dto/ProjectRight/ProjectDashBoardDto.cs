@@ -225,4 +225,13 @@ namespace GSC.Data.Dto.ProjectRight
 
         public int EntrollCount { get; set; }
     }
+
+    public class CtmsMonitoringStatusPIChartDto
+    {
+        public string Lable { get; set; }
+        public int Count { get; set; }
+        public string Text { get; set; }
+
+        public string Status { get; set; }
+    }
 }

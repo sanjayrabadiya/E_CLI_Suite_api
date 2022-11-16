@@ -11,5 +11,7 @@ namespace GSC.Respository.CTMS
     {
         List<CtmsMonitoringGridDto> GetMonitoringForm(int projectId, int siteId, int activityId);
         string StudyLevelFormAlreadyUse(int StudyLevelFormId);
+
+        CtmsMonitoringGridDto GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId);
     }
 }

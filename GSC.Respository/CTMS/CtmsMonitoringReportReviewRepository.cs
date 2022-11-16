@@ -8,10 +8,13 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Respository.EmailSender;
+using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,10 +28,12 @@ namespace GSC.Respository.CTMS
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IProjectRepository _projectRepository;
 
         public CtmsMonitoringReportReviewRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IProjectRightRepository projectRightRepository,
-            IUserRepository userRepository, IEmailSenderRespository emailSenderRespository)
+            IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
+            IProjectRepository projectRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -37,6 +42,7 @@ namespace GSC.Respository.CTMS
             _projectRightRepository = projectRightRepository;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
+            _projectRepository = projectRepository;
         }
 
 
@@ -164,6 +170,108 @@ namespace GSC.Respository.CTMS
         public bool GetReviewSendToAnyone(int CtmsMonitoringReportId)
         {
             return All.Any(x => x.DeletedDate == null && x.CtmsMonitoringReportId == CtmsMonitoringReportId && x.ApproveDate == null);
+        }
+        public List<DashboardDto> GetSendTemplateList(int ProjectId, int? siteId)
+        {
+            var projectIds = new List<int>();
+
+            if (siteId == 0)
+            {
+                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ProjectId
+                                                           && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                           && a.UserId == _jwtTokenAccesser.UserId
+                                                           && a.RoleId == _jwtTokenAccesser.RoleId
+                                                           && a.DeletedDate == null
+                                                           && a.RollbackReason == null)
+                                                           && x.DeletedDate == null).Select(x => x.Id).ToList();
+            }
+            else
+            {
+                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ProjectId
+                                                        && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                        && a.UserId == _jwtTokenAccesser.UserId
+                                                        && a.RoleId == _jwtTokenAccesser.RoleId
+                                                        && a.DeletedDate == null
+                                                        && a.RollbackReason == null)
+                                                        && x.Id == siteId
+                                                        && x.DeletedDate == null).Select(x => x.Id).ToList();
+            }
+
+            var result = All.Include(t => t.CtmsMonitoringReport)
+                        .ThenInclude(t => t.CtmsMonitoring)
+                        .ThenInclude(t => t.Project)
+                        .Include(z => z.CtmsMonitoringReport).ThenInclude(c => c.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
+
+                        .Where(t => t.DeletedDate == null && projectIds.Contains(t.CtmsMonitoringReport.CtmsMonitoring.ProjectId)
+                        && t.UserId == _jwtTokenAccesser.UserId && t.IsSendBack == false && t.CtmsMonitoringReport.DeletedDate == null)
+                        .Select(s => new DashboardDto
+                        {
+                            Id = s.Id,
+                            TaskInformation = s.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode + " - " + s.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName,
+                            ExtraData = s.CtmsMonitoringReportId,
+                            CreatedDate = s.CreatedDate,
+                            CreatedByUser = s.CreatedByUser.UserName,
+                            Module = MyTaskModule.CTMS.GetDescription(),
+                            DataType = MyTaskMethodModule.Reviewed.GetDescription(),
+                            Level = 6,
+                            VariableTemplateId = s.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplateId,
+                            ControlType = DashboardMyTaskType.ManageMonitoringReportSendData,
+                            CtmsMonitoringId = s.CtmsMonitoringReport.CtmsMonitoringId,
+                            ActivityId = s.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.ActivityId
+                        }).OrderByDescending(x => x.CreatedDate).ToList();
+
+            return result;
+        }
+        public List<DashboardDto> GetSendBackTemplateList(int ProjectId, int? siteId)
+        {
+            var projectIds = new List<int>();
+
+            if (siteId == 0)
+            {
+                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ProjectId
+                                                           && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                           && a.UserId == _jwtTokenAccesser.UserId
+                                                           && a.RoleId == _jwtTokenAccesser.RoleId
+                                                           && a.DeletedDate == null
+                                                           && a.RollbackReason == null)
+                                                           && x.DeletedDate == null).Select(x => x.Id).ToList();
+            }
+            else
+            {
+                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ProjectId
+                                                        && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                        && a.UserId == _jwtTokenAccesser.UserId
+                                                        && a.RoleId == _jwtTokenAccesser.RoleId
+                                                        && a.DeletedDate == null
+                                                        && a.RollbackReason == null)
+                                                        && x.Id == siteId
+                                                        && x.DeletedDate == null).Select(x => x.Id).ToList();
+            }
+
+            var result = All.Include(t => t.CtmsMonitoringReport)
+                        .ThenInclude(t => t.CtmsMonitoring)
+                        .ThenInclude(t => t.Project)
+                        .Include(z => z.CtmsMonitoringReport).ThenInclude(c => c.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
+
+                        .Where(t => t.DeletedDate == null && projectIds.Contains(t.CtmsMonitoringReport.CtmsMonitoring.ProjectId)
+                        && t.UserId == _jwtTokenAccesser.UserId && t.IsSendBack == true && t.CtmsMonitoringReport.DeletedDate == null)
+                        .Select(s => new DashboardDto
+                        {
+                            Id = s.Id,
+                            TaskInformation = s.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode + " - " + s.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName,
+                            ExtraData = s.CtmsMonitoringReportId,
+                            CreatedDate = s.CreatedDate,
+                            CreatedByUser = s.CreatedByUser.UserName,
+                            Module = MyTaskModule.CTMS.GetDescription(),
+                            DataType = MyTaskMethodModule.Reviewed.GetDescription(),
+                            Level = 6,
+                            VariableTemplateId = s.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplateId,
+                            ControlType = DashboardMyTaskType.ManageMonitoringReportSendBackData,
+                            CtmsMonitoringId = s.CtmsMonitoringReport.CtmsMonitoringId,
+                            ActivityId = s.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.ActivityId
+                        }).OrderByDescending(x => x.CreatedDate).ToList();
+
+            return result;
         }
     }
 }

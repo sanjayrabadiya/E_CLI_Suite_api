@@ -23,5 +23,7 @@ namespace GSC.Respository.Master
         List<DashboardQueryGraphFinalDto> GetNewDashboardQueryGraphData(int projectId, int countryId, int siteId);
 
         dynamic GetCTMSMonitoringChart(int projectId, int countryId, int siteId);
+
+        dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId);
     }
 }

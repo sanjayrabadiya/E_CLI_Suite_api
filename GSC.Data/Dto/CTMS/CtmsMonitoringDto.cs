@@ -34,5 +34,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
         public int? ParentId { get; set; }
+
+        public string ScreenCode { get; set; }
     }
 }

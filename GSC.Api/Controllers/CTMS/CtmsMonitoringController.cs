@@ -130,5 +130,15 @@ namespace GSC.Api.Controllers.CTMS
 
             return Ok();
         }
+        [HttpGet]
+        [Route("GetMonitoringFormforDashboard/{ctmsMonitoringId}/{activityId}")]
+        public IActionResult GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId)
+        {
+            if (ctmsMonitoringId <= 0) return BadRequest();
+            if (activityId <= 0) return BadRequest();
+
+            var result = _ctmsMonitoringRepository.GetMonitoringFormforDashboard(ctmsMonitoringId, activityId);
+            return Ok(result);
+        }
     }
 }
