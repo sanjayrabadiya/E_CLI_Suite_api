@@ -243,10 +243,10 @@ namespace GSC.Api.Controllers.Master
             return Ok(queries);
         }
         [HttpGet]
-        [Route("GetCTMSMonitoringPlanDashboard/{ProjectId}/{SiteId}")]
-        public IActionResult getCTMSMonitoringPlanDashboard(int projectId, int siteId)
+        [Route("GetCTMSMonitoringPlanDashboard/{ProjectId}/{countryId}/{SiteId}")]
+        public IActionResult getCTMSMonitoringPlanDashboard(int projectId,int countryId, int siteId)
         {
-            var queries = _dashboardRepository.getCTMSMonitoringPlanDashboard(projectId, siteId);
+            var queries = _dashboardRepository.getCTMSMonitoringPlanDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
         [HttpGet]

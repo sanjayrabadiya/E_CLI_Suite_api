@@ -89,7 +89,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 productVerificationDto.PathName = DocumentService.SaveUploadDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductVerification,"");
                 productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
-                //productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
             }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
@@ -114,13 +113,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 productVerificationDto.PathName = DocumentService.SaveDocument(productVerificationDto.FileModel, _uploadSettingRepository.GetDocumentPath(), FolderType.ProductReceipt, "");
                 productVerificationDto.MimeType = productVerificationDto.FileModel.Extension;
-                //productVerificationDto.FileName = "ProductVerification_" + DateTime.Now.Ticks + "." + productVerificationDto.FileModel.Extension;
+                
             }
             else
             {
                 productVerificationDto.PathName = productRec.PathName;
                 productVerificationDto.MimeType = productRec.MimeType;
-               // productVerificationDto.FileName = productRec.FileName;
             }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
@@ -174,22 +172,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
-            //var validate = _productVerificationRepository.Duplicate(record);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
             _productVerificationRepository.Active(record);
-
-            //var verifyRecord = _productVerificationDetailRepository.FindByInclude(x => x.ProductVerificationId == id).ToList();
-
-            //if (verifyRecord != null)
-            //    _productVerificationDetailRepository.Active(verifyRecord[0]);
-
             _uow.Save();
-
             return Ok();
         }
 

@@ -241,5 +241,7 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? ScheduleStartDate { get; set; }
         public DateTime? ActualStartDate { get; set; }
         public string Status { get; set; }
+        public string Country { get; set; }
+        public string Site { get; set; }
     }
 }

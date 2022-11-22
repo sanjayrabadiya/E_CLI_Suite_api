@@ -9,6 +9,7 @@ using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -22,11 +23,12 @@ namespace GSC.Respository.CTMS
         private readonly IGSCContext _context;
         private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly ICtmsMonitoringReportVariableValueRepository _ctmsMonitoringReportVariableValueRepository;
-
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public CtmsMonitoringReportRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
-            ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository)
+            ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
+            IUploadSettingRepository uploadSettingRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -34,10 +36,12 @@ namespace GSC.Respository.CTMS
             _context = context;
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
             _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public CtmsMonitoringReportFormDto GetCtmsMonitoringReportVariableValue(CtmsMonitoringReportFormDto designTemplateDto, int CtmsMonitoringReportId)
         {
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var ctmsMonitoringReport = All.Where(x => x.Id == CtmsMonitoringReportId && x.DeletedDate == null).FirstOrDefault();
 
             var ctmsMonitoringReportFormBasic = GetFormBasic(CtmsMonitoringReportId);
@@ -69,7 +73,8 @@ namespace GSC.Respository.CTMS
                     variable.IsNaValue = t.IsNa;
                     if (!string.IsNullOrWhiteSpace(variable.VariableValue) || variable.IsNaValue)
                         variable.IsValid = true;
-
+                    variable.DocPath = t.DocPath != null ? t.DocPath : null;
+                    variable.DocFullPath = t.DocPath != null ? documentUrl + t.DocPath : null;
                     if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
                         variable.Values.ToList().ForEach(val =>
                         {

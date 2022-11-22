@@ -702,10 +702,10 @@ namespace GSC.Respository.Master
             return null;
         }
 
-        public List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int siteId)
+        public List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId)
         {
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
-
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
@@ -715,14 +715,19 @@ namespace GSC.Respository.Master
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
 
-            var list = _context.CtmsMonitoring.Where(x => x.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
-                        && x.DeletedDate == null)
+            var list = _context.CtmsMonitoring
+                .Include(x => x.Project)
+                .ThenInclude(x => x.ManageSite)
+                .Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                            && x.DeletedDate == null)
                 .Select(b => new CtmsMonitoringPlanDashoardDto
                 {
                     Id = b.Id,
                     Activity = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
                     ScheduleStartDate = b.ScheduleStartDate,
-                    ActualStartDate = b.ActualStartDate
+                    ActualStartDate = b.ActualStartDate,
+                    Site = b.Project.ProjectCode,
+                    Country = b.Project.ManageSite.City.State.Country.CountryName
 
                 }).ToList();
             if (list.Count > 0)
@@ -770,24 +775,29 @@ namespace GSC.Respository.Master
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
 
-            var asd = _context.CtmsMonitoring.Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
-                        && x.DeletedDate == null)
+            var asd = _context.CtmsActionPoint.Include(x => x.CtmsMonitoring).Where(x => projectIds.Contains(x.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+                          && x.DeletedDate == null)
                 .Select(b => new
                 {
-                    ProjectId = b.ProjectId,
-
+                    Id = b.CtmsMonitoringId,
+                    Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    Status = b.Status
                 }).ToList();
+           
 
+          
 
             if (asd.Count > 0)
             {
-                var result = _context.CtmsActionPoint
-                .Where(x => asd.Select(z => z.ProjectId).Contains(x.CtmsMonitoring.ProjectId))
-                .GroupBy(g => g.Status).Select(n => new
+                var result = asd
+                .GroupBy(c => new { Activity = c.Activity, status = c.Status })
+                .Select(g => new
                 {
-                    Status = n.Key.GetDescription(),
-                    Count = n.ToList().Count()
+                    Activity = g.Key.Activity,
+                    Status = g.Key.Activity + " " + g.Key.status,
+                    Count = g.ToList().Count
                 }).ToList();
+
                 return result;
             }
             return null;

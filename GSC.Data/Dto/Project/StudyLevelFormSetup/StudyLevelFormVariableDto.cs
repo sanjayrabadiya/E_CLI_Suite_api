@@ -50,6 +50,9 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public bool HasComments { get; set; }
         public bool HasQueries { get; set; }
         public string DocPath { get; set; }
+
+        public string DocFullPath { get; set; }
+
         public CtmsCommentStatus? QueryStatus { get; set; }
         public string VariableCategoryName { get; set; }
         public VariableCategoryType? SystemType { get; set; }
