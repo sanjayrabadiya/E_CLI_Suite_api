@@ -21,7 +21,6 @@ namespace GSC.Api.Controllers.Master
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
-        private readonly IManageMonitoringReportReviewRepository _manageMonitoringReportReviewRepository;
         private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly IAEReportingRepository _aEReportingRepository;
         private readonly IProjectRepository _projectRepository;
@@ -36,7 +35,6 @@ namespace GSC.Api.Controllers.Master
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
-            IManageMonitoringReportReviewRepository manageMonitoringReportReviewRepository,
             IAEReportingRepository aEReportingRepository,
             IProjectRepository projectRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
@@ -51,7 +49,6 @@ namespace GSC.Api.Controllers.Master
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
-            _manageMonitoringReportReviewRepository = manageMonitoringReportReviewRepository;
             _aEReportingRepository = aEReportingRepository;
             _projectRepository = projectRepository;
             _projectDocumentReviewRepository = projectDocumentReviewRepository;

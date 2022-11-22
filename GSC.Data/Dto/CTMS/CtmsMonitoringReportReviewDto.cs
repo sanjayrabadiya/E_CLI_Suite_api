@@ -21,7 +21,7 @@ namespace GSC.Data.Dto.CTMS
         public string Name { get; set; }
         public bool IsSelected { get; set; }
         public bool IsRights { get; set; }
-        public List<ManageMonitoringReportReviewDto> users { get; set; }
+        public List<CtmsMonitoringReportReviewDto> users { get; set; }
         public User User { get; set; }
     }
 

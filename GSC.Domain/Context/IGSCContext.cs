@@ -285,7 +285,6 @@ namespace GSC.Domain.Context
         DbSet<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
         DbSet<EConsentVideo> EConsentVideo { get; set; }
-        DbSet<ManageMonitoring> ManageMonitoring { get; set; }
         DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         DbSet<HolidayMaster> HolidayMaster { get; set; }
         DbSet<WeekEndMaster> WeekEndMaster { get; set; }
@@ -316,16 +315,9 @@ namespace GSC.Domain.Context
         DbSet<BarcodeAudit> BarcodeAudit { get; set; }
         DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
         DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
-        DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
         DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
         DbSet<LabManagementUploadExcelData> LabManagementUploadExcelData { get; set; }
-        DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
-        DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
-        DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
-        DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
         DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
-        DbSet<ManageMonitoringReportReview> ManageMonitoringReportReview { get; set; }
-        DbSet<ManageMonitoringReportVariableComment> ManageMonitoringReportVariableComment { get; set; }
         DbSet<SyncConfigurationMaster> SyncConfigurationMaster { get; set; }
         DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }

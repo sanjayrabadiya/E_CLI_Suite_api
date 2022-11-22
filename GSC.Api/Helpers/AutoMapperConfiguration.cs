@@ -355,7 +355,6 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.EconsentDocumentName, x => x.MapFrom(a => a.EconsentSetup.DocumentName))
                 .ReverseMap();
             CreateMap<EConsentVideo, EConsentVideoDto>().ReverseMap();
-            CreateMap<ManageMonitoring, ManageMonitoringDto>().ReverseMap();
             CreateMap<StudyPlanTaskDto, StudyPlanTask>().ReverseMap();
             CreateMap<StudyPlantaskParameterDto, StudyPlanTask>().ReverseMap();
             //CreateMap<DependentTaskParameterDto, DependentTask>().ReverseMap();
@@ -416,17 +415,9 @@ namespace GSC.Api.Helpers
             CreateMap<AttendanceBarcodeGenerate, AttendanceBarcodeGenerateDto>().ReverseMap();
             CreateMap<BarcodeAudit, BarcodeAuditDto>().ReverseMap();
             CreateMap<LabManagementConfiguration, LabManagementConfigurationDto>().ReverseMap();
-            CreateMap<ManageMonitoringVisit, ManageMonitoringVisitDto>().ReverseMap();
             CreateMap<LabManagementUploadData, LabManagementUploadDataDto>().ReverseMap();
-            CreateMap<ManageMonitoringReport, ManageMonitoringReportDto>().ReverseMap();
-            CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
-            CreateMap<ManageMonitoringReportVariable, ManageMonitoringValueBasic>()
-                .ForMember(x => x.IsComment, x => x.MapFrom(a => a.Comments.Any()));
-            CreateMap<ManageMonitoringReportVariableChild, ManageMonitoringReportVariableChildDto>().ReverseMap();
-            CreateMap<ManageMonitoringReportVariableAudit, ManageMonitoringReportVariableAuditDto>().ReverseMap();
             CreateMap<LabManagementUploadExcelData, LabManagementUploadExcelDataDto>().ReverseMap();
-            CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();
-            CreateMap<ManageMonitoringReportVariableComment, ManageMonitoringReportVariableCommentDto>().ReverseMap();
+           
             CreateMap<SyncConfigurationMaster, SyncConfigurationMasterDto>().ReverseMap();
             CreateMap<SyncConfigurationMasterDetails, ConfigurationData>()
                 .ForMember(x => x.WorkPlaceFolderName, x => x.MapFrom(a => a.WorkPlaceFolder.GetDescription()))
