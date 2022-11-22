@@ -21,19 +21,16 @@ namespace GSC.Respository.Master
         private readonly IGSCContext _context;
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         private readonly IVariableValueRepository _variableValueRepository;
-        private readonly IManageMonitoringReportVariableRepository _manageMonitoringReportVariableRepository;
         public VariableTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IVariableValueRepository variableValueRepository,
-            IVariableTemplateDetailRepository variableTemplateDetailRepository,
-            IManageMonitoringReportVariableRepository manageMonitoringReportVariableRepository)
+            IVariableTemplateDetailRepository variableTemplateDetailRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
             _variableValueRepository = variableValueRepository;
-            _manageMonitoringReportVariableRepository = manageMonitoringReportVariableRepository;
         }
 
         public List<DropDownDto> GetVariableTemplateDropDown()
@@ -166,84 +163,84 @@ namespace GSC.Respository.Master
             .OrderBy(o => o.Value).ToList();
         }
 
-        public MonitoringReportTemplateDto GetReportTemplate(int id)
-        {
-            var result = All.Where(t => t.Id == id)
-                .Include(d => d.VariableTemplateDetails)
-                .Select(r => new MonitoringReportTemplateDto
-                {
-                    Id = r.Id,
-                    VariableTemplateId = r.Id,
-                    VariableTemplateName = r.TemplateName,
-                    //ActivityName = r.Activity.CtmsActivity.ActivityName,
-                    Notes = r.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
-                    VariableTemplateDetails = r.VariableTemplateDetails.Where(c => c.Variable.DeletedDate == null).ToList()
-                }
-            ).FirstOrDefault();
+        //public MonitoringReportTemplateDto GetReportTemplate(int id)
+        //{
+        //    var result = All.Where(t => t.Id == id)
+        //        .Include(d => d.VariableTemplateDetails)
+        //        .Select(r => new MonitoringReportTemplateDto
+        //        {
+        //            Id = r.Id,
+        //            VariableTemplateId = r.Id,
+        //            VariableTemplateName = r.TemplateName,
+        //            //ActivityName = r.Activity.CtmsActivity.ActivityName,
+        //            Notes = r.Notes.Where(c => c.DeletedDate == null).Select(a => a.Note).ToList(),
+        //            VariableTemplateDetails = r.VariableTemplateDetails.Where(c => c.Variable.DeletedDate == null).ToList()
+        //        }
+        //    ).FirstOrDefault();
 
-            result.VariableTemplateDetails = result.VariableTemplateDetails.Where(t => t.DeletedDate == null).OrderBy(t => t.SeqNo).ToList();
+        //    result.VariableTemplateDetails = result.VariableTemplateDetails.Where(t => t.DeletedDate == null).OrderBy(t => t.SeqNo).ToList();
 
-            if (result != null)
-            {
-                List<ManageMonitoringVariableDto> VariablesDto = new List<ManageMonitoringVariableDto>();
-                result.VariableTemplateDetails.ForEach(detail =>
-                {
-                    var variables = _context.Variable.Where(t => t.Id == detail.VariableId && t.DeletedDate == null)
-                    .Include(variable => variable.Values)
-                    .Select(x => new ManageMonitoringVariableDto
-                    {
-                        VariableTemplateId = id,
-                        VariableId = x.Id,
-                        Id = x.Id,
-                        VariableName = x.VariableName,
-                        VariableCode = x.VariableCode,
-                        CollectionSource = x.CollectionSource,
-                        ValidationType = x.ValidationType,
-                        DataType = x.DataType,
-                        Length = x.Length,
-                        DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
-                        LargeStep = x.LargeStep,
-                        LowRangeValue = x.LowRangeValue,
-                        HighRangeValue = x.HighRangeValue,
-                        PrintType = x.PrintType,
-                        UnitName = x.Unit.UnitName,
-                        VariableCategoryName = x.VariableCategory.CategoryName ?? "",
-                        SystemType = x.SystemType,
-                        IsNa = x.IsNa,
-                        DateValidate = x.DateValidate,
-                        Alignment = x.Alignment ?? Alignment.Right,
-                        Note = detail.Note,
-                        ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : ""
-                    }).FirstOrDefault();
+        //    if (result != null)
+        //    {
+        //        List<ManageMonitoringVariableDto> VariablesDto = new List<ManageMonitoringVariableDto>();
+        //        result.VariableTemplateDetails.ForEach(detail =>
+        //        {
+        //            var variables = _context.Variable.Where(t => t.Id == detail.VariableId && t.DeletedDate == null)
+        //            .Include(variable => variable.Values)
+        //            .Select(x => new ManageMonitoringVariableDto
+        //            {
+        //                VariableTemplateId = id,
+        //                VariableId = x.Id,
+        //                Id = x.Id,
+        //                VariableName = x.VariableName,
+        //                VariableCode = x.VariableCode,
+        //                CollectionSource = x.CollectionSource,
+        //                ValidationType = x.ValidationType,
+        //                DataType = x.DataType,
+        //                Length = x.Length,
+        //                DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
+        //                LargeStep = x.LargeStep,
+        //                LowRangeValue = x.LowRangeValue,
+        //                HighRangeValue = x.HighRangeValue,
+        //                PrintType = x.PrintType,
+        //                UnitName = x.Unit.UnitName,
+        //                VariableCategoryName = x.VariableCategory.CategoryName ?? "",
+        //                SystemType = x.SystemType,
+        //                IsNa = x.IsNa,
+        //                DateValidate = x.DateValidate,
+        //                Alignment = x.Alignment ?? Alignment.Right,
+        //                Note = detail.Note,
+        //                ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : ""
+        //            }).FirstOrDefault();
 
-                    variables.Values = _context.VariableValue.Where(c => c.VariableId == detail.VariableId && c.Variable.DeletedDate == null).Select(c => new ManageMonitoringReportVariableValueDto
-                    {
-                        Id = c.Id,
-                        VariableId = c.VariableId,
-                        ValueName = c.ValueName,
-                        SeqNo = c.SeqNo,
-                        Label = c.Label,
-                    }).OrderBy(c => c.SeqNo).ToList();
+        //            variables.Values = _context.VariableValue.Where(c => c.VariableId == detail.VariableId && c.Variable.DeletedDate == null).Select(c => new ManageMonitoringReportVariableValueDto
+        //            {
+        //                Id = c.Id,
+        //                VariableId = c.VariableId,
+        //                ValueName = c.ValueName,
+        //                SeqNo = c.SeqNo,
+        //                Label = c.Label,
+        //            }).OrderBy(c => c.SeqNo).ToList();
 
-                    VariablesDto.Add(variables);
-                });
-                result.Variables = VariablesDto;
-            }
+        //            VariablesDto.Add(variables);
+        //        });
+        //        result.Variables = VariablesDto;
+        //    }
 
-            return result;
-        }
-        private List<ManageMonitoringReportVariableDto> GetReportVariableValue(int VariableId)
-        {
-            var result = _manageMonitoringReportVariableRepository.All.AsNoTracking().Where(x => x.VariableId == VariableId
-                && x.DeletedDate == null)
-                .Select(y => new ManageMonitoringReportVariableDto
-                {
-                    Id = y.VariableId,
-                    Value = y.Value
-                })
-                .ToList();
+        //    return result;
+        //}
+        //private List<ManageMonitoringReportVariableDto> GetReportVariableValue(int VariableId)
+        //{
+        //    var result = _manageMonitoringReportVariableRepository.All.AsNoTracking().Where(x => x.VariableId == VariableId
+        //        && x.DeletedDate == null)
+        //        .Select(y => new ManageMonitoringReportVariableDto
+        //        {
+        //            Id = y.VariableId,
+        //            Value = y.Value
+        //        })
+        //        .ToList();
 
-            return result;
-        }
+        //    return result;
+        //}
     }
 }
