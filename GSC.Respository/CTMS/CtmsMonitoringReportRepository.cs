@@ -24,11 +24,13 @@ namespace GSC.Respository.CTMS
         private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly ICtmsMonitoringReportVariableValueRepository _ctmsMonitoringReportVariableValueRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly ICtmsMonitoringReportVariableValueChildRepository _ctmsMonitoringReportVariableValueChildRepository;
         public CtmsMonitoringReportRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
             ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
-            IUploadSettingRepository uploadSettingRepository)
+            IUploadSettingRepository uploadSettingRepository,
+            ICtmsMonitoringReportVariableValueChildRepository ctmsMonitoringReportVariableValueChildRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -37,6 +39,7 @@ namespace GSC.Respository.CTMS
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
             _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
             _uploadSettingRepository = uploadSettingRepository;
+            _ctmsMonitoringReportVariableValueChildRepository = ctmsMonitoringReportVariableValueChildRepository;
         }
 
         public CtmsMonitoringReportFormDto GetCtmsMonitoringReportVariableValue(CtmsMonitoringReportFormDto designTemplateDto, int CtmsMonitoringReportId)
@@ -61,6 +64,9 @@ namespace GSC.Respository.CTMS
 
             values.ForEach(t =>
             {
+                var ScreeningTemplateValueChild = GetCTMSTemplateValueChild(t.Id);
+
+                var MaxLevel = ScreeningTemplateValueChild.Max(x => x.LevelNo);
                 var variable = designTemplateDto.Variables.FirstOrDefault(v => v.StudyLevelFormVariableId == t.StudyLevelFormVariableId);
                 if (variable != null)
                 {
@@ -87,6 +93,69 @@ namespace GSC.Respository.CTMS
                                 val.CtmsMonitoringReportVariableValueChildId = childValue.Id;
                             }
                         });
+
+                    if (variable.Values != null && variable.CollectionSource == CollectionSources.Table)
+                    {
+                        var ValuesList = new List<StudyLevelFormVariableValueDto>();
+
+                        variable.Values.ToList().ForEach(val =>
+                        {
+                            MaxLevel = MaxLevel > 0 ? MaxLevel : 0;
+                            var notExistLevel = Enumerable.Range(1, (int)MaxLevel).ToArray();
+
+                            var childValue = t.Children.Where(v => v.StudyLevelFormVariableValueId == val.Id).GroupBy(x => x.LevelNo)
+                            .Select(x => new CtmsMonitoringReportVariableValueChild
+                            {
+                                Id = x.FirstOrDefault().Id,
+                                CtmsMonitoringReportVariableValueId = x.FirstOrDefault().CtmsMonitoringReportVariableValueId,
+                                StudyLevelFormVariableValueId = x.FirstOrDefault().StudyLevelFormVariableValueId,
+                                Value = x.FirstOrDefault().Value,
+                                LevelNo = x.FirstOrDefault().LevelNo,
+                                DeletedDate = x.FirstOrDefault().DeletedDate
+                            }).ToList();
+
+
+                            var Levels = notExistLevel.Where(x => !childValue.Select(y => (int)y.LevelNo).Contains(x)).ToList();
+
+                            Levels.ForEach(x =>
+                            {
+                                CtmsMonitoringReportVariableValueChild obj = new CtmsMonitoringReportVariableValueChild();
+                                obj.Id = 0;
+                                obj.CtmsMonitoringReportVariableValueId = t.Id;
+                                obj.StudyLevelFormVariableValueId = val.Id;
+                                obj.Value = null;
+                                obj.LevelNo = (short)x;
+                                childValue.Add(obj);
+                            });
+
+                            if (childValue.Count() == 0 && Levels.Count() == 0)
+                            {
+                                CtmsMonitoringReportVariableValueChild obj = new CtmsMonitoringReportVariableValueChild();
+                                obj.Id = 0;
+                                obj.CtmsMonitoringReportVariableValueId = t.Id;
+                                obj.StudyLevelFormVariableValueId = val.Id;
+                                obj.Value = null;
+                                obj.LevelNo = 1;
+                                childValue.Add(obj);
+                            }
+
+                            childValue.ForEach(child =>
+                            {
+                                StudyLevelFormVariableValueDto obj = new StudyLevelFormVariableValueDto();
+                                variable.IsValid = true;
+                                obj.Id = child.StudyLevelFormVariableValueId;
+                                obj.VariableValue = child.Value;
+                                obj.VariableValueOld = child.Value;
+                                obj.CtmsMonitoringReportVariableValueChildId = child.Id;
+                                obj.LevelNo = child.LevelNo;
+                                obj.ValueName = val.ValueName;
+                                obj.IsDeleted = child.DeletedDate == null ? false : true;
+                                obj.TableCollectionSource = val.TableCollectionSource;
+                                ValuesList.Add(obj);
+                            });
+                        });
+                        variable.Values = ValuesList.Where(x => x.IsDeleted == false).ToList();
+                    }
                 }
             });
 
@@ -121,9 +190,6 @@ namespace GSC.Respository.CTMS
                                 .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
                                 && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
-            //var CtmsMonitoringReport = All.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
-            //                           && x.CtmsMonitoring.DeletedDate == null).ToList();
-
             var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
                                        && x.CtmsMonitoring.DeletedDate == null).ToList();
 
@@ -131,6 +197,10 @@ namespace GSC.Respository.CTMS
                 return "Please Approve " + CtmsActivity.ActivityName + " .";
 
             return "";
+        }
+        private List<CtmsMonitoringReportVariableValueChild> GetCTMSTemplateValueChild(int CtmsMonitoringReportVariableValueId)
+        {
+            return _ctmsMonitoringReportVariableValueChildRepository.All.AsNoTracking().Where(t => t.CtmsMonitoringReportVariableValueId == CtmsMonitoringReportVariableValueId && t.DeletedDate == null).ToList();
         }
     }
 }

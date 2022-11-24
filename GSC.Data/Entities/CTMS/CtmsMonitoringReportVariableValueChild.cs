@@ -18,5 +18,7 @@ namespace GSC.Data.Entities.CTMS
         public string Value { get; set; }
         public CtmsMonitoringReportVariableValue CtmsMonitoringReportVariableValue { get; set; }
         public StudyLevelFormVariableValue StudyLevelFormVariableValue { get; set; }
+
+        public short? LevelNo { get; set; }
     }
 }
