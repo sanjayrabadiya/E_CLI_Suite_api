@@ -7,7 +7,7 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public interface IProjectWorkPlaceZoneRepository : IGenericRepository<ProjectWorkPlaceZone>
+    public interface IProjectWorkPlaceZoneRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
         List<DropDownDto> GetProjectWorkPlaceZoneDropDown(int CountryId);
         List<DropDownDto> GetProjectByZone(int ParentProjectId);

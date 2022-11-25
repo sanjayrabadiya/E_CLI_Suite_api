@@ -14,6 +14,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -55,7 +56,7 @@ namespace GSC.Api.Controllers.Etmf
             IProjectWorkPlaceZoneRepository projectWorkPlaceZoneRepository,
             IProjectWorkplaceSectionRepository projectWorkplaceSectionRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
-            IEtmfUserPermissionRepository etmfUserPermissionRepository           
+            IEtmfUserPermissionRepository etmfUserPermissionRepository
             )
         {
             _userRepository = userRepository;
@@ -72,7 +73,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceSectionRepository = projectWorkplaceSectionRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _etmfUserPermissionRepository = etmfUserPermissionRepository;
-           
+
         }
 
         [Route("Get")]
@@ -87,16 +88,16 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var projectworkplace = _eTMFWorkplaceRepository.All.Include(x => x.Project);
-            return Ok(projectworkplace);
+            var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.All.Include(x => x.Project);
+            return Ok(EtmfProjectWorkPlace);
         }
 
         [Route("GetTreeview/{projectId}/{chartType:int?}")]
         [HttpGet]
         public IActionResult GetTreeview(int projectId, EtmfChartType? chartType)
         {
-            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(projectId, chartType);
-            return Ok(projectworkplace);
+            var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.GetTreeview(projectId, chartType);
+            return Ok(EtmfProjectWorkPlace);
         }
 
         [HttpPost]
@@ -117,28 +118,41 @@ namespace GSC.Api.Controllers.Etmf
 
             var SaveFolderStructure = _eTMFWorkplaceRepository.SaveFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
             SaveFolderStructure.Version = artificiteList.FirstOrDefault().Version;
+            SaveFolderStructure.TableTag = (int)EtmfTableNameTag.ProjectWorkPlace;
             _eTMFWorkplaceRepository.Add(SaveFolderStructure);
-            foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetail)
+            foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetails)
             {
+                workplaceDetail.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceDetail;
+                workplaceDetail.Version = SaveFolderStructure.Version;
+                workplaceDetail.ProjectId = SaveFolderStructure.ProjectId;
                 _projectWorkplaceDetailRepository.Add(workplaceDetail);
 
-                foreach (var zone in workplaceDetail.ProjectWorkPlaceZone)
+                foreach (var zone in workplaceDetail.ProjectWorkplaceDetails)
                 {
+                    zone.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceZone;
+                    zone.Version = SaveFolderStructure.Version;
+                    zone.ProjectId = SaveFolderStructure.ProjectId;
                     _projectWorkPlaceZoneRepository.Add(zone);
 
-                    foreach (var section in zone.ProjectWorkplaceSection)
+                    foreach (var section in zone.ProjectWorkplaceDetails)
                     {
+                        section.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceSection;
+                        section.Version = SaveFolderStructure.Version;
+                        section.ProjectId = SaveFolderStructure.ProjectId;
                         _projectWorkplaceSectionRepository.Add(section);
 
-                        foreach (var artificate in section.ProjectWorkplaceArtificate)
+                        foreach (var artificate in section.ProjectWorkplaceDetails)
                         {
+                            artificate.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceArtificate;
+                            artificate.Version = SaveFolderStructure.Version;
+                            artificate.ProjectId = SaveFolderStructure.ProjectId;
                             _projectWorkplaceArtificateRepository.Add(artificate);
                         }
                     }
                 }
             }
             if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
-            _etmfUserPermissionRepository.AddEtmfAccessRights(SaveFolderStructure.ProjectWorkplaceDetail);
+            _etmfUserPermissionRepository.AddEtmfAccessRights(SaveFolderStructure.ProjectWorkplaceDetails.ToList());
             return Ok(SaveFolderStructure.Id);
         }
 
@@ -184,21 +198,34 @@ namespace GSC.Api.Controllers.Etmf
             var imageUrl = _uploadSettingRepository.GetDocumentPath();
 
             var SaveFolderStructure = _eTMFWorkplaceRepository.SaveSiteFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
-
-            foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetail)
+            SaveFolderStructure.Version = artificiteList.FirstOrDefault().Version;
+            SaveFolderStructure.TableTag = (int)EtmfTableNameTag.ProjectWorkPlace;
+            foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetails)
             {
+                workplaceDetail.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceDetail;
+                workplaceDetail.Version = SaveFolderStructure.Version;
+                workplaceDetail.ProjectId = SaveFolderStructure.ProjectId;
                 _projectWorkplaceDetailRepository.Add(workplaceDetail);
 
-                foreach (var zone in workplaceDetail.ProjectWorkPlaceZone)
+                foreach (var zone in workplaceDetail.ProjectWorkplaceDetails)
                 {
+                    zone.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceZone;
+                    zone.Version = SaveFolderStructure.Version;
+                    zone.ProjectId = SaveFolderStructure.ProjectId;
                     _projectWorkPlaceZoneRepository.Add(zone);
 
-                    foreach (var section in zone.ProjectWorkplaceSection)
+                    foreach (var section in zone.ProjectWorkplaceDetails)
                     {
+                        section.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceSection;
+                        section.Version = SaveFolderStructure.Version;
+                        section.ProjectId = SaveFolderStructure.ProjectId;
                         _projectWorkplaceSectionRepository.Add(section);
 
-                        foreach (var artificate in section.ProjectWorkplaceArtificate)
+                        foreach (var artificate in section.ProjectWorkplaceDetails)
                         {
+                            artificate.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceArtificate;
+                            artificate.Version = SaveFolderStructure.Version;
+                            artificate.ProjectId = SaveFolderStructure.ProjectId;
                             _projectWorkplaceArtificateRepository.Add(artificate);
                         }
                     }
@@ -213,8 +240,8 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult GetChartReport(int projectId, EtmfChartType? chartType)
         {
-            var projectworkplace = _eTMFWorkplaceRepository.GetChartReport(projectId, chartType);
-            return Ok(projectworkplace);
+            var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.GetChartReport(projectId, chartType);
+            return Ok(EtmfProjectWorkPlace);
         }
 
         [HttpDelete("{id}")]
@@ -227,7 +254,7 @@ namespace GSC.Api.Controllers.Etmf
             _eTMFWorkplaceRepository.Delete(record.Id);
 
             _eTMFWorkplaceRepository.DeleteAllTable(record);
-            
+
             _uow.Save();
             return Ok();
         }

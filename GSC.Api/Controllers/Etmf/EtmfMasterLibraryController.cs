@@ -1,29 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AutoMapper;
+﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
-using GSC.Data.Entities.Etmf;
-using GSC.Domain.Context;
 using GSC.Respository.Etmf;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+using System;
 
 namespace GSC.Api.Controllers.Etmf
 {
     [Route("api/[controller]")]
-    public class EtmfSectionMasterLibraryController : BaseController
+    [ApiController]
+    public class EtmfMasterLibraryController : BaseController
     {
-
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLibraryRepository;
-        public EtmfSectionMasterLibraryController(
+        public EtmfMasterLibraryController(
             IUnitOfWork uow,
             IMapper mapper,
             IEtmfMasterLbraryRepository etmfMasterLibraryRepository,
@@ -38,11 +32,12 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] EtmfMasterLibraryDto sectionMasterLibraryDto)
+        public IActionResult Put([FromBody] EtmfMasterLibraryDto masterLibraryDto)
         {
 
-            var data = _etmfMasterLibraryRepository.Find(sectionMasterLibraryDto.Id);
-            data.SectionName = sectionMasterLibraryDto.SectionName;
+            var data = _etmfMasterLibraryRepository.Find(masterLibraryDto.Id);
+            data.ZonName = masterLibraryDto.ZonName;
+            data.SectionName = masterLibraryDto.SectionName;
 
             var validate = _etmfMasterLibraryRepository.Duplicate(data);
             if (!string.IsNullOrEmpty(validate))

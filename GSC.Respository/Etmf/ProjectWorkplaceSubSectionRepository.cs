@@ -14,7 +14,7 @@ using System.Linq;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceSubSectionRepository : GenericRespository<ProjectWorkplaceSubSection>, IProjectWorkplaceSubSectionRepository
+    public class ProjectWorkplaceSubSectionRepository : GenericRespository<EtmfProjectWorkPlace>, IProjectWorkplaceSubSectionRepository
     {
 
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -29,33 +29,34 @@ namespace GSC.Respository.Etmf
             _uploadSettingRepository = uploadSettingRepository;
         }
 
-        public string Duplicate(ProjectWorkplaceSubSection objSave)
+        public string Duplicate(EtmfProjectWorkPlace objSave)
         {
-            if (All.Any(x => x.ProjectWorkplaceSectionId == objSave.ProjectWorkplaceSectionId && x.Id != objSave.Id && x.SubSectionName == objSave.SubSectionName.Trim() && x.DeletedDate == null))
+            if (All.Any(x => x.EtmfProjectWorkPlaceId == objSave.EtmfProjectWorkPlaceId && x.Id != objSave.Id && x.SubSectionName == objSave.SubSectionName.Trim() && x.DeletedDate == null))
                 return "Duplicate Sub Section name : " + objSave.SubSectionName;
             return "";
         }
 
-        public ProjectWorkplaceSubSectionDto getSectionDetail(ProjectWorkplaceSubSectionDto projectWorkplaceSubSectionDto)
+        public EtmfProjectWorkPlaceDto getSectionDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto)
         {
-            var data = (from section in _context.ProjectWorkplaceSection.Where(x => x.Id == projectWorkplaceSubSectionDto.ProjectWorkplaceSectionId)
-                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+            var data = (from section in _context.EtmfProjectWorkPlace.Where(x => x.Id == projectWorkplaceSubSectionDto.ProjectWorkplaceSectionId)
+                        join etmfsection in _context.EtmfMasterLibrary on section.EtmfMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.EtmfProjectWorkPlace on section.EtmfProjectWorkPlaceId equals workzone.Id
+                        join etmfZone in _context.EtmfMasterLibrary on workzone.EtmfMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.EtmfProjectWorkPlace on workzone.EtmfProjectWorkPlaceId equals workdetail.Id
+                        join work in _context.EtmfProjectWorkPlace on workdetail.EtmfProjectWorkPlaceId equals work.Id
                         join project in _context.Project on work.ProjectId equals project.Id
 
                         join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
                         join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
-                        select new ProjectWorkplaceSubSectionDto
+                        select new EtmfProjectWorkPlaceDto
                         {
                             SectionName = etmfsection.SectionName,
                             ProjectWorkplaceSectionId = section.Id,
                             ProjectWorkplaceZoneId = workzone.Id,
                             ZonName = etmfZone.ZonName,
+                            ProjectId=workdetail.ProjectId,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
@@ -84,22 +85,22 @@ namespace GSC.Respository.Etmf
             return data;
         }
 
-        public ProjectWorkplaceSubSectionDto updateSectionDetailFolder(ProjectWorkplaceSubSectionDto projectWorkplaceSubSectionDto)
+        public EtmfProjectWorkPlaceDto updateSectionDetailFolder(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto)
         {
-            var data = (from subsection in _context.ProjectWorkplaceSubSection.Where(x => x.Id == projectWorkplaceSubSectionDto.Id)
-                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+            var data = (from subsection in _context.EtmfProjectWorkPlace.Where(x => x.Id == projectWorkplaceSubSectionDto.Id)
+                        join section in _context.EtmfProjectWorkPlace on subsection.EtmfProjectWorkPlaceId equals section.Id
+                        join etmfsection in _context.EtmfMasterLibrary on section.EtmfMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.EtmfProjectWorkPlace on section.EtmfProjectWorkPlaceId equals workzone.Id
+                        join etmfZone in _context.EtmfMasterLibrary on workzone.EtmfMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.EtmfProjectWorkPlace on workzone.EtmfProjectWorkPlaceId equals workdetail.Id
+                        join work in _context.EtmfProjectWorkPlace on workdetail.EtmfProjectWorkPlaceId equals work.Id
                         join project in _context.Project on work.ProjectId equals project.Id
 
                         join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
                         join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
-                        select new ProjectWorkplaceSubSectionDto
+                        select new EtmfProjectWorkPlaceDto
                         {
                             SectionName = etmfsection.SectionName,
                             ProjectWorkplaceSectionId = section.Id,
@@ -151,19 +152,19 @@ namespace GSC.Respository.Etmf
 
         public string DeletSectionDetailFolder(int id)
         {
-            var data = (from subsection in _context.ProjectWorkplaceSubSection.Where(x => x.Id == id)
-                        join section in _context.ProjectWorkplaceSection on subsection.ProjectWorkplaceSectionId equals section.Id
-                        join etmfsection in _context.EtmfSectionMasterLibrary on section.EtmfSectionMasterLibraryId equals etmfsection.Id
-                        join workzone in _context.ProjectWorkPlaceZone on section.ProjectWorkPlaceZoneId equals workzone.Id
-                        join etmfZone in _context.EtmfZoneMasterLibrary on workzone.EtmfZoneMasterLibraryId equals etmfZone.Id
-                        join workdetail in _context.ProjectWorkplaceDetail on workzone.ProjectWorkplaceDetailId equals workdetail.Id
-                        join work in _context.ProjectWorkplace on workdetail.ProjectWorkplaceId equals work.Id
+            var data = (from subsection in _context.EtmfProjectWorkPlace.Where(x => x.Id == id)
+                        join section in _context.EtmfProjectWorkPlace on subsection.EtmfProjectWorkPlaceId equals section.Id
+                        join etmfsection in _context.EtmfMasterLibrary on section.EtmfMasterLibraryId equals etmfsection.Id
+                        join workzone in _context.EtmfProjectWorkPlace on section.EtmfProjectWorkPlaceId equals workzone.Id
+                        join etmfZone in _context.EtmfMasterLibrary on workzone.EtmfMasterLibraryId equals etmfZone.Id
+                        join workdetail in _context.EtmfProjectWorkPlace on workzone.EtmfProjectWorkPlaceId equals workdetail.Id
+                        join work in _context.EtmfProjectWorkPlace on workdetail.EtmfProjectWorkPlaceId equals work.Id
                         join project in _context.Project on work.ProjectId equals project.Id
                         join countryleft in _context.Country on workdetail.ItemId equals countryleft.Id into countryl
                         from country in countryl.DefaultIfEmpty()
                         join projectsite in _context.Project on workdetail.ItemId equals projectsite.Id into siteleft
                         from site in siteleft.DefaultIfEmpty()
-                        select new ProjectWorkplaceSubSectionDto
+                        select new EtmfProjectWorkPlaceDto
                         {
                             SectionName = etmfsection.SectionName,
                             ProjectWorkplaceSectionId = section.Id,
@@ -210,7 +211,7 @@ namespace GSC.Respository.Etmf
         public List<DropDownDto> GetDrodDown(int SectionId)
         {
             return All.Where(x =>
-                    x.ProjectWorkplaceSectionId == SectionId)
+                    x.EtmfProjectWorkPlaceId == SectionId)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.SubSectionName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }

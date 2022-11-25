@@ -50,9 +50,9 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var projectWorkplaceSection = _projectWorkplaceSectionRepository.FindByInclude(x => x.Id == id, x => x.EtmfSectionMasterLibrary).FirstOrDefault();
-            var projectWorkplaceSectionDto = _mapper.Map<ProjectWorkplaceSectionDto>(projectWorkplaceSection);
-            projectWorkplaceSectionDto.SectionName = projectWorkplaceSection.EtmfSectionMasterLibrary.SectionName;
+            var projectWorkplaceSection = _projectWorkplaceSectionRepository.FindByInclude(x => x.Id == id, x => x.EtmfMasterLibrary).FirstOrDefault();
+            var projectWorkplaceSectionDto = _mapper.Map<EtmfProjectWorkPlaceDto>(projectWorkplaceSection);
+            projectWorkplaceSectionDto.SectionName = projectWorkplaceSection.EtmfMasterLibrary.SectionName;
             return Ok(projectWorkplaceSectionDto);
         }
     }

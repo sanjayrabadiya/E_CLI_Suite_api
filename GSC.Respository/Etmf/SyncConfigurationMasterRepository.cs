@@ -112,9 +112,9 @@ namespace GSC.Respository.Etmf
         }
 
         public string ValidateSyncConfigurationMasterDetails(int ProjectId, string ReportCode)
-        {            
+        {
             int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
-            string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
+            string Version = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             if (All.Any(x => x.ReportScreenId == ReportScreenId && x.DeletedDate == null && x.Version == Version))
                 return "";
             else
@@ -124,7 +124,7 @@ namespace GSC.Respository.Etmf
         public string ValidateFolderConfiguration(int ProjectId, string ReportCode, WorkPlaceFolder folder)
         {
             int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
-            string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
+            string Version = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             List<SyncConfigurationMasterDetails> details = All.Where(x => x.ReportScreenId == ReportScreenId && x.DeletedDate == null && x.Version == Version)
                 .Select(x => x.SyncConfigurationMasterDetails).FirstOrDefault();
             if (details.Any(x => x.WorkPlaceFolder == folder && x.ZoneMasterLibraryId > 0 && x.SectionMasterLibraryId > 0 && x.ArtificateMasterLbraryId > 0))
@@ -160,25 +160,25 @@ namespace GSC.Respository.Etmf
         private string GetConfigurationPath(SyncConfigurationParameterDto details, WorkPlaceFolder workplaceFolder, out int ProjectWorkplaceArtificateId)
         {
             int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == details.ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
-            string Version = _context.ProjectWorkplace.Where(x => x.ProjectId == details.ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
+            string Version = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == details.ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             var syncConfigDetails = _context.SyncConfigurationMasterDetails.Where(x => x.SyncConfigurationMaster.ReportScreenId == ReportScreenId && x.SyncConfigurationMaster.Version == Version && x.WorkPlaceFolder == workplaceFolder && x.DeletedDate == null && x.SyncConfigurationMaster.DeletedDate == null).FirstOrDefault();
 
-            var projectDetails = _context.ProjectWorkplaceArtificate.Where(x =>
-         x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == details.ProjectId
-         && x.EtmfArtificateMasterLbraryId == syncConfigDetails.ArtificateMasterLbraryId && x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId == Convert.ToInt32(syncConfigDetails.WorkPlaceFolder)
-         && x.ProjectWorkplaceSection.EtmfSectionMasterLibraryId == syncConfigDetails.SectionMasterLibraryId
-         && x.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibraryId == syncConfigDetails.ZoneMasterLibraryId
-         && x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.DeletedDate == null
+            var projectDetails = _context.EtmfProjectWorkPlace.Where(x =>
+         x.ProjectWorkPlace.ProjectId == details.ProjectId
+         && x.EtmfArtificateMasterLbraryId == syncConfigDetails.ArtificateMasterLbraryId && x.WorkPlaceFolderId == Convert.ToInt32(syncConfigDetails.WorkPlaceFolder)
+         && x.EtmfMasterLibraryId == syncConfigDetails.SectionMasterLibraryId
+         && x.EtmfMasterLibraryId == syncConfigDetails.ZoneMasterLibraryId
+         && x.ProjectWorkPlace.DeletedDate == null
          // && syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Site ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.SiteId :(syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0))
-         && (workplaceFolder == WorkPlaceFolder.Site ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.SiteId : (syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0)))
+         && (workplaceFolder == WorkPlaceFolder.Site ? x.ItemId == details.SiteId : (syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ItemId == details.CountryId : x.ItemId == 0)))
            .Select(x => new SyncConfigrationPathDetails
            {
                ProjectWorkplaceArtificateId = x.Id,
-               ProjectCode = x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectCode,
-               WorkPlaceFolder = ((WorkPlaceFolder)x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription(),
-               ItemName = x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName,
-               ZonName = x.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName,
-               SectionName = x.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName,
+               ProjectCode = x.ProjectWorkPlace.Project.ProjectCode,
+               WorkPlaceFolder = ((WorkPlaceFolder)x.WorkPlaceFolderId).GetDescription(),
+               ItemName = x.ItemName,
+               ZonName = x.EtmfMasterLibrary.ZonName,
+               SectionName = x.EtmfMasterLibrary.SectionName,
                ArtificateName = x.EtmfArtificateMasterLbrary.ArtificateName,
            }).FirstOrDefault();
             if (projectDetails == null)

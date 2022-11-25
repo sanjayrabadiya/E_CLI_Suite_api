@@ -7,7 +7,7 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public interface IProjectWorkplaceSectionRepository : IGenericRepository<ProjectWorkplaceSection>
+    public interface IProjectWorkplaceSectionRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
         List<DropDownDto> GetProjectWorkPlaceSectionDropDown(int zoneId);
     }

@@ -11,7 +11,7 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ProjectWorkplaceSectionRepository: GenericRespository<ProjectWorkplaceSection>, IProjectWorkplaceSectionRepository
+    public class ProjectWorkplaceSectionRepository: GenericRespository<EtmfProjectWorkPlace>, IProjectWorkplaceSectionRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectWorkplaceSectionRepository(IGSCContext context,
@@ -24,8 +24,8 @@ namespace GSC.Respository.Etmf
         public List<DropDownDto> GetProjectWorkPlaceSectionDropDown(int zoneId)
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectWorkPlaceZoneId == zoneId)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.EtmfSectionMasterLibrary.SectionName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.EtmfProjectWorkPlaceId == zoneId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.EtmfMasterLibrary.SectionName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }

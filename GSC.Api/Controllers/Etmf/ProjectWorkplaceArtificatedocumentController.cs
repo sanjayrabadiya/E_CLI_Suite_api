@@ -68,8 +68,8 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public IActionResult GetTreeview()
         {
-            var projectworkplace = _eTMFWorkplaceRepository.GetTreeview(1, null);
-            return Ok(projectworkplace);
+            var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.GetTreeview(1, null);
+            return Ok(EtmfProjectWorkPlace);
         }
 
         [Route("GetDocumentList/{id}")]

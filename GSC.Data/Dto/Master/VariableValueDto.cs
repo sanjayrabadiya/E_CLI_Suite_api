@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 
 namespace GSC.Data.Dto.Master
 {
@@ -15,6 +16,8 @@ namespace GSC.Data.Dto.Master
         public string Label { get; set; }
         public bool IsDefault { get; set; }
         public string Style { get; set; }
+        public TableCollectionSource? TableCollectionSource { get; set; }
+        public string TableCollectionSourceName { get; set; }
     }
 
     public class VerificationApprovalVariableValueDto

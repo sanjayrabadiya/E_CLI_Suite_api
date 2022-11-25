@@ -373,27 +373,24 @@ namespace GSC.Respository.Master
             ProjectRemoveDataSuccess finaldata = new ProjectRemoveDataSuccess();
             try
             {
-                var ProjectWorkplace = _context.ProjectWorkplace
-                    .Include(x => x.ProjectWorkplaceDetail)
-                    .ThenInclude(x => x.ProjectWorkPlaceZone)
-                    .ThenInclude(x => x.ProjectWorkplaceSection)
-                    .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                var EtmfProjectWorkPlace = _context.EtmfProjectWorkPlace
+                    .Include(x => x.ProjectWorkPlace)
                     .ThenInclude(x => x.ProjectWorkplaceArtificatedocument)
                     .ThenInclude(x => x.ProjectArtificateDocumentApprover)
 
                     .Where(x => x.ProjectId == obj.ProjectId).ToList();
-                if (ProjectWorkplace.Count > 0)
+                if (EtmfProjectWorkPlace.Count > 0)
                 {
-                    ProjectWorkplace.ForEach(pw =>
+                    EtmfProjectWorkPlace.ForEach(pw =>
                     {
-                        pw.ProjectWorkplaceDetail.ForEach(pwd =>
+                        pw.ProjectWorkplaceDetails.ToList().ForEach(pwd =>
                          {
-                             pwd.ProjectWorkPlaceZone.ForEach(pwpz =>
+                             pwd.ProjectWorkplaceDetails.ToList().ForEach(pwpz =>
                              {
 
-                                 pwpz.ProjectWorkplaceSection.ForEach(pwsection =>
+                                 pwpz.ProjectWorkplaceDetails.ToList().ForEach(pwsection =>
                                  {
-                                     pwsection.ProjectWorkplaceArtificate.ForEach(pwa =>
+                                     pwsection.ProjectWorkplaceDetails.ToList().ForEach(pwa =>
                                      {
 
                                          pwa.ProjectWorkplaceArtificatedocument.ForEach(pwaart =>
@@ -415,20 +412,20 @@ namespace GSC.Respository.Master
                                          if (pwa.ProjectWorkplaceArtificatedocument != null)
                                              _context.ProjectWorkplaceArtificatedocument.RemoveRange(pwa.ProjectWorkplaceArtificatedocument);
                                      });
-                                     if (pwsection.ProjectWorkplaceArtificate != null)
-                                         _context.ProjectWorkplaceArtificate.RemoveRange(pwsection.ProjectWorkplaceArtificate);
+                                     if (pwsection.ProjectWorkplaceDetails != null)
+                                         _context.EtmfProjectWorkPlace.RemoveRange(pwsection.ProjectWorkplaceDetails);
 
-                                     var ProjectWorkplaceSubSection = _context.ProjectWorkplaceSubSection
-                                     .Include(x => x.ProjectWorkplaceSubSectionArtifact)
+                                     var ProjectWorkplaceSubSection = _context.EtmfProjectWorkPlace
+                                     .Include(x => x.ProjectWorkPlace)
                                      .ThenInclude(x => x.ProjectWorkplaceSubSecArtificatedocument)
                                      .ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
-                                     .Where(a => a.ProjectWorkplaceSectionId == pwsection.Id).ToList();
+                                     .Where(a => a.EtmfProjectWorkPlaceId == pwsection.Id).ToList();
 
                                      if (ProjectWorkplaceSubSection != null && ProjectWorkplaceSubSection.Count > 0)
                                      {
                                          ProjectWorkplaceSubSection.ForEach(PWsubsection =>
                                          {
-                                             PWsubsection.ProjectWorkplaceSubSectionArtifact.ForEach(PWsubsectionart =>
+                                             PWsubsection.ProjectWorkplaceDetails.ToList().ForEach(PWsubsectionart =>
                                              {
                                                  PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument.ForEach(PWsubsectionartDoc =>
                                                  {
@@ -449,30 +446,30 @@ namespace GSC.Respository.Master
                                                      _context.ProjectWorkplaceSubSecArtificatedocument.RemoveRange(PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument);
 
                                              });
-                                             if (PWsubsection.ProjectWorkplaceSubSectionArtifact != null)
-                                                 _context.ProjectWorkplaceSubSectionArtifact.RemoveRange(PWsubsection.ProjectWorkplaceSubSectionArtifact);
+                                             if (PWsubsection.ProjectWorkplaceDetails != null)
+                                                 _context.EtmfProjectWorkPlace.RemoveRange(PWsubsection.ProjectWorkplaceDetails);
 
                                          });
 
-                                         _context.ProjectWorkplaceSubSection.RemoveRange(ProjectWorkplaceSubSection);
+                                         _context.EtmfProjectWorkPlace.RemoveRange(ProjectWorkplaceSubSection);
                                      }
                                  });
-                                 if (pwpz.ProjectWorkplaceSection != null)
-                                     _context.ProjectWorkplaceSection.RemoveRange(pwpz.ProjectWorkplaceSection);
+                                 if (pwpz.ProjectWorkplaceDetails != null)
+                                     _context.EtmfProjectWorkPlace.RemoveRange(pwpz.ProjectWorkplaceDetails);
 
                              });
-                             if (pwd.ProjectWorkPlaceZone != null)
-                                 _context.ProjectWorkPlaceZone.RemoveRange(pwd.ProjectWorkPlaceZone);
+                             if (pwd.ProjectWorkplaceDetails != null)
+                                 _context.EtmfProjectWorkPlace.RemoveRange(pwd.ProjectWorkplaceDetails);
 
                              var EtmfUserPermission = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == pwd.Id).ToList();
                              if (EtmfUserPermission != null)
                                  _context.EtmfUserPermission.RemoveRange(EtmfUserPermission);
                          });
-                        if (pw.ProjectWorkplaceDetail != null)
-                            _context.ProjectWorkplaceDetail.RemoveRange(pw.ProjectWorkplaceDetail);
+                        if (pw.ProjectWorkplaceDetails != null)
+                            _context.EtmfProjectWorkPlace.RemoveRange(pw.ProjectWorkplaceDetails);
                     });
-                    if (ProjectWorkplace != null)
-                        _context.ProjectWorkplace.RemoveRange(ProjectWorkplace);
+                    if (EtmfProjectWorkPlace != null)
+                        _context.EtmfProjectWorkPlace.RemoveRange(EtmfProjectWorkPlace);
                 }
 
                 _context.Save();

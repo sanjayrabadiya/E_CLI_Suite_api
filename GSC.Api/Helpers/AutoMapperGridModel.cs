@@ -148,8 +148,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.IsFirstTime, x => x.MapFrom(a => a.User == null ? false : a.User.IsFirstTime))
                 .ReverseMap();
 
-            CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
-                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+            CreateMap<EtmfProjectWorkPlace, ETMFWorkplaceGridDto>()
+                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                 //.ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.ToList().Count() > 0 ? a.ChildProject.ToList().Count() : 0))
                 .ReverseMap();

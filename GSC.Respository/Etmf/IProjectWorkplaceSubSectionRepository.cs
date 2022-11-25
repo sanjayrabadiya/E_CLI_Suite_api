@@ -8,11 +8,11 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public interface IProjectWorkplaceSubSectionRepository : IGenericRepository<ProjectWorkplaceSubSection>
+    public interface IProjectWorkplaceSubSectionRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
-        string Duplicate(ProjectWorkplaceSubSection objSave);
-        ProjectWorkplaceSubSectionDto getSectionDetail(ProjectWorkplaceSubSectionDto projectWorkplaceSubSectionDto);
-        ProjectWorkplaceSubSectionDto updateSectionDetailFolder(ProjectWorkplaceSubSectionDto projectWorkplaceSubSectionDto);
+        string Duplicate(EtmfProjectWorkPlace objSave);
+        EtmfProjectWorkPlaceDto getSectionDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto);
+        EtmfProjectWorkPlaceDto updateSectionDetailFolder(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto);
         List<DropDownDto> GetDrodDown(int zoneId);
         string DeletSectionDetailFolder(int id);
     }

@@ -27,23 +27,20 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
-        private readonly IEtmfSectionMasterLibraryRepository _etmfSectionMasterLibraryRepository;
+        private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLibraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public EtmfZoneMasterLibraryController(
             IUnitOfWork uow,
             IMapper mapper,
-            IEtmfZoneMasterLibraryRepository etmfZoneMasterLibraryRepository,
-            IEtmfSectionMasterLibraryRepository etmfSectionMasterLibraryRepository,
+            IEtmfMasterLbraryRepository etmfMasterLibraryRepository,
             IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLibraryRepository,
                 IUploadSettingRepository uploadSettingRepository
             )
         {
             _uow = uow;
             _mapper = mapper;
-            _etmfZoneMasterLibraryRepository = etmfZoneMasterLibraryRepository;
-            _etmfSectionMasterLibraryRepository = etmfSectionMasterLibraryRepository;
+            _etmfMasterLibraryRepository = etmfMasterLibraryRepository;
             _etmfArtificateMasterLibraryRepository = etmfArtificateMasterLibraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
         }
@@ -53,7 +50,7 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult Get()
         {
-            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).OrderBy(x =>
+            var result = _etmfMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null && x.EtmfMasterLibraryId == 0, x => x.EtmfSectionMasterLibrary).OrderBy(x =>
             {
                 x.EtmfSectionMasterLibrary = x.EtmfSectionMasterLibrary.OrderBy(y => y.Sectionno).ToList();
                 return x.Id;
@@ -66,20 +63,20 @@ namespace GSC.Api.Controllers.Etmf
         [HttpPost]
         public ActionResult UploadExcel([FromBody] List<MasterLibraryDto> data)
         {
-            List<EtmfZoneMasterLibrary> result = new List<EtmfZoneMasterLibrary>();
+            List<EtmfMasterLibrary> result = new List<EtmfMasterLibrary>();
             if (data != null)
             {
-                result = _etmfZoneMasterLibraryRepository.ExcelDataConvertToEntityformat(data);
+                result = _etmfMasterLibraryRepository.ExcelDataConvertToEntityformat(data);
 
-                var LastVersiondata = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
+                var LastVersiondata = _etmfMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
                 if (LastVersiondata != null && LastVersiondata.Count > 0)
                 {
                     foreach (var Lastdata in LastVersiondata)
                     {
-                        _etmfZoneMasterLibraryRepository.Delete(Lastdata);
+                        _etmfMasterLibraryRepository.Delete(Lastdata);
                         foreach (var SectionLast in Lastdata.EtmfSectionMasterLibrary)
                         {
-                            _etmfSectionMasterLibraryRepository.Delete(SectionLast);
+                            _etmfMasterLibraryRepository.Delete(SectionLast);
                             var LastArtificateVersiondata = _etmfArtificateMasterLibraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == SectionLast.Id).ToList();
                             foreach (var ArtificateLast in LastArtificateVersiondata)
                             {
@@ -98,11 +95,13 @@ namespace GSC.Api.Controllers.Etmf
                     foreach (var item in result)
                     {
                         item.FileName = FileName;
-                        _etmfZoneMasterLibraryRepository.Add(item);
+                        item.EtmfMasterLibraryId = 0;
+                        _etmfMasterLibraryRepository.Add(item);
 
                         foreach (var section in item.EtmfSectionMasterLibrary)
                         {
-                            _etmfSectionMasterLibraryRepository.Add(section);
+                            section.EtmfMasterLibraryId = item.Id;
+                            _etmfMasterLibraryRepository.Add(section);
 
                             foreach (var Artificate in section.EtmfArtificateMasterLbrary)
                             {
@@ -121,29 +120,29 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult CheckETMFVersion(string Version)
         {
-            var result = _etmfZoneMasterLibraryRepository.FindBy(x => x.Version == Version);
+            var result = _etmfMasterLibraryRepository.FindBy(x => x.Version == Version);
             return Ok(result);
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] EtmfZoneMasterLibraryDto etmfZoneMasterLibraryDto)
+        public IActionResult Put([FromBody] EtmfMasterLibraryDto etmfZoneMasterLibraryDto)
         {
 
-            var data = _etmfZoneMasterLibraryRepository.Find(etmfZoneMasterLibraryDto.Id);
+            var data = _etmfMasterLibraryRepository.Find(etmfZoneMasterLibraryDto.Id);
             data.ZonName = etmfZoneMasterLibraryDto.ZonName;
             //if (etmfZoneMasterLibraryDto.Id <= 0) return BadRequest();
 
             //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             //var etmfZoneMasterLibrary = _mapper.Map<EtmfZoneMasterLibrary>(etmfZoneMasterLibraryDto);
-            var validate = _etmfZoneMasterLibraryRepository.Duplicate(data);
+            var validate = _etmfMasterLibraryRepository.Duplicate(data);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _etmfZoneMasterLibraryRepository.Update(data);
+            _etmfMasterLibraryRepository.Update(data);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
             return Ok(data.Id);
@@ -154,7 +153,7 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult GetOldVersion()
         {
-            var result = _etmfZoneMasterLibraryRepository.FindBy(x => x.DeletedBy != null).Select(x => x.Version).Distinct();
+            var result = _etmfMasterLibraryRepository.FindBy(x => x.DeletedBy != null && x.EtmfMasterLibraryId == 0).Select(x => x.Version).Distinct();
             int cnt = 1;
             List<DropDownDto> dtolist = new List<DropDownDto>();
             foreach (var val in result)
@@ -172,7 +171,7 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult GetVersion()
         {
-            var result = _etmfZoneMasterLibraryRepository.All.Select(x => x.Version).Distinct();
+            var result = _etmfMasterLibraryRepository.All.Select(x => x.Version).Distinct();
             int cnt = 1;
             List<DropDownDto> dtolist = new List<DropDownDto>();
             foreach (var val in result)
@@ -190,7 +189,7 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult GetInActiveVersionData(string version)
         {
-            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.Version == version, x => x.EtmfSectionMasterLibrary);
+            var result = _etmfMasterLibraryRepository.FindByInclude(x => x.Version == version, x => x.EtmfSectionMasterLibrary);
             return Ok(result);
         }
 
@@ -198,7 +197,7 @@ namespace GSC.Api.Controllers.Etmf
         [Route("GetZoneMasterLibraryDropDown/{version}")]
         public IActionResult GetZoneMasterLibraryDropDown(string version)
         {
-            return Ok(_etmfZoneMasterLibraryRepository.GetZoneMasterLibraryDropDown(version));
+            return Ok(_etmfMasterLibraryRepository.GetZoneMasterLibraryDropDown(version));
         }
     }
 }
