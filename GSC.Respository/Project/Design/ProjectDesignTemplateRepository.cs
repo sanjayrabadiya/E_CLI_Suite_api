@@ -75,9 +75,9 @@ namespace GSC.Respository.Project.Design
 
         public DesignScreeningTemplateDto GetTemplate(int id)
         {
-            var projectDesignTemplate = All.Where(x=>x.Id==id).Include(d=>d.ProjectDesignVisit).ThenInclude(d => d.ProjectDesignPeriod).FirstOrDefault();            
+            var projectDesignTemplate = All.Where(x => x.Id == id).Include(d => d.ProjectDesignVisit).ThenInclude(d => d.ProjectDesignPeriod).FirstOrDefault();
             var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
-            
+
             var result = All.Where(t => t.Id == id).
                 Select(r => new DesignScreeningTemplateDto
                 {
@@ -106,7 +106,9 @@ namespace GSC.Respository.Project.Design
             if (result != null)
             {
 
-                var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null)
+                var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null
+                 && (t.CollectionSource == CollectionSources.Date || t.CollectionSource == CollectionSources.DateTime
+                 || t.CollectionSource == CollectionSources.MultilineTextBox || t.CollectionSource == CollectionSources.RadioButton))
                     .Select(x => new DesignScreeningVariableDto
                     {
                         ProjectDesignTemplateId = x.ProjectDesignTemplateId,
@@ -146,7 +148,7 @@ namespace GSC.Respository.Project.Design
                         IsHide = x.IsHide,
                         IsLevelNo = x.IsLevelNo,
                         PreLabel = x.PreLabel == null ? "" : x.PreLabel,
-                        ScaleType=x.ScaleType
+                        ScaleType = x.ScaleType
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
@@ -160,7 +162,7 @@ namespace GSC.Respository.Project.Design
                          InActiveVersion = c.InActiveVersion,
                          Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
                          TableCollectionSource = c.TableCollectionSource,
-                         Style=c.Style,
+                         Style = c.Style,
                          OriginalValue = c.ValueName
                      }).ToList();
 
