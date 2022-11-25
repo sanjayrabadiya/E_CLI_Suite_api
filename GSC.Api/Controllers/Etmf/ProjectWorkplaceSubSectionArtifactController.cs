@@ -6,6 +6,7 @@ using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
+using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
@@ -21,20 +22,20 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IEtmfZoneMasterLibraryRepository _etmfZoneMasterLibraryRepository;
+        private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
         private readonly IProjectWorkplaceSubSectionArtifactRepository _projectWorkplaceSubSectionArtifactRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public ProjectWorkplaceSubSectionArtifactController(
             IUnitOfWork uow,
             IMapper mapper,
-            IEtmfZoneMasterLibraryRepository etmfZoneMasterLibraryRepository,
+            IEtmfMasterLbraryRepository etmfMasterLibraryRepository,
             IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceSubSectionArtifactRepository projectWorkplaceSubSectionArtifactRepository
             )
         {
             _uow = uow;
             _mapper = mapper;
-            _etmfZoneMasterLibraryRepository = etmfZoneMasterLibraryRepository;
+            _etmfMasterLibraryRepository = etmfMasterLibraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectWorkplaceSubSectionArtifactRepository = projectWorkplaceSubSectionArtifactRepository;
         }
@@ -44,16 +45,19 @@ namespace GSC.Api.Controllers.Etmf
         [HttpGet]
         public ActionResult Get()
         {
-            var result = _etmfZoneMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary);
+            var result = _etmfMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary);
             return Ok(result);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionArtifactDto)
+        public IActionResult Post([FromBody] EtmfProjectWorkPlaceDto projectWorkplaceSubSectionArtifactDto)
         {
             var data = _projectWorkplaceSubSectionArtifactRepository.getSectionDetail(projectWorkplaceSubSectionArtifactDto);
 
-            var projectWorkplaceSubSectionArtifact = _mapper.Map<ProjectWorkplaceSubSectionArtifact>(projectWorkplaceSubSectionArtifactDto);
+            var projectWorkplaceSubSectionArtifact = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceSubSectionArtifactDto);
+            projectWorkplaceSubSectionArtifact.EtmfProjectWorkPlaceId = projectWorkplaceSubSectionArtifactDto.ProjectWorkplaceSubSectionId;
+            projectWorkplaceSubSectionArtifact.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact;
+            projectWorkplaceSubSectionArtifact.ProjectId = data.ProjectId;
             var validate = _projectWorkplaceSubSectionArtifactRepository.Duplicate(projectWorkplaceSubSectionArtifact);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -64,17 +68,19 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceSubSectionArtifactRepository.Add(projectWorkplaceSubSectionArtifact);
             if (_uow.Save() <= 0) throw new Exception("Creating Sub Section failed on save.");
             return Ok(projectWorkplaceSubSectionArtifact.Id);
- 
+
         }
 
 
         [HttpPut]
-        public IActionResult Put([FromBody] ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionArtifactDto)
+        public IActionResult Put([FromBody] EtmfProjectWorkPlaceDto projectWorkplaceSubSectionArtifactDto)
         {
             var data = _projectWorkplaceSubSectionArtifactRepository.UpdateArtifactDetail(projectWorkplaceSubSectionArtifactDto);
 
-            var projectWorkplaceSubSectionArtifact = _mapper.Map<ProjectWorkplaceSubSectionArtifact>(projectWorkplaceSubSectionArtifactDto);
-           
+            var projectWorkplaceSubSectionArtifact = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceSubSectionArtifactDto);
+            projectWorkplaceSubSectionArtifact.EtmfProjectWorkPlaceId = projectWorkplaceSubSectionArtifactDto.ProjectWorkplaceSubSectionId;
+            projectWorkplaceSubSectionArtifact.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact;
+            projectWorkplaceSubSectionArtifact.ProjectId = data.ProjectId;
             var validate = _projectWorkplaceSubSectionArtifactRepository.Duplicate(projectWorkplaceSubSectionArtifact);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -122,7 +128,7 @@ namespace GSC.Api.Controllers.Etmf
             {
                 projectWorkplaceSubSecArtificatDto.IsNotRequired = !projectWorkplaceSubSecArtificatDto.IsNotRequired;
             }
-            var projectWorkplaceSubSecArtificat = _mapper.Map<ProjectWorkplaceSubSectionArtifact>(projectWorkplaceSubSecArtificatDto);
+            var projectWorkplaceSubSecArtificat = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceSubSecArtificatDto);
             _projectWorkplaceSubSectionArtifactRepository.Update(projectWorkplaceSubSecArtificat);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Artificate failed on save.");

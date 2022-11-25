@@ -235,8 +235,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IMeddraCodingAuditRepository, MeddraCodingAuditRepository>();
             services.AddScoped<IScreeningProgress, ScreeningProgress>();
             services.AddScoped<IEditCheckFormulaRepository, EditCheckFormulaRepository>();
-            services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
-            services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
+            //services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
+            //services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
+            services.AddScoped<IEtmfMasterLbraryRepository, EtmfMasterLbraryRepository>();
             services.AddScoped<IEtmfArtificateMasterLbraryRepository, EtmfArtificateMasterLbraryRepository>();
             services.AddScoped<IETMFWorkplaceRepository, ETMFWorkplaceRepository>();
             services.AddScoped<IProjectWorkPlaceZoneRepository, ProjectWorkPlaceZoneRepository>();

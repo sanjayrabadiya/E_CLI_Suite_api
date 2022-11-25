@@ -250,18 +250,20 @@ namespace GSC.Domain.Context
         public DbSet<MeddraCodingComment> MeddraCodingComment { get; set; }
         public DbSet<MeddraCodingAudit> MeddraCodingAudit { get; set; }
         public DbSet<ElectronicSignature> ElectronicSignature { get; set; }
-        public DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
-        public DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        //public DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
+        //public DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        public DbSet<EtmfMasterLibrary> EtmfMasterLibrary { get; set; }
         public DbSet<EtmfArtificateMasterLbrary> EtmfArtificateMasterLbrary { get; set; }
 
-        public DbSet<ProjectWorkplace> ProjectWorkplace { get; set; }
-        public DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
-        public DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
-        public DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
-        public DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
+        public DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
+        //public DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
+        //public DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
+        //public DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
+        //public DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
+        //public DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
         public DbSet<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }
-        public DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
-        public DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
+        //public DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
+        //public DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
         public DbSet<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
         public DbSet<InvestigatorContactDetail> InvestigatorContactDetail { get; set; }
         public DbSet<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }

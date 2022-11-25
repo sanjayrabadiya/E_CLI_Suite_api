@@ -263,15 +263,23 @@ namespace GSC.Api.Helpers
             CreateMap<MeddraCodingAudit, MeddraCodingAuditDto>().ReverseMap();
 
 
-            CreateMap<EtmfZoneMasterLibrary, EtmfZoneMasterLibraryDto>().ReverseMap();
-            CreateMap<EtmfSectionMasterLibrary, EtmfSectionMasterLibraryDto>().ReverseMap();
+            CreateMap<EtmfMasterLibrary, EtmfMasterLibraryDto>().ReverseMap();
+            //CreateMap<EtmfSectionMasterLibrary, EtmfSectionMasterLibraryDto>().ReverseMap();
             CreateMap<EtmfArtificateMasterLbrary, EtmfArtificateMasterLbraryDto>().ReverseMap();
 
-            CreateMap<ProjectWorkplace, ETMFWorkplaceDto>().ReverseMap();
+            CreateMap<EtmfProjectWorkPlace, ETMFWorkplaceDto>().ReverseMap();
+            CreateMap<EtmfProjectWorkPlace, EtmfProjectWorkPlaceDto>()
+                .ForMember(x => x.ProjectWorkplaceDetailId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
+                //.ForMember(x => x.projectWorkplaceDetailId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
+                .ForMember(x => x.ProjectWorkplaceZoneId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
+                //.ForMember(x => x.ProjectWorkPlaceZoneId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
+                .ForMember(x => x.ProjectWorkplaceSectionId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
+                .ForMember(x => x.ProjectWorkplaceSubSectionId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
+                .ReverseMap();
             CreateMap<ProjectWorkplaceArtificatedocument, ProjectWorkplaceArtificatedocumentDto>().ReverseMap();
-            CreateMap<ProjectWorkplaceSubSection, ProjectWorkplaceSubSectionDto>().ReverseMap();
-            CreateMap<ProjectWorkplaceSubSectionArtifact, ProjectWorkplaceSubSectionArtifactDto>().ReverseMap();
-            CreateMap<ProjectWorkplaceSection, ProjectWorkplaceSectionDto>().ReverseMap();
+            //CreateMap<ProjectWorkplaceSubSection, ProjectWorkplaceSubSectionDto>().ReverseMap();
+            //CreateMap<ProjectWorkplaceSubSectionArtifact, ProjectWorkplaceSubSectionArtifactDto>().ReverseMap();
+            //CreateMap<ProjectWorkplaceSection, ProjectWorkplaceSectionDto>().ReverseMap();
             CreateMap<ProjectWorkplaceSubSecArtificatedocument, ProjectWorkplaceSubSecArtificatedocumentDto>().ReverseMap();
             CreateMap<InvestigatorContactDetail, InvestigatorContactDetailDto>().ReverseMap();
             CreateMap<Holiday, HolidayDto>().ReverseMap();

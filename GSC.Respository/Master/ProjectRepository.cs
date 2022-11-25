@@ -263,8 +263,8 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            var AlreadyAdded = _context.ProjectWorkplace.Where(x => x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
-                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var AlreadyAdded = _context.EtmfProjectWorkPlace.Where(x => x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
+                   ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var ProjectList = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
@@ -290,8 +290,8 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            var AlreadyAdded = _context.ProjectWorkplace.Where(x => x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
-                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var AlreadyAdded = _context.EtmfProjectWorkPlace.Where(x => x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
+                     ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var ProjectList = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)

@@ -32,32 +32,29 @@ namespace GSC.Data.Entities.Etmf
     }
 
     public class SyncConfigurationMasterDetailsAudit : BaseEntity
-    {        
-        
+    {
         public int ReportScreenId { get; set; }
         public string Version { get; set; }
         public ReportScreen ReportScreen { get; set; }
         public int SyncConfigrationDetailId { get; set; }
         [ForeignKey("SyncConfigrationDetailId")]
-        public SyncConfigurationMasterDetails SyncConfigurationMasterDetails { get; set; }       
+        public SyncConfigurationMasterDetails SyncConfigurationMasterDetails { get; set; }
         public int? ZoneMasterLibraryId { get; set; }
         [ForeignKey("ZoneMasterLibraryId")]
-        public EtmfZoneMasterLibrary EtmfZoneMasterLibrary { get; set; }
+        public EtmfMasterLibrary EtmfZoneMasterLibrary { get; set; }
         public int? SectionMasterLibraryId { get; set; }
         [ForeignKey("SectionMasterLibraryId")]
-        public EtmfSectionMasterLibrary EtmfSectionMasterLibrary { get; set; }
+        public EtmfMasterLibrary EtmfSectionMasterLibrary { get; set; }
         public int? ArtificateMasterLbraryId { get; set; }
         [ForeignKey("ArtificateMasterLbraryId")]
         public EtmfArtificateMasterLbrary EtmfArtificateMasterLbrary { get; set; }
-        public int? ReasonId { get; set; }        
+        public int? ReasonId { get; set; }
         [ForeignKey("ReasonId")]
         public AuditReason AuditReason { get; set; }
         public string Note { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
         public string Activity { get; set; }
-
-
 
     }
 }

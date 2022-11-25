@@ -12,6 +12,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.Reports;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +25,12 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class ETMFWorkplaceRepository : GenericRespository<ProjectWorkplace>, IETMFWorkplaceRepository
+    public class ETMFWorkplaceRepository : GenericRespository<EtmfProjectWorkPlace>, IETMFWorkplaceRepository
     {
-        ProjectWorkplace projectWorkplace = new ProjectWorkplace();
+        EtmfProjectWorkPlace EtmfProjectWorkPlace = new EtmfProjectWorkPlace();
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        List<ProjectWorkplaceDetail> ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
+        List<EtmfProjectWorkPlace> ProjectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
@@ -131,14 +132,13 @@ namespace GSC.Respository.Etmf
             // Level 3 : Country/Site/Trial Name
             // Level 4 : Zone Name
             // Level 5 : Section Name      Level 5.1 : Sub Section Name    Level 5.2 : Sub Section Artifact Name
-            // Level 6 : Artifact Name     
-
-            var projectWorkplaces = _context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
-                            .Include(x => x.ProjectWorkplaceDetail)
-                            .ThenInclude(x => x.ProjectWorkPlaceZone)
-                            .ThenInclude(x => x.ProjectWorkplaceSection)
-                            .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                            .AsNoTracking().ToList();
+            // Level 6 : Artifact Name
+            // 
+            var projectWorkplaces = _context.EtmfProjectWorkPlace.Where(t => t.DeletedBy == null && t.ProjectId == id && t.TableTag == (int)EtmfTableNameTag.ProjectWorkPlace)
+                .Include(x => x.ProjectWorkplaceDetails)
+                .ThenInclude(x => x.ProjectWorkplaceDetails)
+                .ThenInclude(x => x.ProjectWorkplaceDetails)
+                .ThenInclude(x => x.ProjectWorkplaceDetails).ToList();
 
             List<TreeValue> pvList = new List<TreeValue>();
             TreeValue pvListObj = new TreeValue();
@@ -184,7 +184,7 @@ namespace GSC.Respository.Etmf
             foreach (var b in projectWorkplaces)
             {
                 #region Get Country
-                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Country && x.DeletedBy == null))
+                foreach (var c in b.ProjectWorkplaceDetails.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Country && x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail))
                 {
                     var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
 
@@ -193,20 +193,20 @@ namespace GSC.Respository.Etmf
                         TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, CountryFol.RandomId);
 
                         List<TreeValue> pvListZoneList = new List<TreeValue>();
-                        foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                        foreach (var d in c.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone))
                         {
-                            d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                            d.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(d.EtmfMasterLibraryId);
                             // Get zone
                             TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             List<TreeValue> pvListSectionList = new List<TreeValue>();
-                            foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                            foreach (var e in d.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection))
                             {
-                                e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                                e.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(e.EtmfMasterLibraryId);
                                 // Get section
                                 TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Country, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Country, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).ToList(), WorkPlaceFolder.Country, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
@@ -229,7 +229,7 @@ namespace GSC.Respository.Etmf
                 #endregion
 
                 #region Get Site
-                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site && x.DeletedBy == null))
+                foreach (var c in b.ProjectWorkplaceDetails.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site && x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail))
                 {
                     var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
                     if (rights != null ? rights.IsView : false)
@@ -237,20 +237,20 @@ namespace GSC.Respository.Etmf
                         TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, SiteFol.RandomId);
 
                         List<TreeValue> pvListZoneList = new List<TreeValue>();
-                        foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                        foreach (var d in c.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone))
                         {
-                            d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                            d.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(d.EtmfMasterLibraryId);
                             // Get zone
                             TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             List<TreeValue> pvListSectionList = new List<TreeValue>();
-                            foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                            foreach (var e in d.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection))
                             {
-                                e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                                e.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(e.EtmfMasterLibraryId);
                                 // Get section
                                 TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Site, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Site, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).ToList(), WorkPlaceFolder.Site, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
@@ -272,7 +272,7 @@ namespace GSC.Respository.Etmf
                 #endregion
 
                 #region Get Trial
-                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial && x.DeletedBy == null))
+                foreach (var c in b.ProjectWorkplaceDetails.Where(x => x.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial && x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail))
                 {
                     var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
                     if (rights != null ? rights.IsView : false)
@@ -280,20 +280,20 @@ namespace GSC.Respository.Etmf
                         TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, TrialFol.RandomId);
                         List<TreeValue> pvListZoneList = new List<TreeValue>();
 
-                        foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                        foreach (var d in c.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone))
                         {
-                            d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                            d.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(d.EtmfMasterLibraryId);
                             // Get zone
                             TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
                             List<TreeValue> pvListSectionList = new List<TreeValue>();
-                            foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                            foreach (var e in d.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection))
                             {
-                                e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                                e.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(e.EtmfMasterLibraryId);
                                 // Get section
                                 TreeValue pvListSectionObj = GetSection(e, WorkPlaceFolder.Trial, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get Artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, WorkPlaceFolder.Trial, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).ToList(), WorkPlaceFolder.Trial, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 pvListSectionList.Add(pvListSectionObj);
                                 pvListSectionObj.Item = pvListArtificateList.OrderBy(x => x.Number).ToList();
@@ -337,7 +337,7 @@ namespace GSC.Respository.Etmf
                         : "las la-folder-open text-blue eicon";
             return data;
         }
-        public TreeValue GetWorksplaceDetails(EtmfUserPermission rights, ProjectWorkplaceDetail c, string Data)
+        public TreeValue GetWorksplaceDetails(EtmfUserPermission rights, EtmfProjectWorkPlace c, string Data)
         {
             TreeValue pvListdetaiObj = new TreeValue();
             pvListdetaiObj.Id = Convert.ToInt32(RandomPassword.CreateRandomNumericNumber(6));
@@ -356,13 +356,13 @@ namespace GSC.Respository.Etmf
             return pvListdetaiObj;
         }
 
-        public TreeValue GetZone(EtmfUserPermission rights, ProjectWorkplaceDetail c, ProjectWorkPlaceZone d, ProjectWorkplace b, string data)
+        public TreeValue GetZone(EtmfUserPermission rights, EtmfProjectWorkPlace c, EtmfProjectWorkPlace d, EtmfProjectWorkPlace b, string data)
         {
             TreeValue pvListZoneObj = new TreeValue();
             pvListZoneObj.Id = d.Id;
             pvListZoneObj.RandomId = "ZO" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + d.Id;
-            pvListZoneObj.Text = d.EtmfZoneMasterLibrary.ZonName;
-            pvListZoneObj.Number = d.EtmfZoneMasterLibrary.ZoneNo;
+            pvListZoneObj.Text = d.EtmfMasterLibrary.ZonName;
+            pvListZoneObj.Number = d.EtmfMasterLibrary.ZoneNo;
             pvListZoneObj.Level = 4;
             pvListZoneObj.ParentMasterId = b.ProjectId;
             pvListZoneObj.Icon = "las la-folder-open text-blue eicon";
@@ -377,14 +377,14 @@ namespace GSC.Respository.Etmf
             return pvListZoneObj;
         }
 
-        public TreeValue GetSection(ProjectWorkplaceSection e, WorkPlaceFolder folderType, EtmfUserPermission rights, ProjectWorkplaceDetail c,
-            ProjectWorkPlaceZone d, ProjectWorkplace b, string data)
+        public TreeValue GetSection(EtmfProjectWorkPlace e, WorkPlaceFolder folderType, EtmfUserPermission rights, EtmfProjectWorkPlace c,
+            EtmfProjectWorkPlace d, EtmfProjectWorkPlace b, string data)
         {
             TreeValue pvListSectionObj = new TreeValue();
             pvListSectionObj.Id = e.Id;
             pvListSectionObj.RandomId = "SE" + ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription().Substring(0, 2) + e.Id;
-            pvListSectionObj.Text = e.EtmfSectionMasterLibrary.SectionName;
-            pvListSectionObj.Number = e.EtmfSectionMasterLibrary.Sectionno;
+            pvListSectionObj.Text = e.EtmfMasterLibrary.SectionName;
+            pvListSectionObj.Number = e.EtmfMasterLibrary.Sectionno;
             pvListSectionObj.Level = 5;
             pvListSectionObj.ZoneId = d.Id;
             pvListSectionObj.CountryId = folderType == WorkPlaceFolder.Country ? c.Id : 0;
@@ -404,8 +404,8 @@ namespace GSC.Respository.Etmf
             return pvListSectionObj;
         }
 
-        public List<TreeValue> GetArtificate(List<ProjectWorkplaceArtificate> ArtificateList, WorkPlaceFolder folderType, EtmfChartType? chartType, EtmfUserPermission rights, ProjectWorkplaceDetail c,
-            ProjectWorkPlaceZone d, ProjectWorkplaceSection e, ProjectWorkplace b, string data)
+        public List<TreeValue> GetArtificate(List<EtmfProjectWorkPlace> ArtificateList, WorkPlaceFolder folderType, EtmfChartType? chartType, EtmfUserPermission rights, EtmfProjectWorkPlace c,
+            EtmfProjectWorkPlace d, EtmfProjectWorkPlace e, EtmfProjectWorkPlace b, string data)
         {
             List<TreeValue> pvListArtificateList = new List<TreeValue>();
             foreach (var f in ArtificateList.Where(x => x.DeletedBy == null))
@@ -494,7 +494,7 @@ namespace GSC.Respository.Etmf
             }
 
             #region Add sub section folder data
-            var SectionData = _context.ProjectWorkplaceSubSection.Where(x => x.ProjectWorkplaceSectionId == e.Id && x.DeletedBy == null).ToList();
+            var SectionData = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == e.Id && x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection).ToList();
             foreach (var s in SectionData)
             {
 
@@ -521,7 +521,7 @@ namespace GSC.Respository.Etmf
                 pvListSubSectionObj.ExpandData = string.Join(",", data, pvListSubSectionObj.RandomId);
                 #region MyRegion
                 List<TreeValue> pvListartifactsubsectionList = new List<TreeValue>();
-                var artifactsubSectionData = _context.ProjectWorkplaceSubSectionArtifact.Where(x => x.ProjectWorkplaceSubSectionId == s.Id && x.DeletedBy == null).ToList();
+                var artifactsubSectionData = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == s.Id && x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).ToList();
                 foreach (var itemartifact in artifactsubSectionData)
                 {
                     var Document = _context.ProjectWorkplaceSubSecArtificatedocument
@@ -621,7 +621,7 @@ namespace GSC.Respository.Etmf
             return pvListArtificateList;
         }
 
-        public ProjectWorkplace SaveFolderStructure(Data.Entities.Master.Project projectDetail, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
+        public EtmfProjectWorkPlace SaveFolderStructure(Data.Entities.Master.Project projectDetail, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
         {
             bool status = false;
             try
@@ -630,9 +630,9 @@ namespace GSC.Respository.Etmf
                 string countryPath = string.Empty;
                 string sitePath = string.Empty;
                 string trialPath = string.Empty;
-                projectWorkplace = new ProjectWorkplace();
-                ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
-                projectWorkplace.ProjectId = projectDetail.Id;
+                EtmfProjectWorkPlace = new EtmfProjectWorkPlace();
+                ProjectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
+                EtmfProjectWorkPlace.ProjectId = projectDetail.Id;
                 projectPath = System.IO.Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""), FolderType.Etmf.GetDescription());
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
@@ -659,7 +659,7 @@ namespace GSC.Respository.Etmf
 
                     foreach (var coountryp in countryList)
                     {
-                        ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
+                        EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
                         projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Country;
                         projectWorkplaceobj.ItemId = coountryp.Id;
                         projectWorkplaceobj.ItemName = coountryp.Value;
@@ -677,11 +677,11 @@ namespace GSC.Respository.Etmf
                         var CountryLevelArtificteData = artificiteList.Where(x => x.CountryLevelDoc == true).ToList();
                         CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                         var aa = createDBSet(CountryLevelArtificteData);
-                        projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                        projectWorkplaceobj.ProjectWorkplaceDetails = aa;
                         ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
 
                     }
-                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
                 }
 
                 if (childProjectList != null && childProjectList.Count > 0)
@@ -690,7 +690,7 @@ namespace GSC.Respository.Etmf
 
                     foreach (var childp in childProjectList)
                     {
-                        ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
+                        EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
                         projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Site;
                         projectWorkplaceobj.ItemId = childp.Id;
                         projectWorkplaceobj.ItemName = childp.Value;
@@ -705,10 +705,10 @@ namespace GSC.Respository.Etmf
                         string CountryNameCreatePath = Path.Combine(sitePath, childp.Value);
                         CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                         var aa = createDBSet(CountryLevelArtificteData);
-                        projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                        projectWorkplaceobj.ProjectWorkplaceDetails = aa;
                         ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
                     }
-                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
                 }
 
                 var TrialLevelArtificteData = artificiteList.Where(x => x.TrailLevelDoc == true).ToList();
@@ -725,16 +725,16 @@ namespace GSC.Respository.Etmf
 
                         System.IO.Directory.CreateDirectory(Path.Combine(trialPath));
                     }
-                    ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
+                    EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
                     projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Trial;
                     CreateFolder(TrialLevelArtificteData, trialPath);
                     var aa = createDBSet(TrialLevelArtificteData);
-                    projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                    projectWorkplaceobj.ProjectWorkplaceDetails = aa;
                     ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
-                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
                 }
 
-                return projectWorkplace;
+                return EtmfProjectWorkPlace;
             }
             catch (Exception)
             {
@@ -766,39 +766,39 @@ namespace GSC.Respository.Etmf
                 if (!ArtifactExists) System.IO.Directory.CreateDirectory(Path.Combine(ArtifactPath));
             }
 
-            var aaa = projectWorkplace;
+            var aaa = EtmfProjectWorkPlace;
 
             return 1;
         }
 
-        public List<ProjectWorkPlaceZone> createDBSet(List<MasterLibraryJoinDto> artificiteList)
+        public List<EtmfProjectWorkPlace> createDBSet(List<MasterLibraryJoinDto> artificiteList)
         {
-            List<ProjectWorkPlaceZone> zoneLibraryList = new List<ProjectWorkPlaceZone>();
+            List<EtmfProjectWorkPlace> zoneLibraryList = new List<EtmfProjectWorkPlace>();
 
             var objZone = artificiteList.GroupBy(u => u.ZoneId).ToList();
             foreach (var zoneObj in objZone)
             {
 
-                ProjectWorkPlaceZone zoneLibraryObj = new ProjectWorkPlaceZone();
+                EtmfProjectWorkPlace zoneLibraryObj = new EtmfProjectWorkPlace();
                 if (zoneObj.Key > 0)
                 {
-                    zoneLibraryObj.EtmfZoneMasterLibraryId = zoneObj.Key;
-                    zoneLibraryObj.ProjectWorkplaceSection = new List<ProjectWorkplaceSection>();
+                    zoneLibraryObj.EtmfMasterLibraryId = zoneObj.Key;
+                    zoneLibraryObj.ProjectWorkplaceDetails = new List<EtmfProjectWorkPlace>();
                     foreach (var sectionObj in zoneObj.GroupBy(x => x.SectionId).ToList())
                     {
 
-                        ProjectWorkplaceSection sectionLibraryObj = new ProjectWorkplaceSection();
-                        sectionLibraryObj.EtmfSectionMasterLibraryId = sectionObj.Key;
+                        EtmfProjectWorkPlace sectionLibraryObj = new EtmfProjectWorkPlace();
+                        sectionLibraryObj.EtmfMasterLibraryId = sectionObj.Key;
 
-                        sectionLibraryObj.ProjectWorkplaceArtificate = new List<ProjectWorkplaceArtificate>();
+                        sectionLibraryObj.ProjectWorkplaceDetails = new List<EtmfProjectWorkPlace>();
                         foreach (var item in sectionObj)
                         {
-                            ProjectWorkplaceArtificate artificateObj = new ProjectWorkplaceArtificate();
+                            EtmfProjectWorkPlace artificateObj = new EtmfProjectWorkPlace();
                             artificateObj.EtmfArtificateMasterLbraryId = item.ArtificateId;
-                            artificateObj.ProjectWorkplaceSectionId = item.SectionId;
-                            sectionLibraryObj.ProjectWorkplaceArtificate.Add(artificateObj);
+                            artificateObj.EtmfProjectWorkPlaceId = item.SectionId;
+                            sectionLibraryObj.ProjectWorkplaceDetails.Add(artificateObj);
                         }
-                        zoneLibraryObj.ProjectWorkplaceSection.Add(sectionLibraryObj);
+                        zoneLibraryObj.ProjectWorkplaceDetails.Add(sectionLibraryObj);
                     }
                     zoneLibraryList.Add(zoneLibraryObj);
                 }
@@ -815,15 +815,15 @@ namespace GSC.Respository.Etmf
 
             if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId)).
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId) && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlace).
                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
 
         public byte[] CreateZipFileOfWorkplace(int Id)
         {
-            var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
+            var EtmfProjectWorkPlace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), EtmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
             byte[] compressedBytes;
             var zipfolder = FolderPath + ".zip";
@@ -838,17 +838,17 @@ namespace GSC.Respository.Etmf
         public void CreateZipFileOfWorkplaceJobMonitoring(int Id)
         {
             var etmfname = DateTime.Now.Ticks;
-            var ProjectWorkplace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
+            var EtmfProjectWorkPlace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), EtmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + etmfname + ".zip", CompressionLevel.Fastest, true);
             var zipfolder = FolderPath + ".zip";
 
             JobMonitoring jobMonitoring = new JobMonitoring();
             jobMonitoring.JobName = JobNameType.ETMF;
-            jobMonitoring.JobDescription = ProjectWorkplace.Project.Id;
+            jobMonitoring.JobDescription = EtmfProjectWorkPlace.Project.Id;
             jobMonitoring.JobType = JobTypeEnum.Zip;
             jobMonitoring.JobStatus = JobStatusType.Completed;
-            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), ProjectWorkplace.Project.ProjectCode.Replace("/", ""));
+            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), EtmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""));
             jobMonitoring.FolderName = JobNameType.ETMF.GetDescription() + etmfname + ".zip";
             jobMonitoring.SubmittedBy = _jwtTokenAccesser.UserId;
             jobMonitoring.SubmittedTime = _jwtTokenAccesser.GetClientDate();
@@ -856,7 +856,7 @@ namespace GSC.Respository.Etmf
             _context.Save();
         }
 
-        public ProjectWorkplace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
+        public EtmfProjectWorkPlace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
         {
             bool status = false;
             try
@@ -864,8 +864,8 @@ namespace GSC.Respository.Etmf
                 string projectPath = string.Empty;
                 string countryPath = string.Empty;
                 string sitePath = string.Empty;
-                projectWorkplace = All.Where(x => x.ProjectId == projectDetail.Id).FirstOrDefault();
-                ProjectWorkplaceDetailList = new List<ProjectWorkplaceDetail>();
+                EtmfProjectWorkPlace = All.Where(x => x.ProjectId == projectDetail.Id).FirstOrDefault();
+                ProjectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
                 projectPath = Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""));
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
@@ -890,8 +890,8 @@ namespace GSC.Respository.Etmf
 
                     foreach (var coountryp in countryList)
                     {
-                        ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
-                        projectWorkplaceobj.ProjectWorkplaceId = projectWorkplace.Id;
+                        EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
+                        projectWorkplaceobj.EtmfProjectWorkPlaceId = EtmfProjectWorkPlace.Id;
                         projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Country;
                         projectWorkplaceobj.ItemId = coountryp.Id;
                         projectWorkplaceobj.ItemName = coountryp.Value;
@@ -912,11 +912,11 @@ namespace GSC.Respository.Etmf
                             var CountryLevelArtificteData = artificiteList.Where(x => x.CountryLevelDoc == true).ToList();
                             CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                             var aa = createDBSet(CountryLevelArtificteData);
-                            projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                            projectWorkplaceobj.ProjectWorkplaceDetails = aa;
                             ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
                         }
                     }
-                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
                 }
 
                 if (childProjectList != null && childProjectList.Count > 0)
@@ -937,8 +937,8 @@ namespace GSC.Respository.Etmf
                                         ParentProjectId = c.ParentProjectId ?? 0
                                     }).OrderBy(o => o.Value).FirstOrDefault();
 
-                        ProjectWorkplaceDetail projectWorkplaceobj = new ProjectWorkplaceDetail();
-                        projectWorkplaceobj.ProjectWorkplaceId = projectWorkplace.Id;
+                        EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
+                        projectWorkplaceobj.EtmfProjectWorkPlaceId = EtmfProjectWorkPlace.Id;
                         projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Site;
                         projectWorkplaceobj.ItemId = childp.Id;
                         projectWorkplaceobj.ItemName = childp.Value;
@@ -956,14 +956,14 @@ namespace GSC.Respository.Etmf
                             string CountryNameCreatePath = Path.Combine(sitePath, childp.Value);
                             CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                             var aa = createDBSet(CountryLevelArtificteData);
-                            projectWorkplaceobj.ProjectWorkPlaceZone = aa;
+                            projectWorkplaceobj.ProjectWorkplaceDetails = aa;
                             ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
                         }
                     }
-                    projectWorkplace.ProjectWorkplaceDetail = ProjectWorkplaceDetailList;
+                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
                 }
 
-                return projectWorkplace;
+                return EtmfProjectWorkPlace;
             }
             catch (Exception)
             {
@@ -975,17 +975,17 @@ namespace GSC.Respository.Etmf
         public List<ChartReport> GetChartReport(int id, EtmfChartType? chartType)
         {
             var result = new List<ChartReport>();
-            var projectWorkplaces = _context.ProjectWorkplace.Where(t => t.DeletedBy == null && t.ProjectId == id)
-                            .Include(x => x.ProjectWorkplaceDetail)
-                            .ThenInclude(x => x.ProjectWorkPlaceZone)
-                            .ThenInclude(x => x.ProjectWorkplaceSection)
-                            .ThenInclude(x => x.ProjectWorkplaceArtificate)
+            var projectWorkplaces = _context.EtmfProjectWorkPlace.Where(t => t.DeletedBy == null && t.ProjectId == id && t.TableTag == (int)EtmfTableNameTag.ProjectWorkPlace)
+                            .Include(x => x.ProjectWorkplaceDetails)
+                            .ThenInclude(x => x.ProjectWorkplaceDetails)
+                            .ThenInclude(x => x.ProjectWorkplaceDetails)
+                            .ThenInclude(x => x.ProjectWorkplaceDetails)
                             .AsNoTracking().ToList();
             var Project = _context.Project.Where(x => x.Id == id).FirstOrDefault();
             foreach (var b in projectWorkplaces)
             {
                 #region Details
-                foreach (var c in b.ProjectWorkplaceDetail.Where(x => x.DeletedBy == null))
+                foreach (var c in b.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail))
                 {
                     var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
 
@@ -993,19 +993,19 @@ namespace GSC.Respository.Etmf
                     {
                         TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, null);
 
-                        foreach (var d in c.ProjectWorkPlaceZone.Where(x => x.DeletedBy == null))
+                        foreach (var d in c.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone))
                         {
-                            d.EtmfZoneMasterLibrary = _context.EtmfZoneMasterLibrary.Find(d.EtmfZoneMasterLibraryId);
+                            d.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(d.EtmfMasterLibraryId);
                             // Get zone
                             TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
 
-                            foreach (var e in d.ProjectWorkplaceSection.Where(x => x.DeletedBy == null))
+                            foreach (var e in d.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection))
                             {
-                                e.EtmfSectionMasterLibrary = _context.EtmfSectionMasterLibrary.Find(e.EtmfSectionMasterLibraryId);
+                                e.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(e.EtmfMasterLibraryId);
                                 // Get section
                                 TreeValue pvListSectionObj = GetSection(e, (WorkPlaceFolder)c.WorkPlaceFolderId, rights, c, d, b, pvListZoneObj.ExpandData);
                                 // Get artificate
-                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceArtificate, (WorkPlaceFolder)c.WorkPlaceFolderId, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).ToList(), (WorkPlaceFolder)c.WorkPlaceFolderId, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
 
                                 foreach (var artificate in pvListArtificateList.Where(x => x.Level == 6).ToList())
                                 {
@@ -1013,8 +1013,8 @@ namespace GSC.Respository.Etmf
                                     obj.ProjectCode = Project.ProjectCode;
                                     obj.WorkPlaceFolderName = c.ItemName;
                                     obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
-                                    obj.ZoneName = d.EtmfZoneMasterLibrary.ZonName;
-                                    obj.SectionName = e.EtmfSectionMasterLibrary.SectionName;
+                                    obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                    obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                     obj.ArtificateName = artificate.Text;
                                     result.Add(obj);
                                 }
@@ -1027,8 +1027,8 @@ namespace GSC.Respository.Etmf
                                         obj.ProjectCode = Project.ProjectCode;
                                         obj.WorkPlaceFolderName = c.ItemName;
                                         obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
-                                        obj.ZoneName = d.EtmfZoneMasterLibrary.ZonName;
-                                        obj.SectionName = e.EtmfSectionMasterLibrary.SectionName;
+                                        obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                        obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                         obj.SubSectionName = artificate.Text;
                                         obj.ArtificateName = subData.Text;
                                         result.Add(obj);
@@ -1043,28 +1043,25 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
-        public ProjectWorkplace GetWorkplaceDetails(int id)
+        public EtmfProjectWorkPlace GetWorkplaceDetails(int id)
         {
-            var result = All.Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection)
-                        .ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkplaceArtificatedocument)
+            var result = All.Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkplaceArtificatedocument)
                         .ThenInclude(x => x.ProjectArtificateDocumentReview)
-                        .Include("ProjectWorkplaceDetail.EtmfUserPermission")
-                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceArtificate.ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentApprover")
-                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceArtificate.ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentComment")
-                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceArtificate.ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentHistory")
-                        .Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone).ThenInclude(x => x.ProjectWorkplaceSection)
-                        .ThenInclude(x => x.ProjectWorkplaceSubSection).ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
-                        .ThenInclude(x => x.ProjectWorkplaceSubSecArtificatedocument).ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
-                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceSubSection.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentApprover")
-                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceSubSection.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentComment")
-                        .Include("ProjectWorkplaceDetail.ProjectWorkPlaceZone.ProjectWorkplaceSection.ProjectWorkplaceSubSection.ProjectWorkplaceSubSectionArtifact.ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentHistory")
+                        .Include(x => x.EtmfUserPermission)
+                        .Include("ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentApprover")
+                        .Include("ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentComment")
+                        .Include("ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentHistory")
+                        .Include(x => x.ProjectWorkplaceSubSecArtificatedocument).ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
+                        .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentApprover")
+                        .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentComment")
+                        .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentHistory")
                         .Where(x => x.Id == id).FirstOrDefault();
             return result;
         }
 
-        public void DeleteAllTable(ProjectWorkplace projectWorkplace)
+        public void DeleteAllTable(EtmfProjectWorkPlace EtmfProjectWorkPlace)
         {
-            foreach (var workplaceDetail in projectWorkplace.ProjectWorkplaceDetail)
+            foreach (var workplaceDetail in EtmfProjectWorkPlace.ProjectWorkplaceDetails)
             {
                 _projectWorkplaceDetailRepository.Delete(workplaceDetail.Id);
 
@@ -1073,19 +1070,19 @@ namespace GSC.Respository.Etmf
                     _etmfUserPermissionRepository.Delete(userPermission.Id);
                 }
 
-                foreach (var zone in workplaceDetail.ProjectWorkPlaceZone)
+                foreach (var zone in workplaceDetail.ProjectWorkplaceDetails)
                 {
                     _projectWorkPlaceZoneRepository.Delete(zone.Id);
 
-                    foreach (var section in zone.ProjectWorkplaceSection)
+                    foreach (var section in zone.ProjectWorkplaceDetails)
                     {
                         _projectWorkplaceSectionRepository.Delete(section.Id);
 
-                        foreach (var subsection in section.ProjectWorkplaceSubSection)
+                        foreach (var subsection in section.ProjectWorkplaceDetails)
                         {
                             _projectWorkplaceSubSectionRepository.Delete(subsection.Id);
 
-                            foreach (var SubSectionArtifact in subsection.ProjectWorkplaceSubSectionArtifact)
+                            foreach (var SubSectionArtifact in subsection.ProjectWorkplaceDetails)
                             {
                                 _projectWorkplaceSubSectionArtifactRepository.Delete(SubSectionArtifact.Id);
 
@@ -1115,7 +1112,7 @@ namespace GSC.Respository.Etmf
                                 }
                             }
                         }
-                        foreach (var artificate in section.ProjectWorkplaceArtificate)
+                        foreach (var artificate in section.ProjectWorkplaceDetails)
                         {
                             _projectWorkplaceArtificateRepository.Delete(artificate.Id);
 

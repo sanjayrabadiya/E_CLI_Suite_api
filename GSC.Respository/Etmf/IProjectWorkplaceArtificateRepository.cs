@@ -8,7 +8,7 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public interface IProjectWorkplaceArtificateRepository : IGenericRepository<ProjectWorkplaceArtificate>
+    public interface IProjectWorkplaceArtificateRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
         List<DropDownDto> GetProjectWorkPlaceArtificateDropDown(int sectionId);
         List<WorkplaceFolderDto> GetWorkPlaceFolder(int EtmfArtificateMasterLbraryId, int ProjectWorkplaceArtificateId);

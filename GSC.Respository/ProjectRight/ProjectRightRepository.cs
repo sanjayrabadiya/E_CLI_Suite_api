@@ -730,7 +730,7 @@ namespace GSC.Respository.ProjectRight
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId, c.RoleId }, (key, group) => group.First());
 
-            var etmf = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == projectId).ToList();
+            var etmf = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkPlace.ProjectId == projectId).ToList();
             var etmfresult = etmf.OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
             {
                 Id = x.FirstOrDefault().Id,

@@ -91,14 +91,13 @@ namespace GSC.Respository.Etmf
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
                    .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                   .ThenInclude(x => x.ProjectWorkplaceSection).ThenInclude(x => x.ProjectWorkPlaceZone)
-                   .ThenInclude(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkplace)
+                   .ThenInclude(x => x.ProjectWorkPlace)
                    .ThenInclude(x => x.Project)
                    .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
-            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.Project.ProjectName;
+            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.Project.ProjectName;
 
             //var document = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId);
-            var document = _context.ProjectWorkplaceArtificatedocument.Where(x =>x.Id== ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
+            var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
             var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
             var user = _userRepository.Find(ProjectArtificateDocumentApproverDto.UserId);
 
@@ -109,17 +108,16 @@ namespace GSC.Respository.Etmf
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
             var result = All.Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
-                 && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection
-                .ProjectWorkPlaceZone.ProjectWorkplaceDetail.ProjectWorkplace.ProjectId == ProjectId)
+                 && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectId == ProjectId)
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
                     TaskInformation =
-                    ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.WorkPlaceFolderId).GetDescription() + " | " +
-                    (s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName == null ? "" :
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemName + " | ") +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.ProjectWorkPlaceZone.EtmfZoneMasterLibrary.ZonName + " | " +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkplaceSection.EtmfSectionMasterLibrary.SectionName + " | " +
+                    ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.WorkPlaceFolderId).GetDescription() + " | " +
+                    (s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ItemName == null ? "" :
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ItemName + " | ") +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.EtmfMasterLibrary.ZonName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.EtmfMasterLibrary.SectionName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.DocumentName,
                     ExtraData = s.ProjectWorkplaceArtificatedDocumentId,
@@ -128,7 +126,7 @@ namespace GSC.Respository.Etmf
                     Module = MyTaskModule.ETMF.GetDescription(),
                     DataType = MyTaskMethodModule.Approved.GetDescription(),
                     Level = 6,
-                    ControlType=DashboardMyTaskType.ETMFApproveData
+                    ControlType = DashboardMyTaskType.ETMFApproveData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
@@ -196,7 +194,7 @@ namespace GSC.Respository.Etmf
                 //_projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
                 var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == Id).FirstOrDefault();
                 document.IsAccepted = true;
-                _context.ProjectWorkplaceArtificatedocument.Update(document);                
+                _context.ProjectWorkplaceArtificatedocument.Update(document);
                 _context.Save();
             }
         }

@@ -5,6 +5,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,33 +13,44 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public class EtmfZoneMasterLibraryRepository : GenericRespository<EtmfZoneMasterLibrary>, IEtmfZoneMasterLibraryRepository
+    public class EtmfMasterLbraryRepository : GenericRespository<EtmfMasterLibrary>, IEtmfMasterLbraryRepository
     {
-        public EtmfZoneMasterLibraryRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser)
-           : base(context)
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
+        public EtmfMasterLbraryRepository(IGSCContext context,
+           IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
+            _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        public List<EtmfZoneMasterLibrary> ExcelDataConvertToEntityformat(List<MasterLibraryDto> data)
 
+        public string Duplicate(EtmfMasterLibrary objSave)
         {
-            List<EtmfZoneMasterLibrary> zoneLibraryList = new List<EtmfZoneMasterLibrary>();
+            if (All.Any(x => x.Id != objSave.Id && x.Version == objSave.Version.Trim() && x.DeletedDate == null))
+                return "Duplicate Zone name : " + objSave.ZonName;
+            return "";
+        }
+
+        public List<EtmfMasterLibrary> ExcelDataConvertToEntityformat(List<MasterLibraryDto> data)
+        {
+            List<EtmfMasterLibrary> zoneLibraryList = new List<EtmfMasterLibrary>();
 
             var objZone = data.GroupBy(u => u.Zoneno).ToList();
             foreach (var zoneObj in objZone)
             {
-                EtmfZoneMasterLibrary zoneLibraryObj = new EtmfZoneMasterLibrary();
+                EtmfMasterLibrary zoneLibraryObj = new EtmfMasterLibrary();
 
                 if (!string.IsNullOrEmpty(zoneObj.Key))
                 {
-                    zoneLibraryObj.ZoneNo = zoneObj.Key;
-                    zoneLibraryObj.EtmfSectionMasterLibrary = new List<EtmfSectionMasterLibrary>();
+                    zoneLibraryObj.Version = zoneObj.Key;
+                    zoneLibraryObj.EtmfMasterLibraryId = 0;
+                    zoneLibraryObj.EtmfSectionMasterLibrary = new List<EtmfMasterLibrary>();
                     foreach (var sectionObj in zoneObj.GroupBy(x => x.SectionNo).ToList())
                     {
 
-                        EtmfSectionMasterLibrary sectionLibraryObj = new EtmfSectionMasterLibrary();
-                        sectionLibraryObj.Sectionno = sectionObj.Key;
+                        EtmfMasterLibrary sectionLibraryObj = new EtmfMasterLibrary();
+                        sectionLibraryObj.Version = sectionObj.Key;
 
                         sectionLibraryObj.EtmfArtificateMasterLbrary = new List<EtmfArtificateMasterLbrary>();
                         foreach (var item in sectionObj)
@@ -47,6 +59,8 @@ namespace GSC.Respository.Etmf
                             zoneLibraryObj.ZonName = item.ZoneName;
                             zoneLibraryObj.Version = item.Version;
                             sectionLibraryObj.SectionName = item.SectionName;
+                            sectionLibraryObj.Sectionno = item.SectionNo;
+                            sectionLibraryObj.EtmfMasterLibraryId = zoneLibraryObj.EtmfMasterLibraryId;
 
                             artificateObj.ArtificateName = item.ArtificateName;
                             artificateObj.ArtificateNo = item.ArtificateNo;
@@ -71,21 +85,19 @@ namespace GSC.Respository.Etmf
 
                 }
             }
-
             return zoneLibraryList;
         }
 
-        public string Duplicate(EtmfZoneMasterLibrary objSave)
+        public List<DropDownDto> GetSectionMasterLibraryDropDown(int EtmfZoneMasterLibraryId)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ZonName == objSave.ZonName.Trim() && x.DeletedDate == null))
-                return "Duplicate Zone name : " + objSave.ZonName;
-            return "";
+            return All.Where(x => x.EtmfMasterLibraryId == EtmfZoneMasterLibraryId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.SectionName }).OrderBy(o => o.Value).ToList();
         }
+
         public List<DropDownDto> GetZoneMasterLibraryDropDown(string version)
         {
-            return All.Where(x => x.Version== version)
-                    //(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.ZonName }).OrderBy(o => o.Value).ToList();
+            return All.Where(x => x.Version == version && x.EtmfMasterLibraryId == 0)
+                    .Select(c => new DropDownDto { Id = c.Id, Value = c.ZonName }).OrderBy(o => o.Value).ToList();
         }
     }
 }

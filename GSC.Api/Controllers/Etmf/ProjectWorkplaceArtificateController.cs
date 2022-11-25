@@ -75,7 +75,7 @@ namespace GSC.Api.Controllers.Etmf
             {
                 projectWorkplaceArtificateDto.IsNotRequired = !projectWorkplaceArtificateDto.IsNotRequired;
             }
-            var projectWorkplaceArtificate = _mapper.Map<ProjectWorkplaceArtificate>(projectWorkplaceArtificateDto);
+            var projectWorkplaceArtificate = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceArtificateDto);
             _projectWorkplaceArtificateRepository.Update(projectWorkplaceArtificate);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Artificate failed on save.");

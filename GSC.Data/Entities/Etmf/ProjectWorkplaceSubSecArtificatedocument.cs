@@ -3,6 +3,7 @@ using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using GSC.Common.Common;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Etmf
 {
@@ -17,8 +18,8 @@ namespace GSC.Data.Entities.Etmf
         public bool? IsAccepted { get; set; }
         public int? ParentDocumentId { get; set; }
 
-        
-        public ProjectWorkplaceSubSectionArtifact ProjectWorkplaceSubSectionArtifact { get; set; }
+        [ForeignKey("ProjectWorkplaceSubSectionArtifactId")]
+        public EtmfProjectWorkPlace ProjectWorkplaceSubSectionArtifact { get; set; }
         public List<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }
         public List<ProjectSubSecArtificateDocumentApprover> ProjectSubSecArtificateDocumentApprover { get; set; }
         public List<ProjectSubSecArtificateDocumentComment> ProjectSubSecArtificateDocumentComment { get; set; }

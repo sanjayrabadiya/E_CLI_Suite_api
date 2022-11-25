@@ -4,6 +4,7 @@ using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -25,9 +26,9 @@ namespace GSC.Respository.Etmf
 
         public List<MasterLibraryJoinDto> GetArtifcateWithAllList()
         {
-            var dtolist = (from zone in _context.EtmfZoneMasterLibrary.Where(t => t.DeletedDate == null)
-                           join section in _context.EtmfSectionMasterLibrary.Where(t => t.DeletedDate == null) on zone.Id equals
-                               section.EtmfZoneMasterLibraryId
+            var dtolist = (from zone in _context.EtmfMasterLibrary.Where(t => t.DeletedDate == null)
+                           join section in _context.EtmfMasterLibrary.Where(t => t.DeletedDate == null) on zone.Id equals
+                               section.EtmfMasterLibraryId
                            join artificate in _context.EtmfArtificateMasterLbrary.Where(t => t.DeletedDate == null) on section.Id equals
                                artificate.EtmfSectionMasterLibraryId
                            select new MasterLibraryJoinDto
@@ -57,13 +58,12 @@ namespace GSC.Respository.Etmf
 
         public List<MasterLibraryJoinDto> GetArtifcateWithAllListByVersion(int ParentProjectId)
         {
-            var result = _context.ProjectWorkplace.Include(x => x.ProjectWorkplaceDetail).ThenInclude(x => x.ProjectWorkPlaceZone)
-                                        .ThenInclude(x => x.EtmfZoneMasterLibrary)
-                                        .Where(x => x.ProjectId == ParentProjectId).FirstOrDefault();
+            var result = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ParentProjectId && x.TableTag==(int)EtmfTableNameTag.ProjectWorkPlaceZone)
+                .Include(x=>x.EtmfMasterLibrary).FirstOrDefault();
 
-            var dtolist = (from zone in _context.EtmfZoneMasterLibrary.Where(t => t.Version == result.ProjectWorkplaceDetail.FirstOrDefault().ProjectWorkPlaceZone.FirstOrDefault().EtmfZoneMasterLibrary.Version)
-                           join section in _context.EtmfSectionMasterLibrary on zone.Id equals
-                               section.EtmfZoneMasterLibraryId
+            var dtolist = (from zone in _context.EtmfMasterLibrary.Where(t => t.Version == result.EtmfMasterLibrary.Version)
+                           join section in _context.EtmfMasterLibrary on zone.Id equals
+                               section.EtmfMasterLibraryId
                            join artificate in _context.EtmfArtificateMasterLbrary on section.Id equals
                                artificate.EtmfSectionMasterLibraryId
                            select new MasterLibraryJoinDto

@@ -9,18 +9,18 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public interface IETMFWorkplaceRepository : IGenericRepository<ProjectWorkplace>
+    public interface IETMFWorkplaceRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
         List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted);
         string Duplicate(int id);
         //List<TreeValue> Get(int id);
         List<TreeValue> GetTreeview(int id, EtmfChartType? chartType);
-        ProjectWorkplace SaveFolderStructure(Data.Entities.Master.Project Project, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList,string imageUrl);
-        ProjectWorkplace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath);
+        EtmfProjectWorkPlace SaveFolderStructure(Data.Entities.Master.Project Project, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList,string imageUrl);
+        EtmfProjectWorkPlace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath);
         byte[] CreateZipFileOfWorkplace(int Id);
         List<ChartReport> GetChartReport(int id, EtmfChartType? chartType);
         void CreateZipFileOfWorkplaceJobMonitoring(int Id);
-        ProjectWorkplace GetWorkplaceDetails(int id);
-        void DeleteAllTable(ProjectWorkplace projectWorkplace);
+        EtmfProjectWorkPlace GetWorkplaceDetails(int id);
+        void DeleteAllTable(EtmfProjectWorkPlace EtmfProjectWorkPlace);
     }
 }
