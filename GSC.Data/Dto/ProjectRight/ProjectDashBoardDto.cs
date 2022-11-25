@@ -223,6 +223,12 @@ namespace GSC.Data.Dto.ProjectRight
         public int ACount { get; set; }
         public int RCount { get; set; }
 
+        public int TerminatedCount { get; set; }
+
+        public int OnHoldCount { get; set; }
+
+        public int CloseOutCount { get; set; }
+
         public int EntrollCount { get; set; }
     }
 

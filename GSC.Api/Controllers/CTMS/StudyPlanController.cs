@@ -150,6 +150,8 @@ namespace GSC.Api.Controllers.CTMS
                     ModelState.AddModelError("Message", validatecode);
                     return BadRequest(ModelState);
                 }
+                data.DeletedBy = null;
+                data.DeletedDate = null;
                 _studyPlanRepository.Active(data);
             }
             _uow.Save();

@@ -643,6 +643,9 @@ namespace GSC.Respository.Master
                     ActivityName = n.Key,
                     ACount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Approved).Count(),
                     RCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Rejected).Count(),
+                    TerminatedCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Terminated).Count(),
+                    OnHoldCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.OnHold).Count(),
+                    CloseOutCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.CloseOut).Count(),
                     EntrollCount = 0
                 }).ToList();
 
@@ -678,6 +681,33 @@ namespace GSC.Respository.Master
                                 obj.Lable = item.ActivityName + " Rejected ";
                                 obj.Count = item.RCount;
                                 obj.Status = "Rejected";
+                                list.Add(obj);
+                            }
+                            if (item.TerminatedCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Terminated " + item.RCount;
+                                obj.Lable = item.ActivityName + " Terminated ";
+                                obj.Count = item.RCount;
+                                obj.Status = "Terminated";
+                                list.Add(obj);
+                            }
+                            if (item.OnHoldCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " OnHold " + item.RCount;
+                                obj.Lable = item.ActivityName + " OnHold ";
+                                obj.Count = item.RCount;
+                                obj.Status = "OnHold";
+                                list.Add(obj);
+                            }
+                            if (item.CloseOutCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Close Out " + item.RCount;
+                                obj.Lable = item.ActivityName + " Close Out ";
+                                obj.Count = item.RCount;
+                                obj.Status = "CloseOut";
                                 list.Add(obj);
                             }
                         }
@@ -752,7 +782,7 @@ namespace GSC.Respository.Master
             }
             if (obj.ScheduleStartDate != null && data != null && !data.IsApproved)
             {
-                return "In signature pending review";
+                return "In signature/pending review";
             }
             if (obj.ScheduleStartDate != null && data != null && data.IsApproved)
             {
