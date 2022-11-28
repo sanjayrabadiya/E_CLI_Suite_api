@@ -599,5 +599,12 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetParentProjectCTMSDropDown());
         }
 
+        [HttpGet]
+        [Route("GetParentStaticProjectDropDownIWRS")]
+        public IActionResult GetParentStaticProjectDropDownIWRS()
+        {
+            return Ok(_projectRepository.GetParentStaticProjectDropDownIWRS());
+        }
+
     }
 }

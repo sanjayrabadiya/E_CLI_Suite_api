@@ -54,5 +54,7 @@ namespace GSC.Respository.Master
         List<LockUnlockProject> GetParentStaticProject();
 
         List<ProjectDropDown> GetParentProjectCTMSDropDown();
+
+        List<ProjectDropDown> GetParentStaticProjectDropDownIWRS();
     }
 }
