@@ -136,7 +136,7 @@ namespace GSC.Api.Controllers.AdverseEvent
 
             aEReporting.RandomizationId = randomization.Id;
             aEReporting.IsReviewedDone = false;
-            aEReporting.AdverseEventSettingsId = studyId > 0 ? _adverseEventSettingsRepository.All.Where(x => x.ProjectId == (int)studyId).Select(x => x.Id).FirstOrDefault() : 0;
+            aEReporting.AdverseEventSettingsId = studyId > 0 ? _adverseEventSettingsRepository.All.Where(x => x.ProjectId == (int)studyId && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault() : 0;
             _iAEReportingRepository.Add(aEReporting);
             _uow.Save();
             for (int i = 0; i <= aEReportingDto.template.Variables.Count - 1; i++)
