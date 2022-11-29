@@ -68,7 +68,7 @@ namespace GSC.Respository.AdverseEvent
                 var aereportingvalue = _aEReportingValueRepository.FindBy(x => x.AEReportingId == id).ToList();
                 var aEReportingdto = _mapper.Map<AEReportingDto>(aereportingdata);
 
-                var data = _projectDesignTemplateRepository.GetTemplate(adversesettingdata.ProjectDesignTemplateIdPatient);
+                var data = _projectDesignTemplateRepository.GetTemplateAE(adversesettingdata.ProjectDesignTemplateIdPatient);
                 aereportingvalue.ForEach(t =>
                 {
                     var variable = data.Variables.FirstOrDefault(v => v.ProjectDesignVariableId == t.ProjectDesignVariableId);
@@ -96,7 +96,7 @@ namespace GSC.Respository.AdverseEvent
             {
                 return null;
             }
-            var data = _projectDesignTemplateRepository.GetTemplate(adverseEventSettings.ProjectDesignTemplateIdPatient);
+            var data = _projectDesignTemplateRepository.GetTemplateAE(adverseEventSettings.ProjectDesignTemplateIdPatient);
             return data;
         }
 
