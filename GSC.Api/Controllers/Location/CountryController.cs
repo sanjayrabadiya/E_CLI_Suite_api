@@ -166,5 +166,11 @@ namespace GSC.Api.Controllers.Location
         {
             return Ok(_countryRepository.GetCountryByProjectIdDropDown(ParentProjectId));
         }
+        [HttpGet]
+        [Route("GetCountryByProjectIdDropDownDepot/{ParentProjectId}/{id}")]
+        public IActionResult GetCountryByProjectIdDropDownDepot(int ParentProjectId, int id)
+        {
+            return Ok(_countryRepository.GetCountryByProjectIdDropDownDepot(ParentProjectId, id));
+        }
     }
 }

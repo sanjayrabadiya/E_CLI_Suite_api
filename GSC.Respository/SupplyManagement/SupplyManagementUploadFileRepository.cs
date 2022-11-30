@@ -214,6 +214,8 @@ namespace GSC.Respository.SupplyManagement
                     return "Remove country if file uploaded for the site level.";
                 if (site.Trim() != "")
                 {
+                    if (supplyManagementUploadFile.SiteId == null)
+                        return "Please select site!";
                     if (site.Trim().ToLower() != Convert.ToString(GetProjectCode((int)supplyManagementUploadFile.SiteId)).ToLower())
                         return "Please check site code";
                 }
@@ -274,7 +276,7 @@ namespace GSC.Respository.SupplyManagement
                 if (dr.Length != 0)
                     return "Please fill required randomization details!";
                 else
-                   return "";
+                    return "";
                 //else
                 //{
                 //    for (int i = 5; i < results.Tables[0].Rows.Count; i++)
