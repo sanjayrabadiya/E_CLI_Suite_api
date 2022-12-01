@@ -86,7 +86,7 @@ namespace GSC.Respository.Master
                 {
                     ProjectId = c.Id,
                     CreatedDate = c.CreatedDate.Value
-        }).OrderByDescending(x => x.ProjectId).ToList();
+                }).OrderByDescending(x => x.ProjectId).ToList();
 
 
             projects.ForEach(item =>
@@ -115,7 +115,7 @@ namespace GSC.Respository.Master
                 item.CountCountry = temCountries.Distinct().Count();
                 item.projectCode = project.ProjectCode;
                 item.Project = project;
-                
+
 
             });
 
@@ -1159,16 +1159,16 @@ namespace GSC.Respository.Master
 
         public List<ProjectDropDown> GetParentStaticProjectDropDownIWRS()
         {
-            
+
             var projectList = _projectRightRepository.GetParentProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-
+            var list = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && projectList.Contains(x.ProjectId) && x.IsIGT == true).Select(x => x.ProjectId).ToList();
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.ParentProjectId == null
                     && x.ProjectCode != null
-                    && projectList.Contains(x.Id))
+                    && list.Contains(x.Id))
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
