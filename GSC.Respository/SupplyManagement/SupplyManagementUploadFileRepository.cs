@@ -444,18 +444,36 @@ namespace GSC.Respository.SupplyManagement
 
             for (int i = 0; i < dt.Rows.Count; i++)
             {
-                string[] str = dt.Rows[i][1].ToString().Split(',').ToArray();
-                var result = str.All(m => productTypes.Select(x => x.ProductTypeCode).Contains(m));
-                var columns = dt.Columns.Count;
+                string[] str = dt.Rows[i][1].ToString().TrimStart(' ').TrimEnd(' ').Trim().Split(',').ToArray();
+                if (str.Length > 0)
+                {
+                    List<string> list = new List<string>();
+                    string[] str1 = new string[str.Length];
+                    foreach (var item in str)
+                    {
+                        var t1 = item.Replace("\n", " ");
+                        var t2 = t1.TrimStart(' ');
+                        var t3 = t2.TrimEnd(' ');
+                        if (t3.Contains(@"\n"))
+                        {
+                            return "Remove space from product code.";
+                        }
+                        list.Add(t3);
+                    }
+                    str1 = list.ToArray();
+                    var result = str1.All(m => productTypes.Select(x => x.ProductTypeCode).Contains(m));
+                    var columns = dt.Columns.Count;
 
-                if (!result)
-                    return "Product code not match.";
+                    if (!result)
+                        return "Product code not match.";
 
-                string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).ToArray();
-                var cellResult = dataRow.All(m => str.Contains(m));
+                    string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).ToArray();
+                    var cellResult = dataRow.All(m => str1.Contains(m.Trim()));
 
-                if (!cellResult)
-                    return "Product code not match in cell.";
+                    if (!cellResult)
+                        return "Product code not match in cell.";
+                }
+               
             }
 
             return "";
