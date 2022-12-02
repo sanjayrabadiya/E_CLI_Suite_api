@@ -101,5 +101,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (_uow.Save() <= 0) throw new Exception("Updating lab management data failed on action.");
             return Ok(supplyManagementUploadFile.Id);
         }
+        [HttpGet("CheckUploadApproalPending/{ProjectId}/{SiteId}/{CountryId}")]
+        public IActionResult CheckUploadApproalPending(int ProjectId, int SiteId, int CountryId)
+        {
+            var productVerification = _supplyManagementUploadFileRepository.CheckUploadApproalPending(ProjectId, SiteId, CountryId);
+            return Ok(productVerification);
+        }
     }
 }

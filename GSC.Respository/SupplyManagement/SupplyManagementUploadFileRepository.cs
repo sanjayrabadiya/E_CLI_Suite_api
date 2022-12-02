@@ -473,7 +473,7 @@ namespace GSC.Respository.SupplyManagement
                     if (!cellResult)
                         return "Product code not match in cell.";
                 }
-               
+
             }
 
             return "";
@@ -503,6 +503,19 @@ namespace GSC.Respository.SupplyManagement
             //    j++;
             //}
             return "";
+        }
+
+        public bool CheckUploadApproalPending(int ProjectId, int SiteId, int CountryId)
+        {
+            if (SiteId == 0 && CountryId == 0)
+                return All.Any(x => x.ProjectId == ProjectId && x.CountryId == CountryId && x.DeletedDate == null && x.Status == Helper.LabManagementUploadStatus.Pending);
+            if (SiteId > 0)
+                return All.Any(x => x.ProjectId == ProjectId && x.SiteId == SiteId && x.DeletedDate == null && x.Status == Helper.LabManagementUploadStatus.Pending);
+            if (CountryId > 0)
+                return All.Any(x => x.ProjectId == ProjectId && x.CountryId == CountryId && x.DeletedDate == null && x.Status == Helper.LabManagementUploadStatus.Pending);
+
+            return false;
+
         }
     }
 }
