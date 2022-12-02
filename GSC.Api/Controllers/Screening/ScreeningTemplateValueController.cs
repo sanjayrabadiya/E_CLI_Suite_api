@@ -104,7 +104,7 @@ namespace GSC.Api.Controllers.Screening
             if (randomization != null)
             {
                 var dbLock = _context.ScreeningTemplate.FirstOrDefault(x => x.ProjectDesignTemplateId == screeningTemplateValue.ScreeningTemplateId && x.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
-                if (dbLock.IsLocked || dbLock.IsHardLocked)
+                if (dbLock != null && (dbLock.IsLocked || dbLock.IsHardLocked))
                 {
                     ModelState.AddModelError("Message", "Template is locked");
                     return BadRequest(ModelState);
