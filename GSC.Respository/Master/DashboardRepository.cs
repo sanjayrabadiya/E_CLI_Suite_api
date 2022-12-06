@@ -813,9 +813,9 @@ namespace GSC.Respository.Master
                     Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
                     Status = b.Status
                 }).ToList();
-           
 
-          
+
+
 
             if (asd.Count > 0)
             {
@@ -824,7 +824,7 @@ namespace GSC.Respository.Master
                 .Select(g => new
                 {
                     Activity = g.Key.Activity,
-                    Status = g.Key.Activity + " " + g.Key.status,
+                    Status = g.Key.status + " action of " + g.Key.Activity,
                     Count = g.ToList().Count
                 }).ToList();
 
