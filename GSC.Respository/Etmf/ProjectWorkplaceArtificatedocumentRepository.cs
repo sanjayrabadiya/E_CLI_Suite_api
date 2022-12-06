@@ -370,43 +370,52 @@ namespace GSC.Respository.Etmf
             {
                 if (filters.countrySiteId != null)
                 {
-                    workplacedetail = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplace.Id && x.WorkPlaceFolderId == filters.folderId && x.Id == filters.countrySiteId).Select(y => y.Id).ToList();
+                    workplacedetail = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplace.Id
+                    && x.WorkPlaceFolderId == filters.folderId && x.Id == filters.countrySiteId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail).Select(y => y.Id).ToList();
                 }
                 else
                 {
-                    workplacedetail = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplace.Id && x.WorkPlaceFolderId == filters.folderId).Select(y => y.Id).ToList();
+                    workplacedetail = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplace.Id && x.WorkPlaceFolderId == filters.folderId
+                    && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail).Select(y => y.Id).ToList();
                 }
             }
             else
             {
-                workplacedetail = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplace.Id).Select(y => y.Id).ToList();
+                workplacedetail = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplace.Id
+                && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail).Select(y => y.Id).ToList();
             }
             var workplacezone = new List<int>();
             if (filters.zoneId != null)
             {
-                workplacezone = _context.EtmfProjectWorkPlace.Where(x => x.EtmfMasterLibraryId == filters.zoneId && workplacedetail.Contains(x.EtmfProjectWorkPlaceId)).Select(y => y.Id).ToList();
+                workplacezone = _context.EtmfProjectWorkPlace.Where(x => x.EtmfMasterLibraryId == filters.zoneId
+                && workplacedetail.Contains(x.EtmfProjectWorkPlaceId) && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone).Select(y => y.Id).ToList();
             }
             else
             {
-                workplacezone = _context.EtmfProjectWorkPlace.Where(x => workplacedetail.Contains(x.EtmfProjectWorkPlaceId)).Select(y => y.Id).ToList();
+                workplacezone = _context.EtmfProjectWorkPlace.Where(x => workplacedetail.Contains(x.EtmfProjectWorkPlaceId)
+                && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone).Select(y => y.Id).ToList();
             }
             var workplacesection = new List<int>();
             if (filters.sectionId != null)
             {
-                workplacesection = _context.EtmfProjectWorkPlace.Where(x => x.EtmfMasterLibraryId == filters.sectionId && workplacezone.Contains(x.EtmfProjectWorkPlaceId)).Select(y => y.Id).ToList();
+                workplacesection = _context.EtmfProjectWorkPlace.Where(x => x.EtmfMasterLibraryId == filters.sectionId && workplacezone.Contains(x.EtmfProjectWorkPlaceId)
+                && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection).Select(y => y.Id).ToList();
             }
             else
             {
-                workplacesection = _context.EtmfProjectWorkPlace.Where(x => workplacezone.Contains(x.EtmfProjectWorkPlaceId)).Select(y => y.Id).ToList();
+                workplacesection = _context.EtmfProjectWorkPlace.Where(x => workplacezone.Contains(x.EtmfProjectWorkPlaceId)
+                && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection).Select(y => y.Id).ToList();
             }
             var workplaceartificate = new List<int>();
             if (filters.artificateId != null)
             {
-                workplaceartificate = _context.EtmfProjectWorkPlace.Where(x => x.EtmfArtificateMasterLbraryId == filters.artificateId && workplacesection.Contains(x.EtmfProjectWorkPlaceId)).Select(y => y.Id).ToList();
+                workplaceartificate = _context.EtmfProjectWorkPlace.Where(x => x.EtmfArtificateMasterLbraryId == filters.artificateId && workplacesection.Contains(x.EtmfProjectWorkPlaceId)
+                && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).Select(y => y.Id).ToList();
             }
             else
             {
-                workplaceartificate = _context.EtmfProjectWorkPlace.Where(x => workplacesection.Contains(x.EtmfProjectWorkPlaceId)).Select(y => y.Id).ToList();
+                workplaceartificate = _context.EtmfProjectWorkPlace.Where(x => workplacesection.Contains(x.EtmfProjectWorkPlaceId)
+                && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).Select(y => y.Id).ToList();
             }
             var workplaceartificatedocument = new List<int>();
             workplaceartificatedocument = FindByInclude(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).Select(y => y.Id).ToList();
@@ -420,7 +429,9 @@ namespace GSC.Respository.Etmf
                 ThenInclude(x => x.ProjectWorkPlace).
                 Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary).
                 Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
-                .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).OrderByDescending(x => x.Id).ToList();
+                .Where(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)
+                && x.ProjectWorkplaceArtificate.ProjectId == filters.projectId
+                && x.ProjectWorkplaceArtificate.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).OrderByDescending(x => x.Id).ToList();
 
             var projectWorkplaceArtificatedocumentreviews = _context.ProjectArtificateDocumentReview.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
             var projectWorkplaceArtificatedocumentapprover = _context.ProjectArtificateDocumentApprover.Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId)).ToList();
@@ -615,7 +626,7 @@ namespace GSC.Respository.Etmf
                 ThenInclude(x => x.ProjectWorkPlace)
                 .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                 .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
-                .Where(x => workplaceartificate.Contains(x.Id))
+                .Where(x => workplaceartificate.Contains(x.Id) && x.ProjectId == filters.projectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
                 .Select(r => new EtmfAuditLogReportDto
                 {
                     Id = r.Id,
@@ -661,7 +672,7 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkPlace)
                 .Include(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                 .Include(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
-                .Where(x => workplacesection.Contains(x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.EtmfProjectWorkPlaceId))
+                .Where(x => workplacesection.Contains(x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.EtmfProjectWorkPlaceId) && x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectId == filters.projectId && x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection)
                 .OrderByDescending(x => x.Id).ToList();
 
             var SubSecDocuments = projectWorkplaceSubsectionDocuments.Select(r => new EtmfAuditLogReportDto
@@ -862,7 +873,7 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkPlace)
                 .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                 .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
-                .Where(x => workplacesection.Contains(x.EtmfProjectWorkPlaceId))
+                .Where(x => workplacesection.Contains(x.EtmfProjectWorkPlaceId) && x.ProjectId == filters.projectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection)
                 .OrderByDescending(x => x.Id).ToList();
 
             var subsectionAdded = subsection.Where(x => x.DeletedDate == null).Select(r => new EtmfAuditLogReportDto
@@ -935,7 +946,7 @@ namespace GSC.Respository.Etmf
                 .ThenInclude(x => x.ProjectWorkPlace)
                 .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                 .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
-                .Where(x => workplacesection.Contains(x.ProjectWorkPlace.EtmfProjectWorkPlaceId))
+                .Where(x => workplacesection.Contains(x.ProjectWorkPlace.EtmfProjectWorkPlaceId) && x.ProjectWorkPlace.ProjectId == filters.projectId && x.ProjectWorkPlace.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
                 .Select(r => new EtmfAuditLogReportDto
                 {
                     Id = r.Id,
@@ -1461,7 +1472,7 @@ namespace GSC.Respository.Etmf
             }
 
             return result.OrderByDescending(x => x.CreatedDate).ToList();
-        }       
+        }
     }
 }
 

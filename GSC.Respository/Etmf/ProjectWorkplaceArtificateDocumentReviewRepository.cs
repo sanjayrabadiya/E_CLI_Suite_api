@@ -105,10 +105,9 @@ namespace GSC.Respository.Etmf
         public void SendMailToReviewer(ProjectArtificateDocumentReviewDto ReviewDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                   .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.Project)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.Project)
                    .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ReviewDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
-            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.Project.ProjectName;
+            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.Project.ProjectName;
             //var document = _projectWorkplaceArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceArtificatedDocumentId);
             var document = _context.ProjectWorkplaceArtificatedocument.Where(x=>x.Id==ReviewDto.ProjectWorkplaceArtificatedDocumentId && x.DeletedDate==null).FirstOrDefault();
             var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
@@ -120,8 +119,7 @@ namespace GSC.Respository.Etmf
         public void SendMailToSendBack(ProjectArtificateDocumentReview ReviewDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                   .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.Project)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.Project)
                    .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ReviewDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
             var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.Project.ProjectName;
             //var document = _projectWorkplaceArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceArtificatedDocumentId);
