@@ -70,11 +70,11 @@ namespace GSC.Respository.Etmf
         public void SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto ProjectSubSecArtificateDocumentApproverDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace)
+                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
                    .ThenInclude(x => x.Project)
                    .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId).FirstOrDefault();
 
-            var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.Project.ProjectName;
+            var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
             var Document = project.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
             var Artificate = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
             var User = _userRepository.Find(ProjectSubSecArtificateDocumentApproverDto.UserId);

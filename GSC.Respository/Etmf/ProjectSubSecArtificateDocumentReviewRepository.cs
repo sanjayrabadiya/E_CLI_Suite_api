@@ -110,7 +110,7 @@ namespace GSC.Respository.Etmf
         public void SendMailToSendBack(ProjectSubSecArtificateDocumentReview ReviewDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.Project)
+                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x=>x.Project)
                    .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ReviewDto.ProjectWorkplaceSubSecArtificateDocumentId).FirstOrDefault();
 
             var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;

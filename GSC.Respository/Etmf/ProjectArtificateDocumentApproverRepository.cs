@@ -90,11 +90,9 @@ namespace GSC.Respository.Etmf
         public void SendMailForApprover(ProjectArtificateDocumentApproverDto ProjectArtificateDocumentApproverDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                   .ThenInclude(x => x.ProjectWorkPlace)
-                   .ThenInclude(x => x.Project)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.Project)
                    .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
-            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.Project.ProjectName;
+            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.Project.ProjectName;
 
             //var document = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId);
             var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
@@ -107,7 +105,11 @@ namespace GSC.Respository.Etmf
         // Get data for mytasklist on dashboard
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
-            var result = All.Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
+            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                   .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
+                   .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
+                   .ThenInclude(x => x.Project).Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
                  && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectId == ProjectId)
                 .Select(s => new DashboardDto
                 {
