@@ -13,5 +13,7 @@ namespace GSC.Respository.Master
         string DuplicateCountry(Country objSave);
         List<DropDownDto> GetCountryByProjectIdDropDown(int ParentProjectId);
         List<CountryGridDto> GetCountryList(bool isDeleted);
+
+        List<DropDownDto> GetCountryByProjectIdDropDownDepot(int ParentProjectId, int id);
     }
 }

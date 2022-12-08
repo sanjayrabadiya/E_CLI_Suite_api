@@ -211,6 +211,21 @@ namespace GSC.Report
             PdfLayoutResult result = richTextElement.Draw(page, position, pdfLayoutFormat);
             return result;
         }
+        private PdfLayoutResult AddStringCheckbox(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        {
+            //font.SetTextEncoding(Encoding.GetEncoding("Windows-1250"))
+            //PdfTrueTypeFont fonts = new PdfTrueTypeFont(new Font("Microsoft Sans Serif", 14), true);
+
+            PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
+            //Draws String       
+            PdfStringFormat stringFormat = new PdfStringFormat();
+            stringFormat.MeasureTrailingSpaces = true;
+            stringFormat.WordWrap = PdfWordWrapType.Word;
+            richTextElement.StringFormat = stringFormat;
+
+            PdfLayoutResult result = richTextElement.Draw(page, position, pdfLayoutFormat);
+            return result;
+        }
         private PdfLayoutResult AddStringVariable(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat, string varnote)
         {
 
@@ -990,7 +1005,7 @@ namespace GSC.Report
                                             variblevaluename = variable.Values.Where(x => x.Id == Id).Select(x => x.ValueName).SingleOrDefault();
                                         foreach (var value in variable.Values.OrderBy(x => x.SeqNo))
                                         {
-                                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString($"{ value.ValueName} { value.Label }", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Y, 130, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                             PdfRadioButtonListField radioList = new PdfRadioButtonListField(result.Page, variable.Id.ToString());
                                             document.Form.Fields.Add(radioList);
 
@@ -1000,7 +1015,7 @@ namespace GSC.Report
                                             radioList.ReadOnly = true;
                                             if (value.ValueName == variblevaluename)
                                                 radioList.SelectedIndex = 0;
-                                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Bottom + 10, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+                                            result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(370, result.Bounds.Bottom + 10, 130, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
                                         }
                                     }
                                     result = AddString(" ", result.Page, new Syncfusion.Drawing.RectangleF(0, result.Bounds.Y, 180, result.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);

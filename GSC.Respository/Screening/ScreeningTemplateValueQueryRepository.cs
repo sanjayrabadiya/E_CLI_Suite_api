@@ -858,7 +858,8 @@ namespace GSC.Respository.Screening
                           {
                               a.Note,
                               a.UserName,
-                              a.CreatedDate
+                              a.CreatedDate,
+                              a.UserRole
                           }).FirstOrDefault()
                           let lastAduit = screeningValue.ScreeningTemplateValueAudits.OrderByDescending(c => c.Id).Select(a => new
                           {
@@ -867,7 +868,8 @@ namespace GSC.Respository.Screening
                               a.OldValue,
                               a.Value,
                               a.UserName,
-                              a.CreatedDate
+                              a.CreatedDate,
+                              a.UserRole
                           }).FirstOrDefault()
                           select new ScreeningQueryDto
                           {
@@ -879,9 +881,9 @@ namespace GSC.Respository.Screening
                               QueryDescription = lastQuery.Note,
                               OldValue = lastAduit.OldValue,
                               QueryStatus = screeningValue.QueryStatus,
-                              LastUpdateBy = lastAduit.UserName,
+                              LastUpdateBy = string.IsNullOrEmpty(lastAduit.UserRole) ? lastAduit.UserName : $"{lastAduit.UserName} ({lastAduit.UserRole})",
                               LastUpdateDate = lastAduit.CreatedDate,
-                              LastQueryBy = lastQuery.UserName,
+                              LastQueryBy = string.IsNullOrEmpty(lastQuery.UserRole) ? lastQuery.UserName : $"{lastQuery.UserName} ({lastQuery.UserRole})",
                               AcknowledgeLevel = screeningValue.AcknowledgeLevel,
                               ReviewLevel = screeningValue.ReviewLevel,
                               UserRoleId = screeningValue.UserRoleId,

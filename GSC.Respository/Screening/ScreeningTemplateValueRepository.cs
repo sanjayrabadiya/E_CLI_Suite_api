@@ -177,7 +177,7 @@ namespace GSC.Respository.Screening
             {
                 foreach (var variable in templateVariable)
                 {
-                  
+
                     string value = string.Empty;
                     var allocationsetting = _context.SupplyManagementAllocation.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == variable.Id).FirstOrDefault();
                     if (allocationsetting != null)
@@ -189,7 +189,12 @@ namespace GSC.Respository.Screening
                         }
                         if (allocationsetting.Type == SupplyManagementAllocationType.ProductCode)
                         {
-                            value = verifyuploadsheetdata.TreatmentType;
+                            var uploadvisits = _context.SupplyManagementUploadFileVisit
+                                  .Where(x => x.SupplyManagementUploadFileDetailId == verifyuploadsheetdata.Id
+                                        && x.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId).FirstOrDefault();
+                           
+                            if (uploadvisits != null)
+                                value = uploadvisits.Value;
                         }
                         if (allocationsetting.Type == SupplyManagementAllocationType.ProductName)
                         {
@@ -598,91 +603,91 @@ namespace GSC.Respository.Screening
                 #region MedDRA
 
                 var MeddraDetails = (from Mcode in _context.MeddraCoding
-                                    join Mconfig in _context.MedraConfig on Mcode.MeddraConfigId equals Mconfig.Id
-                                    join mv in _context.MedraVersion on Mconfig.MedraVersionId equals mv.Id
-                                    join meddraSoc in _context.MeddraSocTerm on Mcode.MeddraSocTermId equals meddraSoc.Id
-                                    join meddraLLT in _context.MeddraLowLevelTerm on Mcode.MeddraLowLevelTermId equals meddraLLT.Id
-                                    join meddraMD in _context.MeddraMdHierarchy on meddraSoc.soc_code equals meddraMD.soc_code
-                                    join ml in _context.MedraLanguage on Mconfig.LanguageId equals ml.Id
-                                    join U in _context.Users on Mcode.ModifiedBy equals U.Id
-                                    join stv in _context.ScreeningTemplateValue on Mcode.ScreeningTemplateValueId equals stv.Id
-                                    join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
-                                    join d in _context.Domain on pdv.DomainId equals d.Id
-                                    join st in _context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id
-                                    join pdt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pdt.Id
-                                    join sv in _context.ScreeningVisit on st.ScreeningVisitId equals sv.Id
-                                    join pdvisit in _context.ProjectDesignVisit on sv.ProjectDesignVisitId equals pdvisit.Id
-                                    join se in _context.ScreeningEntry on sv.ScreeningEntryId equals se.Id
-                                    join r in _context.Randomization on se.RandomizationId equals r.Id
-                                    join p in _context.Project on r.ProjectId equals p.Id
+                                     join Mconfig in _context.MedraConfig on Mcode.MeddraConfigId equals Mconfig.Id
+                                     join mv in _context.MedraVersion on Mconfig.MedraVersionId equals mv.Id
+                                     join meddraSoc in _context.MeddraSocTerm on Mcode.MeddraSocTermId equals meddraSoc.Id
+                                     join meddraLLT in _context.MeddraLowLevelTerm on Mcode.MeddraLowLevelTermId equals meddraLLT.Id
+                                     join meddraMD in _context.MeddraMdHierarchy on meddraSoc.soc_code equals meddraMD.soc_code
+                                     join ml in _context.MedraLanguage on Mconfig.LanguageId equals ml.Id
+                                     join U in _context.Users on Mcode.ModifiedBy equals U.Id
+                                     join stv in _context.ScreeningTemplateValue on Mcode.ScreeningTemplateValueId equals stv.Id
+                                     join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
+                                     join d in _context.Domain on pdv.DomainId equals d.Id
+                                     join st in _context.ScreeningTemplate on stv.ScreeningTemplateId equals st.Id
+                                     join pdt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pdt.Id
+                                     join sv in _context.ScreeningVisit on st.ScreeningVisitId equals sv.Id
+                                     join pdvisit in _context.ProjectDesignVisit on sv.ProjectDesignVisitId equals pdvisit.Id
+                                     join se in _context.ScreeningEntry on sv.ScreeningEntryId equals se.Id
+                                     join r in _context.Randomization on se.RandomizationId equals r.Id
+                                     join p in _context.Project on r.ProjectId equals p.Id
 
-                                    where (sites.Contains(se.ProjectId) && (filters.PeriodIds == null || filters.PeriodIds.Contains(se.ProjectDesignPeriodId))
-                                         && (filters.SubjectIds == null || filters.SubjectIds.Count() == 0 || filters.SubjectIds.Contains(se.Id))
-                                         && se.DeletedDate == null) && st.DeletedDate ==null 
-                                         && ((filters.TemplateIds == null || filters.TemplateIds.Contains(st.ProjectDesignTemplateId))
-                                     && (filters.VisitIds == null || filters.VisitIds.Contains(st.ProjectDesignTemplate.ProjectDesignVisitId))
-                                     && (filters.DomainIds == null || filters.DomainIds.Contains(st.ProjectDesignTemplate.DomainId)) 
-                                     && st.Status != ScreeningTemplateStatus.Pending && st.Status != ScreeningTemplateStatus.InProcess)
-                                     && Mcode.DeletedDate==null
-                                     && Mconfig.DeletedDate ==null
-                                     && meddraMD.DeletedDate ==null
-                                     && meddraLLT.pt_code == meddraMD.pt_code
-                                        && meddraSoc.MedraConfigId == Mconfig.Id
-                                        && meddraLLT.MedraConfigId == Mconfig.Id
-                                        && meddraMD.MedraConfigId == Mconfig.Id
-                                    select new MeddraDetails
-                                    {
-                                        ProjectCode = ProjectCode,
-                                        SiteCode = se.Project.ParentProjectId != null ? se.Project.ProjectCode : "",
-                                        DomainCode = pdv.Domain.DomainName,
-                                        //ScreeningNumber = nonregister.ScreeningNumber,
-                                        //RandomizationNumber = nonregister.RandomizationNumber,
-                                        //Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                                        Initial = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.Initial : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
-                                        ScreeningNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.ScreeningNumber : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
-                                        RandomizationNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.RandomizationNumber : "",
-                                        RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
-                                        Visit = st.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
-                                        TemplateName = st.ProjectDesignTemplate.TemplateName,
-                                        VariableAnnotation = pdv.Annotation,
-                                        VariableTerm = stv.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
-                                          from stvc in _context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == stv.Id && x.Value == "true")
-                                          join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
-                                          prpjectdesignvalueDto
-                                          from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
-                                          select prpjectdesignvalue.ValueName)
-                                          : stv.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
-                                          !string.IsNullOrEmpty(stv.Value)
-                                          ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                                          b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id).ValueName
-                                          : stv.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
-                                          stv.IsNa && string.IsNullOrEmpty(stv.Value) ? "NA"
-                                          : stv.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                                          stv.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
-                                          stv.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
-                                          ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                                          b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id &&
-                                          b.Id == Convert.ToInt32(stv.Value)).ValueName
-                                          : stv.Value,
-                                        Version = mv.Version.ToString(),
-                                        Language = ml.LanguageName,
-                                        SocCode = meddraSoc.soc_code.ToString(),
-                                        SocName = meddraSoc.soc_name,
-                                        SocAbbrev = meddraSoc.soc_abbrev,
-                                        PrimaryIndicator = meddraMD.primary_soc_fg,
-                                        HlgtCode = meddraMD.hlgt_code.ToString(),
-                                        HlgtName = meddraMD.hlgt_name,
-                                        HltCode = meddraMD.hlt_code.ToString(),
-                                        HltName = meddraMD.hlt_name,
-                                        PtCode = meddraMD.pt_code.ToString(),
-                                        PtName = meddraMD.pt_name,
-                                        PtSocCode = meddraMD.pt_soc_code.ToString(),
-                                        LltCode = meddraLLT.llt_code.ToString(),
-                                        LltName = meddraLLT.llt_name,
-                                        LltCurrency = meddraLLT.llt_currency,
-                                        CodedBy = U.UserName,
-                                        CodedOn = Mcode.ModifiedDate
-                                    }).OrderBy(x => x.ScreeningNumber).ToList();
+                                     where (sites.Contains(se.ProjectId) && (filters.PeriodIds == null || filters.PeriodIds.Contains(se.ProjectDesignPeriodId))
+                                          && (filters.SubjectIds == null || filters.SubjectIds.Count() == 0 || filters.SubjectIds.Contains(se.Id))
+                                          && se.DeletedDate == null) && st.DeletedDate == null
+                                          && ((filters.TemplateIds == null || filters.TemplateIds.Contains(st.ProjectDesignTemplateId))
+                                      && (filters.VisitIds == null || filters.VisitIds.Contains(st.ProjectDesignTemplate.ProjectDesignVisitId))
+                                      && (filters.DomainIds == null || filters.DomainIds.Contains(st.ProjectDesignTemplate.DomainId))
+                                      && st.Status != ScreeningTemplateStatus.Pending && st.Status != ScreeningTemplateStatus.InProcess)
+                                      && Mcode.DeletedDate == null
+                                      && Mconfig.DeletedDate == null
+                                      && meddraMD.DeletedDate == null
+                                      && meddraLLT.pt_code == meddraMD.pt_code
+                                         && meddraSoc.MedraConfigId == Mconfig.Id
+                                         && meddraLLT.MedraConfigId == Mconfig.Id
+                                         && meddraMD.MedraConfigId == Mconfig.Id
+                                     select new MeddraDetails
+                                     {
+                                         ProjectCode = ProjectCode,
+                                         SiteCode = se.Project.ParentProjectId != null ? se.Project.ProjectCode : "",
+                                         DomainCode = pdv.Domain.DomainName,
+                                         //ScreeningNumber = nonregister.ScreeningNumber,
+                                         //RandomizationNumber = nonregister.RandomizationNumber,
+                                         //Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
+                                         Initial = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.Initial : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                                         ScreeningNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.ScreeningNumber : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+                                         RandomizationNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.RandomizationNumber : "",
+                                         RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
+                                         Visit = st.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
+                                         TemplateName = st.ProjectDesignTemplate.TemplateName,
+                                         VariableAnnotation = pdv.Annotation,
+                                         VariableTerm = stv.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
+                                           from stvc in _context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == stv.Id && x.Value == "true")
+                                           join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
+                                           prpjectdesignvalueDto
+                                           from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
+                                           select prpjectdesignvalue.ValueName)
+                                           : stv.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
+                                           !string.IsNullOrEmpty(stv.Value)
+                                           ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                                           b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id).ValueName
+                                           : stv.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
+                                           stv.IsNa && string.IsNullOrEmpty(stv.Value) ? "NA"
+                                           : stv.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
+                                           stv.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
+                                           stv.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
+                                           ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
+                                           b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id &&
+                                           b.Id == Convert.ToInt32(stv.Value)).ValueName
+                                           : stv.Value,
+                                         Version = mv.Version.ToString(),
+                                         Language = ml.LanguageName,
+                                         SocCode = meddraSoc.soc_code.ToString(),
+                                         SocName = meddraSoc.soc_name,
+                                         SocAbbrev = meddraSoc.soc_abbrev,
+                                         PrimaryIndicator = meddraMD.primary_soc_fg,
+                                         HlgtCode = meddraMD.hlgt_code.ToString(),
+                                         HlgtName = meddraMD.hlgt_name,
+                                         HltCode = meddraMD.hlt_code.ToString(),
+                                         HltName = meddraMD.hlt_name,
+                                         PtCode = meddraMD.pt_code.ToString(),
+                                         PtName = meddraMD.pt_name,
+                                         PtSocCode = meddraMD.pt_soc_code.ToString(),
+                                         LltCode = meddraLLT.llt_code.ToString(),
+                                         LltName = meddraLLT.llt_name,
+                                         LltCurrency = meddraLLT.llt_currency,
+                                         CodedBy = U.UserName,
+                                         CodedOn = Mcode.ModifiedDate
+                                     }).OrderBy(x => x.ScreeningNumber).ToList();
 
 
 

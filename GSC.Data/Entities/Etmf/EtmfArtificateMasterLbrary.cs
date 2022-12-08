@@ -2,6 +2,7 @@
 using GSC.Common.Common;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace GSC.Data.Entities.Etmf
@@ -20,7 +21,8 @@ namespace GSC.Data.Entities.Etmf
         public bool CountryLevelDoc { get; set; }
         public bool SiteLevelDoc { get; set; }
         public int EtmfSectionMasterLibraryId { get; set; }
-        public EtmfSectionMasterLibrary EtmfSectionMasterLibrary{ get; set; }
+        [ForeignKey("EtmfSectionMasterLibraryId")]
+        public EtmfMasterLibrary EtmfSectionMasterLibrary { get; set; }
 
     }
 }

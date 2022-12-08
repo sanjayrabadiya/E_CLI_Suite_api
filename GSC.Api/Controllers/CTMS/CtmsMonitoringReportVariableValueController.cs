@@ -7,12 +7,16 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Respository.Project.StudyLevelFormSetup;
+using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -27,24 +31,30 @@ namespace GSC.Api.Controllers.Master
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-
+        private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IProjectRepository _projectRepository;
+        private readonly IGSCContext _context;
         public CtmsMonitoringReportVariableValueController(IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             IStudyLevelFormRepository studyLevelFormRepository,
             ICtmsMonitoringReportRepository ctmsMonitoringReportRepository,
             ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
             IStudyLevelFormVariableRepository studyLevelFormVariableRepository,
-            IVariableTemplateRepository variableTemplateRepository)
+            IVariableTemplateRepository variableTemplateRepository,
+            IUploadSettingRepository uploadSettingRepository, IProjectRepository projectRepository, IGSCContext context)
         {
             _studyLevelFormRepository = studyLevelFormRepository;
             _studyLevelFormVariableRepository = studyLevelFormVariableRepository;
             _ctmsMonitoringReportRepository = ctmsMonitoringReportRepository;
             _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
-            
+
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _uploadSettingRepository = uploadSettingRepository;
+            _projectRepository = projectRepository;
+            _context = context;
         }
 
         /// Get Form & Variable & VariableValue by manageMonitoringReportId
@@ -75,6 +85,47 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetQueryStatusByReportId(int id)
         {
             return Ok(_ctmsMonitoringReportVariableValueRepository.GetQueryStatusByReportId(id));
+        }
+
+        [HttpPut("UploadDocument")]
+        public IActionResult UploadDocument([FromBody] CtmsMonitoringReportVariableValueDto ctmsMonitoringReportVariableValueSaveDto)
+        {
+            if (ctmsMonitoringReportVariableValueSaveDto.Id <= 0) return BadRequest();
+
+            var screeningTemplateValue = _context.CtmsMonitoringReportVariableValue
+                                         .Include(x => x.CtmsMonitoringReport)
+                                         .ThenInclude(x => x.CtmsMonitoring)
+                                         .ThenInclude(x => x.Project)
+                                         .Where(x => x.Id == ctmsMonitoringReportVariableValueSaveDto.Id).FirstOrDefault(); ;
+
+            var documentPath = _uploadSettingRepository.GetDocumentPath();
+
+            if (ctmsMonitoringReportVariableValueSaveDto.FileModel?.Base64?.Length > 0)
+            {
+
+
+                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit((int)screeningTemplateValue.CtmsMonitoringReport.CtmsMonitoring.Project.ParentProjectId);
+                if (!string.IsNullOrEmpty(validateuploadlimit))
+                {
+                    ModelState.AddModelError("Message", validateuploadlimit);
+                    return BadRequest(ModelState);
+                }
+                DocumentService.RemoveFile(documentPath, screeningTemplateValue.DocPath);
+                screeningTemplateValue.DocPath = DocumentService.SaveUploadDocument(ctmsMonitoringReportVariableValueSaveDto.FileModel,
+                      documentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode((int)screeningTemplateValue.CtmsMonitoringReport.CtmsMonitoring.Project.ParentProjectId), FolderType.Ctms, "");
+
+                screeningTemplateValue.MimeType = ctmsMonitoringReportVariableValueSaveDto.FileModel.Extension;
+            }
+
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            ctmsMonitoringReportVariableValueSaveDto.DocPath = screeningTemplateValue.DocPath;
+            ctmsMonitoringReportVariableValueSaveDto.DocFullPath = documentUrl + screeningTemplateValue.DocPath;
+            screeningTemplateValue.DocPath = screeningTemplateValue.DocPath;
+
+            _ctmsMonitoringReportVariableValueRepository.Update(screeningTemplateValue);
+            _uow.Save();
+
+            return Ok(ctmsMonitoringReportVariableValueSaveDto);
         }
     }
 }

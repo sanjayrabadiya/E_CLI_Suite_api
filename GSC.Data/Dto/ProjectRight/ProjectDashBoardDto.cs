@@ -215,4 +215,39 @@ namespace GSC.Data.Dto.ProjectRight
 
        
     }
+    public class CtmsMonitoringStatusChartDto
+    {
+        public MonitoringSiteStatus? Status { get; set; }
+        public string StatusName { get; set; }
+        public string ActivityName { get; set; }
+        public int ACount { get; set; }
+        public int RCount { get; set; }
+
+        public int TerminatedCount { get; set; }
+
+        public int OnHoldCount { get; set; }
+
+        public int CloseOutCount { get; set; }
+
+        public int EntrollCount { get; set; }
+    }
+
+    public class CtmsMonitoringStatusPIChartDto
+    {
+        public string Lable { get; set; }
+        public int Count { get; set; }
+        public string Text { get; set; }
+
+        public string Status { get; set; }
+    }
+    public class CtmsMonitoringPlanDashoardDto
+    {
+        public int Id { get; set; }
+        public string Activity { get; set; }
+        public DateTime? ScheduleStartDate { get; set; }
+        public DateTime? ActualStartDate { get; set; }
+        public string Status { get; set; }
+        public string Country { get; set; }
+        public string Site { get; set; }
+    }
 }

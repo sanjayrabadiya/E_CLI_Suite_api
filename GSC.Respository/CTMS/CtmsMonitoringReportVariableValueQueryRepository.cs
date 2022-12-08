@@ -90,9 +90,9 @@ namespace GSC.Respository.CTMS
             var queryValue = "";
             if (ctmsMonitoringReportVariableValueQueryDto.Children?.Count > 0)
             {
-                var oldProjectDesignVariableValueIds = _context.ManageMonitoringReportVariableChild.AsNoTracking().Where(t =>
+                var oldProjectDesignVariableValueIds = _context.CtmsMonitoringReportVariableValueChild.AsNoTracking().Where(t =>
                         ctmsMonitoringReportVariableValueQueryDto.Children.Select(s => s.Id).Contains(t.Id) && t.Value == "true")
-                    .Select(t => t.VariableValueId).ToList();
+                    .Select(t => t.StudyLevelFormVariableValueId).ToList();
 
                 queryOldValue = string.Join(", ",
                     _context.ProjectDesignVariableValue.Where(t => oldProjectDesignVariableValueIds.Contains(t.Id))

@@ -17,6 +17,7 @@ using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.AdverseEvent
 {
@@ -113,7 +114,18 @@ namespace GSC.Api.Controllers.AdverseEvent
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var aEReporting = _mapper.Map<AEReporting>(aEReportingDto);
-            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            var randomization = _randomizationRepository.AllIncluding(x => x.ScreeningEntry).FirstOrDefault(x => x.UserId == _jwtTokenAccesser.UserId);
+
+            var template = _context.ScreeningTemplate.Include(x => x.ScreeningVisit.ScreeningEntry).FirstOrDefault(q => q.ProjectDesignTemplateId == aEReporting.ScreeningTemplateId && q.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
+            if (template != null)
+            {
+                if (template.IsHardLocked || template.IsLocked)
+                {
+                    ModelState.AddModelError("Message", "The template is locked");
+                    return BadRequest(ModelState);
+                }
+            }
+
             if (randomization == null)
             {
                 ModelState.AddModelError("Message", "Error to save Adverse Event Reporting.");
@@ -124,7 +136,7 @@ namespace GSC.Api.Controllers.AdverseEvent
 
             aEReporting.RandomizationId = randomization.Id;
             aEReporting.IsReviewedDone = false;
-            aEReporting.AdverseEventSettingsId = studyId > 0 ? _adverseEventSettingsRepository.All.Where(x => x.ProjectId == (int)studyId).Select(x => x.Id).FirstOrDefault() : 0;
+            aEReporting.AdverseEventSettingsId = studyId > 0 ? _adverseEventSettingsRepository.All.Where(x => x.ProjectId == (int)studyId && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault() : 0;
             _iAEReportingRepository.Add(aEReporting);
             _uow.Save();
             for (int i = 0; i <= aEReportingDto.template.Variables.Count - 1; i++)

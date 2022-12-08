@@ -5,6 +5,7 @@ using GSC.Data.Entities.Common;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Helper;
+using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.CTMS
@@ -21,6 +22,9 @@ namespace GSC.Data.Dto.CTMS
         public CtmsMonitoringReport CtmsMonitoringReport { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
         public ICollection<CtmsMonitoringReportVariableValueChildDto> Children { get; set; }
+        public string DocPath { get; set; }
+        public string DocFullPath { get; set; }
+        public FileModel FileModel { get; set; }
     }
 
     public class CtmsMonitoringReportVariableValueBasic : BaseAuditDto
@@ -36,6 +40,8 @@ namespace GSC.Data.Dto.CTMS
         public bool IsNa { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
         public ICollection<CtmsMonitoringReportVariableValueChild> Children { get; set; }
+
+        public string DocPath { get; set; }
     }
 
     public class CtmsMonitoringReportVariableValueSaveDto : BaseDto
@@ -43,4 +49,5 @@ namespace GSC.Data.Dto.CTMS
         //public int VariableTemplateId { get; set; }
         public List<CtmsMonitoringReportVariableValueDto> CtmsMonitoringReportVariableValueList { get; set; }
     }
+
 }

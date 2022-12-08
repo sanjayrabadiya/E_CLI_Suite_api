@@ -79,7 +79,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt, "");
                 productReceiptDto.MimeType = productReceiptDto.FileModel.Extension;
-                // productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
             }
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
@@ -118,13 +117,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 productReceiptDto.PathName = DocumentService.SaveUploadDocument(productReceiptDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.ProductReceipt, "");
                 productReceiptDto.MimeType = productReceiptDto.FileModel.Extension;
-                //productReceiptDto.FileName = "ProductReceipt_" + DateTime.Now.Ticks + "." + productReceiptDto.FileModel.Extension;
             }
             else
             {
                 productReceiptDto.PathName = productRec.PathName;
                 productReceiptDto.MimeType = productRec.MimeType;
-                // productReceiptDto.FileName = productRec.FileName;
             }
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);

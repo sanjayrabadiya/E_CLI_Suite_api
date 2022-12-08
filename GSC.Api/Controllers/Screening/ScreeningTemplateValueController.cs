@@ -17,6 +17,7 @@ using GSC.Respository.Master;
 using System.Linq;
 using GSC.Respository.Project.Design;
 using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -92,10 +93,23 @@ namespace GSC.Api.Controllers.Screening
                 return BadRequest(ModelState);
             }
 
+
+
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
             screeningTemplateValue.Id = 0;
+
+            var randomization = _context.Randomization.Include(x => x.ScreeningEntry).FirstOrDefault(x => x.UserId == _jwtTokenAccesser.UserId);
+            if (randomization != null)
+            {
+                var dbLock = _context.ScreeningTemplate.FirstOrDefault(x => x.ProjectDesignTemplateId == screeningTemplateValue.ScreeningTemplateId && x.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
+                if (dbLock != null && (dbLock.IsLocked || dbLock.IsHardLocked))
+                {
+                    ModelState.AddModelError("Message", "Template is locked");
+                    return BadRequest(ModelState);
+                }
+            }
 
             _screeningTemplateValueRepository.Add(screeningTemplateValue);
 

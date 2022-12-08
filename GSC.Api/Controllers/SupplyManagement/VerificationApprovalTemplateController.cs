@@ -117,12 +117,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
                 _productReceiptRepository.Update(receipt);
-                //for email
-                //var usersEmail = _userRoleRepository.GetUserEmailByRole(verificationApprovalTemplate.SecurityRoleId);
-                //if (usersEmail != null)
-                //    foreach (var item in usersEmail)
-                //        _emailSenderRespository.SendApproveVerificationEmail(item);
-
             }
 
             if (_uow.Save() <= 0) throw new Exception("Creating Verification Approval Template failed on save.");
@@ -186,22 +180,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                 {
                     verificationApprovalTemplate.Status = Helper.ProductVerificationStatus.Rejected;
                     receipt.Status = Helper.ProductVerificationStatus.Rejected;
-
-                    //for email
-                    //var email = _context.Users.Find(verification.CreatedBy).Email;
-                    //if (email != null)
-                    //    _emailSenderRespository.RejectByApproverVerificationEmail(email);
                 }
                 else
                 {
                     verificationApprovalTemplate.Status = Helper.ProductVerificationStatus.SentForApproval;
                     receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
-
-                    //for email
-                    //var usersEmail = _userRoleRepository.GetUserEmailByRole(verificationTemplate.SecurityRoleId);
-                    //if (usersEmail != null)
-                    //    foreach (var item in usersEmail)
-                    //        _emailSenderRespository.SendApproveVerificationEmail(item);
                 }
                 _productReceiptRepository.Update(receipt);
             }
@@ -268,16 +251,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                 if (verificationApprovalTemplateDto.IsApprove)
                 {
                     receipt.Status = Helper.ProductVerificationStatus.Approved;
-                    //for email
-                    //if (email != null)
-                    //    _emailSenderRespository.ApproveByApproverVerificationEmail(email);
                 }
                 else
                 {
                     receipt.Status = Helper.ProductVerificationStatus.Rejected;
-                    //for email
-                    //if (email != null)
-                    //    _emailSenderRespository.RejectByApproverVerificationEmail(email);
+                  
                 }
                 _productReceiptRepository.Update(receipt);
             }

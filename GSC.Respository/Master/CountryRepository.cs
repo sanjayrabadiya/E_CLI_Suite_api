@@ -79,7 +79,28 @@ namespace GSC.Respository.Master
                 }).Distinct().OrderBy(o => o.Value).ToList();
             return country;
         }
+        public List<DropDownDto> GetCountryByProjectIdDropDownDepot(int ParentProjectId, int id)
+        {
 
+            var country = _context.Project
+                .Where(x => x.DeletedDate == null && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
+                {
+                    Id = (int)r.ManageSite.City.State.CountryId,
+                    Value = r.ManageSite.City.State.Country.CountryName,
+                    Code = r.ManageSite.City.State.Country.CountryCode
+                }).Distinct().OrderBy(o => o.Value).ToList();
+            if (country != null && id > 0 && !country.Any(x => x.Id == id))
+            {
+               return _context.Project
+                .Where(x => x.Id == id && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
+                {
+                    Id = (int)r.ManageSite.City.State.CountryId,
+                    Value = r.ManageSite.City.State.Country.CountryName,
+                    Code = r.ManageSite.City.State.Country.CountryCode
+                }).Distinct().OrderBy(o => o.Value).ToList();
+            }
+            return country;
+        }
         public List<CountryGridDto> GetCountryList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).

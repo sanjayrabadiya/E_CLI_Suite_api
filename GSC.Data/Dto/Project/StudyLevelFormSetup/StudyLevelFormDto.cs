@@ -64,4 +64,23 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public IList<VerificationApprovalVariableDto> Variables { get; set; }
     }
 
+    public class CTMSVariableValueDto
+    {
+        public int Id { get; set; }
+        public int StudyLevelFormVariableId { get; set; }
+        public string ValueName { get; set; }
+        public string ScreeningValue { get; set; }
+        public int CtmsMonitoringReportVariableValueChildId { get; set; }
+        public string ScreeningValueOld { get; set; }
+        public string Label { get; set; }
+        public int SeqNo { get; set; }
+        public double? StudyVersion { get; set; }
+        public double? InActiveVersion { get; set; }
+        public short? LevelNo { get; set; }
+        public bool IsDeleted { get; set; }
+        public TableCollectionSource? TableCollectionSource { get; set; }
+        public string Style { get; set; }
+        public string OriginalValue { get; set; }
+    }
+
 }

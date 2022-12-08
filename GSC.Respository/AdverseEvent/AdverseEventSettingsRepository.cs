@@ -17,20 +17,26 @@ namespace GSC.Respository.AdverseEvent
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IAdverseEventSettingsDetailRepository _adverseEventSettingsDetailRepository;
+        private readonly IStudyVersionRepository _studyVersionRepository;
         public AdverseEventSettingsRepository(IGSCContext context, IMapper mapper,
-            IAdverseEventSettingsDetailRepository adverseEventSettingsDetailRepository) : base(context)
+            IAdverseEventSettingsDetailRepository adverseEventSettingsDetailRepository,
+            IStudyVersionRepository studyVersionRepository) : base(context)
         {
             _context = context;
             _mapper = mapper;
             _adverseEventSettingsDetailRepository = adverseEventSettingsDetailRepository;
+            _studyVersionRepository = studyVersionRepository;
 
         }
 
         public IList<DropDownDto> GetVisitDropDownforAEReportingInvestigatorForm(int projectId)
         {
+            var studyVersion = _studyVersionRepository.GetStudyVersionForLive(projectId); 
+
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
              && x.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
-             && x.DeletedDate == null)
+             && x.DeletedDate == null && (x.StudyVersion == null || x.StudyVersion <= studyVersion) &&
+            (x.InActiveVersion == null || x.InActiveVersion > studyVersion))
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
@@ -93,7 +99,7 @@ namespace GSC.Respository.AdverseEvent
 
         public AdverseEventSettingsListDto GetData(int projectId)
         {
-            var adverseEventSettingsDto = _context.AdverseEventSettings.Where(x => x.ProjectId == projectId)
+            var adverseEventSettingsDto = _context.AdverseEventSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                 .Select(x => new AdverseEventSettingsListDto
                 {
                     Id = x.Id,
@@ -123,7 +129,7 @@ namespace GSC.Respository.AdverseEvent
             if (data != null)
             {
                 _context.AdverseEventSettingsDetails.RemoveRange(data);
-                _context.Save();
+                //_context.Save();
             }
         }
 

@@ -211,18 +211,20 @@ namespace GSC.Domain.Context
         DbSet<MeddraCodingComment> MeddraCodingComment { get; set; }
         DbSet<MeddraCodingAudit> MeddraCodingAudit { get; set; }
         DbSet<ElectronicSignature> ElectronicSignature { get; set; }
-        DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
-        DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        //DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
+        //DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        DbSet<EtmfMasterLibrary> EtmfMasterLibrary { get; set; }
         DbSet<EtmfArtificateMasterLbrary> EtmfArtificateMasterLbrary { get; set; }
 
-        DbSet<ProjectWorkplace> ProjectWorkplace { get; set; }
-        DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
-        DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
-        DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
-        DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
+        DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
+        //DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
+        //DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
+        //DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
+        //DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
+        //DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
         DbSet<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }
-        DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
-        DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
+        //DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
+        //DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
         DbSet<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
         DbSet<InvestigatorContactDetail> InvestigatorContactDetail { get; set; }
         DbSet<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
@@ -285,7 +287,6 @@ namespace GSC.Domain.Context
         DbSet<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         DbSet<VariableValueLanguage> VariableValueLanguage { get; set; }
         DbSet<EConsentVideo> EConsentVideo { get; set; }
-        DbSet<ManageMonitoring> ManageMonitoring { get; set; }
         DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         DbSet<HolidayMaster> HolidayMaster { get; set; }
         DbSet<WeekEndMaster> WeekEndMaster { get; set; }
@@ -316,16 +317,9 @@ namespace GSC.Domain.Context
         DbSet<BarcodeAudit> BarcodeAudit { get; set; }
         DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
         DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
-        DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
         DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
         DbSet<LabManagementUploadExcelData> LabManagementUploadExcelData { get; set; }
-        DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
-        DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
-        DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
-        DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
         DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
-        DbSet<ManageMonitoringReportReview> ManageMonitoringReportReview { get; set; }
-        DbSet<ManageMonitoringReportVariableComment> ManageMonitoringReportVariableComment { get; set; }
         DbSet<SyncConfigurationMaster> SyncConfigurationMaster { get; set; }
         DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }

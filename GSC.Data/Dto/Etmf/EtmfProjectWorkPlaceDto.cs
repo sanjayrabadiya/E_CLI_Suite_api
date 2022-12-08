@@ -1,17 +1,56 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace GSC.Data.Dto.Etmf
 {
-    public class ProjectWorkplaceArtificateDto : BaseDto
+    public class EtmfProjectWorkPlaceDto: BaseDto
     {
+        public int ProjectId { get; set; }
+        public Data.Entities.Master.Project Project { get; set; }
+
+
+        public int ProjectWorkplaceId { get; set; }
+        public int WorkPlaceFolderId { get; set; }
+        public int ItemId { get; set; }
+        public string ItemName { get; set; }
+
+
+
+        public List<EtmfProjectWorkPlaceDto> ProjectWorkplaceCountry { get; set; }
+        public List<EtmfProjectWorkPlaceDto> ProjectWorkplaceSite { get; set; }
+        public List<EtmfProjectWorkPlaceDto> ProjectWorkplaceTrial { get; set; }
+
+
+
+        public int ProjectWorkplaceDetailId { get; set; }
+        public int EtmfZoneMasterLibraryId { get; set; }
+        //public int ProjectWorkPlaceZoneId { get; set; }
+        public int EtmfSectionMasterLibraryId { get; set; }
+        public string SectionName { get; set; }
+
+
+
         public int ProjectWorkplaceSectionId { get; set; }
         public int EtmfArtificateMasterLbraryId { get; set; }
         public int? ParentArtificateId { get; set; }
         public bool IsNotRequired { get; set; }
+
+
+
+        public string SubSectionName { get; set; }
+        public int ProjectWorkplaceZoneId { get; set; }
+        public string ZonName { get; set; }
+        public string ChildName { get; set; }
+        public string ProjectName { get; set; }
+        //public int projectWorkplaceDetailId { get; set; }
+        public string SubSectionArtifactName { get; set; }
+        public int CompanyId { get; set; }
+
+
+        public int ProjectWorkplaceSubSectionId { get; set; }
+        public string ArtifactName { get; set; }
     }
     public class WorkplaceFolderDto
     {

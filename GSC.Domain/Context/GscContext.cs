@@ -250,18 +250,20 @@ namespace GSC.Domain.Context
         public DbSet<MeddraCodingComment> MeddraCodingComment { get; set; }
         public DbSet<MeddraCodingAudit> MeddraCodingAudit { get; set; }
         public DbSet<ElectronicSignature> ElectronicSignature { get; set; }
-        public DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
-        public DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        //public DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
+        //public DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
+        public DbSet<EtmfMasterLibrary> EtmfMasterLibrary { get; set; }
         public DbSet<EtmfArtificateMasterLbrary> EtmfArtificateMasterLbrary { get; set; }
 
-        public DbSet<ProjectWorkplace> ProjectWorkplace { get; set; }
-        public DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
-        public DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
-        public DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
-        public DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
+        public DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
+        //public DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
+        //public DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
+        //public DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
+        //public DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
+        //public DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
         public DbSet<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }
-        public DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
-        public DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
+        //public DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
+        //public DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
         public DbSet<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
         public DbSet<InvestigatorContactDetail> InvestigatorContactDetail { get; set; }
         public DbSet<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
@@ -327,7 +329,6 @@ namespace GSC.Domain.Context
         public DbSet<RandomizationNumberSettings> RandomizationNumberSettings { get; set; }
         public DbSet<ScreeningNumberSettings> ScreeningNumberSettings { get; set; }
         public DbSet<EConsentVideo> EConsentVideo { get; set; }
-        public DbSet<ManageMonitoring> ManageMonitoring { get; set; }
         public DbSet<DependentTaskDto> DependentTaskDto { get; set; }
         public DbSet<HolidayMaster> HolidayMaster { get; set; }
         public DbSet<WeekEndMaster> WeekEndMaster { get; set; }
@@ -364,16 +365,10 @@ namespace GSC.Domain.Context
         public DbSet<BarcodeAudit> BarcodeAudit { get; set; }
         public DbSet<LabManagementConfiguration> LabManagementConfiguration { get; set; }
         public DbSet<LabManagementVariableMapping> LabManagementVariableMapping { get; set; }
-        public DbSet<ManageMonitoringVisit> ManageMonitoringVisit { get; set; }
         public DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
         public DbSet<LabManagementUploadExcelData> LabManagementUploadExcelData { get; set; }
-        public DbSet<ManageMonitoringReport> ManageMonitoringReport { get; set; }
-        public DbSet<ManageMonitoringReportVariable> ManageMonitoringReportVariable { get; set; }
-        public DbSet<ManageMonitoringReportVariableAudit> ManageMonitoringReportVariableAudit { get; set; }
-        public DbSet<ManageMonitoringReportVariableChild> ManageMonitoringReportVariableChild { get; set; }
         public DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
-        public DbSet<ManageMonitoringReportReview> ManageMonitoringReportReview { get; set; }
-        public DbSet<ManageMonitoringReportVariableComment> ManageMonitoringReportVariableComment { get; set; }
+        
         public DbSet<SyncConfigurationMaster> SyncConfigurationMaster { get; set; }
         public DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         public DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }

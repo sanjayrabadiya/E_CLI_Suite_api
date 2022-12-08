@@ -26,4 +26,15 @@ namespace GSC.Shared.Generic
         [Description("Germany")] ge = 2
     }
 
+    public enum EtmfTableNameTag : int
+    {
+        [Description("ProjectWorkPlace")] ProjectWorkPlace = 1,
+        [Description("ProjectWorkPlaceDetail")] ProjectWorkPlaceDetail = 2,
+        [Description("ProjectWorkPlaceZone")] ProjectWorkPlaceZone = 3,
+        [Description("ProjectWorkPlaceSection")] ProjectWorkPlaceSection = 4,
+        [Description("ProjectWorkPlaceArtificate")] ProjectWorkPlaceArtificate = 5,
+        [Description("ProjectWorkPlaceSubSection")] ProjectWorkPlaceSubSection = 6,
+        [Description("ProjectWorkPlaceSubSectionArtifact")] ProjectWorkPlaceSubSectionArtifact = 7
+    }
+
 }

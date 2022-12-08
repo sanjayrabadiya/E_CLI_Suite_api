@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Helper;
 
 namespace GSC.Data.Entities.Master
 {
@@ -14,5 +15,6 @@ namespace GSC.Data.Entities.Master
         public Variable Variable { get; set; }
 
         public string Style { get; set; }
+        public TableCollectionSource? TableCollectionSource { get; set; }
     }
 }

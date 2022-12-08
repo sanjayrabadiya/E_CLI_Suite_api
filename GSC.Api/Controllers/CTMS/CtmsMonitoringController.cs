@@ -118,17 +118,28 @@ namespace GSC.Api.Controllers.CTMS
                 var monitoring = _ctmsMonitoringRepository.FindBy(t => t.Id == CtmsMonitoringId && t.DeletedDate == null).FirstOrDefault();
                 monitoring.Id = 0;
                 monitoring.ScheduleStartDate = null;
-                monitoring.ScheduleEndDate = null;  
+                monitoring.ScheduleEndDate = null;
                 monitoring.ActualStartDate = null;
                 monitoring.ActualEndDate = null;
                 monitoring.ParentId = ctmsMonitoringId;
-
+                monitoring.ModifiedBy = null;
+                monitoring.ModifiedDate = null;
                 _ctmsMonitoringRepository.Add(monitoring);
             }
 
             _uow.Save();
 
             return Ok();
+        }
+        [HttpGet]
+        [Route("GetMonitoringFormforDashboard/{ctmsMonitoringId}/{activityId}")]
+        public IActionResult GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId)
+        {
+            if (ctmsMonitoringId <= 0) return BadRequest();
+            if (activityId <= 0) return BadRequest();
+
+            var result = _ctmsMonitoringRepository.GetMonitoringFormforDashboard(ctmsMonitoringId, activityId);
+            return Ok(result);
         }
     }
 }

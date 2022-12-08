@@ -148,8 +148,8 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.IsFirstTime, x => x.MapFrom(a => a.User == null ? false : a.User.IsFirstTime))
                 .ReverseMap();
 
-            CreateMap<ProjectWorkplace, ETMFWorkplaceGridDto>()
-                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
+            CreateMap<EtmfProjectWorkPlace, ETMFWorkplaceGridDto>()
+                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                 //.ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.ToList().Count() > 0 ? a.ChildProject.ToList().Count() : 0))
                 .ReverseMap();
@@ -284,11 +284,6 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.CtmsActivity.ActivityName))
                  .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.AppScreen.ScreenName))
                 .ReverseMap();
-            CreateMap<ManageMonitoring, ManageMonitoringGridDto>()
-                   .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.CtmsActivity.ActivityName))
-                   .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
-                   .ForMember(x => x.VariableTemplate, x => x.MapFrom(a => a.VariableTemplate.TemplateName))
-                  .ReverseMap();
 
             CreateMap<TaskMaster, TaskMasterGridDto>()
                 .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
@@ -390,8 +385,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.SecurityRoleId, x => x.MapFrom(a => a.LabManagementConfiguration.SecurityRoleId))
                 .ForMember(x => x.LabManagementUploadExcelDatas, x => x.MapFrom(a => a.LabManagementUploadExcelDatas))
                 .ReverseMap();
-            CreateMap<ManageMonitoringReportVariable, ManageMonitoringReportVariableDto>().ReverseMap();
-            CreateMap<ManageMonitoringReportReview, ManageMonitoringReportReviewDto>().ReverseMap();
+            
             CreateMap<SyncConfigurationMaster, SyncConfigurationMasterGridDto>()
                 .ForMember(x => x.ReportName, x => x.MapFrom(a => a.ReportScreen.ReportName))
                 .ReverseMap();

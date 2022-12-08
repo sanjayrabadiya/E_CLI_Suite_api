@@ -2,7 +2,6 @@
 using System.Reflection;
 using AutoMapper;
 using GSC.Api.Helpers;
-using GSC.Api.Hubs;
 using GSC.Domain.Context;
 using GSC.Shared.Configuration;
 using GSC.Shared.Filter;

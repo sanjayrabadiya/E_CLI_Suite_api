@@ -1,6 +1,8 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Screening;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
@@ -32,6 +34,7 @@ namespace GSC.Respository.Master
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
 
 
         public DashboardRepository(IJwtTokenAccesser jwtTokenAccesser, IScreeningVisitRepository screeningVisitRepository,
@@ -45,7 +48,8 @@ namespace GSC.Respository.Master
             IProjectDesignRepository projectDesignRepository,
             IProjectRepository projectRepository,
             IProjectRightRepository projectRightRepository,
-            IProjectDocumentReviewRepository projectDocumentReviewRepository)
+            IProjectDocumentReviewRepository projectDocumentReviewRepository,
+            IGSCContext context)
         {
             _screeningVisitRepository = screeningVisitRepository;
             _randomizationRepository = randomizationRepository;
@@ -60,6 +64,7 @@ namespace GSC.Respository.Master
             _projectRepository = projectRepository;
             _projectRightRepository = projectRightRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
 
@@ -556,5 +561,276 @@ namespace GSC.Respository.Master
 
         }
 
+        public dynamic GetCTMSMonitoringChart(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+
+            var asd = _context.CtmsMonitoring.Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                        && x.DeletedDate == null)
+                .Select(b => new
+                {
+                    ProjectId = b.ProjectId,
+                    ProjectName = b.Project.ProjectCode,
+                    ActivityName = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    Status = _context.CtmsMonitoringStatus.Where(v => v.CtmsMonitoringId == b.Id).OrderByDescending(x => x.Id).FirstOrDefault().Status
+                }).ToList();
+
+
+            if (asd.Count > 0)
+            {
+                var result = asd.GroupBy(g => g.ActivityName).Select(n => new CtmsMonitoringStatusChartDto
+                {
+                    ActivityName = n.Key,
+                    ACount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Approved).Count(),
+                    RCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Rejected).Count(),
+                    EntrollCount = 0
+                }).ToList();
+
+                var result1 = _context.Randomization.Where(x => asd.Select(x => x.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).Distinct().Distinct().Select(x => x.ProjectId).Count();
+                var result3 = new CtmsMonitoringStatusChartDto
+                {
+                    ActivityName = "Enrolled",
+                    EntrollCount = result1
+
+                };
+                result.Add(result3);
+
+
+                return result;
+            }
+            return null;
+        }
+
+        public dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+
+            var asd = _context.CtmsMonitoring.Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                        && x.DeletedDate == null)
+                .Select(b => new
+                {
+                    ProjectId = b.ProjectId,
+                    ProjectName = b.Project.ProjectCode,
+                    ActivityName = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    Status = _context.CtmsMonitoringStatus.Where(v => v.CtmsMonitoringId == b.Id).OrderByDescending(x => x.Id).FirstOrDefault().Status
+                }).ToList();
+
+
+            if (asd.Count > 0)
+            {
+                var result = asd.GroupBy(g => g.ActivityName).Select(n => new CtmsMonitoringStatusChartDto
+                {
+                    ActivityName = n.Key,
+                    ACount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Approved).Count(),
+                    RCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Rejected).Count(),
+                    TerminatedCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Terminated).Count(),
+                    OnHoldCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.OnHold).Count(),
+                    CloseOutCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.CloseOut).Count(),
+                    EntrollCount = 0
+                }).ToList();
+
+                var result1 = _context.Randomization.Where(x => asd.Select(x => x.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).Distinct().Select(x => x.ProjectId).Count();
+                var result3 = new CtmsMonitoringStatusChartDto
+                {
+                    ActivityName = "Enrolled",
+                    EntrollCount = result1
+
+                };
+                result.Add(result3);
+                List<CtmsMonitoringStatusPIChartDto> list = new List<CtmsMonitoringStatusPIChartDto>();
+                if (result.Count > 0)
+                {
+                    foreach (var item in result)
+                    {
+
+                        if (item.ActivityName == "Feasibility" || item.ActivityName == "Site Selection" || item.ActivityName == "Site Initiation")
+                        {
+                            if (item.ACount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Approved " + item.ACount;
+                                obj.Lable = item.ActivityName + " Approved ";
+                                obj.Count = item.ACount;
+                                obj.Status = "Approved";
+                                list.Add(obj);
+                            }
+                            if (item.RCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Rejected " + item.RCount;
+                                obj.Lable = item.ActivityName + " Rejected ";
+                                obj.Count = item.RCount;
+                                obj.Status = "Rejected";
+                                list.Add(obj);
+                            }
+                            if (item.TerminatedCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Terminated " + item.RCount;
+                                obj.Lable = item.ActivityName + " Terminated ";
+                                obj.Count = item.RCount;
+                                obj.Status = "Terminated";
+                                list.Add(obj);
+                            }
+                            if (item.OnHoldCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " OnHold " + item.RCount;
+                                obj.Lable = item.ActivityName + " OnHold ";
+                                obj.Count = item.RCount;
+                                obj.Status = "OnHold";
+                                list.Add(obj);
+                            }
+                            if (item.CloseOutCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Close Out " + item.RCount;
+                                obj.Lable = item.ActivityName + " Close Out ";
+                                obj.Count = item.RCount;
+                                obj.Status = "CloseOut";
+                                list.Add(obj);
+                            }
+                        }
+                        if (item.ActivityName == "Enrolled")
+                        {
+                            if (item.EntrollCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " " + item.EntrollCount;
+                                obj.Lable = item.ActivityName;
+                                obj.Count = item.EntrollCount;
+                                obj.Status = "Enrolled";
+                                list.Add(obj);
+                            }
+
+                        }
+
+                    }
+                }
+                return list;
+            }
+            return null;
+        }
+
+        public List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+
+            var list = _context.CtmsMonitoring
+                .Include(x => x.Project)
+                .ThenInclude(x => x.ManageSite)
+                .Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                            && x.DeletedDate == null)
+                .Select(b => new CtmsMonitoringPlanDashoardDto
+                {
+                    Id = b.Id,
+                    Activity = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    ScheduleStartDate = b.ScheduleStartDate,
+                    ActualStartDate = b.ActualStartDate,
+                    Site = b.Project.ProjectCode,
+                    Country = b.Project.ManageSite.City.State.Country.CountryName
+
+                }).ToList();
+            if (list.Count > 0)
+            {
+                foreach (var item in list)
+                {
+                    item.Status = GetMonitoringStatus(item);
+                }
+            }
+
+
+
+            return list;
+        }
+
+        public string GetMonitoringStatus(CtmsMonitoringPlanDashoardDto obj)
+        {
+            var data = _context.CtmsMonitoringReportReview.Include(x => x.CtmsMonitoringReport).Where(x => x.CtmsMonitoringReport.CtmsMonitoringId == obj.Id).FirstOrDefault();
+            if (obj.ScheduleStartDate != null && data == null)
+            {
+                return "In Progress";
+            }
+            if (obj.ScheduleStartDate != null && data != null && !data.IsApproved)
+            {
+                return "In signature/pending review";
+            }
+            if (obj.ScheduleStartDate != null && data != null && data.IsApproved)
+            {
+                return "Final";
+            }
+            return "";
+        }
+
+        public dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+
+            var asd = _context.CtmsActionPoint.Include(x => x.CtmsMonitoring).Where(x => projectIds.Contains(x.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+                          && x.DeletedDate == null)
+                .Select(b => new
+                {
+                    Id = b.CtmsMonitoringId,
+                    Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    Status = b.Status
+                }).ToList();
+
+
+
+
+            if (asd.Count > 0)
+            {
+                var result = asd
+                .GroupBy(c => new { Activity = c.Activity, status = c.Status })
+                .Select(g => new
+                {
+                    Activity = g.Key.Activity,
+                    Status = g.Key.status + " action of " + g.Key.Activity,
+                    Count = g.ToList().Count
+                }).ToList();
+
+                return result;
+            }
+            return null;
+        }
     }
 }

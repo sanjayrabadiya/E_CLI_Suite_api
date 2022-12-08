@@ -2,6 +2,7 @@ using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.UserMgt;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Etmf
 {
@@ -22,7 +23,8 @@ namespace GSC.Data.Entities.Etmf
         public bool IsRevoked { get; set; }
         public string RollbackReason { get; set; }
         public int? AuditReasonId { get; set; }
-        public ProjectWorkplaceDetail ProjectWorkplaceDetail { get; set; }
+        [ForeignKey("ProjectWorkplaceDetailId")]
+        public EtmfProjectWorkPlace ProjectWorkplaceDetail { get; set; }
         public User User { get; set; }
         public AuditReason AuditReason { get; set; }
         public int ModifiedAuditReasonId { get; set; }

@@ -43,21 +43,4 @@ namespace GSC.Data.Dto.Master
         // public bool SystemType { get; set; }
 
     }
-
-    public class MonitoringReportTemplateDto : BaseDto
-    {
-        public string ActivityName { get; set; }
-        public string TemplateCode { get; set; }
-        public int VariableTemplateId { get; set; }
-        public string VariableTemplateName { get; set; }
-        public int DesignOrder { get; set; }
-        public int ManageMonitoringReportId { get; set; }
-        public int ProjectId { get; set; }
-        public bool IsSender { get; set; }
-        public MonitoringReportStatus StatusId { get; set; }
-        public List<string> Notes { get; set; }
-        public List<VariableTemplateDetail> VariableTemplateDetails { get; set; }
-        public IList<ManageMonitoringVariableDto> Variables { get; set; }
-
-    }
 }

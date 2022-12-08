@@ -8,12 +8,12 @@ using System.Text;
 
 namespace GSC.Respository.Etmf
 {
-    public interface IProjectWorkplaceSubSectionArtifactRepository : IGenericRepository<ProjectWorkplaceSubSectionArtifact>
+    public interface IProjectWorkplaceSubSectionArtifactRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
-        string Duplicate(ProjectWorkplaceSubSectionArtifact objSave);
-        ProjectWorkplaceSubSectionDto getSectionDetail(ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionArtifactDto);
+        string Duplicate(EtmfProjectWorkPlace objSave);
+        EtmfProjectWorkPlaceDto getSectionDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionArtifactDto);
         List<DropDownDto> GetDrodDown(int subsectionId);
-        ProjectWorkplaceSubSectionArtifactDto UpdateArtifactDetail(ProjectWorkplaceSubSectionArtifactDto projectWorkplaceSubSectionDto);
+        EtmfProjectWorkPlaceDto UpdateArtifactDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto);
         string DeletArtifactDetailFolder(int id);
 
 

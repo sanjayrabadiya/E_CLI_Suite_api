@@ -209,7 +209,7 @@ namespace GSC.Respository.CTMS
         private void UpdateDependentTaskDate(int StudyPlanTaskId)
         {
             var dependenttask = All.Where(x => x.Id == StudyPlanTaskId).FirstOrDefault();
-            
+
             var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).FirstOrDefault();
             if (dependenttask.ActivityType == ActivityType.FF)
             {
@@ -239,7 +239,7 @@ namespace GSC.Respository.CTMS
                 maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
                 Update(maintask);
             }
-            
+
             _context.Save();
         }
 
@@ -269,6 +269,7 @@ namespace GSC.Respository.CTMS
                              from   temp oc
                              join   StudyPlanTask e
                              on     e.DependentTaskId = oc.Id
+                             where e.DeletedDate is null
                             )
                              select Id from temp;";
             var finaldata = _context.FromSql<DependentTaskDto>(sqlqry).ToList();
@@ -278,7 +279,7 @@ namespace GSC.Respository.CTMS
         public string UpdateDependentTask(int StudyPlanTaskId)
         {
             var dependentIds = GetRelatedChainId(StudyPlanTaskId);
-            var refrencedata = All.Where(x => dependentIds.Select(x => x.Id).Contains(x.Id) || x.Id == StudyPlanTaskId).ToList();
+            var refrencedata = All.Where(x => (dependentIds.Select(x => x.Id).Contains(x.Id) || x.Id == StudyPlanTaskId) && x.DeletedDate == null).ToList();
             for (int i = 0; i < dependentIds.Count; i++)
             {
                 string validate = UpdateDependentTaskDate1(dependentIds[i].Id, ref refrencedata);
@@ -336,7 +337,7 @@ namespace GSC.Respository.CTMS
             int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
-            
+
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
             //var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).SingleOrDefault();
             var maintask = reftasklist.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).FirstOrDefault();
@@ -345,7 +346,7 @@ namespace GSC.Respository.CTMS
                 var task = reftasklist.Where(x => x.Id == maintask.DependentTaskId).FirstOrDefault();
                 maintask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet);
                 maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                
+
                 Update(maintask);
             }
             else if (maintask.ActivityType == ActivityType.FS)
@@ -353,7 +354,7 @@ namespace GSC.Respository.CTMS
                 var task = reftasklist.Where(x => x.Id == maintask.DependentTaskId).FirstOrDefault();
                 maintask.StartDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), maintask.OffSet);
                 maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                
+
                 Update(maintask);
             }
             else if (maintask.ActivityType == ActivityType.SF)
@@ -361,7 +362,7 @@ namespace GSC.Respository.CTMS
                 var task = reftasklist.Where(x => x.Id == maintask.DependentTaskId).FirstOrDefault();
                 maintask.EndDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), maintask.OffSet);
                 maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                
+
                 Update(maintask);
             }
             else if (maintask.ActivityType == ActivityType.SS)
@@ -369,7 +370,7 @@ namespace GSC.Respository.CTMS
                 var task = reftasklist.Where(x => x.Id == maintask.DependentTaskId).FirstOrDefault();
                 maintask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet);
                 maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-               
+
                 Update(maintask);
             }
             return "";

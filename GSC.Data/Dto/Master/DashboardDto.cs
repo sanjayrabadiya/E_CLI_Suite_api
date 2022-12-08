@@ -20,6 +20,10 @@ namespace GSC.Data.Dto.Master
         public int DocumentId { get; set; }
         public int VariableTemplateId { get; set; }
         public DashboardMyTaskType ControlType { get; set; }
+
+        public int CtmsMonitoringId { get; set; }
+
+        public int ActivityId { get; set; }
     }
 
     public class DashboardDetailsDto : BaseDto

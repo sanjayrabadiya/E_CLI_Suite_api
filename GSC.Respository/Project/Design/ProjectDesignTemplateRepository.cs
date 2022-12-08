@@ -75,9 +75,9 @@ namespace GSC.Respository.Project.Design
 
         public DesignScreeningTemplateDto GetTemplate(int id)
         {
-            var projectDesignTemplate = All.Where(x=>x.Id==id).Include(d=>d.ProjectDesignVisit).ThenInclude(d => d.ProjectDesignPeriod).FirstOrDefault();            
+            var projectDesignTemplate = All.Where(x => x.Id == id).Include(d => d.ProjectDesignVisit).ThenInclude(d => d.ProjectDesignPeriod).FirstOrDefault();
             var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
-            
+
             var result = All.Where(t => t.Id == id).
                 Select(r => new DesignScreeningTemplateDto
                 {
@@ -146,7 +146,7 @@ namespace GSC.Respository.Project.Design
                         IsHide = x.IsHide,
                         IsLevelNo = x.IsLevelNo,
                         PreLabel = x.PreLabel == null ? "" : x.PreLabel,
-                        ScaleType=x.ScaleType
+                        ScaleType = x.ScaleType
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
@@ -160,7 +160,7 @@ namespace GSC.Respository.Project.Design
                          InActiveVersion = c.InActiveVersion,
                          Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
                          TableCollectionSource = c.TableCollectionSource,
-                         Style=c.Style,
+                         Style = c.Style,
                          OriginalValue = c.ValueName
                      }).ToList();
 
@@ -192,6 +192,126 @@ namespace GSC.Respository.Project.Design
             return result;
         }
 
+        public DesignScreeningTemplateDto GetTemplateAE(int id)
+        {
+            var projectDesignTemplate = All.Where(x => x.Id == id).Include(d => d.ProjectDesignVisit).ThenInclude(d => d.ProjectDesignPeriod).FirstOrDefault();
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
+
+            var result = All.Where(t => t.Id == id).
+                Select(r => new DesignScreeningTemplateDto
+                {
+                    Id = r.Id,
+                    ProjectDesignTemplateId = r.Id,
+                    ProjectDesignVisitId = r.ProjectDesignVisitId,
+                    TemplateName = ((_jwtTokenAccesser.Language != 1) ?
+                        r.TemplateLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && r.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.TemplateName),
+                    ProjectDesignVisitName = r.ProjectDesignVisit.DisplayName,
+                    ActivityName = r.ActivityName,
+                    Notes = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null
+                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId == _jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null && (c.IsBottom == null || c.IsBottom == false)).Select(a => a.Note).ToList(),
+                    NotesAlign = (_jwtTokenAccesser.Language != 1) ? _context.TemplateNoteLanguage.Where(a => a.DeletedDate == null
+                    && a.ProjectDesignTemplateNote.ProjectDesignTemplateId == id && a.LanguageId == _jwtTokenAccesser.Language).Select(t => t.Display).ToList() : r.ProjectDesignTemplateNote.Where(c => c.DeletedDate == null && c.IsBottom == true).Select(a => a.Note).ToList(),
+                    DomainId = r.DomainId,
+                    IsRepeated = r.IsRepeated,
+                    IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
+                    DesignOrder = sequenseDeatils.IsTemplateSeqNo == true && sequenseDeatils.IsVariableSeqNo == true ? r.DesignOrder.ToString() : "",
+                    VariableTemplateId = r.VariableTemplateId,
+                    DomainName = r.Domain.DomainName,
+                    IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
+                    IsVariableSeqNo = sequenseDeatils.IsVariableSeqNo
+                }
+            ).FirstOrDefault();
+
+            if (result != null)
+            {
+
+                var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null
+                 && (t.CollectionSource == CollectionSources.Date || t.CollectionSource == CollectionSources.DateTime
+                 || t.CollectionSource == CollectionSources.MultilineTextBox || t.CollectionSource == CollectionSources.RadioButton))
+                    .Select(x => new DesignScreeningVariableDto
+                    {
+                        ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                        ProjectDesignVariableId = x.Id,
+                        Id = x.Id,
+                        VariableName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableName),
+                        VariableCode = x.VariableCode,
+                        CollectionSource = x.CollectionSource,
+                        ValidationType = x.ValidationType,
+                        DataType = x.DataType,
+                        Length = x.Length,
+                        DefaultValue = string.IsNullOrEmpty(x.DefaultValue) && x.CollectionSource == CollectionSources.HorizontalScale ? "1" : x.DefaultValue,
+                        LargeStep = x.LargeStep,
+                        LowRangeValue = x.LowRangeValue,
+                        HighRangeValue = x.HighRangeValue,
+                        RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
+                        PrintType = x.PrintType,
+                        //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
+                        UnitName = x.Unit.UnitName,
+                        DesignOrder = sequenseDeatils.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
+                        DesignOrderForOrderBy = x.DesignOrder,
+                        IsDocument = x.IsDocument,
+                        VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableCategory.VariableCategoryLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.VariableCategory.CategoryName) ?? "",
+                        SystemType = x.SystemType,
+                        IsNa = x.IsNa,
+                        DateValidate = x.DateValidate,
+                        Alignment = x.Alignment ?? Alignment.Right,
+                        StudyVersion = x.StudyVersion,
+                        InActiveVersion = x.InActiveVersion,
+                        Note = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
+                        ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
+                        DisplayStepValue = x.DisplayStepValue,
+                        Label = x.Label,
+                        IsHide = x.IsHide,
+                        IsLevelNo = x.IsLevelNo,
+                        PreLabel = x.PreLabel == null ? "" : x.PreLabel,
+                        ScaleType = x.ScaleType
+                    }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
+
+                var values = _projectDesignVariableValueRepository.All.
+                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                     {
+                         Id = c.Id,
+                         ProjectDesignVariableId = c.ProjectDesignVariableId,
+                         ValueName = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : c.ValueName,
+                         SeqNo = c.SeqNo,
+                         StudyVersion = c.StudyVersion,
+                         InActiveVersion = c.InActiveVersion,
+                         Label = _jwtTokenAccesser.Language != 1 ? c.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null).Select(a => a.LabelName).FirstOrDefault() : c.Label,
+                         TableCollectionSource = c.TableCollectionSource,
+                         Style = c.Style,
+                         OriginalValue = c.ValueName
+                     }).ToList();
+
+
+                var variableEncryptRole = _projectDesignVariableEncryptRoleRepository.All.
+                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id &&
+                     x.RoleId == _jwtTokenAccesser.RoleId &&
+                     x.DeletedDate == null).
+                     Select(t => t.ProjectDesignVariableId).ToList();
+
+                variables.ForEach(x =>
+                {
+                    x.IsEncrypt = variableEncryptRole.Any(t => t == x.ProjectDesignVariableId);
+                    if (x.IsEncrypt != true)
+                    {
+                        x.Values = values.Where(c => c.ProjectDesignVariableId == x.ProjectDesignVariableId).OrderBy(c => c.SeqNo).ToList();
+                    }
+
+
+                    if (x.IsEncrypt == true)
+                        x.IsNa = false;
+
+
+                });
+
+                result.Variables = variables;
+            }
+
+            return result;
+        }
 
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)
         {

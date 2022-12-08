@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (id <= 0) return BadRequest();
             var task = _taskMasterRepository.Find(id);
-            var taskDto = _mapper.Map<TaskmasterDto>(task);            
+            var taskDto = _mapper.Map<TaskmasterDto>(task);
             return Ok(taskDto);
         }
 
@@ -54,16 +54,19 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<TaskMaster>(taskmasterDto);
-                
+
             if (tastMaster.IsMileStone || tastMaster.Duration == 0)
             {
                 tastMaster.Duration = 0;
                 tastMaster.IsMileStone = true;
             }
             tastMaster.TaskOrder = _taskMasterRepository.UpdateTaskOrder(taskmasterDto);
-            _taskMasterRepository.Add(tastMaster);         
+            _taskMasterRepository.Add(tastMaster);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Task failed on save.");
+            taskmasterDto.Id = tastMaster.Id;
+            _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
+
             return Ok(tastMaster.Id);
         }
 
@@ -81,7 +84,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             _taskMasterRepository.Update(taskmaster);
             if (_uow.Save() <= 0) throw new Exception("Updating Task Master failed on save.");
-
+            _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(taskmaster.Id);
         }
 
@@ -111,10 +114,10 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (id <= 0) return BadRequest();
             var milestonetask = _taskMasterRepository.Find(id);
-            milestonetask.IsMileStone = true;            
+            milestonetask.IsMileStone = true;
             milestonetask.Duration = 0;
             _taskMasterRepository.Update(milestonetask);
-            _uow.Save();       
+            _uow.Save();
             return Ok(id);
         }
 
@@ -123,10 +126,10 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (id <= 0) return BadRequest();
             var milestonetask = _taskMasterRepository.Find(id);
-            milestonetask.IsMileStone = false;            
+            milestonetask.IsMileStone = false;
             milestonetask.Duration = 1;
             _taskMasterRepository.Update(milestonetask);
-            _uow.Save();           
+            _uow.Save();
             return Ok(id);
         }
 

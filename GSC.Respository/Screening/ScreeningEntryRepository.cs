@@ -95,6 +95,9 @@ namespace GSC.Respository.Screening
                     VolunteerName = t.RandomizationId != null
                         ? t.Randomization.Initial
                         : t.Attendance.Volunteer.AliasName,
+                    VolunteerNo = t.RandomizationId != null
+                        ? t.Randomization.RandomizationNumber
+                        : t.Attendance.Volunteer.VolunteerNo,
                     IsFitnessFit = t.IsFitnessFit,
                     IsEnrolled = t.IsEnrolled,
                     ProjectNo = t.Project.ProjectCode,
@@ -694,12 +697,37 @@ namespace GSC.Respository.Screening
                     var ProjectDesignVariableValue = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningTemplateValueDto.Value)).FirstOrDefault();
                     if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.FitnessFit.GetDescription())
                     {
-                        screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        if (ProjectDesignVariableValue != null)
+                        {
+                            screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+
+                            if (screeningEntry.IsFitnessFit == true)
+                            {
+                                screeningEntry.FitnessNotes = "";
+                            }
+                        }
+                        else
+                        {
+                            screeningEntry.IsFitnessFit = null;
+                        }
                     }
                     else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
                     {
-                        screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
-                        ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                        if (ProjectDesignVariableValue != null)
+                        {
+                            screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                            ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+
+                            if (screeningEntry.IsEnrolled == true)
+                            {
+                                screeningEntry.FitnessNotes = "";
+                            }
+                        }
+                        else
+                        {
+                            screeningEntry.IsEnrolled = null;
+                            ScreeningHistory.Enrolled = null;
+                        }
                     }
                 }
 

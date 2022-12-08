@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Hubs;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
@@ -14,7 +13,6 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.Configuration;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Options;
@@ -25,11 +23,9 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class EconsentChatController : BaseController
     {
-        // note: messagehub not accessible in repository so all the messagehub related logic written in this class
         private readonly IUnitOfWork _uow;
         private readonly IEconsentChatRepository _econsentChatRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-       // private readonly IHubContext<MessageHub> _hubcontext;
         private readonly IUserRepository _userRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly ICentreUserService _centreUserService;
@@ -39,7 +35,6 @@ namespace GSC.Api.Controllers.InformConcent
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         ICentreUserService centreUserService,
-                                         //  IHubContext<MessageHub> hubcontext,
                                          IOptions<EnvironmentSetting> environmentSetting,
                                         IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
                                         IMapper mapper)
@@ -97,6 +92,7 @@ namespace GSC.Api.Controllers.InformConcent
         {
             // insert message details in econsentchat table          
             econsentChat.Salt = Cryptography.CreateSaltKey();
+            econsentChat.SendDateTime = _jwtTokenAccesser.GetClientDate();
             econsentChat.Message = EncryptionDecryption.EncryptString(econsentChat.Salt, econsentChat.Message);
             _econsentChatRepository.Add(econsentChat);
             _uow.Save();
@@ -143,24 +139,11 @@ namespace GSC.Api.Controllers.InformConcent
             _uow.Save();
             List<int> senderids = new List<int>();
             senderids = messages.Select(x => x.SenderId).Distinct().ToList();
-            if (ConnectedUser.Ids != null)
-            {
-                var userlist = ConnectedUser.Ids.Where(x => senderids.Contains(x.userId)).ToList();
-                List<string> listData = new List<string>();
-                for (int i = 0; i < userlist.Count; i++)
-                {
-                    listData.Add(userlist[i].connectionId);
-                }
-                IReadOnlyList<string> readOnlyData = listData.AsReadOnly();
 
-                EconsentChatCentralDto obj = new EconsentChatCentralDto();
-                obj.ReceiverId = receiverId;
-                obj.ReadOnlyData = readOnlyData;
-
-                var result = await _centreUserService.AllMessageDelivered($"{_environmentSetting.Value.CentralApi}Chat/AllMessageDelivered", obj);
-                //   await _hubcontext.Clients.Clients(readOnlyData).SendAsync("AllMessageDelivered", receiverId);
-            }
-            return Ok();
+            EconsentChatCentralDto obj = new EconsentChatCentralDto();
+            obj.ReceiverId = receiverId;
+            obj.SenderIds = senderids;
+            return Ok(obj);
         }
 
         [HttpPut]
@@ -170,9 +153,9 @@ namespace GSC.Api.Controllers.InformConcent
             //all message read flag update when user clicks on particular user chat
             _econsentChatRepository.AllMessageRead(senderId);
             
-            await _centreUserService.AllMessageRead($"{_environmentSetting.Value.CentralApi}Chat/AllMessageRead/{_jwtTokenAccesser.UserId}/{senderId}");
+            //await _centreUserService.AllMessageRead($"{_environmentSetting.Value.CentralApi}Chat/AllMessageRead/{_jwtTokenAccesser.UserId}/{senderId}");
             
-            return Ok();
+            return Ok(senderId);
         }
     }
 }

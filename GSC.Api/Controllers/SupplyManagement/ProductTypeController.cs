@@ -42,10 +42,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             var productTypes = _productTypeRepository.GetProductTypeList(isDeleted);
             return Ok(productTypes);
-            //var productTypes = _productTypeRepository
-            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    ).OrderByDescending(x => x.Id).ToList();
-            //return Ok(productTypesDto);
         }
 
 

@@ -25,6 +25,10 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public string VariableValueOld { get; set; }
         public int? VerificationApprovalTemplateValueId { get; set; }
         public int? VerificationApprovalTemplateValueChildId { get; set; }
+
+        public TableCollectionSource? TableCollectionSource { get; set; }
+
+        public short? LevelNo { get; set; }
     }
     
     public class StudyLevelFormVariableValueDropDown

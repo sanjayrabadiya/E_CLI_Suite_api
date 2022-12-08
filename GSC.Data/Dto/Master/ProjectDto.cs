@@ -90,6 +90,11 @@ namespace GSC.Data.Dto.Master
         public string DrugName { get; set; }
         public string InvestigatorContactName { get; set; }
         public string TherapeuticIndication { get; set; }
+
+
+        public bool? AnyLive { get; set; }
+        public string TrialVersion { get; set; }
+        public string LiveVersion { get; set; }
     }
 
     public class ProjectDetailsDto

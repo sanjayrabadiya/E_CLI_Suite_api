@@ -235,8 +235,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IMeddraCodingAuditRepository, MeddraCodingAuditRepository>();
             services.AddScoped<IScreeningProgress, ScreeningProgress>();
             services.AddScoped<IEditCheckFormulaRepository, EditCheckFormulaRepository>();
-            services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
-            services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
+            //services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
+            //services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
+            services.AddScoped<IEtmfMasterLbraryRepository, EtmfMasterLbraryRepository>();
             services.AddScoped<IEtmfArtificateMasterLbraryRepository, EtmfArtificateMasterLbraryRepository>();
             services.AddScoped<IETMFWorkplaceRepository, ETMFWorkplaceRepository>();
             services.AddScoped<IProjectWorkPlaceZoneRepository, ProjectWorkPlaceZoneRepository>();
@@ -311,7 +312,6 @@ namespace GSC.Api.Helpers
             services.AddScoped<IScreeningNumberSettingsRepository, ScreeningNumberSettingsRepository>();
             services.AddScoped<IRandomizationNumberSettingsRepository, RandomizationNumberSettingsRepository>();
             services.AddScoped<IEConsentVideoRepository, EConsentVideoRepository>();
-            services.AddScoped<IManageMonitoringRepository, ManageMonitoringRepository>();
             services.AddScoped<IHolidayMasterRepository, HolidayMasterRepository>();
             services.AddScoped<IWeekEndMasterRepository, WeekEndMasterRepository>();
             services.AddScoped<ISupplyLocationRepository, SupplyLocationRepository>();
@@ -341,16 +341,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVersionEffectRepository, VersionEffectRepository>();
             services.AddScoped<ILabManagementConfigurationRepository, LabManagementConfigurationRepository>();
             services.AddScoped<ILabManagementVariableMappingRepository, LabManagementVariableMappingRepository>();
-            services.AddScoped<IManageMonitoringVisitRepository, ManageMonitoringVisitRepository>();
             services.AddScoped<ILabManagementUploadDataRepository, LabManagementUploadDataRepository>();
             services.AddScoped<ILabManagementUploadExcelDataRepository, LabManagementUploadExcelDataRepository>();
-            services.AddScoped<IManageMonitoringReportRepository, ManageMonitoringReportRepository>();
-            services.AddScoped<IManageMonitoringReportVariableRepository, ManageMonitoringReportVariableRepository>();
-            services.AddScoped<IManageMonitoringReportVariableChildRepository, ManageMonitoringReportVariableChildRepository>();
-            services.AddScoped<IManageMonitoringReportVariableAuditRepository, ManageMonitoringReportVariableAuditRepository>();
             services.AddScoped<IEconsentReviewDetailsAuditRepository, EconsentReviewDetailsAuditRepository>();
-            services.AddScoped<IManageMonitoringReportReviewRepository, ManageMonitoringReportReviewRepository>();
-            services.AddScoped<IManageMonitoringReportVariableCommentRepository, ManageMonitoringReportVariableCommentRepository>();
             services.AddScoped<ISyncConfigurationMasterRepository, SyncConfigurationMasterRepository>();
             services.AddScoped<ISyncConfigurationMasterDetailsRepository, SyncConfigurationMasterDetailsRepository>();
             services.AddScoped<ISyncConfigurationMasterDetailsRepositoryAudit, SyncConfigurationMasterDetailsRepositoryAudit>();
