@@ -90,7 +90,6 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(appScreen.Id);
         }
 
-
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
