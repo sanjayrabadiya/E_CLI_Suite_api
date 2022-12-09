@@ -29,5 +29,10 @@ namespace GSC.Respository.Master
         List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId);
 
         dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId);
+        dynamic GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId);
+
+        dynamic GetDashboardAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId);
+        dynamic GetDashboardSAesBySeverityGraph(int projectId, int countryId, int siteId);
+        dynamic GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId);
     }
 }

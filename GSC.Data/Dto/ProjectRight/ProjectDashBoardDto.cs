@@ -250,4 +250,23 @@ namespace GSC.Data.Dto.ProjectRight
         public string Country { get; set; }
         public string Site { get; set; }
     }
+
+    public class AeChart
+    {
+        public string Type{ get; set; }
+        public int Likely { get; set; }
+        public int Unlikely { get; set; }
+        public int Unspecified { get; set; }
+    }
+
+    public class AeCChart
+    {
+        public string Type { get; set; }
+        public int ResolvedWithoutSequlae { get; set; }
+        public int ResolvedWithSequlae { get; set; }
+        public int Ongoing { get; set; }
+        public int OngoingAtTheTimeOfDeath { get; set; }
+        public int Death { get; set; }
+        public int Other { get; set; }
+    }
 }
