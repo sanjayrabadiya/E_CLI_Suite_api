@@ -367,5 +367,6 @@ namespace GSC.Domain.Context
         DbSet<ScreeningEntryStudyHistory> ScreeningEntryStudyHistory { get; set; }
         DbSet<EconsentGlossary> EconsentGlossary { get; set; }
         DbSet<ScreeningSetting> ScreeningSetting { get; set; }
+        DbSet<VolunteerFinger> VolunteerFinger { get; set; }
     }
 }

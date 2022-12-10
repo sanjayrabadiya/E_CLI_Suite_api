@@ -386,6 +386,7 @@ namespace GSC.Api.Helpers
 
             services.AddScoped<IEconsentGlossaryRepository, EconsentGlossaryRepository>();
             services.AddScoped<IScreeningSettingRepository, ScreeningSettingRepository>();
+            services.AddScoped<IVolunteerFingerRepository, VolunteerFingerRepository>();
 
         }
     }
