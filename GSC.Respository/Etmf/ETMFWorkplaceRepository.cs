@@ -467,7 +467,7 @@ namespace GSC.Respository.Etmf
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
+                else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault()?.Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
