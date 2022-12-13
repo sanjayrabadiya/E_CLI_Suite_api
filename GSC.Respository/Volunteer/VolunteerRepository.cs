@@ -440,33 +440,11 @@ namespace GSC.Respository.Volunteer
                .Select(c => new DropDownDto { Id = c.PopulationTypeId.Value, Value = c.PopulationType.PopulationName, IsDeleted = c.DeletedDate != null }).Distinct().OrderBy(o => o.Value).ToList();
         }
 
-        public void GetFingureDeviceConnected()
+        public List<DropDownDto> GetVolunteerDropDown()
         {
-            //int ret = zkfperrdef.ZKFP_ERR_OK;
-            //if ((ret = zkfp2.Init()) == zkfperrdef.ZKFP_ERR_OK)
-            //{
-            //    int nCount = zkfp2.GetDeviceCount() - 1;
-            //    if (nCount > 0)
-            //    {
-            //        for (int i = 0; i < nCount; i++)
-            //        {
-            //            cmbIdx.Items.Add(i.ToString());
-            //        }
-            //        cmbIdx.SelectedIndex = 0;
-            //        bnInit.Enabled = false;
-            //        bnFree.Enabled = true;
-            //        bnOpen.Enabled = true;
-            //    }
-            //    else
-            //    {
-            //        zkfp2.Terminate();
-            //        MessageBox.Show("No device connected!");
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Initialize fail, ret=" + ret + " !");
-            //}
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }

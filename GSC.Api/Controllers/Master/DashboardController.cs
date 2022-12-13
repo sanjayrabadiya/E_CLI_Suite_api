@@ -253,5 +253,34 @@ namespace GSC.Api.Controllers.Master
             var queries = _dashboardRepository.getCTMSMonitoringActionPointChartDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
+
+        [HttpGet]
+        [Route("GetDashboardAesBySeverityGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardAesBySeverityGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetDashboardAesBySeverityandCausalityGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardAesBySeverityandCausalityGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetDashboardSAesBySeverityGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardSAesBySeverityGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardSAesBySeverityGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetDashboardSAesBySeverityandCausalityGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardSAesBySeverityandCausalityGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
     }
 }

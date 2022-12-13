@@ -318,6 +318,7 @@ namespace GSC.Respository.Master
                     StatusName = "Not Started",
                     RecordCount = screnningTemplates.Where(s => s.Status == ScreeningTemplateStatus.Pending).Count()
                 });
+
             return formGrpah;
         }
 
@@ -831,6 +832,257 @@ namespace GSC.Respository.Master
                 return result;
             }
             return null;
+        }
+
+        public dynamic GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId)
+        {
+            //var template = _context.ProjectDesignTemplate.Where(x => x.TemplateCode == "AE001" && x.DeletedDate == null).FirstOrDefault();
+            //var Variable = _context.ProjectDesignVariable.Include(x => x.ProjectDesignTemplate).Include(x => x.Values).Where(x => x.ProjectDesignTemplate.TemplateCode == "AE001" && x.DeletedDate == null).ToList();
+
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            string[] types = { "Major", "Mild", "Moderate", "Severe" };
+            string[] ser = { "likely", "possible unlikely", "conditional unspecified" };
+
+            //  type: "Major", likely: 5, unlikely: 7, unspecified: 8
+
+            //var screeningTempateValue = _screeningTemplateValueRepository.All
+            //    .Include(x => x.ProjectDesignVariable)
+            //    .ThenInclude(x => x.Values)
+            //     .Include(x => x.ProjectDesignVariable)
+            //    .ThenInclude(x => x.ProjectDesignTemplate)
+            //    .ThenInclude(x => x.ProjectDesignVisit)
+            //    .Include(x => x.ScreeningTemplate)
+            //    .ThenInclude(x => x.ScreeningVisit)
+            //    .ThenInclude(x => x.ScreeningEntry).
+            //    Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+            //    && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
+            //    && (x.ProjectDesignVariable.VariableCode == "V003" || x.ProjectDesignVariable.VariableCode == "001")
+            //    && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).ToList().GroupBy(x => x.ScreeningTemplateId).ToList();
+
+            var tenoResult = _screeningTemplateValueRepository.All.
+                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
+                && (x.ProjectDesignVariable.VariableCode == "V003")
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new
+                {
+                    r.ScreeningTemplateId,
+                    r.ProjectDesignVariableId,
+                    r.ProjectDesignVariable.VariableName,
+                    r.Value,
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "001")
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                }).ToList();
+
+            var result = new List<AeChart>();
+
+
+            foreach (string t in types)
+            {
+                var r = new AeChart();
+                r.Type = t;
+                r.Likely = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[0]).ToList().Count();
+                r.Unlikely = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[1]).ToList().Count();
+                r.Unspecified = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[2]).ToList().Count();
+                result.Add(r);
+            }
+
+
+            //var finalResult = tenoResult.GroupBy(x => new { x.Value, x.against }).Select(a => new
+            //{
+            //    //data = tenoResult.Where(p => p.ProjectDesignVariableId == a.Key.ProjectDesignVariableId).GroupBy(v => v.Value).
+            //    //   Select(d => new
+            //    //   {
+            //    count = a.Count(),
+            //    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(a.Key.Value)).Select(g => g.ValueName).FirstOrDefault(),
+            //    Against = a.Key.against
+            //    //}).ToList()
+
+
+            //});
+
+            return result;
+            //var result = new AeReportDto();
+            //var VariableValue = Variable.Find(x => x.VariableCode == "V003").Values.Select(s => new { Id = s.Id, Value = s.ValueName }).ToList();
+            //var VValue = Variable.Find(x => x.VariableCode == "001").Values.Select(s => new { Id = s.Id, Value = s.ValueName }).ToList();
+
+            //dynamic newobj = new ExpandoObject();
+
+            ////dynamic obj for property
+            //VValue.ForEach(x =>
+            //{
+            //    AddProperty(newobj, "Variable", x.Value);
+
+            //    VariableValue.ForEach(s =>
+            //    {
+            //        AddProperty(newobj, s.Value, s.Id);
+            //    });
+
+            //});
+
+            ////for get proprty name
+            //List<String> list = new List<String>();
+
+            ////for get property(collectionValue Id)
+            //List<String> valueID = new List<String>();
+
+            //// set property name and id
+            //foreach (KeyValuePair<string, object> kvp in ((IDictionary<string, object>)newobj))
+            //{
+            //    //string PropertyWithValue = kvp.Key + ": " + kvp.Value.ToString();
+            //    list.Add(kvp.Key);
+            //    valueID.Add(kvp.Value.ToString());
+            //}
+
+            //dynamic returnobj = new ExpandoObject();
+            //VValue.ForEach(x =>
+            //{
+            //    AddProperty(returnobj, "Variable", x.Value);
+
+            //    for (int i = 1; list.Count() > i; i++)
+            //    {
+            //        int j = 0;
+
+            //        screeningTempateValue.ForEach(z =>
+            //        {
+            //            var count = z.Where(y => Convert.ToInt32(y.Value) == Convert.ToInt32(valueID[i]) || Convert.ToInt32(y.Value) == x.Id).Count();
+            //            if (count > 1)
+            //                j++;
+            //        });
+            //        AddProperty(returnobj, list[i], j);
+            //    }
+            //    var ret = returnobj;
+
+
+            //});
+            //// R.Add()
+
+
+
+
+            //return screeningTempateValue;
+        }
+
+        public dynamic GetDashboardAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            string[] types = { "Major", "Mild", "Moderate", "Severe" };
+            string[] ser = { "resolved without sequlae", "resolved with sequlae", "ongoing", "ongoing at the time of death", "death Complete Study Exit CRF with date of death", "other specify" };
+
+            var tenoResult = _screeningTemplateValueRepository.All.
+                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
+                && (x.ProjectDesignVariable.VariableCode == "V004")
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new
+                {
+                    r.ScreeningTemplateId,
+                    r.ProjectDesignVariableId,
+                    r.ProjectDesignVariable.VariableName,
+                    r.Value,
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "001")
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                }).ToList();
+
+            var result = new List<AeCChart>();
+
+
+            foreach (string t in types)
+            {
+                var r = new AeCChart();
+                r.Type = t;
+                r.ResolvedWithoutSequlae = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[0].ToLower()).ToList().Count();
+                r.ResolvedWithSequlae = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[1].ToLower()).ToList().Count();
+                r.Ongoing = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[2].ToLower()).ToList().Count();
+                r.OngoingAtTheTimeOfDeath = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[3].ToLower()).ToList().Count();
+                r.Death = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[4].ToLower()).ToList().Count();
+                r.Other = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[5].ToLower()).ToList().Count();
+                result.Add(r);
+            }
+
+            return result;
+            
+        }
+
+        public dynamic GetDashboardSAesBySeverityGraph(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            string[] types = { "Death", "Life Threatening", "Requires impatient hospitalization or prolongation of existing hospitalization", "Result in persistent or significant disability or incapacity", "Birth defect", "Other medically important event" };
+            string[] ser = { "likely", "possible unlikely", "conditional unspecified" };
+
+            var tenoResult = _screeningTemplateValueRepository.All.
+                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
+                && (x.ProjectDesignVariable.VariableCode == "V003")
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new
+                {
+                    r.ScreeningTemplateId,
+                    r.ProjectDesignVariableId,
+                    r.ProjectDesignVariable.VariableName,
+                    r.Value,
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "V002")
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                }).ToList();
+
+            var result = new List<AeChart>();
+
+
+            foreach (string t in types)
+            {
+                var r = new AeChart();
+                r.Type = t;
+                r.Likely = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[0]).ToList().Count();
+                r.Unlikely = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[1]).ToList().Count();
+                r.Unspecified = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[2]).ToList().Count();
+                result.Add(r);
+            }
+
+            return result;
+        }
+
+        public dynamic GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            string[] types = { "Death", "Life Threatening", "Requires impatient hospitalization or prolongation of existing hospitalization", "Result in persistent or significant disability or incapacity", "Birth defect", "Other medically important event" };
+            string[] ser = { "Resolved without sequlae", "Resolved with sequlae", "Ongoing", "Ongoing at the time of death", "Death Complete Study Exit CRF with date of death", "Other specify" };
+
+            var tenoResult = _screeningTemplateValueRepository.All.
+                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
+                && (x.ProjectDesignVariable.VariableCode == "V004")
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new
+                {
+                    r.ScreeningTemplateId,
+                    r.ProjectDesignVariableId,
+                    r.ProjectDesignVariable.VariableName,
+                    r.Value,
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "V002")
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                }).ToList();
+
+            var result = new List<AeCChart>();
+
+
+            foreach (string t in types)
+            {
+                var r = new AeCChart();
+                r.Type = t;
+                r.ResolvedWithoutSequlae = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[0].ToLower()).ToList().Count();
+                r.ResolvedWithSequlae = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[1].ToLower()).ToList().Count();
+                r.Ongoing = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[2].ToLower()).ToList().Count();
+                r.OngoingAtTheTimeOfDeath = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[3].ToLower()).ToList().Count();
+                r.Death = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[4].ToLower()).ToList().Count();
+                r.Other = tenoResult.Where(e => e.against == t && e.VariableValue.ToLower() == ser[5].ToLower()).ToList().Count();
+                result.Add(r);
+            }
+
+            return result;
+
         }
     }
 }

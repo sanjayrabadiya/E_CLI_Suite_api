@@ -1,67 +1,78 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Controllers\Department\**" />
-    <Content Remove="Controllers\Department\**" />
-    <EmbeddedResource Remove="Controllers\Department\**" />
-    <None Remove="Controllers\Department\**" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Controllers\Department\**" />
+		<Content Remove="Controllers\Department\**" />
+		<EmbeddedResource Remove="Controllers\Department\**" />
+		<None Remove="Controllers\Department\**" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Helpers\JwtConfigurationExtension.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Helpers\JwtConfigurationExtension.cs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="wwwroot\volunteer\documents\" />
-  </ItemGroup>
+	<ItemGroup>
+		<Folder Include="wwwroot\volunteer\documents\" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
-  </ItemGroup>
+	<ItemGroup>
+		<DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="10.0.0" />
-    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
-    <PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
-    <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.6" />
-    <PackageReference Include="OpenTok" Version="3.6.0" />
-	  <PackageReference Include="ServiceStack.Text" Version="5.9.2" />
-    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
-  </ItemGroup>
+	<ItemGroup>
+		<PackageReference Include="AutoMapper" Version="10.0.0" />
+		<PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="8.0.1" />
+		<PackageReference Include="Microsoft.AspNet.WebApi.Core" Version="5.2.7" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.6" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.6" />
+		<PackageReference Include="OpenTok" Version="3.6.0" />
+		<PackageReference Include="ServiceStack.Text" Version="5.9.2" />
+		<PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="5.5.1" />
+		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.7.1" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\GSC.Audit\GSC.Audit.csproj" />
-    <ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
-    <ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
-    <ProjectReference Include="..\GSC.Domain\GSC.Domain.csproj" />
-    <ProjectReference Include="..\GSC.Report\GSC.Report.csproj" />
-    <ProjectReference Include="..\GSC.Respository\GSC.Respository.csproj" />
-    <ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\GSC.Audit\GSC.Audit.csproj" />
+		<ProjectReference Include="..\GSC.Common\GSC.Common.csproj" />
+		<ProjectReference Include="..\GSC.Data\GSC.Data.csproj" />
+		<ProjectReference Include="..\GSC.Domain\GSC.Domain.csproj" />
+		<ProjectReference Include="..\GSC.Report\GSC.Report.csproj" />
+		<ProjectReference Include="..\GSC.Respository\GSC.Respository.csproj" />
+		<ProjectReference Include="..\GSC.Shared\GSC.Shared.csproj" />
+	</ItemGroup>
 
-  <ProjectExtensions><VisualStudio><UserProperties /></VisualStudio></ProjectExtensions>
+	<ItemGroup>
+	  <Reference Include="ftrSDKHelper13">
+	    <HintPath>C:\Program Files (x86)\Futronic\SDK 4.2\Bin\ftrSDKHelper13.dll</HintPath>
+	    <HintPath>C:\Program Files (x86)\Futronic\SDK 4.2\Bin\x64\ftrSDKHelper13.dll</HintPath>
+	  </Reference>
+	</ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <TypeScriptTarget>ES2018</TypeScriptTarget>
-    <TypeScriptJSXEmit>React</TypeScriptJSXEmit>
-    <TypeScriptModuleKind>AMD</TypeScriptModuleKind>
-    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
-    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
-    <TypeScriptRemoveComments>False</TypeScriptRemoveComments>
-    <TypeScriptOutFile />
-    <TypeScriptOutDir />
-    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
-    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
-    <TypeScriptSourceMap>True</TypeScriptSourceMap>
-    <TypeScriptMapRoot />
-    <TypeScriptSourceRoot />
-  </PropertyGroup>
+	<ProjectExtensions>
+		<VisualStudio>
+			<UserProperties />
+		</VisualStudio>
+	</ProjectExtensions>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+		<TypeScriptTarget>ES2018</TypeScriptTarget>
+		<TypeScriptJSXEmit>React</TypeScriptJSXEmit>
+		<TypeScriptModuleKind>AMD</TypeScriptModuleKind>
+		<TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+		<TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+		<TypeScriptRemoveComments>False</TypeScriptRemoveComments>
+		<TypeScriptOutFile />
+		<TypeScriptOutDir />
+		<TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+		<TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+		<TypeScriptSourceMap>True</TypeScriptSourceMap>
+		<TypeScriptMapRoot />
+		<TypeScriptSourceRoot />
+	</PropertyGroup>
 
 </Project>

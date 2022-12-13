@@ -19,6 +19,8 @@ using GSC.Shared.Generic;
 using GSC.Report;
 using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
+using Futronic.SDKHelper;
+using GSC.Data.Entities.Volunteer;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -35,6 +37,7 @@ namespace GSC.Api.Controllers.Volunteer
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IVolunteerSummaryReport _volunteerSummaryReport;
+        private readonly IVolunteerFingerRepository _volunteerFingerRepository;
 
         public VolunteerController(IVolunteerRepository volunteerRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -44,7 +47,8 @@ namespace GSC.Api.Controllers.Volunteer
             IUserRecentItemRepository userRecentItemRepository,
             IRolePermissionRepository rolePermissionRepository,
             IAttendanceRepository attendanceRepository,
-            IVolunteerSummaryReport volunteerSummaryReport)
+            IVolunteerSummaryReport volunteerSummaryReport,
+            IVolunteerFingerRepository volunteerFingerRepository)
         {
             _volunteerRepository = volunteerRepository;
             _uow = uow;
@@ -56,6 +60,7 @@ namespace GSC.Api.Controllers.Volunteer
             _rolePermissionRepository = rolePermissionRepository;
             _attendanceRepository = attendanceRepository;
             _volunteerSummaryReport = volunteerSummaryReport;
+            _volunteerFingerRepository = volunteerFingerRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -248,8 +253,8 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (record == null)
                 return NotFound();
-            _volunteerRepository.Active(record);            
-            
+            _volunteerRepository.Active(record);
+
             _uow.Save();
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Activated, record.Id,
@@ -305,6 +310,76 @@ namespace GSC.Api.Controllers.Volunteer
         public IActionResult GetPopulationTypeDropDown()
         {
             return Ok(_volunteerRepository.GetPopulationTypeDropDownList());
+        }
+
+        [HttpPost]
+        [Route("VolunteerIdentification")]
+        public IActionResult VolunteerIdentification([FromBody] dynamic obj)
+        {
+            int iIndex = 0;
+            int nResult;
+            //retrieve the template data byte[] from string
+            //string strTmplaste = Request[data].ToString();
+           
+            byte[] decode_tmplate = Convert.FromBase64String(obj.Split(',')[1]);
+
+            List<DbRecords> Users = _volunteerFingerRepository.GetFingers();
+            FtrIdentifyRecord[] rgRecords = new FtrIdentifyRecord[Users.Count];
+
+            foreach (DbRecords item in Users)
+            {
+                rgRecords[iIndex].KeyValue = item.m_Key.ToByteArray();
+                rgRecords[iIndex].Template = Convert.FromBase64String(item.m_Template.Split(',')[1]);
+                iIndex++;
+            }
+
+            FutronicSdkBase m_Operation = new FutronicIdentification();
+            ((FutronicIdentification)m_Operation).FARN = 245;
+            ((FutronicIdentification)m_Operation).BaseTemplate = decode_tmplate; // the Sample sent from client
+            nResult = ((FutronicIdentification)m_Operation).Identification(rgRecords, ref iIndex); // rgRecords are the saved templates.
+
+            if (nResult == FutronicSdkBase.RETCODE_OK)
+            {
+                if (iIndex != -1)
+                {
+                    return Ok(Users[iIndex]);
+                }
+                else
+                {
+                    ModelState.AddModelError("Message", "Identification process complete. User not found.");
+                    return BadRequest(ModelState);
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("Message", "Identification failed." + FutronicSdkBase.SdkRetCode2Message(nResult));
+                return BadRequest(ModelState);
+            }
+        }
+
+        [HttpPost]
+        [Route("AddFingerImage")]
+        public IActionResult AddFingerImage([FromBody] VolunteerFingerAddDto objVolunteerFingerDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            
+            VolunteerFingerDto volunteerFingerDto = new VolunteerFingerDto();
+            volunteerFingerDto.Id = 0;
+            volunteerFingerDto.VolunteerId = objVolunteerFingerDto.VolunteerId;
+            volunteerFingerDto.FingerImage = objVolunteerFingerDto.Template;
+            var volunteerFinger = _mapper.Map<VolunteerFinger>(volunteerFingerDto);
+
+            _volunteerFingerRepository.Add(volunteerFinger);
+
+            if (_uow.Save() <= 0) throw new Exception("Creating volunteer Finger failed on save.");
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetVolunteerDropDown")]
+        public IActionResult GetVolunteerDropDown()
+        {
+            return Ok(_volunteerRepository.GetVolunteerDropDown());
         }
     }
 }
