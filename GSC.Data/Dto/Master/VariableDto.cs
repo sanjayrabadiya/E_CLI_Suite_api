@@ -53,7 +53,7 @@ namespace GSC.Data.Dto.Master
         public string UnitAnnotation { get; set; }
         public PrintType? PrintType { get; set; }
         public bool IsDocument { get; set; }
-        public IList<VariableValue> Values { get; set; } = null;
+        public IList<VariableValueDto> Values { get; set; } = null;
         public VariableCategoryType? SystemType { get; set; }
         public bool IsNa { get; set; }
         public DateValidateType? DateValidate { get; set; }
@@ -66,7 +66,6 @@ namespace GSC.Data.Dto.Master
         public ScaleType? ScaleType { get; set; }
         public string DomainCode { get; set; }
     }
-
     public class VariableGridDto : BaseAuditDto
     {
         public string VariableName { get; set; }

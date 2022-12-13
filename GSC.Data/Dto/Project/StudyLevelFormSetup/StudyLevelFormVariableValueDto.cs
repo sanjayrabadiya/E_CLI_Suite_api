@@ -28,7 +28,10 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
 
         public TableCollectionSource? TableCollectionSource { get; set; }
 
+        public string TableCollectionSourceName { get; set; }
         public short? LevelNo { get; set; }
+
+        public string Style { get; set; }
     }
     
     public class StudyLevelFormVariableValueDropDown

@@ -596,7 +596,7 @@ namespace GSC.Respository.Master
                     EntrollCount = 0
                 }).ToList();
 
-                var result1 = _context.Randomization.Where(x => asd.Select(x => x.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).Distinct().Distinct().Select(x => x.ProjectId).Count();
+                var result1 = _context.Randomization.Where(x => asd.Select(z => z.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).GroupBy(x => x.ProjectId).Select(x => x.Key).Count();
                 var result3 = new CtmsMonitoringStatusChartDto
                 {
                     ActivityName = "Enrolled",
@@ -649,7 +649,7 @@ namespace GSC.Respository.Master
                     EntrollCount = 0
                 }).ToList();
 
-                var result1 = _context.Randomization.Where(x => asd.Select(x => x.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).Distinct().Select(x => x.ProjectId).Count();
+                var result1 = _context.Randomization.Where(x => asd.Select(z => z.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).GroupBy(x => x.ProjectId).Select(x => x.Key).Count();
                 var result3 = new CtmsMonitoringStatusChartDto
                 {
                     ActivityName = "Enrolled",

@@ -60,6 +60,14 @@ namespace GSC.Respository.CTMS
 
             var reviewPerson = _ctmsMonitoringReportReviewRepository.GetReview(CtmsMonitoringReportId);
 
+            designTemplateDto.Variables.Where(x => x.CollectionSource == CollectionSources.Table).ToList().ForEach(t =>
+            {
+                t.Values.Where(c => c.LevelNo == null).ToList().ForEach(v =>
+                {
+                    v.LevelNo = 1;
+                });
+            });
+
             var values = _ctmsMonitoringReportVariableValueRepository.GetVariableValues(ctmsMonitoringReportFormBasic.Id);
 
             values.ForEach(t =>

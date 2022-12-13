@@ -75,6 +75,8 @@ namespace GSC.Data.Dto.Project.StudyLevelFormSetup
         public string VariableValueOld { get; set; }
         public bool IsReviewPerson { get; set; }
         public int StudyLevelFormVariableId { get; set; }
+
+        public bool? IsLevelNo { get; set; }
     }
 
     public class StudyLevelFormVariableBasicDto : BaseDto

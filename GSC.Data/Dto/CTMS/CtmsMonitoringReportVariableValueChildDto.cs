@@ -10,5 +10,7 @@ namespace GSC.Data.Dto.CTMS
         public int StudyLevelFormVariableValueId { get; set; }
         public string Value { get; set; }
         public StudyLevelFormVariableValue StudyLevelFormVariableValue { get; set; }
+
+        public short? LevelNo { get; set; }
     }
 }

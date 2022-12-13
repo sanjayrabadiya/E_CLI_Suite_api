@@ -110,6 +110,9 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
                     var studyLevelFormVariableValue = _mapper.Map<StudyLevelFormVariableValue>(variableValue);
                     studyLevelFormVariableValue.Id = 0;
                     studyLevelFormVariableValue.SeqNo = ++valueOrder;
+                    if (variableDetail.Variable.CollectionSource == Helper.CollectionSources.Table)
+                        studyLevelFormVariableValue.TableCollectionSource = variableValue.TableCollectionSource;
+                    studyLevelFormVariableValue.Style = variableValue.Style;
                     _studyLevelFormVariableValueRepository.Add(studyLevelFormVariableValue);
                     studyLevelFormVariable.Values.Add(studyLevelFormVariableValue);
                 }

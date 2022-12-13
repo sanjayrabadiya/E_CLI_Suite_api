@@ -80,7 +80,15 @@ namespace GSC.Api.Controllers.Master
             //    variable.Values = variable.Values.Where(x => x.DeletedDate == null).ToList();
 
             var variableDto = _mapper.Map<VariableDto>(variable);
-            
+            if (variableDto != null && variableDto.Values != null)
+            {
+                variableDto.Values.ToList().ForEach(x =>
+                {
+                    if (variableDto.CollectionSource == CollectionSources.Table)
+                        x.TableCollectionSourceName = x.TableCollectionSource.GetDescription();
+                });
+            }
+
             return Ok(variableDto);
         }
 
@@ -131,7 +139,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            variableDto.Values.Where(s => s.VariableId == null || s.VariableId == 0)
+            variableDto.Values.Where(s => s.VariableId == 0)
                 .Select(s =>
                 {
                     s.VariableId = variableDto.Id;

@@ -9,10 +9,12 @@ using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.Project.StudyLevelFormSetup;
+using GSC.Shared.Extension;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -59,7 +61,14 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var variable = _studyLevelFormVariableRepository.
                 FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null).OrderBy(x => x.SeqNo)).FirstOrDefault();
             var variableDto = _mapper.Map<StudyLevelFormVariableDto>(variable);
-
+            if (variableDto != null && variableDto.Values != null)
+            {
+                variableDto.Values.ToList().ForEach(x =>
+                {
+                    if (variableDto.CollectionSource == CollectionSources.Table)
+                        x.TableCollectionSourceName = x.TableCollectionSource.GetDescription();
+                });
+            }
             return Ok(variableDto);
         }
 

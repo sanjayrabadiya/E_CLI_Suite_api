@@ -111,6 +111,11 @@ namespace GSC.Api.Controllers.CTMS
         [TransactionRequired]
         public IActionResult CloneForm(int ctmsMonitoringId, int noOfClones)
         {
+            if (ctmsMonitoringId <= 0)
+            {
+                ModelState.AddModelError("Message", "You can't able to clone the form as monitoring visit is not started!");
+                return BadRequest(ModelState);
+            }
             var CtmsMonitoringId = _ctmsMonitoringRepository.Find(ctmsMonitoringId).Id;
 
             for (var i = 1; i <= noOfClones; i++)

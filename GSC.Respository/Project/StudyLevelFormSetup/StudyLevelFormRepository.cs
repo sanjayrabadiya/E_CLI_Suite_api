@@ -116,6 +116,7 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                         InActiveVersion = x.InActiveVersion,
                         Note = x.Note,
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
+                        IsLevelNo = false,
                     }).OrderBy(r => r.DesignOrder).ToList();
 
                 var values = _studyLevelFormVariableValueRepository.All.
@@ -126,6 +127,8 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
                          ValueName = c.ValueName,
                          SeqNo = c.SeqNo,
                          Label = c.Label,
+                         TableCollectionSource = c.TableCollectionSource,
+                         Style = c.Style,
                      }).ToList();
 
                 variables.ForEach(x =>
