@@ -143,11 +143,12 @@ namespace GSC.Respository.Screening
         public void UpdateTemplateConfigurationUploadRandomizationValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId)
         {
             var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
-            if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
-                return;
+            //if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
+            //    return;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
-            var templateVariable = designScreeningTemplateDto.Variables.Where(r => !screeningDesignVariableId.Contains(r.Id)
-            && r.CollectionSource == CollectionSources.TextBox
+            var templateVariable = designScreeningTemplateDto.Variables.Where(r => 
+            //!screeningDesignVariableId.Contains(r.Id) &&
+            r.CollectionSource == CollectionSources.TextBox
             ).ToList();
 
             var projectdata = _context.ScreeningTemplate
@@ -192,7 +193,7 @@ namespace GSC.Respository.Screening
                             var uploadvisits = _context.SupplyManagementUploadFileVisit
                                   .Where(x => x.SupplyManagementUploadFileDetailId == verifyuploadsheetdata.Id
                                         && x.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId).FirstOrDefault();
-                           
+
                             if (uploadvisits != null)
                                 value = uploadvisits.Value;
                         }
@@ -208,17 +209,20 @@ namespace GSC.Respository.Screening
                             Value = value,
 
                         };
-                        Add(screeningTemplateValue);
+                        if (screeningDesignVariableId == null)
+                            Add(screeningTemplateValue);
 
-
-                        var audit = new ScreeningTemplateValueAudit
+                        if (screeningDesignVariableId == null)
                         {
-                            ScreeningTemplateValue = screeningTemplateValue,
-                            Value = value,
-                            OldValue = null,
-                            Note = "Submitted with IWRS data"
-                        };
-                        _screeningTemplateValueAuditRepository.Save(audit);
+                            var audit = new ScreeningTemplateValueAudit
+                            {
+                                ScreeningTemplateValue = screeningTemplateValue,
+                                Value = value,
+                                OldValue = null,
+                                Note = "Submitted with IWRS data"
+                            };
+                            _screeningTemplateValueAuditRepository.Save(audit);
+                        }
 
                     }
 
