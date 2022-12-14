@@ -63,9 +63,9 @@ namespace GSC.Api.Controllers.Etmf
         {
             if (!ModelState.IsValid || !etmfUserPermission.Any()) return new UnprocessableEntityObjectResult(ModelState);
 
-            _etmfUserPermissionRepository.Save(etmfUserPermission);
+            var result = _etmfUserPermissionRepository.Save(etmfUserPermission);
 
-            return Ok();
+            return Ok(result);
         }
 
         /// Update rights

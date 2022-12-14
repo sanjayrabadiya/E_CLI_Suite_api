@@ -9,6 +9,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -45,8 +46,8 @@ namespace GSC.Respository.Etmf
                             }).Where(x => ParentProject != null ? x.ItemId == 2 : x.ItemId == 1 || x.ItemId == 3).OrderBy(o => o.ItemId).ToList();
 
             // Get child of workplace folder
-            var ProjectWorkplaceDetail = _context.EtmfProjectWorkPlace.Include(t => t.ProjectWorkPlace)
-                .Where(t => t.DeletedDate == null && (ParentProject == null ? t.ProjectId == ProjectId : t.ItemId == ProjectId))
+            var ProjectWorkplaceDetail = _context.EtmfProjectWorkPlace
+                .Where(t => t.DeletedDate == null && (ParentProject == null ? t.ProjectId == ProjectId : t.ItemId == ProjectId) && t.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail)
                 .Select(t => new EtmfUserPermissionDto
                 {
                     ParentWorksplaceFolderId = t.WorkPlaceFolderId,
@@ -89,7 +90,7 @@ namespace GSC.Respository.Etmf
             return ProjectWorkplaceDetail.OrderBy(item => item.ItemId == 3 ? 1 : item.ItemId == 1 ? 2 : 2).ToList();
         }
 
-        public void Save(List<EtmfUserPermission> EtmfUserPermission)
+        public int Save(List<EtmfUserPermission> EtmfUserPermission)
         {
             var userId = EtmfUserPermission.First().UserId;
 
@@ -109,7 +110,7 @@ namespace GSC.Respository.Etmf
                 .ToList();
 
             _context.EtmfUserPermission.AddRange(EtmfUserPermission);
-            _context.Save();
+           return _context.Save();
         }
 
         public void updatePermission(List<EtmfUserPermissionDto> EtmfUserPermissionDto)
