@@ -316,11 +316,49 @@ namespace GSC.Api.Controllers.Volunteer
         [Route("VolunteerIdentification")]
         public IActionResult VolunteerIdentification([FromBody] dynamic obj)
         {
+            return GetIdentification(obj, false);
+        }
+
+        [HttpPost]
+        [Route("AddFingerImage")]
+        public IActionResult AddFingerImage([FromBody] VolunteerFingerAddDto objVolunteerFingerDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            bool obj = GetIdentification(objVolunteerFingerDto.Template, true);
+
+            if (obj)
+            {
+                ModelState.AddModelError("Message", "Same finger enroll with another volunteer.");
+                return BadRequest(ModelState);
+            }
+
+            VolunteerFingerDto volunteerFingerDto = new VolunteerFingerDto();
+            volunteerFingerDto.Id = 0;
+            volunteerFingerDto.VolunteerId = objVolunteerFingerDto.VolunteerId;
+            volunteerFingerDto.FingerImage = objVolunteerFingerDto.Template;
+            var volunteerFinger = _mapper.Map<VolunteerFinger>(volunteerFingerDto);
+
+            _volunteerFingerRepository.Add(volunteerFinger);
+
+            if (_uow.Save() <= 0) throw new Exception("Creating volunteer Finger failed on save.");
+            return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetVolunteerDropDown")]
+        public IActionResult GetVolunteerDropDown()
+        {
+            return Ok(_volunteerRepository.GetVolunteerDropDown());
+        }
+
+        public dynamic GetIdentification(dynamic obj, bool isFromAdd)
+        {
             int iIndex = 0;
             int nResult;
             //retrieve the template data byte[] from string
             //string strTmplaste = Request[data].ToString();
-           
+
             byte[] decode_tmplate = Convert.FromBase64String(obj.Split(',')[1]);
 
             List<DbRecords> Users = _volunteerFingerRepository.GetFingers();
@@ -342,44 +380,31 @@ namespace GSC.Api.Controllers.Volunteer
             {
                 if (iIndex != -1)
                 {
+                    if (isFromAdd)
+                    {
+                        return true;
+                    }
                     return Ok(Users[iIndex]);
                 }
                 else
                 {
+                    if (isFromAdd)
+                    {
+                        return false;
+                    }
                     ModelState.AddModelError("Message", "Identification process complete. User not found.");
                     return BadRequest(ModelState);
                 }
             }
             else
             {
+                if (isFromAdd)
+                {
+                    return false;
+                }
                 ModelState.AddModelError("Message", "Identification failed." + FutronicSdkBase.SdkRetCode2Message(nResult));
                 return BadRequest(ModelState);
             }
-        }
-
-        [HttpPost]
-        [Route("AddFingerImage")]
-        public IActionResult AddFingerImage([FromBody] VolunteerFingerAddDto objVolunteerFingerDto)
-        {
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            
-            VolunteerFingerDto volunteerFingerDto = new VolunteerFingerDto();
-            volunteerFingerDto.Id = 0;
-            volunteerFingerDto.VolunteerId = objVolunteerFingerDto.VolunteerId;
-            volunteerFingerDto.FingerImage = objVolunteerFingerDto.Template;
-            var volunteerFinger = _mapper.Map<VolunteerFinger>(volunteerFingerDto);
-
-            _volunteerFingerRepository.Add(volunteerFinger);
-
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer Finger failed on save.");
-            return Ok();
-        }
-
-        [HttpGet]
-        [Route("GetVolunteerDropDown")]
-        public IActionResult GetVolunteerDropDown()
-        {
-            return Ok(_volunteerRepository.GetVolunteerDropDown());
         }
     }
 }
