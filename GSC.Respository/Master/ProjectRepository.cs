@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GSC.Shared.Extension;
 
 namespace GSC.Respository.Master
 {
@@ -110,7 +111,8 @@ namespace GSC.Respository.Master
                 project.LiveVersion = _studyVersionRepository.All.Where(x => x.ProjectId == item.ProjectId && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
                 project.AnyLive = _studyVersionRepository.All.Any(x => x.ProjectId == item.ProjectId && x.DeletedDate == null && x.VersionStatus == VersionStatus.GoLive);
                 project.TrialVersion = _studyVersionRepository.All.Where(x => x.ProjectId == item.ProjectId && x.DeletedDate == null && x.VersionStatus == VersionStatus.OnTrial).Select(t => t.VersionNumber.ToString()).FirstOrDefault();
-
+                project.ProjectStatusName = _context.ProjectStatus.Any(x => x.ProjectId == item.ProjectId) ? _context.ProjectStatus.Where(x => x.ProjectId == item.ProjectId).FirstOrDefault().Status.GetDescription() : "";
+                project.IsCtmsStudy = _context.ProjectSettings.Any(x => x.ProjectId == item.ProjectId) ? _context.ProjectSettings.Where(x => x.ProjectId == item.ProjectId).FirstOrDefault().IsCtms : false;
                 item.CountriesName = temCountries.Distinct().ToList();
                 item.CountCountry = temCountries.Distinct().Count();
                 item.projectCode = project.ProjectCode;

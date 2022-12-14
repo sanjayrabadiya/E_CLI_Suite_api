@@ -368,5 +368,6 @@ namespace GSC.Domain.Context
         DbSet<EconsentGlossary> EconsentGlossary { get; set; }
         DbSet<ScreeningSetting> ScreeningSetting { get; set; }
         DbSet<VolunteerFinger> VolunteerFinger { get; set; }
+        DbSet<ProjectStatus> ProjectStatus { get; set; }
     }
 }

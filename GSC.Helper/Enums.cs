@@ -941,4 +941,13 @@ namespace GSC.Helper
         [Description("ReConsent")] ReConsent = 4,
         [Description("Consent Withdraw")] ConsentWithdraw = 5
     }
+
+    public enum ProjectStatusEnum : short
+    {
+        [Description("Ongoing")] Ongoing = 1,
+        [Description("Complete")] Complete = 2,
+        [Description("On Hold")] OnHold = 3,
+        [Description("Discountinue")] Discountinue = 4,
+        [Description("Terminate")] Terminate = 5,
+    }
 }

@@ -95,6 +95,10 @@ namespace GSC.Data.Dto.Master
         public bool? AnyLive { get; set; }
         public string TrialVersion { get; set; }
         public string LiveVersion { get; set; }
+
+        public string ProjectStatusName { get; set; }
+
+        public bool? IsCtmsStudy { get; set; }
     }
 
     public class ProjectDetailsDto
@@ -202,6 +206,16 @@ namespace GSC.Data.Dto.Master
         public int? CountCountry { get; set; }
         public string projectCode { get; set; }
         public DateTime CreatedDate { get; set; }
+    }
+
+    public class ProjectStatusDto : BaseDto
+    {
+        public int ProjectId { get; set; }
+        public ProjectStatusEnum projectStatusId { get; set; }
+
+        public int AuditReasonId { get; set; }
+
+        public string ReasonOth { get; set; }
     }
 
 }

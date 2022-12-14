@@ -41,6 +41,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
+        private readonly IGSCContext _context;
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
@@ -55,7 +56,8 @@ namespace GSC.Api.Controllers.Master
             IOptions<EnvironmentSetting> environmentSetting,
             IRandomizationRepository randomizationRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
-            IScreeningNumberSettingsRepository screeningNumberSettingsRepository
+            IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
+            IGSCContext context
             )
         {
             _projectRepository = projectRepository;
@@ -73,6 +75,7 @@ namespace GSC.Api.Controllers.Master
             _randomizationRepository = randomizationRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
+            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -606,5 +609,28 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetParentStaticProjectDropDownIWRS());
         }
 
+        [HttpGet]
+        [Route("getProjectStatusData/{ProjectId}")]
+        public IActionResult getProjectStatusData(int ProjectId)
+        {
+            if (ProjectId <= 0) return BadRequest();
+            var Project = _context.ProjectStatus.Where(x => x.ProjectId == ProjectId).FirstOrDefault();
+            return Ok(Project);
+        }
+
+        [HttpPost("UpdateProjectStatus")]
+        public IActionResult UpdateProjectStatus([FromBody] ProjectStatusDto projectDto)
+        {
+            var project = _mapper.Map<Data.Entities.Master.ProjectStatus>(projectDto);
+            project.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            project.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            project.Status = projectDto.projectStatusId;
+            if (projectDto.Id > 0)
+                _context.ProjectStatus.Update(project);
+            else
+                _context.ProjectStatus.Add(project);
+            if (_uow.Save() <= 0) throw new Exception("Update project failed on save.");
+            return Ok(project);
+        }
     }
 }

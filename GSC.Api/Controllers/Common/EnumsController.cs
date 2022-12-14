@@ -767,5 +767,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetProjectStatus")]
+        public IActionResult GetProjectStatus()
+        {
+            var refrencetype = Enum.GetValues(typeof(ProjectStatusEnum))
+                .Cast<ProjectStatusEnum>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(refrencetype);
+        }
     }
 }
