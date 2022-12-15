@@ -15,25 +15,16 @@ namespace GSC.Api.Controllers.SupplyManagement
     [Route("api/[controller]")]
     public class ProductTypeController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
+        
         private readonly IMapper _mapper;
         private readonly IProductTypeRepository _productTypeRepository;
         private readonly IUnitOfWork _uow;
 
-        public ProductTypeController(IProductTypeRepository productTypeRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public ProductTypeController(IProductTypeRepository productTypeRepository,IUnitOfWork uow, IMapper mapper)
         {
             _productTypeRepository = productTypeRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -139,16 +130,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetProductTypeDropDown()
         {
             return Ok(_productTypeRepository.GetProductTypeDropDown());
-        }
-
-        [HttpPost]
-        [Route("PostVerified")]
-        public IActionResult PostVerified([FromBody] ProductVerificationDto productVerificationDto)
-        {
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-
-            return Ok();
         }
     }
 }

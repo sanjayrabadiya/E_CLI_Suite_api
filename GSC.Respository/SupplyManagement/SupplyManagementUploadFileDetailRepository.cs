@@ -12,15 +12,14 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementUploadFileDetailRepository : GenericRespository<SupplyManagementUploadFileDetail>, ISupplyManagementUploadFileDetailRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
         private readonly IMapper _mapper;
-
         public SupplyManagementUploadFileDetailRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
+            
             IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
+            
             _mapper = mapper;
         }
 

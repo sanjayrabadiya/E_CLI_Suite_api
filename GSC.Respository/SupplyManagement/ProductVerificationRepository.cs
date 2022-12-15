@@ -17,18 +17,16 @@ namespace GSC.Respository.SupplyManagement
 {
     public class ProductVerificationRepository : GenericRespository<ProductVerification>, IProductVerificationRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public ProductVerificationRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
             IUploadSettingRepository uploadSettingRepository)
             : base(context)
         {
             _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
         }

@@ -20,7 +20,7 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyMangementShipmentController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
         private readonly IMapper _mapper;
         private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
         private readonly IUnitOfWork _uow;
@@ -28,12 +28,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IGSCContext _context;
         public SupplyMangementShipmentController(ISupplyManagementShipmentRepository supplyManagementShipmentRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementRequestRepository supplyManagementRequestRepository, IGSCContext context)
+            ISupplyManagementRequestRepository supplyManagementRequestRepository, IGSCContext context)
         {
             _supplyManagementShipmentRepository = supplyManagementShipmentRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
+            
             _supplyManagementRequestRepository = supplyManagementRequestRepository;
             _context = context;
         }

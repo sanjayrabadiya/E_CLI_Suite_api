@@ -39,13 +39,6 @@ namespace GSC.Respository.SupplyManagement
                    ProjectTo<ProductReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
-        public string Duplicate(ProductReceipt objSave)
-        {
-            //if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.ProductTypeId == objSave.ProductTypeId && x.ProductUnitType == objSave.ProductUnitType && x.DeletedDate == null))
-            //    return "Duplicate record found.";
-            return "";
-        }
-
         // If Study Product Type already use than not delete and Edit
         public string StudyProductTypeAlreadyUse(int PharmacyStudyProductTypeId)
         {

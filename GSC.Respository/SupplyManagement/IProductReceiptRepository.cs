@@ -8,7 +8,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface IProductReceiptRepository : IGenericRepository<ProductReceipt>
     {
-        string Duplicate(ProductReceipt objSave);
+        
         List<DropDownDto> GetProductReceipteDropDown(int ProjectId);
         List<ProductReceiptGridDto> GetProductReceiptList(int ProjectId, bool isDeleted);
         string StudyProductTypeAlreadyUse(int PharmacyStudyProductTypeId);

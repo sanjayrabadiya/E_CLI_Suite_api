@@ -23,7 +23,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementUploadFileRepository : GenericRespository<SupplyManagementUploadFile>, ISupplyManagementUploadFileRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
@@ -34,7 +34,6 @@ namespace GSC.Respository.SupplyManagement
         private readonly IPharmacyStudyProductTypeRepository _pharmacyStudyProductTypeRepository;
 
         public SupplyManagementUploadFileRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IUploadSettingRepository uploadSettingRepository,
             ISupplyManagementUploadFileVisitRepository supplyManagementUploadFileVisitRepository,
             ISupplyManagementUploadFileDetailRepository supplyManagementUploadFileDetailRepository,
@@ -52,7 +51,7 @@ namespace GSC.Respository.SupplyManagement
             _pharmacyStudyProductTypeRepository = pharmacyStudyProductTypeRepository;
             _projectRepository = projectRepository;
             _countryRepository = countryRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
+            
             _mapper = mapper;
         }
 
@@ -102,11 +101,6 @@ namespace GSC.Respository.SupplyManagement
                 var isValidRandomizationNo = RandomizationNumberValidation(dt, supplyManagementUploadFile.ProjectId, validate, supplyManagementUploadFile.SiteId, supplyManagementUploadFile.CountryId);
                 if (isValidRandomizationNo != "")
                     return isValidRandomizationNo;
-
-                // check visit with older upload excel sheet
-                var visitMatch = matchVisitWithOlderUpload(results, supplyManagementUploadFile.ProjectId, validate);
-                if (visitMatch != "")
-                    return visitMatch;
             }
             else
             {
@@ -244,9 +238,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "Visit name should not be duplicate.";
             }
-            //var visitcount = visitcheck.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count();
-            //if (projectDesignVisits.Count() != (visitcount - 2))
-            //    return "Visit name not match with design visit.";
+           
 
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
@@ -277,36 +269,7 @@ namespace GSC.Respository.SupplyManagement
                     return "Please fill required randomization details!";
                 else
                     return "";
-                //else
-                //{
-                //    for (int i = 5; i < results.Tables[0].Rows.Count; i++)
-                //    {
-                //        if (Convert.ToString(results.Tables[0].Rows[i][1]).Contains(','))
-                //        {
-                //            var arr2 = Convert.ToString(results.Tables[0].Rows[i][1]).Split(',').ToArray();
-                //            var arr1 = results.Tables[0].Rows[i].ItemArray;
-                //            var arr3 = results.Tables[0].Rows[i].ItemArray.Count();
-
-                //            if (arr2.Length != (arr3 - 2))
-                //            {
-                //                return "Product code with visit sequence not matched";
-
-                //            }
-
-                //            for (var k = 0; k < arr2.Length; k++)
-                //            {
-                //                if (arr1[2 + k].ToString().ToLower() != arr2[k].ToLower())
-                //                {
-                //                    return "Product code with visit sequence not matched at row no " + (i + 1).ToString();
-                //                }
-                //            }
-
-
-                //        }
-
-                //    }
-                //    return "";
-                //}
+                
             }
             else
                 return "Please fill required randomization details.";
@@ -476,32 +439,6 @@ namespace GSC.Respository.SupplyManagement
 
             }
 
-            return "";
-        }
-
-        public string matchVisitWithOlderUpload(DataSet results, int projectId, SupplyManagementUploadFile supplyManagementUploadFile)
-        {
-            // get last upload sheet data
-            //var supplyManagementUploadDetail = _supplyManagementUploadFileDetailRepository.All.Where(x => x.SupplyManagementUploadFileId == supplyManagementUploadFile.Id)
-            //.OrderByDescending(x => x.Id).FirstOrDefault();
-
-            //var supplyManagementUploadDetailVisit = _supplyManagementUploadFileVisitRepository.All.Include(x => x.ProjectDesignVisit).Where(x => x.SupplyManagementUploadFileDetailId == supplyManagementUploadDetail.Id)
-            //    .Select(x => x.ProjectDesignVisit.DisplayName)
-            //.ToList();
-
-            //if (supplyManagementUploadDetailVisit.Count() != results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").Count() - 2)
-            //    return "visit not match with previous upload file.";
-
-            //var j = 0;
-            //foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
-            //{
-            //    if (j >= 2)
-            //    {
-            //        if (!supplyManagementUploadDetailVisit.Contains(item.ToString(), StringComparer.InvariantCultureIgnoreCase))
-            //            return "visit not match with previous upload file.";
-            //    }
-            //    j++;
-            //}
             return "";
         }
 

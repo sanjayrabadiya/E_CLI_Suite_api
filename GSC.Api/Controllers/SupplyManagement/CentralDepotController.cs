@@ -16,21 +16,18 @@ namespace GSC.Api.Controllers.SupplyManagement
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CentralDepotController : BaseController
-    {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+    public class CentralDepotController : BaseController{
+        
         private readonly IMapper _mapper;
         private readonly ICentralDepotRepository _centralDepotRepository;
         private readonly IUnitOfWork _uow;
 
         public CentralDepotController(ICentralDepotRepository centralDepotRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _centralDepotRepository = centralDepotRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]

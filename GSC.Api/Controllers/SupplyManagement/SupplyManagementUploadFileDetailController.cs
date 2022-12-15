@@ -19,21 +19,12 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyManagementUploadFileDetailController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
+      
         private readonly ISupplyManagementUploadFileDetailRepository _supplyManagementUploadFileDetailRepository;
-        private readonly IUnitOfWork _uow;
-
-        public SupplyManagementUploadFileDetailController(ISupplyManagementUploadFileDetailRepository supplyManagementUploadFileDetailRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IUploadSettingRepository uploadSettingRepository,
-            IProjectRepository projectRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public SupplyManagementUploadFileDetailController(ISupplyManagementUploadFileDetailRepository supplyManagementUploadFileDetailRepository)
         {
             _supplyManagementUploadFileDetailRepository = supplyManagementUploadFileDetailRepository;
-            _uow = uow;
-            _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
+          
         }
 
         [HttpGet("{supplyManagementUploadFileId}")]

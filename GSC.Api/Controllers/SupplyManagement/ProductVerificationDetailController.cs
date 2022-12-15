@@ -18,18 +18,18 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class ProductVerificationDetailController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
 
         public ProductVerificationDetailController(
             IMapper mapper
-            , IJwtTokenAccesser jwtTokenAccesser
+            
             , IUnitOfWork uow
             , IProductVerificationDetailRepository productVerificationDetailRepository)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
+            
             _mapper = mapper;
             _uow = uow;
             _productVerificationDetailRepository = productVerificationDetailRepository;

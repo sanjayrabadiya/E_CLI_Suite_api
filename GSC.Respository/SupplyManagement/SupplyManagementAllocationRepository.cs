@@ -89,12 +89,7 @@ namespace GSC.Respository.SupplyManagement
                 ExtraData = c.FirstOrDefault().ExtraData
             }).OrderBy(o => o.Id).ToList();
 
-            //var randomuploddata = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.Status == LabManagementUploadStatus.Approve)
-            //    .Select(x => x.ProjectId).ToList();
-            //if (randomuploddata != null && randomuploddata.Count() > 0)
-            //{
-            //    return data.Where(x => randomuploddata.Contains(x.Id)).ToList();
-            //}
+            
             return data;
         }
         public IList<DropDownDto> GetTemplateDropDownByVisitId(int visitId)

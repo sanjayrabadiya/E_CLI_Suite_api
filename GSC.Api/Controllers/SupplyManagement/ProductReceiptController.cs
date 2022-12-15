@@ -83,12 +83,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
             productReceipt.Status = ProductVerificationStatus.Quarantine;
-            var validate = _productReceiptRepository.Duplicate(productReceipt);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+           
             _productReceiptRepository.Add(productReceipt);
             if (_uow.Save() <= 0) throw new Exception("Creating product receipt failed on save.");
             return Ok(productReceipt.Id);
@@ -126,14 +121,6 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
             productReceipt.Status = productRec.Status;
-
-            var validate = _productReceiptRepository.Duplicate(productReceipt);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
-
             _productReceiptRepository.AddOrUpdate(productReceipt);
             if (_uow.Save() <= 0) throw new Exception("Updating product receipt failed on save.");
             return Ok(productReceipt.Id);
@@ -170,13 +157,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
-            var validate = _productReceiptRepository.Duplicate(record);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
-
+           
             _productReceiptRepository.Active(record);
             var verification = _productVerificationRepository.All.Where(x => x.ProductReceiptId == id).FirstOrDefault();
             if (verification != null)
