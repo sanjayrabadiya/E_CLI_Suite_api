@@ -16,19 +16,16 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class VerificationApprovalTemplateHistoryController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
+        
         private readonly IVerificationApprovalTemplateHistoryRepository _verificationApprovalTemplateHistoryRepository;
-        private readonly IUnitOfWork _uow;
+       
 
         public VerificationApprovalTemplateHistoryController(IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+           )
         {
             _verificationApprovalTemplateHistoryRepository = verificationApprovalTemplateHistoryRepository;
-            _uow = uow;
-            _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
+          
+          
         }
 
         [HttpGet("{ProductVerificationDetailId}")]

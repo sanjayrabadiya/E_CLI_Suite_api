@@ -9,15 +9,6 @@ namespace GSC.Respository.SupplyManagement
     public interface IVerificationApprovalTemplateRepository : IGenericRepository<VerificationApprovalTemplate>
     {
         DesignVerificationApprovalTemplateDto GetVerificationApprovalTemplate(DesignVerificationApprovalTemplateDto designTemplateDto, int ProductVerificationDetailId);
-        VerificationApprovalTemplate AddVerificationApprovalTemplateHistory(VerificationApprovalTemplate verificationApprovalTemplate, VerificationApprovalTemplateDto verificationApprovalTemplateDto);
-        void Addverificationhistory(VerificationApprovalTemplateDto verificationApprovalTemplateDto);
-
-        VerificationApprovalTemplateHistoryDto getverificationApprovalTemplateHistory(VerificationApprovalTemplateHistoryDto verificationApprovalTemplateDto);
-
-        void AddHistory(VerificationApprovalTemplateDto verificationApprovalTemplateDto);
-
-        void Addvalues(VerificationApprovalTemplateDto verificationApprovalTemplateDto);
-
-        void SendStatusApproval(VerificationApprovalTemplateDto verificationApprovalTemplateDto, int Id, VerificationApprovalTemplate verification);
+      
     }
 }
