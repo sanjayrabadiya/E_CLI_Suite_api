@@ -203,7 +203,7 @@ namespace GSC.Respository.Etmf
 
             bool projectPathExists = Directory.Exists(filePath);
             if (projectPathExists)
-                System.IO.Directory.Delete(filePath);
+                System.IO.Directory.Delete(filePath, true);
              
             return "success";
         }
