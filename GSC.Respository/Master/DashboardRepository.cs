@@ -687,27 +687,27 @@ namespace GSC.Respository.Master
                             if (item.TerminatedCount > 0)
                             {
                                 CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
-                                obj.Text = item.ActivityName + " Terminated " + item.RCount;
+                                obj.Text = item.ActivityName + " Terminated " + item.TerminatedCount;
                                 obj.Lable = item.ActivityName + " Terminated ";
-                                obj.Count = item.RCount;
+                                obj.Count = item.TerminatedCount;
                                 obj.Status = "Terminated";
                                 list.Add(obj);
                             }
                             if (item.OnHoldCount > 0)
                             {
                                 CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
-                                obj.Text = item.ActivityName + " OnHold " + item.RCount;
+                                obj.Text = item.ActivityName + " OnHold " + item.OnHoldCount;
                                 obj.Lable = item.ActivityName + " OnHold ";
-                                obj.Count = item.RCount;
+                                obj.Count = item.OnHoldCount;
                                 obj.Status = "OnHold";
                                 list.Add(obj);
                             }
                             if (item.CloseOutCount > 0)
                             {
                                 CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
-                                obj.Text = item.ActivityName + " Close Out " + item.RCount;
+                                obj.Text = item.ActivityName + " Close Out " + item.CloseOutCount;
                                 obj.Lable = item.ActivityName + " Close Out ";
-                                obj.Count = item.RCount;
+                                obj.Count = item.CloseOutCount;
                                 obj.Status = "CloseOut";
                                 list.Add(obj);
                             }
