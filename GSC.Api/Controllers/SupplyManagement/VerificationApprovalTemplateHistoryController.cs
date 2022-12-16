@@ -20,8 +20,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IVerificationApprovalTemplateHistoryRepository _verificationApprovalTemplateHistoryRepository;
        
 
-        public VerificationApprovalTemplateHistoryController(IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository,
-           )
+        public VerificationApprovalTemplateHistoryController(IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository)
         {
             _verificationApprovalTemplateHistoryRepository = verificationApprovalTemplateHistoryRepository;
           
