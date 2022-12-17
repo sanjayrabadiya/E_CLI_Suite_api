@@ -548,7 +548,6 @@ namespace GSC.Respository.EditCheckImpact
                     isFound = true;
                     r.IsHide = true;
                     r.ReviewLevel = null;
-                    r.Progress = 0;
                     r.Status = r.Status > ScreeningTemplateStatus.Pending ? ScreeningTemplateStatus.InProcess : ScreeningTemplateStatus.Pending;
 
                     var screeningTemplateReview = _screeningTemplateReviewRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id && x.IsRepeat == false).ToList();
