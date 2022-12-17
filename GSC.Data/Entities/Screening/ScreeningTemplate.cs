@@ -43,6 +43,7 @@ namespace GSC.Data.Entities.Screening
         public bool IsCompleteReview { get; set; }
         public bool IsDisable { get; set; }
         public int? RepeatSeqNo { get; set; }
+        public bool? IsHide { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
 
     }

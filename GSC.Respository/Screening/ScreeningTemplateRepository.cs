@@ -623,6 +623,7 @@ namespace GSC.Respository.Screening
                 Progress = t.Progress ?? 0,
                 ReviewLevel = t.ReviewLevel,
                 IsLocked = t.IsLocked,
+                IsHide = t.IsHide,
                 MyReview = workFlowLevel.LevelNo == t.ReviewLevel,
                 ParentId = t.ParentId,
                 IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
@@ -632,6 +633,8 @@ namespace GSC.Respository.Screening
             }).ToList();
 
             var templateValues = _screeningTemplateValueRepository.GetQueryStatusBySubject(screeningEntryId);
+
+            result = result.Where(x => x.IsHide == null || x.IsHide == false).ToList();
 
             result.ForEach(a =>
             {
@@ -698,6 +701,7 @@ namespace GSC.Respository.Screening
             screeningTemplate.Status = ScreeningTemplateStatus.Pending;
             screeningTemplate.Children = null;
             screeningTemplate.IsDisable = false;
+            screeningTemplate.IsHide = false;
             Add(screeningTemplate);
 
             return screeningTemplate;

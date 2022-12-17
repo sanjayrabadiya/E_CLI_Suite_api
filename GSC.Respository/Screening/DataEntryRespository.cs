@@ -106,11 +106,22 @@ namespace GSC.Respository.Screening
                  }).ToList()
              }).ToListAsync();
 
-            var templates = await _screeningTemplateRepository.All.
-                Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && !r.IsDisable && r.DeletedDate == null).
+            var tempTemplates = await _screeningTemplateRepository.All.
+               Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).Select(c => new
+               {
+                   c.ScreeningVisit.ScreeningEntryId,
+                   c.ScreeningVisitId,
+                   c.ReviewLevel,
+                   c.Status,
+                   c.IsDisable,
+                   c.IsHide
+               }).ToListAsync();
+
+            var templates = tempTemplates.
+                Where(r => !r.IsDisable && (r.IsHide == null || r.IsHide == false)).
                 GroupBy(c => new
                 {
-                    c.ScreeningVisit.ScreeningEntryId,
+                    c.ScreeningEntryId,
                     c.ScreeningVisitId,
                     c.ReviewLevel,
                     c.Status
@@ -121,7 +132,9 @@ namespace GSC.Respository.Screening
                     t.Key.ScreeningVisitId,
                     t.Key.ReviewLevel,
                     TotalTemplate = t.Count()
-                }).ToListAsync();
+                }).ToList();
+
+
 
             var queries = await _screeningTemplateValueRepository.All.Where(r =>
             r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
@@ -175,7 +188,6 @@ namespace GSC.Respository.Screening
                 PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 StudyVersion = x.Randomization.StudyVersion ?? 1,
-                //IsEconsentCompleted = x.RandomizationId != null ? EconsentReviewDetails.Where(b => b.RandomizationId == x.RandomizationId).All(c => c.IsReviewDoneByInvestigator == true && c.IsReviewedByPatient == true) : true,
                 IsEconsentCompleted = true,
                 Visit = x.ScreeningVisit.Where(t => t.DeletedDate == null && (!t.IsSchedule || t.IsScheduleTerminate == true || t.Status > ScreeningVisitStatus.NotStarted)).Select(a => new DataEntryVisitTemplateDto
                 {
@@ -188,29 +200,18 @@ namespace GSC.Respository.Screening
                     ScheduleDate = a.ScheduleDate,
                     IsSchedule = a.IsSchedule,
                     DesignOrder = a.ProjectDesignVisit.DesignOrder,
-                    IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == true) ? true : false,
+                    IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == false) ? false : true,
                     StudyVersion = a.ProjectDesignVisit.StudyVersion
                 }).OrderBy(b => b.DesignOrder).ToList()
 
             }).ToListAsync();
 
-            //await Task.WhenAll(projectDesignVisitTask, randomizationDataTask, templateTask, queryTask, screeningDataTask);
 
-            //var projectDesignVisit = await projectDesignVisitTask;
-            //var randomizationData = await randomizationDataTask;
-            //var templates = await templateTask;
-            //var queries = await queryTask;
-            //var screeningData = await screeningDataTask;
 
             randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
 
             screeningData.ForEach(r =>
             {
-                //added by vipul for check locked status
-
-                var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntryId == r.ScreeningEntryId && y.DeletedDate == null).ToList();
-                r.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
-
                 r.Visit.ForEach(v =>
                 {
                     if (v.VisitStatusId > 3)
@@ -267,10 +268,12 @@ namespace GSC.Respository.Screening
 
         public List<DataEntryTemplateCountDisplayTree> GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus)
         {
-            var details = _context.ScreeningVisit.Where(s => s.Id == screeningVisitId).Include(d => d.ScreeningEntry).FirstOrDefault();
-            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == details.ScreeningEntry.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
+            var projectDesignId = _context.ScreeningVisit.Where(s => s.Id == screeningVisitId).Select(r => r.ScreeningEntry.ProjectDesignId).FirstOrDefault();
 
-            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.Status == templateStatus)
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
+
+            var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null
+            && s.Status == templateStatus && (s.IsHide == null || s.IsHide == false))
                  .Select(t => new DataEntryTemplateCountDisplayTree
                  {
                      Id = t.Id,
@@ -313,7 +316,11 @@ namespace GSC.Respository.Screening
             else
                 tempResult = tempResult.Where(s => s.ScreeningTemplateValues.Any(r => r.QueryStatus == queryStatus && r.DeletedDate == null));
 
-            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == tempResult.FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
+            tempResult = tempResult.Where(x => (x.IsHide == null || x.IsHide == false));
+
+            var projectDesignId = _context.ScreeningVisit.Where(s => s.Id == screeningVisitId).Select(r => r.ScreeningEntry.ProjectDesignId).FirstOrDefault();
+
+            var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault();
 
             var result = tempResult.Select(t => new DataEntryTemplateCountDisplayTree
             {
@@ -351,6 +358,7 @@ namespace GSC.Respository.Screening
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
 
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null
+            && (s.IsHide== null || s.IsHide==false)
             && s.ScreeningTemplateValues.Any(r => (r.AcknowledgeLevel == workflowlevel.LevelNo ||
             ((r.QueryStatus == QueryStatus.Open || r.QueryStatus == QueryStatus.Reopened) && workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate)) ||
             ((r.QueryStatus == QueryStatus.Resolved || r.QueryStatus == QueryStatus.Answered) && workflowlevel.LevelNo == 0 && r.UserRoleId == _jwtTokenAccesser.RoleId)
@@ -389,6 +397,7 @@ namespace GSC.Respository.Screening
         public List<DataEntryTemplateCountDisplayTree> GetTemplateVisitWorkFlow(int screeningVisitId, short reviewLevel)
         {
             var details = _context.ScreeningTemplate.Where(s => s.ScreeningVisitId == screeningVisitId).Include(d => d.ScreeningVisit).ThenInclude(d => d.ScreeningEntry).FirstOrDefault();
+
             var sequenseDeatils = _templateVariableSequenceNoSettingRepository.All.Where(x => x.ProjectDesignId == details.ScreeningVisit.ScreeningEntry.ProjectDesignId && x.DeletedDate == null).FirstOrDefault();
 
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId && s.DeletedDate == null && s.ReviewLevel == reviewLevel)
@@ -479,7 +488,7 @@ namespace GSC.Respository.Screening
             return result;
         }
 
-        public static string PreLabelSetting(ScreeningTemplate t, ProjectDesignTemplate pt, TemplateVariableSequenceNoSetting seq)
+        private static string PreLabelSetting(ScreeningTemplate t, ProjectDesignTemplate pt, TemplateVariableSequenceNoSetting seq)
         {
             string str = "";
             if (!String.IsNullOrEmpty(pt.PreLabel))

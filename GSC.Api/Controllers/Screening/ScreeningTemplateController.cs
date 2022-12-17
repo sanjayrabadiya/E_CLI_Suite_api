@@ -223,6 +223,7 @@ namespace GSC.Api.Controllers.Screening
 
             screeningTemplate.Status = ScreeningTemplateStatus.Submitted;
             screeningTemplate.IsDisable = false;
+            screeningTemplate.IsHide = false;
 
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, 0);
 

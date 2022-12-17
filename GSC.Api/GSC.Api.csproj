@@ -48,7 +48,7 @@
 
 	<ItemGroup>
 	  <Reference Include="ftrSDKHelper13">
-	    <HintPath>..\..\..\ftrSDKHelper13.dll</HintPath>
+	    <HintPath>..\Reference\ftrSDKHelper13.dll</HintPath>
 	  </Reference>
 	</ItemGroup>
 
