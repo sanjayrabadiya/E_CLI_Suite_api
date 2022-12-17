@@ -768,7 +768,8 @@ namespace GSC.Respository.Attendance
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
                             ScheduleDate = r.ScheduleDate,
                             IsTemplateRestricted = false,
-                            IsPastTemplate = false
+                            IsPastTemplate = false,
+                            IsHide = r.IsHide ?? false
                         }).OrderBy(r => r.DesignOrder).ToList();
             data.ForEach(x =>
             {
