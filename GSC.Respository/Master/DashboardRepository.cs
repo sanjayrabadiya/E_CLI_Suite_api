@@ -577,6 +577,7 @@ namespace GSC.Respository.Master
 
 
             var asd = _context.CtmsMonitoring.Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                       && (siteId == 0 ? (!x.Project.IsTestSite) : true)
                         && x.DeletedDate == null)
                 .Select(b => new
                 {
@@ -627,6 +628,7 @@ namespace GSC.Respository.Master
 
 
             var asd = _context.CtmsMonitoring.Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                        && (siteId == 0 ? (!x.Project.IsTestSite) : true)
                         && x.DeletedDate == null)
                 .Select(b => new
                 {
@@ -750,6 +752,7 @@ namespace GSC.Respository.Master
                 .Include(x => x.Project)
                 .ThenInclude(x => x.ManageSite)
                 .Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
+                            && (siteId == 0 ? (!x.Project.IsTestSite) : true)
                             && x.DeletedDate == null)
                 .Select(b => new CtmsMonitoringPlanDashoardDto
                 {
@@ -806,8 +809,10 @@ namespace GSC.Respository.Master
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
 
-            var asd = _context.CtmsActionPoint.Include(x => x.CtmsMonitoring).Where(x => projectIds.Contains(x.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
-                          && x.DeletedDate == null)
+            var asd = _context.CtmsActionPoint.Include(x => x.CtmsMonitoring).ThenInclude(x => x.Project).Where(x => projectIds.Contains(x.CtmsMonitoring.ProjectId)
+              && (siteId == 0 ? (!x.CtmsMonitoring.Project.IsTestSite) : true)
+              && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+                            && x.DeletedDate == null)
                 .Select(b => new
                 {
                     Id = b.CtmsMonitoringId,
