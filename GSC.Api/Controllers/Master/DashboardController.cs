@@ -218,6 +218,7 @@ namespace GSC.Api.Controllers.Master
 
         //Add By prakash on 13/10/2022 for dasboard query graph data
         //Change by vipul on 14/10/2022 for add filter country and studyid
+
         [HttpGet]
         [Route("GetNewDashboardQueryGraphData/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult GetNewDashboardQueryGraphData(int projectId, int countryId, int siteId)
@@ -280,6 +281,14 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
         {
             var queries = _dashboardRepository.GetDashboardSAesBySeverityandCausalityGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardPatientEngagementGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardPatientEngagementGraph(projectId, countryId, siteId);
             return Ok(queries);
         }
     }

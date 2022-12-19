@@ -251,22 +251,27 @@ namespace GSC.Data.Dto.ProjectRight
         public string Site { get; set; }
     }
 
-    public class AeChart
+    public class DynamicAeChart
     {
-        public string Type{ get; set; }
-        public int Likely { get; set; }
-        public int Unlikely { get; set; }
-        public int Unspecified { get; set; }
+        public List<DynamicAeChartDetails> Data { get; set; }
+        public string SeriesName { get; set; }
+
     }
 
-    public class AeCChart
+    public class DynamicAeChartDetails
     {
-        public string Type { get; set; }
-        public int ResolvedWithoutSequlae { get; set; }
-        public int ResolvedWithSequlae { get; set; }
-        public int Ongoing { get; set; }
-        public int OngoingAtTheTimeOfDeath { get; set; }
-        public int Death { get; set; }
-        public int Other { get; set; }
+        public string X { get; set; }
+        public int Y { get; set; }
     }
+
+    public class DynamicAeChartData
+    {
+        public string VariableName { get; set; }
+        public string VariableValue { get; set; }
+        public string Against { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public string Value { get; set; }
+        public int ProjectDesignVariableId { get; set; }
+    }
+
 }
