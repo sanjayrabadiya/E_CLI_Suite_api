@@ -72,6 +72,8 @@ namespace GSC.Respository.Volunteer
                 m_Id = x.Volunteer.Id,
                 m_UserName = x.Volunteer.VolunteerNo + " " + x.Volunteer.FirstName + " " + x.Volunteer.MiddleName + " " + x.Volunteer.LastName,
                 m_Template = x.FingerImage,
+                UserBlock = x.Volunteer.IsBlocked == true ? true : false,
+                UserInActive = x.Volunteer.DeletedDate != null,
             }).ToList();
 
             return finger;

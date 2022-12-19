@@ -137,6 +137,8 @@ namespace GSC.Data.Dto.Volunteer
     {
         public int? m_Id { get; set; }
         public string m_UserName { get; set; }
+        public bool? UserBlock { get; set; }
+        public bool? UserInActive { get; set; }
         public Guid m_Key { get; set; }
         public string m_Template { get; set; }
     }
