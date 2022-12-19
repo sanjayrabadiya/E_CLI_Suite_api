@@ -160,7 +160,7 @@ namespace GSC.Respository.EditCheckImpact
 
             var editCheckResult = _impactService.GetEditCheckByVaiableId(projectDesignTemplateId, projectDesignVariableId, editCheckIds);
 
-            var skipIds = editCheckResult.Where(x => x.ProjectDesignVariableId == 0).Select(r => r.EditCheckId).ToList();
+            var skipIds = editCheckResult.Where(x => x.ProjectDesignVariableId == 0 && x.CheckBy == EditCheckRuleBy.ByVariableAnnotation).Select(r => r.EditCheckId).ToList();
 
             editCheckResult = editCheckResult.Where(x => !skipIds.Contains(x.EditCheckId)).ToList();
 
@@ -314,6 +314,12 @@ namespace GSC.Respository.EditCheckImpact
             }
 
             _context.Save();
+
+            targetResult.Where(r => r.Operator == Operator.Hide && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
+            {
+                UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r.ValidateType, editTargetValidation);
+            });
+
         }
 
         public List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, int screeningEntryId, int screeningVisitId, bool isVariable, bool isQueryRaise)
@@ -527,7 +533,72 @@ namespace GSC.Respository.EditCheckImpact
                 Update(r);
             });
             _context.Save();
+        }
 
+        private void UpdateTemplateHide(int projectDesignTemplateId, int domainId, int screeningVisitId, EditCheckValidateType checkValidateType, List<EditCheckTargetValidationList> editTargetValidation)
+        {
+            List<ScreeningTemplate> screeningTemplates = GetEnableTemplate(projectDesignTemplateId, domainId, screeningVisitId);
+
+            var templatesHide = new List<HideShowEditChekTemplateDto>();
+            var isFound = false;
+            screeningTemplates.ForEach(r =>
+            {
+                if (checkValidateType == EditCheckValidateType.Passed && r.IsHide != true)
+                {
+                    isFound = true;
+                    r.IsHide = true;
+                    r.ReviewLevel = null;
+                    r.Status = r.Status > ScreeningTemplateStatus.Pending ? ScreeningTemplateStatus.InProcess : ScreeningTemplateStatus.Pending;
+
+                    var screeningTemplateReview = _screeningTemplateReviewRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id && x.IsRepeat == false).ToList();
+
+                    screeningTemplateReview.ForEach(c =>
+                    {
+                        c.IsRepeat = true;
+                        _screeningTemplateReviewRepository.Update(c);
+                    });
+                    UnLockTemplate(r);
+                    Update(r);
+                    templatesHide.Add(new HideShowEditChekTemplateDto
+                    {
+                        IsHide = true,
+                        ScreeningTemplateId = r.Id
+                    });
+                    var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id).ToList();
+                    screeningTemplateValue.ForEach(x =>
+                    {
+                        if (x.QueryStatus != null)
+                        {
+                            x.IsSystem = false;
+                            x.QueryStatus = QueryStatus.Closed;
+                            _screeningTemplateValueRepository.Update(x);
+                        }
+                    });
+
+                }
+                else if (checkValidateType != EditCheckValidateType.Passed && r.IsHide == true)
+                {
+                    isFound = true;
+                    r.IsHide = false;
+                    Update(r);
+                    templatesHide.Add(new HideShowEditChekTemplateDto
+                    {
+                        IsHide = false,
+                        ScreeningTemplateId = r.Id
+                    });
+                }
+
+                _context.Save();
+                _context.DetachAllEntities();
+            });
+
+            if (isFound)
+            {
+                if (editTargetValidation.Count == 0)
+                    editTargetValidation.Add(new EditCheckTargetValidationList());
+
+                editTargetValidation.FirstOrDefault().TemplatesHide = templatesHide;
+            }
 
         }
 
@@ -541,7 +612,6 @@ namespace GSC.Respository.EditCheckImpact
 
                 bool isReviewed = _screeningTemplateReviewRepository.All.AsNoTracking().Any(x => x.ScreeningTemplateId == r.Id && x.Status == ScreeningTemplateStatus.Reviewed);
                 bool isFound = false;
-                var isTemplateQuery = false;
                 bool isSubmitted = false;
                 if (isReviewed && isQueryRaise)
                 {
@@ -594,9 +664,6 @@ namespace GSC.Respository.EditCheckImpact
                         Status = r.Status
                     });
                 }
-
-                if (isTemplateQuery)
-                    UnLockTemplate(r);
 
                 Update(r);
                 _context.Save();
@@ -771,7 +838,11 @@ namespace GSC.Respository.EditCheckImpact
             screeningTemplateValue.IsHide = isHide;
 
             if (isHide && screeningTemplateValue.QueryStatus != null)
+            {
+                screeningTemplateValue.IsSystem = false;
                 screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+            }
+
 
             if (isHide)
                 screeningTemplateValue.Value = null;

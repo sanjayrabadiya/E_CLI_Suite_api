@@ -52,8 +52,15 @@ namespace GSC.Data.Dto.Project.Design
             set => _scheduleDate = value?.UtcDateTime();
         }
         public ScreeningTemplateStatus Status { get; set; }
+        public List<HideShowEditChekTemplateDto> TemplatesHide { get; set; }
+
     }
 
+    public class HideShowEditChekTemplateDto
+    {
+        public bool IsHide { get; set; }
+        public int ScreeningTemplateId { get; set; }
+    }
 
     public class EditCheckTargetEnableViewModel
     {

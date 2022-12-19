@@ -58,14 +58,7 @@ namespace GSC.Api.Controllers.Screening
             if (id <= 0) return BadRequest();
 
             var screeningEntryDto = _screeningEntryRepository.GetDetails(id);
-            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            //{
-            //    KeyId = screeningEntryDto.Id,
-            //    SubjectName = screeningEntryDto.ScreeningNo,
-            //    SubjectName1 = screeningEntryDto.VolunteerName,
-            //    ScreenType = UserRecent.Project
-            //});
-
+     
             return Ok(screeningEntryDto);
         }
 

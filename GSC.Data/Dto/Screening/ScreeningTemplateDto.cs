@@ -40,6 +40,7 @@ namespace GSC.Data.Dto.Screening
         public bool? IsVariableSeqNo { get; set; }
         public string Label { get; set; }
         public string PreLabel { get; set; }
+        public bool? IsHide { get; set; }
     }
 
 
@@ -65,6 +66,7 @@ namespace GSC.Data.Dto.Screening
         public short? LastReviewLevel { get; set; }
         public Gender Gender { get; set; }
         public bool IsCompleteReview { get; set; }
+        public bool? IsHide { get; set; }
 
     }
 
