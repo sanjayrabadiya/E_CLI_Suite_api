@@ -839,6 +839,21 @@ namespace GSC.Respository.Master
             return null;
         }
 
+
+        //Ae Detail
+
+        public dynamic GetDashboardAEDetail(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var CountAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001")).Count();
+            var Count7AE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001" && x.CreatedDate < DateTime.Today.AddDays(-7))).Count();
+            var CountSAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001")).Count();
+            var Count7SAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001" && x.CreatedDate < DateTime.Today.AddDays(-7))).Count();
+
+            return new { CountAE, Count7AE, CountSAE, Count7SAE };
+        }
+
         public dynamic GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
@@ -1008,8 +1023,6 @@ namespace GSC.Respository.Master
             return r;
         }
 
-
-
         public dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag)
         {
             // 0 all expired and due
@@ -1022,7 +1035,7 @@ namespace GSC.Respository.Master
             var details = _screeningTemplateRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId)
                 && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess)
-              //  && x.ScreeningTemplateReview.OrderBy(r => r.Id).LastOrDefault().Status >= ScreeningTemplateStatus.Submitted
+                //  && x.ScreeningTemplateReview.OrderBy(r => r.Id).LastOrDefault().Status >= ScreeningTemplateStatus.Submitted
                 && x.ScheduleDate != null &&
                 (x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId != ScreeningPatientStatus.ScreeningFailure || x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId != ScreeningPatientStatus.Withdrawal)
                && (FilterFlag == 0 ? (((DateTime)x.ScheduleDate).Date == _jwtTokenAccesser.GetClientDate().Date || ((DateTime)x.ScheduleDate).Date < _jwtTokenAccesser.GetClientDate().Date)

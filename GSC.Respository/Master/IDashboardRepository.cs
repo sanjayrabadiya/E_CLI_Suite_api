@@ -31,6 +31,8 @@ namespace GSC.Respository.Master
         dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId);
         dynamic GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId);
 
+        dynamic GetDashboardAEDetail(int projectId, int countryId, int siteId);
+
         dynamic GetDashboardAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardSAesBySeverityGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId);

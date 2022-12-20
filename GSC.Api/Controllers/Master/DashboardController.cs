@@ -291,5 +291,12 @@ namespace GSC.Api.Controllers.Master
             var queries = _dashboardRepository.GetDashboardPatientEngagementGraph(projectId, countryId, siteId, FilterFlag);
             return Ok(queries);
         }
+
+        [HttpGet]
+        [Route("GetDashboardAEDetail/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardAEDetail(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetDashboardAEDetail(projectId, countryId, siteId));
+        }
     }
 }
