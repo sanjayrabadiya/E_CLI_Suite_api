@@ -114,6 +114,107 @@ namespace GSC.Respository.Etmf
             return "";
         }
 
+        public EtmfGroupSearchModel GetEtmfSearchData(int id)
+        {
+
+            var rights = _context.EtmfUserPermission.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
+                .Select(s => s.ProjectWorkplaceDetailId).ToList();
+
+            var projectWorkplaces = _context.EtmfProjectWorkPlace.Where(t => t.DeletedBy == null && t.ProjectId == id && t.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
+                .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                .Where(q => rights.Contains(q.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.Id))
+                .Include(x => x.Project)
+                .Include(x => x.EtmfArtificateMasterLbrary)
+                .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary) //Etmf Section
+                .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary) // Etmf Zone
+                .Select(s => new EtmfSearchModel()
+                {
+                    Id = s.Id,
+                    ProjectId = s.ProjectId,
+                    ProjectCode = s.Project.ProjectCode,
+                    ArtificateName = s.EtmfArtificateMasterLbrary.ArtificateName,
+                    SectionName = s.ProjectWorkPlace.EtmfMasterLibrary.SectionName,
+                    SectionId = s.ProjectWorkPlace.Id,
+                    ZoneName = s.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
+                    ZoneId = s.ProjectWorkPlace.ProjectWorkPlace.Id,
+                    SiteName = s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
+                    TableTag = s.TableTag,
+                    WorkPlaceFolderName = ((WorkPlaceFolder)s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
+                    WorkPlaceFolderId = s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId
+                }).ToList();
+
+            var subsetionartificates = _context.EtmfProjectWorkPlace.Where(t => t.DeletedBy == null && t.ProjectId == id && t.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
+                .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                .Where(q => rights.Contains(q.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.Id))
+                .Include(x => x.Project)
+                //.Include(x => x.ProjectWorkPlace)
+                .Include(x => x.ProjectWorkPlace.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
+                .Select(s => new EtmfSearchModel()
+                {
+                    Id = s.Id,
+                    ProjectId = s.ProjectId,
+                    ProjectCode = s.Project.ProjectCode,
+                    SubSectionArtificateName = s.ArtifactName,
+                    SubSectionName = s.ProjectWorkPlace.SubSectionName,
+                    SubSectionId = s.ProjectWorkPlace.Id,
+                    SectionName = s.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.SectionName,
+                    SectionId = s.ProjectWorkPlace.ProjectWorkPlace.Id,
+                    ZoneName = s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
+                    ZoneId = s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.Id,
+                    SiteName = s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
+                    TableTag = s.TableTag,
+                    WorkPlaceFolderName = ((WorkPlaceFolder)s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
+                    WorkPlaceFolderId = s.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId
+                }).ToList();
+
+            projectWorkplaces.AddRange(subsetionartificates);
+
+            var distRecords = projectWorkplaces.Distinct().OrderBy(o => o.WorkPlaceFolderName).ToList();
+
+            var folders = distRecords.GroupBy(g => g.WorkPlaceFolderId)
+                .Select(s => new
+                {
+                    Id = s.Key,
+                    Value = s.FirstOrDefault().WorkPlaceFolderName
+                });
+
+            var zones = distRecords.GroupBy(g => g.ZoneId)
+                .Select(s => new
+                {
+                    Id = s.Key,
+                    Folder = s.FirstOrDefault().WorkPlaceFolderId,
+                    Value = s.FirstOrDefault().ZoneName
+                });
+
+            var sections = distRecords.GroupBy(g => g.SectionId)
+               .Select(s => new
+               {
+                   Id = s.Key,
+                   Zone = s.FirstOrDefault().ZoneId,
+                   Value = s.FirstOrDefault().SectionName
+               });
+
+            var subSections = distRecords.GroupBy(g => g.SubSectionId)
+              .Select(s => new
+              {
+                  Id = s.Key,
+                  Section = s.FirstOrDefault().SectionId,
+                  Value = s.FirstOrDefault().SubSectionName
+              });
+
+            var groupRecords = new EtmfGroupSearchModel()
+            {
+                FolderData = folders,
+                ZoneData = zones,
+                SectionData = sections,
+                SubSectionData = subSections,
+                SearchData = distRecords
+            };
+
+            return groupRecords;
+        }
+
         public List<TreeValue> GetTreeview(int id, EtmfChartType? chartType)
         {
             //chartType

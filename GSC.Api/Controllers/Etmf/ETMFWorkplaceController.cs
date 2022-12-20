@@ -99,6 +99,13 @@ namespace GSC.Api.Controllers.Etmf
             var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.GetTreeview(projectId, chartType);
             return Ok(EtmfProjectWorkPlace);
         }
+        [Route("GetEtmfSearchData/{id}")]
+        [HttpGet]
+        public IActionResult GetEtmfSearchData(int id)
+        {
+            var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.GetEtmfSearchData(id);
+            return Ok(EtmfProjectWorkPlace);
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] ETMFWorkplaceDto eTMFWorkplaceDto)
