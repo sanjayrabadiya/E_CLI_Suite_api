@@ -62,7 +62,7 @@ namespace GSC.Respository.Screening
             var data = All.Include(x => x.ScreeningEntry).ThenInclude(x => x.Attendance).ThenInclude(x => x.Volunteer)
                 .Where(y => y.ScreeningEntry.Attendance.VolunteerId == attendanceDto.VolunteerId).OrderByDescending(v => v.Id).FirstOrDefault();
 
-            if (data.NextEligibleDate.HasValue)
+            if (data != null && data.NextEligibleDate.HasValue)
             {
                 if (_jwtTokenAccesser.GetClientDate().Date < data.NextEligibleDate.Value.Date)
                     return "This volunteer " + data.ScreeningEntry.Attendance.Volunteer.VolunteerNo +" is not eligible for screening attendance";
