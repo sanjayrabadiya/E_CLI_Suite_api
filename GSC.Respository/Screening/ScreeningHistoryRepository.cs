@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
 {
     public class ScreeningHistoryRepository : GenericRespository<ScreeningHistory>,
         IScreeningHistoryRepository
     {
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ScreeningHistoryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public List<ScreeningHistoryDto> GetScreeningHistoryByVolunteerId(int volunteerId, int lastDay)
@@ -51,6 +55,19 @@ namespace GSC.Respository.Screening
             }).OrderByDescending(x => x.Id).ToList();
 
             return finalResult;
+        }
+
+        public string CheckVolunteerEligibaleDate(AttendanceDto attendanceDto)
+        {
+            var data = All.Include(x => x.ScreeningEntry).ThenInclude(x => x.Attendance).ThenInclude(x => x.Volunteer)
+                .Where(y => y.ScreeningEntry.Attendance.VolunteerId == attendanceDto.VolunteerId).OrderByDescending(v => v.Id).FirstOrDefault();
+
+            if (data.NextEligibleDate.HasValue)
+            {
+                if (_jwtTokenAccesser.GetClientDate().Date < data.NextEligibleDate.Value.Date)
+                    return "This volunteer " + data.ScreeningEntry.Attendance.Volunteer.VolunteerNo +" is not eligible for screening attendance";
+            }
+            return "";
         }
     }
 }

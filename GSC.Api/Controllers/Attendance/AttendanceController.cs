@@ -8,6 +8,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Domain.Context;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Attendance
@@ -21,12 +22,13 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IProjectSubjectRepository _projectSubjectRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IScreeningHistoryRepository _screeningHistoryRepository;
 
         public AttendanceController(IAttendanceRepository attendanceRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectSubjectRepository projectSubjectRepository,
             IAttendanceHistoryRepository attendanceHistoryRepository,
-            IStudyVersionRepository studyVersionRepository)
+            IStudyVersionRepository studyVersionRepository, IScreeningHistoryRepository screeningHistoryRepository)
         {
             _attendanceRepository = attendanceRepository;
             _uow = uow;
@@ -34,6 +36,7 @@ namespace GSC.Api.Controllers.Attendance
             _projectSubjectRepository = projectSubjectRepository;
             _attendanceHistoryRepository = attendanceHistoryRepository;
             _studyVersionRepository = studyVersionRepository;
+            _screeningHistoryRepository = screeningHistoryRepository;
         }
 
         [HttpPost]
@@ -69,6 +72,13 @@ namespace GSC.Api.Controllers.Attendance
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            var validatemsg = _screeningHistoryRepository.CheckVolunteerEligibaleDate(attendanceDto);
+            if (!string.IsNullOrEmpty(validatemsg))
+            {
+                ModelState.AddModelError("Message", validatemsg);
                 return BadRequest(ModelState);
             }
 
