@@ -285,10 +285,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetDashboardPatientEngagementGraph/{ProjectId}/{countryId}/{siteId}")]
-        public IActionResult GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId)
+        [Route("GetDashboardPatientEngagementGraph/{ProjectId}/{countryId}/{siteId}/{FilterFlag}")]
+        public IActionResult GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag)
         {
-            var queries = _dashboardRepository.GetDashboardPatientEngagementGraph(projectId, countryId, siteId);
+            var queries = _dashboardRepository.GetDashboardPatientEngagementGraph(projectId, countryId, siteId, FilterFlag);
             return Ok(queries);
         }
     }

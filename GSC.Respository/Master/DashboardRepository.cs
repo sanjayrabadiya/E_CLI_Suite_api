@@ -1010,28 +1010,40 @@ namespace GSC.Respository.Master
 
 
 
-        public dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId)
+        public dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag)
         {
+            // 0 all expired and due
+            // 1 due
+            // 2 expired only
+            // 3 upcoming only
+
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var details = _screeningTemplateRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId)
-                && x.ScreeningTemplateReview.OrderBy(r => r.Id).LastOrDefault().Status >= ScreeningTemplateStatus.Submitted
+                && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess)
+              //  && x.ScreeningTemplateReview.OrderBy(r => r.Id).LastOrDefault().Status >= ScreeningTemplateStatus.Submitted
                 && x.ScheduleDate != null &&
                 (x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId != ScreeningPatientStatus.ScreeningFailure || x.ScreeningVisit.ScreeningEntry.Randomization.PatientStatusId != ScreeningPatientStatus.Withdrawal)
-               && (((DateTime)x.ScheduleDate).Date == _jwtTokenAccesser.GetClientDate().Date || ((DateTime)x.ScheduleDate).Date < _jwtTokenAccesser.GetClientDate().Date)
-                ).Select(r => new {
-                    r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
-                    r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
-                    r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
-                    r.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                    r.ProjectDesignTemplate.TemplateName,
-                    r.ScheduleDate,
-                    flag = ((DateTime)r.ScheduleDate).Date == _jwtTokenAccesser.GetClientDate().Date == true ? true : false
-                }).ToList();
+               && (FilterFlag == 0 ? (((DateTime)x.ScheduleDate).Date == _jwtTokenAccesser.GetClientDate().Date || ((DateTime)x.ScheduleDate).Date < _jwtTokenAccesser.GetClientDate().Date)
+               : FilterFlag == 1 ? ((DateTime)x.ScheduleDate).Date == _jwtTokenAccesser.GetClientDate().Date
+               : FilterFlag == 2 ? (((DateTime)x.ScheduleDate).Date < _jwtTokenAccesser.GetClientDate().Date && ((DateTime)x.ScheduleDate).Date >= _jwtTokenAccesser.GetClientDate().Date.AddMonths(-1))
+               : (((DateTime)x.ScheduleDate).Date > _jwtTokenAccesser.GetClientDate().Date && ((DateTime)x.ScheduleDate).Date <= _jwtTokenAccesser.GetClientDate().Date.AddMonths(1))
+               )
+               ).Select(r => new
+               {
+                   r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
+                   r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                   r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                   r.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                   r.ProjectDesignTemplate.TemplateName,
+                   r.ScheduleDate,
+                   flag = ((DateTime)r.ScheduleDate).Date == _jwtTokenAccesser.GetClientDate().Date == true ? true : false
+               }).ToList();
 
             return details;
 
         }
+
     }
 }
