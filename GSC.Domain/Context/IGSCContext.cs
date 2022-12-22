@@ -369,5 +369,8 @@ namespace GSC.Domain.Context
         DbSet<ScreeningSetting> ScreeningSetting { get; set; }
         DbSet<VolunteerFinger> VolunteerFinger { get; set; }
         DbSet<ProjectStatus> ProjectStatus { get; set; }
+        DbSet<SupplyManagementFector> SupplyManagementFector { get; set; }
+
+        DbSet<SupplyManagementFectorDetail> SupplyManagementFectorDetail { get; set; }
     }
 }

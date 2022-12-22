@@ -556,6 +556,9 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.Project, x => x.MapFrom(a => a.EconsentSetup.Project.ProjectCode))
                 .ForMember(x => x.Document, x => x.MapFrom(a => a.EconsentSetup.DocumentName))
                 .ReverseMap();
+            CreateMap<SupplyManagementFector, SupplyManagementFectorGridDto>()
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ReverseMap();
         }
     }
 }

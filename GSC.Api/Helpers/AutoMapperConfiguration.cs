@@ -479,6 +479,8 @@ namespace GSC.Api.Helpers
             CreateMap<ScreeningSetting, ScreeningSettingDto>().ReverseMap();
             CreateMap<VolunteerFinger, VolunteerFingerDto>().ReverseMap();
             CreateMap<ProjectStatus, ProjectStatusDto>().ReverseMap();
+            CreateMap<SupplyManagementFector, SupplyManagementFectorDto>().ReverseMap();
+            CreateMap<SupplyManagementFectorDetail, SupplyManagementFectorDetailDto>().ReverseMap();
         }
     }
 }

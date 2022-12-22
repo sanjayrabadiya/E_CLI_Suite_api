@@ -64,5 +64,10 @@ namespace GSC.Data.Entities.Attendance
         public double? StudyVersion { get; set; }
 
         public int? LARUserId { get; set; }
+
+        public Gender? Genderfactor { get; set; }
+        public DaitoryFector? Diatoryfactor { get; set; }
+        public string Agefactor { get; set; }
+        public string BMIfactor { get; set; }
     }
 }

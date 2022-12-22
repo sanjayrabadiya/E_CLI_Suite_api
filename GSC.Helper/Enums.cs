@@ -950,4 +950,30 @@ namespace GSC.Helper
         [Description("Discountinue")] Discountinue = 4,
         [Description("Terminate")] Terminate = 5,
     }
+    public enum Fector : short
+    {
+        [Description("Gender")] Gender = 1,
+        [Description("Dietory")] Diatory = 2,
+        [Description("BMI")] BMI = 3,
+        [Description("Age")] Age = 4
+    }
+    public enum FectorOperator : short
+    {
+        [Description("=")] Equal = 1,
+        [Description(">")] Greater = 2,
+        [Description(">=")] GreaterEqual = 3,
+        [Description("<")] Lessthen = 4,
+        [Description("<=")] LessthenEqual = 5,
+    }
+
+    public enum FectoreType : short
+    {
+        [Description("Study Level")] StudyLevel = 1,
+        [Description("Site Level")] SiteLevel = 2,
+    }
+    public enum DaitoryFector : short
+    {
+        [Description("Veg")] Veg = 1,
+        [Description("Non-Veg")] NonVeg = 2
+    }
 }

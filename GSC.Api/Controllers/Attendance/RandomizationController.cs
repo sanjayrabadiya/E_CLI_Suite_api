@@ -26,6 +26,7 @@ using GSC.Shared.Configuration;
 using GSC.Data.Entities.UserMgt;
 using GSC.Data.Dto.Medra;
 using GSC.Domain.Context;
+using GSC.Respository.SupplyManagement;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -48,6 +49,7 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IProjectRepository _projectRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IGSCContext _context;
+        private readonly ISupplyManagementFectorDetailRepository _supplyManagementFectorDetailRepository;
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignRepository projectDesignRepository,
@@ -62,7 +64,8 @@ namespace GSC.Api.Controllers.Attendance
             IUserRoleRepository userRoleRepository,
             IProjectRepository projectRepository,
             IStudyVersionRepository studyVersionRepository,
-            IGSCContext context
+            IGSCContext context,
+            ISupplyManagementFectorDetailRepository supplyManagementFectorDetailRepository
             )
         {
             _randomizationRepository = randomizationRepository;
@@ -81,6 +84,7 @@ namespace GSC.Api.Controllers.Attendance
             _projectRepository = projectRepository;
             _studyVersionRepository = studyVersionRepository;
             _context = context;
+            _supplyManagementFectorDetailRepository = supplyManagementFectorDetailRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -116,7 +120,7 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest();
 
             var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
-
+            
             return Ok(randomizationDto);
         }
 
@@ -547,6 +551,21 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult GetDashboardRecruitmentRate(int projectId)
         {
             return Ok(_randomizationRepository.GetDashboardRecruitmentRate(projectId));
+        }
+
+        [HttpGet("GetFactorSetting/{id}")]
+        public IActionResult GetFactorSetting(int id)
+        {
+            RandomizationFactor randomizationDto = new RandomizationFactor();
+            var factorData = _supplyManagementFectorDetailRepository.All.Where(x => x.DeletedDate == null && x.SupplyManagementFector.ProjectId == id).ToList();
+            if (factorData != null && factorData.Count > 0)
+            {
+                randomizationDto.IsGenderFactor = factorData.Any(x => x.Fector == Fector.Gender);
+                randomizationDto.IsDaitoryFactor = factorData.Any(x => x.Fector == Fector.Diatory);
+                randomizationDto.IsAgeFactor = factorData.Any(x => x.Fector == Fector.Age);
+                randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
+            }
+            return Ok(randomizationDto);
         }
     }
 }

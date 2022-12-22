@@ -49,6 +49,10 @@ namespace GSC.Data.Dto.Attendance
         public int? UserId { get; set; }
         public double? StudyVersion { get; set; }
         public int? LARUserId { get; set; }
+        public Gender? Genderfactor { get; set; }
+        public DaitoryFector? Diatoryfactor { get; set; }
+        public string Agefactor { get; set; }
+        public string BMIfactor { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto
@@ -116,6 +120,10 @@ namespace GSC.Data.Dto.Attendance
         public bool IsEicf { get; set; }
         public bool IsAllEconsentReviewed { get; set; }
         public double? StudyVersion { get; set; }
+        public Gender? Genderfactor { get; set; }
+        public DaitoryFector? Diatoryfactor { get; set; }
+        public string Agefactor { get; set; }
+        public string BMIfactor { get; set; }
 
     }
 
@@ -142,5 +150,12 @@ namespace GSC.Data.Dto.Attendance
         public bool IsIGT { get; set; }
 
 
+    }
+    public class RandomizationFactor
+    {
+        public bool IsGenderFactor { get; set; }
+        public bool IsDaitoryFactor { get; set; }
+        public bool IsAgeFactor { get; set; }
+        public bool IsBMIFactor { get; set; }
     }
 }

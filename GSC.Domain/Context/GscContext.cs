@@ -423,6 +423,10 @@ namespace GSC.Domain.Context
         public DbSet<VolunteerFinger> VolunteerFinger { get; set; }
 
         public DbSet<ProjectStatus> ProjectStatus { get; set; }
+
+        public DbSet<SupplyManagementFector> SupplyManagementFector { get; set; }
+
+        public DbSet<SupplyManagementFectorDetail> SupplyManagementFectorDetail { get; set; }
     }
 
 

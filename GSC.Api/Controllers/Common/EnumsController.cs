@@ -781,5 +781,72 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(refrencetype);
         }
+
+        [HttpGet]
+        [Route("GetFactors")]
+        public IActionResult GetFactors()
+        {
+            var fectore = Enum.GetValues(typeof(Fector))
+                .Cast<Fector>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+        [HttpGet]
+        [Route("GetGenderFactors")]
+        public IActionResult GetGenderFactors()
+        {
+            var fectore = Enum.GetValues(typeof(Gender))
+                .Cast<Gender>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).Where(x => x.Id != 3).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+
+        [HttpGet]
+        [Route("GetDaitoryFactors")]
+        public IActionResult GetDaitoryFactors()
+        {
+            var fectore = Enum.GetValues(typeof(DaitoryFector))
+                .Cast<DaitoryFector>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+        [HttpGet]
+        [Route("GetFactorsOperators")]
+        public IActionResult GetFactorsOperators()
+        {
+            var fectore = Enum.GetValues(typeof(FectorOperator))
+                .Cast<FectorOperator>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+        [HttpGet]
+        [Route("GetFactorsTypes")]
+        public IActionResult GetFactorsTypes()
+        {
+            var fectore = Enum.GetValues(typeof(FectoreType))
+                .Cast<FectoreType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
     }
 }
