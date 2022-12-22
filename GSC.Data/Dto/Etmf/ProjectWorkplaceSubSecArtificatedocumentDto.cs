@@ -65,6 +65,7 @@ namespace GSC.Data.Dto.Etmf
         public List<DocumentUsers> Approver { get; set; }
         public bool IsApproveDoc { get; set; }
         public bool IsNotRequired { get; set; }
+        public bool? IsReplyAllComment { get; set; }
     }
 
     public class DocumentUsers

@@ -17,6 +17,7 @@ namespace GSC.Data.Entities.Etmf
         public int CompanyId { get; set; }
         public bool? IsAccepted { get; set; }
         public bool IsMoved { get; set; }
+        public bool? IsReplyAllComment { get; set; }
         public int? ParentDocumentId { get; set; }
         [ForeignKey("ProjectWorkplaceArtificateId")]
         public EtmfProjectWorkPlace ProjectWorkplaceArtificate { get; set; }
