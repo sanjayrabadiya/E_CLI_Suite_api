@@ -325,11 +325,22 @@ namespace GSC.Api.Controllers.Volunteer
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            bool obj = GetIdentification(objVolunteerFingerDto.Template, true);
+            dynamic obj = GetIdentification(objVolunteerFingerDto.Template, true);
 
-            if (obj)
+            if (obj.GetType().Name != "Boolean")
             {
-                ModelState.AddModelError("Message", "Same finger enroll with another volunteer.");
+                if (obj.UserBlock)
+                {
+                    ModelState.AddModelError("Message", obj.m_UserName + " is block.");
+                    return BadRequest(ModelState);
+                }
+                else if (obj.UserInActive)
+                {
+                    ModelState.AddModelError("Message", obj.m_UserName + " is inactive. If required, active the volunteer.");
+                    return BadRequest(ModelState);
+                }
+
+                ModelState.AddModelError("Message", "Same finger enroll with another volunteer. UserName: " + obj.m_UserName);
                 return BadRequest(ModelState);
             }
 
@@ -382,7 +393,7 @@ namespace GSC.Api.Controllers.Volunteer
                 {
                     if (isFromAdd)
                     {
-                        return true;
+                        return Users[iIndex];
                     }
                     return Ok(Users[iIndex]);
                 }

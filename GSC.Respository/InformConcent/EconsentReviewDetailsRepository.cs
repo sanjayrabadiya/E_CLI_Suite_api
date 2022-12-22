@@ -268,7 +268,7 @@ namespace GSC.Respository.InformConcent
             //if (!File.Exists(FullPath))
             //    return null;
             GC.Collect();
-            FileStream stream = new FileStream(FullPath, FileMode.Open);
+            FileStream stream = new FileStream(FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             return new FileStreamResult(stream, "application/pdf");
         }
         public List<DashboardDto> GetEconsentMyTaskList(int ProjectId)

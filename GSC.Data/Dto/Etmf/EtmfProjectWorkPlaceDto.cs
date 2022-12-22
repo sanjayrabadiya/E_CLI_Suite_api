@@ -5,7 +5,7 @@ using System.Text;
 
 namespace GSC.Data.Dto.Etmf
 {
-    public class EtmfProjectWorkPlaceDto: BaseDto
+    public class EtmfProjectWorkPlaceDto : BaseDto
     {
         public int ProjectId { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
@@ -103,5 +103,32 @@ namespace GSC.Data.Dto.Etmf
         public string SubSectionName { get; set; }
         public string SubSectionArtificateName { get; set; }
 
+    }
+
+    public class EtmfGroupSearchModel
+    {
+        public dynamic FolderData { get; set; }
+        public dynamic ZoneData { get; set; }
+        public dynamic SectionData { get; set; }
+        public dynamic SubSectionData { get; set; }
+        public List<EtmfSearchModel> SearchData { get; set; }
+    }
+    public class EtmfSearchModel
+    {
+        public int Id { get; set; }
+        public int? ProjectId { get; set; }
+        public string ProjectCode { get; set; }
+        public string WorkPlaceFolderName { get; set; }
+        public int WorkPlaceFolderId { get; set; }
+        public string ZoneName { get; set; }
+        public int ZoneId { get; set; }
+        public string SectionName { get; set; }
+        public int SectionId { get; set; }
+        public string ArtificateName { get; set; }
+        public string SubSectionName { get; set; }
+        public int SubSectionId { get; set; }
+        public string SubSectionArtificateName { get; set; }
+        public string SiteName { get; set; }
+        public int TableTag { get; set; }
     }
 }

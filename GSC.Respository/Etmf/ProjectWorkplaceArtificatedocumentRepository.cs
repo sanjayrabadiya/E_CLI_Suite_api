@@ -212,6 +212,7 @@ namespace GSC.Respository.Etmf
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId || reviewerList.Contains(_jwtTokenAccesser.UserId);
+                obj.IsReplyAllComment = item.IsReplyAllComment;
                 dataList.Add(obj);
             }
             return dataList;
@@ -1472,6 +1473,14 @@ namespace GSC.Respository.Etmf
             }
 
             return result.OrderByDescending(x => x.CreatedDate).ToList();
+        }
+
+        public void UpdateDocumentComment(int documentId, bool? isComment)
+        {
+            var doc = All.FirstOrDefault(x => x.Id == documentId);
+            doc.IsReplyAllComment = isComment;
+            Update(doc);
+            _context.Save();
         }
     }
 }

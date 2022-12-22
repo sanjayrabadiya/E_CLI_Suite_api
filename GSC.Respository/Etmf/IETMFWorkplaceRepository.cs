@@ -22,5 +22,6 @@ namespace GSC.Respository.Etmf
         void CreateZipFileOfWorkplaceJobMonitoring(int Id);
         EtmfProjectWorkPlace GetWorkplaceDetails(int id);
         void DeleteAllTable(EtmfProjectWorkPlace EtmfProjectWorkPlace);
+        EtmfGroupSearchModel GetEtmfSearchData(int id);
     }
 }

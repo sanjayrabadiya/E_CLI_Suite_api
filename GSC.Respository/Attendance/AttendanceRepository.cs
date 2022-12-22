@@ -136,7 +136,7 @@ namespace GSC.Respository.Attendance
                 AttendanceId = x.Id,
                 VolunteerId = x.VolunteerId,
                 ProjectDesignId = x.ProjectDesignPeriod.ProjectDesignId,
-                AliasName=x.Volunteer.AliasName,
+                AliasName = x.Volunteer.AliasName,
                 VolunteerName = x.Volunteer.FirstName + " " + x.Volunteer.MiddleName + " " + x.Volunteer.LastName,
                 VolunteerNumber = x.Volunteer.VolunteerNo,
                 Gender = x.Volunteer == null || x.Volunteer.GenderId == null ? "" : x.Volunteer.GenderId.ToString(),
@@ -348,8 +348,8 @@ namespace GSC.Respository.Attendance
                 if (All.Any(x =>
                     x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening &&
                     //Convert.ToDateTime(x.AttendanceDate).ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString()  &&
-                    x.AttendanceDate.Day.CompareTo(attendanceDto.AttendanceDate.Day)==0 && //_jwtTokenAccesser.GetClientDate().Date &&
-                    //x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
+                    x.AttendanceDate.Day.CompareTo(attendanceDto.AttendanceDate.Day) == 0 && //_jwtTokenAccesser.GetClientDate().Date &&
+                                                                                             //x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
                     x.DeletedDate == null))
                     return "Volunteer already present today";
             if (attendanceDto.AttendanceType == DataEntryType.Project)

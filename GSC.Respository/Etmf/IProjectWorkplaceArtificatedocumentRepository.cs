@@ -30,5 +30,6 @@ namespace GSC.Respository.Etmf
         string ImportData(int Id);
         ProjectWorkplaceArtificatedocument WordToPdf(int Id);
         IList<EtmfStudyReportDto> GetEtmfStudyReport(StudyReportSearchDto filters);
+        void UpdateDocumentComment(int documentId, bool? isComment);
     }
 }

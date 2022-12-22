@@ -320,5 +320,13 @@ namespace GSC.Api.Controllers.Etmf
 
             return Ok(auditsDto);
         }
+
+        [HttpGet]
+        [Route("UpdateDocumentComment/{documentId}/{isComment}")]
+        public IActionResult UpdateDocumentComment(int documentId, bool? isComment)
+        {
+            _projectWorkplaceArtificatedocumentRepository.UpdateDocumentComment(documentId, isComment);
+            return Ok("");
+        }
     }
 }
