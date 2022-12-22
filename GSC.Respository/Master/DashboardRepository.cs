@@ -847,9 +847,9 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var CountAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001")).Count();
-            var Count7AE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001" && (x.CreatedDate == DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7)))).Count();
+            var Count7AE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001" && (x.CreatedDate <= DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7)))).Count();
             var CountSAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001")).Count();
-            var Count7SAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001" && (x.CreatedDate == DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7) ))).Count();
+            var Count7SAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001" && (x.CreatedDate <= DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7) ))).Count();
 
             return new { CountAE, Count7AE, CountSAE, Count7SAE };
         }
