@@ -34,6 +34,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Medra;
 using System.Globalization;
 using GSC.Respository.InformConcent;
+using GSC.Respository.SupplyManagement;
 
 namespace GSC.Respository.Attendance
 {
@@ -57,6 +58,7 @@ namespace GSC.Respository.Attendance
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
         private readonly IUserRoleRepository _userRoleRepository;
+        private readonly ISupplyManagementFectorRepository _supplyManagementFectorRepository;
 
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
@@ -77,7 +79,8 @@ namespace GSC.Respository.Attendance
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
             IUnitOfWork uow, IUserRoleRepository userRoleRepository,
-            IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository, IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository
+            IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository, IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository,
+            ISupplyManagementFectorRepository supplyManagementFectorRepository
             )
             : base(context)
         {
@@ -98,6 +101,7 @@ namespace GSC.Respository.Attendance
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
             _userRoleRepository = userRoleRepository;
+            _supplyManagementFectorRepository = supplyManagementFectorRepository;
         }
 
         public void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto)
@@ -263,6 +267,15 @@ namespace GSC.Respository.Attendance
             }
             else
             {
+                var result = _supplyManagementFectorRepository.ValidateSubjecWithFactor(randomization);
+                if (result != null)
+                {
+                    if (!string.IsNullOrEmpty(result.ErrorMessage))
+                        randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                    if (!string.IsNullOrEmpty(result.Result))
+                        randomizationNumberDto.ErrorMessage = result.Result;
+                    return randomizationNumberDto;
+                }
                 randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId);
             }
             return randomizationNumberDto;

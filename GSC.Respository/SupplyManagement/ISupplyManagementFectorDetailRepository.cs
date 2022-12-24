@@ -8,7 +8,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ISupplyManagementFectorDetailRepository : IGenericRepository<SupplyManagementFectorDetail>
     {
-        List<SupplyManagementFectorDetailDto> GetDetailList(int id);
+        SupplyManagementFectorDto GetDetailList(int id);
         SupplyManagementFectorDetailDto GetDetail(int id);
         bool CheckType(SupplyManagementFectorDetailDto supplyManagementFectorDetailDto);
     }

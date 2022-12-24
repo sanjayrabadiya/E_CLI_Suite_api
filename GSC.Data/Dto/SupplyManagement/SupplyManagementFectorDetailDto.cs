@@ -23,5 +23,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ProjectCode { get; set; }
         public int ProjectId { get; set; }
+
+        public string InputValue { get; set; }
+        public string QueryFormula { get; set; }
+
+        public DataType? dataType { get; set; }
     }
 }

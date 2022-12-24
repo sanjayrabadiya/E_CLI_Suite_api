@@ -88,6 +88,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementFectorRepository.DeleteChild(supplyManagementFectorDto.Id);
             _supplyManagementFectorRepository.Update(supplyManagementFector);
             if (_uow.Save() <= 0) throw new Exception("Updating fector failed on save.");
+
             return Ok(supplyManagementFector.Id);
         }
 
@@ -113,6 +114,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
             _supplyManagementFectorRepository.Update(record);
             _uow.Save();
+           
             return Ok();
         }
 
@@ -134,6 +136,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
                 }
             }
+            _uow.Save();
+            _supplyManagementFectorRepository.UpdateFactorFormula(record.Id);
             _uow.Save();
             return Ok();
         }

@@ -8,6 +8,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,27 +31,34 @@ namespace GSC.Respository.SupplyManagement
             _mapper = mapper;
             _context = context;
         }
-        public List<SupplyManagementFectorDetailDto> GetDetailList(int id)
+        public SupplyManagementFectorDto GetDetailList(int id)
         {
-
-            var data = All.Where(x => x.DeletedDate == null && x.SupplyManagementFectorId == id).Select(z => new SupplyManagementFectorDetailDto
+            var data = _context.SupplyManagementFector.Include(x => x.FectorDetailList).Where(x => x.Id == id).Select(x => new SupplyManagementFectorDto
             {
-                Id = z.Id,
-                SupplyManagementFectorId = z.SupplyManagementFectorId,
-                ProductTypeCode = z.ProductTypeCode,
-                Fector = z.Fector,
-                Operator = z.Operator,
-                CollectionValue = z.CollectionValue,
-                LogicalOperator = z.LogicalOperator,
-                Ratio = z.Ratio,
-                FactoreName = z.Fector.GetDescription(),
-                FactoreOperatorName = z.Operator.ToString(),
-                collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
-                Type = z.Type,
-                TypeName = z.Type.GetDescription(),
-                IsDeleted = z.DeletedDate != null ? true : false,
-                ProjectCode = z.SupplyManagementFector.Project.ProjectCode
-            }).ToList();
+                Id = x.Id,
+                SourceFormula = x.SourceFormula,
+                CheckFormula = x.CheckFormula,
+                ErrorMessage = x.ErrorMessage,
+                SampleResult = x.SampleResult,
+                Children = x.FectorDetailList.Select(z => new SupplyManagementFectorDetailDto
+                {
+                    Id = z.Id,
+                    SupplyManagementFectorId = z.SupplyManagementFectorId,
+                    ProductTypeCode = z.ProductTypeCode,
+                    Fector = z.Fector,
+                    Operator = z.Operator,
+                    CollectionValue = z.CollectionValue,
+                    LogicalOperator = z.LogicalOperator,
+                    Ratio = z.Ratio,
+                    FactoreName = z.Fector.GetDescription(),
+                    FactoreOperatorName = z.Operator.ToString(),
+                    collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
+                    Type = z.Type,
+                    TypeName = z.Type.GetDescription(),
+                    IsDeleted = z.DeletedDate != null ? true : false,
+                    ProjectCode = z.SupplyManagementFector.Project.ProjectCode
+                }).ToList()
+            }).FirstOrDefault();
             return data;
         }
         public SupplyManagementFectorDetailDto GetDetail(int id)

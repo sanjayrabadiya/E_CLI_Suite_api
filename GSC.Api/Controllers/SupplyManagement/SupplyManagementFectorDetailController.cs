@@ -79,6 +79,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _supplyManagementFectorDetailRepository.Add(supplyManagementFectorDetail);
             if (_uow.Save() <= 0) throw new Exception("Creating fector detail failed on save.");
+
+            _supplyManagementFectorRepository.UpdateFactorFormula(supplyManagementFectorDetailDto.SupplyManagementFectorId);
             return Ok(supplyManagementFectorDetail.Id);
         }
         [HttpPut]
@@ -94,6 +96,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _supplyManagementFectorDetailRepository.Update(supplyManagementFectorDetail);
             if (_uow.Save() <= 0) throw new Exception("Updating fector detail failed on save.");
+            _supplyManagementFectorRepository.UpdateFactorFormula(supplyManagementFectorDetailDto.SupplyManagementFectorId);
             return Ok(supplyManagementFectorDetail.Id);
         }
 
@@ -110,27 +113,23 @@ namespace GSC.Api.Controllers.SupplyManagement
                 record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
             _supplyManagementFectorDetailRepository.Update(record);
             _uow.Save();
+            _supplyManagementFectorRepository.UpdateFactorFormula(record.SupplyManagementFectorId);
+            _uow.Save();
             return Ok();
         }
 
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _supplyManagementFectorRepository.Find(id);
+            var record = _supplyManagementFectorDetailRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            _supplyManagementFectorRepository.Active(record);
-            var list = _supplyManagementFectorDetailRepository.All.Where(x => x.SupplyManagementFectorId == id).ToList();
-            if (list != null)
-            {
-                foreach (var item in list)
-                {
-                    _supplyManagementFectorDetailRepository.Active(item);
-
-                }
-            }
+            _supplyManagementFectorDetailRepository.Active(record);
+            
+            _uow.Save();
+            _supplyManagementFectorRepository.UpdateFactorFormula(record.SupplyManagementFectorId);
             _uow.Save();
             return Ok();
         }

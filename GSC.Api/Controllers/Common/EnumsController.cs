@@ -823,17 +823,32 @@ namespace GSC.Api.Controllers.Common
             return Ok(fectore);
         }
         [HttpGet]
-        [Route("GetFactorsOperators")]
-        public IActionResult GetFactorsOperators()
+        [Route("GetFactorsOperators/{id}")]
+        public IActionResult GetFactorsOperators(int id)
         {
-            var fectore = Enum.GetValues(typeof(FectorOperator))
-                .Cast<FectorOperator>().Select(e => new DropDownEnum
-                {
-                    Id = Convert.ToInt16(e),
-                    Value = e.GetDescription()
-                }).OrderBy(o => o.Id).ToList();
+            if (id == 1 || id == 2)
+            {
+                var fectore = Enum.GetValues(typeof(FectorOperator))
+                    .Cast<FectorOperator>().Select(e => new DropDownEnum
+                    {
+                        Id = Convert.ToInt16(e),
+                        Value = e.GetDescription()
+                    }).Where(x => x.Id == 1).OrderBy(o => o.Id).ToList();
 
-            return Ok(fectore);
+                return Ok(fectore);
+            }
+            else
+            {
+                var fectore = Enum.GetValues(typeof(FectorOperator))
+                   .Cast<FectorOperator>().Select(e => new DropDownEnum
+                   {
+                       Id = Convert.ToInt16(e),
+                       Value = e.GetDescription()
+                   }).OrderBy(o => o.Id).ToList();
+
+                return Ok(fectore);
+            }
+
         }
         [HttpGet]
         [Route("GetFactorsTypes")]

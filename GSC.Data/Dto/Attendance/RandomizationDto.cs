@@ -149,6 +149,8 @@ namespace GSC.Data.Dto.Attendance
         public bool IsIWRS { get; set; }
         public bool IsIGT { get; set; }
 
+        public string ErrorMessage { get; set; }
+
 
     }
     public class RandomizationFactor

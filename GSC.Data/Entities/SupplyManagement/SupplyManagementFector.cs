@@ -13,5 +13,13 @@ namespace GSC.Data.Entities.SupplyManagement
         public List<SupplyManagementFectorDetail> FectorDetailList { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public string CheckFormula { get; set; }
+
+        public string SourceFormula { get; set; }
+
+        public string SampleResult { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 }
