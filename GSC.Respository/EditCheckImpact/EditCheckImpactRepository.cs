@@ -564,13 +564,13 @@ namespace GSC.Respository.EditCheckImpact
                         IsHide = true,
                         ScreeningTemplateId = r.Id
                     });
+
                     var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id).ToList();
                     screeningTemplateValue.ForEach(x =>
                     {
-                        if (x.QueryStatus != null)
+                        if (x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed)
                         {
-                            x.IsSystem = false;
-                            x.QueryStatus = QueryStatus.Closed;
+                            ForceClosedQuery(x, true);
                             _screeningTemplateValueRepository.Update(x);
                         }
                     });
@@ -837,20 +837,43 @@ namespace GSC.Respository.EditCheckImpact
 
             screeningTemplateValue.IsHide = isHide;
 
-            if (isHide && screeningTemplateValue.QueryStatus != null)
+            if (isHide)
             {
-                screeningTemplateValue.IsSystem = false;
-                screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+                screeningTemplateValue.Value = null;
+                ForceClosedQuery(screeningTemplateValue, false);
             }
 
 
-            if (isHide)
-                screeningTemplateValue.Value = null;
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
             _context.Save();
             _context.DetachAllEntities();
 
+        }
+
+        void ForceClosedQuery(ScreeningTemplateValue screeningTemplateValue, bool isTemplate)
+        {
+            if (screeningTemplateValue.QueryStatus != null && screeningTemplateValue.QueryStatus != QueryStatus.Closed)
+            {
+                screeningTemplateValue.IsSystem = false;
+                screeningTemplateValue.AcknowledgeLevel = null;
+                screeningTemplateValue.ReviewLevel = 0;
+                screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+
+                var valueQuery = new ScreeningTemplateValueQuery();
+                valueQuery.QueryStatus = QueryStatus.Closed;
+                valueQuery.IsSystem = true;
+                valueQuery.ScreeningTemplateValue = screeningTemplateValue;
+                valueQuery.ScreeningTemplateValueId = screeningTemplateValue.Id;
+                valueQuery.QueryLevel = screeningTemplateValue.ReviewLevel;
+
+                if (isTemplate)
+                    valueQuery.Note = $"Closed query for hide template";
+                else
+                    valueQuery.Note = $"Closed query for hide variable";
+
+                _screeningTemplateValueQueryRepository.Save(valueQuery);
+            }
         }
 
         public int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource, bool isDisable)
