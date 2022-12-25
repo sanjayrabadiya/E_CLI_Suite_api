@@ -317,7 +317,7 @@ namespace GSC.Respository.EditCheckImpact
 
             targetResult.Where(r => r.Operator == Operator.Hide && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
             {
-                UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r.ValidateType, editTargetValidation);
+                UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningEntryId, r.ValidateType, editTargetValidation);
             });
 
         }
@@ -523,6 +523,21 @@ namespace GSC.Respository.EditCheckImpact
             return screeningTemplates;
         }
 
+        private List<ScreeningTemplate> GetHideTemplates(int projectDesignTemplateId, int domainId, int screeningEntryId)
+        {
+            List<ScreeningTemplate> screeningTemplates = null;
+            if (projectDesignTemplateId > 0)
+                screeningTemplates = All.AsNoTracking().
+                    Where(r => r.ProjectDesignTemplateId == projectDesignTemplateId &&
+                    r.ScreeningVisit.ScreeningEntryId == screeningEntryId).ToList();
+            else
+                screeningTemplates = All.AsNoTracking().
+                    Where(r => r.ProjectDesignTemplate.DomainId == domainId
+                    && r.ScreeningVisit.ScreeningEntryId == screeningEntryId).ToList();
+
+            return screeningTemplates;
+        }
+
 
         private void UpdateTemplateDisable(int projectDesignTemplateId, int domainId, int screeningVisitId)
         {
@@ -535,9 +550,9 @@ namespace GSC.Respository.EditCheckImpact
             _context.Save();
         }
 
-        private void UpdateTemplateHide(int projectDesignTemplateId, int domainId, int screeningVisitId, EditCheckValidateType checkValidateType, List<EditCheckTargetValidationList> editTargetValidation)
+        private void UpdateTemplateHide(int projectDesignTemplateId, int domainId, int screeningEntryId, EditCheckValidateType checkValidateType, List<EditCheckTargetValidationList> editTargetValidation)
         {
-            List<ScreeningTemplate> screeningTemplates = GetEnableTemplate(projectDesignTemplateId, domainId, screeningVisitId);
+            List<ScreeningTemplate> screeningTemplates = GetHideTemplates(projectDesignTemplateId, domainId, screeningEntryId);
 
             var templatesHide = new List<HideShowEditChekTemplateDto>();
             var isFound = false;
