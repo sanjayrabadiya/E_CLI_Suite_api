@@ -273,19 +273,19 @@ namespace GSC.Respository.Attendance
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
                         randomizationNumberDto.ErrorMessage = result.ErrorMessage;
-                        return randomizationNumberDto;
                     }
                     if (!string.IsNullOrEmpty(result.Result))
                     {
                         randomizationNumberDto.ErrorMessage = result.Result;
-                        return randomizationNumberDto;
+
                     }
+                    if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
+                        randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType);
                 }
-                randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId);
             }
             return randomizationNumberDto;
         }
-        public string GetRandNoIWRS(int projectid, int siteId, int? countryId)
+        public string GetRandNoIWRS(int projectid, int siteId, int? countryId, string productType)
         {
             string randno = string.Empty;
 
@@ -296,7 +296,13 @@ namespace GSC.Respository.Attendance
             }
             if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
             {
-                var data = _context.SupplyManagementUploadFileDetail
+                var data = productType != null && productType != "" ? _context.SupplyManagementUploadFileDetail
+                                            .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
+                                            && x.RandomizationId == null
+                                            && x.TreatmentType == productType.Trim()
+                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault()
+                                            : _context.SupplyManagementUploadFileDetail
                                             .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
                                             && x.RandomizationId == null
                                             && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
@@ -312,7 +318,14 @@ namespace GSC.Respository.Attendance
                 var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == countryId).FirstOrDefault();
                 if (site != null)
                 {
-                    var datacountry = _context.SupplyManagementUploadFileDetail
+                    var datacountry = productType != null && productType != "" ? _context.SupplyManagementUploadFileDetail
+                                        .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                                        && x.RandomizationId == null
+                                        && x.TreatmentType == productType.Trim()
+                                        && x.SupplyManagementUploadFile.ProjectId == projectid
+                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault()
+                                        : _context.SupplyManagementUploadFileDetail
                                         .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
                                         && x.RandomizationId == null
                                         && x.SupplyManagementUploadFile.ProjectId == projectid
@@ -328,7 +341,13 @@ namespace GSC.Respository.Attendance
             }
             if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
             {
-                var datastudy = _context.SupplyManagementUploadFileDetail
+                var datastudy = productType != null && productType != "" ? _context.SupplyManagementUploadFileDetail
+                                        .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
+                                        && x.RandomizationId == null
+                                         && x.TreatmentType == productType.Trim()
+                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault() :
+                                        _context.SupplyManagementUploadFileDetail
                                         .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
                                         && x.RandomizationId == null
                                         && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve

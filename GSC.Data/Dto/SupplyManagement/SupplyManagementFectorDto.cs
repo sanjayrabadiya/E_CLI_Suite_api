@@ -41,6 +41,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string Result { get; set; }
         public string ResultMessage { get; set; }
         public string ErrorMessage { get; set; } = "";
+        public string ProductType { get; set; }
 
     }
 }

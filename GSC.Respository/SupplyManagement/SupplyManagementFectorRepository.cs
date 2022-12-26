@@ -213,6 +213,7 @@ namespace GSC.Respository.SupplyManagement
             var dt = new DataTable();
             string ruleStr = "";
             string displayRule = "";
+            string productType = "";
 
             int i = 0;
             editCheck.ForEach(r =>
@@ -248,6 +249,12 @@ namespace GSC.Respository.SupplyManagement
 
                 col.ColumnName = colName;
                 dt.Columns.Add(col);
+
+                if (!string.IsNullOrEmpty(r.ProductTypeCode))
+                    productType = productType + r.ProductTypeCode;
+                if (r.LogicalOperator == "OR")
+                    productType = productType + " OR ";
+
             });
 
             ruleStr = ruleStr.Replace("  ", " ").Trim();
@@ -255,6 +262,45 @@ namespace GSC.Respository.SupplyManagement
             var result = ValidateDataTableFactor(dt, ruleStr);
 
             result.SampleText = displayRule;
+
+            if (ruleStr.Contains("OR"))
+            {
+                var splitRules = ruleStr.Split("OR").ToList();
+                if (splitRules.Count > 0)
+                {
+                    for (int r = 0; r < splitRules.Count; r++)
+                    {
+                        var result1 = ValidateDataTableFactor(dt, splitRules[r]);
+                        if (result1.IsValid)
+                        {
+                            if (!string.IsNullOrEmpty(productType))
+                            {
+                                if (productType.Contains("OR"))
+                                {
+                                    var ProducttypeArray = productType.Split("OR").ToArray();
+                                    result.ProductType = ProducttypeArray[r].Trim();
+                                }
+                                else
+                                {
+                                    result.ProductType = productType.Trim();
+                                }
+                            }
+
+
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var result1 = ValidateDataTableFactor(dt, ruleStr);
+                if (result1.IsValid)
+                {
+                    if (!string.IsNullOrEmpty(productType))
+                        result.ProductType = productType.Trim();
+                }
+            }
+
             return result;
         }
 
