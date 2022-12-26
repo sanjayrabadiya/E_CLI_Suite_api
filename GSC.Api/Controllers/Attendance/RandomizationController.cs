@@ -479,16 +479,17 @@ namespace GSC.Api.Controllers.Attendance
                     ModelState.AddModelError("Message", "Patient status is not eligible for randomization");
                     return BadRequest(ModelState);
                 }
+                if (data.IsIGT && !string.IsNullOrEmpty(data.ErrorMessage))
+                {
+                    ModelState.AddModelError("Message", data.ErrorMessage);
+                    return BadRequest(ModelState);
+                }
                 if (data.IsIGT && string.IsNullOrEmpty(data.RandomizationNumber))
                 {
                     ModelState.AddModelError("Message", "Please upload randomization sheet");
                     return BadRequest(ModelState);
                 }
-                if (data.IsIGT && string.IsNullOrEmpty(data.ErrorMessage))
-                {
-                    ModelState.AddModelError("Message", data.ErrorMessage);
-                    return BadRequest(ModelState);
-                }
+                
                 return Ok(data);
             }
             else

@@ -40,7 +40,7 @@ namespace GSC.Respository.SupplyManagement
                 CheckFormula = x.CheckFormula,
                 ErrorMessage = x.ErrorMessage,
                 SampleResult = x.SampleResult,
-                Children = x.FectorDetailList.Select(z => new SupplyManagementFectorDetailDto
+                Children = x.FectorDetailList.Where(x => x.DeletedDate == null).Select(z => new SupplyManagementFectorDetailDto
                 {
                     Id = z.Id,
                     SupplyManagementFectorId = z.SupplyManagementFectorId,

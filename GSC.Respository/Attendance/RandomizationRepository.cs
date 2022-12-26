@@ -271,10 +271,15 @@ namespace GSC.Respository.Attendance
                 if (result != null)
                 {
                     if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    {
                         randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                        return randomizationNumberDto;
+                    }
                     if (!string.IsNullOrEmpty(result.Result))
+                    {
                         randomizationNumberDto.ErrorMessage = result.Result;
-                    return randomizationNumberDto;
+                        return randomizationNumberDto;
+                    }
                 }
                 randomizationNumberDto.RandomizationNumber = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId);
             }
