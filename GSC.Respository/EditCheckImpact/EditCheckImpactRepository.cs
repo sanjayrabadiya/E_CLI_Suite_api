@@ -317,7 +317,7 @@ namespace GSC.Respository.EditCheckImpact
 
             targetResult.Where(r => r.Operator == Operator.Hide && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
             {
-                UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningVisitId, r.ValidateType, editTargetValidation);
+                UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningEntryId, r.ValidateType, editTargetValidation);
             });
 
         }
@@ -523,6 +523,21 @@ namespace GSC.Respository.EditCheckImpact
             return screeningTemplates;
         }
 
+        private List<ScreeningTemplate> GetHideTemplates(int projectDesignTemplateId, int domainId, int screeningEntryId)
+        {
+            List<ScreeningTemplate> screeningTemplates = null;
+            if (projectDesignTemplateId > 0)
+                screeningTemplates = All.AsNoTracking().
+                    Where(r => r.ProjectDesignTemplateId == projectDesignTemplateId &&
+                    r.ScreeningVisit.ScreeningEntryId == screeningEntryId).ToList();
+            else
+                screeningTemplates = All.AsNoTracking().
+                    Where(r => r.ProjectDesignTemplate.DomainId == domainId
+                    && r.ScreeningVisit.ScreeningEntryId == screeningEntryId).ToList();
+
+            return screeningTemplates;
+        }
+
 
         private void UpdateTemplateDisable(int projectDesignTemplateId, int domainId, int screeningVisitId)
         {
@@ -535,9 +550,9 @@ namespace GSC.Respository.EditCheckImpact
             _context.Save();
         }
 
-        private void UpdateTemplateHide(int projectDesignTemplateId, int domainId, int screeningVisitId, EditCheckValidateType checkValidateType, List<EditCheckTargetValidationList> editTargetValidation)
+        private void UpdateTemplateHide(int projectDesignTemplateId, int domainId, int screeningEntryId, EditCheckValidateType checkValidateType, List<EditCheckTargetValidationList> editTargetValidation)
         {
-            List<ScreeningTemplate> screeningTemplates = GetEnableTemplate(projectDesignTemplateId, domainId, screeningVisitId);
+            List<ScreeningTemplate> screeningTemplates = GetHideTemplates(projectDesignTemplateId, domainId, screeningEntryId);
 
             var templatesHide = new List<HideShowEditChekTemplateDto>();
             var isFound = false;
@@ -564,13 +579,13 @@ namespace GSC.Respository.EditCheckImpact
                         IsHide = true,
                         ScreeningTemplateId = r.Id
                     });
+
                     var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(x => x.ScreeningTemplateId == r.Id).ToList();
                     screeningTemplateValue.ForEach(x =>
                     {
-                        if (x.QueryStatus != null)
+                        if (x.QueryStatus != null && x.QueryStatus != QueryStatus.Closed)
                         {
-                            x.IsSystem = false;
-                            x.QueryStatus = QueryStatus.Closed;
+                            ForceClosedQuery(x, true);
                             _screeningTemplateValueRepository.Update(x);
                         }
                     });
@@ -837,20 +852,43 @@ namespace GSC.Respository.EditCheckImpact
 
             screeningTemplateValue.IsHide = isHide;
 
-            if (isHide && screeningTemplateValue.QueryStatus != null)
+            if (isHide)
             {
-                screeningTemplateValue.IsSystem = false;
-                screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+                screeningTemplateValue.Value = null;
+                ForceClosedQuery(screeningTemplateValue, false);
             }
 
 
-            if (isHide)
-                screeningTemplateValue.Value = null;
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
             _context.Save();
             _context.DetachAllEntities();
 
+        }
+
+        void ForceClosedQuery(ScreeningTemplateValue screeningTemplateValue, bool isTemplate)
+        {
+            if (screeningTemplateValue.QueryStatus != null && screeningTemplateValue.QueryStatus != QueryStatus.Closed)
+            {
+                screeningTemplateValue.IsSystem = false;
+                screeningTemplateValue.AcknowledgeLevel = null;
+                screeningTemplateValue.ReviewLevel = 0;
+                screeningTemplateValue.QueryStatus = QueryStatus.Closed;
+
+                var valueQuery = new ScreeningTemplateValueQuery();
+                valueQuery.QueryStatus = QueryStatus.Closed;
+                valueQuery.IsSystem = true;
+                valueQuery.ScreeningTemplateValue = screeningTemplateValue;
+                valueQuery.ScreeningTemplateValueId = screeningTemplateValue.Id;
+                valueQuery.QueryLevel = screeningTemplateValue.ReviewLevel;
+
+                if (isTemplate)
+                    valueQuery.Note = $"Closed query for hide template";
+                else
+                    valueQuery.Note = $"Closed query for hide variable";
+
+                _screeningTemplateValueQueryRepository.Save(valueQuery);
+            }
         }
 
         public int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource, bool isDisable)
