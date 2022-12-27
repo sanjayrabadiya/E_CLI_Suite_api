@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authorization;
 using System.Collections.Generic;
 using Futronic.SDKHelper;
 using GSC.Data.Entities.Volunteer;
+using System.Linq;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -375,12 +376,15 @@ namespace GSC.Api.Controllers.Volunteer
             List<DbRecords> Users = _volunteerFingerRepository.GetFingers();
             FtrIdentifyRecord[] rgRecords = new FtrIdentifyRecord[Users.Count];
 
-            foreach (DbRecords item in Users)
-            {
-                rgRecords[iIndex].KeyValue = item.m_Key.ToByteArray();
-                rgRecords[iIndex].Template = Convert.FromBase64String(item.m_Template.Split(',')[1]);
-                iIndex++;
-            }
+
+            rgRecords = Users.Select(item => new FtrIdentifyRecord { KeyValue = item.m_Key.ToByteArray(), Template = Convert.FromBase64String(item.m_Template.Split(',')[1])}).ToArray();
+
+            //foreach (DbRecords item in Users)
+            //{
+            //    rgRecords[iIndex].KeyValue = item.m_Key.ToByteArray();
+            //    rgRecords[iIndex].Template = Convert.FromBase64String(item.m_Template.Split(',')[1]);
+            //    iIndex++;
+            //}
 
             FutronicSdkBase m_Operation = new FutronicIdentification();
             ((FutronicIdentification)m_Operation).FARN = 245;
