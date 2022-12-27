@@ -242,7 +242,7 @@ namespace GSC.Respository.Etmf
             obj.IsAccepted = document.IsAccepted;
             obj.ApprovedStatus = document.IsAccepted == null ? "" : document.IsAccepted == true ? "Approved" : "Rejected";
             obj.EtmfArtificateMasterLbraryId = document.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
-
+            obj.IsReplyAllComment = document.IsReplyAllComment;
             return obj;
         }
 
@@ -333,9 +333,9 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetEtmfCountrySiteDropdown(int projectId, int folderId)
         {
-            int workplaceid = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault().Id;
+            //int workplaceid = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault()?.Id;
 
-            var data = _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == workplaceid && x.WorkPlaceFolderId == folderId && x.DeletedDate == null)
+            var data = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == projectId && x.WorkPlaceFolderId == folderId && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail)
                         .Select(x => new DropDownDto
                         {
                             Id = x.Id,

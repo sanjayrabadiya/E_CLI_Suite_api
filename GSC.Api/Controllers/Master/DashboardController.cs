@@ -90,10 +90,12 @@ namespace GSC.Api.Controllers.Master
             };
             objdashboard.MyTaskList.AddRange(_projectArtificateDocumentApproverRepository.GetEtmfMyTaskList(ProjectId));
             objdashboard.MyTaskList.AddRange(_projectWorkplaceArtificateDocumentReviewRepository.GetSendDocumentList(ProjectId));
+            objdashboard.MyTaskList.AddRange(_projectWorkplaceArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId));
+
             objdashboard.MyTaskList.AddRange(_projectSubSecArtificateDocumentApproverRepository.GetEtmfMyTaskList(ProjectId));
             objdashboard.MyTaskList.AddRange(_projectSubSecArtificateDocumentReviewRepository.GetSendDocumentList(ProjectId));
-            objdashboard.MyTaskList.AddRange(_projectWorkplaceArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId));
             objdashboard.MyTaskList.AddRange(_projectSubSecArtificateDocumentReviewRepository.GetSendBackDocumentList(ProjectId));
+
             objdashboard.MyTaskList.AddRange(_econsentReviewDetailsRepository.GetEconsentMyTaskList(ProjectId));
             objdashboard.MyTaskList.AddRange(_aEReportingRepository.GetAEReportingMyTaskList(ProjectId, (int)(SiteId != null ? SiteId : ProjectId)));
             objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));

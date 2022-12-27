@@ -105,12 +105,15 @@ namespace GSC.Respository.Etmf
         // Get data for mytasklist on dashboard
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
-            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                   .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                   .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                   .ThenInclude(x => x.Project).Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
-                 && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectId == ProjectId)
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument)
+                .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                .ThenInclude(x => x.EtmfArtificateMasterLbrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace).Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
+                 && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectId == ProjectId && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,

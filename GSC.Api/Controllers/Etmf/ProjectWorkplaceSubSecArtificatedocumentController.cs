@@ -187,5 +187,13 @@ namespace GSC.Api.Controllers.Etmf
             var result = _projectWorkplaceSubSecArtificatedocumentRepository.GetDocumentForPdfHistory(id);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("UpdateSubSectionDocumentComment/{documentId}/{isComment}")]
+        public IActionResult UpdateSubSectionDocumentComment(int documentId, bool? isComment)
+        {
+            _projectWorkplaceSubSecArtificatedocumentRepository.UpdateSubDocumentComment(documentId, isComment);
+            return Ok("");
+        }
     }
 }

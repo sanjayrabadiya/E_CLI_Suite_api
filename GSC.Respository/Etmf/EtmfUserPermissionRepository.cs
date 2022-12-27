@@ -110,7 +110,7 @@ namespace GSC.Respository.Etmf
                 .ToList();
 
             _context.EtmfUserPermission.AddRange(EtmfUserPermission);
-           return _context.Save();
+            return _context.Save();
         }
 
         public void updatePermission(List<EtmfUserPermissionDto> EtmfUserPermissionDto)
@@ -295,7 +295,7 @@ namespace GSC.Respository.Etmf
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
-                    Value = x.ProjectCode,
+                    Value = x.ProjectCode + " (" + x.ProjectName + ")",
                     ExtraData = x.ProjectName
                 }).ToList();
 

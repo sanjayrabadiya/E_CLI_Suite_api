@@ -194,14 +194,17 @@ namespace GSC.Respository.Etmf
 
         public List<DashboardDto> GetSendDocumentList(int ProjectId)
         {
-            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
-                           .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                           .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                           .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.Project)
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument)
+                .ThenInclude(x => x.ProjectWorkplaceArtificate)
+                .ThenInclude(x => x.EtmfArtificateMasterLbrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
                            .Where(x => x.DeletedDate == null && (x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.UserId == _jwtTokenAccesser.UserId)
                            && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
-                           && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace
-                           .ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectId == ProjectId && x.IsSendBack == false)
+                           && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectId == ProjectId && x.IsSendBack == false && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
                            .Select(s => new DashboardDto
                            {
                                Id = s.Id,
@@ -226,20 +229,25 @@ namespace GSC.Respository.Etmf
 
         public List<DashboardDto> GetSendBackDocumentList(int ProjectId)
         {
-            var result = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+            var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument)
                 .ThenInclude(x => x.ProjectWorkplaceArtificate)
-                .ThenInclude(x => x.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfArtificateMasterLbrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace)
+                .ThenInclude(x => x.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
                 .Where(x => x.DeletedDate == null && (x.CreatedBy == x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.CreatedBy == _jwtTokenAccesser.UserId)
-                && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectId == ProjectId && x.IsSendBack == true)
+                && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectId == ProjectId && x.IsSendBack == true && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
                     DocumentId = s.ProjectWorkplaceArtificatedDocumentId,
-                    TaskInformation = ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.WorkPlaceFolderId).GetDescription() + " | " +
-                    (s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ItemName == null ? "" :
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ItemName + " | ") +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfMasterLibrary.ZonName + " | " +
-                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfMasterLibrary.SectionName + " | " +
+                    TaskInformation = ((WorkPlaceFolder)s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription() + " | " +
+                    (s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName == null ? "" :
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName + " | ") +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName + " | " +
+                    s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.EtmfMasterLibrary.SectionName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.ArtificateName + " | " +
                     s.ProjectWorkplaceArtificatedDocument.DocumentName,
                     CreatedDate = s.CreatedDate,
