@@ -92,7 +92,7 @@ namespace GSC.Respository.Etmf
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.SubSectionArtifactName.Trim());
             //filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(), path);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
             bool projectPathExists = Directory.Exists(filePath);
             if (!projectPathExists)
                 System.IO.Directory.CreateDirectory(Path.Combine(filePath));
@@ -225,6 +225,7 @@ namespace GSC.Respository.Etmf
                 obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.Any(x => x.IsApproved == false) ? "Reject" : ApproveList.All(x => x.IsApproved == true) ? "Approved"
                    : "Send For Approval";
                 obj.Approver = ApproverName;
+                obj.IsReplyAllComment = item.IsReplyAllComment;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 dataList.Add(obj);
             }
@@ -329,6 +330,7 @@ namespace GSC.Respository.Etmf
             obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == document.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
             obj.IsAccepted = document.IsAccepted;
             obj.ApprovedStatus = document.IsAccepted == null ? "" : document.IsAccepted == true ? "Approved" : "Rejected";
+            obj.IsReplyAllComment = document.IsReplyAllComment;
             return obj;
         }
 
@@ -336,7 +338,7 @@ namespace GSC.Respository.Etmf
         {
             string path = getArtifactSectionDetail(projectWorkplaceSubSecArtificatedocumentDto);
             // string filePath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
-            string filePath = Path.Combine(_uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(),path);
+            string filePath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
             string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceSubSecArtificatedocumentDto.FileModel, filePath, projectWorkplaceSubSecArtificatedocumentDto.FileName);
 
             projectWorkplaceSubSecArtificatedocumentDto.Id = 0;
@@ -537,6 +539,14 @@ namespace GSC.Respository.Etmf
             var FullPath = Path.Combine(upload.DocumentUrl, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             obj.FullDocPath = FullPath;
             return obj;
+        }
+
+        public void UpdateSubDocumentComment(int documentId, bool? isComment)
+        {
+            var doc = All.FirstOrDefault(x => x.Id == documentId);
+            doc.IsReplyAllComment = isComment;
+            Update(doc);
+            _context.Save();
         }
     }
 }

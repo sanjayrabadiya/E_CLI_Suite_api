@@ -28,7 +28,7 @@ namespace GSC.Data.Dto.Etmf
         public string Version { get; set; }
         public int? ParentDocumentId { get; set; }
         public bool? IsAccepted { get; set; }
-
+        public bool? IsReplyAllComment { get; set; }
     }
 
     public class CommonArtifactDocumentDto

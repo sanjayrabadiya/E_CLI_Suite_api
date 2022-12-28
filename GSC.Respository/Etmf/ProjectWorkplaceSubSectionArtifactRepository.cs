@@ -7,7 +7,9 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -35,7 +37,7 @@ namespace GSC.Respository.Etmf
 
         public string Duplicate(EtmfProjectWorkPlace objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ArtifactName == objSave.ArtifactName.Trim() && x.DeletedDate == null))
+            if (All.Where(x => x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).Include(x => x.ProjectWorkPlace).Any(x => x.Id != objSave.Id && x.ArtifactName == objSave.ArtifactName.Trim() && x.DeletedDate == null && x.ProjectWorkPlace.DeletedDate == null))
                 return "Duplicate Artifact Name: " + objSave.ArtifactName;
             return "";
         }
@@ -62,7 +64,7 @@ namespace GSC.Respository.Etmf
                             ProjectWorkplaceSectionId = section.Id,
                             ProjectWorkplaceZoneId = workzone.Id,
                             ZonName = etmfZone.ZonName,
-                            ProjectId=workdetail.ProjectId,
+                            ProjectId = workdetail.ProjectId,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
@@ -161,9 +163,9 @@ namespace GSC.Respository.Etmf
             {
                 b.DocPath = path;
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(b);
-                 _context.Save();
+                _context.Save();
             });
-            
+
             #endregion
             return data;
         }
@@ -199,7 +201,7 @@ namespace GSC.Respository.Etmf
 
                         }).FirstOrDefault();
 
-           
+
             string OldfilePath = string.Empty;
             string Oldpath = string.Empty;
 
@@ -207,19 +209,19 @@ namespace GSC.Respository.Etmf
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
-                
+
             }
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
-               
+
             }
             else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                 data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
-                
+
             }
             OldfilePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), Oldpath);
             bool projectPathExists = Directory.Exists(OldfilePath);

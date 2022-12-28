@@ -110,7 +110,7 @@ namespace GSC.Respository.Etmf
         public void SendMailToSendBack(ProjectSubSecArtificateDocumentReview ReviewDto)
         {
             var project = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
-                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x=>x.Project)
+                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.Project)
                    .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ReviewDto.ProjectWorkplaceSubSecArtificateDocumentId).FirstOrDefault();
 
             var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
@@ -184,12 +184,17 @@ namespace GSC.Respository.Etmf
         public List<DashboardDto> GetSendDocumentList(int ProjectId)
         {
             var result = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
-                .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace)
-                .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                .Where(x => x.DeletedDate == null &&(x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy && x.UserId == _jwtTokenAccesser.UserId)
+                 .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
+                 .ThenInclude(x => x.ProjectWorkPlace) // Sub Section
+                 .ThenInclude(x => x.ProjectWorkPlace) // Section
+                 .ThenInclude(x => x.EtmfMasterLibrary) // Etmf Section
+                 .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                 .ThenInclude(x => x.EtmfMasterLibrary)
+                 .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                .Where(x => x.DeletedDate == null && (x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy && x.UserId == _jwtTokenAccesser.UserId)
                 && x.ProjectWorkplaceSubSecArtificateDocument.DeletedDate == null
-                && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectId == ProjectId && x.IsSendBack == false)
+                && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectId == ProjectId && x.IsSendBack == false
+                && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
@@ -204,10 +209,10 @@ namespace GSC.Respository.Etmf
                     ExtraData = s.ProjectWorkplaceSubSecArtificateDocumentId,
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
-                    Module = MyTaskModule.ETMF.GetDescription(),
+                    Module = "e-TMF",
                     DataType = MyTaskMethodModule.Reviewed.GetDescription(),
                     Level = 5.2,
-                    ControlType=DashboardMyTaskType.ETMFSubSecSendData
+                    ControlType = DashboardMyTaskType.ETMFSubSecSendData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
@@ -216,12 +221,17 @@ namespace GSC.Respository.Etmf
         public List<DashboardDto> GetSendBackDocumentList(int ProjectId)
         {
             var result = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
-                .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace)
-                .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                .ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
+                 .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
+                 .ThenInclude(x => x.ProjectWorkPlace) // Sub Section
+                 .ThenInclude(x => x.ProjectWorkPlace) // Section
+                 .ThenInclude(x => x.EtmfMasterLibrary) // Etmf Section
+                 .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                 .ThenInclude(x => x.EtmfMasterLibrary)
+                 .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
                 .Where(x => x.DeletedDate == null && (x.CreatedBy == x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy && x.CreatedBy == _jwtTokenAccesser.UserId)
                 && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace
-                .ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectId == ProjectId && x.IsSendBack == true)
+                .ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectId == ProjectId && x.IsSendBack == true
+                && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
                 .Select(s => new DashboardDto
                 {
                     Id = s.Id,
@@ -235,9 +245,9 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceSubSecArtificateDocument.DocumentName,
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
-                    Module = MyTaskModule.ETMF.GetDescription(),
+                    Module = "e-TMF",
                     DataType = MyTaskMethodModule.SendBack.GetDescription(),
-                    ControlType=DashboardMyTaskType.ETMFSubSecSendBackData
+                    ControlType = DashboardMyTaskType.ETMFSubSecSendBackData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             result.ForEach(s =>

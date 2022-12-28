@@ -85,29 +85,35 @@ namespace GSC.Respository.Etmf
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {
             var result = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
-                .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace)
-                .Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceSubSecArtificateDocument.DeletedDate == null
-                && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectId == ProjectId)
-                .Select(s => new DashboardDto
-                {
-                    Id = s.Id,
-                    TaskInformation =
-                    ((WorkPlaceFolder)s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.WorkPlaceFolderId).GetDescription() + " | " +
-                    (s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ItemName == null ? "" :
-                    s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ItemName + " | ") +
-                    s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.EtmfMasterLibrary.ZonName + " | " +
-                    s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.EtmfMasterLibrary.SectionName + " | " +
-                    s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.SubSectionName + " | " +
-                    s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName + " | " +
-                    s.ProjectWorkplaceSubSecArtificateDocument.DocumentName,
-                    ExtraData = s.ProjectWorkplaceSubSecArtificateDocumentId,
-                    CreatedDate = s.CreatedDate,
-                    CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
-                    Module = MyTaskModule.ETMF.GetDescription(),
-                    DataType = MyTaskMethodModule.Approved.GetDescription(),
-                    Level = 5.2,
-                    ControlType=DashboardMyTaskType.ETMFSubSecApproveData
-                }).OrderByDescending(x => x.CreatedDate).ToList();
+                 .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
+                 .ThenInclude(x => x.ProjectWorkPlace) // Sub Section
+                 .ThenInclude(x => x.ProjectWorkPlace) // Section
+                 .ThenInclude(x => x.EtmfMasterLibrary) // Etmf Section
+                 .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                 .ThenInclude(x => x.EtmfMasterLibrary)
+                 .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                 .Where(x => x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null && x.ProjectWorkplaceSubSecArtificateDocument.DeletedDate == null
+                 && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectId == ProjectId && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
+                 .Select(s => new DashboardDto
+                 {
+                     Id = s.Id,
+                     TaskInformation =
+                     ((WorkPlaceFolder)s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription() + " | " +
+                     (s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName == null ? "" :
+                     s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName + " | ") +
+                     s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName + " | " +
+                     s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.SectionName + " | " +
+                     s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.SubSectionName + " | " +
+                     s.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName + " | " +
+                     s.ProjectWorkplaceSubSecArtificateDocument.DocumentName,
+                     ExtraData = s.ProjectWorkplaceSubSecArtificateDocumentId,
+                     CreatedDate = s.CreatedDate,
+                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                     Module = "e-TMF",
+                     DataType = MyTaskMethodModule.Approved.GetDescription(),
+                     Level = 5.2,
+                     ControlType = DashboardMyTaskType.ETMFSubSecApproveData
+                 }).OrderByDescending(x => x.CreatedDate).ToList();
 
             return result;
         }
