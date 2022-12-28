@@ -109,7 +109,7 @@ namespace GSC.Respository.Etmf
                      ExtraData = s.ProjectWorkplaceSubSecArtificateDocumentId,
                      CreatedDate = s.CreatedDate,
                      CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
-                     Module = MyTaskModule.ETMF.GetDescription(),
+                     Module = "e-TMF",
                      DataType = MyTaskMethodModule.Approved.GetDescription(),
                      Level = 5.2,
                      ControlType = DashboardMyTaskType.ETMFSubSecApproveData

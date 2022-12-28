@@ -209,7 +209,7 @@ namespace GSC.Respository.Etmf
                     ExtraData = s.ProjectWorkplaceSubSecArtificateDocumentId,
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
-                    Module = MyTaskModule.ETMF.GetDescription(),
+                    Module = "e-TMF",
                     DataType = MyTaskMethodModule.Reviewed.GetDescription(),
                     Level = 5.2,
                     ControlType = DashboardMyTaskType.ETMFSubSecSendData
@@ -245,7 +245,7 @@ namespace GSC.Respository.Etmf
                     s.ProjectWorkplaceSubSecArtificateDocument.DocumentName,
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
-                    Module = MyTaskModule.ETMF.GetDescription(),
+                    Module = "e-TMF",
                     DataType = MyTaskMethodModule.SendBack.GetDescription(),
                     ControlType = DashboardMyTaskType.ETMFSubSecSendBackData
                 }).OrderByDescending(x => x.CreatedDate).ToList();
