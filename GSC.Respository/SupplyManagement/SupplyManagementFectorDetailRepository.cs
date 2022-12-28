@@ -51,12 +51,14 @@ namespace GSC.Respository.SupplyManagement
                     LogicalOperator = z.LogicalOperator,
                     Ratio = z.Ratio,
                     FactoreName = z.Fector.GetDescription(),
-                    FactoreOperatorName = z.Operator.ToString(),
+                    FactoreOperatorName = z.Operator.GetDescription(),
                     collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
                     Type = z.Type,
                     TypeName = z.Type.GetDescription(),
                     IsDeleted = z.DeletedDate != null ? true : false,
-                    ProjectCode = z.SupplyManagementFector.Project.ProjectCode
+                    ProjectCode = z.SupplyManagementFector.Project.ProjectCode,
+                    StartParens = z.StartParens,
+                    EndParens = z.EndParens
                 }).ToList()
             }).FirstOrDefault();
             return data;
@@ -79,6 +81,8 @@ namespace GSC.Respository.SupplyManagement
                 collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
                 Type = z.Type,
                 TypeName = z.Type.GetDescription(),
+                StartParens = z.StartParens,
+                EndParens = z.EndParens
             }).FirstOrDefault();
             return data;
         }

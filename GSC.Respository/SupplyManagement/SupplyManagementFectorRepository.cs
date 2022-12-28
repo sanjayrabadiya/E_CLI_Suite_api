@@ -55,6 +55,8 @@ namespace GSC.Respository.SupplyManagement
                     collectionValueName = z.CollectionValue,
                     Type = z.Type,
                     TypeName = z.Type.GetDescription(),
+                    StartParens = z.StartParens,
+                    EndParens = z.EndParens
                 }).ToList()
 
             }).FirstOrDefault();
@@ -117,6 +119,8 @@ namespace GSC.Respository.SupplyManagement
                     collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
                     Type = z.Type,
                     TypeName = z.Type.GetDescription(),
+                    StartParens = z.StartParens,
+                    EndParens = z.EndParens
                 }).ToList().OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
@@ -126,7 +130,7 @@ namespace GSC.Respository.SupplyManagement
                 var operatorName = x.Operator.GetDescription();
                 var collectionValue = x.collectionValueName;
 
-                name = $"{"{"}{name.Trim()} {operatorName}{""} {collectionValue}";
+                name = $"{x.StartParens}{"{"}{name.Trim()} {operatorName}{x.EndParens ?? ""} {collectionValue}";
 
                 if (x.Equals(last))
                     name = $"{name}{"}"}";
@@ -199,7 +203,9 @@ namespace GSC.Respository.SupplyManagement
                     TypeName = z.Type.GetDescription(),
                     IsDeleted = z.DeletedDate != null ? true : false,
                     ProjectCode = z.SupplyManagementFector.Project.ProjectCode,
-                    InputValue = z.CollectionValue
+                    InputValue = z.CollectionValue,
+                    StartParens = z.StartParens,
+                    EndParens = z.EndParens
                 }).ToList();
 
 
@@ -225,12 +231,12 @@ namespace GSC.Respository.SupplyManagement
                 string collectionValue = r.collectionValueName;
 
 
-                ruleStr = ruleStr + $"{null}{colName} {r.Operator.GetDescription()} {singleQuote}{collectionValue}{singleQuote}";
-                displayRule = displayRule + $"{null}{fieldName} {r.Operator.GetDescription()} {collectionValue}";
+                ruleStr = ruleStr + $"{r.StartParens}{colName} {r.Operator.GetDescription()} {singleQuote}{collectionValue}{singleQuote}";
+                displayRule = displayRule + $"{r.StartParens}{fieldName} {r.Operator.GetDescription()} {collectionValue}";
 
 
-                ruleStr = ruleStr + $"{null} {r.LogicalOperator} ";
-                displayRule = displayRule + $"{null} {r.LogicalOperator} ";
+                ruleStr = ruleStr + $"{r.EndParens} {r.LogicalOperator} ";
+                displayRule = displayRule + $"{r.EndParens} {r.LogicalOperator} ";
 
                 var col = new DataColumn();
                 col.DefaultValue = r.InputValue ?? "";
@@ -331,7 +337,7 @@ namespace GSC.Respository.SupplyManagement
         public FactorCheckResult ValidateSubjecWithFactor(Randomization randomization)
         {
             var projectid = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault().ParentProjectId;
-            var supplyManagementFector = _context.SupplyManagementFector.Where(x => x.ProjectId == projectid).FirstOrDefault();
+            var supplyManagementFector = _context.SupplyManagementFector.Where(x => x.ProjectId == projectid && x.DeletedDate == null).FirstOrDefault();
             var result = new FactorCheckResult();
             var data = _context.SupplyManagementFectorDetail.
                 Where(x => x.DeletedDate == null &&

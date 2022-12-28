@@ -28,5 +28,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string QueryFormula { get; set; }
 
         public DataType? dataType { get; set; }
+
+        public string StartParens { get; set; }
+        public string EndParens { get; set; }
     }
 }

@@ -294,70 +294,107 @@ namespace GSC.Respository.Attendance
             {
                 return "";
             }
-            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+            if (!string.IsNullOrEmpty(productType))
             {
-                var data = productType != null && productType != "" ? _context.SupplyManagementUploadFileDetail
-                                            .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
-                                            && x.RandomizationId == null
-                                            && x.TreatmentType == productType.Trim()
-                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
-                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault()
-                                            : _context.SupplyManagementUploadFileDetail
-                                            .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
-                                            && x.RandomizationId == null
-                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
-                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-                if (data != null)
+                var productarray =  productType.Split(',').ToArray();
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
-                    randno = Convert.ToString(data.RandomizationNo);
-                    return randno;
-                }
-            }
-            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
-            {
-                var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == countryId).FirstOrDefault();
-                if (site != null)
-                {
-                    var datacountry = productType != null && productType != "" ? _context.SupplyManagementUploadFileDetail
-                                        .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
-                                        && x.RandomizationId == null
-                                        && x.TreatmentType == productType.Trim()
-                                        && x.SupplyManagementUploadFile.ProjectId == projectid
-                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
-                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault()
-                                        : _context.SupplyManagementUploadFileDetail
-                                        .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
-                                        && x.RandomizationId == null
-                                        && x.SupplyManagementUploadFile.ProjectId == projectid
-                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
-                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-                    if (datacountry != null)
+                    var data = _context.SupplyManagementUploadFileDetail
+                                                .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
+                                                && x.RandomizationId == null
+                                                && productarray.Contains(x.TreatmentType)
+                                                && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                                && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                    if (data != null)
                     {
-                        randno = Convert.ToString(datacountry.RandomizationNo);
+                        randno = Convert.ToString(data.RandomizationNo);
                         return randno;
                     }
                 }
-
-            }
-            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
-            {
-                var datastudy = productType != null && productType != "" ? _context.SupplyManagementUploadFileDetail
-                                        .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
-                                        && x.RandomizationId == null
-                                         && x.TreatmentType == productType.Trim()
-                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
-                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault() :
-                                        _context.SupplyManagementUploadFileDetail
-                                        .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
-                                        && x.RandomizationId == null
-                                        && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
-                                        && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
-                if (datastudy != null)
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                 {
-                    randno = Convert.ToString(datastudy.RandomizationNo);
-                    return randno;
+                    var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == countryId).FirstOrDefault();
+                    if (site != null)
+                    {
+                        var datacountry = _context.SupplyManagementUploadFileDetail
+                                            .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                                            && x.RandomizationId == null
+                                            && productarray.Contains(x.TreatmentType)
+                                            && x.SupplyManagementUploadFile.ProjectId == projectid
+                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                        if (datacountry != null)
+                        {
+                            randno = Convert.ToString(datacountry.RandomizationNo);
+                            return randno;
+                        }
+                    }
+
+                }
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                {
+                    var datastudy = _context.SupplyManagementUploadFileDetail
+                                            .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
+                                            && x.RandomizationId == null
+                                            && productarray.Contains(x.TreatmentType)
+                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                    if (datastudy != null)
+                    {
+                        randno = Convert.ToString(datastudy.RandomizationNo);
+                        return randno;
+                    }
                 }
             }
+            else
+            {
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                {
+                    var data = _context.SupplyManagementUploadFileDetail
+                                                .Where(x => x.SupplyManagementUploadFile.SiteId == siteId
+                                                && x.RandomizationId == null
+                                                && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                                && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                    if (data != null)
+                    {
+                        randno = Convert.ToString(data.RandomizationNo);
+                        return randno;
+                    }
+                }
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                {
+                    var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == countryId).FirstOrDefault();
+                    if (site != null)
+                    {
+                        var datacountry = _context.SupplyManagementUploadFileDetail
+                                            .Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                                            && x.RandomizationId == null
+                                            && x.SupplyManagementUploadFile.ProjectId == projectid
+                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                        if (datacountry != null)
+                        {
+                            randno = Convert.ToString(datacountry.RandomizationNo);
+                            return randno;
+                        }
+                    }
+
+                }
+                if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                {
+                    var datastudy = _context.SupplyManagementUploadFileDetail
+                                            .Where(x => x.SupplyManagementUploadFile.ProjectId == projectid
+                                            && x.RandomizationId == null
+                                            && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                                            && x.DeletedDate == null).OrderBy(x => x.RandomizationNo).FirstOrDefault();
+                    if (datastudy != null)
+                    {
+                        randno = Convert.ToString(datastudy.RandomizationNo);
+                        return randno;
+                    }
+                }
+            }
+
             return randno;
 
         }

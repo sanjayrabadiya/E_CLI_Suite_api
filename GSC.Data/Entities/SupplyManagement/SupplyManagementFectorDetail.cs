@@ -18,5 +18,8 @@ namespace GSC.Data.Entities.SupplyManagement
 
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public string StartParens { get; set; }
+        public string EndParens { get; set; }
     }
 }

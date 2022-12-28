@@ -427,6 +427,8 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementFector> SupplyManagementFector { get; set; }
 
         public DbSet<SupplyManagementFectorDetail> SupplyManagementFectorDetail { get; set; }
+
+        public DbSet<SupplyManagementKitAllocationSettings> SupplyManagementKitAllocationSettings { get; set; }
     }
 
 

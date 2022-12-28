@@ -389,6 +389,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVolunteerFingerRepository, VolunteerFingerRepository>();
             services.AddScoped<ISupplyManagementFectorRepository, SupplyManagementFectorRepository>();
             services.AddScoped<ISupplyManagementFectorDetailRepository, SupplyManagementFectorDetailRepository>();
+            services.AddScoped<ISupplyManagementKitAllocationSettingsRepository, SupplyManagementKitAllocationSettingsRepository>();
 
         }
     }

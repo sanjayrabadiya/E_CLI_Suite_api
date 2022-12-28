@@ -481,6 +481,7 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectStatus, ProjectStatusDto>().ReverseMap();
             CreateMap<SupplyManagementFector, SupplyManagementFectorDto>().ReverseMap();
             CreateMap<SupplyManagementFectorDetail, SupplyManagementFectorDetailDto>().ReverseMap();
+            CreateMap<SupplyManagementKitAllocationSettings, SupplyManagementKitAllocationSettingsDto>().ReverseMap();
         }
     }
 }
