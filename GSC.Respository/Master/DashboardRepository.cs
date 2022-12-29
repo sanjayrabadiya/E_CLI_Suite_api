@@ -521,9 +521,10 @@ namespace GSC.Respository.Master
             var result = new DashboardInformConsentStatusDto();
 
             result.TotalRandomization = randomizations.Count();
+            result.PreScreening = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.PreScreening || (int)x.PatientStatusId > 1).Count();
             result.Screened = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.Screening).Count();
             result.ConsentInProgress = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess).Count();
-            result.ConsentCompleted = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentCompleted).Count();
+            result.ConsentCompleted = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || ((int)x.PatientStatusId > 4 && (int)x.PatientStatusId < 10 && (int)x.PatientStatusId != 5)).Count();
             result.ReConsent = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess).Count();
             result.ConsentWithdraw = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.Withdrawal).Count();
 
@@ -551,7 +552,7 @@ namespace GSC.Respository.Master
                 obj.DisplayName = x.Value;
                 obj.Total = randomizations.Where(v => (x.Id == 1 ? v.PatientStatusId == ScreeningPatientStatus.Screening
                                                 : x.Id == 2 ? v.PatientStatusId == ScreeningPatientStatus.ConsentInProcess
-                                                : x.Id == 3 ? v.PatientStatusId == ScreeningPatientStatus.ConsentCompleted
+                                                : x.Id == 3 ? (v.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || ((int)v.PatientStatusId > 4 && (int)v.PatientStatusId < 10 && (int)v.PatientStatusId != 5))
                                                 : x.Id == 4 ? v.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess
                                                 : v.PatientStatusId == ScreeningPatientStatus.Withdrawal
                                                 )).Count();

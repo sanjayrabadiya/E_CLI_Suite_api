@@ -190,6 +190,7 @@ namespace GSC.Data.Dto.ProjectRight
     public class DashboardInformConsentStatusDto
     {
         public int ProjectId { get; set; }
+        public int PreScreening { get; set; }
         public int Screened { get; set; }
         public int ConsentInProgress { get; set; }
         public int ConsentCoSign { get; set; }
