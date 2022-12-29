@@ -9,7 +9,7 @@ namespace GSC.Data.Dto.SupplyManagement
 {
     public class SupplyManagementKitAllocationSettingsDto : BaseDto
     {
-        public int VisitId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
         public int NoOfImp { get; set; }
         public string VisitName { get; set; }
         public int? AuditReasonId { get; set; }
@@ -18,5 +18,15 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ReasonName { get; set; }
 
     }
-   
+
+    public class SupplyManagementKitAllocationSettingsGridDto : BaseAuditDto
+    {
+        public int ProjectDesignVisitId { get; set; }
+        public int NoOfImp { get; set; }
+        public string VisitName { get; set; }
+        public int? AuditReasonId { get; set; }
+        public string ReasonOth { get; set; }
+        public string ReasonName { get; set; }
+    }
+
 }

@@ -38,10 +38,10 @@ namespace GSC.Respository.SupplyManagement
             _context = context;
         }
 
-        public List<SupplyManagementKitAllocationSettingsDto> GetKITAllocationList(bool isDeleted, int ProjectId)
+        public List<SupplyManagementKitAllocationSettingsGridDto> GetKITAllocationList(bool isDeleted, int ProjectId)
         {
             return _context.SupplyManagementKitAllocationSettings.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
-                   ProjectTo<SupplyManagementKitAllocationSettingsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                   ProjectTo<SupplyManagementKitAllocationSettingsGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public IList<DropDownDto> GetVisitDropDownByProjectId(int projectId)

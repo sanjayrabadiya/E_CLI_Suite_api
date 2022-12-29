@@ -13,7 +13,7 @@ namespace GSC.Data.Entities.SupplyManagement
     public class SupplyManagementKITDetail : BaseEntity
     {
         
-        public int KitNo { get; set; }
+        public string KitNo { get; set; }
         public int SupplyManagementKITId { get; set; }
         public int? SupplyManagementShipmentId { get; set; }
         public int? AuditReasonId { get; set; }

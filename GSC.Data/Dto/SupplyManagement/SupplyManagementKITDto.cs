@@ -26,7 +26,7 @@ namespace GSC.Data.Dto.SupplyManagement
 
     public class SupplyManagementKITGridDto : BaseAuditDto
     {
-        public int KitNo { get; set; }
+        public string KitNo { get; set; }
         public string StudyCode { get; set; }
         public string SiteCode { get; set; }
         public string Reason { get; set; }
@@ -59,7 +59,7 @@ namespace GSC.Data.Dto.SupplyManagement
     public class KitListApprove
     {
         public int Id { get; set; }
-        public int KitNo { get; set; }
+        public string KitNo { get; set; }
         public string VisitName { get; set; }
         public string SiteCode { get; set; }
     }
@@ -67,7 +67,7 @@ namespace GSC.Data.Dto.SupplyManagement
     public class KitListApproved
     {
         public int Id { get; set; }
-        public int KitNo { get; set; }
+        public string KitNo { get; set; }
         public string VisitName { get; set; }
         public string SiteCode { get; set; }
 

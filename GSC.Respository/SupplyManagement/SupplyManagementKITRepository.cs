@@ -26,26 +26,16 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementKITRepository : GenericRespository<SupplyManagementKIT>, ISupplyManagementKITRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+
         private readonly IMapper _mapper;
-        private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
-        private readonly IProjectRepository _projectRepository;
-        private readonly ICountryRepository _countryRepository;
         private readonly IGSCContext _context;
 
         public SupplyManagementKITRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-        IProjectDesignVisitRepository projectDesignVisitRepository,
-             IProjectRepository projectRepository,
-         ICountryRepository countryRepository,
         IMapper mapper)
             : base(context)
         {
 
-            _projectDesignVisitRepository = projectDesignVisitRepository;
-            _projectRepository = projectRepository;
-            _countryRepository = countryRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
+
             _mapper = mapper;
             _context = context;
         }
@@ -58,17 +48,7 @@ namespace GSC.Respository.SupplyManagement
 
         public IList<DropDownDto> GetVisitDropDownByAllocation(int projectId)
         {
-            //var visits = _context.SupplyManagementAllocation.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
-            // && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
-            // && x.DeletedDate == null)
-            //    .Select(x => new DropDownDto
-            //    {
-            //        Id = x.ProjectDesignVisit.Id,
-            //        Value = x.ProjectDesignVisit.DisplayName,
-            //    }).Distinct().ToList();
-            //return visits;
-
-            var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
+            var visits = _context.SupplyManagementKitAllocationSettings.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
                          && x.DeletedDate == null)
                     .Select(x => new DropDownDto
                     {
@@ -110,6 +90,15 @@ namespace GSC.Respository.SupplyManagement
             }
 
             return data;
+        }
+        public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings,int noseriese)
+        {
+            string kitno = string.Empty;
+
+            kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+
+            return kitno;
+
         }
     }
 }

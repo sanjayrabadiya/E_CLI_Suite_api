@@ -385,7 +385,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.SecurityRoleId, x => x.MapFrom(a => a.LabManagementConfiguration.SecurityRoleId))
                 .ForMember(x => x.LabManagementUploadExcelDatas, x => x.MapFrom(a => a.LabManagementUploadExcelDatas))
                 .ReverseMap();
-            
+
             CreateMap<SyncConfigurationMaster, SyncConfigurationMasterGridDto>()
                 .ForMember(x => x.ReportName, x => x.MapFrom(a => a.ReportScreen.ReportName))
                 .ReverseMap();
@@ -523,7 +523,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ProjectDesignVisit, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                .ForMember(x => x.ProjectDesignTemplate, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.TemplateName))
                .ForMember(x => x.ProjectDesignVariable, a => a.MapFrom(m => m.ProjectDesignVariable.VariableName))
-              // .ForMember(x => x.CollectionValue, a => a.MapFrom(m => string.Join(", ", m.ProjectDesignVariable.Values.Where(z=> m.CollectionValue.Contains(z.ValueName)).Select(x => x.ValueName))))
+               // .ForMember(x => x.CollectionValue, a => a.MapFrom(m => string.Join(", ", m.ProjectDesignVariable.Values.Where(z=> m.CollectionValue.Contains(z.ValueName)).Select(x => x.ValueName))))
                .ForMember(x => x.Email, a => a.MapFrom(m => m.Email))
                .ForMember(x => x.EmailTemplate, a => a.MapFrom(m => m.EmailTemplate))
                .ReverseMap();
@@ -559,6 +559,12 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementFector, SupplyManagementFectorGridDto>()
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                 .ReverseMap();
+            CreateMap<SupplyManagementKitAllocationSettings, SupplyManagementKitAllocationSettingsGridDto>()
+               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+               .ReverseMap();
+            CreateMap<SupplyManagementKitNumberSettings, SupplyManagementKitNumberSettingsGridDto>()
+               .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ReverseMap();
         }
     }
 }

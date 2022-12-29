@@ -9,7 +9,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ISupplyManagementKitAllocationSettingsRepository : IGenericRepository<SupplyManagementKitAllocationSettings>
     {
-        List<SupplyManagementKitAllocationSettingsDto> GetKITAllocationList(bool isDeleted, int ProjectId);
+        List<SupplyManagementKitAllocationSettingsGridDto> GetKITAllocationList(bool isDeleted, int ProjectId);
 
         IList<DropDownDto> GetVisitDropDownByProjectId(int projectId);
     }

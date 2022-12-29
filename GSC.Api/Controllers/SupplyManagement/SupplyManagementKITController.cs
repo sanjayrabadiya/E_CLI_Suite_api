@@ -29,16 +29,17 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
         private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
-        
+        private readonly IGSCContext _context;
         public SupplyManagementKITController(ISupplyManagementKITRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
+            IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            
+            _context = context;
             _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
         }
 
@@ -65,23 +66,31 @@ namespace GSC.Api.Controllers.SupplyManagement
             List<SupplyManagementKITDetail> list = new List<SupplyManagementKITDetail>();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementUploadFileDto.Id = 0;
-
+            var kitsettings = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == supplyManagementUploadFileDto.ProjectId).FirstOrDefault();
+            if (kitsettings == null)
+            {
+                ModelState.AddModelError("Message", "please set kit number formate!");
+                return BadRequest(ModelState);
+            }
             var supplyManagementUploadFile = _mapper.Map<SupplyManagementKIT>(supplyManagementUploadFileDto);
             supplyManagementUploadFile.TotalUnits = (supplyManagementUploadFileDto.NoOfImp * supplyManagementUploadFileDto.NoofPatient);
             _supplyManagementKITRepository.Add(supplyManagementUploadFile);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
-            var kitno = _supplyManagementKITDetailRepository.All.OrderByDescending(x => x.KitNo).Select(x => x.KitNo).FirstOrDefault();
 
-            for (int i = 0; i < supplyManagementUploadFileDto.NoofPatient; i++)
+
+            for (int i = 0; i < supplyManagementUploadFile.TotalUnits; i++)
             {
+                var kitnoseriese = kitsettings.KitNoseries;
                 SupplyManagementKITDetail obj = new SupplyManagementKITDetail();
-                obj.KitNo = ++kitno;
+                obj.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, kitnoseriese);
                 obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
                 obj.Status = KitStatus.AllocationPending;
                 _supplyManagementKITDetailRepository.Add(obj);
                 _uow.Save();
+                ++kitsettings.KitNoseries;
             }
-
+            _context.SupplyManagementKitNumberSettings.Update(kitsettings);
+            _uow.Save();
             return Ok(supplyManagementUploadFile.Id);
 
         }
@@ -130,7 +139,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 _supplyManagementKITDetailRepository.Update(record);
                 _uow.Save();
             }
-            
+
             return Ok();
         }
 
@@ -160,6 +169,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult getApprovedKit(int id)
         {
             return Ok(_supplyManagementKITRepository.getApprovedKit(id));
+        }
+
+        [HttpGet]
+        [Route("getIMPPerKitByKitAllocation/{visitId}")]
+        public IActionResult getIMPPerKitByKitAllocation(int visitId)
+        {
+            var data = _context.SupplyManagementKitAllocationSettings.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == visitId).FirstOrDefault();
+            return Ok(data);
         }
     }
 }

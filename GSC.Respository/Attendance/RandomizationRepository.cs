@@ -296,7 +296,7 @@ namespace GSC.Respository.Attendance
             }
             if (!string.IsNullOrEmpty(productType))
             {
-                var productarray =  productType.Split(',').ToArray();
+                var productarray = productType.Split(',').ToArray();
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
                     var data = _context.SupplyManagementUploadFileDetail
@@ -454,6 +454,16 @@ namespace GSC.Respository.Attendance
                     }
                 }
             }
+        }
+        public bool ValidateRandomizationIdForIWRS(RandomizationDto obj)
+        {
+            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+            && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber)).FirstOrDefault();
+            if (data != null && data.RandomizationId != null && data.RandomizationId != obj.Id)
+            {
+                return false;
+            }
+            return true;
         }
         public bool IsScreeningFormatSetInStudy(int id)
         {

@@ -54,5 +54,7 @@ namespace GSC.Respository.Attendance
         void SendEmailOfStartEconsentLAR(Randomization randomization);
         void AddRandomizationUser(UserDto userDto, CommonResponceView userdetails);
         void AddRandomizationUserLAR(UserDto userLarDto, CommonResponceView userLardetails);
+
+        bool ValidateRandomizationIdForIWRS(RandomizationDto obj);
     }
 }

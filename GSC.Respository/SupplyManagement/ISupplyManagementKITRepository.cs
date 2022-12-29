@@ -14,5 +14,7 @@ namespace GSC.Respository.SupplyManagement
         IList<DropDownDto> GetVisitDropDownByAllocation(int projectId);
 
         List<KitListApproved> getApprovedKit(int id);
+
+        string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese);
     }
 }

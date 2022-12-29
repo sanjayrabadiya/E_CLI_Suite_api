@@ -120,7 +120,7 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest();
 
             var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
-            
+
             return Ok(randomizationDto);
         }
 
@@ -388,6 +388,11 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            if (!_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
+            {
+                ModelState.AddModelError("Message", "This randomization number already assigned!");
+                return BadRequest(ModelState);
+            }
 
             var validaterandomizationno = _randomizationRepository.ValidateRandomizationNumber(randomizationDto);
             if (!string.IsNullOrEmpty(validaterandomizationno))
@@ -399,6 +404,7 @@ namespace GSC.Api.Controllers.Attendance
             _randomizationRepository.SaveRandomizationNumber(randomization, randomizationDto);
 
             _randomizationRepository.UpdateRandomizationIdForIWRS(randomizationDto);
+            
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
@@ -489,7 +495,7 @@ namespace GSC.Api.Controllers.Attendance
                     ModelState.AddModelError("Message", "Please upload randomization sheet");
                     return BadRequest(ModelState);
                 }
-                
+
                 return Ok(data);
             }
             else

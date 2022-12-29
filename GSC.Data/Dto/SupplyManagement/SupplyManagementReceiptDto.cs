@@ -79,7 +79,7 @@ namespace GSC.Data.Dto.SupplyManagement
     public class KitAllocatedList
     {
         public int Id { get; set; }
-        public int KitNo { get; set; }
+        public string KitNo { get; set; }
         public string VisitName { get; set; }
         public string SiteCode { get; set; }
 

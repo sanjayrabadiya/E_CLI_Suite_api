@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             if (id <= 0) return BadRequest();
             var centralDepo = _supplyManagementKitAllocationSettingsRepository.Find(id);
-            var centralDepoDto = _mapper.Map<SupplyManagementKITDto>(centralDepo);
+            var centralDepoDto = _mapper.Map<SupplyManagementKitAllocationSettingsDto>(centralDepo);
             return Ok(centralDepoDto);
         }
 
@@ -64,6 +64,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementKitAllocationSettingsDto.Id = 0;
+            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            {
+                ModelState.AddModelError("Message", "You already added visit!");
+                return BadRequest(ModelState);
+            }
 
             var supplyManagementKitAllocationSettings = _mapper.Map<SupplyManagementKitAllocationSettings>(supplyManagementKitAllocationSettingsDto);
             _supplyManagementKitAllocationSettingsRepository.Add(supplyManagementKitAllocationSettings);
@@ -77,6 +82,11 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Put([FromBody] SupplyManagementKitAllocationSettingsDto supplyManagementKitAllocationSettingsDto)
         {
+            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.Id != supplyManagementKitAllocationSettingsDto.Id && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            {
+                ModelState.AddModelError("Message", "You already added visit!");
+                return BadRequest(ModelState);
+            }
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var supplyManagementKitAllocationSettings = _mapper.Map<SupplyManagementKitAllocationSettings>(supplyManagementKitAllocationSettingsDto);
@@ -96,10 +106,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
-            record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
-            record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
-
-
+            if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
+                record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
+                record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            _supplyManagementKitAllocationSettingsRepository.Update(record);
+            _supplyManagementKitAllocationSettingsRepository.Delete(record);
             _uow.Save();
             return Ok();
         }
