@@ -840,13 +840,13 @@ namespace GSC.Respository.Attendance
 
         public List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId)
         {
-            var data = _context.ScreeningTemplate.Include(x => x.ProjectDesignTemplate).Include(x => x.ScreeningVisit).Where(x => x.ScreeningVisitId == screeningVisitId && x.DeletedDate == null && x.ProjectDesignTemplate.IsParticipantView == true).
+            var data = _context.ScreeningTemplate.Where(x => x.ScreeningVisitId == screeningVisitId && x.DeletedDate == null && x.ProjectDesignTemplate.IsParticipantView == true).
                         Select(r => new ProjectDesignTemplateMobileDto
                         {
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
                             ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
-                            TemplateName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
+                            TemplateName = (( _jwtTokenAccesser.Language != 1) ?
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
@@ -855,6 +855,8 @@ namespace GSC.Respository.Attendance
                             IsPastTemplate = false,
                             IsHide = r.IsHide ?? false
                         }).OrderBy(r => r.DesignOrder).ToList();
+
+            data = data.Where(x => x.IsHide == false).ToList();
             data.ForEach(x =>
             {
                 if (x.Status == ScreeningTemplateStatus.Submitted)
@@ -905,25 +907,7 @@ namespace GSC.Respository.Attendance
             return data;
         }
 
-        //public RandomizationNumberDto GetRandomizationAndScreeningNumber(int id)
-        //{
-        //    return GenerateRandomizationAndScreeningNumber(id);
-        //}
-        //for (int i = 0; i < data.Count; i++)
-        //{
-        //    if (data[i].ScheduleDate != null)
-        //    {
-        //        var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == data[i].ProjectDesignTemplateId && t.ProjectDesignVisitId == data[i].ProjectDesignVisitId);
-        //        var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
-        //        var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
-        //        var mindate = ((DateTime)data[i].ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
-        //        var maxdate = ((DateTime)data[i].ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
-        //        if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
-        //            data[i].IsTemplateRestricted = false;
-        //        else
-        //            data[i].IsTemplateRestricted = true;
-        //    }
-        //}
+        
         public RandomizationNumberDto GetRandomizationNumber(int id)
         {
             return GenerateRandomizationNumber(id);
