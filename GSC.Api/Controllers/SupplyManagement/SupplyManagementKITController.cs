@@ -178,5 +178,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             var data = _context.SupplyManagementKitAllocationSettings.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == visitId).FirstOrDefault();
             return Ok(data);
         }
+
+        [HttpGet]
+        [Route("GetAvailableRemainingkitCount/{projectId}/{projecttypeId}")]
+        public IActionResult GetAvailableRemainingkitCount(int projectId, int projecttypeId)
+        {
+            return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitCount(projectId, projecttypeId));
+        }
     }
 }

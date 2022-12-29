@@ -16,5 +16,7 @@ namespace GSC.Respository.SupplyManagement
         List<KitListApproved> getApprovedKit(int id);
 
         string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese);
+
+       int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId);
     }
 }

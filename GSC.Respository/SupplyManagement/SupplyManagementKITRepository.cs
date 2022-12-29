@@ -100,5 +100,26 @@ namespace GSC.Respository.SupplyManagement
             return kitno;
 
         }
+
+        public int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId)
+        {
+
+            var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
+                 && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
+                 .Sum(z => z.RemainingQuantity);
+            if (RemainingQuantity > 0)
+            {
+                var approvedQty = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
+                 && x.SupplyManagementKIT.ProjectId == ProjectId && x.SupplyManagementKIT.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)).Count();
+
+                var finalRemainingQty = RemainingQuantity - approvedQty;
+                return finalRemainingQty;
+
+            }
+
+            return 0;
+        }
     }
 }
