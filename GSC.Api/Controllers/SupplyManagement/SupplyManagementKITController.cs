@@ -78,7 +78,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
 
 
-            for (int i = 0; i < supplyManagementUploadFile.TotalUnits; i++)
+            for (int i = 0; i < supplyManagementUploadFile.NoofPatient; i++)
             {
                 var kitnoseriese = kitsettings.KitNoseries;
                 SupplyManagementKITDetail obj = new SupplyManagementKITDetail();
