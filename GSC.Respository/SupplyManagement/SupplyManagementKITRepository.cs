@@ -94,12 +94,8 @@ namespace GSC.Respository.SupplyManagement
         }
         public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
         {
-            string kitno = string.Empty;
-
-            kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
-
+            var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
             return kitno;
-
         }
 
         public int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId)
