@@ -412,7 +412,7 @@ namespace GSC.Respository.Attendance
                 }
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
-                    var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
+                    var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId && x.DeletedDate == null
                     && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                     if (data != null)
@@ -429,7 +429,7 @@ namespace GSC.Respository.Attendance
                     if (site != null)
                     {
                         var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
-                           && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                           && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId && x.DeletedDate == null
                            && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                         if (data1 != null)
@@ -444,7 +444,7 @@ namespace GSC.Respository.Attendance
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                 {
                     var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                     if (data1 != null)
                     {
@@ -460,7 +460,7 @@ namespace GSC.Respository.Attendance
             var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (numerformate != null && numerformate.IsIGT)
             {
-                var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                 if (SupplyManagementUploadFile == null)
                 {
                     return false;
@@ -469,7 +469,7 @@ namespace GSC.Respository.Attendance
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
                     var data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
-                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                   && x.DeletedDate == null && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                     if (data != null && data.RandomizationId != null && data.RandomizationId != obj.Id)
                     {
@@ -484,7 +484,7 @@ namespace GSC.Respository.Attendance
                     {
                         var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
                            && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                           && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                          && x.DeletedDate == null && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                         if (data1 != null && data1.RandomizationId != null && data1.RandomizationId != obj.Id)
                         {
@@ -496,7 +496,7 @@ namespace GSC.Respository.Attendance
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                 {
                     var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                    && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    && x.DeletedDate == null && x.RandomizationNo == Convert.ToInt32(obj.RandomizationNumber) && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                     if (data1 != null && data1.RandomizationId != null && data1.RandomizationId != obj.Id)
                     {
@@ -887,7 +887,7 @@ namespace GSC.Respository.Attendance
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
                             ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
-                            TemplateName = (( _jwtTokenAccesser.Language != 1) ?
+                            TemplateName = ((_jwtTokenAccesser.Language != 1) ?
                 r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
@@ -948,7 +948,7 @@ namespace GSC.Respository.Attendance
             return data;
         }
 
-        
+
         public RandomizationNumberDto GetRandomizationNumber(int id)
         {
             return GenerateRandomizationNumber(id);
