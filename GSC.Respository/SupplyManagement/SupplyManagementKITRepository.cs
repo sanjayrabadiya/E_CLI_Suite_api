@@ -49,6 +49,7 @@ namespace GSC.Respository.SupplyManagement
         public IList<DropDownDto> GetVisitDropDownByAllocation(int projectId)
         {
             var visits = _context.SupplyManagementKitAllocationSettings.Where(x => x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
+            && x.ProjectDesignVisit.DeletedDate == null
                          && x.DeletedDate == null)
                     .Select(x => new DropDownDto
                     {
@@ -91,7 +92,7 @@ namespace GSC.Respository.SupplyManagement
 
             return data;
         }
-        public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings,int noseriese)
+        public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
         {
             string kitno = string.Empty;
 
