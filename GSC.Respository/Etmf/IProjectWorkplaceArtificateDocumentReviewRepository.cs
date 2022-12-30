@@ -18,6 +18,6 @@ namespace GSC.Respository.Etmf
         List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id);
         List<DashboardDto> GetSendDocumentList(int ProjectId);
         List<DashboardDto> GetSendBackDocumentList(int ProjectId);
-        
+        bool GetReviewPending(int documentId);
     }
 }

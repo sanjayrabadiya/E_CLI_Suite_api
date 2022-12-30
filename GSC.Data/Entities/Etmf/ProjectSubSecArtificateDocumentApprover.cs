@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.Etmf
         public bool? IsApproved { get; set; }
         public string Comment { get; set; }
         public int CompanyId { get; set; }
+        public int? SequenceNo { get; set; }
         public ProjectWorkplaceSubSecArtificatedocument ProjectWorkplaceSubSecArtificateDocument { get; set; }
         public List<ProjectSubSecArtificateDocumentHistory> ProjectSubSecArtificateDocumentHistory { get; set; }
     }

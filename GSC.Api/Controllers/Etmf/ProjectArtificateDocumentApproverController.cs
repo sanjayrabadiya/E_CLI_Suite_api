@@ -120,5 +120,13 @@ namespace GSC.Api.Controllers.Etmf
             _uow.Save();
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetPendingApprove/{documentId}")]
+        public IActionResult GetPendingApprove(int documentId)
+        {
+            var result = _projectArtificateDocumentApproverRepository.GetApprovePending(documentId);
+            return Ok(result);
+        }
     }
 }

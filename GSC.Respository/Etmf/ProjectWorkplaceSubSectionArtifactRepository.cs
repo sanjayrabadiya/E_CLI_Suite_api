@@ -37,7 +37,7 @@ namespace GSC.Respository.Etmf
 
         public string Duplicate(EtmfProjectWorkPlace objSave)
         {
-            if (All.Where(x => x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).Include(x => x.ProjectWorkPlace).Any(x => x.Id != objSave.Id && x.ArtifactName == objSave.ArtifactName.Trim() && x.DeletedDate == null && x.ProjectWorkPlace.DeletedDate == null))
+            if (All.Where(x => x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).Include(x => x.ProjectWorkPlace).Any(x => x.Id != objSave.Id && x.ArtifactName == objSave.ArtifactName.Trim() && x.DeletedDate == null && x.ProjectWorkPlace.DeletedDate == null && x.EtmfProjectWorkPlaceId == objSave.EtmfProjectWorkPlaceId))
                 return "Duplicate Artifact Name: " + objSave.ArtifactName;
             return "";
         }

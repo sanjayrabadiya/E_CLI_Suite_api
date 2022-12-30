@@ -9,6 +9,7 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsApproved { get; set; }
         public string Comment { get; set; }
         public int CompanyId { get; set; }
+        public int? SequenceNo { get; set; }
     }
 
     public class ProjectSubSecArtificateDocumentApproverHistory : BaseAuditDto

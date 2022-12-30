@@ -152,12 +152,14 @@ namespace GSC.Respository.Etmf
 
             foreach (var item in documentList)
             {
-                var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => z.UserId).Distinct().ToList();
+                var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, IsSendBack = z.IsSendBack }).Distinct().ToList();
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
                     DocumentUsers obj = new DocumentUsers();
-                    obj.UserName = _userRepository.Find(r).UserName;
+                    obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    obj.SequenceNo = r.SequenceNo;
+                    obj.IsSendBack = r.IsSendBack;
                     users.Add(obj);
                 });
 
@@ -170,7 +172,8 @@ namespace GSC.Respository.Etmf
                         Id = y.FirstOrDefault().Id,
                         UserId = y.Key,
                         ProjectWorkplaceArtificatedDocumentId = y.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId,
-                        IsApproved = y.FirstOrDefault().IsApproved
+                        IsApproved = y.FirstOrDefault().IsApproved,
+                        SequenceNo = y.FirstOrDefault().SequenceNo
                     }).ToList();
 
                 var ApproverName = new List<DocumentUsers>();
@@ -178,6 +181,8 @@ namespace GSC.Respository.Etmf
                 {
                     DocumentUsers obj = new DocumentUsers();
                     obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    obj.SequenceNo = r.SequenceNo;
+                    obj.IsSendBack = r.IsApproved;
                     ApproverName.Add(obj);
                 });
 
@@ -193,7 +198,7 @@ namespace GSC.Respository.Etmf
                 obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
-                obj.Reviewer = users;
+                obj.Reviewer = users.OrderBy(x => x.SequenceNo).ToList();
                 obj.CreatedDate = item.CreatedDate;
                 obj.Version = item.Version;
                 obj.IsMoved = item.IsMoved;
@@ -208,10 +213,10 @@ namespace GSC.Respository.Etmf
                 obj.IsAccepted = item.IsAccepted;
                 obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.Any(x => x.IsApproved == false) ? "Reject" : ApproveList.All(x => x.IsApproved == true) ? "Approved"
                     : "Send For Approval";
-                obj.Approver = ApproverName;
+                obj.Approver = ApproverName.OrderBy(x=>x.SequenceNo).ToList();
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
-                obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId || reviewerList.Contains(_jwtTokenAccesser.UserId);
+                obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId || reviewerList.Select(s => s.UserId).ToList().Contains(_jwtTokenAccesser.UserId);
                 obj.IsReplyAllComment = item.IsReplyAllComment;
                 dataList.Add(obj);
             }

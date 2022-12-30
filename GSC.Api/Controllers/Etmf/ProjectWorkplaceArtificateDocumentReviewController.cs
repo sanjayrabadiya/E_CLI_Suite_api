@@ -109,5 +109,13 @@ namespace GSC.Api.Controllers.Etmf
             _uow.Save();
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetPendingReviewer/{documentId}")]
+        public IActionResult GetPendingReviewer(int documentId)
+        {
+            var result = _projectWorkplaceArtificateDocumentReviewRepository.GetReviewPending(documentId);
+            return Ok(result);
+        }
     }
 }

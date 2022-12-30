@@ -71,6 +71,8 @@ namespace GSC.Data.Dto.Etmf
     public class DocumentUsers
     {
         public string UserName { get; set; }
+        public bool? IsSendBack { get; set; }
+        public int? SequenceNo { get; set; }
     }
     public class CustomParameter
     {
