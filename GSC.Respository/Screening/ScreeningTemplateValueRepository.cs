@@ -146,7 +146,7 @@ namespace GSC.Respository.Screening
             //if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
             //    return;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
 
-            var templateVariable = designScreeningTemplateDto.Variables.Where(r => 
+            var templateVariable = designScreeningTemplateDto.Variables.Where(r =>
             //!screeningDesignVariableId.Contains(r.Id) &&
             r.CollectionSource == CollectionSources.TextBox
             ).ToList();
@@ -209,10 +209,10 @@ namespace GSC.Respository.Screening
                             Value = value,
 
                         };
-                        if (screeningDesignVariableId == null)
+                        if (screeningDesignVariableId.Count == 0 || screeningDesignVariableId == null)
                             Add(screeningTemplateValue);
 
-                        if (screeningDesignVariableId == null)
+                        if (screeningDesignVariableId.Count == 0 || screeningDesignVariableId == null)
                         {
                             var audit = new ScreeningTemplateValueAudit
                             {

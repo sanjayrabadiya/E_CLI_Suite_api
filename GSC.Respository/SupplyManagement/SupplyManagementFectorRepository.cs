@@ -339,6 +339,8 @@ namespace GSC.Respository.SupplyManagement
             var projectid = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault().ParentProjectId;
             var supplyManagementFector = _context.SupplyManagementFector.Where(x => x.ProjectId == projectid && x.DeletedDate == null).FirstOrDefault();
             var result = new FactorCheckResult();
+            if (supplyManagementFector == null)
+                return result;
             var data = _context.SupplyManagementFectorDetail.
                 Where(x => x.DeletedDate == null &&
                 x.SupplyManagementFectorId == supplyManagementFector.Id).Select(z => new SupplyManagementFectorDetailDto
