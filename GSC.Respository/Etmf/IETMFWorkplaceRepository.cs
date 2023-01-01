@@ -23,5 +23,6 @@ namespace GSC.Respository.Etmf
         EtmfProjectWorkPlace GetWorkplaceDetails(int id);
         void DeleteAllTable(EtmfProjectWorkPlace EtmfProjectWorkPlace);
         EtmfGroupSearchModel GetEtmfSearchData(int id);
+        void DeleteAllEtmfTableRecords(int id);
     }
 }

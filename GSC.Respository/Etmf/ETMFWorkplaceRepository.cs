@@ -591,7 +591,7 @@ namespace GSC.Respository.Etmf
                 else if (chartType == EtmfChartType.Recommended && f.EtmfArtificateMasterLbrary.InclutionType == 1 && Document.Count() == 0)
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
-                }
+                }                
             }
 
             #region Add sub section folder data
@@ -910,8 +910,8 @@ namespace GSC.Respository.Etmf
 
         public List<ETMFWorkplaceGridDto> GetETMFWorkplaceList(bool isDeleted)
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
-            var childProjectList = _projectRightRepository.GetChildProjectRightIdList();
+            var projectList = _projectRightRepository.GetEtmfProjectRightIdList();
+            var childProjectList = _projectRightRepository.GetEtmfChildProjectRightIdList();
             projectList.AddRange(childProjectList);
 
             if (projectList == null || projectList.Count == 0) return null;
@@ -1158,6 +1158,98 @@ namespace GSC.Respository.Etmf
                         .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentHistory")
                         .Where(x => x.Id == id).FirstOrDefault();
             return result;
+        }
+
+        public void DeleteAllEtmfTableRecords(int id)
+        {
+            var etmfProject = All.Where(x => x.Id == id && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlace)
+                .Include(x => x.ProjectWorkplaceDetails)
+                .ThenInclude(x => x.EtmfUserPermission).FirstOrDefault();
+
+            var artificates = All.Where(x => x.ProjectId == etmfProject.ProjectId && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
+                .Include(x => x.ProjectWorkplaceArtificatedocument)
+                .ThenInclude(x => x.ProjectArtificateDocumentReview)
+                .Include("ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentApprover")
+                .Include("ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentComment")
+                .Include("ProjectWorkplaceArtificatedocument.ProjectArtificateDocumentHistory").ToList();
+
+            var subSectionArtificates = All.Where(x => x.ProjectId == etmfProject.ProjectId && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
+                .Include(x => x.ProjectWorkplaceSubSecArtificatedocument)
+                .ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
+                .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentApprover")
+                .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentComment")
+                .Include("ProjectWorkplaceSubSecArtificatedocument.ProjectSubSecArtificateDocumentHistory").ToList();
+
+            foreach (var artificate in subSectionArtificates)
+            {
+                foreach (var doc in artificate.ProjectWorkplaceSubSecArtificatedocument)
+                {
+                    _projectWorkplaceSubSecArtificatedocumentRepository.Delete(doc.Id);
+
+                    foreach (var subsecreview in doc.ProjectSubSecArtificateDocumentReview)
+                    {
+                        _projectSubSecArtificateDocumentReviewRepository.Delete(subsecreview.Id);
+                    }
+
+                    foreach (var his in doc.ProjectSubSecArtificateDocumentHistory)
+                    {
+                        _projectSubSecArtificateDocumentHistoryRepository.Delete(his.Id);
+                    }
+
+                    foreach (var subseccomment in doc.ProjectSubSecArtificateDocumentComment)
+                    {
+                        _projectSubSecArtificateDocumentCommentRepository.Delete(subseccomment.Id);
+                    }
+
+                    foreach (var subsecapprover in doc.ProjectSubSecArtificateDocumentApprover)
+                    {
+                        _projectSubSecArtificateDocumentApproverRepository.Delete(subsecapprover.Id);
+                    }
+                }
+            }
+
+            foreach (var artificate in artificates)
+            {
+                foreach (var document in artificate.ProjectWorkplaceArtificatedocument)
+                {
+                    _projectWorkplaceArtificatedocumentRepository.Delete(document.Id);
+
+                    foreach (var review in document.ProjectArtificateDocumentReview)
+                    {
+                        _projectWorkplaceArtificateDocumentReviewRepository.Delete(review.Id);
+                    }
+
+                    foreach (var approver in document.ProjectArtificateDocumentApprover)
+                    {
+                        _projectArtificateDocumentApproverRepository.Delete(approver.Id);
+                    }
+
+                    foreach (var comment in document.ProjectArtificateDocumentComment)
+                    {
+                        _projectArtificateDocumentCommentRepository.Delete(comment.Id);
+                    }
+
+                    foreach (var history in document.ProjectArtificateDocumentHistory)
+                    {
+                        _projectArtificateDocumentHistoryRepository.Delete(history.Id);
+                    }
+                }
+            }
+
+            foreach (var workplaceDetail in etmfProject.ProjectWorkplaceDetails)
+            {
+                foreach (var userPermission in workplaceDetail.EtmfUserPermission)
+                {
+                    _etmfUserPermissionRepository.Delete(userPermission.Id);
+                }
+            }
+
+            var projects = All.Where(x => x.ProjectId == etmfProject.ProjectId && x.DeletedDate == null).ToList();
+            foreach (var project in projects)
+            {
+                Delete(project.Id);
+            }
+
         }
 
         public void DeleteAllTable(EtmfProjectWorkPlace EtmfProjectWorkPlace)
