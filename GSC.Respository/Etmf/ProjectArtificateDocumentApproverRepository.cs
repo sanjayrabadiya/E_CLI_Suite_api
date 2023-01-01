@@ -71,8 +71,8 @@ namespace GSC.Respository.Etmf
                 {
                     UserId = c.UserId,
                     Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
-                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null 
-                    && b.IsApproved == true),
+                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null
+                    && (b.IsApproved == true || b.IsApproved == null)),
                 }).Where(x => x.IsSelected == false).ToList();
 
             users.ForEach(x =>
@@ -206,14 +206,14 @@ namespace GSC.Respository.Etmf
 
         public bool GetApprovePending(int documentId)
         {
-            var reviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == null && x.IsApproved == null);
-            if (reviewers.Count() == All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.IsApproved == null).Count())
+            var reviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == null);
+            if (reviewers.Count() == All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null).Count())
             {
                 return false;
             }
             else
             {
-                var reviewer = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.SequenceNo != null && x.IsApproved == null).FirstOrDefault();
+                var reviewer = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.SequenceNo != null).FirstOrDefault();
                 if (reviewer == null)
                 {
                     var nulldata = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.SequenceNo != null && x.IsApproved == null);
@@ -228,7 +228,7 @@ namespace GSC.Respository.Etmf
                 }
                 else
                 {
-                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null && x.IsApproved == null).OrderBy(o => o.SequenceNo);
+                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo);
                     if (sendBackReviewers.Count() <= 0)
                     {
                         return false;
