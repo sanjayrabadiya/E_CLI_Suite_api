@@ -133,8 +133,8 @@ namespace GSC.Respository.Etmf
             result.PendingApprove = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentApprover.Count() != 0 && y.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null))).Count() +
                 SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentApprover.Count() != 0 && y.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null))).Count();
 
-            //result.PendingFinal = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.ProjectArtificateDocumentApprover.Count() != 0 && y.ProjectArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null))).Count() +
-            //SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.ProjectSubSecArtificateDocumentApprover.Count() != 0 && y.ProjectSubSecArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null))).Count();
+            result.PendingFinal = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.ProjectArtificateDocumentApprover.Count() != 0 && y.ProjectArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null))).Count() +
+            SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.ProjectSubSecArtificateDocumentApprover.Count() != 0 && y.ProjectSubSecArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null))).Count();
 
             result.Final = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Final)).Count() +
                 SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Final)).Count();

@@ -74,6 +74,7 @@ namespace GSC.Data.Dto.Etmf
         public int InComplete { get; set; }
         public int PendingReview { get; set; }
         public int AllPendingReview { get; set; }
+        public int PendingFinal { get; set; }
         public int AllArtificate { get; set; }
         public int CoreArtificate { get; set; }
         public int RecommendedArtificate { get; set; }
@@ -130,5 +131,8 @@ namespace GSC.Data.Dto.Etmf
         public string SubSectionArtificateName { get; set; }
         public string SiteName { get; set; }
         public int TableTag { get; set; }
+        public int DocumentId { get; set; }
+        public string DocumentName { get; set; }
+        public List<ProjectWorkplaceArtificatedocumentDto> DocumentList { get; set; }
     }
 }
