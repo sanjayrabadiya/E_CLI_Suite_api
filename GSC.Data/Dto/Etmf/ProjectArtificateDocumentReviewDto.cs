@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.Etmf
         public bool IsRights { get; set; }
         public DateTime? SendBackDate { get; set; }
         public string Message { get; set; }
+        public int? SequenceNo { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
     }
 

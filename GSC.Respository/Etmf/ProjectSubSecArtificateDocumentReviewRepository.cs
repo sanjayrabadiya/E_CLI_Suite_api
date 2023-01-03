@@ -84,6 +84,7 @@ namespace GSC.Respository.Etmf
                         UserId = ReviewDto.UserId,
                         IsSendBack = false,
                         Message = ReviewDto.Message,
+                        SequenceNo = ReviewDto.SequenceNo
                     });
                     if (_context.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
@@ -256,6 +257,59 @@ namespace GSC.Respository.Etmf
             });
 
             return result.Where(x => Convert.ToInt32(x.ExtraData) == 0).ToList();
+        }
+
+        public bool GetReviewPending(int documentId)
+        {
+            var reviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == null);
+            if (reviewers.Count() == All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null).Count())
+            {
+                return false;
+            }
+            else
+            {
+                var reviewer = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.SequenceNo != null).FirstOrDefault();
+                if (reviewer == null)
+                {
+                    var nulldata = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo != null && x.IsSendBack == false);
+                    if (nulldata.Count() > 0)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo);
+                    if (sendBackReviewers.Count() <= 0)
+                    {
+                        return false;
+                    }
+                    var result = sendBackReviewers.LastOrDefault().IsSendBack;
+                    return (!result);
+                }
+            }
+
+            //var reviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == null);
+            //if (reviewers.Count() > 0)
+            //{
+            //    return false;
+            //}
+            //var reviewer = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).FirstOrDefault();
+            //if (reviewer == null)
+            //{
+            //    return false;
+            //}
+            //var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null).OrderBy(o => o.SequenceNo);
+            //if (sendBackReviewers.Count() <= 0)
+            //{
+            //    return false;
+            //}
+            //var result = sendBackReviewers.LastOrDefault().IsSendBack;
+            //return (!result);
         }
     }
 }

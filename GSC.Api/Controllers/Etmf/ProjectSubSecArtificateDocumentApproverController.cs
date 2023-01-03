@@ -113,5 +113,14 @@ namespace GSC.Api.Controllers.Etmf
             _uow.Save();
             return Ok();
         }
+
+
+        [HttpGet]
+        [Route("GetPendingSubSectionApprove/{documentId}")]
+        public IActionResult GetPendingSubSectionApprove(int documentId)
+        {
+            var result = _projectSubSecArtificateDocumentApproverRepository.GetApprovePending(documentId);
+            return Ok(result);
+        }
     }
 }

@@ -264,6 +264,21 @@ namespace GSC.Respository.ProjectRight
             }
         }
 
+        public List<int> GetEtmfProjectRightIdList()
+        {
+            return All.Include(x => x.project).Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId &&
+                                  c.RoleId == _jwtTokenAccesser.RoleId
+                                  && c.IsReviewDone && c.project.DeletedDate == null).Select(x => x.ProjectId).ToList();
+        }
+
+        public List<int> GetEtmfChildProjectRightIdList()
+        {
+            return All.Include(x => x.project).Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId &&
+                                  c.project.ParentProjectId != null &&
+                                  c.RoleId == _jwtTokenAccesser.RoleId
+                                  && c.IsReviewDone && c.project.DeletedDate == null).Select(x => (int)x.project.ParentProjectId).ToList();
+        }
+
         public List<int> GetProjectRightIdList()
         {
             return All.Where(c => c.DeletedDate == null && c.UserId == _jwtTokenAccesser.UserId &&
@@ -680,7 +695,7 @@ namespace GSC.Respository.ProjectRight
         }
         public IList<UserReportDto> GetUserReportList(UserReportSearchDto filters)
         {
-            var results = (from user in _context.Users.Where(t => (filters.UserId == 2 && (t.DeletedBy != null  || (t.ValidFrom.HasValue && t.ValidFrom.Value > DateTime.Now
+            var results = (from user in _context.Users.Where(t => (filters.UserId == 2 && (t.DeletedBy != null || (t.ValidFrom.HasValue && t.ValidFrom.Value > DateTime.Now
                             || t.ValidTo.HasValue && t.ValidTo.Value < DateTime.Now)))
                             || (t.DeletedBy == null && filters.UserId == 3)
                             || (filters.UserId == 1))

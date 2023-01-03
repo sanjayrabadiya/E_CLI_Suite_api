@@ -16,6 +16,6 @@ namespace GSC.Respository.Etmf
         List<DashboardDto> GetEtmfMyTaskList(int ProjectId);
         List<ProjectArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id);
         void IsApproveDocument(int Id);
-
+        bool GetApprovePending(int documentId);
     }
 }

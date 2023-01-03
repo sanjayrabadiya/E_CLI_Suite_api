@@ -288,7 +288,7 @@ namespace GSC.Respository.Etmf
         public List<DropDownDto> GetSitesForEtmf(int ProjectId)
         {
             // Get site for add after worksplace created
-            var result = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ProjectId && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
+            var result = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ProjectId && x.WorkPlaceFolderId == (int)WorkPlaceFolder.Site && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail)
                         .Select(x => x.ItemId).ToList();
 
             var project = _context.Project.Where(x => x.ParentProjectId == ProjectId && x.DeletedDate == null && !result.Contains(x.Id))

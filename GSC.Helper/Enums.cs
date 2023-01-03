@@ -630,7 +630,9 @@ namespace GSC.Helper
         [Description("Pending Approve")] PendingApprove = 5,
         [Description("Final")] Final = 6,
         [Description("Incomplete")] Incomplete = 7,
-        [Description("Not Required")] NotRequired = 8
+        [Description("Not Required")] NotRequired = 8,
+        [Description("Pending Final")] PendingFinal = 9
+            
     }
 
     public enum VideoCallStatus : int

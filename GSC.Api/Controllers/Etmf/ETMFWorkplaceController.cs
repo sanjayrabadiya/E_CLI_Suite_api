@@ -254,14 +254,14 @@ namespace GSC.Api.Controllers.Etmf
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _eTMFWorkplaceRepository.GetWorkplaceDetails(id);
-            if (record == null)
-                return NotFound();
+            //var record = _eTMFWorkplaceRepository.GetWorkplaceDetails(id);
+            //if (record == null)
+            //    return NotFound();
 
-            _eTMFWorkplaceRepository.Delete(record.Id);
+            //_eTMFWorkplaceRepository.Delete(record.Id);
 
-            _eTMFWorkplaceRepository.DeleteAllTable(record);
-
+            //_eTMFWorkplaceRepository.DeleteAllTable(record);
+            _eTMFWorkplaceRepository.DeleteAllEtmfTableRecords(id);
             _uow.Save();
             return Ok();
         }

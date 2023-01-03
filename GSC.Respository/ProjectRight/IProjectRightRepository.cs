@@ -27,5 +27,9 @@ namespace GSC.Respository.ProjectRight
         List<int> GetChildProjectRightIdList();
         List<int> GetParentProjectRightIdList();
 
+        List<int> GetEtmfProjectRightIdList();
+
+        List<int> GetEtmfChildProjectRightIdList();
+
     }
 }
