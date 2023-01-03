@@ -376,9 +376,12 @@ namespace GSC.Api.Controllers.Attendance
         [Route("saveRandomizationNumber")]
         public IActionResult SaveRandomizationNumber([FromBody] RandomizationDto randomizationDto)
         {
+            bool Isalreadyassigned = false;
             if (randomizationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId).FirstOrDefault();
 
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
 
@@ -388,10 +391,9 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            if (!_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
+            if (numerformate.IsIGT && !_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
             {
-                ModelState.AddModelError("Message", "This randomization number already assigned!");
-                return BadRequest(ModelState);
+                Isalreadyassigned = true;
             }
 
             var validaterandomizationno = _randomizationRepository.ValidateRandomizationNumber(randomizationDto);
@@ -400,15 +402,33 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validaterandomizationno);
                 return BadRequest(ModelState);
             }
-
+            if (Isalreadyassigned)
+            {
+                randomizationDto.RandomizationNumber = _randomizationRepository.GetRandomizationNumberIWRS(randomizationDto.Id);
+                if (string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                {
+                    ModelState.AddModelError("Message", "Please upload randomization sheet");
+                    return BadRequest(ModelState);
+                }
+            }
             _randomizationRepository.SaveRandomizationNumber(randomization, randomizationDto);
 
             _randomizationRepository.UpdateRandomizationIdForIWRS(randomizationDto);
-            
+
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
-            return Ok(randomization.Id);
+            if (numerformate.IsIWRS && _randomizationRepository.CheckKitNumber(randomizationDto))
+            {
+                randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
+                if (string.IsNullOrEmpty(randomizationDto.KitNo))
+                {
+                    ModelState.AddModelError("Message", "Kit is not available");
+                    return BadRequest(ModelState);
+                }
+            }
+
+            return Ok(randomizationDto);
         }
 
         //[HttpPut]

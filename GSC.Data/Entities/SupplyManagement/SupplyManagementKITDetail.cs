@@ -27,5 +27,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public KitStatus? Status { get; set; }
 
         public string Comments { get; set; }
+
+        public int? RandomizationId { get; set; }
     }
 }

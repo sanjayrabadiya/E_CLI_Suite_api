@@ -1285,5 +1285,75 @@ namespace GSC.Respository.Attendance
             userLarRole.UserRoleId = _context.SecurityRole.Where(c => c.RoleShortName == "LAR").FirstOrDefault().Id;
             _userRoleRepository.Add(userLarRole);
         }
+
+        public string GetRandomizationNumberIWRS(int id)
+        {
+            var randomizationNumberDto = GenerateRandomizationNumber(id);
+            return randomizationNumberDto.RandomizationNumber;
+        }
+        public RandomizationDto SetKitNumber(RandomizationDto obj)
+        {
+           
+                var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                if (SupplyManagementUploadFile == null)
+                    return obj;
+
+                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.RandomizationId == obj.Id && x.DeletedDate == null).FirstOrDefault();
+                if (data == null)
+                    return obj;
+
+                var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id).FirstOrDefault();
+                if (visit == null)
+                    return obj;
+
+                var kitdata = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
+                              && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
+                              && x.SupplyManagementKIT.PharmacyStudyProductType.ProjectId == obj.ParentProjectId
+                              && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == data.TreatmentType
+                              && x.SupplyManagementShipmentId != null
+                              && x.SupplyManagementKIT.DeletedDate == null
+                              && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                              && x.RandomizationId == null).OrderBy(x => x.Id).FirstOrDefault();
+                if (kitdata == null)
+                    return obj;
+
+                kitdata.RandomizationId = obj.Id;
+                _context.SupplyManagementKITDetail.Update(kitdata);
+                _context.Save();
+                obj.KitNo = kitdata.KitNo;
+
+            
+
+            return obj;
+        }
+
+        public bool CheckKitNumber(RandomizationDto obj)
+        {
+
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            if (SupplyManagementUploadFile == null)
+                return false;
+
+            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.RandomizationId == obj.Id && x.DeletedDate == null).FirstOrDefault();
+            if (data == null)
+                return false;
+
+            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id).FirstOrDefault();
+            if (visit == null)
+                return false;
+
+            var kitdata = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
+                          && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
+                          && x.SupplyManagementKIT.PharmacyStudyProductType.ProjectId == obj.ParentProjectId
+                          && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == data.TreatmentType
+                          && x.SupplyManagementShipmentId != null
+                          && x.SupplyManagementKIT.DeletedDate == null
+                          && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                          && x.RandomizationId == obj.Id).OrderBy(x => x.Id).FirstOrDefault();
+            if (kitdata != null)
+                return false;
+
+            return true;
+        }
     }
 }

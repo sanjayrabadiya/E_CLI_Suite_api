@@ -18,7 +18,7 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyManagementReceiptController : BaseController
     {
-        
+
         private readonly IMapper _mapper;
         private readonly ISupplyManagementReceiptRepository _supplyManagementReceiptRepository;
         private readonly IUnitOfWork _uow;
@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (supplyManagementshipmentDto.Kits != null)
             {
 
-                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null))
+                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null && x.Status != Helper.KitStatus.WithoutIssue))
                 {
                     if (string.IsNullOrEmpty(item.Comments))
                     {

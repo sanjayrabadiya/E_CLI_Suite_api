@@ -202,6 +202,12 @@ namespace GSC.Respository.Screening
                             var producttype = _context.ProductType.Where(x => x.ProductTypeCode == verifyuploadsheetdata.TreatmentType).FirstOrDefault();
                             value = producttype != null ? producttype.ProductTypeName : "";
                         }
+                        if (allocationsetting.Type == SupplyManagementAllocationType.KitNo)
+                        {
+                            var producttype = _context.SupplyManagementKITDetail.Include(x=>x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                            && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+                            value = producttype != null ? producttype.KitNo : "";
+                        }
                         var screeningTemplateValue = new ScreeningTemplateValue
                         {
                             ScreeningTemplateId = screeningTemplateId,

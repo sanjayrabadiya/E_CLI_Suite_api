@@ -109,10 +109,10 @@ namespace GSC.Respository.SupplyManagement
             {
                 var approvedQty = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
                  && x.SupplyManagementKIT.ProjectId == ProjectId && x.SupplyManagementKIT.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
-                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)).Count();
+                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)).Sum(x => x.SupplyManagementKIT.TotalUnits);
 
                 var finalRemainingQty = RemainingQuantity - approvedQty;
-                return finalRemainingQty;
+                return (int)finalRemainingQty;
 
             }
 

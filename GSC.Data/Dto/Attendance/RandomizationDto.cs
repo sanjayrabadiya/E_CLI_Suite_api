@@ -53,6 +53,8 @@ namespace GSC.Data.Dto.Attendance
         public DaitoryFector? Diatoryfactor { get; set; }
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
+
+        public string KitNo { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto

@@ -56,5 +56,11 @@ namespace GSC.Respository.Attendance
         void AddRandomizationUserLAR(UserDto userLarDto, CommonResponceView userLardetails);
 
         bool ValidateRandomizationIdForIWRS(RandomizationDto obj);
+
+        string GetRandomizationNumberIWRS(int id);
+
+        RandomizationDto SetKitNumber(RandomizationDto obj);
+
+        bool CheckKitNumber(RandomizationDto obj);
     }
 }

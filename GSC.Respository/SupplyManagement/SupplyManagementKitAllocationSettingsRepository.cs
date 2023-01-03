@@ -26,7 +26,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementKitAllocationSettingsRepository : GenericRespository<SupplyManagementKitAllocationSettings>, ISupplyManagementKitAllocationSettingsRepository
     {
-        
+
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
@@ -47,12 +47,13 @@ namespace GSC.Respository.SupplyManagement
         public IList<DropDownDto> GetVisitDropDownByProjectId(int projectId)
         {
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
+                         && x.IsNonCRF == false
                          && x.DeletedDate == null)
                     .Select(x => new DropDownDto
-                    {
-                        Id = x.Id,
-                        Value = x.DisplayName,
-                    }).Distinct().ToList();
+                     {
+                         Id = x.Id,
+                         Value = x.DisplayName,
+                     }).Distinct().ToList();
             return visits;
 
         }

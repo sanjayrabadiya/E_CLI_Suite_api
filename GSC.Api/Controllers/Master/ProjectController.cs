@@ -632,5 +632,11 @@ namespace GSC.Api.Controllers.Master
             if (_uow.Save() <= 0) throw new Exception("Update project failed on save.");
             return Ok(project);
         }
+        [HttpGet]
+        [Route("GetProjectDropDownIWRS")]
+        public IActionResult GetProjectDropDownIWRS()
+        {
+            return Ok(_projectRepository.GetProjectDropDownIWRS());
+        }
     }
 }

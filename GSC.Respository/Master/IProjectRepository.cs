@@ -56,5 +56,7 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetParentProjectCTMSDropDown();
 
         List<ProjectDropDown> GetParentStaticProjectDropDownIWRS();
+
+        List<ProjectDropDown> GetProjectDropDownIWRS();
     }
 }

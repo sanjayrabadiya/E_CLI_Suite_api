@@ -26,6 +26,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool? WithIssue { get; set; }
         public string ReasonOth { get; set; }
         public int? ApprovedQty { get; set; }
+        public int? RequestQty { get; set; }
+        public int? ShipmentQty { get; set; }
         public string StatusName { get; set; }
         public SupplyMangementShipmentStatus Status { get; set; }
         public string StudyProjectCode { get; set; }

@@ -454,6 +454,7 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.ShipmentReasonOth, x => x.MapFrom(a => a.SupplyManagementShipment.ReasonOth))
                  .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementShipment.Status.GetDescription()))
                  .ForMember(x => x.ApprovedQty, x => x.MapFrom(a => a.SupplyManagementShipment.ApprovedQty))
+                 .ForMember(x => x.RequestQty, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.RequestQty))
                  .ForMember(x => x.ApproveRejectDateTime, x => x.MapFrom(a => a.SupplyManagementShipment.CreatedDate))
                  .ForMember(x => x.ShipmentNo, x => x.MapFrom(a => a.SupplyManagementShipment.ShipmentNo))
                  .ForMember(x => x.CourierName, x => x.MapFrom(a => a.SupplyManagementShipment.CourierName))
