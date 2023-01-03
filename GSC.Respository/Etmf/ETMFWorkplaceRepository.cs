@@ -624,26 +624,38 @@ namespace GSC.Respository.Etmf
                 }
                 else if (chartType == EtmfChartType.Missing && Document.Count() == 0 && f.IsNotRequired == false)
                 {
+                    pvListArtificateObj.Icon = "las la-file-alt text-missing eicon";
+                    pvListArtificateObj.IconType = EtmfChartType.Missing;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
                 else if (chartType == EtmfChartType.Incomplete && Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy && y.DeletedDate == null).Count() == 0).Count() != 0)
                 {
+                    pvListArtificateObj.Icon = "las la-file-alt text-incomeplete eicon";
+                    pvListArtificateObj.IconType = EtmfChartType.Incomplete;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
                 else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault()?.Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                 {
+                    pvListArtificateObj.Icon = "las la-file-alt text-pendingreview eicon";
+                    pvListArtificateObj.IconType = EtmfChartType.PendingReview;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
                 else if (chartType == EtmfChartType.PendingApprove && Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0)
                 {
+                    pvListArtificateObj.Icon = "las la-file-alt text-pendingapprove eicon";
+                    pvListArtificateObj.IconType = EtmfChartType.PendingApprove;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
                 else if (chartType == EtmfChartType.Final && Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0)
                 {
+                    pvListArtificateObj.Icon = "las la-file-alt text-final eicon";
+                    pvListArtificateObj.IconType = EtmfChartType.Final;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
                 else if (chartType == EtmfChartType.NotRequired && f.IsNotRequired == true)
                 {
+                    pvListArtificateObj.Icon = "las la-file-alt text-notreq eicon";
+                    pvListArtificateObj.IconType = EtmfChartType.NotRequired;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
                 else if (chartType == EtmfChartType.core && f.EtmfArtificateMasterLbrary.InclutionType == 2 && Document.Count() == 0)
@@ -746,26 +758,38 @@ namespace GSC.Respository.Etmf
                     }
                     else if (chartType == EtmfChartType.Missing && Document.Count() == 0 && itemartifact.IsNotRequired == false)
                     {
+                        pvListartifactsubsectionobj.Icon = "las la-file-alt text-missing eicon";
+                        pvListartifactsubsectionobj.IconType = EtmfChartType.Missing;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                     else if (chartType == EtmfChartType.Incomplete && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy && y.DeletedDate == null).Count() == 0).Count() != 0)
                     {
+                        pvListartifactsubsectionobj.Icon = "las la-file-alt text-incomeplete eicon";
+                        pvListartifactsubsectionobj.IconType = EtmfChartType.Incomplete;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                     else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                     {
+                        pvListartifactsubsectionobj.Icon = "las la-file-alt text-pendingreview eicon";
+                        pvListartifactsubsectionobj.IconType = EtmfChartType.PendingReview;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                     else if (chartType == EtmfChartType.PendingApprove && Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0)
                     {
+                        pvListartifactsubsectionobj.Icon = "las la-file-alt text-pendingapprove eicon";
+                        pvListartifactsubsectionobj.IconType = EtmfChartType.PendingApprove;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                     else if (chartType == EtmfChartType.Final && Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0)
                     {
+                        pvListartifactsubsectionobj.Icon = "las la-file-alt text-final eicon";
+                        pvListartifactsubsectionobj.IconType = EtmfChartType.Final;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                     else if (chartType == EtmfChartType.NotRequired && itemartifact.IsNotRequired == true)
                     {
+                        pvListartifactsubsectionobj.Icon = "las la-file-alt text-notreq eicon";
+                        pvListartifactsubsectionobj.IconType = EtmfChartType.NotRequired;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
                     else if (chartType == EtmfChartType.PendingFinal && Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0)
