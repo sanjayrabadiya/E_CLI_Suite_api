@@ -99,6 +99,14 @@ namespace GSC.Api.Controllers.SupplyManagement
             var record = _supplyManagementFectorRepository.Find(id);
             if (record == null)
                 return NotFound();
+            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == record.ProjectId
+           && x.RandomizationNumber != null).FirstOrDefault();
+
+            if (randomization != null)
+            {
+                ModelState.AddModelError("Message", "You can't delete the factor once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
             _supplyManagementFectorRepository.Delete(record);
 
             var verifyRecord = _supplyManagementFectorDetailRepository.All.Where(x => x.SupplyManagementFectorId == record.Id).ToList();
@@ -115,7 +123,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
             _supplyManagementFectorRepository.Update(record);
             _uow.Save();
-           
+
             return Ok();
         }
 

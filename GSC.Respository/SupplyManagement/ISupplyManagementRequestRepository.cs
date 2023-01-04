@@ -21,6 +21,9 @@ namespace GSC.Respository.SupplyManagement
         List<KitListApprove> GetAvailableKit(int SupplyManagementRequestId);
 
         int GetAvailableRemainingKit(int SupplyManagementRequestId);
-        
+
+        int GetAvailableRemainingKitBlindedStudy(int SupplyManagementRequestId);
+
+
     }
 }

@@ -63,6 +63,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public ProductUnitType ProductUnitType { get; set; }
 
         public string SiteRequest { get; set; }
+        public int? StudyProductTypeId { get; set; }
     }
 
 }

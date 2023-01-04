@@ -29,16 +29,19 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly ISupplyManagementKitNumberSettingsRepository _supplyManagementKitNumberSettingsRepository;
         private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
         public SupplyManagementKitNumberSettingsController(
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-             ISupplyManagementKitNumberSettingsRepository supplyManagementKitNumberSettingsRepository)
+             ISupplyManagementKitNumberSettingsRepository supplyManagementKitNumberSettingsRepository,
+             IGSCContext context)
         {
 
             _uow = uow;
             _mapper = mapper;
             _supplyManagementKitNumberSettingsRepository = supplyManagementKitNumberSettingsRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet("{id}")]
@@ -97,6 +100,16 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
+            var kit = _context.SupplyManagementKIT.Where(x => x.ProjectId == record.ProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+            if (kit.Count > 0)
+            {
+                var kitdetail = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null && kit.Contains(x.SupplyManagementKITId) && x.Status != KitStatus.AllocationPending).Count();
+                if (kitdetail > 0)
+                {
+                    ModelState.AddModelError("Message", "You can't able to delete because kit has already created!");
+                    return BadRequest(ModelState);
+                }
+            }
 
             if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
                 record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
@@ -122,6 +135,26 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             return Ok();
         }
-       
+
+        [HttpGet("CheckSettingExist/{projectId}")]
+        public IActionResult CheckSettingExist(int projectId)
+        {
+            var data = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
+            return Ok(data);
+        }
+        [HttpGet("CheckIsBlidedStudy/{projectId}")]
+        public IActionResult CheckIsBlidedStudy(int projectId)
+        {
+            bool Isblined = false;
+            if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsBlindedStudy == true))
+            {
+                Isblined = true;
+            }
+            else
+            {
+                Isblined = false;
+            }
+            return Ok(Isblined);
+        }
     }
 }

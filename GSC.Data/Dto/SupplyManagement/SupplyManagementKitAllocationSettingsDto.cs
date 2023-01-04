@@ -17,6 +17,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ReasonName { get; set; }
 
+        public int PharmacyStudyProductTypeId { get; set; }
+
+        public string ProductName { get; set; }
+
     }
 
     public class SupplyManagementKitAllocationSettingsGridDto : BaseAuditDto
@@ -27,6 +31,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string ReasonName { get; set; }
+
+        public int PharmacyStudyProductTypeId { get; set; }
+
+        public string ProductName { get; set; }
     }
 
 }

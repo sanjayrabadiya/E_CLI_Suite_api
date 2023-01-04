@@ -106,6 +106,15 @@ namespace GSC.Api.Controllers.SupplyManagement
             var record = _supplyManagementFectorDetailRepository.Find(id);
             if (record == null)
                 return NotFound();
+
+            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == record.SupplyManagementFector.ProjectId
+            && x.RandomizationNumber != null).FirstOrDefault();
+
+            if (randomization != null)
+            {
+                ModelState.AddModelError("Message", "You can't delete the factor once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
             _supplyManagementFectorDetailRepository.Delete(record);
             if (!string.IsNullOrEmpty(_jwtTokenAccesser.GetHeader("audit-reason-oth")))
                 record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
@@ -127,7 +136,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return NotFound();
 
             _supplyManagementFectorDetailRepository.Active(record);
-            
+
             _uow.Save();
             _supplyManagementFectorRepository.UpdateFactorFormula(record.SupplyManagementFectorId);
             _uow.Save();

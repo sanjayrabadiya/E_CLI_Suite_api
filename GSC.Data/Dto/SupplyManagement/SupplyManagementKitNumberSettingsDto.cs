@@ -17,8 +17,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string ReasonName { get; set; }
-
         public int KitNoseries { get; set; }
+        public bool? IsBlindedStudy { get; set; }
 
     }
 
@@ -32,6 +32,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string ReasonName { get; set; }
+        public bool? IsBlindedStudy { get; set; }
     }
 
 }

@@ -40,8 +40,17 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKitAllocationSettingsGridDto> GetKITAllocationList(bool isDeleted, int ProjectId)
         {
-            return _context.SupplyManagementKitAllocationSettings.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
+            var data = _context.SupplyManagementKitAllocationSettings.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
                    ProjectTo<SupplyManagementKitAllocationSettingsGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            data.ForEach(x =>
+            {
+                var pharmacyProductType = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(z => z.Id == x.PharmacyStudyProductTypeId).FirstOrDefault();
+                if (pharmacyProductType != null)
+                {
+                    x.ProductName = pharmacyProductType.ProductType.ProductTypeCode;
+                }
+            });
+            return data;
         }
 
         public IList<DropDownDto> GetVisitDropDownByProjectId(int projectId)
@@ -50,10 +59,10 @@ namespace GSC.Respository.SupplyManagement
                          && x.IsNonCRF == false
                          && x.DeletedDate == null)
                     .Select(x => new DropDownDto
-                     {
-                         Id = x.Id,
-                         Value = x.DisplayName,
-                     }).Distinct().ToList();
+                    {
+                        Id = x.Id,
+                        Value = x.DisplayName,
+                    }).Distinct().ToList();
             return visits;
 
         }

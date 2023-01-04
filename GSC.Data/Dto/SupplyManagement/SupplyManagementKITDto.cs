@@ -49,6 +49,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string Status { get; set; }
 
+        public string RandomizationNo { get; set; }
+
+        public int? RandomizationId { get; set; }
+
 
     }
 
@@ -62,6 +66,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string KitNo { get; set; }
         public string VisitName { get; set; }
         public string SiteCode { get; set; }
+
+        public string ProductCode { get; set; }
     }
 
     public class KitListApproved

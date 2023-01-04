@@ -42,8 +42,14 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId)
         {
-            return _context.SupplyManagementKITDetail.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SupplyManagementKIT.ProjectId == ProjectId).
+            var data = _context.SupplyManagementKITDetail.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SupplyManagementKIT.ProjectId == ProjectId).
                    ProjectTo<SupplyManagementKITGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            data.ForEach(x =>
+            {
+                if (x.RandomizationId > 0)
+                    x.RandomizationNo = _context.Randomization.Where(z => z.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+            });
+            return data;
         }
 
         public IList<DropDownDto> GetVisitDropDownByAllocation(int projectId)

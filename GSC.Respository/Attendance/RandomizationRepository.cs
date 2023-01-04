@@ -1293,37 +1293,35 @@ namespace GSC.Respository.Attendance
         }
         public RandomizationDto SetKitNumber(RandomizationDto obj)
         {
-           
-                var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-                if (SupplyManagementUploadFile == null)
-                    return obj;
 
-                var data = _context.SupplyManagementUploadFileDetail.Where(x => x.RandomizationId == obj.Id && x.DeletedDate == null).FirstOrDefault();
-                if (data == null)
-                    return obj;
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            if (SupplyManagementUploadFile == null)
+                return obj;
 
-                var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id).FirstOrDefault();
-                if (visit == null)
-                    return obj;
+            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.RandomizationId == obj.Id && x.DeletedDate == null).FirstOrDefault();
+            if (data == null)
+                return obj;
 
-                var kitdata = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
+            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id).FirstOrDefault();
+            if (visit == null)
+                return obj;
+
+            var kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x => x.DeletedDate == null
                               && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
                               && x.SupplyManagementKIT.PharmacyStudyProductType.ProjectId == obj.ParentProjectId
                               && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == data.TreatmentType
                               && x.SupplyManagementShipmentId != null
                               && x.SupplyManagementKIT.DeletedDate == null
+                              && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ProjectId
                               && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                               && x.RandomizationId == null).OrderBy(x => x.Id).FirstOrDefault();
-                if (kitdata == null)
-                    return obj;
+            if (kitdata == null)
+                return obj;
 
-                kitdata.RandomizationId = obj.Id;
-                _context.SupplyManagementKITDetail.Update(kitdata);
-                _context.Save();
-                obj.KitNo = kitdata.KitNo;
-
-            
-
+            kitdata.RandomizationId = obj.Id;
+            _context.SupplyManagementKITDetail.Update(kitdata);
+            _context.Save();
+            obj.KitNo = kitdata.KitNo;
             return obj;
         }
 

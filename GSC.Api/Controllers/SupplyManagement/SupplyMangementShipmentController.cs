@@ -20,7 +20,7 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyMangementShipmentController : BaseController
     {
-        
+
         private readonly IMapper _mapper;
         private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
         private readonly IUnitOfWork _uow;
@@ -33,7 +33,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementShipmentRepository = supplyManagementShipmentRepository;
             _uow = uow;
             _mapper = mapper;
-            
+
             _supplyManagementRequestRepository = supplyManagementRequestRepository;
             _context = context;
         }
@@ -90,12 +90,17 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "Request data not found!");
                 return BadRequest(ModelState);
             }
-
-            if (shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentData.FromProject.ParentProjectId).FirstOrDefault();
+            if (setting != null && setting.IsBlindedStudy == true)
             {
-                return Ok(_supplyManagementRequestRepository.GetAvailableRemainingKit(SupplyManagementRequestId));
+                return Ok(_supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(SupplyManagementRequestId));
             }
-            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty((int)shipmentData.FromProject.ParentProjectId, shipmentData.StudyProductTypeId));
+            else
+            {
+                if (shipmentData.PharmacyStudyProductType != null && shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+                    return Ok(_supplyManagementRequestRepository.GetAvailableRemainingKit(SupplyManagementRequestId));
+            }
+            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty((int)shipmentData.FromProject.ParentProjectId, (int)shipmentData.StudyProductTypeId));
         }
 
         [HttpGet]

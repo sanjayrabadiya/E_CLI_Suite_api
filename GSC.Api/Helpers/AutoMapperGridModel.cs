@@ -470,11 +470,11 @@ namespace GSC.Api.Helpers
                   .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.FromProject.ProjectCode))
                   .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.ToProject.ProjectCode))
                   .ForMember(x => x.SupplyManagementRequestId, x => x.MapFrom(a => a.Id))
-                  .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
-                  .ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType.GetDescription()))
+                  //.ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
+                  //.ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType.GetDescription()))
                   .ForMember(x => x.RequestBy, x => x.MapFrom(a => a.CreatedByUser.UserName))
                   .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.CreatedDate))
-                  .ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType))
+                  //.ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType))
                   .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.CreatedDate))
                   .ReverseMap();
 

@@ -104,6 +104,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
+            if (record.Status != KitStatus.AllocationPending)
+            {
+                ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
+                return BadRequest(ModelState);
+            }
+
             _supplyManagementKITDetailRepository.Delete(record);
             _uow.Save();
 
@@ -172,10 +178,10 @@ namespace GSC.Api.Controllers.SupplyManagement
         }
 
         [HttpGet]
-        [Route("getIMPPerKitByKitAllocation/{visitId}")]
-        public IActionResult getIMPPerKitByKitAllocation(int visitId)
+        [Route("getIMPPerKitByKitAllocation/{visitId}/{pharmacyStudyProductTypeId}")]
+        public IActionResult getIMPPerKitByKitAllocation(int visitId, int pharmacyStudyProductTypeId)
         {
-            var data = _context.SupplyManagementKitAllocationSettings.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == visitId).FirstOrDefault();
+            var data = _context.SupplyManagementKitAllocationSettings.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == visitId && x.PharmacyStudyProductTypeId == pharmacyStudyProductTypeId).FirstOrDefault();
             return Ok(data);
         }
 

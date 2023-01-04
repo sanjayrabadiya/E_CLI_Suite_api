@@ -11,7 +11,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsSiteRequest { get; set; }
         public int? FromProjectId { get; set; }
         public int? ToProjectId { get; set; }
-        public int StudyProductTypeId { get; set; }
+        public int? StudyProductTypeId { get; set; }
         public int RequestQty { get; set; }
         public int? VisitId { get; set; }
     }
@@ -21,7 +21,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsSiteRequest { get; set; }
         public int? FromProjectId { get; set; }
         public int? ToProjectId { get; set; }
-        public int StudyProductTypeId { get; set; }
+        public int? StudyProductTypeId { get; set; }
         public int RequestQty { get; set; }
 
         public int ApprovedQty { get; set; }

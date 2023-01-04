@@ -54,7 +54,10 @@ namespace GSC.Respository.SupplyManagement
                 obj.RequestDate = t.CreatedDate;
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
-                obj.ProductUnitType = t.ProductUnitType;
+                obj.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
+                obj.StudyProductTypeName = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductType.ProductTypeName).FirstOrDefault() : "";
+                obj.StudyProductTypeUnitName = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductUnitType.GetDescription()).FirstOrDefault() : "Kit";
+
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
@@ -100,7 +103,18 @@ namespace GSC.Respository.SupplyManagement
             }
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                if (shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+                var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == project.ParentProjectId
+                                && x.DeletedDate == null && x.IsBlindedStudy == true).FirstOrDefault();
+                if (settings != null)
+                {
+                    var data1 = supplyManagementshipmentDto.Kits.GroupBy(x => x.ProductCode).ToList();
+                    if (data1.Count > 1)
+                    {
+                        return "You can't select different product!";
+                    }
+                }
+
+                if (shipmentData.PharmacyStudyProductType != null && shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
                 {
                     if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKit(supplyManagementshipmentDto.SupplyManagementRequestId))
                     {
@@ -115,10 +129,11 @@ namespace GSC.Respository.SupplyManagement
 
                         return "Please select kits!";
                     }
+
                 }
                 else
                 {
-                    if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, shipmentData.StudyProductTypeId))
+                    if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, (int)shipmentData.StudyProductTypeId))
                     {
                         return "Approve qty should not greater than remaining qty!";
                     }

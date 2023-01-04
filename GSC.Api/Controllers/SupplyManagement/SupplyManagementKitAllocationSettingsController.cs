@@ -29,16 +29,19 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly ISupplyManagementKitAllocationSettingsRepository _supplyManagementKitAllocationSettingsRepository;
         private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
         public SupplyManagementKitAllocationSettingsController(
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-             ISupplyManagementKitAllocationSettingsRepository supplyManagementKitAllocationSettingsRepository)
+             ISupplyManagementKitAllocationSettingsRepository supplyManagementKitAllocationSettingsRepository,
+             IGSCContext context)
         {
 
             _uow = uow;
             _mapper = mapper;
             _supplyManagementKitAllocationSettingsRepository = supplyManagementKitAllocationSettingsRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet("{id}")]
@@ -64,11 +67,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementKitAllocationSettingsDto.Id = 0;
-            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
-            {
-                ModelState.AddModelError("Message", "You already added visit!");
-                return BadRequest(ModelState);
-            }
+            //if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            //{
+            //    ModelState.AddModelError("Message", "You already added visit!");
+            //    return BadRequest(ModelState);
+            //}
 
             var supplyManagementKitAllocationSettings = _mapper.Map<SupplyManagementKitAllocationSettings>(supplyManagementKitAllocationSettingsDto);
             _supplyManagementKitAllocationSettingsRepository.Add(supplyManagementKitAllocationSettings);
@@ -82,7 +85,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Put([FromBody] SupplyManagementKitAllocationSettingsDto supplyManagementKitAllocationSettingsDto)
         {
-            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.Id != supplyManagementKitAllocationSettingsDto.Id && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.DeletedDate == null && x.Id != supplyManagementKitAllocationSettingsDto.Id && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
             {
                 ModelState.AddModelError("Message", "You already added visit!");
                 return BadRequest(ModelState);
@@ -105,7 +108,16 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
-
+            var kit = _context.SupplyManagementKIT.Where(x => x.ProjectDesignVisitId == record.ProjectDesignVisitId && x.DeletedDate == null).Select(x => x.Id).ToList();
+            if (kit.Count > 0)
+            {
+                var kitdetail = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null && kit.Contains(x.SupplyManagementKITId) && x.Status != KitStatus.AllocationPending).Count();
+                if (kitdetail > 0)
+                {
+                    ModelState.AddModelError("Message", "You can't able to delete because kit has already created!");
+                    return BadRequest(ModelState);
+                }
+            }
             if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
                 record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
             if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")

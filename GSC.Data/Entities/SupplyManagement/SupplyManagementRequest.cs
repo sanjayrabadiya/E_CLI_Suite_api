@@ -17,7 +17,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public bool IsSiteRequest { get; set; }
         public int? FromProjectId { get; set; }
         public int? ToProjectId { get; set; }
-        public int StudyProductTypeId { get; set; }
+        public int? StudyProductTypeId { get; set; }
         public int RequestQty { get; set; }
         public int? VisitId { get; set; }
 
@@ -28,7 +28,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public GSC.Data.Entities.Master.Project ToProject { get; set; }
 
         [ForeignKey("StudyProductTypeId")]
-        public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
+        public PharmacyStudyProductType? PharmacyStudyProductType { get; set; }
 
         [ForeignKey("VisitId")]
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
