@@ -106,8 +106,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             var record = _supplyManagementFectorDetailRepository.Find(id);
             if (record == null)
                 return NotFound();
-
-            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == record.SupplyManagementFector.ProjectId
+            var SupplyManagementFector = _context.SupplyManagementFector.Where(x => x.Id == record.SupplyManagementFectorId).FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == SupplyManagementFector.ProjectId
             && x.RandomizationNumber != null).FirstOrDefault();
 
             if (randomization != null)

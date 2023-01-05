@@ -56,7 +56,18 @@ namespace GSC.Respository.SupplyManagement
                 obj.CreatedDate = null;
                 obj.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
                 obj.StudyProductTypeName = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductType.ProductTypeName).FirstOrDefault() : "";
-                obj.StudyProductTypeUnitName = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductUnitType.GetDescription()).FirstOrDefault() : "Kit";
+                if (t.StudyProductTypeId > 0)
+                {
+                    var ptype = _context.PharmacyStudyProductType.Where(x => x.Id == t.StudyProductTypeId).FirstOrDefault();
+                    if (ptype != null)
+                    {
+                        obj.StudyProductTypeUnitName = ptype.ProductUnitType.GetDescription();
+                    }
+                }
+                else
+                {
+                    obj.StudyProductTypeUnitName = "Kit";
+                }
 
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
@@ -112,9 +123,22 @@ namespace GSC.Respository.SupplyManagement
                     {
                         return "You can't select different product!";
                     }
+                    if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(supplyManagementshipmentDto.SupplyManagementRequestId))
+                    {
+                        return "Entered quantity is higher than available quantity!";
+                    }
+                    if (supplyManagementshipmentDto.Kits.Count > supplyManagementshipmentDto.ApprovedQty)
+                    {
+                        return "Selected quantity is higher than available quantity!";
+                    }
+                    if (supplyManagementshipmentDto.Kits.Count == 0)
+                    {
+
+                        return "Please select kits!";
+                    }
                 }
 
-                if (shipmentData.PharmacyStudyProductType != null && shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+                else if (shipmentData.PharmacyStudyProductType != null && shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
                 {
                     if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKit(supplyManagementshipmentDto.SupplyManagementRequestId))
                     {
@@ -133,9 +157,12 @@ namespace GSC.Respository.SupplyManagement
                 }
                 else
                 {
-                    if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, (int)shipmentData.StudyProductTypeId))
+                    if (shipmentData.StudyProductTypeId != null)
                     {
-                        return "Approve qty should not greater than remaining qty!";
+                        if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, (int)shipmentData.StudyProductTypeId))
+                        {
+                            return "Approve qty should not greater than remaining qty!";
+                        }
                     }
                 }
             }
@@ -166,7 +193,7 @@ namespace GSC.Respository.SupplyManagement
         {
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                if (shipmentdata.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+                if (supplyManagementshipmentDto.Kits.Count > 0)
                 {
                     var shipmentkitid = 0;
                     foreach (var item in supplyManagementshipmentDto.Kits)
