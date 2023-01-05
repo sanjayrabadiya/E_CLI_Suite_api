@@ -51,6 +51,7 @@ namespace GSC.Respository.SupplyManagement
 
             var requestdata = _context.SupplyManagementShipment.Where(x =>
                 !data.Select(x => x.SupplyManagementShipmentId).Contains(x.Id)
+                && x.SupplyManagementRequest.FromProjectId == SiteId
                 && x.Status == SupplyMangementShipmentStatus.Approved && x.DeletedDate == null).
                  ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>

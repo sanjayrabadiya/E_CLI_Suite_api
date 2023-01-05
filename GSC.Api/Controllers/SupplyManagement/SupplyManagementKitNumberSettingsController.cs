@@ -81,6 +81,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Put([FromBody] SupplyManagementKitNumberSettingsDto supplyManagementKitNumberSettingsDto)
         {
+            var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectId == supplyManagementKitNumberSettingsDto.ProjectId && x.DeletedDate == null && x.Status != KitStatus.AllocationPending).Select(x => x.Id).ToList();
+            if (kit.Count > 0)
+            {
+                ModelState.AddModelError("Message", "You can't able to update because kit has already shipped or reciept!");
+                return BadRequest(ModelState);
+
+            }
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var supplyManagementKitNumberSettings = _mapper.Map<SupplyManagementKitNumberSettings>(supplyManagementKitNumberSettingsDto);
@@ -100,15 +107,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
-            var kit = _context.SupplyManagementKIT.Where(x => x.ProjectId == record.ProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
+            var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectId == record.ProjectId && x.DeletedDate == null && x.Status != KitStatus.AllocationPending).Select(x => x.Id).ToList();
             if (kit.Count > 0)
             {
-                var kitdetail = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null && kit.Contains(x.SupplyManagementKITId) && x.Status != KitStatus.AllocationPending).Count();
-                if (kitdetail > 0)
-                {
-                    ModelState.AddModelError("Message", "You can't able to delete because kit has already created!");
-                    return BadRequest(ModelState);
-                }
+                ModelState.AddModelError("Message", "You can't able to delete because kit has already shipped or reciept!");
+                return BadRequest(ModelState);
             }
 
             if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")

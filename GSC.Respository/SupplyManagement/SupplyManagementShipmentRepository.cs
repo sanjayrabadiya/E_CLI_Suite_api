@@ -44,7 +44,7 @@ namespace GSC.Respository.SupplyManagement
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                        && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
+                       && x.FromProjectId == SiteId && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
                      ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {
