@@ -48,12 +48,15 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (supplyManagementshipmentDto.Kits != null)
             {
 
-                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null && x.Status != Helper.KitStatus.WithoutIssue))
+                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null))
                 {
-                    if (string.IsNullOrEmpty(item.Comments))
+                    if (item.Status != Helper.KitStatus.WithoutIssue)
                     {
-                        ModelState.AddModelError("Message", "Please enter comments!");
-                        return BadRequest(ModelState);
+                        if (string.IsNullOrEmpty(item.Comments))
+                        {
+                            ModelState.AddModelError("Message", "Please enter comments!");
+                            return BadRequest(ModelState);
+                        }
                     }
                     var data = _supplyManagementKITDetailRepository.All.Where(x => x.Id == item.Id).FirstOrDefault();
                     if (data != null)

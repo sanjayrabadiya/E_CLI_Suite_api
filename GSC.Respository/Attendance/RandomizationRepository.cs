@@ -1306,7 +1306,8 @@ namespace GSC.Respository.Attendance
             if (visit == null)
                 return obj;
 
-            var kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x => x.DeletedDate == null
+            var kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x => 
+                              x.DeletedDate == null
                               && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
                               && x.SupplyManagementKIT.PharmacyStudyProductType.ProjectId == obj.ParentProjectId
                               && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == data.TreatmentType
@@ -1324,7 +1325,21 @@ namespace GSC.Respository.Attendance
             obj.KitNo = kitdata.KitNo;
             return obj;
         }
+        public void UpdateRandmizationKitNotAssigned(Randomization randomization)
+        {
+            randomization.DateOfRandomization = null;
+            randomization.RandomizationNumber = null;
+            _context.Randomization.Update(randomization);
+            _context.Save();
 
+            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.RandomizationId == randomization.Id).FirstOrDefault();
+            if (data != null)
+            {
+                data.RandomizationId = null;
+                _context.SupplyManagementUploadFileDetail.Update(data);
+                _context.Save();
+            }
+        }
         public bool CheckKitNumber(RandomizationDto obj)
         {
 

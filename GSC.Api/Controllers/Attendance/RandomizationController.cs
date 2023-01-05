@@ -423,6 +423,8 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
                 if (string.IsNullOrEmpty(randomizationDto.KitNo))
                 {
+                    _randomizationRepository.UpdateRandmizationKitNotAssigned(randomization);
+
                     ModelState.AddModelError("Message", "Kit is not available");
                     return BadRequest(ModelState);
                 }
