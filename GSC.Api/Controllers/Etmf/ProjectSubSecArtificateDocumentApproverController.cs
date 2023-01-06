@@ -76,11 +76,11 @@ namespace GSC.Api.Controllers.Etmf
         }
 
         [HttpPut]
-        [Route("ApproveDocument/{DocApprover}/{Id}")]
-        public IActionResult ApproveDocument(bool DocApprover, int Id)
+        [Route("ApproveDocument/{DocApprover}/{seqNo}/{Id}")]
+        public IActionResult ApproveDocument(bool DocApprover, int? seqNo, int Id)
         {
             var ProjectSubSecArtificateDocumentApproverDto = _projectSubSecArtificateDocumentApproverRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId
-            && x.ProjectWorkplaceSubSecArtificateDocumentId == Id && x.IsApproved == null).FirstOrDefault();
+            && x.ProjectWorkplaceSubSecArtificateDocumentId == Id && x.IsApproved == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             var ProjectSubSecArtificateDocumentApprover = _mapper.Map<ProjectSubSecArtificateDocumentApprover>(ProjectSubSecArtificateDocumentApproverDto);
             ProjectSubSecArtificateDocumentApprover.IsApproved = DocApprover ? true : false;

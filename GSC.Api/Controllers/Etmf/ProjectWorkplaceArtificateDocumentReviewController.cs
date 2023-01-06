@@ -71,16 +71,28 @@ namespace GSC.Api.Controllers.Etmf
         /// Save user for send back
         /// Created By Swati
         [HttpPut]
-        [Route("SendBackDocument/{id}")]
-        public IActionResult SendBackDocument(int id)
+        [Route("SendBackDocument/{id}/{isReview}/{seqNo}")]
+        public IActionResult SendBackDocument(int id, bool isReview, int? seqNo)
         {
             var projectArtificateDocumentReviewDto = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
-            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.DeletedDate == null).FirstOrDefault();
+            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.IsReviewed == false && x.DeletedDate == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             projectArtificateDocumentReviewDto.IsSendBack = true;
+            projectArtificateDocumentReviewDto.IsReviewed = seqNo == 0 ? true : isReview;
             projectArtificateDocumentReviewDto.SendBackDate = _jwtTokenAccesser.GetClientDate();
             var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(projectArtificateDocumentReviewDto);
             _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
+
+            if (isReview)
+            {
+                var projectArtificateDocumentReviewDtos = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
+                && x.UserId == _jwtTokenAccesser.UserId && x.IsSendBack == true && x.IsReviewed == false && x.DeletedDate == null);
+                foreach (var item in projectArtificateDocumentReviewDtos)
+                {
+                    item.IsReviewed = true;
+                    _projectWorkplaceArtificateDocumentReviewRepository.Update(item);
+                }
+            }
 
             if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
             _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
@@ -89,6 +101,7 @@ namespace GSC.Api.Controllers.Etmf
             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, projectArtificateDocumentReviewDto.Id, null);
             return Ok();
         }
+
 
         /// Delete review
         /// Created By Swati

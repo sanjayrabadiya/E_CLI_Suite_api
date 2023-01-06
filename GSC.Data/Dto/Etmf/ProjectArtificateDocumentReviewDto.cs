@@ -18,6 +18,8 @@ namespace GSC.Data.Dto.Etmf
         public DateTime? SendBackDate { get; set; }
         public string Message { get; set; }
         public int? SequenceNo { get; set; }
+        public int? TempSeqNo { get; set; }
+        public bool IsReview { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
     }
 

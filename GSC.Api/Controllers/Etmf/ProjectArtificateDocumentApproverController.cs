@@ -83,11 +83,11 @@ namespace GSC.Api.Controllers.Etmf
         /// update approve doc or not
         /// Created By Swati
         [HttpPut]
-        [Route("ApproveDocument/{DocApprover}/{Id}")]
-        public IActionResult ApproveDocument(bool DocApprover, int Id)
+        [Route("ApproveDocument/{DocApprover}/{seqNo}/{Id}")]
+        public IActionResult ApproveDocument(bool DocApprover, int? seqNo, int Id)
         {
             var ProjectArtificateDocumentApproverDto = _projectArtificateDocumentApproverRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId
-            && x.ProjectWorkplaceArtificatedDocumentId == Id && x.IsApproved == null).FirstOrDefault();
+            && x.ProjectWorkplaceArtificatedDocumentId == Id && x.IsApproved == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             var ProjectArtificateDocumentApprover = _mapper.Map<ProjectArtificateDocumentApprover>(ProjectArtificateDocumentApproverDto);
             ProjectArtificateDocumentApprover.IsApproved = DocApprover ? true : false;

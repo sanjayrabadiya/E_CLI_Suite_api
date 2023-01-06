@@ -59,11 +59,14 @@ namespace GSC.Respository.Etmf
                 {
                     UserId = c.UserId,
                     Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    IsReview = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsReviewed == true),
+                    SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == true)?.SequenceNo,
                     IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == false),
-                }).Where(x => x.IsSelected == false).ToList();
+                }).Where(x => x.IsSelected == false && x.IsReview == false).ToList();
 
             users.ForEach(x =>
             {
+                x.TempSeqNo = x.SequenceNo;
                 var etmfUserPermissions = _context.EtmfUserPermission.Include(y => y.ProjectWorkplaceDetail)
                                         .Where(y => y.ProjectWorkplaceDetailId == ProjectDetailsId && y.DeletedDate == null && y.UserId == x.UserId)
                                         .OrderByDescending(x => x.Id).FirstOrDefault();
@@ -271,7 +274,7 @@ namespace GSC.Respository.Etmf
                 var reviewer = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.SequenceNo != null).FirstOrDefault();
                 if (reviewer == null)
                 {
-                    var nulldata = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo != null && x.IsSendBack == false);
+                    var nulldata = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo != null && x.IsReviewed == false);
                     if (nulldata.Count() > 0)
                     {
                         return true;
@@ -288,28 +291,10 @@ namespace GSC.Respository.Etmf
                     {
                         return false;
                     }
-                    var result = sendBackReviewers.LastOrDefault().IsSendBack;
+                    var result = sendBackReviewers.LastOrDefault().IsReviewed;
                     return (!result);
                 }
             }
-
-            //var reviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == null);
-            //if (reviewers.Count() > 0)
-            //{
-            //    return false;
-            //}
-            //var reviewer = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).FirstOrDefault();
-            //if (reviewer == null)
-            //{
-            //    return false;
-            //}
-            //var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null).OrderBy(o => o.SequenceNo);
-            //if (sendBackReviewers.Count() <= 0)
-            //{
-            //    return false;
-            //}
-            //var result = sendBackReviewers.LastOrDefault().IsSendBack;
-            //return (!result);
         }
     }
 }

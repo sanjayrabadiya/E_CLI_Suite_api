@@ -18,6 +18,8 @@ namespace GSC.Data.Dto.Etmf
         public string Message { get; set; }
         public bool IsRights { get; set; }
         public int? SequenceNo { get; set; }
+        public int? TempSeqNo { get; set; }
+        public bool IsReview { get; set; }
         public List<ProjectSubSecArtificateDocumentReviewDto> users { get; set; }
     }
 
