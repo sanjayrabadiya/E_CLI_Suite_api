@@ -71,7 +71,7 @@ namespace GSC.Api.Controllers.Etmf
             && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.IsReviewed == false && x.DeletedDate == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             projectArtificateDocumentReviewDto.IsSendBack = true;
-            projectArtificateDocumentReviewDto.IsSendBack = seqNo == 0 ? true : isReview;
+            projectArtificateDocumentReviewDto.IsReviewed = seqNo == 0 ? true : isReview;
             projectArtificateDocumentReviewDto.SendBackDate = _jwtTokenAccesser.GetClientDate();
             var projectArtificateDocumentReview = _mapper.Map<ProjectSubSecArtificateDocumentReview>(projectArtificateDocumentReviewDto);
             _projectSubSecArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);

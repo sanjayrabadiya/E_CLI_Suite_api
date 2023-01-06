@@ -148,7 +148,9 @@ namespace GSC.Respository.Etmf
 
             var documentList = All.Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.EtmfArtificateMasterLbrary)
                 .ThenInclude(x => x.EtmfSectionMasterLibrary).ThenInclude(x => x.EtmfZoneMasterLibrary)
-                .Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null).ToList();
+                .Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null 
+                && (x.CreatedBy == _jwtTokenAccesser.UserId || 
+                _context.ProjectArtificateDocumentReview.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null))).ToList();
 
             foreach (var item in documentList)
             {
@@ -229,7 +231,7 @@ namespace GSC.Respository.Etmf
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 dataList.Add(obj);
             }
-            return dataList;
+            return dataList.OrderByDescending(q => q.CreatedDate).ToList();
         }
 
         public CommonArtifactDocumentDto GetDocument(int id)
@@ -1052,7 +1054,7 @@ namespace GSC.Respository.Etmf
             result.AddRange(subsectionModified);
             result.AddRange(subsectionRequiredArtificate);
             result.AddRange(subsectionArtificateAdded);
-            return result.OrderByDescending(x => x.actionDate).ToList();
+            return result.Distinct().OrderByDescending(x => x.actionDate).ToList();
         }
         public string ImportWordDocument(Stream stream, string FullPath)
         {

@@ -167,7 +167,8 @@ namespace GSC.Respository.Etmf
             && c.UserId == _jwtTokenAccesser.UserId).Select(x => x.ProjectWorkplaceSubSecArtificateDocumentId).ToList();
 
             if (reviewdocument == null || reviewdocument.Count == 0) return dataList;
-            var documentList = FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == Id && x.DeletedDate == null, x => x.ProjectWorkplaceSubSectionArtifact)
+            var documentList = FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == Id && x.DeletedDate == null && (x.CreatedBy == _jwtTokenAccesser.UserId ||
+                _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)), x => x.ProjectWorkplaceSubSectionArtifact)
                 .ToList().OrderByDescending(x => x.Id);
 
             foreach (var item in documentList)
@@ -244,7 +245,7 @@ namespace GSC.Respository.Etmf
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 dataList.Add(obj);
             }
-            return dataList;
+            return dataList.OrderByDescending(q => q.CreatedDate).ToList();
         }
 
         //public List<CommonArtifactDocumentDto> GetSubSecDocumentList(int Id)
