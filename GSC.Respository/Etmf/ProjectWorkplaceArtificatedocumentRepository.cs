@@ -148,9 +148,10 @@ namespace GSC.Respository.Etmf
 
             var documentList = All.Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.EtmfArtificateMasterLbrary)
                 .ThenInclude(x => x.EtmfSectionMasterLibrary).ThenInclude(x => x.EtmfZoneMasterLibrary)
-                .Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null 
-                && (x.CreatedBy == _jwtTokenAccesser.UserId || 
-                _context.ProjectArtificateDocumentReview.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null))).ToList();
+                .Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null
+                && (x.CreatedBy == _jwtTokenAccesser.UserId ||
+                _context.ProjectArtificateDocumentReview.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
+                || _context.ProjectArtificateDocumentApprover.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null))).ToList();
 
             foreach (var item in documentList)
             {

@@ -205,7 +205,7 @@ namespace GSC.Respository.Etmf
                 }
                 else
                 {
-                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo);
+                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo).OrderBy(s => s.Id);
                     if (sendBackReviewers.Count() <= 0)
                     {
                         return false;

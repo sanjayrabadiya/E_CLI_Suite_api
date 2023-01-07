@@ -85,6 +85,7 @@ namespace GSC.Respository.Etmf
         public void SaveDocumentReview(List<ProjectArtificateDocumentReviewDto> pojectArtificateDocumentReviewDto)
         {
             foreach (var ReviewDto in pojectArtificateDocumentReviewDto)
+            {
                 if (ReviewDto.IsSelected)
                 {
                     Add(new ProjectArtificateDocumentReview
@@ -97,12 +98,28 @@ namespace GSC.Respository.Etmf
                     });
                     if (_context.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
-                    SendMailToReviewer(ReviewDto);
-
                     //var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceArtificatedDocumentId);
                     var projectWorkplaceArtificatedocument = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == ReviewDto.ProjectWorkplaceArtificatedDocumentId && x.DeletedDate == null).FirstOrDefault();
                     _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, All.Max(p => p.Id), null);
                 }
+            }
+
+            if (pojectArtificateDocumentReviewDto.Where(x => x.SequenceNo == null && x.IsSelected).Count() == pojectArtificateDocumentReviewDto.Where(x => x.IsSelected).Count())
+            {
+                foreach (var ReviewDto in pojectArtificateDocumentReviewDto)
+                {
+                    if (ReviewDto.IsSelected)
+                    {
+                        SendMailToReviewer(ReviewDto);
+                    }
+                }
+            }
+            else
+            {
+                var firstRecord = pojectArtificateDocumentReviewDto.Where(q => q.IsSelected).OrderBy(x => x.SequenceNo).FirstOrDefault();
+                if (firstRecord.IsReview == false)
+                    SendMailToReviewer(firstRecord);
+            }
         }
 
         // Send mail for review

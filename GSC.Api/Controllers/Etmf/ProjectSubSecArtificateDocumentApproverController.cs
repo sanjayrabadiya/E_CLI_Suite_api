@@ -67,6 +67,45 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(ProjectSubSecArtificateDocumentApprover.Id);
         }
 
+        [HttpPost]
+        [Route("SaveDocumentApprove")]
+        public IActionResult SaveDocumentApprove([FromBody] List<ProjectSubSecArtificateDocumentApproverDto> projectArtificateDocumentApproveDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            foreach (var ProjectSubSecArtificateDocumentApproverDto in projectArtificateDocumentApproveDto)
+            {
+                ProjectSubSecArtificateDocumentApproverDto.Id = 0;
+                var ProjectSubSecArtificateDocumentApprover = _mapper.Map<ProjectSubSecArtificateDocumentApprover>(ProjectSubSecArtificateDocumentApproverDto);
+
+                _projectSubSecArtificateDocumentApproverRepository.Add(ProjectSubSecArtificateDocumentApprover);
+
+
+                if (_uow.Save() <= 0) throw new Exception("Creating Approver failed on save.");
+                // _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto);
+                _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId, false);
+
+                var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(ProjectSubSecArtificateDocumentApprover.ProjectWorkplaceSubSecArtificateDocumentId);
+                _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, ProjectSubSecArtificateDocumentApprover.Id);
+
+            }
+
+            if (projectArtificateDocumentApproveDto.Where(x => x.SequenceNo == null).Count() == projectArtificateDocumentApproveDto.Count())
+            {
+                foreach (var ReviewDto in projectArtificateDocumentApproveDto)
+                {
+                    _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(ReviewDto);
+                }
+            }
+            else
+            {
+                var firstRecord = projectArtificateDocumentApproveDto.OrderBy(x => x.SequenceNo).FirstOrDefault();
+                if (firstRecord.IsApproved == null)
+                    _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(firstRecord);
+            }
+
+            return Ok(1);
+        }
+
         [HttpGet]
         [Route("UserNameForApproval/{Id}/{ProjectId}/{ProjectDetailsId}")]
         public IActionResult UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId)
@@ -90,6 +129,17 @@ namespace GSC.Api.Controllers.Etmf
             _projectSubSecArtificateDocumentApproverRepository.IsApproveDocument(Id);
             var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(ProjectSubSecArtificateDocumentApprover.ProjectWorkplaceSubSecArtificateDocumentId);
             _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, null, ProjectSubSecArtificateDocumentApprover.Id);
+
+            if (seqNo > 0 && DocApprover)
+            {
+                var projectArtificateDocumentReviewDtos = _projectSubSecArtificateDocumentApproverRepository.All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id && x.SequenceNo > seqNo && x.DeletedDate == null)
+                    .OrderBy(x => x.SequenceNo).FirstOrDefault();
+                if (projectArtificateDocumentReviewDtos != null)
+                {
+                    var reviewDto = _mapper.Map<ProjectSubSecArtificateDocumentApproverDto>(projectArtificateDocumentReviewDtos);
+                    _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(reviewDto);
+                }
+            }
 
             return Ok(ProjectSubSecArtificateDocumentApprover.Id);
         }

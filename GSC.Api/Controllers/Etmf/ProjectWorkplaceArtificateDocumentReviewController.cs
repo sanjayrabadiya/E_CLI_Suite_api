@@ -95,7 +95,19 @@ namespace GSC.Api.Controllers.Etmf
             }
 
             if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
-            _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
+            if (isReview == false)
+                _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
+
+            if (seqNo > 0 && isReview)
+            {
+                var projectArtificateDocumentReviewDtos = _projectWorkplaceArtificateDocumentReviewRepository.All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == id && x.SequenceNo > seqNo && x.DeletedDate == null)
+                    .OrderBy(x => x.SequenceNo).FirstOrDefault();
+                if (projectArtificateDocumentReviewDtos != null)
+                {
+                    var reviewDto = _mapper.Map<ProjectArtificateDocumentReviewDto>(projectArtificateDocumentReviewDtos);
+                    _projectWorkplaceArtificateDocumentReviewRepository.SendMailToReviewer(reviewDto);
+                }
+            }
 
             var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(projectArtificateDocumentReviewDto.ProjectWorkplaceArtificatedDocumentId);
             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, projectArtificateDocumentReviewDto.Id, null);

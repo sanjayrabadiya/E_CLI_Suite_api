@@ -27,6 +27,7 @@ using GSC.Shared.Extension;
 using GSC.Respository.LogReport;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
+using GSC.Respository.Etmf;
 
 namespace GSC.Api.Controllers.UserMgt
 {
@@ -47,6 +48,11 @@ namespace GSC.Api.Controllers.UserMgt
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
+        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
+        private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
+
+        private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
+        private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
         public UserController(IUserRepository userRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -58,7 +64,11 @@ namespace GSC.Api.Controllers.UserMgt
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService,
             IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IUserLoginReportRespository userLoginReportRepository
+            IUserLoginReportRespository userLoginReportRepository,
+            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
+            IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
+            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
+            IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository
             )
         {
             _userRepository = userRepository;
@@ -75,6 +85,10 @@ namespace GSC.Api.Controllers.UserMgt
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userLoginReportRepository = userLoginReportRepository;
+            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
+            _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
+            _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
+            _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
         }
 
 
@@ -253,7 +267,33 @@ namespace GSC.Api.Controllers.UserMgt
             _centreUserService.DeleteUser(_environmentSetting.Value.CentralApi, id);
             var user = _userRepository.Find(id);
             _userRepository.Delete(user);
+
+            var etmfUserList = _projectWorkplaceArtificateDocumentReviewRepository.All.Where(x => x.UserId == id && x.DeletedDate == null);
+            foreach (var etmfRecored in etmfUserList)
+            {
+                _projectWorkplaceArtificateDocumentReviewRepository.Delete(etmfRecored);
+            }
+
+            var etmfapproverUsers = _projectArtificateDocumentApproverRepository.All.Where(x => x.UserId == id && x.DeletedDate == null);
+            foreach (var etmfRecored in etmfapproverUsers)
+            {
+                _projectArtificateDocumentApproverRepository.Delete(etmfRecored);
+            }
+
+            var etmfsubreviewerUsers = _projectSubSecArtificateDocumentReviewRepository.All.Where(x => x.UserId == id && x.DeletedDate == null);
+            foreach (var etmfRecored in etmfsubreviewerUsers)
+            {
+                _projectSubSecArtificateDocumentReviewRepository.Delete(etmfRecored);
+            }
+
+            var etmfsubapproverUsers = _projectSubSecArtificateDocumentApproverRepository.All.Where(x => x.UserId == id && x.DeletedDate == null);
+            foreach (var etmfRecored in etmfsubapproverUsers)
+            {
+                _projectSubSecArtificateDocumentApproverRepository.Delete(etmfRecored);
+            }
+
             _uow.Save();
+
 
             return Ok();
         }
@@ -276,6 +316,31 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _userRepository.Active(record);
+
+            var etmfUserList = _projectWorkplaceArtificateDocumentReviewRepository.All.Where(x => x.UserId == id && x.DeletedDate != null);
+            foreach (var etmfRecored in etmfUserList)
+            {
+                _projectWorkplaceArtificateDocumentReviewRepository.Active(etmfRecored);
+            }
+
+            var etmfapproverUsers = _projectArtificateDocumentApproverRepository.All.Where(x => x.UserId == id && x.DeletedDate != null);
+            foreach (var etmfRecored in etmfapproverUsers)
+            {
+                _projectArtificateDocumentApproverRepository.Active(etmfRecored);
+            }
+
+            var etmfsubreviewerUsers = _projectSubSecArtificateDocumentReviewRepository.All.Where(x => x.UserId == id && x.DeletedDate != null);
+            foreach (var etmfRecored in etmfsubreviewerUsers)
+            {
+                _projectSubSecArtificateDocumentReviewRepository.Active(etmfRecored);
+            }
+
+            var etmfsubapproverUsers = _projectSubSecArtificateDocumentApproverRepository.All.Where(x => x.UserId == id && x.DeletedDate != null);
+            foreach (var etmfRecored in etmfsubapproverUsers)
+            {
+                _projectSubSecArtificateDocumentApproverRepository.Active(etmfRecored);
+            }
+
             _uow.Save();
             return Ok();
         }
