@@ -118,23 +118,26 @@ namespace GSC.Respository.SupplyManagement
                                 && x.DeletedDate == null && x.IsBlindedStudy == true).FirstOrDefault();
                 if (settings != null)
                 {
-                    var data1 = supplyManagementshipmentDto.Kits.GroupBy(x => x.ProductCode).ToList();
-                    if (data1.Count > 1)
+                    if (supplyManagementshipmentDto.Kits != null)
                     {
-                        return "You can't select different product!";
-                    }
-                    if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(supplyManagementshipmentDto.SupplyManagementRequestId))
-                    {
-                        return "Entered quantity is higher than available quantity!";
-                    }
-                    if (supplyManagementshipmentDto.Kits.Count > supplyManagementshipmentDto.ApprovedQty)
-                    {
-                        return "Selected quantity is higher than available quantity!";
-                    }
-                    if (supplyManagementshipmentDto.Kits.Count == 0)
-                    {
+                        var data1 = supplyManagementshipmentDto.Kits.GroupBy(x => x.ProductCode).ToList();
+                        if (data1.Count > 1)
+                        {
+                            return "You can't select different product!";
+                        }
+                        if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(supplyManagementshipmentDto.SupplyManagementRequestId))
+                        {
+                            return "Entered quantity is higher than available quantity!";
+                        }
+                        if (supplyManagementshipmentDto.Kits.Count > supplyManagementshipmentDto.ApprovedQty)
+                        {
+                            return "Selected quantity is higher than available quantity!";
+                        }
+                        if (supplyManagementshipmentDto.Kits.Count == 0)
+                        {
 
-                        return "Please select kits!";
+                            return "Please select kits!";
+                        }
                     }
                 }
 
@@ -144,7 +147,7 @@ namespace GSC.Respository.SupplyManagement
                     {
                         return "Entered quantity is higher than available quantity!";
                     }
-                    if (supplyManagementshipmentDto.Kits.Count > supplyManagementshipmentDto.ApprovedQty)
+                    if (supplyManagementshipmentDto.Kits != null && supplyManagementshipmentDto.Kits.Count > supplyManagementshipmentDto.ApprovedQty)
                     {
                         return "Selected quantity is higher than available quantity!";
                     }
