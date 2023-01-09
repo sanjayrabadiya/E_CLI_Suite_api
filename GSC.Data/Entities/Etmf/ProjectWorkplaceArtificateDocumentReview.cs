@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Etmf
         public DateTime? SendBackDate { get; set; }
         public string Message { get; set; }
         public int? SequenceNo { get; set; }
+        public bool IsReviewed { get; set; }
         public ProjectWorkplaceArtificatedocument ProjectWorkplaceArtificatedDocument { get; set; }
         public List<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
     }

@@ -603,17 +603,17 @@ namespace GSC.Respository.Etmf
 
                 pvListArtificateObj.Icon = Document.Count() == 0 && f.IsNotRequired == false ? "las la-file-alt text-missing eicon" :
                     Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
-                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y =>  y.IsReviewed==false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
                     Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0 ? "las la-file-alt text-pendingapprove eicon" :
-                    Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0 ? "las la-file-alt text-pendingfinal eicon" :
+                    Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0 ? "las la-file-alt text-pendingfinal eicon" :
                     Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? "las la-file-alt text-final eicon" :
                     f.IsNotRequired == true ? "las la-file-alt text-notreq eicon"
                     : "las la-file-alt text-blue eicon";
                 pvListArtificateObj.IconType = Document.Count() == 0 && f.IsNotRequired == false ? EtmfChartType.Missing :
                     Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? EtmfChartType.Incomplete :
-                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? EtmfChartType.PendingReview :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsReviewed == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? EtmfChartType.PendingReview :
                     Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0 ? EtmfChartType.PendingApprove :
-                    Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0 ? EtmfChartType.PendingFinal :
+                    Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0 ? EtmfChartType.PendingFinal :
                     Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? EtmfChartType.Final :
                     f.IsNotRequired == true ? EtmfChartType.NotRequired
                     : EtmfChartType.Nothing;
@@ -634,7 +634,7 @@ namespace GSC.Respository.Etmf
                     pvListArtificateObj.IconType = EtmfChartType.Incomplete;
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault()?.Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
+                else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault()?.Where(y => y.IsReviewed == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                 {
                     pvListArtificateObj.Icon = "las la-file-alt text-pendingreview eicon";
                     pvListArtificateObj.IconType = EtmfChartType.PendingReview;
@@ -666,7 +666,7 @@ namespace GSC.Respository.Etmf
                 {
                     pvListArtificateList.Add(pvListArtificateObj);
                 }
-                else if (chartType == EtmfChartType.PendingFinal && Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0)
+                else if (chartType == EtmfChartType.PendingFinal && Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0)
                 {
                     pvListArtificateObj.Icon = "las la-file-alt text-pendingfinal eicon";
                     pvListArtificateObj.IconType = EtmfChartType.PendingFinal;
@@ -736,18 +736,18 @@ namespace GSC.Respository.Etmf
 
                     pvListartifactsubsectionobj.Icon = Document.Count() == 0 && itemartifact.IsNotRequired == false ? "las la-file-alt text-missing eicon" :
                     Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
-                    Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
+                    Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsReviewed == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
                     Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0 ? "las la-file-alt text-pendingapprove eicon" :
-                    Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0 ? "las la-file-alt text-pendingfinal eicon" :
+                    Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0 ? "las la-file-alt text-pendingfinal eicon" :
                     Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? "las la-file-alt text-final eicon" :
                     itemartifact.IsNotRequired == true ? "las la-file-alt text-notreq eicon"
                     : "las la-file-alt text-blue eicon";
 
                     pvListartifactsubsectionobj.IconType = Document.Count() == 0 && itemartifact.IsNotRequired == false ? EtmfChartType.Missing :
                        Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? EtmfChartType.Incomplete :
-                       Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? EtmfChartType.PendingReview :
+                       Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsReviewed == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? EtmfChartType.PendingReview :
                        Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0 ? EtmfChartType.PendingApprove :
-                       Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0 ? EtmfChartType.PendingFinal :
+                       Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0 ? EtmfChartType.PendingFinal :
                        Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? EtmfChartType.Final :
                        itemartifact.IsNotRequired == true ? EtmfChartType.NotRequired
                         : EtmfChartType.Nothing;
@@ -768,7 +768,7 @@ namespace GSC.Respository.Etmf
                         pvListartifactsubsectionobj.IconType = EtmfChartType.Incomplete;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
-                    else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsSendBack == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
+                    else if (chartType == EtmfChartType.PendingReview && Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Count() != 0 && x.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsReviewed == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0)
                     {
                         pvListartifactsubsectionobj.Icon = "las la-file-alt text-pendingreview eicon";
                         pvListartifactsubsectionobj.IconType = EtmfChartType.PendingReview;
@@ -792,7 +792,7 @@ namespace GSC.Respository.Etmf
                         pvListartifactsubsectionobj.IconType = EtmfChartType.NotRequired;
                         pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
                     }
-                    else if (chartType == EtmfChartType.PendingFinal && Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.All(c => c.IsApproved == true && c.DeletedDate == null)).Count() != 0)
+                    else if (chartType == EtmfChartType.PendingFinal && Document.Where(x => x.ProjectSubSecArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectSubSecArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0)
                     {
                         pvListartifactsubsectionobj.Icon = "las la-file-alt text-pendingfinal eicon";
                         pvListartifactsubsectionobj.IconType = EtmfChartType.PendingFinal;

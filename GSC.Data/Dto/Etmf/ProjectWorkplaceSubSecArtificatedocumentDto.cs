@@ -29,6 +29,7 @@ namespace GSC.Data.Dto.Etmf
         public int? ParentDocumentId { get; set; }
         public bool? IsAccepted { get; set; }
         public bool? IsReplyAllComment { get; set; }
+        public int? SequenceNo { get; set; }
     }
 
     public class CommonArtifactDocumentDto
@@ -66,12 +67,15 @@ namespace GSC.Data.Dto.Etmf
         public bool IsApproveDoc { get; set; }
         public bool IsNotRequired { get; set; }
         public bool? IsReplyAllComment { get; set; }
+        public int? SequenceNo { get; set; }
+        public int? ApproveSequenceNo { get; set; }
     }
 
     public class DocumentUsers
     {
         public string UserName { get; set; }
         public bool? IsSendBack { get; set; }
+        public bool IsReview { get; set; }
         public int? SequenceNo { get; set; }
     }
     public class CustomParameter
