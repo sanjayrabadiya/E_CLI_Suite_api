@@ -566,6 +566,16 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementKitNumberSettings, SupplyManagementKitNumberSettingsGridDto>()
                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                .ReverseMap();
+            CreateMap<SupplyManagementVisitKITDetail, SupplyManagementVisitKITDetailGridDto>()
+              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
+              .ForMember(x => x.ParentProjectId, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id))
+              .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Randomization.Project.ProjectCode))
+              .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.Randomization.Project.Id))
+              .ForMember(x => x.ReasonName, x => x.MapFrom(a => a.AuditReason.ReasonName))
+              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+              .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
+              .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+              .ReverseMap();
         }
     }
 }

@@ -632,7 +632,7 @@ namespace GSC.Helper
         [Description("Incomplete")] Incomplete = 7,
         [Description("Not Required")] NotRequired = 8,
         [Description("Pending Final")] PendingFinal = 9
-            
+
     }
 
     public enum VideoCallStatus : int
@@ -912,12 +912,13 @@ namespace GSC.Helper
     public enum KitStatus : int
     {
         [Description("Allocation Pending")] AllocationPending = 1,
-        [Description("Shipped")] Allocated = 2,
+        [Description("Shipped")] Shipped = 2,
         [Description("Returned")] Returned = 3,
         [Description("Missing")] Missing = 4,
         [Description("Damaged")] Damaged = 5,
         [Description("Receipt With Issues")] WithIssue = 6,
-        [Description("Receipt Without Issues")] WithoutIssue = 7
+        [Description("Receipt Without Issues")] WithoutIssue = 7,
+        [Description("Allocated")] Allocated = 8
     }
 
     public enum ScreeningReport : short

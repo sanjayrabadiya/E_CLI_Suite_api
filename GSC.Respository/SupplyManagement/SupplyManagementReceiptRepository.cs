@@ -168,7 +168,7 @@ namespace GSC.Respository.SupplyManagement
                               VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                               SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
                               Comments = x.Comments,
-                              Status = KitStatus.Allocated.ToString()
+                              Status = KitStatus.Shipped.ToString()
                           }).OrderByDescending(x => x.KitNo).ToList();
 
             }

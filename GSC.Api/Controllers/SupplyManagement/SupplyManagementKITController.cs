@@ -104,6 +104,14 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
+            var kit = _context.SupplyManagementKIT.Where(x => x.Id == record.SupplyManagementKITId).FirstOrDefault();
+            if (kit != null)
+            {
+                var kitnumber = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == kit.ProjectId && x.DeletedDate == null).FirstOrDefault();
+                kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
+                _context.SupplyManagementKitNumberSettings.Update(kitnumber);
+            }
+
             if (record.Status != KitStatus.AllocationPending)
             {
                 ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
@@ -132,6 +140,14 @@ namespace GSC.Api.Controllers.SupplyManagement
             foreach (var item in deleteKitDto.list)
             {
                 var record = _supplyManagementKITDetailRepository.Find(item);
+
+                var kit = _context.SupplyManagementKIT.Where(x => x.Id == record.SupplyManagementKITId).FirstOrDefault();
+                if (kit != null)
+                {
+                    var kitnumber = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == kit.ProjectId && x.DeletedDate == null).FirstOrDefault();
+                    kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
+                    _context.SupplyManagementKitNumberSettings.Update(kitnumber);
+                }
 
                 if (record == null)
                     return NotFound();
@@ -190,6 +206,32 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetAvailableRemainingkitCount(int projectId, int projecttypeId)
         {
             return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitCount(projectId, projecttypeId));
+        }
+
+        [HttpGet("GetRandomizationKitNumberAssignList/{projectId}/{siteId}/{id}")]
+        public IActionResult GetRandomizationKitNumberAssignList(int projectId, int siteId, int id)
+        {
+            var productTypes = _supplyManagementKITRepository.GetRandomizationKitNumberAssignList(projectId, siteId, id);
+            return Ok(productTypes);
+        }
+        [HttpGet("GetRandomizationDropdownKit/{projectId}")]
+        public IActionResult GetRandomizationDropdownKit(int projectId)
+        {
+            var productTypes = _supplyManagementKITRepository.GetRandomizationDropdownKit(projectId);
+            return Ok(productTypes);
+        }
+
+        [HttpPost]
+        [Route("AssignKitNumber")]
+        public IActionResult AssignKitNumber([FromBody] SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto)
+        {
+            supplyManagementVisitKITDetailDto = _supplyManagementKITRepository.SetKitNumber(supplyManagementVisitKITDetailDto);
+            if (string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.KitNo))
+            {
+                ModelState.AddModelError("Message", "Kit is not available");
+                return BadRequest(ModelState);
+            }
+            return Ok();
         }
     }
 }

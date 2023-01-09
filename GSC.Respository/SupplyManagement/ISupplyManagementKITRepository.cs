@@ -17,6 +17,14 @@ namespace GSC.Respository.SupplyManagement
 
         string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese);
 
-       int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId);
+        int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId);
+
+        void InsertKitRandomizationDetail(SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto);
+
+        List<SupplyManagementVisitKITDetailGridDto> GetRandomizationKitNumberAssignList(int projectId, int siteId, int id);
+
+        List<DropDownDto> GetRandomizationDropdownKit(int projectid);
+
+        SupplyManagementVisitKITDetailDto SetKitNumber(SupplyManagementVisitKITDetailDto obj);
     }
 }

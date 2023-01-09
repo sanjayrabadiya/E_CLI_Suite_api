@@ -63,6 +63,6 @@ namespace GSC.Respository.Attendance
 
         bool CheckKitNumber(RandomizationDto obj);
 
-        void UpdateRandmizationKitNotAssigned(Randomization randomization);
+        void UpdateRandmizationKitNotAssigned(RandomizationDto randomization);
     }
 }

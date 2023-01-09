@@ -202,7 +202,7 @@ namespace GSC.Respository.SupplyManagement
                         if (kit != null && supplyManagementshipmentDto.Id > 0)
                         {
                             shipmentkitid = kit.SupplyManagementKITId;
-                            kit.Status = Helper.KitStatus.Allocated;
+                            kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
                             _context.SupplyManagementKITDetail.Update(kit);
                             _uow.Save();
