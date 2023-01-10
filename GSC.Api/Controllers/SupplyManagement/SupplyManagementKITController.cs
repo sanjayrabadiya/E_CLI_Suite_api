@@ -87,6 +87,14 @@ namespace GSC.Api.Controllers.SupplyManagement
                 obj.Status = KitStatus.AllocationPending;
                 _supplyManagementKITDetailRepository.Add(obj);
                 _uow.Save();
+
+                SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                history.SupplyManagementKITDetailId = obj.Id;
+                history.Status = KitStatus.AllocationPending;
+                history.RoleId = _jwtTokenAccesser.RoleId;
+                _supplyManagementKITRepository.InsertKitHistory(history);
+                _uow.Save();
+
                 ++kitsettings.KitNoseries;
             }
             _context.SupplyManagementKitNumberSettings.Update(kitsettings);
@@ -232,6 +240,13 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
             return Ok();
+        }
+
+        [HttpGet("GetKitHistory/{id}")]
+        public IActionResult GetKitHistory(int id)
+        {
+            var history = _supplyManagementKITRepository.KitHistoryList(id);
+            return Ok(history);
         }
     }
 }

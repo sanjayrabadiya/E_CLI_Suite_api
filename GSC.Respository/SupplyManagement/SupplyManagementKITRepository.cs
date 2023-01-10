@@ -75,7 +75,7 @@ namespace GSC.Respository.SupplyManagement
 
             data = _context.SupplyManagementKITDetail.Where(x =>
                     x.SupplyManagementShipmentId == id
-                    && x.Status == Helper.KitStatus.Allocated
+                    && x.Status == Helper.KitStatus.Shipped
                     && x.DeletedDate == null).Select(x => new KitListApproved
                     {
                         Id = x.Id,
@@ -300,13 +300,34 @@ namespace GSC.Respository.SupplyManagement
                 KitNo = kitdata.KitNo,
                 ProductCode = visit.Value,
                 ReasonOth = obj.ReasonOth,
-                AuditReasonId = obj.AuditReasonId
+                AuditReasonId = obj.AuditReasonId,
+                SupplyManagementKITDetailId = kitdata.Id
             };
             InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
             _context.Save();
             obj.KitNo = kitdata.KitNo;
 
             return obj;
+        }
+
+        public void InsertKitHistory(SupplyManagementKITDetailHistory supplyManagementVisitKITDetailHistory)
+        {
+            _context.SupplyManagementKITDetailHistory.Add(supplyManagementVisitKITDetailHistory);
+            _context.Save();
+        }
+
+        public List<SupplyManagementKITDetailHistoryDto> KitHistoryList(int id)
+        {
+            var data = _context.SupplyManagementKITDetailHistory.Where(x => x.SupplyManagementKITDetailId == id).
+                  ProjectTo<SupplyManagementKITDetailHistoryDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            data.ForEach(x =>
+            {
+                x.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
+                x.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+            });
+
+            return data;
         }
 
     }

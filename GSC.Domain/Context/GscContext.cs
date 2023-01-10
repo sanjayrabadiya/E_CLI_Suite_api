@@ -434,6 +434,8 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementVisitKITDetail> SupplyManagementVisitKITDetail { get; set; }
 
+        public DbSet<SupplyManagementKITDetailHistory> SupplyManagementKITDetailHistory { get; set; }
+
     }
 
 

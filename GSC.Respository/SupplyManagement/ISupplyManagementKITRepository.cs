@@ -26,5 +26,9 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetRandomizationDropdownKit(int projectid);
 
         SupplyManagementVisitKITDetailDto SetKitNumber(SupplyManagementVisitKITDetailDto obj);
+
+        void InsertKitHistory(SupplyManagementKITDetailHistory supplyManagementKITDetailHistory);
+
+        List<SupplyManagementKITDetailHistoryDto> KitHistoryList(int id);
     }
 }

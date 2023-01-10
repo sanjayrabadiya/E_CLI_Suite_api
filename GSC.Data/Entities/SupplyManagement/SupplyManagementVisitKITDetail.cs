@@ -22,6 +22,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public AuditReason AuditReason { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public Randomization Randomization { get; set; }
+        public int? SupplyManagementKITDetailId { get; set; }
+        public SupplyManagementKITDetail SupplyManagementKITDetail { get; set; }
 
     }
 }

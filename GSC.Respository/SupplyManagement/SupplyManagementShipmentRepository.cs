@@ -208,6 +208,12 @@ namespace GSC.Respository.SupplyManagement
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
                             _context.SupplyManagementKITDetail.Update(kit);
+
+                            SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                            history.SupplyManagementKITDetailId = item.Id;
+                            history.Status = KitStatus.Shipped;
+                            history.RoleId = _jwtTokenAccesser.RoleId;
+                            _context.SupplyManagementKITDetailHistory.Add(history);
                             _uow.Save();
                         }
                     }

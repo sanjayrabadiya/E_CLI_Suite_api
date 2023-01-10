@@ -57,7 +57,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
                          && x.IsNonCRF == false
-                         && x.DeletedDate == null)
+                         && x.DeletedDate == null && x.InActiveVersion == null)
                     .Select(x => new DropDownDto
                     {
                         Id = x.Id,

@@ -1358,9 +1358,15 @@ namespace GSC.Respository.Attendance
                 RandomizationId = obj.Id,
                 ProjectDesignVisitId = visit.ProjectDesignVisitId,
                 KitNo = kitdata.KitNo,
-                ProductCode = visit.Value
+                ProductCode = visit.Value,
+                SupplyManagementKITDetailId = kitdata.Id
             };
             _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
+            SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+            history.SupplyManagementKITDetailId = kitdata.Id;
+            history.Status = KitStatus.Allocated;
+            history.RoleId = _jwtTokenAccesser.RoleId;
+            _supplyManagementKITRepository.InsertKitHistory(history);
             _context.Save();
             obj.KitNo = kitdata.KitNo;
 

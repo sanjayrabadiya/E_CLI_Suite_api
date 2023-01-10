@@ -378,5 +378,7 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementKitNumberSettings> SupplyManagementKitNumberSettings { get; set; }
 
         DbSet<SupplyManagementVisitKITDetail> SupplyManagementVisitKITDetail { get; set; }
+
+        DbSet<SupplyManagementKITDetailHistory> SupplyManagementKITDetailHistory { get; set; }
     }
 }

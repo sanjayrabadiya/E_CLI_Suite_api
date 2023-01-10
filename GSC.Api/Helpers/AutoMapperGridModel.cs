@@ -576,6 +576,10 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
               .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
               .ReverseMap();
+
+            CreateMap<SupplyManagementKITDetailHistory, SupplyManagementKITDetailHistoryDto>()
+            .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
+            .ReverseMap();
         }
     }
 }

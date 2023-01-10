@@ -18,19 +18,23 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyManagementReceiptController : BaseController
     {
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementReceiptRepository _supplyManagementReceiptRepository;
         private readonly IUnitOfWork _uow;
         private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
+        private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
         public SupplyManagementReceiptController(ISupplyManagementReceiptRepository supplyManagementReceiptRepository,
             IUnitOfWork uow, IMapper mapper,
-            ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
+            ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKITRepository supplyManagementKITRepository,
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _supplyManagementReceiptRepository = supplyManagementReceiptRepository;
             _uow = uow;
             _mapper = mapper;
             _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
+            _supplyManagementKITRepository = supplyManagementKITRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
         [HttpPost]
         public IActionResult Post([FromBody] SupplyManagementReceiptDto supplyManagementshipmentDto)
@@ -64,6 +68,12 @@ namespace GSC.Api.Controllers.SupplyManagement
                         data.Status = item.Status;
                         data.Comments = item.Comments;
                         _supplyManagementKITDetailRepository.Update(data);
+
+                        SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                        history.SupplyManagementKITDetailId = item.Id;
+                        history.Status = item.Status;
+                        history.RoleId = _jwtTokenAccesser.RoleId;
+                        _supplyManagementKITRepository.InsertKitHistory(history);
                         //_uow.Save();
                     }
                 }

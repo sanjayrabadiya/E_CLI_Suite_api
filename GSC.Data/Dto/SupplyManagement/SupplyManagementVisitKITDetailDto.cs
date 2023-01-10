@@ -31,6 +31,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int ParentProjectId { get; set; }
 
         public int ProjectId { get; set; }
+
+        public int? SupplyManagementKITDetailId { get; set; }
     }
     public class SupplyManagementVisitKITDetailGridDto : BaseAuditDto
     {

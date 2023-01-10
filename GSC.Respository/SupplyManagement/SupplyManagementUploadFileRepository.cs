@@ -185,7 +185,7 @@ namespace GSC.Respository.SupplyManagement
         {
             return _projectDesignVisitRepository.All
                                         .Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
-                                        && x.DeletedDate == null).ToList();
+                                        && x.DeletedDate == null && x.InActiveVersion == null).ToList();
         }
 
         public string validateExcel(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile)
