@@ -330,5 +330,69 @@ namespace GSC.Respository.SupplyManagement
             return data;
         }
 
+        public List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
+        {
+            var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT)
+                                                         .ThenInclude(x => x.PharmacyStudyProductType)
+                                                         .ThenInclude(x => x.ProductType)
+                                                         .Where(x => x.SupplyManagementKIT.ProjectId == projectId
+                                                          && x.DeletedDate == null
+                                                          && x.Status != KitStatus.Missing 
+                                                          ).Select(x => new SupplyManagementKITReturnGridDto
+                                                          {
+                                                              KitNo = x.KitNo,
+                                                              ProjectDesignVisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
+                                                              ProductTypeName = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                                              NoOfImp = x.NoOfImp,
+                                                              RandomizationId = x.RandomizationId,
+                                                              StudyCode = x.SupplyManagementKIT.Project.ProjectCode,
+                                                              SupplyManagementKITDetailId = x.Id,
+                                                              VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                                                              Status = x.Status,
+                                                              ReturnImp = x.ReturnImp,
+                                                              CreatedByUser = x.CreatedByUser.UserName,
+                                                              ModifiedByUser = x.ModifiedByUser.UserName,
+                                                              DeletedByUser = x.DeletedByUser.UserName,
+                                                              CreatedDate = x.CreatedDate,
+                                                              ModifiedDate = x.ModifiedDate,
+                                                              DeletedDate = x.DeletedDate
+                                                          }).ToList();
+            if (data.Count > 0)
+            {
+                data.ForEach(x =>
+                {
+                    var randomization = _context.Randomization.Where(z => z.Id == x.RandomizationId).FirstOrDefault();
+                    if (randomization != null)
+                    {
+                        x.RandomizationNo = randomization.RandomizationNumber;
+                        x.ScreeningNo = randomization.ScreeningNumber;
+                    }
+                });
+                if (kitType == KitStatusRandomization.Used)
+                {
+                    data = data.Where(x => x.Status == KitStatus.Allocated).ToList();
+                }
+                if (kitType == KitStatusRandomization.Damaged)
+                {
+                    data = data.Where(x => x.Status == KitStatus.Damaged).ToList();
+                }
+                if (kitType == KitStatusRandomization.UnUsed)
+                {
+                    data = data.Where(x => x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.WithIssue).ToList();
+                }
+                if (visitId > 0)
+                {
+                    data = data.Where(x => x.ProjectDesignVisitId == visitId).ToList();
+                }
+                if (randomizationId > 0)
+                {
+                    data = data.Where(x => x.RandomizationId == randomizationId).ToList();
+                }
+            }
+
+            return data;
+
+        }
+
     }
 }

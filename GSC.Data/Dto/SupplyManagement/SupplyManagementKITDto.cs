@@ -79,7 +79,7 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string Comments { get; set; }
 
-        public KitStatus? Status { get; set; }
+        public KitStatus Status { get; set; }
 
         public List<DropDownEnum> StatusList { get; set; }
     }

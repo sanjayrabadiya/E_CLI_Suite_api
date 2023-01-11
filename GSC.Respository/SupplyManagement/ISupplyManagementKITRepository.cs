@@ -2,6 +2,7 @@
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Helper;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
@@ -30,5 +31,7 @@ namespace GSC.Respository.SupplyManagement
         void InsertKitHistory(SupplyManagementKITDetailHistory supplyManagementKITDetailHistory);
 
         List<SupplyManagementKITDetailHistoryDto> KitHistoryList(int id);
+
+        List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId);
     }
 }

@@ -11,5 +11,7 @@ namespace GSC.Respository.SupplyManagement
         SupplyManagementFectorDto GetDetailList(int id);
         SupplyManagementFectorDetailDto GetDetail(int id);
         bool CheckType(SupplyManagementFectorDetailDto supplyManagementFectorDetailDto);
+
+        bool CheckrandomizationStarted(int id);
     }
 }

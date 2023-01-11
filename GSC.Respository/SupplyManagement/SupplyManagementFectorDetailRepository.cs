@@ -134,5 +134,17 @@ namespace GSC.Respository.SupplyManagement
             }
             return true;
         }
+        public bool CheckrandomizationStarted(int id)
+        {
+            var SupplyManagementFector = _context.SupplyManagementFector.Where(x => x.Id == id).FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == SupplyManagementFector.ProjectId
+            && x.RandomizationNumber != null).FirstOrDefault();
+
+            if (randomization != null)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

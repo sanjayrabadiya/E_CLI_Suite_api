@@ -24,10 +24,14 @@ namespace GSC.Data.Entities.SupplyManagement
         public SupplyManagementKIT SupplyManagementKIT { get; set; }
         public SupplyManagementShipment SupplyManagementShipment { get; set; }
 
-        public KitStatus? Status { get; set; }
+        public KitStatus Status { get; set; }
 
         public string Comments { get; set; }
 
         public int? RandomizationId { get; set; }
+
+        public int? NoOfImp { get; set; }
+
+        public int? ReturnImp { get; set; }
     }
 }

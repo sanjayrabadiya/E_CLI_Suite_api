@@ -218,12 +218,12 @@ namespace GSC.Respository.SupplyManagement
                         }
                     }
 
-                    var kitmaster = _context.SupplyManagementKIT.Where(x => x.Id == shipmentkitid).FirstOrDefault();
-                    if (kitmaster != null)
-                    {
-                        kitmaster.SiteId = shipmentdata.FromProjectId;
-                    }
-                    _context.SupplyManagementKIT.Update(kitmaster);
+                    //var kitmaster = _context.SupplyManagementKIT.Where(x => x.Id == shipmentkitid).FirstOrDefault();
+                    //if (kitmaster != null)
+                    //{
+                    //    kitmaster.SiteId = shipmentdata.FromProjectId;
+                    //}
+                    //_context.SupplyManagementKIT.Update(kitmaster);
                     _uow.Save();
                 }
             }

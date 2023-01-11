@@ -68,17 +68,23 @@ namespace GSC.Api.Controllers.SupplyManagement
                         data.Status = item.Status;
                         data.Comments = item.Comments;
                         _supplyManagementKITDetailRepository.Update(data);
-
-                        SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
-                        history.SupplyManagementKITDetailId = item.Id;
-                        history.Status = item.Status;
-                        history.RoleId = _jwtTokenAccesser.RoleId;
-                        _supplyManagementKITRepository.InsertKitHistory(history);
-                        //_uow.Save();
+                        // _uow.Save();
+                        
                     }
                 }
             }
             if (_uow.Save() <= 0) throw new Exception("Creating shipment receipt failed on save.");
+            if (supplyManagementshipmentDto.Kits != null)
+            {
+                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null))
+                {
+                    SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                    history.SupplyManagementKITDetailId = item.Id;
+                    history.Status = item.Status;
+                    history.RoleId = _jwtTokenAccesser.RoleId;
+                    _supplyManagementKITRepository.InsertKitHistory(history);
+                }
+            }
             return Ok(supplyManagementRequest.Id);
         }
 

@@ -15,5 +15,7 @@ namespace GSC.Respository.SupplyManagement
         SupplyManagementFector UpdateFactorFormula(int id);
 
         FactorCheckResult ValidateSubjecWithFactor(Randomization randomization);
+
+        bool CheckfactorrandomizationStarted(int projectId);
     }
 }

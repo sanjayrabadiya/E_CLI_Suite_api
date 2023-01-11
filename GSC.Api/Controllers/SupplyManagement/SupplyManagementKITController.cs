@@ -85,6 +85,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 obj.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, kitnoseriese);
                 obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
                 obj.Status = KitStatus.AllocationPending;
+                obj.NoOfImp = supplyManagementUploadFileDto.NoOfImp;
                 _supplyManagementKITDetailRepository.Add(obj);
                 _uow.Save();
 
@@ -247,6 +248,26 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             var history = _supplyManagementKITRepository.KitHistoryList(id);
             return Ok(history);
+        }
+
+        [HttpGet]
+        [Route("GetKitReturnList/{projectId}/{kitType}/{siteId?}/{visitId?}/{randomizationId?}")]
+        public IActionResult GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
+        {
+            return Ok(_supplyManagementKITRepository.GetKitReturnList(projectId, kitType, siteId, visitId, randomizationId));
+        }
+
+        [HttpPost]
+        [Route("ReturnSave")]
+        public IActionResult ReturnSave([FromBody] SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto)
+        {
+            supplyManagementVisitKITDetailDto = _supplyManagementKITRepository.SetKitNumber(supplyManagementVisitKITDetailDto);
+            if (string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.KitNo))
+            {
+                ModelState.AddModelError("Message", "Kit is not available");
+                return BadRequest(ModelState);
+            }
+            return Ok();
         }
     }
 }

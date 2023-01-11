@@ -979,4 +979,10 @@ namespace GSC.Helper
         [Description("Veg")] Veg = 1,
         [Description("Non-Veg")] NonVeg = 2
     }
+    public enum KitStatusRandomization : short
+    {
+        [Description("Used")] Used = 1,
+        [Description("UnUsed")] UnUsed = 2,
+        [Description("Damaged")] Damaged = 3
+    }
 }

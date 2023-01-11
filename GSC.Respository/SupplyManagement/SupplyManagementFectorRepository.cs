@@ -418,5 +418,17 @@ namespace GSC.Respository.SupplyManagement
 
             return false;
         }
+
+        public bool CheckfactorrandomizationStarted(int projectId)
+        {
+            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == projectId
+            && x.RandomizationNumber != null).FirstOrDefault();
+
+            if (randomization != null)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

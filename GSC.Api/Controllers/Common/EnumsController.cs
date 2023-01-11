@@ -863,5 +863,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(fectore);
         }
+        [HttpGet]
+        [Route("GetKitStatusRandomization")]
+        public IActionResult GetKitStatusRandomization()
+        {
+            var fectore = Enum.GetValues(typeof(KitStatusRandomization))
+                .Cast<KitStatusRandomization>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
     }
 }
