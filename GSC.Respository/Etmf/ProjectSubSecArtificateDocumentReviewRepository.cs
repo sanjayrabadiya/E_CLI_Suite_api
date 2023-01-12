@@ -28,6 +28,7 @@ namespace GSC.Respository.Etmf
         private readonly IUserRepository _userRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
 
         public ProjectSubSecArtificateDocumentReviewRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
@@ -35,7 +36,8 @@ namespace GSC.Respository.Etmf
             IUserRepository userRepository,
             IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
             IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
-            IProjectRightRepository projectRightRepository
+            IProjectRightRepository projectRightRepository,
+            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository
             )
            : base(context)
         {
@@ -46,6 +48,7 @@ namespace GSC.Respository.Etmf
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _projectRightRepository = projectRightRepository;
+            _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
         }
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId, int ProjectDetailsId)
@@ -139,7 +142,14 @@ namespace GSC.Respository.Etmf
             var document = project.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
             var artificate = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
             var user = _userRepository.Find((int)ReviewDto.CreatedBy);
-            _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document, artificate, ProjectName);
+            if (ReviewDto.IsReviewed)
+            {
+                _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document, artificate, ProjectName);
+            }
+            else
+            {
+                _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document, artificate, ProjectName);
+            }
         }
 
         public void SaveByDocumentIdInReview(int ProjectWorkplaceSubSecArtificateDocumentId)
@@ -304,13 +314,18 @@ namespace GSC.Respository.Etmf
                 }
                 else
                 {
-                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo);
-                    if (sendBackReviewers.Count() <= 0)
+                    var numArray = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).Select(s => s.SequenceNo).ToList();
+                    if (numArray.Count > 0)
+                    {
+                        var minseqno = _projectWorkplaceArtificateRepository.ClosestToNumber(numArray, reviewer.SequenceNo.Value);
+                        var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == minseqno).ToList();
+                        var result = sendBackReviewers.Any(x => x.IsReviewed);
+                        return (!result);
+                    }
+                    else
                     {
                         return false;
                     }
-                    var result = sendBackReviewers.LastOrDefault().IsReviewed;
-                    return (!result);
                 }
             }
         }

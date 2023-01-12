@@ -147,8 +147,16 @@ namespace GSC.Respository.Etmf
             var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == ReviewDto.ProjectWorkplaceArtificatedDocumentId && x.DeletedDate == null).FirstOrDefault();
             var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
             var user = _userRepository.Find((int)ReviewDto.CreatedBy);
-            _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+            if (ReviewDto.IsReviewed)
+            {
+                _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+            }
+            else
+            {
+                _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+            }
         }
+
 
         public void SaveByDocumentIdInReview(int projectWorkplaceArtificateDocumentId)
         {
@@ -310,13 +318,18 @@ namespace GSC.Respository.Etmf
                 }
                 else
                 {
-                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo);
-                    if (sendBackReviewers.Count() <= 0)
+                    var numArray = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).Select(s => s.SequenceNo).ToList();
+                    if (numArray.Count > 0)
+                    {
+                        var minseqno = _projectWorkplaceArtificateRepository.ClosestToNumber(numArray, reviewer.SequenceNo.Value);
+                        var sendBackReviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == minseqno).ToList();
+                        var result = sendBackReviewers.Any(x => x.IsReviewed);
+                        return (!result);
+                    }
+                    else
                     {
                         return false;
                     }
-                    var result = sendBackReviewers.LastOrDefault().IsReviewed;
-                    return (!result);
                 }
             }
         }

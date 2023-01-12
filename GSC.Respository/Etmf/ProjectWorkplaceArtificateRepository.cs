@@ -159,5 +159,24 @@ namespace GSC.Respository.Etmf
 
             return result;
         }
+
+
+
+        public int ClosestToNumber(List<int?> collection, int target)
+        {
+            var closest = int.MaxValue;
+            var minDifference = int.MaxValue;
+            foreach (var element in collection)
+            {
+                var difference = Math.Abs((long)element - target);
+                if (minDifference > difference)
+                {
+                    minDifference = (int)difference;
+                    closest = element.Value;
+                }
+            }
+
+            return closest;
+        }
     }
 }

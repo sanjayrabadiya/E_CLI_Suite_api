@@ -26,10 +26,12 @@ namespace GSC.Respository.Etmf
         private readonly IUserRepository _userRepository;
         private readonly IGSCContext _context;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         public ProjectSubSecArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
            IEmailSenderRespository emailSenderRespository,
+           IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
            IUserRepository userRepository, IProjectRightRepository projectRightRepository)
            : base(context)
         {
@@ -39,6 +41,7 @@ namespace GSC.Respository.Etmf
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
             _projectRightRepository = projectRightRepository;
+            _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
         }
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId)
@@ -53,7 +56,7 @@ namespace GSC.Respository.Etmf
                     UserId = c.UserId,
                     Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
                     SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && (b.IsApproved == false || b.IsApproved == null))?.SequenceNo,
-                    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null 
+                    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null
                     && (b.IsApproved == true || b.IsApproved == null)),
                 }).Where(x => x.IsSelected == false).ToList();
 
@@ -205,13 +208,18 @@ namespace GSC.Respository.Etmf
                 }
                 else
                 {
-                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo).OrderBy(s => s.Id);
-                    if (sendBackReviewers.Count() <= 0)
+                    var numArray = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).Select(s => s.SequenceNo).ToList();
+                    if (numArray.Count > 0)
+                    {
+                        var minseqno = _projectWorkplaceArtificateRepository.ClosestToNumber(numArray, reviewer.SequenceNo.Value);
+                        var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == minseqno).ToList();
+                        var result = sendBackReviewers.Any(x => x.IsApproved == true);
+                        return (!result);
+                    }
+                    else
                     {
                         return false;
                     }
-                    var result = sendBackReviewers.LastOrDefault().IsApproved;
-                    return (!(result == null ? false : result.Value));
                 }
             }
         }
