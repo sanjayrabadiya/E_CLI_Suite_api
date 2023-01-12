@@ -230,13 +230,18 @@ namespace GSC.Respository.Etmf
                 }
                 else
                 {
-                    var sendBackReviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).OrderBy(o => o.SequenceNo).OrderBy(s => s.Id);
-                    if (sendBackReviewers.Count() <= 0)
+                    var numArray = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo < reviewer.SequenceNo && x.DeletedDate == null && x.SequenceNo != null).Select(s => s.SequenceNo).ToList();
+                    if (numArray.Count > 0)
+                    {
+                        var minseqno = _projectWorkplaceArtificateRepository.ClosestToNumber(numArray, reviewer.SequenceNo.Value);
+                        var sendBackReviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == minseqno).ToList();
+                        var result = sendBackReviewers.Any(x => x.IsApproved == true);
+                        return (!result);
+                    }
+                    else
                     {
                         return false;
                     }
-                    var result = sendBackReviewers.LastOrDefault().IsApproved;
-                    return (!(result == null ? false : result.Value));
                 }
             }
         }

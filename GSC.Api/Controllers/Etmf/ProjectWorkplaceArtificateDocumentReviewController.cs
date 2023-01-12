@@ -78,25 +78,24 @@ namespace GSC.Api.Controllers.Etmf
             && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.IsReviewed == false && x.DeletedDate == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             projectArtificateDocumentReviewDto.IsSendBack = true;
-            projectArtificateDocumentReviewDto.IsReviewed = seqNo == 0 ? true : isReview;
+            projectArtificateDocumentReviewDto.IsReviewed = isReview;
             projectArtificateDocumentReviewDto.SendBackDate = _jwtTokenAccesser.GetClientDate();
             var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(projectArtificateDocumentReviewDto);
             _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
 
-            if (isReview)
-            {
-                var projectArtificateDocumentReviewDtos = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
-                && x.UserId == _jwtTokenAccesser.UserId && x.IsSendBack == true && x.IsReviewed == false && x.DeletedDate == null);
-                foreach (var item in projectArtificateDocumentReviewDtos)
-                {
-                    item.IsReviewed = true;
-                    _projectWorkplaceArtificateDocumentReviewRepository.Update(item);
-                }
-            }
+            //if (isReview)
+            //{
+            //    var projectArtificateDocumentReviewDtos = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
+            //    && x.UserId == _jwtTokenAccesser.UserId && x.IsSendBack == true && x.IsReviewed == false && x.DeletedDate == null);
+            //    foreach (var item in projectArtificateDocumentReviewDtos)
+            //    {
+            //        item.IsReviewed = true;
+            //        _projectWorkplaceArtificateDocumentReviewRepository.Update(item);
+            //    }
+            //}
 
             if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
-            if (isReview == false)
-                _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
+            _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
 
             if (seqNo > 0 && isReview)
             {

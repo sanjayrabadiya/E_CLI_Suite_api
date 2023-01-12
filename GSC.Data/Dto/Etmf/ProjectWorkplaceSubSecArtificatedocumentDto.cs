@@ -77,6 +77,9 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsSendBack { get; set; }
         public bool IsReview { get; set; }
         public int? SequenceNo { get; set; }
+        public int UserId { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? SendBackDate { get; set; }
     }
     public class CustomParameter
     {

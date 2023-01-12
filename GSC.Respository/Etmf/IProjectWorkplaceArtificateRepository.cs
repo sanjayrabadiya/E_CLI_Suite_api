@@ -13,5 +13,6 @@ namespace GSC.Respository.Etmf
         List<DropDownDto> GetProjectWorkPlaceArtificateDropDown(int sectionId);
         List<WorkplaceFolderDto> GetWorkPlaceFolder(int EtmfArtificateMasterLbraryId, int ProjectWorkplaceArtificateId);
         WorkplaceChartDto GetDocChart(WorkplaceChartFilterDto filters);
+        int ClosestToNumber(List<int?> collection, int target);
     }
 }
