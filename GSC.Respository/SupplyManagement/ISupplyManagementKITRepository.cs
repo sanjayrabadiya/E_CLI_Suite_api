@@ -35,5 +35,7 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId);
 
         SupplyManagementKITReturnGridDto ReturnSave(SupplyManagementKITReturnGridDto obj);
+
+        void ReturnSaveAll(SupplyManagementKITReturnDtofinal data);
     }
 }

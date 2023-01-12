@@ -264,5 +264,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             var returnkit = _supplyManagementKITRepository.ReturnSave(supplyManagementKITReturnGridDto);
             return Ok(returnkit);
         }
+        [HttpPost]
+        [Route("ReturnSaveAll")]
+        public IActionResult ReturnSaveAll([FromBody] SupplyManagementKITReturnDtofinal supplyManagementKITReturnGridDto)
+        {
+             _supplyManagementKITRepository.ReturnSaveAll(supplyManagementKITReturnGridDto);
+            return Ok();
+        }
     }
 }

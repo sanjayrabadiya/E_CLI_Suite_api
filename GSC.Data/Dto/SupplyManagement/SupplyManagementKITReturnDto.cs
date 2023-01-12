@@ -45,4 +45,13 @@ namespace GSC.Data.Dto.SupplyManagement
 
 
     }
+
+    public class SupplyManagementKITReturnDtofinal
+    {
+        public int? AuditReasonId { get; set; }
+        public string ReasonOth { get; set; }
+        public List<SupplyManagementKITReturnGridDto> list { get; set; }
+    }
+
+
 }

@@ -29,15 +29,16 @@ namespace GSC.Respository.SupplyManagement
 
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public SupplyManagementKITRepository(IGSCContext context,
-        IMapper mapper)
+        IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
 
 
             _mapper = mapper;
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId)
@@ -332,12 +333,17 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
+            var returndata = _context.SupplyManagementKITReturn.
+                 Include(x => x.SupplyManagementKITDetail)
+                .ThenInclude(x => x.SupplyManagementKIT).Where(x => x.DeletedDate == null && x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectId == projectId).ToList();
+
             var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT)
                                                          .ThenInclude(x => x.PharmacyStudyProductType)
                                                          .ThenInclude(x => x.ProductType)
                                                          .Where(x => x.SupplyManagementKIT.ProjectId == projectId
                                                           && x.DeletedDate == null
                                                           && x.Status != KitStatus.Missing
+                                                          && !returndata.Select(z => z.SupplyManagementKITDetailId).Contains(x.Id)
                                                           ).Select(x => new SupplyManagementKITReturnGridDto
                                                           {
                                                               KitNo = x.KitNo,
@@ -410,6 +416,42 @@ namespace GSC.Respository.SupplyManagement
 
             return obj;
         }
+        public void ReturnSaveAll(SupplyManagementKITReturnDtofinal data)
+        {
+            if (data != null && data.list.Count > 0)
+            {
+                foreach (var obj in data.list)
+                {
+                    var datakit = _context.SupplyManagementKITDetail.Where(x => x.Id == obj.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (datakit != null)
+                    {
+                        datakit.ReturnImp = obj.ReturnImp;
+                        datakit.ReturnReason = obj.ReturnReason;
+                        datakit.Status = KitStatus.Returned;
+                        _context.SupplyManagementKITDetail.Update(datakit);
 
+                        SupplyManagementKITReturn returnkit = new SupplyManagementKITReturn();
+                        returnkit.ReturnImp = obj.ReturnImp;
+                        returnkit.ReasonOth = data.ReasonOth;
+                        returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        returnkit.AuditReasonId = data.AuditReasonId;
+                        returnkit.Commnets = obj.ReturnReason;
+                        _context.SupplyManagementKITReturn.Add(returnkit);
+
+                        SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                        history.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        history.Status = KitStatus.Returned;
+                        history.RoleId = _jwtTokenAccesser.RoleId;
+                        _context.SupplyManagementKITDetailHistory.Add(history);
+
+                        _context.Save();
+                    }
+
+                }
+
+
+
+            }
+        }
     }
 }
