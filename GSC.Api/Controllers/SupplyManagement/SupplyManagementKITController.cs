@@ -259,15 +259,10 @@ namespace GSC.Api.Controllers.SupplyManagement
 
         [HttpPost]
         [Route("ReturnSave")]
-        public IActionResult ReturnSave([FromBody] SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto)
+        public IActionResult ReturnSave([FromBody] SupplyManagementKITReturnGridDto supplyManagementKITReturnGridDto)
         {
-            supplyManagementVisitKITDetailDto = _supplyManagementKITRepository.SetKitNumber(supplyManagementVisitKITDetailDto);
-            if (string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.KitNo))
-            {
-                ModelState.AddModelError("Message", "Kit is not available");
-                return BadRequest(ModelState);
-            }
-            return Ok();
+            var returnkit = _supplyManagementKITRepository.ReturnSave(supplyManagementKITReturnGridDto);
+            return Ok(returnkit);
         }
     }
 }

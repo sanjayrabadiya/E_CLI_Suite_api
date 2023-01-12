@@ -39,7 +39,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? RandomizationId { get; set; }
         public int? ProjectDesignVisitId { get; set; }
         public KitStatus Status { get; set; }
-        
+
+        public string ReturnReason { get; set; }
+
+
 
     }
 }

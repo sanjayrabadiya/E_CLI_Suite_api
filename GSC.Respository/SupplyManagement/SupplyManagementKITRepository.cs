@@ -337,7 +337,7 @@ namespace GSC.Respository.SupplyManagement
                                                          .ThenInclude(x => x.ProductType)
                                                          .Where(x => x.SupplyManagementKIT.ProjectId == projectId
                                                           && x.DeletedDate == null
-                                                          && x.Status != KitStatus.Missing 
+                                                          && x.Status != KitStatus.Missing
                                                           ).Select(x => new SupplyManagementKITReturnGridDto
                                                           {
                                                               KitNo = x.KitNo,
@@ -350,6 +350,7 @@ namespace GSC.Respository.SupplyManagement
                                                               VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                                               Status = x.Status,
                                                               ReturnImp = x.ReturnImp,
+                                                              ReturnReason = x.ReturnReason,
                                                               CreatedByUser = x.CreatedByUser.UserName,
                                                               ModifiedByUser = x.ModifiedByUser.UserName,
                                                               DeletedByUser = x.DeletedByUser.UserName,
@@ -392,6 +393,22 @@ namespace GSC.Respository.SupplyManagement
 
             return data;
 
+        }
+        public SupplyManagementKITReturnGridDto ReturnSave(SupplyManagementKITReturnGridDto obj)
+        {
+            var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT)
+                                                        .ThenInclude(x => x.PharmacyStudyProductType)
+                                                        .ThenInclude(x => x.ProductType)
+                                                        .Where(x => x.Id == obj.SupplyManagementKITDetailId).FirstOrDefault();
+            if (data != null)
+            {
+                data.ReturnImp = obj.ReturnImp;
+                data.ReturnReason = obj.ReturnReason;
+                _context.SupplyManagementKITDetail.Update(data);
+                _context.Save();
+            }
+
+            return obj;
         }
 
     }

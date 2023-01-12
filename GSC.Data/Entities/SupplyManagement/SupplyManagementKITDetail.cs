@@ -33,5 +33,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? NoOfImp { get; set; }
 
         public int? ReturnImp { get; set; }
+
+        public string ReturnReason { get; set; }
     }
 }

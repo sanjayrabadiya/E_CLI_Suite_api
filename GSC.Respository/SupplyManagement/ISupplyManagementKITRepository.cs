@@ -33,5 +33,7 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementKITDetailHistoryDto> KitHistoryList(int id);
 
         List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId);
+
+        SupplyManagementKITReturnGridDto ReturnSave(SupplyManagementKITReturnGridDto obj);
     }
 }

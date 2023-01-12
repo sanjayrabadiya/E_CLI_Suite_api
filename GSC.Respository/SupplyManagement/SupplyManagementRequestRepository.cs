@@ -206,7 +206,7 @@ namespace GSC.Respository.SupplyManagement
                 }
                 else
                 {
-                    data = _context.SupplyManagementKITDetail.Where(x =>
+                        data = _context.SupplyManagementKITDetail.Where(x =>
                                       x.SupplyManagementShipmentId == null
                                      && x.SupplyManagementKIT.SiteId == null
                                      && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.Returned)
