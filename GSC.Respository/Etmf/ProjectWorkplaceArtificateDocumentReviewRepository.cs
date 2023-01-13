@@ -67,7 +67,7 @@ namespace GSC.Respository.Etmf
                     Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
                     IsReview = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsReviewed == true),
                     SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == true)?.SequenceNo,
-                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == false),
+                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null),
                 }).Where(x => x.IsSelected == false && x.IsReview == false).ToList();
 
             users.ForEach(x =>
@@ -149,7 +149,7 @@ namespace GSC.Respository.Etmf
             var user = _userRepository.Find((int)ReviewDto.CreatedBy);
             if (ReviewDto.IsReviewed)
             {
-                _emailSenderRespository.SendEmailOfSendBack(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+                _emailSenderRespository.SendEmailOfReviewed(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
             }
             else
             {
