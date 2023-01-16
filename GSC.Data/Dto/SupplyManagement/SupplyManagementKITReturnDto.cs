@@ -32,7 +32,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ProductTypeName { get; set; }
         public int SupplyManagementKITDetailId { get; set; }
 
-        public int SupplyManagementKITReturnId { get; set; }
+        public int? SupplyManagementKITReturnId { get; set; }
 
         public string ScreeningNo { get; set; }
         public string RandomizationNo { get; set; }

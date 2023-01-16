@@ -116,7 +116,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 var approvedQty = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
                  && x.SupplyManagementKIT.ProjectId == ProjectId && x.SupplyManagementKIT.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
-                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)).Sum(x => x.SupplyManagementKIT.TotalUnits);
+                 ).Sum(x => x.NoOfImp);
 
                 var finalRemainingQty = RemainingQuantity - approvedQty;
                 return (int)finalRemainingQty;
@@ -333,9 +333,7 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
-            var returndata = _context.SupplyManagementKITReturn.
-                 Include(x => x.SupplyManagementKITDetail)
-                .ThenInclude(x => x.SupplyManagementKIT).Where(x => x.DeletedDate == null && x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectId == projectId).ToList();
+
 
             var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT)
                                                          .ThenInclude(x => x.PharmacyStudyProductType)
@@ -343,7 +341,6 @@ namespace GSC.Respository.SupplyManagement
                                                          .Where(x => x.SupplyManagementKIT.ProjectId == projectId
                                                           && x.DeletedDate == null
                                                           && x.Status != KitStatus.Missing
-                                                          && !returndata.Select(z => z.SupplyManagementKITDetailId).Contains(x.Id)
                                                           ).Select(x => new SupplyManagementKITReturnGridDto
                                                           {
                                                               KitNo = x.KitNo,
@@ -374,6 +371,10 @@ namespace GSC.Respository.SupplyManagement
                         x.RandomizationNo = randomization.RandomizationNumber;
                         x.ScreeningNo = randomization.ScreeningNumber;
                     }
+                    var returndata = _context.SupplyManagementKITReturn.Where(z => z.SupplyManagementKITDetailId == x.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (returndata != null)
+                        x.SupplyManagementKITReturnId = returndata.Id;
+
                 });
                 if (kitType == KitStatusRandomization.Used)
                 {
@@ -386,6 +387,10 @@ namespace GSC.Respository.SupplyManagement
                 if (kitType == KitStatusRandomization.UnUsed)
                 {
                     data = data.Where(x => x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.WithIssue).ToList();
+                }
+                if (kitType == KitStatusRandomization.Return)
+                {
+                    data = data.Where(x => x.Status == KitStatus.Returned).ToList();
                 }
                 if (visitId > 0)
                 {

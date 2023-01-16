@@ -983,6 +983,7 @@ namespace GSC.Helper
     {
         [Description("Used")] Used = 1,
         [Description("UnUsed")] UnUsed = 2,
-        [Description("Damaged")] Damaged = 3
+        [Description("Damaged")] Damaged = 3,
+        [Description("Returned")] Return = 4
     }
 }

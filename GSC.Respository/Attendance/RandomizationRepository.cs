@@ -1416,7 +1416,7 @@ namespace GSC.Respository.Attendance
 
             }
 
-            var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFileId == data.Id && x.RandomizationId == obj.Id).FirstOrDefault();
+            var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.Id == data.Id && x.RandomizationId == obj.Id).FirstOrDefault();
             if (data1 != null)
             {
                 data1.RandomizationId = null;
