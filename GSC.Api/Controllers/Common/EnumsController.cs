@@ -872,7 +872,20 @@ namespace GSC.Api.Controllers.Common
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
-                }).OrderBy(o => o.Id).ToList();
+                }).Where(x => x.Id == 1 || x.Id == 2 || x.Id == 3 || x.Id == 4).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+        [HttpGet]
+        [Route("GetKitStatusDiscard")]
+        public IActionResult GetKitStatusDiscard()
+        {
+            var fectore = Enum.GetValues(typeof(KitStatusRandomization))
+                .Cast<KitStatusRandomization>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).Where(x => x.Id == 1 || x.Id == 2 || x.Id == 3 || x.Id == 5 || x.Id == 6).OrderBy(o => o.Id).ToList();
 
             return Ok(fectore);
         }

@@ -37,5 +37,11 @@ namespace GSC.Respository.SupplyManagement
         SupplyManagementKITReturnGridDto ReturnSave(SupplyManagementKITReturnGridDto obj);
 
         void ReturnSaveAll(SupplyManagementKITReturnDtofinal data);
+
+        List<SupplyManagementKITDiscardGridDto> GetKitDiscardList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId);
+
+        void KitDiscard(SupplyManagementKITDiscardDtofinal data);
+
+        void KitSendtoSponser(SupplyManagementKITDiscardDtofinal data);
     }
 }

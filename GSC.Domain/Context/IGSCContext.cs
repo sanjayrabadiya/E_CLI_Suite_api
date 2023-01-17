@@ -382,6 +382,10 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementKITDetailHistory> SupplyManagementKITDetailHistory { get; set; }
         DbSet<SupplyManagementKITReturn> SupplyManagementKITReturn { get; set; }
 
+        DbSet<SupplyManagementKITDiscard> SupplyManagementKITDiscard { get; set; }
+
         
+
+
     }
 }

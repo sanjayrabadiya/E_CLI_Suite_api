@@ -5,19 +5,19 @@ using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
-using GSC.Shared.Generic;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.SupplyManagement
 {
-    public class SupplyManagementKITDetailHistory : BaseEntity
+    public class SupplyManagementKITDiscard : BaseEntity
     {
         public int SupplyManagementKITDetailId { get; set; }
-        public KitStatus? Status { get; set; }
-        public int RoleId { get; set; }
-
+        public int? AuditReasonId { get; set; }
+        public KitStatus Status { get; set; }
+        public AuditReason AuditReason { get; set; }
+        public string ReasonOth { get; set; }
         public SupplyManagementKITDetail SupplyManagementKITDetail { get; set; }
-
+       
     }
 }

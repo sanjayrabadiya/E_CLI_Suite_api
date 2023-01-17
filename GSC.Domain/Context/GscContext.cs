@@ -438,6 +438,8 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementKITReturn> SupplyManagementKITReturn { get; set; }
 
+        public DbSet<SupplyManagementKITDiscard> SupplyManagementKITDiscard { get; set; }
+
     }
 
 

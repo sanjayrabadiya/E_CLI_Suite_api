@@ -52,7 +52,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (supplyManagementshipmentDto.Kits != null)
             {
 
-                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null))
+                foreach (var item in supplyManagementshipmentDto.Kits)
                 {
                     if (item.Status != Helper.KitStatus.WithoutIssue)
                     {
@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (_uow.Save() <= 0) throw new Exception("Creating shipment receipt failed on save.");
             if (supplyManagementshipmentDto.Kits != null)
             {
-                foreach (var item in supplyManagementshipmentDto.Kits.Where(x => x.Status != null))
+                foreach (var item in supplyManagementshipmentDto.Kits)
                 {
                     SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                     history.SupplyManagementKITDetailId = item.Id;

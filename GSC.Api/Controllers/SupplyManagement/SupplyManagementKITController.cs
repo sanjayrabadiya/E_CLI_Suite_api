@@ -157,6 +157,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                     kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
                     _context.SupplyManagementKitNumberSettings.Update(kitnumber);
                 }
+                if (record.Status != KitStatus.AllocationPending)
+                {
+                    ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
+                    return BadRequest(ModelState);
+                }
 
                 if (record == null)
                     return NotFound();
@@ -271,5 +276,28 @@ namespace GSC.Api.Controllers.SupplyManagement
              _supplyManagementKITRepository.ReturnSaveAll(supplyManagementKITReturnGridDto);
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetKitDiscardList/{projectId}/{kitType}/{siteId?}/{visitId?}/{randomizationId?}")]
+        public IActionResult GetKitDiscardList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
+        {
+            return Ok(_supplyManagementKITRepository.GetKitDiscardList(projectId, kitType, siteId, visitId, randomizationId));
+        }
+
+        [HttpPost]
+        [Route("KitDiscard")]
+        public IActionResult KitDiscard([FromBody] SupplyManagementKITDiscardDtofinal supplyManagementKITReturnGridDto)
+        {
+            _supplyManagementKITRepository.KitDiscard(supplyManagementKITReturnGridDto);
+            return Ok();
+        }
+        [HttpPost]
+        [Route("SendToSponser")]
+        public IActionResult KitSendtoSponser([FromBody] SupplyManagementKITDiscardDtofinal supplyManagementKITReturnGridDto)
+        {
+            _supplyManagementKITRepository.KitSendtoSponser(supplyManagementKITReturnGridDto);
+            return Ok();
+        }
+
     }
 }

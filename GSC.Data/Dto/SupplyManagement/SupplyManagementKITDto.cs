@@ -81,6 +81,6 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public KitStatus Status { get; set; }
 
-        public List<DropDownEnum> StatusList { get; set; }
+        public List<DropDownStudyDto> StatusList { get; set; }
     }
 }

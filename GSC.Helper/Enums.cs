@@ -918,7 +918,9 @@ namespace GSC.Helper
         [Description("Damaged")] Damaged = 5,
         [Description("Receipt With Issues")] WithIssue = 6,
         [Description("Receipt Without Issues")] WithoutIssue = 7,
-        [Description("Allocated")] Allocated = 8
+        [Description("Allocated")] Allocated = 8,
+        [Description("Discard")] Discard = 9,
+        [Description("Send to sponser")] Sendtosponser = 10
     }
 
     public enum ScreeningReport : short
@@ -984,6 +986,8 @@ namespace GSC.Helper
         [Description("Used")] Used = 1,
         [Description("UnUsed")] UnUsed = 2,
         [Description("Damaged")] Damaged = 3,
-        [Description("Returned")] Return = 4
+        [Description("Returned")] Return = 4,
+        [Description("Discard")] Discard = 5,
+        [Description("Send to sponser")] Sendtosponser = 6
     }
 }

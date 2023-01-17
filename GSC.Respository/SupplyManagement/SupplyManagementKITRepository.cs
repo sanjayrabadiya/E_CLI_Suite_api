@@ -89,7 +89,7 @@ namespace GSC.Respository.SupplyManagement
             {
 
                 var refrencetype = Enum.GetValues(typeof(KitStatus))
-                                    .Cast<KitStatus>().Select(e => new DropDownEnum
+                                    .Cast<KitStatus>().Select(e => new DropDownStudyDto
                                     {
                                         Id = Convert.ToInt16(e),
                                         Value = e.GetDescription()
@@ -333,9 +333,7 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
-
-
-            var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT)
+            var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Include(x => x.SupplyManagementKIT)
                                                          .ThenInclude(x => x.PharmacyStudyProductType)
                                                          .ThenInclude(x => x.ProductType)
                                                          .Where(x => x.SupplyManagementKIT.ProjectId == projectId
@@ -359,7 +357,9 @@ namespace GSC.Respository.SupplyManagement
                                                               DeletedByUser = x.DeletedByUser.UserName,
                                                               CreatedDate = x.CreatedDate,
                                                               ModifiedDate = x.ModifiedDate,
-                                                              DeletedDate = x.DeletedDate
+                                                              DeletedDate = x.DeletedDate,
+                                                              SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
+                                                              SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : ""
                                                           }).ToList();
             if (data.Count > 0)
             {
@@ -373,7 +373,11 @@ namespace GSC.Respository.SupplyManagement
                     }
                     var returndata = _context.SupplyManagementKITReturn.Where(z => z.SupplyManagementKITDetailId == x.SupplyManagementKITDetailId).FirstOrDefault();
                     if (returndata != null)
+                    {
                         x.SupplyManagementKITReturnId = returndata.Id;
+                        x.ReturnDate = returndata.CreatedDate;
+                        x.ReturnBy = _context.Users.Where(z => z.Id == returndata.CreatedBy).FirstOrDefault().UserName;
+                    }
 
                 });
                 if (kitType == KitStatusRandomization.Used)
@@ -399,6 +403,10 @@ namespace GSC.Respository.SupplyManagement
                 if (randomizationId > 0)
                 {
                     data = data.Where(x => x.RandomizationId == randomizationId).ToList();
+                }
+                if (siteId > 0)
+                {
+                    data = data.Where(x => x.SiteId == siteId).ToList();
                 }
             }
 
@@ -453,9 +461,172 @@ namespace GSC.Respository.SupplyManagement
                     }
 
                 }
+            }
+        }
 
+        public List<SupplyManagementKITDiscardGridDto> GetKitDiscardList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
+        {
+            var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Include(x => x.SupplyManagementKIT)
+                                                         .ThenInclude(x => x.PharmacyStudyProductType)
+                                                         .ThenInclude(x => x.ProductType)
+                                                         .Where(x => x.SupplyManagementKIT.ProjectId == projectId
+                                                          && x.DeletedDate == null
+                                                          && x.Status == KitStatus.Returned
+                                                          ).Select(x => new SupplyManagementKITDiscardGridDto
+                                                          {
+                                                              KitNo = x.KitNo,
+                                                              ProjectDesignVisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
+                                                              ProductTypeName = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                                              NoOfImp = x.NoOfImp,
+                                                              RandomizationId = x.RandomizationId,
+                                                              StudyCode = x.SupplyManagementKIT.Project.ProjectCode,
+                                                              SupplyManagementKITDetailId = x.Id,
+                                                              VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                                                              Status = x.Status,
+                                                              ReturnImp = x.ReturnImp,
+                                                              ReturnReason = x.ReturnReason,
+                                                              CreatedByUser = x.CreatedByUser.UserName,
+                                                              ModifiedByUser = x.ModifiedByUser.UserName,
+                                                              DeletedByUser = x.DeletedByUser.UserName,
+                                                              CreatedDate = x.CreatedDate,
+                                                              ModifiedDate = x.ModifiedDate,
+                                                              DeletedDate = x.DeletedDate,
+                                                              SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
+                                                              SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : ""
+                                                          }).ToList();
+            if (data.Count > 0)
+            {
+                var history = _context.SupplyManagementKITDetailHistory.Include(x => x.SupplyManagementKITDetail).Where(x => data.Select(s => s.SupplyManagementKITDetailId).Contains(x.SupplyManagementKITDetailId)).ToList();
+                data.ForEach(x =>
+                {
+                    var randomization = _context.Randomization.Where(z => z.Id == x.RandomizationId).FirstOrDefault();
+                    if (randomization != null)
+                    {
+                        x.RandomizationNo = randomization.RandomizationNumber;
+                        x.ScreeningNo = randomization.ScreeningNumber;
+                    }
+                    var returndata = _context.SupplyManagementKITReturn.Where(z => z.SupplyManagementKITDetailId == x.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (returndata != null)
+                    {
+                        x.SupplyManagementKITReturnId = returndata.Id;
+                        x.ReturnDate = returndata.CreatedDate;
+                        x.ReturnBy = _context.Users.Where(z => z.Id == returndata.CreatedBy).FirstOrDefault().UserName;
+                    }
+                    var discarddata = _context.SupplyManagementKITDiscard.Where(z => z.SupplyManagementKITDetailId == x.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (discarddata != null)
+                    {
+                        x.SupplyManagementKITDiscardId = discarddata.Id;
+                        x.DiscardDate = discarddata.CreatedDate;
+                        x.DiscardBy = _context.Users.Where(z => z.Id == discarddata.CreatedBy).FirstOrDefault().UserName;
+                    }
 
+                });
+                if (kitType == KitStatusRandomization.Used)
+                {
+                    var useddata = history.Where(x => x.Status == KitStatus.Allocated).ToList();
+                    data = data.Where(x => useddata.Select(z => z.SupplyManagementKITDetailId).Contains(x.SupplyManagementKITDetailId)).ToList();
+                }
+                if (kitType == KitStatusRandomization.UnUsed)
+                {
+                    var useddata = history.Where(x => (x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.WithIssue) && x.SupplyManagementKITDetail.RandomizationId == null).ToList();
+                    data = data.Where(x => useddata.Select(z => z.SupplyManagementKITDetailId).Contains(x.SupplyManagementKITDetailId)).ToList();
+                }
+                if (kitType == KitStatusRandomization.Discard)
+                {
+                    data = data.Where(x => x.Status == KitStatus.Discard).ToList();
+                }
+                if (kitType == KitStatusRandomization.Damaged)
+                {
+                    var damageddata = history.Where(x => x.Status == KitStatus.Damaged).ToList();
+                    data = data.Where(x => damageddata.Select(z => z.SupplyManagementKITDetailId).Contains(x.SupplyManagementKITDetailId)).ToList();
+                }
+                if (kitType == KitStatusRandomization.Sendtosponser)
+                {
+                    data = data.Where(x => x.Status == KitStatus.Sendtosponser).ToList();
+                }
+                if (visitId > 0)
+                {
+                    data = data.Where(x => x.ProjectDesignVisitId == visitId).ToList();
+                }
+                if (randomizationId > 0)
+                {
+                    data = data.Where(x => x.RandomizationId == randomizationId).ToList();
+                }
+                if (siteId > 0)
+                {
+                    data = data.Where(x => x.SiteId == siteId).ToList();
+                }
+            }
 
+            return data;
+
+        }
+
+        public void KitDiscard(SupplyManagementKITDiscardDtofinal data)
+        {
+            if (data != null && data.list.Count > 0)
+            {
+                foreach (var obj in data.list)
+                {
+                    var datakit = _context.SupplyManagementKITDetail.Where(x => x.Id == obj.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (datakit != null)
+                    {
+                        datakit.ReturnImp = obj.ReturnImp;
+                        datakit.ReturnReason = obj.ReturnReason;
+                        datakit.Status = KitStatus.Discard;
+                        _context.SupplyManagementKITDetail.Update(datakit);
+
+                        SupplyManagementKITDiscard returnkit = new SupplyManagementKITDiscard();
+
+                        returnkit.ReasonOth = data.ReasonOth;
+                        returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        returnkit.AuditReasonId = data.AuditReasonId;
+                        returnkit.Status = KitStatus.Discard;
+                        _context.SupplyManagementKITDiscard.Add(returnkit);
+
+                        SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                        history.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        history.Status = KitStatus.Discard;
+                        history.RoleId = _jwtTokenAccesser.RoleId;
+                        _context.SupplyManagementKITDetailHistory.Add(history);
+                        _context.Save();
+                    }
+
+                }
+            }
+        }
+
+        public void KitSendtoSponser(SupplyManagementKITDiscardDtofinal data)
+        {
+            if (data != null && data.list.Count > 0)
+            {
+                foreach (var obj in data.list)
+                {
+                    var datakit = _context.SupplyManagementKITDetail.Where(x => x.Id == obj.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (datakit != null)
+                    {
+                        datakit.ReturnImp = obj.ReturnImp;
+                        datakit.ReturnReason = obj.ReturnReason;
+                        datakit.Status = KitStatus.Sendtosponser;
+                        _context.SupplyManagementKITDetail.Update(datakit);
+
+                        SupplyManagementKITDiscard returnkit = new SupplyManagementKITDiscard();
+
+                        returnkit.ReasonOth = data.ReasonOth;
+                        returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        returnkit.AuditReasonId = data.AuditReasonId;
+                        returnkit.Status = KitStatus.Sendtosponser;
+                        _context.SupplyManagementKITDiscard.Add(returnkit);
+
+                        SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                        history.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        history.Status = KitStatus.Sendtosponser;
+                        history.RoleId = _jwtTokenAccesser.RoleId;
+                        _context.SupplyManagementKITDetailHistory.Add(history);
+                        _context.Save();
+                    }
+
+                }
             }
         }
     }
