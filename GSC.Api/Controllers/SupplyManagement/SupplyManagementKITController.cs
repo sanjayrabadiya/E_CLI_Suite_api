@@ -74,6 +74,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             var supplyManagementUploadFile = _mapper.Map<SupplyManagementKIT>(supplyManagementUploadFileDto);
             supplyManagementUploadFile.TotalUnits = (supplyManagementUploadFileDto.NoOfImp * supplyManagementUploadFileDto.NoofPatient);
+
+            var availableqty = _supplyManagementKITRepository.GetAvailableRemainingkitCount(supplyManagementUploadFileDto.ProjectId, supplyManagementUploadFileDto.PharmacyStudyProductTypeId);
+            if (availableqty < supplyManagementUploadFile.TotalUnits)
+            {
+                ModelState.AddModelError("Message", "Quantity is not available");
+                return BadRequest(ModelState);
+            }
             _supplyManagementKITRepository.Add(supplyManagementUploadFile);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
 
@@ -273,7 +280,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("ReturnSaveAll")]
         public IActionResult ReturnSaveAll([FromBody] SupplyManagementKITReturnDtofinal supplyManagementKITReturnGridDto)
         {
-             _supplyManagementKITRepository.ReturnSaveAll(supplyManagementKITReturnGridDto);
+            _supplyManagementKITRepository.ReturnSaveAll(supplyManagementKITReturnGridDto);
             return Ok();
         }
 

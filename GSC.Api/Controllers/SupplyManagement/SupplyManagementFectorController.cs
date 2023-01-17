@@ -73,11 +73,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "You already added for this study!");
                 return BadRequest(ModelState);
             }
-            //if (_supplyManagementFectorRepository.CheckfactorrandomizationStarted(supplyManagementFectorDto.ProjectId))
-            //{
-            //    ModelState.AddModelError("Message", "You can't add the factor once the Randomization is started!");
-            //    return BadRequest(ModelState);
-            //}
+            if (!_supplyManagementFectorRepository.CheckfactorrandomizationStarted(supplyManagementFectorDto.ProjectId))
+            {
+                ModelState.AddModelError("Message", "You can't add the factor once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
             supplyManagementFectorDto.Id = 0;
             var supplyManagementFector = _mapper.Map<SupplyManagementFector>(supplyManagementFectorDto);
 
@@ -159,7 +159,10 @@ namespace GSC.Api.Controllers.SupplyManagement
         [HttpGet("GetProductTypeList/{projectId}")]
         public IActionResult GetProductTypeList(int projectId)
         {
-            var productcodes = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == projectId).Distinct().Select(x => x.TreatmentType).ToList();
+            var productcodes = _context.SupplyManagementUploadFileVisit.
+                Include(x => x.SupplyManagementUploadFileDetail).
+                ThenInclude(x => x.SupplyManagementUploadFile)
+                .Where(x => x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.ProjectId == projectId).Distinct().Select(x => x.Value).ToList();
             if (productcodes.Any())
             {
                 var data = _context.ProductType.Where(x => productcodes.Contains(x.ProductTypeCode)).Select(x => new DropDownEnum
