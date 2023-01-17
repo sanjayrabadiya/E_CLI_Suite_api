@@ -73,11 +73,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "You already added for this study!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementFectorRepository.CheckfactorrandomizationStarted(supplyManagementFectorDto.ProjectId))
-            {
-                ModelState.AddModelError("Message", "You can't add the factor once the Randomization is started!");
-                return BadRequest(ModelState);
-            }
+            //if (_supplyManagementFectorRepository.CheckfactorrandomizationStarted(supplyManagementFectorDto.ProjectId))
+            //{
+            //    ModelState.AddModelError("Message", "You can't add the factor once the Randomization is started!");
+            //    return BadRequest(ModelState);
+            //}
             supplyManagementFectorDto.Id = 0;
             var supplyManagementFector = _mapper.Map<SupplyManagementFector>(supplyManagementFectorDto);
 

@@ -93,11 +93,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "You can not change type!");
                 return BadRequest(ModelState);
             }
-            if (!_supplyManagementFectorDetailRepository.CheckrandomizationStarted(supplyManagementFectorDetailDto.SupplyManagementFectorId))
-            {
-                ModelState.AddModelError("Message", "You can't update the factor once the Randomization is started!");
-                return BadRequest(ModelState);
-            }
+            //if (!_supplyManagementFectorDetailRepository.CheckrandomizationStarted(supplyManagementFectorDetailDto.SupplyManagementFectorId))
+            //{
+            //    ModelState.AddModelError("Message", "You can't update the factor once the Randomization is started!");
+            //    return BadRequest(ModelState);
+            //}
             var supplyManagementFectorDetail = _mapper.Map<SupplyManagementFectorDetail>(supplyManagementFectorDetailDto);
 
             _supplyManagementFectorDetailRepository.Update(supplyManagementFectorDetail);
@@ -112,15 +112,15 @@ namespace GSC.Api.Controllers.SupplyManagement
             var record = _supplyManagementFectorDetailRepository.Find(id);
             if (record == null)
                 return NotFound();
-            var SupplyManagementFector = _context.SupplyManagementFector.Where(x => x.Id == record.SupplyManagementFectorId).FirstOrDefault();
-            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == SupplyManagementFector.ProjectId
-            && x.RandomizationNumber != null).FirstOrDefault();
+            //var SupplyManagementFector = _context.SupplyManagementFector.Where(x => x.Id == record.SupplyManagementFectorId).FirstOrDefault();
+            //var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == SupplyManagementFector.ProjectId
+            //&& x.RandomizationNumber != null).FirstOrDefault();
 
-            if (randomization != null)
-            {
-                ModelState.AddModelError("Message", "You can't delete the factor once the Randomization is started!");
-                return BadRequest(ModelState);
-            }
+            //if (randomization != null)
+            //{
+            //    ModelState.AddModelError("Message", "You can't delete the factor once the Randomization is started!");
+            //    return BadRequest(ModelState);
+            //}
             _supplyManagementFectorDetailRepository.Delete(record);
             if (!string.IsNullOrEmpty(_jwtTokenAccesser.GetHeader("audit-reason-oth")))
                 record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
