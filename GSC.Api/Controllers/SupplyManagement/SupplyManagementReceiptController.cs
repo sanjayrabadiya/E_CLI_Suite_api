@@ -54,6 +54,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
                 foreach (var item in supplyManagementshipmentDto.Kits)
                 {
+                    if (item.Status == 0)
+                    {
+                        ModelState.AddModelError("Message", "Please select kit type!");
+                        return BadRequest(ModelState);
+                    }
                     if (item.Status != Helper.KitStatus.WithoutIssue)
                     {
                         if (string.IsNullOrEmpty(item.Comments))
@@ -69,7 +74,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                         data.Comments = item.Comments;
                         _supplyManagementKITDetailRepository.Update(data);
                         // _uow.Save();
-                        
+
                     }
                 }
             }
