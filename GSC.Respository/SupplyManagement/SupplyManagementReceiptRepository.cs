@@ -159,17 +159,17 @@ namespace GSC.Respository.SupplyManagement
                 var obj = _context.SupplyManagementShipment.Where(x => x.Id == id).FirstOrDefault();
                 if (obj == null)
                     return new List<KitAllocatedList>();
-                return _context.SupplyManagementKITDetail.Where(x =>
-                          x.SupplyManagementShipmentId == id
-                          && x.DeletedDate == null).Select(x => new KitAllocatedList
-                          {
-                              Id = x.Id,
-                              KitNo = x.KitNo,
-                              VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                              SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                              Comments = x.Comments,
-                              Status = KitStatus.Shipped.ToString()
-                          }).OrderByDescending(x => x.KitNo).ToList();
+                return _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
+                                x.SupplyManagementShipmentId == id
+                                && x.DeletedDate == null).Select(x => new KitAllocatedList
+                                {
+                                    Id = x.Id,
+                                    KitNo = x.KitNo,
+                                    VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                                    SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
+                                    Comments = x.Comments,
+                                    Status = KitStatus.Shipped.ToString()
+                                }).OrderByDescending(x => x.KitNo).ToList();
 
             }
             if (Type == "Receipt")
@@ -178,14 +178,14 @@ namespace GSC.Respository.SupplyManagement
                 if (obj == null)
                     return new List<KitAllocatedList>();
 
-                return _context.SupplyManagementKITDetail.Where(x =>
+                return _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
                         x.SupplyManagementShipmentId == obj.SupplyManagementShipmentId
                         && x.DeletedDate == null).Select(x => new KitAllocatedList
                         {
                             Id = x.Id,
                             KitNo = x.KitNo,
                             VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                            SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
+                            SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
                             Comments = x.Comments,
                             Status = x.Status.GetDescription()
                         }).OrderByDescending(x => x.KitNo).ToList();

@@ -9,6 +9,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public int SupplyManagementUploadFileDetailId { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public string Value { get; set; }
+
+        public bool? Isfirstvisit { get; set; }
         public SupplyManagementUploadFileDetail SupplyManagementUploadFileDetail { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
     }

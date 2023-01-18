@@ -12,21 +12,25 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementUploadFileDetailRepository : GenericRespository<SupplyManagementUploadFileDetail>, ISupplyManagementUploadFileDetailRepository
     {
-        
+
         private readonly IMapper _mapper;
         public SupplyManagementUploadFileDetailRepository(IGSCContext context,
-            
+
             IMapper mapper)
             : base(context)
         {
-            
+
             _mapper = mapper;
         }
 
         public List<SupplyManagementUploadFileDetailDto> GetSupplyManagementUploadFileDetailList(int SupplyManagementUploadFileId)
         {
-            var details= All.Where(x => x.SupplyManagementUploadFileId == SupplyManagementUploadFileId).
+            var details = All.Where(x => x.SupplyManagementUploadFileId == SupplyManagementUploadFileId).
                    ProjectTo<SupplyManagementUploadFileDetailDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.RandomizationNo).ToList();
+            foreach (var item in details)
+            {
+                item.Visits = item.Visits.OrderBy(x => x.Id).ToList();
+            }
 
             return details;
         }

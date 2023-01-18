@@ -23,7 +23,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementUploadFileRepository : GenericRespository<SupplyManagementUploadFile>, ISupplyManagementUploadFileRepository
     {
-        
+
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
@@ -32,7 +32,7 @@ namespace GSC.Respository.SupplyManagement
         private readonly IProjectRepository _projectRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IPharmacyStudyProductTypeRepository _pharmacyStudyProductTypeRepository;
-
+        private readonly IGSCContext _context;
         public SupplyManagementUploadFileRepository(IGSCContext context,
             IUploadSettingRepository uploadSettingRepository,
             ISupplyManagementUploadFileVisitRepository supplyManagementUploadFileVisitRepository,
@@ -51,8 +51,9 @@ namespace GSC.Respository.SupplyManagement
             _pharmacyStudyProductTypeRepository = pharmacyStudyProductTypeRepository;
             _projectRepository = projectRepository;
             _countryRepository = countryRepository;
-            
+
             _mapper = mapper;
+            _context = context;
         }
 
         public List<SupplyManagementUploadFileGridDto> GetSupplyManagementUploadFileList(bool isDeleted, int ProjectId)
@@ -238,7 +239,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "Visit name should not be duplicate.";
             }
-           
+
 
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
@@ -269,7 +270,7 @@ namespace GSC.Respository.SupplyManagement
                     return "Please fill required randomization details!";
                 else
                     return "";
-                
+
             }
             else
                 return "Please fill required randomization details.";
@@ -283,30 +284,45 @@ namespace GSC.Respository.SupplyManagement
         {
             DataTable dt = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable();
             var visitIds = GetVisitId(results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").ToList(), supplyManagementUploadFile);
+            if(dt.Rows.Count > 0)
+            {
+                Add(supplyManagementUploadFile);
+                _context.Save();
+            }
             for (int i = 0; i < dt.Rows.Count; i++)
             {
                 var supplyManagementUploadFileDetail = new SupplyManagementUploadFileDetail();
                 supplyManagementUploadFileDetail.Id = 0;
+                supplyManagementUploadFileDetail.SupplyManagementUploadFileId = supplyManagementUploadFile.Id;
                 supplyManagementUploadFileDetail.RandomizationNo = Convert.ToInt32(dt.Rows[i][0]);
                 supplyManagementUploadFileDetail.TreatmentType = dt.Rows[i][1].ToString();
 
                 _supplyManagementUploadFileDetailRepository.Add(supplyManagementUploadFileDetail);
-                supplyManagementUploadFile.Details.Add(supplyManagementUploadFileDetail);
+                _context.Save();
 
                 supplyManagementUploadFileDetail.Visits = new List<SupplyManagementUploadFileVisit>();
                 for (int j = 0; j < visitIds.Length; j++)
                 {
                     var supplyManagementUploadFileVisit = new SupplyManagementUploadFileVisit();
                     supplyManagementUploadFileVisit.Id = 0;
+                    supplyManagementUploadFileVisit.SupplyManagementUploadFileDetailId = supplyManagementUploadFileDetail.Id;
                     supplyManagementUploadFileVisit.ProjectDesignVisitId = visitIds[j];
                     supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 2].ToString();
+                    if (j == 0)
+                    {
+                        supplyManagementUploadFileVisit.Isfirstvisit = true;
+                    }
+                    else
+                    {
+                        supplyManagementUploadFileVisit.Isfirstvisit = false;
+                    }
                     _supplyManagementUploadFileVisitRepository.Add(supplyManagementUploadFileVisit);
-                    supplyManagementUploadFileDetail.Visits.Add(supplyManagementUploadFileVisit);
+                    _context.Save();
                 }
             }
-
+            
             //Add supply Management Upload file Data
-            Add(supplyManagementUploadFile);
+           
             return "";
         }
 

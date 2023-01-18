@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating updaload data failed on save.");
+            //if (_uow.Save() <= 0) throw new Exception("Creating updaload data failed on save.");
             return Ok(supplyManagementUploadFile.Id);
         }
 

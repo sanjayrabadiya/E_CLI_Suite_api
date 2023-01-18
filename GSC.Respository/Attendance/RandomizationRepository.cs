@@ -312,12 +312,19 @@ namespace GSC.Respository.Attendance
                     {
                         foreach (var item in data)
                         {
-                            var treatment = item.TreatmentType.Split(',').ToList();
-                            if (productarray.Contains(treatment[0]))
+                            var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == item.Id && x.Isfirstvisit == true).ToList();
+                            if (visits.Count > 0)
                             {
-                                randno = Convert.ToString(item.RandomizationNo);
-                                return randno;
+                                foreach (var visit in visits)
+                                {
+                                    if (productarray.Contains(visit.Value))
+                                    {
+                                        randno = Convert.ToString(item.RandomizationNo);
+                                        return randno;
+                                    }
+                                }
                             }
+
                         }
 
                     }
@@ -337,14 +344,20 @@ namespace GSC.Respository.Attendance
                         {
                             foreach (var item in datacountry)
                             {
-                                var treatment = item.TreatmentType.Split(',').ToList();
-                                if (productarray.Contains(treatment[0]))
+                                var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == item.Id && x.Isfirstvisit == true).ToList();
+                                if (visits.Count > 0)
                                 {
-                                    randno = Convert.ToString(item.RandomizationNo);
-                                    return randno;
+                                    foreach (var visit in visits)
+                                    {
+                                        if (productarray.Contains(visit.Value))
+                                        {
+                                            randno = Convert.ToString(item.RandomizationNo);
+                                            return randno;
+                                        }
+                                    }
                                 }
                             }
-                            
+
                         }
                     }
 
@@ -360,14 +373,20 @@ namespace GSC.Respository.Attendance
                     {
                         foreach (var item in datastudy)
                         {
-                            var treatment = item.TreatmentType.Split(',').ToList();
-                            if (productarray.Contains(treatment[0]))
+                            var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == item.Id && x.Isfirstvisit == true).ToList();
+                            if (visits.Count > 0)
                             {
-                                randno = Convert.ToString(item.RandomizationNo);
-                                return randno;
+                                foreach (var visit in visits)
+                                {
+                                    if (productarray.Contains(visit.Value))
+                                    {
+                                        randno = Convert.ToString(item.RandomizationNo);
+                                        return randno;
+                                    }
+                                }
                             }
                         }
-                      
+
                     }
                 }
             }
@@ -1354,7 +1373,7 @@ namespace GSC.Respository.Attendance
                     return obj;
             }
 
-            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id).OrderBy(x => x.Id).FirstOrDefault();
+            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id && x.Isfirstvisit == true).FirstOrDefault();
             if (visit == null)
                 return obj;
 
@@ -1441,7 +1460,7 @@ namespace GSC.Respository.Attendance
         public bool CheckKitNumber(RandomizationDto obj)
         {
             SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
-            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
             if (SupplyManagementUploadFile == null)
                 return false;
             if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
@@ -1476,7 +1495,7 @@ namespace GSC.Respository.Attendance
                     return false;
             }
 
-            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id).OrderBy(x => x.Id).FirstOrDefault();
+            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id && x.Isfirstvisit == true).FirstOrDefault();
             if (visit == null)
                 return false;
 
