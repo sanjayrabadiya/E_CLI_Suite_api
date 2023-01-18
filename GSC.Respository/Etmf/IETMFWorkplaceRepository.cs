@@ -5,6 +5,7 @@ using GSC.Data.Entities.Etmf;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace GSC.Respository.Etmf
@@ -24,5 +25,6 @@ namespace GSC.Respository.Etmf
         void DeleteAllTable(EtmfProjectWorkPlace EtmfProjectWorkPlace);
         EtmfGroupSearchModel GetEtmfSearchData(int id);
         void DeleteAllEtmfTableRecords(int id);
+        byte[] DownloadPdf(string filename);
     }
 }
