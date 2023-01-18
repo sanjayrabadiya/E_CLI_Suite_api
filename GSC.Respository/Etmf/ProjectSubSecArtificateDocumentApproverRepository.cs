@@ -1,4 +1,5 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
@@ -27,11 +28,13 @@ namespace GSC.Respository.Etmf
         private readonly IGSCContext _context;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
+        private readonly IMapper _mapper;
         public ProjectSubSecArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
            IEmailSenderRespository emailSenderRespository,
            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+           IMapper mapper,
            IUserRepository userRepository, IProjectRightRepository projectRightRepository)
            : base(context)
         {
@@ -42,6 +45,7 @@ namespace GSC.Respository.Etmf
             _userRepository = userRepository;
             _projectRightRepository = projectRightRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
+            _mapper = mapper;
         }
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId)
@@ -182,6 +186,53 @@ namespace GSC.Respository.Etmf
             {
                 _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(Id, true);
             }
+        }
+
+        public List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId)
+        {
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
+                .Select(c => new ProjectSubSecArtificateDocumentReviewDto
+                {
+                    UserId = c.UserId,
+                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && (b.IsApproved == false || b.IsApproved == null))?.SequenceNo,
+                    IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null
+                    && (b.IsApproved == true || b.IsApproved == null)),
+                }).Where(x => x.IsSelected == false).ToList();
+
+            return users.ToList();
+        }
+
+        public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
+        {
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null && q.IsApproved == false));
+            if (actualUsers.Count() > 0)
+            {
+                foreach (var user in actualUsers)
+                {
+                    var replaceUser = _mapper.Map<ProjectSubSecArtificateDocumentApprover>(user);
+                    replaceUser.UserId = replaceUserId;
+                    replaceUser.Id = 0;
+                    Add(replaceUser);
+                }
+
+                _context.Save();
+
+                foreach (var user in actualUsers)
+                {
+                    Delete(user);
+                }
+
+                _context.Save();
+
+                return 1;
+            }
+
+            return 0;
         }
 
         public bool GetApprovePending(int documentId)

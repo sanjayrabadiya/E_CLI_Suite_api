@@ -1,4 +1,5 @@
-﻿using GSC.Common.GenericRespository;
+﻿using AutoMapper;
+using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
@@ -32,12 +33,14 @@ namespace GSC.Respository.Etmf
         private readonly IUserRepository _userRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IMapper _mapper;
 
         public ProjectWorkplaceArtificateDocumentReviewRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
            IEmailSenderRespository emailSenderRespository,
            IUserRepository userRepository,
+            IMapper mapper,
            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
            IProjectRightRepository projectRightRepository
             )
@@ -50,6 +53,7 @@ namespace GSC.Respository.Etmf
             _userRepository = userRepository;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
             _projectRightRepository = projectRightRepository;
+            _mapper = mapper;
         }
 
         public List<ProjectArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId, int ProjectDetailsId)
@@ -172,28 +176,6 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectArtificateDocumentReviewHistory> GetArtificateDocumentHistory(int Id)
         {
-            //var result = All.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectArtificateDocumentHistory).Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
-            //              && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
-            //    .Select(x => new ProjectArtificateDocumentReviewHistory
-            //    {
-            //        Id = x.Id,
-            //        DocumentName = x.ProjectArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().DocumentName,
-            //        //DocumentName = x.ProjectArtificateDocumentHistory.Count() == 0 ? x.ProjectWorkplaceArtificatedDocument.DocumentName : x.ProjectArtificateDocumentHistory.OrderByDescending(x=>x.Id).FirstOrDefault().DocumentName,
-            //        ProjectArtificateDocumentHistoryId = x.ProjectArtificateDocumentHistory.OrderByDescending(x => x.Id).FirstOrDefault().Id,
-            //        UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
-            //        IsSendBack = x.IsSendBack,
-            //        UserId = x.UserId,
-            //        ProjectWorkplaceArtificatedDocumentId = x.ProjectWorkplaceArtificatedDocumentId,
-            //        CreatedDate = x.CreatedDate,
-            //        CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-            //        ModifiedDate = x.ModifiedDate,
-            //        ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-            //        SendBackDate = x.SendBackDate,
-            //        Message = x.Message,
-            //    }).OrderByDescending(x => x.Id).ToList();
-
-            var aaa = _context.ProjectArtificateDocumentReview.Include(x => x.ProjectArtificateDocumentHistory);
-
             var result = (from review in _context.ProjectArtificateDocumentReview.Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectArtificateDocumentHistory)
                           .Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy)
                           join auditReasonTemp in _context.AuditTrail.Where(x => x.TableName == "ProjectArtificateDocumentReview" && x.ColumnName == "SendBack Date")
@@ -292,6 +274,53 @@ namespace GSC.Respository.Etmf
             });
 
             return result.Where(x => Convert.ToInt32(x.ExtraData) == 0).ToList();
+        }
+
+        public List<ProjectArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId)
+        {
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            //var users1 = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId);
+
+            var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
+                .Select(c => new ProjectArtificateDocumentReviewDto
+                {
+                    UserId = c.UserId,
+                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    IsReview = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsReviewed == true),
+                    SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == true)?.SequenceNo,
+                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null),
+                }).Where(x => x.IsSelected == false && x.IsReview == false).ToList();
+
+            return users.ToList();
+        }
+
+        public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
+        {
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceArtificatedDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false);
+            if (actualUsers.Count() > 0)
+            {
+                foreach (var user in actualUsers)
+                {
+                    var replaceUser = _mapper.Map<ProjectArtificateDocumentReview>(user);
+                    replaceUser.Id = 0;
+                    replaceUser.UserId = replaceUserId;
+                    Add(replaceUser);
+                }
+                _context.Save();
+
+                foreach (var user in actualUsers)
+                {
+                    Delete(user);
+                }
+                _context.Save();
+
+                return 1;
+            }
+
+            return 0;
         }
 
         public bool GetReviewPending(int documentId)

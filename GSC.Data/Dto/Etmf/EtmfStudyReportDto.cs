@@ -8,6 +8,8 @@ namespace GSC.Data.Dto.Etmf
 {
     public class EtmfStudyReportDto : BaseDto
     {
+        public int projectId { get; set; }
+        public int artificateDocumentId { get; set; }
         public string projectCode { get; set; }
         public string folderName { get; set; }
         public string countrysiteName { get; set; }
@@ -21,6 +23,7 @@ namespace GSC.Data.Dto.Etmf
         public WorkplaceStatus statusId { get; set; }
         public string action { get; set; }
         public string userName { get; set; }
+        public int userId { get; set; }
         public DateTime? actionDate { get; set; }
         public string auditReason { get; set; }
         public string auditComment { get; set; }
@@ -38,6 +41,9 @@ namespace GSC.Data.Dto.Etmf
         public int? userId { get; set; }
         public int? sectionId { get; set; }
         public int? artificateId { get; set; }
+
+        public int? subSectionId { get; set; }
+        public int? subSectionArtificateId { get; set; }
         public int? statusId { get; set; }
     }
 }

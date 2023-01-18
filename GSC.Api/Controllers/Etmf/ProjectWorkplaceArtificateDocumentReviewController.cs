@@ -141,5 +141,21 @@ namespace GSC.Api.Controllers.Etmf
             var result = _projectWorkplaceArtificateDocumentReviewRepository.GetReviewPending(documentId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("GetUsers/{Id}/{ProjectId}")]
+        public IActionResult GetUsers(int Id, int ProjectId)
+        {
+            if (Id <= 0) return BadRequest();
+            return Ok(_projectWorkplaceArtificateDocumentReviewRepository.GetUsers(Id, ProjectId));
+        }
+
+        [HttpPost]
+        [Route("ReplaceUser")]
+        public IActionResult ReplaceUser([FromBody] ReplaceUserDto replaceUserDto)
+        {
+            if (replaceUserDto.DocumentId <= 0) return BadRequest();
+            return Ok(_projectWorkplaceArtificateDocumentReviewRepository.ReplaceUser(replaceUserDto.DocumentId, replaceUserDto.UserId, replaceUserDto.ReplaceUserId));
+        }
     }
 }

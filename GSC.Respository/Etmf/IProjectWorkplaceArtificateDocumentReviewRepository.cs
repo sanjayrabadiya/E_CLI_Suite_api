@@ -20,5 +20,7 @@ namespace GSC.Respository.Etmf
         List<DashboardDto> GetSendBackDocumentList(int ProjectId);
         bool GetReviewPending(int documentId);
         void SendMailToReviewer(ProjectArtificateDocumentReviewDto ReviewDto);
+        List<ProjectArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);
+        int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
     }
 }
