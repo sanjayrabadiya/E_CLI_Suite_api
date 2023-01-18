@@ -16,6 +16,8 @@ using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Pdf;
+using Syncfusion.Pdf.Parsing;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -603,7 +605,7 @@ namespace GSC.Respository.Etmf
 
                 pvListArtificateObj.Icon = Document.Count() == 0 && f.IsNotRequired == false ? "las la-file-alt text-missing eicon" :
                     Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
-                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y =>  y.IsReviewed==false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
+                    Document.Where(x => x.ProjectArtificateDocumentReview.Count() != 0 && x.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(x => x.UserId).LastOrDefault().Where(y => y.IsReviewed == false && y.ModifiedDate == null && y.UserId != x.CreatedBy).Count() != 0).Count() != 0 ? "las la-file-alt text-pendingreview eicon" :
                     Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).Count() != 0 ? "las la-file-alt text-pendingapprove eicon" :
                     Document.Where(x => x.ProjectArtificateDocumentApprover.Count() != 0 && x.Status != ArtifactDocStatusType.Final && x.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true))).Count() != 0 ? "las la-file-alt text-pendingfinal eicon" :
                     Document.Where(x => x.Status == ArtifactDocStatusType.Final).Count() != 0 ? "las la-file-alt text-final eicon" :
@@ -1440,6 +1442,39 @@ namespace GSC.Respository.Etmf
                 }
             }
 
+        }
+
+
+        public byte[] DownloadPdf(string filename)
+        {         
+            byte[] bytes = System.IO.File.ReadAllBytes(filename);
+            //Loads the document
+            PdfLoadedDocument loadedDocument = new PdfLoadedDocument(bytes);
+
+            foreach (var page in loadedDocument.Pages)
+            {
+                //Gets the page from PDF document
+                PdfLoadedPage loadedPage = page as PdfLoadedPage;
+
+                //Gets the annotation collection
+                PdfLoadedAnnotationCollection annotations = loadedPage.Annotations;
+
+                //Remove the annoation from annotation collection 
+                for (int i = annotations.Count - 1; i >= 0; i--)
+                {
+                    annotations.RemoveAt(i);
+                }
+            }
+
+            MemoryStream memoryStream = new MemoryStream();
+            //Saves the document
+            loadedDocument.Save(memoryStream);
+            //Closes the document 
+            loadedDocument.Close(true);
+            if (memoryStream.CanSeek)
+                memoryStream.Position = 0;
+
+            return memoryStream.ToArray();
         }
     }
     public class TreeValue

@@ -15,6 +15,7 @@ using GSC.Respository.Etmf;
 using GSC.Respository.Master;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -264,6 +265,16 @@ namespace GSC.Api.Controllers.Etmf
             _eTMFWorkplaceRepository.DeleteAllEtmfTableRecords(id);
             _uow.Save();
             return Ok();
+        }
+        [Route("DownloadPdfFile/{path}")]
+        [AllowAnonymous]
+        [HttpGet]
+        public FileResult DownloadPdfFile(string path)
+        {
+            var actualPath = path.Replace("^", "\\");
+            var result = _eTMFWorkplaceRepository.DownloadPdf(actualPath);
+            var fileName = Path.GetFileName(actualPath);
+            return File(result, "application/octet-stream", fileName);
         }
     }
 }
