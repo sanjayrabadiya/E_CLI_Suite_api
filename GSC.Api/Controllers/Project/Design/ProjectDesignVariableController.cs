@@ -161,7 +161,7 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't edit record!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == variableDto.Id))
+            if (variable.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == variableDto.Id))
             {
                 ModelState.AddModelError("Message", "Can't edit record, Already used in Allocation!");
                 return BadRequest(ModelState);
@@ -212,7 +212,7 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't delete record!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == id))
+            if (record.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == id))
             {
                 ModelState.AddModelError("Message", "Can't delete record, Already used in Allocation!");
                 return BadRequest(ModelState);

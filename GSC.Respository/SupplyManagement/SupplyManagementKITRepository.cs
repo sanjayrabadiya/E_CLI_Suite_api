@@ -359,7 +359,9 @@ namespace GSC.Respository.SupplyManagement
                                                               ModifiedDate = x.ModifiedDate,
                                                               DeletedDate = x.DeletedDate,
                                                               SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
-                                                              SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : ""
+                                                              SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
+                                                              ActionBy = x.ReturnBy,
+                                                              ActionDate = x.ReturnDate
                                                           }).ToList();
             if (data.Count > 0)
             {
@@ -377,7 +379,11 @@ namespace GSC.Respository.SupplyManagement
                         x.SupplyManagementKITReturnId = returndata.Id;
                         x.ReturnDate = returndata.CreatedDate;
                         x.ReturnBy = _context.Users.Where(z => z.Id == returndata.CreatedBy).FirstOrDefault().UserName;
+                        x.ReasonOth = returndata.ReasonOth;
+                        x.Reason = returndata.AuditReasonId > 0 ? _context.AuditReason.Where(s => s.Id == returndata.AuditReasonId).FirstOrDefault().ReasonName : "";
                     }
+                    x.ActionByName = x.ActionBy > 0 ? _context.Users.Where(z => z.Id == x.ActionBy).FirstOrDefault().UserName : "";
+                    x.ActionDate = x.ActionDate;
 
                 });
                 if (kitType == KitStatusRandomization.Used)
@@ -423,6 +429,8 @@ namespace GSC.Respository.SupplyManagement
             {
                 data.ReturnImp = obj.ReturnImp;
                 data.ReturnReason = obj.ReturnReason;
+                data.ReturnBy = _jwtTokenAccesser.UserId;
+                data.ReturnDate = DateTime.Now;
                 _context.SupplyManagementKITDetail.Update(data);
                 _context.Save();
             }
@@ -441,14 +449,15 @@ namespace GSC.Respository.SupplyManagement
                         datakit.ReturnImp = obj.ReturnImp;
                         datakit.ReturnReason = obj.ReturnReason;
                         datakit.Status = KitStatus.Returned;
+                        datakit.IsUnUsed = data.IsUnUsed;
                         _context.SupplyManagementKITDetail.Update(datakit);
 
                         SupplyManagementKITReturn returnkit = new SupplyManagementKITReturn();
                         returnkit.ReturnImp = obj.ReturnImp;
+                        returnkit.Commnets = obj.ReturnReason;
                         returnkit.ReasonOth = data.ReasonOth;
                         returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
                         returnkit.AuditReasonId = data.AuditReasonId;
-                        returnkit.Commnets = obj.ReturnReason;
                         _context.SupplyManagementKITReturn.Add(returnkit);
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -492,7 +501,8 @@ namespace GSC.Respository.SupplyManagement
                                                               ModifiedDate = x.ModifiedDate,
                                                               DeletedDate = x.DeletedDate,
                                                               SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
-                                                              SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : ""
+                                                              SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
+                                                              IsUnUsed = x.IsUnUsed
                                                           }).ToList();
             if (data.Count > 0)
             {
@@ -523,13 +533,11 @@ namespace GSC.Respository.SupplyManagement
                 });
                 if (kitType == KitStatusRandomization.Used)
                 {
-                    var useddata = history.Where(x => x.Status == KitStatus.Allocated).ToList();
-                    data = data.Where(x => useddata.Select(z => z.SupplyManagementKITDetailId).Contains(x.SupplyManagementKITDetailId)).ToList();
+                    data = data.Where(x => x.Status == KitStatus.Returned && x.RandomizationId != null).ToList();
                 }
                 if (kitType == KitStatusRandomization.UnUsed)
                 {
-                    var useddata = history.Where(x => (x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.WithIssue) && x.SupplyManagementKITDetail.RandomizationId == null).ToList();
-                    data = data.Where(x => useddata.Select(z => z.SupplyManagementKITDetailId).Contains(x.SupplyManagementKITDetailId)).ToList();
+                    data = data.Where(x => x.Status == KitStatus.Returned && x.IsUnUsed == true).ToList();
                 }
                 if (kitType == KitStatusRandomization.Discard)
                 {
@@ -577,11 +585,11 @@ namespace GSC.Respository.SupplyManagement
                         _context.SupplyManagementKITDetail.Update(datakit);
 
                         SupplyManagementKITDiscard returnkit = new SupplyManagementKITDiscard();
-
                         returnkit.ReasonOth = data.ReasonOth;
                         returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
                         returnkit.AuditReasonId = data.AuditReasonId;
                         returnkit.Status = KitStatus.Discard;
+                        returnkit.RoleId = _jwtTokenAccesser.RoleId;
                         _context.SupplyManagementKITDiscard.Add(returnkit);
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -611,11 +619,11 @@ namespace GSC.Respository.SupplyManagement
                         _context.SupplyManagementKITDetail.Update(datakit);
 
                         SupplyManagementKITDiscard returnkit = new SupplyManagementKITDiscard();
-
                         returnkit.ReasonOth = data.ReasonOth;
                         returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
                         returnkit.AuditReasonId = data.AuditReasonId;
                         returnkit.Status = KitStatus.Sendtosponser;
+                        returnkit.RoleId = _jwtTokenAccesser.RoleId;
                         _context.SupplyManagementKITDiscard.Add(returnkit);
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();

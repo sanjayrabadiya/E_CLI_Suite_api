@@ -89,7 +89,7 @@ namespace GSC.Respository.SupplyManagement
                 ExtraData = c.FirstOrDefault().ExtraData
             }).OrderBy(o => o.Id).ToList();
 
-            
+
             return data;
         }
         public IList<DropDownDto> GetTemplateDropDownByVisitId(int visitId)
@@ -151,6 +151,16 @@ namespace GSC.Respository.SupplyManagement
             return _context.ProductReceipt.Where(c => c.ProjectId == ProjectId && c.DeletedDate == null
             && c.Status == ProductVerificationStatus.Approved).Select(c => new DropDownDto { Id = c.PharmacyStudyProductType.Id, Value = c.PharmacyStudyProductType.ProductType.ProductTypeCode + "-" + c.PharmacyStudyProductType.ProductType.ProductTypeName })
                 .OrderBy(o => o.Value).Distinct().ToList();
+        }
+
+        public bool CheckRandomizationAssign(SupplyManagementAllocation obj)
+        {
+
+            var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == obj.ProjectId && x.RandomizationNumber == null).FirstOrDefault();
+            if (randomization != null)
+                return false;
+
+            return true;
         }
     }
 }

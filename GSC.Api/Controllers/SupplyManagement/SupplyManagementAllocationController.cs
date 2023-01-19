@@ -58,13 +58,18 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             centralDepotDto.Id = 0;
             var centralDepot = _mapper.Map<SupplyManagementAllocation>(centralDepotDto);
+            if (!_supplyManagementAllocationRepository.CheckRandomizationAssign(centralDepot))
+            {
+                ModelState.AddModelError("Message", "You can't add the template configuration once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
             var validate = _supplyManagementAllocationRepository.CheckDuplicate(centralDepot);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-           
+
             _supplyManagementAllocationRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating central depot failed on save.");
             return Ok(centralDepot.Id);
@@ -77,8 +82,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (centralDepotDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
+           
             var centralDepot = _mapper.Map<SupplyManagementAllocation>(centralDepotDto);
+            if (!_supplyManagementAllocationRepository.CheckRandomizationAssign(centralDepot))
+            {
+                ModelState.AddModelError("Message", "You can't update the template configuration once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
             var validate = _supplyManagementAllocationRepository.CheckDuplicate(centralDepot);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -101,7 +111,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
-
+            if (!_supplyManagementAllocationRepository.CheckRandomizationAssign(record))
+            {
+                ModelState.AddModelError("Message", "You can't delete the template configuration once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
             _supplyManagementAllocationRepository.Delete(record);
             _uow.Save();
 

@@ -49,6 +49,13 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public DateTime? ReturnDate { get; set; }
 
+        public int? ActionBy { get; set; }
+
+        public DateTime? ActionDate { get; set; }
+
+        public string ActionByName { get; set; }
+
+       
     }
 
     public class SupplyManagementKITReturnDtofinal
@@ -56,6 +63,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public List<SupplyManagementKITReturnGridDto> list { get; set; }
+
+        public bool? IsUnUsed { get; set; }
     }
     public class SupplyManagementKITDiscardGridDto : BaseAuditDto
     {
@@ -90,6 +99,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string DiscardBy { get; set; }
         public DateTime? DiscardDate { get; set; }
+
+        public bool? IsUnUsed { get; set; }
 
 
     }

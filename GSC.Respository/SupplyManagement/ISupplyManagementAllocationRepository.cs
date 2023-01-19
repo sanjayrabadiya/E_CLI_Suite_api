@@ -22,5 +22,7 @@ namespace GSC.Respository.SupplyManagement
         string CheckDuplicate(SupplyManagementAllocation obj);
 
         List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId);
+
+        bool CheckRandomizationAssign(SupplyManagementAllocation obj);
     }
 }
