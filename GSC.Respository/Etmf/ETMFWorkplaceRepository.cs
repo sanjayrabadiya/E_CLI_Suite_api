@@ -1474,7 +1474,11 @@ namespace GSC.Respository.Etmf
             if (memoryStream.CanSeek)
                 memoryStream.Position = 0;
 
-            return memoryStream.ToArray();
+            var resultBytes = memoryStream.ToArray();
+            memoryStream.Close();
+            memoryStream.Dispose();
+            
+            return resultBytes;
         }
     }
     public class TreeValue

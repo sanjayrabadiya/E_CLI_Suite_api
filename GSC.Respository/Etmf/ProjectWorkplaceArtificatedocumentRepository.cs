@@ -1237,6 +1237,13 @@ namespace GSC.Respository.Etmf
                 var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, outputname);
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
+
+                docStream.Close();
+                docStream.Dispose();
+                file.Close();
+                file.Dispose();
+                outputStream.Close();
+                outputStream.Dispose();
             }
             else if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
             {
@@ -1256,7 +1263,12 @@ namespace GSC.Respository.Etmf
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
 
-
+                docStream.Close();
+                docStream.Dispose();
+                file.Close();
+                file.Dispose();
+                outputStream.Close();
+                outputStream.Dispose();
             }
             document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
