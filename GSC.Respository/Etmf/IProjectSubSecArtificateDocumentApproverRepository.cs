@@ -14,5 +14,7 @@ namespace GSC.Respository.Etmf
         void IsApproveDocument(int Id);
         List<DashboardDto> GetEtmfMyTaskList(int ProjectId);
         bool GetApprovePending(int documentId);
+        List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);
+        int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
     }
 }

@@ -224,7 +224,7 @@ namespace GSC.Respository.Etmf
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Send Back" : "Send";
+                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
                 obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.IsAccepted = item.IsAccepted;
@@ -393,6 +393,22 @@ namespace GSC.Respository.Etmf
         {
             return _etmfArtificateMasterLbraryRepository.FindBy(x => x.EtmfSectionMasterLibraryId == sectionId)
                .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtificateName })//.OrderBy(o => o.Value)
+               .ToList();
+        }
+
+
+        public List<DropDownDto> GetEtmfSubSectionDropdown(int sectionId)
+        {
+            var subSections = _context.EtmfProjectWorkPlace.Where(x => x.EtmfMasterLibraryId == sectionId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection).Select(s => s.Id).ToList();
+            return _context.EtmfProjectWorkPlace.Where(x => subSections.Contains(x.EtmfProjectWorkPlaceId) && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection)
+               .Select(c => new DropDownDto { Id = c.Id, Value = c.SubSectionName })//.OrderBy(o => o.Value)
+               .ToList();
+        }
+
+        public List<DropDownDto> GetEtmfSubSectionArtificateDropdown(int subSectionId)
+        {
+            return _context.EtmfProjectWorkPlace.Where(x => x.EtmfProjectWorkPlaceId == subSectionId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact)
+               .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtifactName })//.OrderBy(o => o.Value)
                .ToList();
         }
 
@@ -1221,6 +1237,13 @@ namespace GSC.Respository.Etmf
                 var outputFile = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, outputname);
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
+
+                docStream.Close();
+                docStream.Dispose();
+                file.Close();
+                file.Dispose();
+                outputStream.Close();
+                outputStream.Dispose();
             }
             else if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
             {
@@ -1240,7 +1263,12 @@ namespace GSC.Respository.Etmf
                 FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
                 outputStream.WriteTo(file);
 
-
+                docStream.Close();
+                docStream.Dispose();
+                file.Close();
+                file.Dispose();
+                outputStream.Close();
+                outputStream.Dispose();
             }
             document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
@@ -1377,8 +1405,12 @@ namespace GSC.Respository.Etmf
 
             var workplaceartificatedocument = FindByInclude(x => workplaceartificate.Contains(x.ProjectWorkplaceArtificateId)).Select(y => y.Id).ToList();
 
-            var subsection = _context.EtmfProjectWorkPlace.Where(x => workplacesection.Contains(x.EtmfProjectWorkPlaceId) && x.ProjectId == filters.projectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection && x.DeletedDate == null).Select(y => y.Id).ToList();
-            var subsectionArtificate = _context.EtmfProjectWorkPlace.Where(x => subsection.Contains(x.EtmfProjectWorkPlaceId) && x.DeletedDate == null && x.ProjectId == filters.projectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).Select(y => y.Id).ToList();
+            var subsection = filters.subSectionId != null ? _context.EtmfProjectWorkPlace.Where(x => x.Id == filters.subSectionId && x.ProjectId == filters.projectId && workplacesection.Contains(x.EtmfProjectWorkPlaceId) && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection).Select(y => y.Id).ToList()
+                : _context.EtmfProjectWorkPlace.Where(x => workplacesection.Contains(x.EtmfProjectWorkPlaceId) && x.ProjectId == filters.projectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSection && x.DeletedDate == null).Select(y => y.Id).ToList();
+
+            var subsectionArtificate = filters.subSectionArtificateId != null ? _context.EtmfProjectWorkPlace.Where(x => x.Id == filters.subSectionArtificateId && x.ProjectId == filters.projectId && subsection.Contains(x.EtmfProjectWorkPlaceId) && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).Select(y => y.Id).ToList()
+                : _context.EtmfProjectWorkPlace.Where(x => subsection.Contains(x.EtmfProjectWorkPlaceId) && x.DeletedDate == null && x.ProjectId == filters.projectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSubSectionArtifact).Select(y => y.Id).ToList();
+
             var subsecDocument = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => subsectionArtificate.Contains(x.ProjectWorkplaceSubSectionArtifactId)).Select(y => y.Id).ToList();
             var result = new List<EtmfStudyReportDto>();
 
@@ -1408,6 +1440,8 @@ namespace GSC.Respository.Etmf
                 {
                     Id = r.Id,
                     projectCode = ProjectCode,
+                    artificateDocumentId = r.ProjectWorkplaceArtificatedDocument.Id,
+                    projectId = r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectId,
                     folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
                     countrysiteName = r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
                     zoneName = r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
@@ -1420,6 +1454,7 @@ namespace GSC.Respository.Etmf
                     CreatedBy = r.CreatedBy,
                     CreatedDate = r.CreatedDate,
                     userName = _userRepository.Find(r.UserId).UserName,
+                    userId = r.UserId,
                     Level = 6,
                 }).ToList();
 
@@ -1427,6 +1462,8 @@ namespace GSC.Respository.Etmf
                 {
                     Id = r.Id,
                     projectCode = ProjectCode,
+                    artificateDocumentId = r.ProjectWorkplaceSubSecArtificateDocument.Id,
+                    projectId = r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectId,
                     folderName = ((WorkPlaceFolder)r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
                     countrysiteName = r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
                     zoneName = r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
@@ -1440,6 +1477,7 @@ namespace GSC.Respository.Etmf
                     CreatedBy = r.CreatedBy,
                     CreatedDate = r.CreatedDate,
                     userName = _userRepository.Find(r.UserId).UserName,
+                    userId = r.UserId,
                     Level = 5.2
                 });
                 result.AddRange(reviewerData);
@@ -1471,6 +1509,8 @@ namespace GSC.Respository.Etmf
                 {
                     Id = r.Id,
                     projectCode = ProjectCode,
+                    artificateDocumentId = r.ProjectWorkplaceArtificatedDocument.Id,
+                    projectId = r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectId,
                     folderName = ((WorkPlaceFolder)r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
                     countrysiteName = r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
                     zoneName = r.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
@@ -1483,6 +1523,7 @@ namespace GSC.Respository.Etmf
                     CreatedBy = r.CreatedBy,
                     CreatedDate = r.CreatedDate,
                     userName = _userRepository.Find(r.UserId).UserName,
+                    userId = r.UserId,
                     Level = 6,
                 }).ToList();
 
@@ -1490,6 +1531,8 @@ namespace GSC.Respository.Etmf
                 {
                     Id = r.Id,
                     projectCode = ProjectCode,
+                    artificateDocumentId = r.ProjectWorkplaceSubSecArtificateDocument.Id,
+                    projectId = r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectId,
                     folderName = ((WorkPlaceFolder)r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
                     countrysiteName = r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
                     zoneName = r.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
@@ -1503,6 +1546,7 @@ namespace GSC.Respository.Etmf
                     CreatedBy = r.CreatedBy,
                     CreatedDate = r.CreatedDate,
                     userName = _userRepository.Find(r.UserId).UserName,
+                    userId = r.UserId,
                     Level = 5.2
                 });
 

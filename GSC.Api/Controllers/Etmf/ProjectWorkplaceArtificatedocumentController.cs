@@ -278,6 +278,22 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(data);
         }
 
+        [Route("GetEtmfSubSectionDropdown/{sectionId}")]
+        [HttpGet]
+        public IActionResult GetEtmfSubSectionDropdown(int sectionId)
+        {
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfSubSectionDropdown(sectionId);
+            return Ok(data);
+        }
+
+        [Route("GetEtmfSubSectionArtifactDropdown/{subSectionArtifactId}")]
+        [HttpGet]
+        public IActionResult GetEtmfSubSectionArtifactDropdown(int subSectionArtifactId)
+        {
+            var data = _projectWorkplaceArtificatedocumentRepository.GetEtmfSubSectionArtificateDropdown(subSectionArtifactId);
+            return Ok(data);
+        }
+
         [HttpGet]
         [Route("GetEtmfAuditLogReport")]
         public IActionResult GetEtmfAuditLogReport([FromQuery] EtmfAuditLogReportSearchDto filters)

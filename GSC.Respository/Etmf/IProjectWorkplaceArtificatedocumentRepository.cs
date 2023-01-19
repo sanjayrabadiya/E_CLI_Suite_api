@@ -31,5 +31,7 @@ namespace GSC.Respository.Etmf
         ProjectWorkplaceArtificatedocument WordToPdf(int Id);
         IList<EtmfStudyReportDto> GetEtmfStudyReport(StudyReportSearchDto filters);
         void UpdateDocumentComment(int documentId, bool? isComment);
+        List<DropDownDto> GetEtmfSubSectionDropdown(int sectionId);
+        List<DropDownDto> GetEtmfSubSectionArtificateDropdown(int subSectionId);
     }
 }

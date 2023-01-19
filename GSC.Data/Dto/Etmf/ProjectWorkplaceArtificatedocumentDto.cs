@@ -30,4 +30,11 @@ namespace GSC.Data.Dto.Etmf
         public bool SuperSede { get; set; }
         public bool? IsReplyAllComment { get; set; }
     }
+
+    public class ReplaceUserDto
+    {
+        public int UserId { get; set;}
+        public int DocumentId { get; set; }
+        public int ReplaceUserId { get; set; }
+    }
 }

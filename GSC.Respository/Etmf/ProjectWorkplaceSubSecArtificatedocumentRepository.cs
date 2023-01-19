@@ -241,7 +241,7 @@ namespace GSC.Respository.Etmf
                 obj.IsAccepted = item.IsAccepted;
                 //obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceSubSectionArtifact.EtmfArtificateMasterLbraryId;
                 obj.Reviewer = users.OrderBy(x => x.SequenceNo).ToList();
-                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Send Back" : "Send";
+                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
                 obj.IsSendBack = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";

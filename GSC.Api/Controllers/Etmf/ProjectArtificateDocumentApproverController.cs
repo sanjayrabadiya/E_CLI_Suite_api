@@ -93,7 +93,7 @@ namespace GSC.Api.Controllers.Etmf
 
             }
 
-            
+
 
             if (projectArtificateDocumentApproveDto.Where(x => x.SequenceNo == null).Count() == projectArtificateDocumentApproveDto.Count())
             {
@@ -181,6 +181,22 @@ namespace GSC.Api.Controllers.Etmf
         {
             var result = _projectArtificateDocumentApproverRepository.GetApprovePending(documentId);
             return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetUsers/{Id}/{ProjectId}")]
+        public IActionResult GetUsers(int Id, int ProjectId)
+        {
+            if (Id <= 0) return BadRequest();
+            return Ok(_projectArtificateDocumentApproverRepository.GetUsers(Id, ProjectId));
+        }
+
+        [HttpPost]
+        [Route("ReplaceUser")]
+        public IActionResult ReplaceUser([FromBody] ReplaceUserDto replaceUserDto)
+        {
+            if (replaceUserDto.DocumentId <= 0) return BadRequest();
+            return Ok(_projectArtificateDocumentApproverRepository.ReplaceUser(replaceUserDto.DocumentId, replaceUserDto.UserId, replaceUserDto.ReplaceUserId));
         }
     }
 }

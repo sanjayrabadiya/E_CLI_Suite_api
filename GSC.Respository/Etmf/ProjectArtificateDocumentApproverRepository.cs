@@ -206,6 +206,54 @@ namespace GSC.Respository.Etmf
             }
         }
 
+
+        public List<ProjectArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId)
+        {
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
+                .Select(c => new ProjectArtificateDocumentReviewDto
+                {
+                    UserId = c.UserId,
+                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && (b.IsApproved == false || b.IsApproved == null))?.SequenceNo,
+                    IsSelected = All.Any(b => b.ProjectWorkplaceArtificatedDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null
+                    && (b.IsApproved == true || b.IsApproved == null)),
+                }).Where(x => x.IsSelected == false).ToList();
+
+            return users.ToList();
+        }
+
+        public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
+        {
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceArtificatedDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null && q.IsApproved == false));
+            if (actualUsers.Count() > 0)
+            {
+                foreach (var user in actualUsers)
+                {
+                    var replaceUser = _mapper.Map<ProjectArtificateDocumentApprover>(user);
+                    replaceUser.Id = 0;
+                    replaceUser.UserId = replaceUserId;
+                    Add(replaceUser);
+                }
+
+                _context.Save();
+
+                foreach(var user in actualUsers)
+                {
+                    Delete(user);
+                }
+
+                _context.Save();
+
+                return 1;
+            }
+
+            return 0;
+        }
+
         public bool GetApprovePending(int documentId)
         {
             var reviewers = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == null);
