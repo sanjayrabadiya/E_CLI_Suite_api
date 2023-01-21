@@ -28,12 +28,14 @@ namespace GSC.Respository.Etmf
         private readonly IGSCContext _context;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
+        private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
         private readonly IMapper _mapper;
         public ProjectSubSecArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
            IEmailSenderRespository emailSenderRespository,
            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
+           IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
            IMapper mapper,
            IUserRepository userRepository, IProjectRightRepository projectRightRepository)
            : base(context)
@@ -46,6 +48,7 @@ namespace GSC.Respository.Etmf
             _projectRightRepository = projectRightRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _mapper = mapper;
+            _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
         }
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId)
@@ -209,18 +212,27 @@ namespace GSC.Respository.Etmf
 
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
-            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null && q.IsApproved == false));
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null || q.IsApproved == false));
             if (actualUsers.Count() > 0)
             {
-                foreach (var user in actualUsers)
+                foreach (var user in actualUsers.Where(s => s.IsApproved == null))
                 {
-                    var replaceUser = _mapper.Map<ProjectSubSecArtificateDocumentApprover>(user);
-                    replaceUser.UserId = replaceUserId;
-                    replaceUser.Id = 0;
+                    var replaceUser = new ProjectSubSecArtificateDocumentApprover()
+                    {
+                        Id = 0,
+                        UserId = replaceUserId,
+                        CompanyId = user.CompanyId,
+                        IsApproved = user.IsApproved,
+                        SequenceNo = user.SequenceNo,
+                        ProjectWorkplaceSubSecArtificateDocumentId = user.ProjectWorkplaceSubSecArtificateDocumentId
+                    };
                     Add(replaceUser);
-                }
+                    _context.Save();
 
-                _context.Save();
+                    _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceSubSecArtificateDocumentId, false);
+                    var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
+                    _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, user.Id);
+                }
 
                 foreach (var user in actualUsers)
                 {

@@ -36,14 +36,18 @@ namespace GSC.Respository.Etmf
         private readonly IUserRepository _userRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
+        private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         public ProjectArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             //IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
             IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
             IEmailSenderRespository emailSenderRespository,
+             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IUserRepository userRepository,
             IUploadSettingRepository uploadSettingRepository,
+            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
             IProjectRightRepository projectRightRepository)
            : base(context)
         {
@@ -57,6 +61,8 @@ namespace GSC.Respository.Etmf
             _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _projectRightRepository = projectRightRepository;
+            _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
+            _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
         }
 
         // Get UserName for approval
@@ -228,20 +234,29 @@ namespace GSC.Respository.Etmf
 
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
-            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceArtificatedDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null && q.IsApproved == false));
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceArtificatedDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null || q.IsApproved == false));
             if (actualUsers.Count() > 0)
             {
-                foreach (var user in actualUsers)
+                foreach (var user in actualUsers.Where(s => s.IsApproved == null))
                 {
-                    var replaceUser = _mapper.Map<ProjectArtificateDocumentApprover>(user);
-                    replaceUser.Id = 0;
-                    replaceUser.UserId = replaceUserId;
+                    var replaceUser = new ProjectArtificateDocumentApprover()
+                    {
+                        Id = 0,
+                        UserId = replaceUserId,
+                        CompanyId = user.CompanyId,
+                        IsApproved = user.IsApproved,
+                        SequenceNo = user.SequenceNo,
+                        ProjectWorkplaceArtificatedDocumentId = user.ProjectWorkplaceArtificatedDocumentId
+                    };
                     Add(replaceUser);
+                    _context.Save();
+
+                    _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceArtificatedDocumentId, false);
+                    var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(user.ProjectWorkplaceArtificatedDocumentId);
+                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, user.Id);
                 }
 
-                _context.Save();
-
-                foreach(var user in actualUsers)
+                foreach (var user in actualUsers)
                 {
                     Delete(user);
                 }

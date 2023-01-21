@@ -124,10 +124,15 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var record = _projectWorkplaceArtificateDocumentReviewRepository.Find(item);
 
-                if (record == null)
+                var allRecords = _projectWorkplaceArtificateDocumentReviewRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && q.IsReviewed == false);
+
+                if (allRecords == null)
                     return NotFound();
 
-                _projectWorkplaceArtificateDocumentReviewRepository.Delete(record);
+                foreach (var resultRecord in allRecords)
+                {
+                    _projectWorkplaceArtificateDocumentReviewRepository.Delete(resultRecord);
+                }
             }
 
             _uow.Save();
