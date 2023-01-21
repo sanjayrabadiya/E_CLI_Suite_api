@@ -248,9 +248,9 @@ namespace GSC.Respository.Etmf
                     Add(replaceUser);
                     _context.Save();
 
+                    //UpdateApproveDocument(user.ProjectWorkplaceArtificatedDocumentId, false);
                     var projectWorkplaceArtificatedocument = _context.ProjectWorkplaceArtificatedocument.Find(user.ProjectWorkplaceArtificatedDocumentId);
-                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, user.Id);
-                    UpdateApproveDocument(user.ProjectWorkplaceArtificatedDocumentId, false);
+                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, All.Max(p => p.Id));
                 }
 
                 foreach (var user in actualUsers)

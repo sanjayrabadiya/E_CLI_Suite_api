@@ -316,7 +316,7 @@ namespace GSC.Respository.Etmf
 
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
-            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false);
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false).ToList();
             if (actualUsers.Count() > 0)
             {
                 foreach (var user in actualUsers.Where(s => s.IsSendBack == false))

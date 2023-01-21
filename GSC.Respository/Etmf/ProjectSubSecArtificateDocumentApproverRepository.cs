@@ -212,7 +212,7 @@ namespace GSC.Respository.Etmf
 
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
-            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null || q.IsApproved == false));
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null || q.IsApproved == false)).ToList();
             if (actualUsers.Count() > 0)
             {
                 foreach (var user in actualUsers.Where(s => s.IsApproved == null))
@@ -229,9 +229,9 @@ namespace GSC.Respository.Etmf
                     Add(replaceUser);
                     _context.Save();
 
-                    _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceSubSecArtificateDocumentId, false);
+                    //_projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceSubSecArtificateDocumentId, false);
                     var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
-                    _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, user.Id);
+                    _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, All.Max(p => p.Id));
                 }
 
                 foreach (var user in actualUsers)
