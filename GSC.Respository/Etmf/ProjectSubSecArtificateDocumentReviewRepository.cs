@@ -340,6 +340,10 @@ namespace GSC.Respository.Etmf
 
                     var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, All.Max(p => p.Id), null);
+
+                    var replaceUserDto = _mapper.Map<ProjectSubSecArtificateDocumentReviewDto>(replaceUser);
+
+                    SendMailToReviewer(replaceUserDto);
                 }
 
 

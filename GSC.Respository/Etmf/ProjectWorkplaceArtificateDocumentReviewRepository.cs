@@ -324,6 +324,10 @@ namespace GSC.Respository.Etmf
 
                     var projectWorkplaceArtificatedocument = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == user.ProjectWorkplaceArtificatedDocumentId && x.DeletedDate == null).FirstOrDefault();
                     _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, All.Max(p => p.Id), null);
+
+                    var replaceUserDto = _mapper.Map<ProjectArtificateDocumentReviewDto>(replaceUser);
+
+                    SendMailToReviewer(replaceUserDto);
                 }
 
                 foreach (var user in actualUsers)
