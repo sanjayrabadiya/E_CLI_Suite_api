@@ -121,10 +121,15 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var record = _projectSubSecArtificateDocumentReviewRepository.Find(item);
 
-                if (record == null)
+                var allRecords = _projectSubSecArtificateDocumentReviewRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceSubSecArtificateDocumentId == record.ProjectWorkplaceSubSecArtificateDocumentId && q.IsReviewed == false);
+
+                if (allRecords == null)
                     return NotFound();
 
-                _projectSubSecArtificateDocumentReviewRepository.Delete(record);
+                foreach (var resultRecord in allRecords)
+                {
+                    _projectSubSecArtificateDocumentReviewRepository.Delete(resultRecord);
+                }
             }
 
             _uow.Save();

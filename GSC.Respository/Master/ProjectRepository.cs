@@ -256,7 +256,7 @@ namespace GSC.Respository.Master
                     IsStatic = c.IsStatic,
                     ParentProjectId = c.ParentProjectId ?? c.Id,
                     IsDeleted = c.DeletedDate != null
-                }).Distinct().OrderBy(o => o.Value).ToList();
+                }).Where(q => q.IsDeleted == false).Distinct().OrderBy(o => o.Value).ToList();
         }
 
 
@@ -1207,6 +1207,6 @@ namespace GSC.Respository.Master
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
-        
+
     }
 }

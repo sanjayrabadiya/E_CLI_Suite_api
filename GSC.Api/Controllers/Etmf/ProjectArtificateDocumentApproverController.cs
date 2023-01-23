@@ -165,10 +165,15 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var record = _projectArtificateDocumentApproverRepository.Find(item);
 
-                if (record == null)
+                var allRecords = _projectArtificateDocumentApproverRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && q.IsApproved != true && q.DeletedDate==null);
+
+                if (allRecords == null)
                     return NotFound();
 
-                _projectArtificateDocumentApproverRepository.Delete(record);
+                foreach (var resultRecord in allRecords)
+                {
+                    _projectArtificateDocumentApproverRepository.Delete(resultRecord);
+                }
             }
 
             _uow.Save();

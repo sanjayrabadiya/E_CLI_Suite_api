@@ -316,18 +316,32 @@ namespace GSC.Respository.Etmf
 
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
-            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false);
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false).ToList();
             if (actualUsers.Count() > 0)
             {
-                foreach (var user in actualUsers)
+                foreach (var user in actualUsers.Where(s => s.IsSendBack == false))
                 {
-                    var replaceUser = _mapper.Map<ProjectSubSecArtificateDocumentReview>(user);
-                    replaceUser.UserId = replaceUserId;
-                    replaceUser.Id = 0;
+                    var replaceUser = new ProjectSubSecArtificateDocumentReview()
+                    {
+                        Id = 0,
+                        UserId = replaceUserId,
+                        CompanyId = user.CompanyId,
+                        IsReviewed = user.IsReviewed,
+                        IsSendBack = user.IsSendBack,
+                        Message = user.Message,
+                        RoleId = user.RoleId,
+                        SendBackDate = user.SendBackDate,
+                        SequenceNo = user.SequenceNo,
+                        ProjectWorkplaceSubSecArtificateDocumentId = user.ProjectWorkplaceSubSecArtificateDocumentId
+                    };
                     Add(replaceUser);
+
+                    _context.Save();
+
+                    var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
+                    _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, All.Max(p => p.Id), null);
                 }
 
-                _context.Save();
 
                 foreach (var user in actualUsers)
                 {

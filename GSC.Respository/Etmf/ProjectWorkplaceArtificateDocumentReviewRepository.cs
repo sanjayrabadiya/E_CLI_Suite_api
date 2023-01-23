@@ -4,6 +4,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Dto.Report;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
@@ -299,23 +300,39 @@ namespace GSC.Respository.Etmf
 
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
-            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceArtificatedDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false);
+            var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceArtificatedDocumentId == documentId && q.DeletedDate == null && q.IsReviewed == false).ToList();
             if (actualUsers.Count() > 0)
             {
-                foreach (var user in actualUsers)
+                foreach (var user in actualUsers.Where(s => s.IsSendBack == false))
                 {
-                    var replaceUser = _mapper.Map<ProjectArtificateDocumentReview>(user);
-                    replaceUser.Id = 0;
-                    replaceUser.UserId = replaceUserId;
+                    var replaceUser = new ProjectArtificateDocumentReview()
+                    {
+                        Id = 0,
+                        UserId = replaceUserId,
+                        CompanyId = user.CompanyId,
+                        IsReviewed = user.IsReviewed,
+                        IsSendBack = user.IsSendBack,
+                        Message = user.Message,
+                        RoleId = user.RoleId,
+                        SendBackDate = user.SendBackDate,
+                        SequenceNo = user.SequenceNo,
+                        ProjectWorkplaceArtificatedDocumentId = user.ProjectWorkplaceArtificatedDocumentId
+                    };
                     Add(replaceUser);
+
+                    _context.Save();
+
+                    var projectWorkplaceArtificatedocument = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == user.ProjectWorkplaceArtificatedDocumentId && x.DeletedDate == null).FirstOrDefault();
+                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, All.Max(p => p.Id), null);
                 }
-                _context.Save();
 
                 foreach (var user in actualUsers)
                 {
                     Delete(user);
                 }
+
                 _context.Save();
+
 
                 return 1;
             }
