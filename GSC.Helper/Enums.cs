@@ -960,7 +960,8 @@ namespace GSC.Helper
         [Description("Gender")] Gender = 1,
         [Description("Dietory")] Diatory = 2,
         [Description("BMI")] BMI = 3,
-        [Description("Age")] Age = 4
+        [Description("Age")] Age = 4,
+        [Description("Joint")] Joint = 5,
     }
     public enum FectorOperator : short
     {
@@ -990,4 +991,10 @@ namespace GSC.Helper
         [Description("Discard")] Discard = 5,
         [Description("Send to sponser")] Sendtosponser = 6
     }
+    public enum Jointfactor : short
+    {
+        [Description("Knee")] Knee = 1,
+        [Description("Hip")] Hip = 2
+    }
+    
 }

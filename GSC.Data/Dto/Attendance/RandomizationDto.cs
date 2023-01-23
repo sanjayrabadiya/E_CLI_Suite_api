@@ -51,10 +51,13 @@ namespace GSC.Data.Dto.Attendance
         public int? LARUserId { get; set; }
         public Gender? Genderfactor { get; set; }
         public DaitoryFector? Diatoryfactor { get; set; }
+        public Jointfactor? Jointfactor { get; set; }
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
 
         public string KitNo { get; set; }
+
+        public string ProductCode { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto
@@ -153,6 +156,14 @@ namespace GSC.Data.Dto.Attendance
 
         public string ErrorMessage { get; set; }
 
+        public string ProductCode { get; set; }
+
+        public string KitNo { get; set; }
+
+        public int VisitId { get; set; }
+
+        public int KitDetailId { get; set; }
+
 
     }
     public class RandomizationFactor
@@ -161,5 +172,6 @@ namespace GSC.Data.Dto.Attendance
         public bool IsDaitoryFactor { get; set; }
         public bool IsAgeFactor { get; set; }
         public bool IsBMIFactor { get; set; }
+        public bool IsJointFactor { get; set; }
     }
 }

@@ -159,6 +159,20 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
+            if (fector == Fector.Joint)
+            {
+                if (Collectionavalue != null)
+                {
+                    if (Collectionavalue == "1")
+                    {
+                        return "Knee";
+                    }
+                    if (Collectionavalue == "2")
+                    {
+                        return "Hip";
+                    }
+                }
+            }
             if (fector == Fector.Diatory)
             {
                 if (Collectionavalue != null)
@@ -219,7 +233,7 @@ namespace GSC.Respository.SupplyManagement
             var dt = new DataTable();
             string ruleStr = "";
             string displayRule = "";
-            string productType = "";
+
 
             int i = 0;
             editCheck.ForEach(r =>
@@ -236,6 +250,7 @@ namespace GSC.Respository.SupplyManagement
 
 
                 ruleStr = ruleStr + $"{r.EndParens} {r.LogicalOperator} ";
+
                 displayRule = displayRule + $"{r.EndParens} {r.LogicalOperator} ";
 
                 var col = new DataColumn();
@@ -255,12 +270,6 @@ namespace GSC.Respository.SupplyManagement
 
                 col.ColumnName = colName;
                 dt.Columns.Add(col);
-
-                if (!string.IsNullOrEmpty(r.ProductTypeCode))
-                    productType = productType + r.ProductTypeCode;
-                if (r.LogicalOperator == "OR")
-                    productType = productType + " OR ";
-
             });
 
             ruleStr = ruleStr.Replace("  ", " ").Trim();
@@ -269,46 +278,10 @@ namespace GSC.Respository.SupplyManagement
 
             result.SampleText = displayRule;
 
-            if (ruleStr.Contains("OR"))
-            {
-                var splitRules = ruleStr.Split("OR").ToList();
-                if (splitRules.Count > 0)
-                {
-                    for (int r = 0; r < splitRules.Count; r++)
-                    {
-                        var result1 = ValidateDataTableFactor(dt, splitRules[r]);
-                        if (result1.IsValid)
-                        {
-                            if (!string.IsNullOrEmpty(productType))
-                            {
-                                if (productType.Contains("OR"))
-                                {
-                                    var ProducttypeArray = productType.Split("OR").ToArray();
-                                    result.ProductType = ProducttypeArray[r].Trim();
-                                }
-                                else
-                                {
-                                    result.ProductType = productType.Trim();
-                                }
-                            }
-
-
-                        }
-                    }
-                }
-            }
-            else
-            {
-                var result1 = ValidateDataTableFactor(dt, ruleStr);
-                if (result1.IsValid)
-                {
-                    if (!string.IsNullOrEmpty(productType))
-                        result.ProductType = productType.Trim();
-                }
-            }
-
             return result;
         }
+
+
 
         FactorCheckResult ValidateDataTableFactor(DataTable dt, string ruleStr)
         {
@@ -374,19 +347,352 @@ namespace GSC.Respository.SupplyManagement
                     x.InputValue = randomization.Diatoryfactor.GetDescription();
                     x.dataType = DataType.Character;
                 }
+                else if (x.Fector == Fector.Joint && randomization.Jointfactor != null)
+                {
+                    x.InputValue = randomization.Jointfactor.GetDescription();
+                    x.dataType = DataType.Character;
+                }
                 else if (x.Fector == Fector.BMI && !string.IsNullOrEmpty(randomization.BMIfactor))
                 {
                     x.InputValue = randomization.BMIfactor;
                     x.dataType = DataType.Numeric2Decimal;
                 }
-                else
+                else if (x.Fector == Fector.Age && !string.IsNullOrEmpty(randomization.Agefactor))
                 {
                     x.InputValue = randomization.Agefactor;
                     x.dataType = DataType.Numeric;
                 }
 
             });
-            result = ValidateFactor(data);
+
+            result = ValidateFactorSubject(data);
+            return result;
+        }
+        public FactorCheckResult ValidateFactorSubject(List<SupplyManagementFectorDetailDto> editCheck)
+        {
+            var dt = new DataTable();
+            string ruleStr = "";
+            string ruleStrRatio = "";
+            string displayRule = "";
+            string productType = "";
+            string ratios = "";
+
+            int i = 0;
+            editCheck.ForEach(r =>
+            {
+                string singleQuote = SingleQuote(r.Operator, r.dataType);
+                i += 1;
+                string colName = "Col" + i.ToString();
+                string fieldName = r.FactoreName;
+                string collectionValue = r.collectionValueName;
+                string colrandomizationName = "";
+
+                ruleStr = ruleStr + $"{r.StartParens}{colName} {r.Operator.GetDescription()} {singleQuote}{collectionValue}{singleQuote}";
+                displayRule = displayRule + $"{r.StartParens}{fieldName} {r.Operator.GetDescription()} {collectionValue}";
+
+
+                ruleStr = ruleStr + $"{r.EndParens} {r.LogicalOperator} ";
+
+                displayRule = displayRule + $"{r.EndParens} {r.LogicalOperator} ";
+
+                var col = new DataColumn();
+                col.DefaultValue = r.InputValue ?? "";
+
+                decimal value;
+                decimal.TryParse(r.InputValue, out value);
+
+
+                var isnumeri = IsNumeric(r.Fector, r.dataType);
+                if (isnumeri && value == 0)
+                    col.DefaultValue = 0;
+
+                if ((value != 0 || isnumeri) && string.IsNullOrEmpty(singleQuote))
+                    col.DataType = Type.GetType("System.Decimal");
+
+
+                col.ColumnName = colName;
+                dt.Columns.Add(col);
+
+                if (!string.IsNullOrEmpty(r.ProductTypeCode))
+                    productType = productType + r.ProductTypeCode;
+                if (r.LogicalOperator == "OR")
+                    productType = productType + " OR ";
+
+
+                if (r.Fector == Fector.Age)
+                    colrandomizationName = "Agefactor";
+                if (r.Fector == Fector.Gender)
+                    colrandomizationName = "Genderfactor";
+                if (r.Fector == Fector.Diatory)
+                    colrandomizationName = "Diatoryfactor";
+                if (r.Fector == Fector.BMI)
+                    colrandomizationName = "BMIfactor";
+                if (r.Fector == Fector.Joint)
+                    colrandomizationName = "Jointfactor";
+                ruleStrRatio = ruleStrRatio + $"{r.StartParens}{colrandomizationName} {r.Operator.GetDescription()} {singleQuote}{r.CollectionValue}{singleQuote}";
+                ruleStrRatio = ruleStrRatio + $"{r.EndParens} {r.LogicalOperator} ";
+
+                if (r.Ratio > 0)
+                    ratios = ratios + r.Ratio;
+                if (r.LogicalOperator == "OR")
+                    ratios = ratios + " OR ";
+
+            });
+
+            ruleStr = ruleStr.Replace("  ", " ").Trim();
+            if (!string.IsNullOrEmpty(ruleStrRatio))
+                ruleStrRatio = ruleStrRatio.Replace("  ", " ").Trim();
+
+            var result = ValidateDataTableFactor(dt, ruleStr);
+            if (!string.IsNullOrEmpty(result.ErrorMessage) || !string.IsNullOrEmpty(result.Result))
+                return result;
+
+            result.SampleText = displayRule;
+
+            if (ruleStr.Contains("OR"))
+            {
+                var splitRules = ruleStr.Split("OR").ToList();
+                if (splitRules.Count > 0)
+                {
+                    for (int r = 0; r < splitRules.Count; r++)
+                    {
+                        var result1 = ValidateDataTableFactor(dt, splitRules[r]);
+                        if (result1.IsValid)
+                        {
+                            if (!string.IsNullOrEmpty(productType))
+                            {
+                                if (productType.Contains("OR"))
+                                {
+                                    var ProducttypeArray = productType.Split("OR").ToArray();
+                                    result.ProductType = ProducttypeArray[r].Trim();
+                                    if (!string.IsNullOrEmpty(ratios))
+                                        result = CheckRatio(result, ruleStrRatio, ratios, ProducttypeArray[r].Trim(), r);
+
+                                }
+                                else
+                                {
+                                    result.ProductType = productType.Trim();
+                                    if (!string.IsNullOrEmpty(ratios))
+                                        result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, r);
+                                }
+                                return result;
+                            }
+                            else
+                            {
+                                if (!string.IsNullOrEmpty(ratios))
+                                    result = CheckRatio(result, ruleStrRatio, ratios, null, r);
+                            }
+
+
+                        }
+                    }
+                }
+            }
+            else
+            {
+                var result1 = ValidateDataTableFactor(dt, ruleStr);
+                if (result1.IsValid)
+                {
+                    if (!string.IsNullOrEmpty(productType))
+                    {
+                        result.ProductType = productType.Trim();
+                        if (!string.IsNullOrEmpty(ratios))
+                            result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, null);
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(ratios))
+                            result = CheckRatio(result, ruleStrRatio, ratios, null, null);
+                    }
+                }
+            }
+
+            return result;
+        }
+        public FactorCheckResult CheckRatio(FactorCheckResult result, string ratiostr, string ratios, string producttype, int? index)
+        {
+            var isRationOver = false;
+            var products = "";
+            if (!string.IsNullOrEmpty(producttype))
+            {
+                if (producttype.Contains(','))
+                {
+                    var splitproduct = producttype.Split(',').ToList();
+                    if (splitproduct.Count > 0)
+                    {
+                        if (index != null)
+                        {
+                            if (ratiostr.Contains("OR") && ratios.Contains("OR"))
+                            {
+                                var splitRules = ratiostr.Split("OR").ToList();
+                                var splitRatio = ratios.Split("OR").ToList();
+                                if (splitRules.Count > 0 && splitRatio.Count > 0)
+                                {
+                                    var rule = splitRules[(int)index].Trim();
+                                    var ratio = splitRatio[(int)index].Trim();
+
+                                    int count = 0;
+                                    int rationcount = 0;
+                                    foreach (var item in splitproduct)
+                                    {
+                                        var treatment = "'" + item + "'";
+                                        string sqlqry = @"select * from Randomization where ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                        var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                                        if (finaldata.Count >= Convert.ToInt32(ratio))
+                                        {
+                                            rationcount++;
+                                        }
+                                        else
+                                        {
+
+                                            if (count == splitproduct.Count - 1)
+                                                products = products + item;
+                                            else
+                                                products = products + item + ",";
+                                            
+                                        }
+                                        count++;
+
+                                    }
+                                    if (rationcount == splitproduct.Count)
+                                        isRationOver = true;
+
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var rule = ratiostr;
+                            var ratio = ratios;
+                            int count = 0;
+                            int rationcount = 0;
+                            foreach (var item in splitproduct)
+                            {
+                                var treatment = "'" + item + "'";
+                                string sqlqry = @"select * from Randomization where ProductCode = " + treatment + " AND " + rule + "";
+                                var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                                if (finaldata.Count >= Convert.ToInt32(ratio))
+                                {
+                                    rationcount++;
+                                }
+                                else
+                                {
+                                    if (count == splitproduct.Count - 1)
+                                        products = products + item;
+                                    else
+                                        products = products + item + ",";
+                                   
+                                }
+                                count++;
+                            }
+                            if (rationcount == splitproduct.Count)
+                                isRationOver = true;
+
+                        }
+
+                    }
+                }
+                else
+                {
+                    if (index != null)
+                    {
+                        if (ratiostr.Contains("OR") && ratios.Contains("OR"))
+                        {
+                            var splitRules = ratiostr.Split("OR").ToList();
+                            var splitRatio = ratios.Split("OR").ToList();
+                            if (splitRules.Count > 0 && splitRatio.Count > 0)
+                            {
+                                var rule = splitRules[(int)index].Trim();
+                                var ratio = splitRatio[(int)index].Trim();
+                                var product = "'" + producttype + "'";
+
+                                string sqlqry = @"select * from Randomization where ProductCode = " + product + " AND " + rule + "";
+                                var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                                if (finaldata.Count >= Convert.ToInt32(ratio))
+                                {
+                                    isRationOver = true;
+                                }
+                                else
+                                {
+                                    isRationOver = false;
+                                    products = producttype;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var rule = ratiostr;
+                        var ratio = ratios;
+                        var product = "'" + producttype + "'";
+
+                        string sqlqry = @"select * from Randomization where ProductCode = " + product + " AND " + rule + "";
+                        var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                        if (finaldata.Count >= Convert.ToInt32(ratio))
+                        {
+                            isRationOver = true;
+                        }
+                        else
+                        {
+                            isRationOver = false;
+                            products = producttype;
+                        }
+
+                    }
+                }
+
+            }
+            else
+            {
+                if (index != null)
+                {
+                    if (ratiostr.Contains("OR") && ratios.Contains("OR"))
+                    {
+                        var splitRules = ratiostr.Split("OR").ToList();
+                        var splitRatio = ratios.Split("OR").ToList();
+                        if (splitRules.Count > 0 && splitRatio.Count > 0)
+                        {
+                            var rule = splitRules[(int)index].Trim();
+                            var ratio = splitRatio[(int)index].Trim();
+
+                            string sqlqry = @"select * from Randomization where " + rule + "";
+                            var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                            if (finaldata.Count >= Convert.ToInt32(ratio))
+                            {
+                                isRationOver = true;
+                            }
+                            else
+                            {
+                                isRationOver = false;
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    var rule = ratiostr;
+                    var ratio = ratios;
+
+                    string sqlqry = @"select * from Randomization where " + rule + "";
+                    var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                    if (finaldata.Count >= Convert.ToInt32(ratio))
+                    {
+                        isRationOver = true;
+                    }
+                    else
+                    {
+                        isRationOver = false;
+                    }
+
+                }
+
+            }
+            if (isRationOver)
+            {
+                result.ErrorMessage = "Ratio is over!";
+            }
+            result.ProductType = products;
+
             return result;
         }
         string SingleQuote(FectorOperator? _operator, DataType? dataType)
@@ -405,7 +711,7 @@ namespace GSC.Respository.SupplyManagement
         bool IsNumeric(Fector? collection1, DataType? dataType)
         {
             var collection = new CollectionSources();
-            if (collection1 == Fector.Gender || collection1 == Fector.Diatory)
+            if (collection1 == Fector.Gender || collection1 == Fector.Diatory || collection1 == Fector.Joint)
             {
                 collection = CollectionSources.ComboBox;
             }

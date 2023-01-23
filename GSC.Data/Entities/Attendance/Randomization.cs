@@ -67,7 +67,11 @@ namespace GSC.Data.Entities.Attendance
 
         public Gender? Genderfactor { get; set; }
         public DaitoryFector? Diatoryfactor { get; set; }
+
+        public Jointfactor? Jointfactor { get; set; }
+
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
+        public string ProductCode { get; set; }
     }
 }

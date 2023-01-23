@@ -117,6 +117,20 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
+            if (fector == Fector.Joint)
+            {
+                if (Collectionavalue != null)
+                {
+                    if (Collectionavalue == "1")
+                    {
+                        return "Knee";
+                    }
+                    if (Collectionavalue == "2")
+                    {
+                        return "Hip";
+                    }
+                }
+            }
             if (fector == Fector.BMI || fector == Fector.Age)
             {
                 return Collectionavalue;

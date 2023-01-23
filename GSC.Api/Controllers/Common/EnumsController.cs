@@ -823,10 +823,23 @@ namespace GSC.Api.Controllers.Common
             return Ok(fectore);
         }
         [HttpGet]
+        [Route("GetJointfactor")]
+        public IActionResult GetJointfactor()
+        {
+            var fectore = Enum.GetValues(typeof(Jointfactor))
+                .Cast<Jointfactor>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+        [HttpGet]
         [Route("GetFactorsOperators/{id}")]
         public IActionResult GetFactorsOperators(int id)
         {
-            if (id == 1 || id == 2)
+            if (id == 1 || id == 2 || id == 5)
             {
                 var fectore = Enum.GetValues(typeof(FectorOperator))
                     .Cast<FectorOperator>().Select(e => new DropDownEnum

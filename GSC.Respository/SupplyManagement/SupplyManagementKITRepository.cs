@@ -49,6 +49,21 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (x.RandomizationId > 0)
                     x.RandomizationNo = _context.Randomization.Where(z => z.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+                if (x.SupplyManagementShipmentId > 0)
+                {
+                    var request = _context.SupplyManagementShipment.Include(r => r.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(z => z.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                    if (request != null)
+                    {
+                        x.RequestFromSite = request.SupplyManagementRequest.FromProject.ProjectCode;
+
+                        var tositeId = request.SupplyManagementRequest.IsSiteRequest ? request.SupplyManagementRequest.ToProjectId : request.SupplyManagementRequest.FromProject.ParentProjectId;
+                        if (tositeId > 0)
+                        {
+                            x.RequestToSiteOrStudy = _context.Project.Where(s => s.Id == tositeId).FirstOrDefault().ProjectCode;
+                        }
+
+                    }
+                }
             });
             return data;
         }

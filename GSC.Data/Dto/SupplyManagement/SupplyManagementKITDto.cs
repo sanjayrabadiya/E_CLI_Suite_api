@@ -53,6 +53,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int? RandomizationId { get; set; }
 
+        public string RequestFromSite { get; set; }
+
+        public string RequestToSiteOrStudy { get; set; }
+
 
     }
 
