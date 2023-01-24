@@ -232,6 +232,10 @@ namespace GSC.Respository.Etmf
                     //_projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceSubSecArtificateDocumentId, false);
                     var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, All.Max(p => p.Id));
+
+                    var replaceUserDto = _mapper.Map<ProjectSubSecArtificateDocumentApproverDto>(replaceUser);
+
+                    SendMailForApprover(replaceUserDto);
                 }
 
                 foreach (var user in actualUsers)

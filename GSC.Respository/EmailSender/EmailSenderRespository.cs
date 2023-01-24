@@ -100,7 +100,7 @@ namespace GSC.Respository.EmailSender
 
         public void SendEmailOfReviewed(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
         {
-            var emailMessage = ConfigureEmail("ArtificateSendBack", userName);
+            var emailMessage = ConfigureEmail("ArtificateReviewed", userName);
             emailMessage.SendTo = toMail;
             emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
             _emailService.SendMail(emailMessage);

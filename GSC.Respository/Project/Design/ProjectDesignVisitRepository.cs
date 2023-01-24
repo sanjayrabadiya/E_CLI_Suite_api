@@ -157,7 +157,7 @@ namespace GSC.Respository.Project.Design
         {
             if (All.Any(x =>
                 x.Id != objSave.Id && x.DisplayName == objSave.DisplayName &&
-                x.ProjectDesignPeriodId == objSave.ProjectDesignPeriodId && x.DeletedDate == null))
+                x.ProjectDesignPeriodId == objSave.ProjectDesignPeriodId && x.DeletedDate == null && x.InActiveVersion==null))
                 return "Duplicate Visit Name : " + objSave.DisplayName;
             return "";
         }
