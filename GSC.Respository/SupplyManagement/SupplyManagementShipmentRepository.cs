@@ -120,11 +120,11 @@ namespace GSC.Respository.SupplyManagement
                 {
                     if (supplyManagementshipmentDto.Kits != null)
                     {
-                        var data1 = supplyManagementshipmentDto.Kits.GroupBy(x => x.ProductCode).ToList();
-                        if (data1.Count > 1)
-                        {
-                            return "You can't select different product!";
-                        }
+                        //var data1 = supplyManagementshipmentDto.Kits.GroupBy(x => x.ProductCode).ToList();
+                        //if (data1.Count > 1)
+                        //{
+                        //    return "You can't select different product!";
+                        //}
                         if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(supplyManagementshipmentDto.SupplyManagementRequestId))
                         {
                             return "Entered quantity is higher than available quantity!";

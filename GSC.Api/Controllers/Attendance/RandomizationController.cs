@@ -376,7 +376,7 @@ namespace GSC.Api.Controllers.Attendance
         [Route("saveRandomizationNumber")]
         public IActionResult SaveRandomizationNumber([FromBody] RandomizationDto randomizationDto)
         {
-           
+            var randno = string.Empty;
             if (randomizationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -384,14 +384,18 @@ namespace GSC.Api.Controllers.Attendance
             var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId).FirstOrDefault();
 
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
-
+            randno = randomization.RandomizationNumber;
             var validate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            
+            if (randomization.RandomizationNumber != randomizationDto.RandomizationNumber && !_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
+            {
+                ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                return BadRequest(ModelState);
+            }
 
             var validaterandomizationno = _randomizationRepository.ValidateRandomizationNumber(randomizationDto);
             if (!string.IsNullOrEmpty(validaterandomizationno))
@@ -405,20 +409,22 @@ namespace GSC.Api.Controllers.Attendance
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
 
-            randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
-            if (string.IsNullOrEmpty(randomizationDto.KitNo) && numerformate.IsIWRS == true)
+            if (string.IsNullOrEmpty(randno))
             {
-                _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
+                randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
+                if (string.IsNullOrEmpty(randomizationDto.KitNo) && numerformate.IsIWRS == true)
+                {
+                    _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
 
-                ModelState.AddModelError("Message", "Kit is not available");
-                return BadRequest(ModelState);
+                    ModelState.AddModelError("Message", "Kit is not available");
+                    return BadRequest(ModelState);
+                }
+                if (string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                {
+                    ModelState.AddModelError("Message", "Please upload randomization sheet");
+                    return BadRequest(ModelState);
+                }
             }
-            if (string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
-            {
-                ModelState.AddModelError("Message", "Please upload randomization sheet");
-                return BadRequest(ModelState);
-            }
-
 
 
             return Ok(randomizationDto);
@@ -588,6 +594,7 @@ namespace GSC.Api.Controllers.Attendance
         {
             RandomizationFactor randomizationDto = new RandomizationFactor();
             var factorData = _supplyManagementFectorDetailRepository.All.Where(x => x.DeletedDate == null && x.SupplyManagementFector.ProjectId == id).ToList();
+            var randomizationdata = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == id).ToList();
             if (factorData != null && factorData.Count > 0)
             {
                 randomizationDto.IsGenderFactor = factorData.Any(x => x.Fector == Fector.Gender);
@@ -595,6 +602,7 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto.IsAgeFactor = factorData.Any(x => x.Fector == Fector.Age);
                 randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
                 randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
+                randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
             }
             return Ok(randomizationDto);
         }

@@ -21,6 +21,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public GSC.Data.Entities.Master.Project Project { get; set; }
         public int KitNoseries { get; set; }
         public bool? IsBlindedStudy { get; set; }
+        public int? ThresholdValue { get; set; }
 
     }
 }

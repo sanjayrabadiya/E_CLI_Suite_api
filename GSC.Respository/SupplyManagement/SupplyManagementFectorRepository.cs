@@ -689,7 +689,7 @@ namespace GSC.Respository.SupplyManagement
             }
             if (isRationOver)
             {
-                result.ErrorMessage = "Ratio is over!";
+                result.ErrorMessage = "Fector Randomization limit is completed. You can not randomize!";
             }
             result.ProductType = products;
 

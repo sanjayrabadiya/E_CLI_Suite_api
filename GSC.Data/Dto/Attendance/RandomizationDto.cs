@@ -173,5 +173,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsAgeFactor { get; set; }
         public bool IsBMIFactor { get; set; }
         public bool IsJointFactor { get; set; }
+
+        public bool IsIWRS { get; set; }
     }
 }
