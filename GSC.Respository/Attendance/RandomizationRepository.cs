@@ -317,8 +317,12 @@ namespace GSC.Respository.Attendance
                         && x.SupplyManagementUploadFileDetail.RandomizationId == null
                         && x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                         && x.Isfirstvisit == true).OrderBy(x => x.Id).ToList();
-                        if (visit.Count == 0)
+                        if (visit == null || visit.Count == 0)
+                        {
+                            randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
                             return randomizationNumberDto;
+                        }
+
 
 
                         var productarray = productType.Split(',').ToArray();
@@ -333,8 +337,11 @@ namespace GSC.Respository.Attendance
                                       && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                       && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
-                        if (kitdata.Count == 0)
+                        if (kitdata == null || kitdata.Count == 0)
+                        {
+                            randomizationNumberDto.ErrorMessage = "Kit is not available!";
                             return randomizationNumberDto;
+                        }
 
 
                         foreach (var visititem in visit)
@@ -386,8 +393,11 @@ namespace GSC.Respository.Attendance
                                 && x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                 && x.Isfirstvisit == true).OrderBy(x => x.Id).ToList();
 
-                            if (visit == null)
+                            if (visit == null || visit.Count == 0)
+                            {
+                                randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
                                 return randomizationNumberDto;
+                            }
 
 
                             var productarray = productType.Split(',').ToArray();
@@ -402,8 +412,11 @@ namespace GSC.Respository.Attendance
                                           && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                           && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
-                            if (kitdata.Count == 0)
+                            if (kitdata == null || kitdata.Count == 0)
+                            {
+                                randomizationNumberDto.ErrorMessage = "Kit is not available!";
                                 return randomizationNumberDto;
+                            }
 
 
                             foreach (var visititem in visit)
@@ -452,8 +465,11 @@ namespace GSC.Respository.Attendance
                             && x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                             && x.Isfirstvisit == true).OrderBy(x => x.Id).ToList();
 
-                        if (visit == null)
+                        if (visit == null || visit.Count == 0)
+                        {
+                            randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
                             return randomizationNumberDto;
+                        }
 
 
                         var productarray = productType.Split(',').ToArray();
@@ -468,8 +484,11 @@ namespace GSC.Respository.Attendance
                                       && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                       && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
-                        if (kitdata.Count == 0)
+                        if (kitdata == null || kitdata.Count == 0)
+                        {
+                            randomizationNumberDto.ErrorMessage = "Kit is not available!";
                             return randomizationNumberDto;
+                        }
 
 
                         foreach (var visititem in visit)

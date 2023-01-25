@@ -365,10 +365,10 @@ namespace GSC.Respository.SupplyManagement
 
             });
 
-            result = ValidateFactorSubject(data);
+            result = ValidateFactorSubject(data, (int)projectid);
             return result;
         }
-        public FactorCheckResult ValidateFactorSubject(List<SupplyManagementFectorDetailDto> editCheck)
+        public FactorCheckResult ValidateFactorSubject(List<SupplyManagementFectorDetailDto> editCheck, int projectid)
         {
             var dt = new DataTable();
             string ruleStr = "";
@@ -466,21 +466,21 @@ namespace GSC.Respository.SupplyManagement
                                     var ProducttypeArray = productType.Split("OR").ToArray();
                                     result.ProductType = ProducttypeArray[r].Trim();
                                     if (!string.IsNullOrEmpty(ratios))
-                                        result = CheckRatio(result, ruleStrRatio, ratios, ProducttypeArray[r].Trim(), r);
+                                        result = CheckRatio(result, ruleStrRatio, ratios, ProducttypeArray[r].Trim(), r, projectid);
 
                                 }
                                 else
                                 {
                                     result.ProductType = productType.Trim();
                                     if (!string.IsNullOrEmpty(ratios))
-                                        result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, r);
+                                        result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, r, projectid);
                                 }
                                 return result;
                             }
                             else
                             {
                                 if (!string.IsNullOrEmpty(ratios))
-                                    result = CheckRatio(result, ruleStrRatio, ratios, null, r);
+                                    result = CheckRatio(result, ruleStrRatio, ratios, null, r, projectid);
                             }
 
 
@@ -497,19 +497,19 @@ namespace GSC.Respository.SupplyManagement
                     {
                         result.ProductType = productType.Trim();
                         if (!string.IsNullOrEmpty(ratios))
-                            result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, null);
+                            result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, null, projectid);
                     }
                     else
                     {
                         if (!string.IsNullOrEmpty(ratios))
-                            result = CheckRatio(result, ruleStrRatio, ratios, null, null);
+                            result = CheckRatio(result, ruleStrRatio, ratios, null, null, projectid);
                     }
                 }
             }
 
             return result;
         }
-        public FactorCheckResult CheckRatio(FactorCheckResult result, string ratiostr, string ratios, string producttype, int? index)
+        public FactorCheckResult CheckRatio(FactorCheckResult result, string ratiostr, string ratios, string producttype, int? index, int projectid)
         {
             var isRationOver = false;
             var products = "";
@@ -536,7 +536,7 @@ namespace GSC.Respository.SupplyManagement
                                     foreach (var item in splitproduct)
                                     {
                                         var treatment = "'" + item + "'";
-                                        string sqlqry = @"select * from Randomization where ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                        string sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
                                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                                         if (finaldata.Count >= Convert.ToInt32(ratio))
                                         {
@@ -549,7 +549,7 @@ namespace GSC.Respository.SupplyManagement
                                                 products = products + item;
                                             else
                                                 products = products + item + ",";
-                                            
+
                                         }
                                         count++;
 
@@ -569,7 +569,7 @@ namespace GSC.Respository.SupplyManagement
                             foreach (var item in splitproduct)
                             {
                                 var treatment = "'" + item + "'";
-                                string sqlqry = @"select * from Randomization where ProductCode = " + treatment + " AND " + rule + "";
+                                string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment + " AND " + rule + "";
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                                 if (finaldata.Count >= Convert.ToInt32(ratio))
                                 {
@@ -581,7 +581,7 @@ namespace GSC.Respository.SupplyManagement
                                         products = products + item;
                                     else
                                         products = products + item + ",";
-                                   
+
                                 }
                                 count++;
                             }
@@ -606,7 +606,7 @@ namespace GSC.Respository.SupplyManagement
                                 var ratio = splitRatio[(int)index].Trim();
                                 var product = "'" + producttype + "'";
 
-                                string sqlqry = @"select * from Randomization where ProductCode = " + product + " AND " + rule + "";
+                                string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                                 if (finaldata.Count >= Convert.ToInt32(ratio))
                                 {
@@ -626,7 +626,7 @@ namespace GSC.Respository.SupplyManagement
                         var ratio = ratios;
                         var product = "'" + producttype + "'";
 
-                        string sqlqry = @"select * from Randomization where ProductCode = " + product + " AND " + rule + "";
+                        string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                         if (finaldata.Count >= Convert.ToInt32(ratio))
                         {
@@ -655,7 +655,7 @@ namespace GSC.Respository.SupplyManagement
                             var rule = splitRules[(int)index].Trim();
                             var ratio = splitRatio[(int)index].Trim();
 
-                            string sqlqry = @"select * from Randomization where " + rule + "";
+                            string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
                             var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                             if (finaldata.Count >= Convert.ToInt32(ratio))
                             {
@@ -673,7 +673,7 @@ namespace GSC.Respository.SupplyManagement
                     var rule = ratiostr;
                     var ratio = ratios;
 
-                    string sqlqry = @"select * from Randomization where " + rule + "";
+                    string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
                     var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                     if (finaldata.Count >= Convert.ToInt32(ratio))
                     {
@@ -689,7 +689,7 @@ namespace GSC.Respository.SupplyManagement
             }
             if (isRationOver)
             {
-                result.ErrorMessage = "Fector Randomization limit is completed. You can not randomize!";
+                result.ErrorMessage = "Factor Randomization limit is completed. You can not randomize!";
             }
             result.ProductType = products;
 
