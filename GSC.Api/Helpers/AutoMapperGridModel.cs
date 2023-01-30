@@ -580,6 +580,9 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementKITDetailHistory, SupplyManagementKITDetailHistoryDto>()
             .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
             .ReverseMap();
+
+            CreateMap<ProjectArtificateDocumentHistory, ProjectArtificateDocumentHistoryDto>();
+            CreateMap<ProjectSubSecArtificateDocumentHistory, ProjectSubSecArtificateDocumentHistoryDto>();
         }
     }
 }

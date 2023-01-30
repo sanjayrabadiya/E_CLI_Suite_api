@@ -21,5 +21,7 @@ namespace GSC.Respository.Etmf
         CommonArtifactDocumentDto GetDocument(int id);
         CommonArtifactDocumentDto GetDocumentForPdfHistory(int Id);
         void UpdateSubDocumentComment(int documentId, bool? isComment);
+        void UpdateDocumentExpiryStatus();
+        List<ProjectSubSecArtificateDocumentExpiryHistoryDto> GetSubSectionDocumentHistory(int documentId);
     }
 }

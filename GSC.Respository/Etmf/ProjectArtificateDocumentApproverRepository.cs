@@ -107,6 +107,27 @@ namespace GSC.Respository.Etmf
             _emailSenderRespository.SendApproverEmailOfArtificate(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
         }
 
+        public void SendMailForApprovedRejected(ProjectArtificateDocumentApprover ProjectArtificateDocumentApproverDto)
+        {
+            var project = All.Include(t => t.ProjectWorkplaceArtificatedDocument)
+                   .ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.Project)
+                   .Where(x => x.ProjectWorkplaceArtificatedDocumentId == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
+            var ProjectName = project.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.Project.ProjectName;
+
+            //var document = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId);
+            var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId).FirstOrDefault();
+            var artificate = _projectWorkplaceArtificateRepository.FindByInclude(x => x.Id == document.ProjectWorkplaceArtificateId, x => x.EtmfArtificateMasterLbrary).FirstOrDefault();
+            var user = _userRepository.Find((int)ProjectArtificateDocumentApproverDto.CreatedBy);
+            if (ProjectArtificateDocumentApproverDto.IsApproved == true)
+            {
+                _emailSenderRespository.SendApprovedEmailOfArtificate(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+            }
+            if (ProjectArtificateDocumentApproverDto.IsApproved == false)
+            {
+                _emailSenderRespository.SendRejectedEmailOfArtificate(user.Email, user.UserName, document.DocumentName, artificate.EtmfArtificateMasterLbrary.ArtificateName, ProjectName);
+            }
+        }
+
         // Get data for mytasklist on dashboard
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)
         {

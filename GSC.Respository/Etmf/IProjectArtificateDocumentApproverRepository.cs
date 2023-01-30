@@ -19,5 +19,6 @@ namespace GSC.Respository.Etmf
         bool GetApprovePending(int documentId);
         List<ProjectArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);
         int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
+        public void SendMailForApprovedRejected(ProjectArtificateDocumentApprover ProjectArtificateDocumentApproverDto);
     }
 }

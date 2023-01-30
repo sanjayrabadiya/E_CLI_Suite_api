@@ -326,6 +326,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceArtificateDocumentId", DisplayName = "Project Workplace Artificate Document" });
             _dictionaries.Add(new Dictionary { FieldName = "ProjectArtificateDocumentReviewId", DisplayName = "Project Artificate Document Review" });
             _dictionaries.Add(new Dictionary { FieldName = "ProjectArtificateDocumentApproverId", DisplayName = "Project Artificate Document Approver" });
+            _dictionaries.Add(new Dictionary { FieldName = "ExpiryDate", DisplayName = "Document Expiry Date" });
 
             //ProjectArtificateDocumentReview
             // _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role" });

@@ -125,6 +125,7 @@ namespace GSC.Api.Controllers.Etmf
             ProjectSubSecArtificateDocumentApprover.IsApproved = DocApprover ? true : false;
             _projectSubSecArtificateDocumentApproverRepository.Update(ProjectSubSecArtificateDocumentApprover);
             if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
+            _projectSubSecArtificateDocumentApproverRepository.SendMailForApprovedRejected(ProjectSubSecArtificateDocumentApprover);
 
             _projectSubSecArtificateDocumentApproverRepository.IsApproveDocument(Id);
             var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(ProjectSubSecArtificateDocumentApprover.ProjectWorkplaceSubSecArtificateDocumentId);

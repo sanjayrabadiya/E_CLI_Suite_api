@@ -14,5 +14,19 @@ namespace GSC.Data.Dto.Etmf
         public string DocumentName { get; set; }
         public string CreatedByName { get; set; }
         public DateTime? CreatedDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+    }
+
+    public class ProjectArtificateDocumentExpiryHistoryDto : BaseDto
+    {
+        public int ProjectWorkplaceArtificateDocumentId { get; set; }
+        public int? ProjectArtificateDocumentReviewId { get; set; }
+        public int? ProjectArtificateDocumentApproverId { get; set; }
+        public string DocumentName { get; set; }
+        public string CreatedByName { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
     }
 }

@@ -251,6 +251,7 @@ namespace GSC.Respository.Etmf
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
                 obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
+                obj.ExpiryDate = item.ExpiryDate;
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(q => q.CreatedDate).ToList();
@@ -505,12 +506,42 @@ namespace GSC.Respository.Etmf
             return obj;
         }
 
+        public void UpdateDocumentExpiryStatus()
+        {
+            var allDocuments = All.Where(q => q.DeletedDate == null && q.ExpiryDate != null && (q.ExpiryDate.HasValue ? q.ExpiryDate.Value.Date <= DateTime.Now.Date : false));
+            foreach (var document in allDocuments)
+            {
+                document.Status = ArtifactDocStatusType.Expired;
+                Update(document);
+            }
+            _context.Save();
+        }
+
         public void UpdateSubDocumentComment(int documentId, bool? isComment)
         {
             var doc = All.FirstOrDefault(x => x.Id == documentId);
             doc.IsReplyAllComment = isComment;
             Update(doc);
             _context.Save();
+        }
+
+        public List<ProjectSubSecArtificateDocumentExpiryHistoryDto> GetSubSectionDocumentHistory(int documentId)
+        {
+            var docHistory = (from history in _context.ProjectSubSecArtificateDocumentHistory.Where(q => q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.ExpiryDate.HasValue)
+                              join auditReasonTemp in _context.AuditTrail.Where(x => x.TableName == "ProjectSubSecArtificateDocumentHistory" && x.ColumnName == "Document Expiry Date")
+                                      on history.Id equals auditReasonTemp.RecordId into auditReasonDto
+                              from auditReason in auditReasonDto.DefaultIfEmpty()
+                              select new ProjectSubSecArtificateDocumentExpiryHistoryDto()
+                              {
+                                  DocumentName = history.DocumentName,
+                                  CreatedDate = history.CreatedDate,
+                                  CreatedByName = history.CreatedByUser.UserName,
+                                  Reason = auditReason.Reason,
+                                  ReasonOth = auditReason.ReasonOth,
+                                  Id = history.Id,
+                                  ExpiryDate = history.ExpiryDate
+                              }).ToList();
+            return docHistory;
         }
     }
 }

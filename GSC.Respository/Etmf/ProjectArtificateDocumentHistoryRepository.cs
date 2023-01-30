@@ -39,6 +39,7 @@ namespace GSC.Respository.Etmf
             ProjectArtificateDocumentHistory.DocumentName = projectWorkplaceArtificatedocument.DocumentName;
             ProjectArtificateDocumentHistory.ProjectArtificateDocumentReviewId = ReviewId;
             ProjectArtificateDocumentHistory.ProjectArtificateDocumentApproverId = ApproverId;
+            ProjectArtificateDocumentHistory.ExpiryDate = projectWorkplaceArtificatedocument.ExpiryDate;
 
             Add(ProjectArtificateDocumentHistory);
              _context.Save();

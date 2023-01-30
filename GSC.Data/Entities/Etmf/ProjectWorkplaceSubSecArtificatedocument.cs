@@ -18,7 +18,7 @@ namespace GSC.Data.Entities.Etmf
         public bool? IsAccepted { get; set; }
         public int? ParentDocumentId { get; set; }
         public bool? IsReplyAllComment { get; set; }
-
+        public DateTime? ExpiryDate { get; set; }
         [ForeignKey("ProjectWorkplaceSubSectionArtifactId")]
         public EtmfProjectWorkPlace ProjectWorkplaceSubSectionArtifact { get; set; }
         public List<ProjectSubSecArtificateDocumentReview> ProjectSubSecArtificateDocumentReview { get; set; }

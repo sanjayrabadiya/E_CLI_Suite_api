@@ -4,6 +4,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -92,6 +93,26 @@ namespace GSC.Respository.Etmf
             var User = _userRepository.Find(ProjectSubSecArtificateDocumentApproverDto.UserId);
 
             _emailSenderRespository.SendApproverEmailOfArtificate(User.Email, User.UserName, Document, Artificate, ProjectName);
+        }
+        public void SendMailForApprovedRejected(ProjectSubSecArtificateDocumentApprover ProjectSubSecArtificateDocumentApproverDto)
+        {
+            var project = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
+                  .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
+                  .ThenInclude(x => x.Project)
+                  .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId).FirstOrDefault();
+
+            var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
+            var Document = project.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
+            var Artificate = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
+            var user = _userRepository.Find((int)ProjectSubSecArtificateDocumentApproverDto.CreatedBy);
+            if (ProjectSubSecArtificateDocumentApproverDto.IsApproved == true)
+            {
+                _emailSenderRespository.SendApprovedEmailOfArtificate(user.Email, user.UserName, Document, Artificate, ProjectName);
+            }
+            if (ProjectSubSecArtificateDocumentApproverDto.IsApproved == false)
+            {
+                _emailSenderRespository.SendRejectedEmailOfArtificate(user.Email, user.UserName, Document, Artificate, ProjectName);
+            }
         }
 
         public List<DashboardDto> GetEtmfMyTaskList(int ProjectId)

@@ -1020,6 +1020,9 @@ namespace GSC.Respository.Etmf
 
             if (projectList == null || projectList.Count == 0) return null;
 
+            _projectWorkplaceArtificatedocumentRepository.UpdateDocumentExpiryStatus();
+            _projectWorkplaceSubSecArtificatedocumentRepository.UpdateDocumentExpiryStatus();
+
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Any(c => c == x.ProjectId) && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlace).
                    ProjectTo<ETMFWorkplaceGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
