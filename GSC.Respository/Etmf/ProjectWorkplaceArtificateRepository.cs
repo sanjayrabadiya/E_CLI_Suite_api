@@ -124,20 +124,20 @@ namespace GSC.Respository.Etmf
             if (filters.SubSectionArtificateId > 0) SubSectionArtificate = SubSectionArtificate.Where(y => y.Id == filters.SubSectionArtificateId).ToList();
 
             result.All = Artificate.Count() + SubSectionArtificate.Count();
-            result.Missing = Artificate.Where(y => y.ProjectWorkplaceArtificatedocument.Count == 0 && y.IsNotRequired == false).Count()
-                + SubSectionArtificate.Where(y => y.ProjectWorkplaceSubSecArtificatedocument.Count == 0 && y.IsNotRequired == false).Count();
+            result.Missing = Artificate.Where(y => y.ProjectWorkplaceArtificatedocument.Count(q => q.DeletedDate == null) == 0 && y.IsNotRequired == false).Count()
+                + SubSectionArtificate.Where(y => y.ProjectWorkplaceSubSecArtificatedocument.Count(q => q.DeletedDate == null) == 0 && y.IsNotRequired == false).Count();
 
-            result.AllPendingApprove = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentApprover.Count() != 0)).Count() +
-                 SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentApprover.Count != 0)).Count();
+            result.AllPendingApprove = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null)).Count() +
+                 SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null)).Count();
 
-            result.PendingApprove = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentApprover.Count() != 0 && y.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null))).Count() +
-                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentApprover.Count() != 0 && y.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null))).Count();
+            result.PendingApprove = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null))).Count() +
+                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null))).Count();
 
-            result.PendingFinal = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.ProjectArtificateDocumentApprover.Count() != 0 && y.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true)))).Count() +
-            SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.ProjectSubSecArtificateDocumentApprover.Count() != 0 && y.ProjectSubSecArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true)))).Count();
+            result.PendingFinal = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true)))).Count() +
+            SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status != ArtifactDocStatusType.Final && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.ProjectSubSecArtificateDocumentApprover.Where(c => c.DeletedDate == null).GroupBy(g => g.UserId).All(l => l.Any(x => x.IsApproved == true)))).Count();
 
-            result.Final = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Final)).Count() +
-                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Final)).Count();
+            result.Final = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Final && y.DeletedDate == null)).Count() +
+                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Final && y.DeletedDate == null)).Count();
 
             //result.InComplete = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentReview.Where(z => z.UserId != y.CreatedBy).Count() == 0)).Count()
             //    + SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentReview.Where(z => z.UserId != y.CreatedBy).Count() == 0)).Count();
@@ -145,17 +145,21 @@ namespace GSC.Respository.Etmf
             result.InComplete = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(z => z.DeletedDate == null && z.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0)).Count() +
                 SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(z => z.DeletedDate == null && z.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0)).Count();
 
-            result.PendingReview = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentReview.Count != 0 && y.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(z => z.UserId).LastOrDefault()?.Where(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy).Count() != 0)).Count() +
-                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentReview.Count != 0 && y.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(z => z.UserId).LastOrDefault()?.Where(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy).Count() != 0)).Count();
+            result.PendingReview = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.ProjectArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(z => z.UserId).LastOrDefault()?.Where(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy).Count() != 0)).Count() +
+                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.ProjectSubSecArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).GroupBy(z => z.UserId).LastOrDefault()?.Where(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy).Count() != 0)).Count();
 
-            result.AllPendingReview = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() != 0)).Count() +
-                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy).Count() != 0)).Count();
+            result.AllPendingReview = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(x => x.ProjectArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy && x.DeletedDate == null).Count() != 0) && x.DeletedDate == null).Count() +
+                SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.UserId != x.CreatedBy && x.DeletedDate == null).Count() != 0) && x.DeletedDate == null).Count();
 
             result.NotRequired = Artificate.Where(x => x.IsNotRequired == true).Count()
                           + SubSectionArtificate.Where(x => x.IsNotRequired == true).Count();
 
-            result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count() == 0).Count();
-            result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count() == 0).Count();
+            result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count(q => q.DeletedDate == null) == 0).Count();
+            result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count(q => q.DeletedDate == null) == 0).Count();
+
+            result.Expired = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Expired && y.DeletedDate == null)).Count() +
+               SubSectionArtificate.Where(x => x.ProjectWorkplaceSubSecArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Expired && y.DeletedDate == null)).Count();
+
 
             return result;
         }

@@ -79,6 +79,7 @@ namespace GSC.Data.Dto.Etmf
         public int CoreArtificate { get; set; }
         public int RecommendedArtificate { get; set; }
         public int NotRequired { get; set; }
+        public int Expired { get; set; }
     }
 
     public class WorkplaceChartFilterDto
