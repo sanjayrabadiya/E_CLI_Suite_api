@@ -12,6 +12,8 @@ namespace GSC.Respository.SupplyManagement
 
         void SendForApprovalEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt);
 
+        void SendTemplateApproveRejectEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt);
+
 
     }
 }

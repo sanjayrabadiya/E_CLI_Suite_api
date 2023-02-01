@@ -64,6 +64,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public string Status { get; set; }
         public string ActionBy { get; set; }
 
+        public string RequestedBy
+        {
+            get; set;
+        }
+
         public string Visit { get; set; }
 
         public string ScreeningNo { get; set; }
@@ -78,6 +83,6 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string RequestType { get; set; }
 
-        
+
     }
 }

@@ -495,7 +495,7 @@ namespace GSC.Respository.SupplyManagement
                                                          .ThenInclude(x => x.ProductType)
                                                          .Where(x => x.SupplyManagementKIT.ProjectId == projectId
                                                           && x.DeletedDate == null
-                                                          && x.Status == KitStatus.Returned
+                                                          
                                                           ).Select(x => new SupplyManagementKITDiscardGridDto
                                                           {
                                                               KitNo = x.KitNo,

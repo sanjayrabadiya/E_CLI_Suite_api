@@ -19,7 +19,7 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyMangementRequestController : BaseController
     {
-        
+
         private readonly IMapper _mapper;
         private readonly ISupplyManagementRequestRepository _supplyManagementRequestRepository;
         private readonly IUnitOfWork _uow;
@@ -58,6 +58,9 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _supplyManagementRequestRepository.Add(supplyManagementRequest);
             if (_uow.Save() <= 0) throw new Exception("Creating request failed on save.");
+
+            _supplyManagementRequestRepository.SendrequestEmail(supplyManagementRequest.Id);
+
             return Ok(supplyManagementRequest.Id);
         }
         [HttpGet]

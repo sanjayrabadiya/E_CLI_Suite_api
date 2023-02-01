@@ -70,6 +70,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             //assign kit
             supplyManagementshipmentDto.Id = supplyManagementRequest.Id;
             _supplyManagementShipmentRepository.Assignkits(shipmentdata, supplyManagementshipmentDto);
+            _supplyManagementShipmentRepository.SendShipmentApproveRejecttEmail(shipmentdata.Id, supplyManagementRequest);
 
             return Ok(supplyManagementRequest.Id);
         }

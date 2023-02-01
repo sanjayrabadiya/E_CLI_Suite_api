@@ -304,7 +304,9 @@ namespace GSC.Api.Controllers.SupplyManagement
                     }
                 }
             }
+
             if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
+            _verificationApprovalTemplateRepository.SendTemplateApproveRejectEmail(verificationApprovalTemplateDto, receipt);
             return Ok(verificationApprovalTemplateDto.VerificationApprovalTemplateValueList[0].Id);
         }
 

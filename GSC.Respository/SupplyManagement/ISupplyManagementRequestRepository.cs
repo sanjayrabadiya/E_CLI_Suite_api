@@ -24,6 +24,8 @@ namespace GSC.Respository.SupplyManagement
 
         int GetAvailableRemainingKitBlindedStudy(int SupplyManagementRequestId);
 
+        void SendrequestEmail(int id);
+
 
     }
 }

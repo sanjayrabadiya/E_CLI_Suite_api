@@ -809,6 +809,11 @@ namespace GSC.Respository.EmailSender
                 str = Regex.Replace(str, "##DoneBy##", email.ActionBy, RegexOptions.IgnoreCase);
                 str = Regex.Replace(str, "##SendBy##", email.ActionBy, RegexOptions.IgnoreCase);
             }
+            if (!string.IsNullOrEmpty(email.RequestedBy))
+            {
+                str = Regex.Replace(str, "##RequestedBy##", email.RequestedBy, RegexOptions.IgnoreCase);
+               
+            }
 
             return str;
         }

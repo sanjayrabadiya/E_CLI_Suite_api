@@ -100,15 +100,77 @@ namespace GSC.Respository.SupplyManagement
             var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == verificationApprovalTemplateDto.ProjectId && x.Triggers == SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate).FirstOrDefault();
             if (emailconfig != null)
             {
-                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).Select(x => x.Users.Email).ToList();
+                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                 if (details.Count() > 0)
                 {
-                    iWRSEmailModel.ProductType = productReceipt.ProductName;
+                    if (productReceipt != null)
+                    {
+                        var pharmacyStudyProductType = _context.PharmacyStudyProductType.Where(x => x.Id == productReceipt.PharmacyStudyProductTypeId).FirstOrDefault();
+                        if (pharmacyStudyProductType != null)
+                        {
+                            var product = _context.ProductType.Where(x => x.Id == pharmacyStudyProductType.ProductTypeId).FirstOrDefault();
+                            if (product != null)
+                                iWRSEmailModel.ProductType = product.ProductTypeCode;
+                        }
+                    }
                     iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == verificationApprovalTemplateDto.ProjectId).FirstOrDefault().ProjectCode;
                     iWRSEmailModel.ActionBy = _jwtTokenAccesser.UserName;
-                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details, emailconfig);
+                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
+                    foreach (var item in details)
+                    {
+                        SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
+                        history.SupplyManagementEmailConfigurationDetailId = item.Id;
+                        _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+                        _context.Save();
+                    }
                 }
             }
+        }
+        public void SendTemplateApproveRejectEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt)
+        {
+            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+
+            if (productReceipt != null)
+            {
+                var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == productReceipt.ProjectId && x.Triggers == SupplyManagementEmailTriggers.VerificationTemplateApproveReject).FirstOrDefault();
+                if (emailconfig != null)
+                {
+                    var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                    if (details.Count() > 0)
+                    {
+                        if (productReceipt != null)
+                        {
+                            var pharmacyStudyProductType = _context.PharmacyStudyProductType.Where(x => x.Id == productReceipt.PharmacyStudyProductTypeId).FirstOrDefault();
+                            if (pharmacyStudyProductType != null)
+                            {
+                                var product = _context.ProductType.Where(x => x.Id == pharmacyStudyProductType.ProductTypeId).FirstOrDefault();
+                                if (product != null)
+                                    iWRSEmailModel.ProductType = product.ProductTypeCode;
+                            }
+                        }
+
+                        iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == productReceipt.ProjectId).FirstOrDefault().ProjectCode;
+                        iWRSEmailModel.ActionBy = _jwtTokenAccesser.UserName;
+                        iWRSEmailModel.Status = verificationApprovalTemplateDto.IsApprove ? "Approved" : "Rejected";
+                        if (verificationApprovalTemplateDto.VerificationApprovalTemplateHistory != null)
+                        {
+                            var auditreason = _context.AuditReason.Where(x => x.Id == verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId).FirstOrDefault();
+                            iWRSEmailModel.Reason = auditreason != null ? auditreason.ReasonName : "";
+
+                        }
+
+                        _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
+                        foreach (var item in details)
+                        {
+                            SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
+                            history.SupplyManagementEmailConfigurationDetailId = item.Id;
+                            _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+                            _context.Save();
+                        }
+                    }
+                }
+            }
+
         }
     }
 }

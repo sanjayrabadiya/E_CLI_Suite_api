@@ -159,7 +159,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 foreach (var item in obj.SupplyManagementEmailConfigurationDetail)
                 {
-                    var data = _context.SupplyManagementEmailConfigurationDetail.Where(x => x.DeletedDate == null && x.RoleId == item.RoleId && x.UserId == item.UserId).FirstOrDefault();
+                    var data = _context.SupplyManagementEmailConfigurationDetail.Where(x => x.SupplyManagementEmailConfigurationId == id && x.DeletedDate == null && x.RoleId == item.RoleId && x.UserId == item.UserId).FirstOrDefault();
                     if (data == null)
                     {
                         SupplyManagementEmailConfigurationDetail detail = new SupplyManagementEmailConfigurationDetail();
@@ -171,7 +171,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                     else
                     {
-                        var data1 = _context.SupplyManagementEmailConfigurationDetail.Where(x => x.DeletedDate != null && x.RoleId == item.RoleId && x.UserId == item.UserId).FirstOrDefault();
+                        var data1 = _context.SupplyManagementEmailConfigurationDetail.Where(x => x.SupplyManagementEmailConfigurationId == id && x.DeletedDate != null && x.RoleId == item.RoleId && x.UserId == item.UserId).FirstOrDefault();
                         if (data1 != null)
                         {
                             data1.DeletedBy = null;
