@@ -154,7 +154,7 @@ namespace GSC.Respository.Etmf
             result.NotRequired = Artificate.Where(x => x.IsNotRequired == true).Count()
                           + SubSectionArtificate.Where(x => x.IsNotRequired == true).Count();
 
-            result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count(q => q.DeletedDate == null) == 0).Count();
+            result.CoreArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 2 && x.ProjectWorkplaceArtificatedocument.Count(q => q.DeletedDate == null) == 0).Count() + SubSectionArtificate.Where(y => y.ProjectWorkplaceSubSecArtificatedocument.Count(q => q.DeletedDate == null) == 0).Count();
             result.RecommendedArtificate = Artificate.Where(x => x.EtmfArtificateMasterLbrary.InclutionType == 1 && x.ProjectWorkplaceArtificatedocument.Count(q => q.DeletedDate == null) == 0).Count();
 
             result.Expired = Artificate.Where(x => x.ProjectWorkplaceArtificatedocument.Any(y => y.Status == ArtifactDocStatusType.Expired && y.DeletedDate == null)).Count() +
