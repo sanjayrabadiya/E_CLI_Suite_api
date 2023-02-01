@@ -28,6 +28,7 @@ namespace GSC.Data.Dto.Etmf
         public string Version { get; set; }
         public int? ParentDocumentId { get; set; }
         public bool SuperSede { get; set; }
+        public DateTime? ExpiryDate { get; set; }
         public bool? IsReplyAllComment { get; set; }
     }
 

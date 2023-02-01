@@ -236,6 +236,7 @@ namespace GSC.Respository.Etmf
                 obj.IsReplyAllComment = item.IsReplyAllComment;
                 obj.SequenceNo = currentReviewer?.SequenceNo;
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
+                obj.ExpiryDate = item.ExpiryDate;
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(q => q.CreatedDate).ToList();
@@ -1423,7 +1424,7 @@ namespace GSC.Respository.Etmf
                     .Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                     .Include(x => x.ProjectWorkplaceArtificatedDocument).ThenInclude(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                     .Where(x => workplaceartificatedocument.Contains(x.ProjectWorkplaceArtificatedDocumentId) && x.DeletedDate == null
-                    && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.IsSendBack == false && x.IsReviewed==false
+                    && x.UserId != x.ProjectWorkplaceArtificatedDocument.CreatedBy && x.IsSendBack == false && x.IsReviewed == false
                     && (filters.userId == null || filters.userId == x.UserId)
                     ).ToList();
 
@@ -1433,7 +1434,7 @@ namespace GSC.Respository.Etmf
                     .Include(x => x.ProjectWorkplaceSubSecArtificateDocument).ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                     .Include(x => x.ProjectWorkplaceSubSecArtificateDocument).ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfMasterLibrary)
                     .Where(x => subsecDocument.Contains(x.ProjectWorkplaceSubSecArtificateDocumentId) && x.DeletedDate == null
-                    && x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy && x.IsSendBack == false && x.IsReviewed==false
+                    && x.UserId != x.ProjectWorkplaceSubSecArtificateDocument.CreatedBy && x.IsSendBack == false && x.IsReviewed == false
                     && (filters.userId == null || filters.userId == x.UserId)).ToList();
 
                 var reviewerData = reviewer.Select(r => new EtmfStudyReportDto
@@ -1563,6 +1564,36 @@ namespace GSC.Respository.Etmf
             doc.IsReplyAllComment = isComment;
             Update(doc);
             _context.Save();
+        }
+
+        public void UpdateDocumentExpiryStatus()
+        {
+            var allDocuments = All.Where(q => q.DeletedDate == null && q.ExpiryDate != null && (q.ExpiryDate.HasValue ? q.ExpiryDate.Value.Date <= DateTime.Now.Date : false));
+            foreach (var document in allDocuments)
+            {
+                document.Status = ArtifactDocStatusType.Expired;
+                Update(document);
+            }
+            _context.Save();
+        }
+
+        public List<ProjectArtificateDocumentExpiryHistoryDto> GetDocumentHistory(int documentId)
+        {
+            var docHistory = (from history in _context.ProjectArtificateDocumentHistory.Where(q => q.ProjectWorkplaceArtificateDocumentId == documentId && q.ExpiryDate.HasValue)
+                              join auditReasonTemp in _context.AuditTrail.Where(x => x.TableName == "ProjectArtificateDocumentHistory" && x.ColumnName == "Document Expiry Date")
+                                      on history.Id equals auditReasonTemp.RecordId into auditReasonDto
+                              from auditReason in auditReasonDto.DefaultIfEmpty()
+                              select new ProjectArtificateDocumentExpiryHistoryDto()
+                              {
+                                  DocumentName = history.DocumentName,
+                                  CreatedDate = history.CreatedDate,
+                                  CreatedByName = history.CreatedByUser.UserName,
+                                  Reason = auditReason.Reason,
+                                  ReasonOth = auditReason.ReasonOth,
+                                  Id=history.Id,
+                                  ExpiryDate=history.ExpiryDate
+                              }).ToList();
+            return docHistory;
         }
     }
 }

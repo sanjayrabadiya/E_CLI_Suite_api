@@ -169,6 +169,17 @@ namespace GSC.Respository.SupplyManagement
                         _context.SupplyManagementEmailConfigurationDetail.Add(detail);
                         _context.Save();
                     }
+                    else
+                    {
+                        var data1 = _context.SupplyManagementEmailConfigurationDetail.Where(x => x.DeletedDate != null && x.RoleId == item.RoleId && x.UserId == item.UserId).FirstOrDefault();
+                        if (data1 != null)
+                        {
+                            data1.DeletedBy = null;
+                            data1.DeletedDate = null;
+                            _context.SupplyManagementEmailConfigurationDetail.Add(data1);
+                            _context.Save();
+                        }
+                    }
 
                 }
             }

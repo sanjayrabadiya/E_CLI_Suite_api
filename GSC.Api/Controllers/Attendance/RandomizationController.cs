@@ -300,33 +300,61 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", "Email is not set for this patient");
                 return BadRequest(ModelState);
             }
-            var userdata = _userRepository.Find((int)randomization.UserId);
-            var user = new UserViewModel();
-
-            var userLARdata = _userRepository.Find((int)randomization.LARUserId);
-            var userLAR = new UserViewModel();
 
             var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
             var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
 
-            user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
-            userLAR = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userLARdata.UserName}");
 
-            if (user.IsFirstTime == true || userLAR.IsFirstTime == true)
+            if (randomization.UserId != null)
             {
+                var userdata = _userRepository.Find((int)randomization.UserId);
+                var user = new UserViewModel();
+
+                user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
+
                 if (user.IsFirstTime == true)
+                {
                     await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
+                }
+                else
+                {
+                    ModelState.AddModelError("Message", "Patient or Lar already logged in");
+                    return BadRequest(ModelState);
+                }
+            }
 
-                if (userLAR.IsFirstTime == true)
-                    await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, type);
-                //if (projectSetting.IsEicf)
-                //    _randomizationRepository.SendEmailOfStartEconsent(randomization);
-            }
-            else
+            if (randomization.LARUserId != null)
             {
-                ModelState.AddModelError("Message", "Patient or Lar already logged in");
-                return BadRequest(ModelState);
+                var userLARdata = _userRepository.Find((int)randomization.LARUserId);
+                var userLAR = new UserViewModel();
+
+                userLAR = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userLARdata.UserName}");
+                if (userLAR.IsFirstTime == true)
+                {
+                    await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, type);
+                }
+                else
+                {
+                    ModelState.AddModelError("Message", "Patient or Lar already logged in");
+                    return BadRequest(ModelState);
+                }
             }
+
+            //if (user.IsFirstTime == true || userLAR.IsFirstTime == true)
+            //{
+            //    if (user.IsFirstTime == true)
+            //        await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
+
+            //    if (userLAR.IsFirstTime == true)
+            //        await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, type);
+            //    //if (projectSetting.IsEicf)
+            //    //    _randomizationRepository.SendEmailOfStartEconsent(randomization);
+            //}
+            //else
+            //{
+            //    ModelState.AddModelError("Message", "Patient or Lar already logged in");
+            //    return BadRequest(ModelState);
+            //}
 
             return Ok(id);
         }

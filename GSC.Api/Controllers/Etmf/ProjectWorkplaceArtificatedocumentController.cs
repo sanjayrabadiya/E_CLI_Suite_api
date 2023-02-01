@@ -344,5 +344,26 @@ namespace GSC.Api.Controllers.Etmf
             _projectWorkplaceArtificatedocumentRepository.UpdateDocumentComment(documentId, isComment);
             return Ok("");
         }
+
+        [HttpPost]
+        [Route("AddDocumentExpiryDate")]
+        public IActionResult AddDocumentExpiryDate([FromBody] DocumentExpiryModel expiryDate)
+        {
+            var document = _projectWorkplaceArtificatedocumentRepository.Find(expiryDate.id);
+            document.ExpiryDate = expiryDate.ExpiryDate;
+            _projectWorkplaceArtificatedocumentRepository.Update(document);
+            _projectArtificateDocumentHistoryRepository.AddHistory(document, null, null);
+            _context.Save();
+            return Ok(1);
+        }
+
+
+        [HttpGet]
+        [Route("GetDcoumentHistory/{documentId}")]
+        public IActionResult GetDcoumentHistory(int documentId)
+        {
+            var docHistory = _projectWorkplaceArtificatedocumentRepository.GetDocumentHistory(documentId).OrderByDescending(q => q.ExpiryDate);
+            return Ok(docHistory);
+        }
     }
 }

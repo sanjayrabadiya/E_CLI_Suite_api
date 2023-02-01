@@ -33,5 +33,7 @@ namespace GSC.Respository.Etmf
         void UpdateDocumentComment(int documentId, bool? isComment);
         List<DropDownDto> GetEtmfSubSectionDropdown(int sectionId);
         List<DropDownDto> GetEtmfSubSectionArtificateDropdown(int subSectionId);
+        void UpdateDocumentExpiryStatus();
+        List<ProjectArtificateDocumentExpiryHistoryDto> GetDocumentHistory(int documentId);
     }
 }

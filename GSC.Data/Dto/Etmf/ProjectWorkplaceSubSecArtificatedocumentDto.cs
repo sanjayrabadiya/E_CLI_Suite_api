@@ -30,6 +30,7 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsAccepted { get; set; }
         public bool? IsReplyAllComment { get; set; }
         public int? SequenceNo { get; set; }
+        public DateTime? ExpiryDate { get; set; }
     }
 
     public class CommonArtifactDocumentDto
@@ -69,6 +70,7 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsReplyAllComment { get; set; }
         public int? SequenceNo { get; set; }
         public int? ApproveSequenceNo { get; set; }
+        public DateTime? ExpiryDate { get; set; }
     }
 
     public class DocumentUsers
@@ -87,6 +89,12 @@ namespace GSC.Data.Dto.Etmf
         public string fileName { get; set; }
         public string documentData { get; set; }
         public bool AddHistory { get; set; }
+    }
+
+    public class DocumentExpiryModel
+    {
+        public int id { get; set; }
+        public DateTime? ExpiryDate { get; set; }
     }
 
 }

@@ -11,6 +11,7 @@ namespace GSC.Data.Entities.Etmf
         public int? ProjectArtificateDocumentReviewId { get; set; }
         public int? ProjectArtificateDocumentApproverId { get; set; }
         public string DocumentName { get; set; }
+        public DateTime? ExpiryDate { get; set; }
         public ProjectWorkplaceArtificatedocument ProjectWorkplaceArtificatedDocument { get; set; }
     }
 }

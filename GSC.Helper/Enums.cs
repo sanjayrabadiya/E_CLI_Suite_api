@@ -530,6 +530,7 @@ namespace GSC.Helper
         [Description("Final")] Final = 2,
         [Description("Supersede")] Supersede = 3,
         [Description("Not Required")] NotRequired = 4,
+        [Description("Expired")] Expired = 5,
     }
 
 
@@ -631,7 +632,8 @@ namespace GSC.Helper
         [Description("Final")] Final = 6,
         [Description("Incomplete")] Incomplete = 7,
         [Description("Not Required")] NotRequired = 8,
-        [Description("Pending Final")] PendingFinal = 9
+        [Description("Pending Final")] PendingFinal = 9,
+        [Description("Expired")] Expired = 10
 
     }
 

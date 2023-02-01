@@ -135,6 +135,7 @@ namespace GSC.Api.Controllers.Etmf
             ProjectArtificateDocumentApprover.IsApproved = DocApprover ? true : false;
             _projectArtificateDocumentApproverRepository.Update(ProjectArtificateDocumentApprover);
             if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
+            _projectArtificateDocumentApproverRepository.SendMailForApprovedRejected(ProjectArtificateDocumentApprover);
 
             _projectArtificateDocumentApproverRepository.IsApproveDocument(Id);
             var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApprover.ProjectWorkplaceArtificatedDocumentId);

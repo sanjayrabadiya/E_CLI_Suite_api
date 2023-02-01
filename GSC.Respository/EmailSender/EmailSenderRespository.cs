@@ -93,6 +93,22 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendApprovedEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("ArtificateApproved", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendRejectedEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("ArtificateRejected", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            _emailService.SendMail(emailMessage);
+        }
+
         public void SendEmailOfReview(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
         {
             var emailMessage = ConfigureEmail("ArtificateReview", userName);
