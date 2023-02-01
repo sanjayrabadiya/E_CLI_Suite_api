@@ -580,6 +580,16 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementKITDetailHistory, SupplyManagementKITDetailHistoryDto>()
             .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
             .ReverseMap();
+
+            CreateMap<SupplyManagementEmailConfiguration, SupplyManagementEmailConfigurationGridDto>()
+               .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ForMember(x => x.TriggersName, x => x.MapFrom(a => a.Triggers.GetDescription()))
+               .ReverseMap();
+
+            CreateMap<SupplyManagementEmailConfigurationDetail, SupplyManagementEmailConfigurationDetailGridDto>()
+              .ForMember(x => x.RoleName, x => x.MapFrom(a => a.SecurityRole.RoleName))
+              .ForMember(x => x.UserName, x => x.MapFrom(a => a.Users.UserName))
+              .ReverseMap();
         }
     }
 }

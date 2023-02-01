@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -9,7 +10,9 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared;
@@ -711,6 +714,130 @@ namespace GSC.Respository.EmailSender
             }
 
             return emailMessage;
+        }
+        public void SendforApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.Subject = GetSubjectIWRSEmail(supplyManagementEmailConfiguration, iWRSEmailModel);
+            emailMessage.MessageBody = ReplaceBodyForIWRSEmail(supplyManagementEmailConfiguration.EmailBody, iWRSEmailModel);
+
+            if (toMails != null && toMails.Count > 0)
+            {
+                foreach (var item in toMails)
+                {
+                    emailMessage.SendTo = item;
+                    _emailService.SendMail(emailMessage);
+                }
+            }
+
+
+        }
+        private string ReplaceBodyForIWRSEmail(string body, IWRSEmailModel email)
+        {
+
+            var str = body;
+            if (!string.IsNullOrEmpty(email.StudyCode))
+            {
+                str = Regex.Replace(str, "##StudyCode##", email.StudyCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteCode))
+            {
+                str = Regex.Replace(str, "##SiteCode##", email.SiteCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteName))
+            {
+                str = Regex.Replace(str, "##SiteName##", email.SiteName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ProductType))
+            {
+                str = Regex.Replace(str, "##ProductType##", email.ProductType, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.Visit))
+            {
+                str = Regex.Replace(str, "##Visit##", email.Visit, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.Reason))
+            {
+                str = Regex.Replace(str, "##Reason##", email.Reason, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.RequestType))
+            {
+                str = Regex.Replace(str, "##RequestType##", email.RequestType, RegexOptions.IgnoreCase);
+            }
+            if (email.RequestedQty > 0)
+            {
+                str = Regex.Replace(str, "##RequestedQty##", email.RequestedQty.ToString(), RegexOptions.IgnoreCase);
+            }
+            if (email.ApprovedQty > 0)
+            {
+                str = Regex.Replace(str, "##ApprovedQty##", email.ApprovedQty.ToString(), RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.Status))
+            {
+                str = Regex.Replace(str, "##Status##", email.Status, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ScreeningNo))
+            {
+                str = Regex.Replace(str, "##ScreeningNo##", email.ScreeningNo, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.RandomizationNo))
+            {
+                str = Regex.Replace(str, "##RandomizationNo##", email.RandomizationNo, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.KitNo))
+            {
+                str = Regex.Replace(str, "##KitNo##", email.KitNo, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ActionBy))
+            {
+                str = Regex.Replace(str, "##DoneBy##", email.ActionBy, RegexOptions.IgnoreCase);
+                str = Regex.Replace(str, "##SendBy##", email.ActionBy, RegexOptions.IgnoreCase);
+            }
+
+            return str;
+        }
+
+        private string GetSubjectIWRSEmail(SupplyManagementEmailConfiguration supplyManagementEmailConfiguration, IWRSEmailModel iWRSEmailModel)
+        {
+            string str = string.Empty;
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate)
+            {
+                str = " Verification Approval : " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.VerificationTemplateApproveReject)
+            {
+                str = " Verification Approval : " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected)
+            {
+                str = " Randomization Sheet : " + iWRSEmailModel.Status + " , " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.ShipmentRequest)
+            {
+                str = " Shipment Request : " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.ShipmentApproveReject)
+            {
+                str = " Shipment : " + iWRSEmailModel.Status + " , " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.KitReturn)
+            {
+                str = " Kit Return : " + iWRSEmailModel.KitNo;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.SubjectRandomization)
+            {
+                str = "Subject Randomization : " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.Threshold)
+            {
+                str = "Threshold : " + iWRSEmailModel.StudyCode;
+            }
+            if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.Unblind)
+            {
+                str = "Unblind : " + iWRSEmailModel.StudyCode;
+            }
+
+            return str;
         }
     }
 }

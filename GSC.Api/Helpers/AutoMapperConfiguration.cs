@@ -484,6 +484,7 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementKitAllocationSettings, SupplyManagementKitAllocationSettingsDto>().ReverseMap();
             CreateMap<SupplyManagementKitNumberSettings, SupplyManagementKitNumberSettingsDto>().ReverseMap();
             CreateMap<SupplyManagementVisitKITDetailDto, SupplyManagementVisitKITDetail>().ReverseMap();
+            CreateMap<SupplyManagementEmailConfigurationDto, SupplyManagementEmailConfiguration>().ReverseMap();
 
         }
     }

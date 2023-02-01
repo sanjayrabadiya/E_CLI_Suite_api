@@ -117,6 +117,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 receipt.Status = Helper.ProductVerificationStatus.SentForApproval;
                 _productReceiptRepository.Update(receipt);
+                _verificationApprovalTemplateRepository.SendForApprovalEmail(verificationApprovalTemplateDto, receipt);
             }
 
             if (_uow.Save() <= 0) throw new Exception("Creating Verification Approval Template failed on save.");

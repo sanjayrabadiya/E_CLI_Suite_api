@@ -1,7 +1,10 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.SupplyManagement;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace GSC.Respository.EmailSender
@@ -40,5 +43,7 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfLARReviewedPDFtoInvestigator(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
         void SendWithDrawEmailLAR(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
         public void SendEmailOfReviewed(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
+
+        void SendforApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration);
     }
 }

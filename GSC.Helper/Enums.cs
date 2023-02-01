@@ -996,5 +996,18 @@ namespace GSC.Helper
         [Description("Knee")] Knee = 1,
         [Description("Hip")] Hip = 2
     }
-    
+    public enum SupplyManagementEmailTriggers : short
+    {
+        [Description("Threshold")] Threshold = 1,
+        [Description("Send for approval(Verification Template)")] SendforApprovalVerificationTemplate = 2,
+        [Description("Verification Template Approved/Rejected")] VerificationTemplateApproveReject = 3,
+        [Description("Randomization Sheet Approved/Rejected")] RandomizationSheetApprovedRejected = 4,
+        [Description("Shipment Request")] ShipmentRequest = 5,
+        [Description("Shipment Approved/Rejected")] ShipmentApproveReject = 6,
+        [Description("Kit Return")] KitReturn = 7,
+        [Description("Subject Randomization")] SubjectRandomization = 8,
+        [Description("Unblind")] Unblind = 9
+    }
+
+
 }

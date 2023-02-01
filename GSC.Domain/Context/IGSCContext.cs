@@ -384,8 +384,11 @@ namespace GSC.Domain.Context
 
         DbSet<SupplyManagementKITDiscard> SupplyManagementKITDiscard { get; set; }
 
-        
+        DbSet<SupplyManagementEmailConfiguration> SupplyManagementEmailConfiguration { get; set; }
 
+        DbSet<SupplyManagementEmailConfigurationDetail> SupplyManagementEmailConfigurationDetail { get; set; }
+
+        DbSet<SupplyManagementEmailConfigurationDetailHistory> SupplyManagementEmailConfigurationDetailHistory { get; set; }
 
     }
 }

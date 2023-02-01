@@ -9,6 +9,9 @@ namespace GSC.Respository.SupplyManagement
     public interface IVerificationApprovalTemplateRepository : IGenericRepository<VerificationApprovalTemplate>
     {
         DesignVerificationApprovalTemplateDto GetVerificationApprovalTemplate(DesignVerificationApprovalTemplateDto designTemplateDto, int ProductVerificationDetailId);
-      
+
+        void SendForApprovalEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt);
+
+
     }
 }

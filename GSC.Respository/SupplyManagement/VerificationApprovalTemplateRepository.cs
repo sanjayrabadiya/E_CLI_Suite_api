@@ -7,6 +7,7 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.EmailSender;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,16 +22,19 @@ namespace GSC.Respository.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IVerificationApprovalTemplateValueRepository _verificationApprovalTemplateValueRepository;
-
+        private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IGSCContext _context;
         public VerificationApprovalTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IVerificationApprovalTemplateValueRepository verificationApprovalTemplateValueRepository,
-        IMapper mapper)
+        IMapper mapper, IEmailSenderRespository emailSenderRespository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _verificationApprovalTemplateValueRepository = verificationApprovalTemplateValueRepository;
             _mapper = mapper;
+            _emailSenderRespository = emailSenderRespository;
+            _context = context;
         }
 
 
@@ -89,6 +93,22 @@ namespace GSC.Respository.SupplyManagement
         {
             return _verificationApprovalTemplateValueRepository.All.AsNoTracking().Where(t => t.VerificationApprovalTemplateId == verificationApprovalTemplateId)
                     .ProjectTo<VerificationApprovalTemplateValueBasic>(_mapper.ConfigurationProvider).ToList();
+        }
+        public void SendForApprovalEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt)
+        {
+            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == verificationApprovalTemplateDto.ProjectId && x.Triggers == SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate).FirstOrDefault();
+            if (emailconfig != null)
+            {
+                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).Select(x => x.Users.Email).ToList();
+                if (details.Count() > 0)
+                {
+                    iWRSEmailModel.ProductType = productReceipt.ProductName;
+                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == verificationApprovalTemplateDto.ProjectId).FirstOrDefault().ProjectCode;
+                    iWRSEmailModel.ActionBy = _jwtTokenAccesser.UserName;
+                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details, emailconfig);
+                }
+            }
         }
     }
 }

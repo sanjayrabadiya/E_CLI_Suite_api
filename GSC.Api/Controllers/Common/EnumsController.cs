@@ -902,5 +902,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(fectore);
         }
+        [HttpGet]
+        [Route("GetSupplyManagementEmailTriggers")]
+        public IActionResult GetSupplyManagementEmailTriggers()
+        {
+            var emailtrigger = Enum.GetValues(typeof(SupplyManagementEmailTriggers))
+                .Cast<SupplyManagementEmailTriggers>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(emailtrigger);
+        }
     }
 }

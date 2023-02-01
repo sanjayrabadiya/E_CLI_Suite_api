@@ -440,6 +440,14 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementKITDiscard> SupplyManagementKITDiscard { get; set; }
 
+        public DbSet<SupplyManagementEmailConfiguration> SupplyManagementEmailConfiguration { get; set; }
+
+        public DbSet<SupplyManagementEmailConfigurationDetail> SupplyManagementEmailConfigurationDetail { get; set; }
+
+        public DbSet<SupplyManagementEmailConfigurationDetailHistory> SupplyManagementEmailConfigurationDetailHistory { get; set; }
+
+        
+
     }
 
 
