@@ -26,5 +26,6 @@ namespace GSC.Respository.Etmf
         EtmfGroupSearchModel GetEtmfSearchData(int id);
         void DeleteAllEtmfTableRecords(int id);
         byte[] DownloadPdf(string filename);
+        List<CommonArtifactDocumentDto> GetExpiredDocuments(int projectId);
     }
 }

@@ -276,5 +276,13 @@ namespace GSC.Api.Controllers.Etmf
             var fileName = Path.GetFileName(actualPath);
             return File(result, "application/octet-stream", fileName);
         }
+
+        [Route("GetExpiredDocumentReport/{projectId}")]
+        [HttpGet]
+        public IActionResult GetExpiredDocumentReport(int projectId)
+        {
+            var documents = _eTMFWorkplaceRepository.GetExpiredDocuments(projectId);
+            return Ok(documents);
+        }
     }
 }

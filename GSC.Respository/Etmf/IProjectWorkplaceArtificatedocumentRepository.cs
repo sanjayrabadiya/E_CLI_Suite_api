@@ -35,5 +35,6 @@ namespace GSC.Respository.Etmf
         List<DropDownDto> GetEtmfSubSectionArtificateDropdown(int subSectionId);
         void UpdateDocumentExpiryStatus();
         List<ProjectArtificateDocumentExpiryHistoryDto> GetDocumentHistory(int documentId);
+        List<CommonArtifactDocumentDto> GetExpiredDocumentReports(int projectId);
     }
 }

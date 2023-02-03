@@ -23,5 +23,6 @@ namespace GSC.Respository.Etmf
         void UpdateSubDocumentComment(int documentId, bool? isComment);
         void UpdateDocumentExpiryStatus();
         List<ProjectSubSecArtificateDocumentExpiryHistoryDto> GetSubSectionDocumentHistory(int documentId);
+        List<CommonArtifactDocumentDto> GetExpiredDocumentReports(int projectId);
     }
 }
