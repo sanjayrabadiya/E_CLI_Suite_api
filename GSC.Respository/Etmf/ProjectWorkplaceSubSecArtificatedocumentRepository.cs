@@ -152,6 +152,59 @@ namespace GSC.Respository.Etmf
             return id;
         }
 
+        public List<CommonArtifactDocumentDto> GetExpiredDocumentReports(int projectId)
+        {
+            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+
+            var documentList = All.Include(x => x.ProjectWorkplaceSubSectionArtifact)
+                .Include(x => x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
+                .Include(x => x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
+                .Where(x => x.DeletedDate == null && x.ExpiryDate != null && x.ProjectWorkplaceSubSectionArtifact.ProjectId == projectId && (x.CreatedBy == _jwtTokenAccesser.UserId ||
+              _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
+              || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)))
+              .ToList().OrderByDescending(x => x.Id);
+
+            foreach (var item in documentList)
+            {
+                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+                obj.Id = item.Id;
+                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceSubSectionArtifactId;
+                obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
+                obj.SectionName = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.SectionName;
+                obj.DocumentName = item.DocumentName;
+                obj.SubSectionName = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.SubSectionName;
+                obj.ZoneName = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName;
+                //obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
+                obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
+                obj.CreatedDate = item.CreatedDate;
+                obj.Level = 5.2;
+                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                obj.Version = item.Version;
+                obj.StatusName = item.Status.GetDescription();
+                obj.Status = (int)item.Status;
+                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.IsAccepted = item.IsAccepted;
+                //obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceSubSectionArtifact.EtmfArtificateMasterLbraryId;
+                //obj.Reviewer = users.OrderBy(x => x.SequenceNo).ToList();
+                //obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
+                //obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
+                obj.IsSendBack = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
+                //obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";
+                //obj.Approver = ApproverName.OrderBy(x => x.SequenceNo).OrderBy(x => x.CreatedDate).ToList();
+                obj.IsReplyAllComment = item.IsReplyAllComment;
+                //obj.SequenceNo = currentReviewer?.SequenceNo;
+                //obj.ApproveSequenceNo = currentApprover?.SequenceNo;
+                obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
+                //obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
+                obj.ExpiryDate = item.ExpiryDate;
+                dataList.Add(obj);
+            }
+
+            return dataList;
+        }
+
 
         public List<CommonArtifactDocumentDto> GetSubSecDocumentList(int Id)
         {

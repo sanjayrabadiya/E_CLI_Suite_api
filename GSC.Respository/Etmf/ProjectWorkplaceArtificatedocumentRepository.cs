@@ -134,6 +134,57 @@ namespace GSC.Respository.Etmf
             _context.Save();
         }
 
+        public List<CommonArtifactDocumentDto> GetExpiredDocumentReports(int projectId)
+        {
+            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+
+            var documentList = All.Include(x => x.ProjectWorkplaceArtificate).ThenInclude(x => x.EtmfArtificateMasterLbrary)
+           .ThenInclude(x => x.EtmfSectionMasterLibrary).ThenInclude(x => x.EtmfZoneMasterLibrary)
+           .Where(x => x.DeletedDate == null && x.ProjectWorkplaceArtificate.ProjectId == projectId && x.ExpiryDate != null
+           && (x.CreatedBy == _jwtTokenAccesser.UserId ||
+           _context.ProjectArtificateDocumentReview.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
+           || _context.ProjectArtificateDocumentApprover.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null))).ToList();
+            foreach (var item in documentList)
+            {
+                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+                obj.Id = item.Id;
+                obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
+                obj.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
+                obj.Artificatename = _etmfArtificateMasterLbraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId).ArtificateName;
+                obj.SectionName = _etmfMasterLibraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.EtmfSectionMasterLibraryId).SectionName;
+                obj.ZoneName = _etmfMasterLibraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.EtmfSectionMasterLibrary.EtmfMasterLibraryId).ZonName;
+                obj.DocumentName = item.DocumentName;
+                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+                obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
+                obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
+                //obj.Reviewer = users.OrderBy(x => x.SequenceNo).OrderBy(x => x.CreatedDate).ToList();
+                obj.CreatedDate = item.CreatedDate;
+                obj.Version = item.Version;
+                obj.IsMoved = item.IsMoved;
+                obj.StatusName = item.Status.GetDescription();
+                obj.Status = (int)item.Status;
+                obj.Level = 6;
+                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                //obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
+                //obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
+                obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
+                obj.IsAccepted = item.IsAccepted;
+                //obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";
+                //obj.Approver = ApproverName.OrderBy(x => x.SequenceNo).ToList();
+                obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
+                //obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
+                obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
+                obj.IsReplyAllComment = item.IsReplyAllComment;
+                //obj.SequenceNo = currentReviewer?.SequenceNo;
+                //obj.ApproveSequenceNo = currentApprover?.SequenceNo;
+                obj.ExpiryDate = item.ExpiryDate;
+                dataList.Add(obj);
+            }
+
+            return dataList;
+        }
 
         public List<CommonArtifactDocumentDto> GetDocumentList(int id)
         {
@@ -1590,8 +1641,8 @@ namespace GSC.Respository.Etmf
                                   CreatedByName = history.CreatedByUser.UserName,
                                   Reason = auditReason.Reason,
                                   ReasonOth = auditReason.ReasonOth,
-                                  Id=history.Id,
-                                  ExpiryDate=history.ExpiryDate
+                                  Id = history.Id,
+                                  ExpiryDate = history.ExpiryDate
                               }).ToList();
             return docHistory;
         }

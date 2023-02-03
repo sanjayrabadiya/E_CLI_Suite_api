@@ -1503,6 +1503,17 @@ namespace GSC.Respository.Etmf
 
             return resultBytes;
         }
+
+
+        public List<CommonArtifactDocumentDto> GetExpiredDocuments(int projectId)
+        {
+            var listDocuments = _projectWorkplaceArtificatedocumentRepository.GetExpiredDocumentReports(projectId);
+            var subDocumentLists = _projectWorkplaceSubSecArtificatedocumentRepository.GetExpiredDocumentReports(projectId);
+
+            listDocuments.AddRange(subDocumentLists);
+
+            return listDocuments.OrderByDescending(x=>x.CreatedDate).ToList();
+        }
     }
     public class TreeValue
     {
