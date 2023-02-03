@@ -7,7 +7,9 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Shared.JWTAuth;
@@ -33,6 +35,7 @@ namespace GSC.Respository.SupplyManagement
         private readonly ICountryRepository _countryRepository;
         private readonly IPharmacyStudyProductTypeRepository _pharmacyStudyProductTypeRepository;
         private readonly IGSCContext _context;
+        private readonly IEmailSenderRespository _emailSenderRespository;
         public SupplyManagementUploadFileRepository(IGSCContext context,
             IUploadSettingRepository uploadSettingRepository,
             ISupplyManagementUploadFileVisitRepository supplyManagementUploadFileVisitRepository,
@@ -41,7 +44,7 @@ namespace GSC.Respository.SupplyManagement
         IProjectDesignVisitRepository projectDesignVisitRepository,
              IProjectRepository projectRepository,
          ICountryRepository countryRepository,
-        IMapper mapper)
+        IMapper mapper, IEmailSenderRespository emailSenderRespository)
             : base(context)
         {
             _uploadSettingRepository = uploadSettingRepository;
@@ -51,7 +54,7 @@ namespace GSC.Respository.SupplyManagement
             _pharmacyStudyProductTypeRepository = pharmacyStudyProductTypeRepository;
             _projectRepository = projectRepository;
             _countryRepository = countryRepository;
-
+            _emailSenderRespository = emailSenderRespository;
             _mapper = mapper;
             _context = context;
         }
@@ -284,7 +287,7 @@ namespace GSC.Respository.SupplyManagement
         {
             DataTable dt = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable();
             var visitIds = GetVisitId(results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").ToList(), supplyManagementUploadFile);
-            if(dt.Rows.Count > 0)
+            if (dt.Rows.Count > 0)
             {
                 Add(supplyManagementUploadFile);
                 _context.Save();
@@ -320,9 +323,9 @@ namespace GSC.Respository.SupplyManagement
                     _context.Save();
                 }
             }
-            
+
             //Add supply Management Upload file Data
-           
+
             return "";
         }
 
@@ -468,6 +471,50 @@ namespace GSC.Respository.SupplyManagement
                 return All.Any(x => x.ProjectId == ProjectId && x.CountryId == CountryId && x.DeletedDate == null && x.Status == Helper.LabManagementUploadStatus.Pending);
 
             return false;
+
+        }
+        public void SendRandomizationUploadSheetEmail(SupplyManagementUploadFileDto obj)
+        {
+            SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
+            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+
+            var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected).ToList();
+            if (emailconfiglist != null)
+            {
+
+                emailconfig = emailconfiglist.FirstOrDefault();
+
+                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                if (details.Count() > 0)
+                {
+                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.SiteId).FirstOrDefault().ProjectCode;
+
+                    var site = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
+                    if (site != null)
+                    {
+                        iWRSEmailModel.SiteCode = site.ProjectCode;
+                        var managesite = _context.ManageSite.Where(x => x.Id == site.ManageSiteId).FirstOrDefault();
+                        if (managesite != null)
+                        {
+                            iWRSEmailModel.SiteName = managesite.SiteName;
+                        }
+                    }
+                    iWRSEmailModel.Status = obj.Status == LabManagementUploadStatus.Approve ? "Approved" : "Rejected";
+                    if (obj.CountryId > 0)
+                    {
+                        iWRSEmailModel.Country = _context.Country.Where(x => x.Id == obj.CountryId).FirstOrDefault().CountryName;
+                    }
+
+                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
+                    foreach (var item in details)
+                    {
+                        SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
+                        history.SupplyManagementEmailConfigurationDetailId = item.Id;
+                        _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+                        _context.Save();
+                    }
+                }
+            }
 
         }
     }

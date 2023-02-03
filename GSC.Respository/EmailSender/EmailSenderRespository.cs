@@ -812,9 +812,28 @@ namespace GSC.Respository.EmailSender
             if (!string.IsNullOrEmpty(email.RequestedBy))
             {
                 str = Regex.Replace(str, "##RequestedBy##", email.RequestedBy, RegexOptions.IgnoreCase);
-               
-            }
 
+            }
+            if (!string.IsNullOrEmpty(email.RequestToSiteName))
+            {
+                str = Regex.Replace(str, "##RequestToSiteName##", email.RequestToSiteName, RegexOptions.IgnoreCase);
+
+            }
+            if (!string.IsNullOrEmpty(email.RequestToSiteCode))
+            {
+                str = Regex.Replace(str, "##RequestToSiteCode##", email.RequestToSiteCode, RegexOptions.IgnoreCase);
+
+            }
+            if (email.ThresholdValue > 0)
+            {
+                str = Regex.Replace(str, "##ThresholdValue##", email.ThresholdValue.ToString(), RegexOptions.IgnoreCase);
+
+            }
+            if (email.RemainingKit > 0)
+            {
+                str = Regex.Replace(str, "##RemainingKit##", email.RemainingKit.ToString(), RegexOptions.IgnoreCase); 
+
+            }
             return str;
         }
 
@@ -851,7 +870,7 @@ namespace GSC.Respository.EmailSender
             }
             if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.Threshold)
             {
-                str = "Threshold : " + iWRSEmailModel.StudyCode;
+                str = "IMP Threshold Intimation : " + iWRSEmailModel.StudyCode;
             }
             if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.Unblind)
             {

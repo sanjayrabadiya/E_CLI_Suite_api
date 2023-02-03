@@ -273,13 +273,25 @@ namespace GSC.Respository.SupplyManagement
         }
         public void SendrequestEmail(int id)
         {
+            SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
             IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == id).FirstOrDefault();
             if (request != null)
             {
-                var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).FirstOrDefault();
+                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).ToList();
                 if (emailconfig != null)
                 {
+
+                    var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
+                    if (siteconfig.Count > 0)
+                    {
+                        emailconfig = siteconfig.Where(x => x.SiteId == request.FromProjectId).FirstOrDefault();
+                    }
+                    else
+                    {
+                        emailconfig = emailconfiglist.FirstOrDefault();
+                    }
+
                     var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
                     var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                     if (details.Count() > 0)
@@ -287,7 +299,7 @@ namespace GSC.Respository.SupplyManagement
 
                         if (request.PharmacyStudyProductType != null && request.PharmacyStudyProductType.ProductType != null)
                             iWRSEmailModel.ProductType = request.PharmacyStudyProductType.ProductType.ProductTypeCode;
-                        if (allocation.IsBlindedStudy == true)
+                        if (allocation != null && allocation.IsBlindedStudy == true)
                         {
                             iWRSEmailModel.ProductType = "Blinded study";
                         }
@@ -303,6 +315,24 @@ namespace GSC.Respository.SupplyManagement
                         if (request.IsSiteRequest)
                         {
                             iWRSEmailModel.RequestType = "Site to Site Request";
+                            if (request.ToProjectId > 0)
+                            {
+                                var toproject = _context.Project.Where(x => x.Id == request.ToProjectId).FirstOrDefault();
+                                if (toproject != null)
+                                {
+                                    iWRSEmailModel.RequestToSiteCode = toproject.ProjectCode;
+                                    var tomanagesite = _context.ManageSite.Where(x => x.Id == toproject.ManageSiteId).FirstOrDefault();
+                                    if (tomanagesite != null)
+                                    {
+                                        iWRSEmailModel.RequestToSiteName = tomanagesite.SiteName;
+                                    }
+
+                                }
+                                var Projectrights = _context.ProjectRight.Where(x => x.DeletedDate == null && x.ProjectId == request.ToProjectId).ToList();
+                                if (Projectrights.Count > 0)
+                                    details = details.Where(x => Projectrights.Select(z => z.UserId).Contains(x.UserId)).ToList();
+
+                            }
                         }
                         else
                         {

@@ -452,6 +452,11 @@ namespace GSC.Api.Controllers.Attendance
                     ModelState.AddModelError("Message", "Please upload randomization sheet");
                     return BadRequest(ModelState);
                 }
+                _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
+                if (numerformate.IsIWRS)
+                {
+                    _randomizationRepository.SendRandomizationThresholdEMail(randomizationDto);
+                }
             }
 
 

@@ -13,5 +13,7 @@ namespace GSC.Respository.SupplyManagement
         string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile);
 
         bool CheckUploadApproalPending(int ProjectId, int SiteId, int CountryId);
+
+        void SendRandomizationUploadSheetEmail(SupplyManagementUploadFileDto obj);
     }
 }

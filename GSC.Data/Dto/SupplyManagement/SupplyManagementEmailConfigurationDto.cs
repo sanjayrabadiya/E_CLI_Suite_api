@@ -81,8 +81,31 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int ApprovedQty { get; set; }
 
+        public int ThresholdValue { get; set; }
+
+        public int RemainingKit { get; set; }
+
         public string RequestType { get; set; }
 
+        public string RequestToSiteCode { get; set; }
+        public string RequestToSiteName { get; set; }
 
+        public string Country { get; set; }
+
+        public string TypeOfKitReturn { get; set; }
+
+        public int NoOfKitReturn { get; set; }
+
+
+    }
+    public class SupplyManagementEmailConfigurationDetailHistoryGridDto : BaseAuditDto
+    {
+        public int SupplyManagementEmailConfigurationDetailId { get; set; }
+        public int RoleId { get; set; }
+        public int UserId { get; set; }
+        public string UserName { get; set; }
+        public string RoleName { get; set; }
+
+        public string TriggerName { get; set; }
     }
 }

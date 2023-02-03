@@ -99,6 +99,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementUploadFileRepository.Update(supplyManagementUploadFile);
 
             if (_uow.Save() <= 0) throw new Exception("Updating lab management data failed on action.");
+            _supplyManagementUploadFileRepository.SendRandomizationUploadSheetEmail(supplyManagementUploadFileDto);
             return Ok(supplyManagementUploadFile.Id);
         }
         [HttpGet("CheckUploadApproalPending/{ProjectId}/{SiteId}/{CountryId}")]

@@ -198,5 +198,12 @@ namespace GSC.Respository.SupplyManagement
 
             return data;
         }
+        public List<SupplyManagementEmailConfigurationDetailHistoryGridDto> GetEmailHistory(int id)
+        {
+            var data = _context.SupplyManagementEmailConfigurationDetailHistory.Where(x => x.SupplyManagementEmailConfigurationDetail.SupplyManagementEmailConfigurationId == id).
+                   ProjectTo<SupplyManagementEmailConfigurationDetailHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            return data;
+        }
     }
 }

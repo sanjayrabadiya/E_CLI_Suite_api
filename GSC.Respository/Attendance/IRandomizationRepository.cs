@@ -64,5 +64,9 @@ namespace GSC.Respository.Attendance
         bool CheckKitNumber(RandomizationDto obj, bool IsIwrs);
 
         void UpdateRandmizationKitNotAssigned(RandomizationDto randomization);
+
+        void SendRandomizationIWRSEMail(RandomizationDto obj);
+
+        void SendRandomizationThresholdEMail(RandomizationDto obj);
     }
 }

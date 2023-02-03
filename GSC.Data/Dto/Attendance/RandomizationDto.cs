@@ -58,6 +58,10 @@ namespace GSC.Data.Dto.Attendance
         public string KitNo { get; set; }
 
         public string ProductCode { get; set; }
+
+        public int VisitId { get; set; }
+
+        public int KitCount { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto
@@ -163,6 +167,8 @@ namespace GSC.Data.Dto.Attendance
         public int VisitId { get; set; }
 
         public int KitDetailId { get; set; }
+
+        public int KitCount { get; set; }
 
 
     }

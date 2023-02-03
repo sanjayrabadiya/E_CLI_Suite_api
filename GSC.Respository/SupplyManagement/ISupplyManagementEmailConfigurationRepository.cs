@@ -22,5 +22,7 @@ namespace GSC.Respository.SupplyManagement
         void DeleteChildEmailUser(int id);
 
         List<SupplyManagementEmailConfigurationDetailGridDto> GetSupplyManagementEmailConfigurationDetailList(int id);
+
+        List<SupplyManagementEmailConfigurationDetailHistoryGridDto> GetEmailHistory(int id);
     }
 }

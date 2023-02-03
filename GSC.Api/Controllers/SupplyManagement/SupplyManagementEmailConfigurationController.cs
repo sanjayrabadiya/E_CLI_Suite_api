@@ -66,7 +66,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementEmailConfigurationRepository.Add(supplyManagementEmailConfiguration);
             if (_uow.Save() <= 0) throw new Exception("Creating email configuration failed on save.");
 
-            // _supplyManagementEmailConfigurationRepository.ChildEmailUserAdd(supplyManagementEmailConfigurationDto, supplyManagementEmailConfiguration.Id);
+            
             return Ok(supplyManagementEmailConfiguration.Id);
         }
 
@@ -86,12 +86,14 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
+                supplyManagementEmailConfiguration.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
+                supplyManagementEmailConfiguration.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
             _supplyManagementEmailConfigurationRepository.AddOrUpdate(supplyManagementEmailConfiguration);
 
             if (_uow.Save() <= 0) throw new Exception("Updating email configuration study product type failed on save.");
-            //_supplyManagementEmailConfigurationRepository.DeleteChildEmailUser(supplyManagementEmailConfigurationDto.Id);
-            //_supplyManagementEmailConfigurationRepository.ChildEmailUserAdd(supplyManagementEmailConfigurationDto, supplyManagementEmailConfiguration.Id);
+            
             return Ok(supplyManagementEmailConfiguration.Id);
         }
 
@@ -110,6 +112,12 @@ namespace GSC.Api.Controllers.SupplyManagement
                 item.DeletedBy = _jwtTokenAccesser.UserId;
                 _context.SupplyManagementEmailConfigurationDetail.Update(item);
             }
+            if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
+                record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
+                record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            _supplyManagementEmailConfigurationRepository.Update(record);
+            _uow.Save();
 
             _supplyManagementEmailConfigurationRepository.Delete(record);
             _uow.Save();
@@ -195,6 +203,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             _uow.Save();
 
             return Ok();
+        }
+        [HttpGet("GetEmailHistory/{id}")]
+        public IActionResult GetEmailHistory(int id)
+        {
+            var productType = _supplyManagementEmailConfigurationRepository.GetEmailHistory(id);
+            return Ok(productType);
         }
 
     }

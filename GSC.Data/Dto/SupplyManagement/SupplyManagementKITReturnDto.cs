@@ -65,6 +65,15 @@ namespace GSC.Data.Dto.SupplyManagement
         public List<SupplyManagementKITReturnGridDto> list { get; set; }
 
         public bool? IsUnUsed { get; set; }
+        public KitStatusRandomization TypeOfKitReturn { get; set; }
+
+        public int NoOfKitReturn { get;set; }
+
+        public int? siteId { get; set; }
+
+        public int ProjectId { get; set; }
+
+        public int? VisitId { get; set; }
     }
     public class SupplyManagementKITDiscardGridDto : BaseAuditDto
     {
