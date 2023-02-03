@@ -473,13 +473,13 @@ namespace GSC.Respository.SupplyManagement
             return false;
 
         }
-        public void SendRandomizationUploadSheetEmail(SupplyManagementUploadFileDto obj)
+        public void SendRandomizationUploadSheetEmail(SupplyManagementUploadFile obj)
         {
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
             IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
 
             var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected).ToList();
-            if (emailconfiglist != null)
+            if (emailconfiglist != null && emailconfiglist.Count > 0)
             {
 
                 emailconfig = emailconfiglist.FirstOrDefault();

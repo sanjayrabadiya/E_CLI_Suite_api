@@ -14,6 +14,6 @@ namespace GSC.Respository.SupplyManagement
 
         bool CheckUploadApproalPending(int ProjectId, int SiteId, int CountryId);
 
-        void SendRandomizationUploadSheetEmail(SupplyManagementUploadFileDto obj);
+        void SendRandomizationUploadSheetEmail(SupplyManagementUploadFile obj);
     }
 }

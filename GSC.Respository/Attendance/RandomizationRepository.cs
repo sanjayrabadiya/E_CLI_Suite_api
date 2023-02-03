@@ -1907,7 +1907,7 @@ namespace GSC.Respository.Attendance
             if (study != null)
             {
                 var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.SubjectRandomization).ToList();
-                if (emailconfiglist != null)
+                if (emailconfiglist != null && emailconfiglist.Count > 0)
                 {
                     var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                     if (siteconfig.Count > 0)
@@ -1960,7 +1960,7 @@ namespace GSC.Respository.Attendance
                 if (study != null)
                 {
                     var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
-                    if (emailconfiglist != null)
+                    if (emailconfiglist != null && emailconfiglist.Count > 0)
                     {
                         var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                         if (siteconfig.Count > 0)

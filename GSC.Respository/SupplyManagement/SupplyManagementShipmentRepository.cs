@@ -240,7 +240,7 @@ namespace GSC.Respository.SupplyManagement
             if (request != null)
             {
                 var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentApproveReject).ToList();
-                if (emailconfiglist != null)
+                if (emailconfiglist != null && emailconfiglist.Count > 0)
                 {
                     var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                     if (siteconfig.Count > 0)

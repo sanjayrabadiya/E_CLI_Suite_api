@@ -341,7 +341,7 @@ namespace GSC.Respository.SupplyManagement
                 if (study != null)
                 {
                     var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
-                    if (emailconfiglist != null)
+                    if (emailconfiglist != null && emailconfiglist.Count > 0)
                     {
                         var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                         if (siteconfig.Count > 0)
@@ -718,7 +718,7 @@ namespace GSC.Respository.SupplyManagement
             IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
 
             var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected).ToList();
-            if (emailconfiglist != null)
+            if (emailconfiglist != null && emailconfiglist.Count > 0)
             {
 
                 emailconfig = emailconfiglist.FirstOrDefault();
