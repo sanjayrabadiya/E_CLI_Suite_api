@@ -759,6 +759,7 @@ namespace GSC.Respository.ProjectRight
                 Id = x.FirstOrDefault().Id,
                 ProjectId = x.FirstOrDefault().ProjectId,
                 UserId = x.Key,
+                RoleId= x.FirstOrDefault().RoleId,
                 UserName = _context.Users.Where(p => p.Id == x.Key).Select(r => r.UserName).FirstOrDefault(),
                 RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.FirstOrDefault().ProjectId && c.UserId == x.Key
                 && c.RoleId == x.FirstOrDefault().RoleId).Select(a => a.role.RoleName).FirstOrDefault(),

@@ -39,8 +39,8 @@ namespace GSC.Api.Controllers.Etmf
 
         /// Get User for etmf rights
         /// Created By Swati
-        [HttpGet("GetByUserId/{UserId}/{ProjectId}")]
-        public IActionResult GetByUserId(int UserId, int ProjectId)
+        [HttpGet("GetByUserId/{UserId}/{ProjectId}/{roleId}")]
+        public IActionResult GetByUserId(int UserId, int ProjectId, int roleId)
         {
             if (UserId <= 0) return BadRequest();
 
@@ -51,7 +51,7 @@ namespace GSC.Api.Controllers.Etmf
                 ModelState.AddModelError("Message", "Worksplace Not Created.");
                 return BadRequest(ModelState);
             }
-            var permissionDtos = _etmfUserPermissionRepository.GetByUserId(UserId, ProjectId, ParentProject);
+            var permissionDtos = _etmfUserPermissionRepository.GetByUserId(UserId, roleId, ProjectId, ParentProject);
 
             return Ok(permissionDtos);
         }

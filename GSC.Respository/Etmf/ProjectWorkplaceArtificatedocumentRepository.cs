@@ -202,7 +202,8 @@ namespace GSC.Respository.Etmf
                 .Where(x => x.ProjectWorkplaceArtificateId == id && x.DeletedDate == null
                 && (x.CreatedBy == _jwtTokenAccesser.UserId ||
                 _context.ProjectArtificateDocumentReview.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
-                || _context.ProjectArtificateDocumentApprover.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null))).ToList();
+                || _context.ProjectArtificateDocumentApprover.Any(m => m.ProjectWorkplaceArtificatedDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)))
+                .Include(x => x.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission).ToList();
 
             foreach (var item in documentList)
             {
@@ -210,8 +211,10 @@ namespace GSC.Respository.Etmf
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
+                    var role = item.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
                     DocumentUsers obj = new DocumentUsers();
                     obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
                     obj.UserId = r.UserId;
                     obj.SequenceNo = r.SequenceNo;
                     obj.IsSendBack = r.IsSendBack;
@@ -239,8 +242,10 @@ namespace GSC.Respository.Etmf
                 var ApproverName = new List<DocumentUsers>();
                 ApproveList.ForEach(r =>
                 {
+                    var role = item.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
                     DocumentUsers obj = new DocumentUsers();
                     obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
                     obj.SequenceNo = r.SequenceNo;
                     obj.IsSendBack = r.IsApproved;
                     obj.CreatedDate = r.CreatedDate;

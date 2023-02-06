@@ -7,6 +7,8 @@ namespace GSC.Data.Dto.Etmf
     public class EtmfUserPermissionDto : BaseAuditDto
     {
         public int UserId { get; set; }
+
+        public int? RoleId { get; set; }
         public int ProjectWorkplaceDetailId { get; set; }
         public int ProjectWorkplaceId { get; set; }
         public int WorkPlaceFolderId { get; set; }
