@@ -222,7 +222,7 @@ namespace GSC.Respository.Etmf
             if (reviewdocument == null || reviewdocument.Count == 0) return dataList;
             var documentList = FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == Id && x.DeletedDate == null && (x.CreatedBy == _jwtTokenAccesser.UserId ||
                 _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
-                || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)), x => x.ProjectWorkplaceSubSectionArtifact)
+                || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)), x => x.ProjectWorkplaceSubSectionArtifact, m => m.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission)
                 .ToList().OrderByDescending(x => x.Id);
 
             foreach (var item in documentList)
@@ -231,8 +231,10 @@ namespace GSC.Respository.Etmf
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
+                    var role = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
                     DocumentUsers obj = new DocumentUsers();
                     obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
                     obj.SequenceNo = r.SequenceNo;
                     obj.UserId = r.UserId;
                     obj.IsSendBack = r.isSendBack;
@@ -259,8 +261,10 @@ namespace GSC.Respository.Etmf
                 var ApproverName = new List<DocumentUsers>();
                 ApproveList.ForEach(r =>
                 {
+                    var role = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
                     DocumentUsers obj = new DocumentUsers();
                     obj.UserName = _userRepository.Find(r.UserId).UserName;
+                    obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
                     obj.SequenceNo = r.SequenceNo;
                     obj.IsSendBack = r.IsApproved;
                     obj.CreatedDate = r.CreatedDate;

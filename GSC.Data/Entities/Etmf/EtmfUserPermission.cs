@@ -10,6 +10,7 @@ namespace GSC.Data.Entities.Etmf
     {
         public int UserId { get; set; }
 
+        public int? RoleId { get; set; }
         public int ProjectWorkplaceDetailId { get; set; }
 
         public bool IsView { get; set; }
@@ -26,6 +27,7 @@ namespace GSC.Data.Entities.Etmf
         [ForeignKey("ProjectWorkplaceDetailId")]
         public EtmfProjectWorkPlace ProjectWorkplaceDetail { get; set; }
         public User User { get; set; }
+        public User Role { get; set; }
         public AuditReason AuditReason { get; set; }
         public int ModifiedAuditReasonId { get; set; }
         public string ModifiedRollbackReason { get; set; }

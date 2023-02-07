@@ -33,13 +33,14 @@ namespace GSC.Respository.Etmf
             _projectRightRepository = projectRightRepository;
         }
 
-        public List<EtmfUserPermissionDto> GetByUserId(int UserId, int ProjectId, int? ParentProject)
+        public List<EtmfUserPermissionDto> GetByUserId(int UserId, int RoleId, int ProjectId, int? ParentProject)
         {
             // Get workplace folder name
             var Worksplace = Enum.GetValues(typeof(WorkPlaceFolder))
                             .Cast<WorkPlaceFolder>().Select(e => new EtmfUserPermissionDto
                             {
                                 UserId = UserId,
+                                RoleId=RoleId,
                                 ItemId = Convert.ToInt16(e),
                                 ItemName = e.GetDescription(),
                                 hasChild = true,
@@ -63,6 +64,7 @@ namespace GSC.Respository.Etmf
             ProjectWorkplaceDetail.ForEach(t =>
             {
                 t.UserId = UserId;
+                t.RoleId = RoleId;
                 var p = All.Where(s =>
                     s.ProjectWorkplaceDetailId == t.ProjectWorkplaceDetailId && s.UserId == UserId && s.DeletedDate == null).FirstOrDefault();
                 if (p == null) return;
