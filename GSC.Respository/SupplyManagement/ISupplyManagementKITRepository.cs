@@ -43,5 +43,9 @@ namespace GSC.Respository.SupplyManagement
         void KitDiscard(SupplyManagementKITDiscardDtofinal data);
 
         void KitSendtoSponser(SupplyManagementKITDiscardDtofinal data);
+
+        void SendKitReturnEmail(SupplyManagementKITReturnDtofinal obj);
+
+        void returnVerificationStatus(SupplyManagementKITReturnVerificationDto data);
     }
 }

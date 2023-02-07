@@ -281,7 +281,8 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult ReturnSaveAll([FromBody] SupplyManagementKITReturnDtofinal supplyManagementKITReturnGridDto)
         {
             _supplyManagementKITRepository.ReturnSaveAll(supplyManagementKITReturnGridDto);
-
+            if (supplyManagementKITReturnGridDto != null && supplyManagementKITReturnGridDto.ProjectId > 0)
+                _supplyManagementKITRepository.SendKitReturnEmail(supplyManagementKITReturnGridDto);
             return Ok();
         }
 
@@ -304,6 +305,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult KitSendtoSponser([FromBody] SupplyManagementKITDiscardDtofinal supplyManagementKITReturnGridDto)
         {
             _supplyManagementKITRepository.KitSendtoSponser(supplyManagementKITReturnGridDto);
+            return Ok();
+        }
+        [HttpPost]
+        [Route("returnVerificationStatus")]
+        public IActionResult returnVerificationStatus([FromBody] SupplyManagementKITReturnVerificationDto supplyManagementKITReturnVerificationDto)
+        {
+            _supplyManagementKITRepository.returnVerificationStatus(supplyManagementKITReturnVerificationDto);
             return Ok();
         }
 

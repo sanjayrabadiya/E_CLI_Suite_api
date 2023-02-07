@@ -330,7 +330,7 @@ namespace GSC.Respository.SupplyManagement
             SendRandomizationThresholdEMail(obj, kitcount);
             return obj;
         }
-        public void SendRandomizationThresholdEMail(SupplyManagementVisitKITDetailDto obj,int kitcount)
+        public void SendRandomizationThresholdEMail(SupplyManagementVisitKITDetailDto obj, int kitcount)
         {
             var threshold = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (threshold != null && kitcount < threshold.ThresholdValue)
@@ -412,7 +412,7 @@ namespace GSC.Respository.SupplyManagement
                                                          .ThenInclude(x => x.ProductType)
                                                          .Where(x => x.SupplyManagementKIT.ProjectId == projectId
                                                           && x.DeletedDate == null
-                                                          && x.Status != KitStatus.Missing
+                                                          && x.Status != KitStatus.Discard
                                                           ).Select(x => new SupplyManagementKITReturnGridDto
                                                           {
                                                               KitNo = x.KitNo,
@@ -424,6 +424,7 @@ namespace GSC.Respository.SupplyManagement
                                                               SupplyManagementKITDetailId = x.Id,
                                                               VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                                               Status = x.Status,
+                                                              PrevStatus = x.PrevStatus,
                                                               ReturnImp = x.ReturnImp,
                                                               ReturnReason = x.ReturnReason,
                                                               CreatedByUser = x.CreatedByUser.UserName,
@@ -435,7 +436,8 @@ namespace GSC.Respository.SupplyManagement
                                                               SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
                                                               SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
                                                               ActionBy = x.ReturnBy,
-                                                              ActionDate = x.ReturnDate
+                                                              ActionDate = x.ReturnDate,
+                                                              IsUnUsed = x.IsUnUsed
                                                           }).ToList();
             if (data.Count > 0)
             {
@@ -458,6 +460,26 @@ namespace GSC.Respository.SupplyManagement
                     }
                     x.ActionByName = x.ActionBy > 0 ? _context.Users.Where(z => z.Id == x.ActionBy).FirstOrDefault().UserName : "";
                     x.ActionDate = x.ActionDate;
+                    if (kitType == KitStatusRandomization.Return)
+                    {
+                        if (x.Status == KitStatus.Returned && (x.PrevStatus == KitStatus.Missing || x.PrevStatus == KitStatus.Damaged))
+                        {
+                            x.StatusName = x.PrevStatus.ToString();
+                        }
+                        if (x.Status == KitStatus.Returned && (x.PrevStatus == KitStatus.WithoutIssue || x.PrevStatus == KitStatus.WithIssue) && x.IsUnUsed == true)
+                        {
+                            x.StatusName = "Unused";
+                        }
+                        if (x.Status == KitStatus.Returned && x.PrevStatus == KitStatus.Allocated && x.IsUnUsed == false)
+                        {
+                            x.StatusName = "Used";
+                        }
+
+                    }
+                    else
+                    {
+                        x.StatusName = x.Status.GetDescription();
+                    }
 
                 });
                 if (kitType == KitStatusRandomization.Used)
@@ -475,6 +497,30 @@ namespace GSC.Respository.SupplyManagement
                 if (kitType == KitStatusRandomization.Return)
                 {
                     data = data.Where(x => x.Status == KitStatus.Returned).ToList();
+                }
+                if (kitType == KitStatusRandomization.Missing)
+                {
+                    data = data.Where(x => x.Status == KitStatus.Missing).ToList();
+                }
+                if (kitType == KitStatusRandomization.ReturnReceive)
+                {
+                    data = data.Where(x => x.Status == KitStatus.ReturnReceive).ToList();
+                }
+                if (kitType == KitStatusRandomization.ReturnReceiveDamaged)
+                {
+                    data = data.Where(x => x.Status == KitStatus.ReturnReceiveDamaged).ToList();
+                }
+                if (kitType == KitStatusRandomization.ReturnReceiveMissing)
+                {
+                    data = data.Where(x => x.Status == KitStatus.ReturnReceiveMissing).ToList();
+                }
+                if (kitType == KitStatusRandomization.ReturnReceiveWithIssue)
+                {
+                    data = data.Where(x => x.Status == KitStatus.ReturnReceiveWithIssue).ToList();
+                }
+                if (kitType == KitStatusRandomization.ReturnReceiveWithoutIssue)
+                {
+                    data = data.Where(x => x.Status == KitStatus.ReturnReceiveWithoutIssue).ToList();
                 }
                 if (visitId > 0)
                 {
@@ -522,6 +568,7 @@ namespace GSC.Respository.SupplyManagement
                     {
                         datakit.ReturnImp = obj.ReturnImp;
                         datakit.ReturnReason = obj.ReturnReason;
+                        datakit.PrevStatus = datakit.Status;
                         datakit.Status = KitStatus.Returned;
                         datakit.IsUnUsed = data.IsUnUsed;
                         _context.SupplyManagementKITDetail.Update(datakit);
@@ -755,6 +802,23 @@ namespace GSC.Respository.SupplyManagement
                 }
             }
 
+        }
+
+        public void returnVerificationStatus(SupplyManagementKITReturnVerificationDto data)
+        {
+            var datakit = _context.SupplyManagementKITDetail.Where(x => x.Id == data.SupplyManagementKITDetailId).FirstOrDefault();
+            if (datakit != null)
+            {
+                datakit.Status = data.Status;
+                _context.SupplyManagementKITDetail.Update(datakit);
+
+                SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                history.SupplyManagementKITDetailId = data.SupplyManagementKITDetailId;
+                history.Status = data.Status;
+                history.RoleId = _jwtTokenAccesser.RoleId;
+                _context.SupplyManagementKITDetailHistory.Add(history);
+                _context.Save();
+            }
         }
     }
 }

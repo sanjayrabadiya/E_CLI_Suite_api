@@ -41,6 +41,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ProjectDesignVisitId { get; set; }
         public KitStatus Status { get; set; }
 
+        public KitStatus? PrevStatus { get; set; }
+
         public string ReturnReason { get; set; }
 
         public int? SiteId { get; set; }
@@ -55,7 +57,11 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ActionByName { get; set; }
 
-       
+        public string StatusName { get; set; }
+
+        public bool? IsUnUsed { get; set; }
+
+
     }
 
     public class SupplyManagementKITReturnDtofinal
@@ -119,6 +125,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public List<SupplyManagementKITDiscardGridDto> list { get; set; }
+    }
+    public class SupplyManagementKITReturnVerificationDto
+    {
+        public int SupplyManagementKITDetailId { get; set; }
+        public KitStatus Status { get; set; }
     }
 
 }

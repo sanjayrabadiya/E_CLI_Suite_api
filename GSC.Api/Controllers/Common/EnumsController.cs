@@ -885,7 +885,7 @@ namespace GSC.Api.Controllers.Common
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
-                }).Where(x => x.Id == 1 || x.Id == 2 || x.Id == 3 || x.Id == 4).OrderBy(o => o.Id).ToList();
+                }).Where(x => x.Id == 1 || x.Id == 2 || x.Id == 3 || x.Id == 4 || x.Id == 7 || x.Id == 8 || x.Id == 9 || x.Id == 10 || x.Id == 11 || x.Id == 12).OrderBy(o => o.Id).ToList();
 
             return Ok(fectore);
         }
@@ -898,7 +898,7 @@ namespace GSC.Api.Controllers.Common
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
-                }).Where(x => x.Id == 1 || x.Id == 2 || x.Id == 3 || x.Id == 5 || x.Id == 6).OrderBy(o => o.Id).ToList();
+                }).Where(x => x.Id == 1 || x.Id == 2 || x.Id == 3 || x.Id == 5 || x.Id == 6 || x.Id == 7).OrderBy(o => o.Id).ToList();
 
             return Ok(fectore);
         }
@@ -915,5 +915,45 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(emailtrigger);
         }
+        [HttpGet]
+        [Route("GetKitStatusForReturn/{statusName}")]
+        public IActionResult GetKitStatusForReturn(string statusName)
+        {
+            if (statusName == "Missing")
+            {
+                var status = Enum.GetValues(typeof(KitStatus))
+                    .Cast<KitStatus>().Select(e => new DropDownEnum
+                    {
+                        Id = Convert.ToInt16(e),
+                        Value = e.GetDescription()
+                    }).Where(x => x.Id == 12 || x.Id == 13).OrderBy(o => o.Id).ToList();
+
+                return Ok(status);
+            }
+            if (statusName == "Damaged" || statusName == "Used")
+            {
+                var status = Enum.GetValues(typeof(KitStatus))
+                    .Cast<KitStatus>().Select(e => new DropDownEnum
+                    {
+                        Id = Convert.ToInt16(e),
+                        Value = e.GetDescription()
+                    }).Where(x => x.Id == 11).OrderBy(o => o.Id).ToList();
+
+                return Ok(status);
+            }
+            if (statusName == "Unused")
+            {
+                var status = Enum.GetValues(typeof(KitStatus))
+                    .Cast<KitStatus>().Select(e => new DropDownEnum
+                    {
+                        Id = Convert.ToInt16(e),
+                        Value = e.GetDescription()
+                    }).Where(x => x.Id == 12 || x.Id == 13 || x.Id == 14 || x.Id == 15).OrderBy(o => o.Id).ToList();
+
+                return Ok(status);
+            }
+            return Ok();
+        }
+
     }
 }

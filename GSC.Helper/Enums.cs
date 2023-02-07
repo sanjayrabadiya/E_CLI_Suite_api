@@ -922,7 +922,12 @@ namespace GSC.Helper
         [Description("Receipt Without Issues")] WithoutIssue = 7,
         [Description("Allocated")] Allocated = 8,
         [Description("Discard")] Discard = 9,
-        [Description("Send to sponser")] Sendtosponser = 10
+        [Description("Send to sponser")] Sendtosponser = 10,
+        [Description("Return Receive")] ReturnReceive = 11,
+        [Description("Return Receive With Issue")] ReturnReceiveWithIssue = 12,
+        [Description("Return Receive Without Issue")] ReturnReceiveWithoutIssue = 13,
+        [Description("Return Receive Missing")] ReturnReceiveMissing = 14,
+        [Description("Return Receive Damaged")] ReturnReceiveDamaged = 15
     }
 
     public enum ScreeningReport : short
@@ -991,7 +996,15 @@ namespace GSC.Helper
         [Description("Damaged")] Damaged = 3,
         [Description("Returned")] Return = 4,
         [Description("Discard")] Discard = 5,
-        [Description("Send to sponser")] Sendtosponser = 6
+        [Description("Send to sponser")] Sendtosponser = 6,
+        [Description("Missing")] Missing = 7,
+        [Description("Return Receive")] ReturnReceive = 8,
+        [Description("Return Receive With Issue")] ReturnReceiveWithIssue = 9,
+        [Description("Return Receive Without Issue")] ReturnReceiveWithoutIssue = 10,
+        [Description("Return Receive Missing")] ReturnReceiveMissing = 11,
+        [Description("Return Receive Damaged")] ReturnReceiveDamaged = 12
+
+
     }
     public enum Jointfactor : short
     {

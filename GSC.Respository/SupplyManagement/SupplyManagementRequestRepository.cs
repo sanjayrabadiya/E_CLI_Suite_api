@@ -138,7 +138,7 @@ namespace GSC.Respository.SupplyManagement
                         x.SupplyManagementShipmentId == null
                         && x.SupplyManagementKIT.SiteId != null
                         && x.SupplyManagementKIT.SiteId == obj.ToProjectId
-                        && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.Returned)
+                        && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                         && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                         && x.DeletedDate == null).Count();
             }
@@ -147,7 +147,7 @@ namespace GSC.Respository.SupplyManagement
                 remainingKit = _context.SupplyManagementKITDetail.Where(x =>
                                  x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId
                                  && x.SupplyManagementKIT.SiteId == null
-                                 && (x.Status == KitStatus.AllocationPending || (x.Status == KitStatus.Returned && x.IsUnUsed == true))
+                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                  && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                                  && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
                                  && x.DeletedDate == null).Count();
@@ -166,7 +166,7 @@ namespace GSC.Respository.SupplyManagement
                         x.SupplyManagementShipmentId == null
                         && x.SupplyManagementKIT.SiteId != null
                         && x.SupplyManagementKIT.SiteId == obj.ToProjectId
-                        && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.Returned)
+                        && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                         && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                         && x.DeletedDate == null).Count();
             }
@@ -174,7 +174,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 remainingKit = _context.SupplyManagementKITDetail.Where(x =>
                                   x.SupplyManagementKIT.SiteId == null
-                                 && (x.Status == KitStatus.AllocationPending || (x.Status == KitStatus.Returned && x.IsUnUsed == true))
+                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                  && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                                  && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
                                  && x.DeletedDate == null).Count();
@@ -196,7 +196,7 @@ namespace GSC.Respository.SupplyManagement
 
                             x.SupplyManagementShipmentId == null
                             && x.SupplyManagementKIT.SiteId != null
-                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.Returned)
+                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                             && x.SupplyManagementKIT.SiteId == obj.ToProjectId
                             && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                             && x.DeletedDate == null).Select(x => new KitListApprove
@@ -212,7 +212,7 @@ namespace GSC.Respository.SupplyManagement
                 {
                     data = _context.SupplyManagementKITDetail.Where(x =>
                                  x.SupplyManagementKIT.SiteId == null
-                                 && (x.Status == KitStatus.AllocationPending || (x.Status == KitStatus.Returned && x.IsUnUsed == true))
+                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                  && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
                                  && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                                  && x.DeletedDate == null).Select(x => new KitListApprove
@@ -234,7 +234,7 @@ namespace GSC.Respository.SupplyManagement
                             x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId &&
                             x.SupplyManagementShipmentId == null
                             && x.SupplyManagementKIT.SiteId != null
-                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.Returned)
+                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                             && x.SupplyManagementKIT.SiteId == obj.ToProjectId
                             && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                             && x.DeletedDate == null).Select(x => new KitListApprove
@@ -254,7 +254,7 @@ namespace GSC.Respository.SupplyManagement
                     data = _context.SupplyManagementKITDetail.Where(x =>
                                      x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId
                                      && x.SupplyManagementKIT.SiteId == null
-                                     && (x.Status == KitStatus.AllocationPending || (x.Status == KitStatus.Returned && x.IsUnUsed == true))
+                                     && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                      && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
                                      && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
                                      && x.DeletedDate == null).Select(x => new KitListApprove

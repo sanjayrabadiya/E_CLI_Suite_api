@@ -42,5 +42,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? ReturnBy { get; set; }
 
         public DateTime? ReturnDate { get; set; }
+
+        public KitStatus? PrevStatus { get; set; }
     }
 }

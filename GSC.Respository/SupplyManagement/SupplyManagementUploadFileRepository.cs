@@ -487,9 +487,9 @@ namespace GSC.Respository.SupplyManagement
                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                 if (details.Count() > 0)
                 {
-                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.SiteId).FirstOrDefault().ProjectCode;
+                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault().ProjectCode;
 
-                    var site = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
+                    var site = _context.Project.Where(x => x.Id == obj.SiteId).FirstOrDefault();
                     if (site != null)
                     {
                         iWRSEmailModel.SiteCode = site.ProjectCode;
