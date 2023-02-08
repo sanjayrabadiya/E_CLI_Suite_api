@@ -159,7 +159,7 @@ namespace GSC.Respository.Etmf
             var documentList = All.Include(x => x.ProjectWorkplaceSubSectionArtifact)
                 .Include(x => x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
                 .Include(x => x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
-                .Where(x => x.DeletedDate == null && x.ExpiryDate != null && x.ProjectWorkplaceSubSectionArtifact.ProjectId == projectId && (x.CreatedBy == _jwtTokenAccesser.UserId ||
+                .Where(x => x.DeletedDate == null && x.ExpiryDate != null && x.Status== ArtifactDocStatusType.Expired && x.ProjectWorkplaceSubSectionArtifact.ProjectId == projectId && (x.CreatedBy == _jwtTokenAccesser.UserId ||
               _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
               || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)))
               .ToList().OrderByDescending(x => x.Id);
