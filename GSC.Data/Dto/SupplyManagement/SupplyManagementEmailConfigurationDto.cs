@@ -19,6 +19,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string EmailBody { get; set; }
+
+        [NotMapped]
         public IList<SupplyManagementEmailConfigurationDetail> SupplyManagementEmailConfigurationDetail { get; set; } = null;
 
 

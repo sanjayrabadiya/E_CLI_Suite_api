@@ -90,7 +90,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 supplyManagementEmailConfiguration.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
             if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
                 supplyManagementEmailConfiguration.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
-            _supplyManagementEmailConfigurationRepository.AddOrUpdate(supplyManagementEmailConfiguration);
+            _supplyManagementEmailConfigurationRepository.Update(supplyManagementEmailConfiguration);
 
             if (_uow.Save() <= 0) throw new Exception("Updating email configuration study product type failed on save.");
             
