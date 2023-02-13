@@ -26,7 +26,7 @@ namespace GSC.Data.Dto.Etmf
         public string TrailLevelDoc { get; set; }
         public string CountryLevelDoc { get; set; }
         public string SiteLevelDoc { get; set; }
-
+        public string ArtifactCodeName { get; set; }
         public FileModel fileModel { get; set; }
     }
 

@@ -50,6 +50,8 @@ namespace GSC.Data.Dto.Etmf
 
 
         public int ProjectWorkplaceSubSectionId { get; set; }
+
+        public string ArtifactCodeName { get; set; }
         public string ArtifactName { get; set; }
     }
     public class WorkplaceFolderDto
