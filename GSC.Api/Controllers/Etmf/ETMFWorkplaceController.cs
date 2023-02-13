@@ -151,9 +151,11 @@ namespace GSC.Api.Controllers.Etmf
 
                         foreach (var artificate in section.ProjectWorkplaceDetails)
                         {
+                            var artifactMater = _etmfArtificateMasterLbraryRepository.Find(artificate.EtmfArtificateMasterLbraryId);
                             artificate.TableTag = (int)EtmfTableNameTag.ProjectWorkPlaceArtificate;
                             artificate.Version = SaveFolderStructure.Version;
                             artificate.ProjectId = SaveFolderStructure.ProjectId;
+                            artificate.ArtifactCodeName = artifactMater.ArtifactCodeName;
                             _projectWorkplaceArtificateRepository.Add(artificate);
                         }
                     }

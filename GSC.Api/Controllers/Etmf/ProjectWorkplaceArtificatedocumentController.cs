@@ -8,10 +8,13 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Etmf;
+using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
@@ -102,6 +105,62 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(projectWorkplaceArtificatedocument.Id);
 
         }
+
+        [HttpPost]
+        [Route("SaveBulkDocument")]
+        [TransactionRequired]
+        public IActionResult SaveBulkDocument([FromBody] List<BulkDocumentUploadModel> bulkDocuments)
+        {
+            foreach (var document in bulkDocuments)
+            {
+                var etmfProjectArtifact = _projectWorkplaceArtificateRepository.All
+                    .Where(x => x.ProjectId == document.ProjectId && x.ArtifactCodeName == document.ArtifactCodeName && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
+                    .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfUserPermission)
+                    .FirstOrDefault(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsAdd).Any());
+
+
+                if (etmfProjectArtifact != null)
+                {
+                    var fileModel = new FileModel()
+                    {
+                        Base64 = document.Base64,
+                        Extension = document.Extension
+                    };
+
+                    var projectWorkplaceArtificatedocumentDto = new ProjectWorkplaceArtificatedocumentDto()
+                    {
+                        ProjectWorkplaceArtificateId = etmfProjectArtifact.Id,
+                        FileModel = fileModel,
+                        FileName = document.FileName,
+                        ProjectId = document.ProjectId,
+                        SuperSede = false
+                    };
+
+
+                    var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
+
+                    _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
+                    if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+
+                    _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
+                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
+                }
+            }
+            return Ok(1);
+        }
+
+        [HttpGet]
+        [Route("CheckDocumentName/{projectId}")]
+        public ActionResult CheckDocumentName(int projectId)
+        {
+            var etmfProjectArtifact = _projectWorkplaceArtificateRepository.All
+                   .Where(x => x.ProjectId == projectId && x.ArtifactCodeName != null && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
+                   .Select(s =>s.ArtifactCodeName).ToList();
+
+            return Ok(etmfProjectArtifact);
+      
+        }
+
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)

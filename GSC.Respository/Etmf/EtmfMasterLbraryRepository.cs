@@ -75,6 +75,7 @@ namespace GSC.Respository.Etmf
                             artificateObj.TrailLevelDoc = item.TrailLevelDoc == "X" ? true : false;
                             artificateObj.CountryLevelDoc = item.CountryLevelDoc == "X" ? true : false;
                             artificateObj.SiteLevelDoc = item.SiteLevelDoc == "X" ? true : false;
+                            artificateObj.ArtifactCodeName = item.ArtifactCodeName;
 
                             sectionLibraryObj.EtmfArtificateMasterLbrary.Add(artificateObj);
                         }

@@ -38,6 +38,7 @@ namespace GSC.Data.Entities.Etmf
         public string SubSectionName { get; set; }
 
         public string ArtifactName { get; set; }
+        public string ArtifactCodeName { get; set; }
         public List<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
     }
 }

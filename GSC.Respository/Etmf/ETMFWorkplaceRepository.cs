@@ -1512,7 +1512,7 @@ namespace GSC.Respository.Etmf
 
             listDocuments.AddRange(subDocumentLists);
 
-            return listDocuments.OrderByDescending(x=>x.CreatedDate).ToList();
+            return listDocuments.OrderByDescending(x => x.CreatedDate).ToList();
         }
     }
     public class TreeValue

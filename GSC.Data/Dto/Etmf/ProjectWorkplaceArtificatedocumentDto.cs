@@ -32,6 +32,15 @@ namespace GSC.Data.Dto.Etmf
         public bool? IsReplyAllComment { get; set; }
     }
 
+    public class BulkDocumentUploadModel
+    {
+        public int ProjectId { get; set; }
+        public string Base64 { get; set; }
+        public string Extension { get; set; }
+        public string ArtifactCodeName { get; set; }
+        public string FileName { get; set; }
+    }
+
     public class ReplaceUserDto
     {
         public int UserId { get; set;}
