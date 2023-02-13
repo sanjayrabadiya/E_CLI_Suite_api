@@ -47,5 +47,13 @@ namespace GSC.Respository.SupplyManagement
         void SendKitReturnEmail(SupplyManagementKITReturnDtofinal obj);
 
         void returnVerificationStatus(SupplyManagementKITReturnVerificationDto data);
+
+        List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId);
+
+        List<SupplyManagementKITSeriesDetailGridDto> GetKITSeriesDetailList(int id);
+
+        List<SupplyManagementKITSeriesDetailHistoryGridDto> GetKITSeriesDetailHistoryList(int id);
+
+        string CheckAvailableQtySequenceKit(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
     }
 }

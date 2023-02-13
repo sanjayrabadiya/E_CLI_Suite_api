@@ -30,10 +30,11 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
+        private readonly ISupplyManagementKITSeriesRepository _supplyManagementKITSeriesRepository;
         public SupplyManagementKITController(ISupplyManagementKITRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKITSeriesRepository supplyManagementKITSeriesRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;
@@ -41,6 +42,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
+            _supplyManagementKITSeriesRepository = supplyManagementKITSeriesRepository;
         }
 
         [HttpGet("{id}")]
@@ -315,5 +317,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok();
         }
 
+       
     }
 }

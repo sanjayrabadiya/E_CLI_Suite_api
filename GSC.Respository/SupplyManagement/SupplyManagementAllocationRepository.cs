@@ -7,6 +7,7 @@ using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -161,6 +162,47 @@ namespace GSC.Respository.SupplyManagement
                 return false;
 
             return true;
+        }
+
+        public List<DropDownDto> GetTreatmentTypeKitSequence(int ProjectId)
+        {
+            var data = _context.SupplyManagementUploadFileDetail.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                        && x.SupplyManagementUploadFile.ProjectId == ProjectId)
+                        .Select(x => new DropDownDto
+                        {
+                            Code = x.TreatmentType,
+                            Value = x.TreatmentType
+
+                        }).OrderBy(o => o.Value).Distinct().ToList();
+
+            return data;
+        }
+        public List<DropDownDto> GetPharmacyStudyProductTypeDropDownKitSequence(int ProjectId, string TreatmentType, int VisitId)
+        {
+            List<DropDownDto> list = new List<DropDownDto>();
+            var uploaddata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile)
+                .Where(x => x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve && x.DeletedDate == null && x.SupplyManagementUploadFile.ProjectId == ProjectId
+                && x.TreatmentType == TreatmentType.Trim()).ToList();
+
+            if (uploaddata != null && uploaddata.Count > 0)
+            {
+                var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == VisitId && uploaddata.Select(s => s.Id).Contains(x.SupplyManagementUploadFileDetailId)).FirstOrDefault();
+
+                if (visits != null)
+                {
+                    var PharmacyStudyProductType = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.DeletedDate == null && x.ProductType.ProductTypeCode == visits.Value && x.ProjectId == ProjectId).FirstOrDefault();
+
+                    if (PharmacyStudyProductType != null)
+                    {
+                        DropDownDto obj = new DropDownDto();
+                        obj.Value = PharmacyStudyProductType.ProductType.ProductTypeCode;
+                        obj.Id = PharmacyStudyProductType.Id;
+                        list.Add(obj);
+                        return list;
+                    }
+                }
+            }
+            return new List<DropDownDto>();
         }
     }
 }

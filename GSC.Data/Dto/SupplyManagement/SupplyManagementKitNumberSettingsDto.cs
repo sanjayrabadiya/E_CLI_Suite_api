@@ -20,6 +20,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int KitNoseries { get; set; }
         public bool? IsBlindedStudy { get; set; }
 
+        public KitCreationType KitCreationType { get; set; }
+
         public int? ThresholdValue { get; set; }
 
     }
@@ -35,8 +37,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ReasonOth { get; set; }
         public string ReasonName { get; set; }
         public bool? IsBlindedStudy { get; set; }
-
         public int? ThresholdValue { get; set; }
+        public string  KitCreationTypeName { get; set; }
     }
 
 }

@@ -911,6 +911,11 @@ namespace GSC.Helper
         [Description("Site to Site")] SiteToSite = 1,
         [Description("Site to Study")] SiteToStudy = 2
     }
+    public enum KitCreationType : int
+    {
+        [Description("Kit Wise")] KitWise = 1,
+        [Description("Sequence Wise")] SequenceWise = 2
+    }
     public enum KitStatus : int
     {
         [Description("Allocation Pending")] AllocationPending = 1,

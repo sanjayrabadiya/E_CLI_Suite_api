@@ -18,6 +18,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public string Prefix { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public KitCreationType KitCreationType { get; set; }
         public GSC.Data.Entities.Master.Project Project { get; set; }
         public int KitNoseries { get; set; }
         public bool? IsBlindedStudy { get; set; }

@@ -565,6 +565,7 @@ namespace GSC.Api.Helpers
                .ReverseMap();
             CreateMap<SupplyManagementKitNumberSettings, SupplyManagementKitNumberSettingsGridDto>()
                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ForMember(x => x.KitCreationTypeName, x => x.MapFrom(a => a.KitCreationType.GetDescription()))
                .ReverseMap();
             CreateMap<SupplyManagementVisitKITDetail, SupplyManagementVisitKITDetailGridDto>()
               .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
@@ -599,7 +600,26 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.UserName, x => x.MapFrom(a => a.SupplyManagementEmailConfigurationDetail.Users.UserName))
               .ForMember(x => x.TriggerName, x => x.MapFrom(a => a.SupplyManagementEmailConfigurationDetail.SupplyManagementEmailConfiguration.Triggers.GetDescription()))
               .ReverseMap();
-            
+
+            CreateMap<SupplyManagementKITSeries, SupplyManagementKITSeriesGridDto>()
+             .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
+             .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+             //.ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+             .ForMember(x => x.statusName, x => x.MapFrom(a => a.Status.GetDescription()))
+             .ReverseMap();
+
+            CreateMap<SupplyManagementKITSeriesDetail, SupplyManagementKITSeriesDetailGridDto>()
+            .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+            .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+            .ForMember(x => x.KitNo, x => x.MapFrom(a => a.SupplyManagementKITSeries.KitNo))
+            .ForMember(x => x.ProductType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeCode))
+            .ReverseMap();
+
+            CreateMap<SupplyManagementKITSeriesDetailHistory, SupplyManagementKITSeriesDetailHistoryGridDto>()
+              .ForMember(x => x.KitNo, x => x.MapFrom(a => a.SupplyManagementKITSeries.KitNo))
+              .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementKITSeries.Status.GetDescription()))
+              .ReverseMap();
+
         }
     }
 }

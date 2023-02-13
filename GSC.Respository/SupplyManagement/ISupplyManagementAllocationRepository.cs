@@ -24,5 +24,9 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId);
 
         bool CheckRandomizationAssign(SupplyManagementAllocation obj);
+
+        List<DropDownDto> GetTreatmentTypeKitSequence(int ProjectId);
+
+        List<DropDownDto> GetPharmacyStudyProductTypeDropDownKitSequence(int ProjectId, string TreatmentType, int VisitId);
     }
 }

@@ -764,7 +764,7 @@ namespace GSC.Respository.SupplyManagement
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
             IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
 
-            var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected).ToList();
+            var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.KitReturn).ToList();
             if (emailconfiglist != null && emailconfiglist.Count > 0)
             {
 
@@ -819,6 +819,82 @@ namespace GSC.Respository.SupplyManagement
                 _context.SupplyManagementKITDetailHistory.Add(history);
                 _context.Save();
             }
+        }
+
+        public List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId)
+        {
+            var data = _context.SupplyManagementKITSeries.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
+                   ProjectTo<SupplyManagementKITSeriesGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            data.ForEach(x =>
+            {
+                if (x.SiteId > 0)
+                {
+                    x.SiteCode = _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode;
+                }
+                if (x.SupplyManagementShipmentId > 0)
+                {
+                    var request = _context.SupplyManagementShipment.Include(r => r.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(z => z.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                    if (request != null)
+                    {
+                        x.RequestFromSite = request.SupplyManagementRequest.FromProject.ProjectCode;
+
+                        var tositeId = request.SupplyManagementRequest.IsSiteRequest ? request.SupplyManagementRequest.ToProjectId : request.SupplyManagementRequest.FromProject.ParentProjectId;
+                        if (tositeId > 0)
+                        {
+                            x.RequestToSiteOrStudy = _context.Project.Where(s => s.Id == tositeId).FirstOrDefault().ProjectCode;
+                        }
+
+                    }
+                }
+            });
+            return data;
+        }
+
+        public List<SupplyManagementKITSeriesDetailGridDto> GetKITSeriesDetailList(int id)
+        {
+            var data = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == id).
+                   ProjectTo<SupplyManagementKITSeriesDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            return data;
+        }
+        public List<SupplyManagementKITSeriesDetailHistoryGridDto> GetKITSeriesDetailHistoryList(int id)
+        {
+            var data = _context.SupplyManagementKITSeriesDetailHistory.Where(x => x.SupplyManagementKITSeriesId == id).
+                   ProjectTo<SupplyManagementKITSeriesDetailHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            data.ForEach(x =>
+            {
+                x.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+            });
+            return data;
+        }
+        public string CheckAvailableQtySequenceKit(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
+        {
+            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count > 0)
+            {
+                var data = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.GroupBy(x => x.PharmacyStudyProductTypeId).Select(x => new
+                {
+                    Id = x.Key
+                }).ToList();
+
+                if (data.Count > 0)
+                {
+                    foreach (var item in data)
+                    {
+                        var Total = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Where(x => x.PharmacyStudyProductTypeId == item.Id).Sum(z => z.NoOfImp * supplyManagementKITSeriesDto.NoofPatient);
+                        var availableqty = GetAvailableRemainingkitCount(supplyManagementKITSeriesDto.ProjectId, item.Id);
+                        if (availableqty < Total)
+                        {
+                            var PharmacyStudyProductType = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.DeletedDate == null && x.Id == item.Id && x.ProjectId == supplyManagementKITSeriesDto.ProjectId).FirstOrDefault();
+
+
+                            return "Quantity is not available for " + PharmacyStudyProductType.ProductType.ProductTypeCode;
+                        }
+                    }
+
+                }
+            }
+
+
+            return "";
         }
     }
 }

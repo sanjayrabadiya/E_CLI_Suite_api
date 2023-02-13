@@ -392,6 +392,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementKitAllocationSettingsRepository, SupplyManagementKitAllocationSettingsRepository>();
             services.AddScoped<ISupplyManagementKitNumberSettingsRepository, SupplyManagementKitNumberSettingsRepository>();
             services.AddScoped<ISupplyManagementEmailConfigurationRepository, SupplyManagementEmailConfigurationRepository>();
+            services.AddScoped<ISupplyManagementKITSeriesRepository, SupplyManagementKITSeriesRepository>();
 
         }
     }

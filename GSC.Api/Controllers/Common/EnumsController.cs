@@ -955,5 +955,19 @@ namespace GSC.Api.Controllers.Common
             return Ok();
         }
 
+        [HttpGet]
+        [Route("GetKitCreationType")]
+        public IActionResult GetKitCreationType()
+        {
+            var fectore = Enum.GetValues(typeof(KitCreationType))
+                .Cast<KitCreationType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+
     }
 }

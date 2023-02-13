@@ -82,7 +82,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (centralDepotDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-           
+
             var centralDepot = _mapper.Map<SupplyManagementAllocation>(centralDepotDto);
             if (!_supplyManagementAllocationRepository.CheckRandomizationAssign(centralDepot))
             {
@@ -173,6 +173,18 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetPharmacyStudyProductTypeDropDown(int projectId)
         {
             return Ok(_supplyManagementAllocationRepository.GetPharmacyStudyProductTypeDropDown(projectId));
+        }
+        [HttpGet]
+        [Route("GetTreatmentTypeKitSequence/{projectId}")]
+        public IActionResult GetTreatmentTypeKitSequence(int projectId)
+        {
+            return Ok(_supplyManagementAllocationRepository.GetTreatmentTypeKitSequence(projectId));
+        }
+        [HttpGet]
+        [Route("GetPharmacyStudyProductTypeDropDownKitSequence/{projectId}/{treatmentType}/{projectDesignVisitId}")]
+        public IActionResult GetPharmacyStudyProductTypeDropDownKitSequence(int projectId, string treatmentType, int projectDesignVisitId)
+        {
+            return Ok(_supplyManagementAllocationRepository.GetPharmacyStudyProductTypeDropDownKitSequence(projectId, treatmentType, projectDesignVisitId));
         }
     }
 }
