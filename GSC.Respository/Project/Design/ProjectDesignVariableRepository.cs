@@ -319,5 +319,31 @@ namespace GSC.Respository.Project.Design
                     ExtraData = c.DesignOrder
                 }).OrderBy(o => o.ExtraData).ToList();
         }
+
+        public string NonChangeVariableCode(ProjectDesignVariableDto variable)
+        {
+            string[] codes = { "V003", "001", "V004", "SAE003", "SAE001", "SAE002", "Cd001", "Dev001", "Disc001", "DiscR001" };
+
+            if (variable.Id != 0)
+            {
+                var varriable = Find(variable.Id);
+                bool a = Array.Exists(codes, element => element == varriable.VariableCode);
+
+                if (a)
+                {
+                    if (Array.Exists(codes, element => element == variable.VariableCode))
+                        return "";
+                    else
+                        return "Can't edit record with this variable code!";
+                }
+                return "";
+            }
+            else {
+                if (Array.Exists(codes, element => element == variable.VariableCode))
+                    return "Can't add record with this variable code!";
+                else
+                    return "";
+            }
+        }
     }
 }

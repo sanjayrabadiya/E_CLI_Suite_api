@@ -37,5 +37,7 @@ namespace GSC.Respository.Master
         dynamic GetDashboardSAesBySeverityGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag);
+        dynamic GetDashboardByCriticalGraph(int projectId, int countryId, int siteId);
+        dynamic GetDashboardByDiscontinuationGraph(int projectId, int countryId, int siteId);
     }
 }

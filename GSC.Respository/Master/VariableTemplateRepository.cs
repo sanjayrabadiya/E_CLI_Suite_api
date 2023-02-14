@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
@@ -242,5 +243,22 @@ namespace GSC.Respository.Master
 
         //    return result;
         //}
+
+        public string NonChangeTemplateCode(VariableTemplateDto variableTemplate)
+        {
+            var varriableTemplate = Find(variableTemplate.Id);
+            string[] codes = { "AE001", "SAE001", "DV001", "Disc001" };
+
+            bool a = Array.Exists(codes, element => element == varriableTemplate.TemplateCode);
+
+            if (a)
+            {
+                if (Array.Exists(codes, element => element == variableTemplate.TemplateCode))
+                    return "";
+                else
+                    return "Can't edit record!";
+            }
+            return "";
+        }
     }
 }

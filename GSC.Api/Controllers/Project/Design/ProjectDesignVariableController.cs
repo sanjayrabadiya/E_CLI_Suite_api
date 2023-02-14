@@ -96,6 +96,14 @@ namespace GSC.Api.Controllers.Project.Design
 
             variableDto.Id = 0;
 
+            //For Static Vaiable
+            var checkStatic = _projectDesignVariableRepository.NonChangeVariableCode(variableDto);
+            if (!string.IsNullOrEmpty(checkStatic))
+            {
+                ModelState.AddModelError("Message", checkStatic);
+                return BadRequest(ModelState);
+            }
+
             var DomainCode = _domainRepository.Find((int)variableDto.DomainId).DomainCode;
             if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
@@ -151,6 +159,14 @@ namespace GSC.Api.Controllers.Project.Design
             if (variableDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            //For Static Vaiable
+            var checkStatic = _projectDesignVariableRepository.NonChangeVariableCode(variableDto);
+            if (!string.IsNullOrEmpty(checkStatic))
+            {
+                ModelState.AddModelError("Message", checkStatic);
+                return BadRequest(ModelState);
+            }
 
             var variable = _mapper.Map<ProjectDesignVariable>(variableDto);
 

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -104,6 +105,23 @@ namespace GSC.Respository.Master
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
        ProjectTo<VariableGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+
+        public string NonChangeVariableCode(VariableDto variable)
+        {
+            var varriable = Find(variable.Id);
+            string[] codes = { "V003", "001", "V004", "SAE003", "SAE001", "SAE002", "Cd001", "Dev001", "Disc001", "DiscR001" };
+
+            bool a = Array.Exists(codes, element => element == varriable.VariableCode);
+
+            if (a)
+            {
+                if (Array.Exists(codes, element => element == variable.VariableCode))
+                    return "";
+                else
+                    return "Can't edit record!";
+            }
+            return "";
         }
     }
 }

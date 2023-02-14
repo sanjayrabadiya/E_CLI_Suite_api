@@ -131,6 +131,14 @@ namespace GSC.Api.Controllers.Master
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            //For Static Vaiable
+            var checkStatic = _variableRepository.NonChangeVariableCode(variableDto);
+            if (!string.IsNullOrEmpty(checkStatic))
+            {
+                ModelState.AddModelError("Message", checkStatic);
+                return BadRequest(ModelState);
+            }
+
             var lastVariable = _variableRepository.Find(variableDto.Id);
             var DomainCode = _domainRepository.Find((int)lastVariable.DomainId).DomainCode;
             if (DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
