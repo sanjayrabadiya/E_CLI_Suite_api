@@ -12,7 +12,11 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.Configuration;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
-using GSC.Domain.Context;
+using Syncfusion.Pdf.Interactive;
+using Syncfusion.Pdf.Parsing;
+using Syncfusion.Pdf.Redaction;
+using Syncfusion.Pdf;
+using System.IO;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,11 +26,11 @@ namespace GSC.Api.Controllers.Etmf
     public class PdfViewerController : BaseController
     {
         public IMemoryCache _cache;
-        
+
         private IPdfViewerRepository _pdfViewerRepository;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
-       
+
         public PdfViewerController(IMemoryCache cache,
             IPdfViewerRepository pdfViewerRepository, ICentreUserService centreUserService, IOptions<EnvironmentSetting> environmentSetting
             )
@@ -35,7 +39,7 @@ namespace GSC.Api.Controllers.Etmf
             _pdfViewerRepository = pdfViewerRepository;
             _centreUserService = centreUserService;
             _environmentSetting = environmentSetting;
-            
+
         }
 
 
@@ -60,7 +64,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(JsonConvert.SerializeObject(jsonResult));
         }
 
-       
+
         [HttpPost]
         [Route("Download")]
         //Post action for downloading the PDF documents
@@ -72,7 +76,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(documentBase);
         }
 
-      
+
         [HttpPost]
         [Route("RenderThumbnailImages")]
         //Post action for rendering the ThumbnailImages
@@ -84,7 +88,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(JsonConvert.SerializeObject(result));
         }
 
-       
+
         [HttpPost]
         [Route("Bookmarks")]
         //Post action for processing the bookmarks from the PDF documents
@@ -176,7 +180,7 @@ namespace GSC.Api.Controllers.Etmf
             return Content(jsonResult);
         }
 
-       
+
         [AllowAnonymous]
         [HttpPost]
         [Route("SaveDocument")]
@@ -190,8 +194,61 @@ namespace GSC.Api.Controllers.Etmf
                 _pdfViewerRepository.SetDbConnection(result.ConnectionString);
             }
             //await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
-            _pdfViewerRepository.SaveDocument(jsonObject);
+            //_pdfViewerRepository.SaveDocument(jsonObject);
+
+            PdfRenderer pdfviewer = new PdfRenderer(_cache);
+            string documentBase = pdfviewer.GetDocumentAsBase64(jsonObject);
+            //return Content(documentBase);
+            string base64String = documentBase.Split(new string[] { "data:application/pdf;base64," }, StringSplitOptions.None)[1];
+
+            byte[] byteArray = Convert.FromBase64String(base64String);
+
+            PdfLoadedDocument loadedDocument = new PdfLoadedDocument(byteArray);
+            //Get all the pages
+
+            foreach (PdfLoadedPage loadedPage in loadedDocument.Pages)
+            {
+                List<PdfLoadedAnnotation> removeItems = new List<PdfLoadedAnnotation>();
+                //Flatten all the annotations in the page
+                foreach (PdfLoadedAnnotation annotation in loadedPage.Annotations)
+                {
+                    //Check for the circle annotation
+                    if (annotation is PdfLoadedRectangleAnnotation)
+                    {
+                        removeItems.Add(annotation);
+                        //Add redaction based on bounds of annotation.
+                        PdfRedaction redaction = new PdfRedaction(annotation.Bounds, Syncfusion.Drawing.Color.Black);
+                        loadedPage.AddRedaction(redaction);
+                    }
+                }
+                foreach (PdfLoadedAnnotation annotation in removeItems)
+                {
+                    loadedPage.Annotations.Remove(annotation);
+                }
+            }
+            //Redact the contents from the PDF document
+
+            loadedDocument.Redact();
+
+            //Save the PDF document.
+
+            MemoryStream stream = new MemoryStream();
+
+            //Save the PDF document
+
+            loadedDocument.Save(stream);
+
+            stream.Position = 0;
+
+            //Close the document
+
+            loadedDocument.Close(true);
+            byteArray = stream.ToArray();
+
+            _pdfViewerRepository.SaveDocument(jsonObject, byteArray);
+
             return Ok();
+
         }
     }
 }

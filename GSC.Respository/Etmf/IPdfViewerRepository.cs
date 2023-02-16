@@ -10,7 +10,7 @@ namespace GSC.Respository.Etmf
     public interface IPdfViewerRepository : IGenericRepository<ProjectWorkplaceArtificatedocument>
     {
 
-        void SaveDocument(Dictionary<string, string> jsonObject);
+        void SaveDocument(Dictionary<string, string> jsonObject, byte[] byteArray);
         object Load(Dictionary<string, string> jsonData);
     }
 }
