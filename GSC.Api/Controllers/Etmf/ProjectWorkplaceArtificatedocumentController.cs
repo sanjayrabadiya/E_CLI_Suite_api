@@ -108,7 +108,7 @@ namespace GSC.Api.Controllers.Etmf
 
         }
 
-        [HttpPost]
+        [HttpPost, DisableRequestSizeLimit]
         [Route("SaveBulkDocument")]
         [TransactionRequired]
         public async Task<ActionResult> SaveBulkDocument([FromBody] List<BulkDocumentUploadModel> bulkDocuments)
@@ -148,10 +148,12 @@ namespace GSC.Api.Controllers.Etmf
                                 FileName = $"{fileName}.{document.Extension.Trim()}",
                                 ProjectId = document.ProjectId,
                                 SuperSede = false,
+                                Countryname = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
                                 Zonename = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
                                 Sectionname = etmfProjectArtifact.ProjectWorkPlace.EtmfMasterLibrary.SectionName,
                                 Artificatename = etmfProjectArtifact.EtmfArtificateMasterLbrary.ArtificateName,
-                                FolderType = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId
+                                FolderType = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId,
+                                Sitename = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName
                             };
 
                             var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
