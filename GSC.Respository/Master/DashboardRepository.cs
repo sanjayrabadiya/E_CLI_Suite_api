@@ -1140,7 +1140,7 @@ namespace GSC.Respository.Master
 
         public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser, string vCode)
         {
-            var types = _context.VariableValue.Where(x => x.Variable.VariableCode == vCode).Select(x => x.ValueName).ToList();
+            var types = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == vCode).Select(x => x.ValueName).ToList();
             var r = new List<DynamicAeChartDetails>();
 
             foreach (var item in types)
