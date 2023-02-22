@@ -12,5 +12,6 @@ namespace GSC.Respository.Master
         string Duplicate(Variable objSave);
         IList<DropDownDto> GetColumnName(string tableName);
         List<VariableGridDto> GetVariableList(bool isDeleted);
+        string NonChangeVariableCode(VariableDto variable);
     }
 }

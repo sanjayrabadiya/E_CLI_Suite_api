@@ -300,5 +300,22 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetDashboardAEDetail(projectId, countryId, siteId));
         }
+
+        [HttpGet]
+        [Route("GetDashboardByCriticalGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardByCriticalGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardByCriticalGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardByDiscontinuationGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardByDiscontinuationGraph(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetDashboardByDiscontinuationGraph(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+
     }
 }

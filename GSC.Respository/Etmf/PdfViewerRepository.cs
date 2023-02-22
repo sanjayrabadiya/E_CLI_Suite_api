@@ -9,6 +9,7 @@ using System.Net;
 using Syncfusion.EJ2.PdfViewer;
 using Microsoft.Extensions.Caching.Memory;
 using System.Linq;
+using System.Collections;
 
 namespace GSC.Respository.Etmf
 {
@@ -24,7 +25,7 @@ namespace GSC.Respository.Etmf
         public PdfViewerRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
-            IMemoryCache cache, 
+            IMemoryCache cache,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
             IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
             IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository)
@@ -39,22 +40,25 @@ namespace GSC.Respository.Etmf
             _cache = cache;
         }
 
-        public void SaveDocument(Dictionary<string, string> jsonObject)
+        public void SaveDocument(Dictionary<string, string> jsonObject, byte[] byteArray)
         {
             PdfRenderer pdfviewer = new PdfRenderer(_cache);
 
             var docName = jsonObject["documentName"].ToString();
             var fileName = docName.Contains('_') ? docName.Substring(0, docName.LastIndexOf('_')) : docName;
             var docExtendedName = fileName + "_" + DateTime.Now.Ticks + ".pdf";
-            string documentBase = pdfviewer.GetDocumentAsBase64(jsonObject);
-            string base64String = documentBase.Split(new string[] { "data:application/pdf;base64," }, StringSplitOptions.None)[1];
-            if (base64String != null || base64String != string.Empty)
-            {
-                byte[] byteArray = Convert.FromBase64String(base64String);
+            //string documentBase = pdfviewer.GetDocumentAsBase64(jsonObject);
+            //string base64String = documentBase.Split(new string[] { "data:application/pdf;base64," }, StringSplitOptions.None)[1];
+            //if (base64String != null || base64String != string.Empty)
+            //{
+            //    byte[] byteArray = Convert.FromBase64String(base64String);
 
-                MemoryStream ms = new MemoryStream(byteArray);
-                System.IO.File.WriteAllBytes(jsonObject["documentPath"].ToString() + "/" + docExtendedName, byteArray);
-            }
+            //    MemoryStream ms = new MemoryStream(byteArray);
+            //    System.IO.File.WriteAllBytes(jsonObject["documentPath"].ToString() + "/" + docExtendedName, byteArray);
+            //}
+
+            MemoryStream ms = new MemoryStream(byteArray);
+            System.IO.File.WriteAllBytes(jsonObject["documentPath"].ToString() + "/" + docExtendedName, byteArray);
 
             var version = Convert.ToDouble(jsonObject["level"]);
             if (version == 6)
@@ -69,7 +73,7 @@ namespace GSC.Respository.Etmf
             }
             else if (version == 5.2)
             {
-                var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x=>x.Id==Convert.ToInt32(jsonObject["artificateDocumentId"])).FirstOrDefault();
+                var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.Id == Convert.ToInt32(jsonObject["artificateDocumentId"])).FirstOrDefault();
                 projectWorkplaceSubSecArtificatedocument.DocumentName = docExtendedName;
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceSubSecArtificatedocument);
                 if (_context.Save() <= 0) throw new Exception("Updating Document failed on save.");
@@ -79,7 +83,7 @@ namespace GSC.Respository.Etmf
             }
         }
 
-        public object Load(Dictionary<string, string> jsonData) 
+        public object Load(Dictionary<string, string> jsonData)
         {
             PdfRenderer pdfviewer = new PdfRenderer(_cache);
             MemoryStream stream = new MemoryStream();

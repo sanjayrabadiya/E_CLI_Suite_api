@@ -17,6 +17,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetVariableTemplateNonCRFDropDown();
         List<DropDownDto> GetVariableTemplateByModuleId(int moduleId);
 
-        //MonitoringReportTemplateDto GetReportTemplate(int id);
+        string NonChangeTemplateCode(VariableTemplateDto variableTemplate);
     }
 }

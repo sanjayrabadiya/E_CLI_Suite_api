@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
@@ -20,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace GSC.Api.Controllers.Etmf
@@ -106,46 +108,68 @@ namespace GSC.Api.Controllers.Etmf
 
         }
 
-        [HttpPost]
+        [HttpPost, DisableRequestSizeLimit]
         [Route("SaveBulkDocument")]
         [TransactionRequired]
-        public IActionResult SaveBulkDocument([FromBody] List<BulkDocumentUploadModel> bulkDocuments)
+        public async Task<ActionResult> SaveBulkDocument([FromBody] List<BulkDocumentUploadModel> bulkDocuments)
         {
-            foreach (var document in bulkDocuments)
+            var t = System.Threading.Tasks.Task.Run(() =>
             {
-                var etmfProjectArtifact = _projectWorkplaceArtificateRepository.All
-                    .Where(x => x.ProjectId == document.ProjectId && x.ArtifactCodeName == document.ArtifactCodeName && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
-                    .Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace).ThenInclude(x => x.EtmfUserPermission)
-                    .FirstOrDefault(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsAdd).Any());
-
-
-                if (etmfProjectArtifact != null)
+                foreach (var document in bulkDocuments)
                 {
-                    var fileModel = new FileModel()
+                    var etmfProjectArtifactList = _projectWorkplaceArtificateRepository.All
+                        .Where(x => x.ProjectId == document.ProjectId && x.ArtifactCodeName == document.ArtifactCodeName && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
+                        .Include(x => x.EtmfArtificateMasterLbrary)
+                        .Include(x => x.ProjectWorkPlace.EtmfMasterLibrary)
+                        .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
+                        .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission)
+                        .Where(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsAdd).Any()).ToList();
+
+                    foreach (var etmfProjectArtifact in etmfProjectArtifactList)
                     {
-                        Base64 = document.Base64,
-                        Extension = document.Extension
-                    };
+                        if (etmfProjectArtifact != null)
+                        {
+                            var fileModel = new FileModel()
+                            {
+                                Base64 = document.Base64,
+                                Extension = document.Extension
+                            };
 
-                    var projectWorkplaceArtificatedocumentDto = new ProjectWorkplaceArtificatedocumentDto()
-                    {
-                        ProjectWorkplaceArtificateId = etmfProjectArtifact.Id,
-                        FileModel = fileModel,
-                        FileName = document.FileName,
-                        ProjectId = document.ProjectId,
-                        SuperSede = false
-                    };
+                            var index1 = document.FileName.LastIndexOf('-');
+                            string fileName = "";
+                            if (index1 >= 0)
+                            {
+                                fileName = document.FileName.Substring(0, index1);
+                            }
+                            var projectWorkplaceArtificatedocumentDto = new ProjectWorkplaceArtificatedocumentDto()
+                            {
+                                ProjectWorkplaceArtificateId = etmfProjectArtifact.Id,
+                                FileModel = fileModel,
+                                FileName = $"{fileName}.{document.Extension.Trim()}",
+                                ProjectId = document.ProjectId,
+                                SuperSede = false,
+                                Countryname = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
+                                Zonename = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
+                                Sectionname = etmfProjectArtifact.ProjectWorkPlace.EtmfMasterLibrary.SectionName,
+                                Artificatename = etmfProjectArtifact.EtmfArtificateMasterLbrary.ArtificateName,
+                                FolderType = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId,
+                                Sitename = etmfProjectArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName
+                            };
 
+                            var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
+                            _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
 
-                    var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
+                            if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
 
-                    _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
-                    if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
-
-                    _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
-                    _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
+                            _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
+                            _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
+                        }
+                    }
                 }
-            }
+            });
+
+            await t;
+
             return Ok(1);
         }
 
@@ -155,10 +179,10 @@ namespace GSC.Api.Controllers.Etmf
         {
             var etmfProjectArtifact = _projectWorkplaceArtificateRepository.All
                    .Where(x => x.ProjectId == projectId && x.ArtifactCodeName != null && x.DeletedDate == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate)
-                   .Select(s =>s.ArtifactCodeName).ToList();
+                   .Select(s => s.ArtifactCodeName).ToList();
 
             return Ok(etmfProjectArtifact);
-      
+
         }
 
 

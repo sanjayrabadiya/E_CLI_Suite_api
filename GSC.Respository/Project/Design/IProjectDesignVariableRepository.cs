@@ -29,7 +29,8 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetVariabeDropDownForRelationMapping(int projectDesignTemplateId);
 
         IList<DropDownVaribleDto> GetVariabeAnnotationDropDownforhardsoftfetch(int projectDesignTemplateId, int variableId);
+        string NonChangeVariableCode(ProjectDesignVariableDto variable);
 
-        
+
     }
 }
