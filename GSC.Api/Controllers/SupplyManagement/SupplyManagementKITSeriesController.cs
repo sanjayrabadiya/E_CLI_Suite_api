@@ -122,12 +122,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
 
-            var kitnumber = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == record.ProjectId && x.DeletedDate == null).FirstOrDefault();
-            if (kitnumber != null)
-            {
-                kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
-                _context.SupplyManagementKitNumberSettings.Update(kitnumber);
-            }
+            
             var visitdetails = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == record.Id).ToList();
             if (visitdetails != null && visitdetails.Count > 0)
             {
@@ -135,7 +130,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 {
                     item1.DeletedDate = DateTime.Now;
                     item1.DeletedBy = _jwtTokenAccesser.UserId;
-                    _context.SupplyManagementKitNumberSettings.Update(kitnumber);
+                    _context.SupplyManagementKITSeriesDetail.Update(item1);
                 }
             }
             _supplyManagementKITSeriesRepository.Delete(record);
@@ -167,12 +162,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                     ModelState.AddModelError("Message", "Kit " + record.KitNo + " should not be deleted once the shipment/receipt has been generated!");
                     return BadRequest(ModelState);
                 }
-                var kitnumber = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == record.ProjectId && x.DeletedDate == null).FirstOrDefault();
-                if (kitnumber != null)
-                {
-                    kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
-                    _context.SupplyManagementKitNumberSettings.Update(kitnumber);
-                }
+                
                 var visitdetails = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == record.Id).ToList();
                 if (visitdetails != null && visitdetails.Count > 0)
                 {
@@ -180,7 +170,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                     {
                         item1.DeletedDate = DateTime.Now;
                         item1.DeletedBy = _jwtTokenAccesser.UserId;
-                        _context.SupplyManagementKitNumberSettings.Update(kitnumber);
+                        _context.SupplyManagementKITSeriesDetail.Update(item1);
                     }
                 }
 

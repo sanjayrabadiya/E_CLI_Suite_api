@@ -927,7 +927,7 @@ namespace GSC.Helper
         [Description("Receipt Without Issues")] WithoutIssue = 7,
         [Description("Allocated")] Allocated = 8,
         [Description("Discard")] Discard = 9,
-        [Description("Send to sponser")] Sendtosponser = 10,
+        [Description("Send to sponsor")] Sendtosponser = 10,
         [Description("Return Receive")] ReturnReceive = 11,
         [Description("Return Receive With Issue")] ReturnReceiveWithIssue = 12,
         [Description("Return Receive Without Issue")] ReturnReceiveWithoutIssue = 13,

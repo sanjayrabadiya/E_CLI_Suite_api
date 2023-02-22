@@ -37,6 +37,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string StudyProjectCode { get; set; }
 
+        public int ProjectId { get; set; }
+
         public string FromProjectCode { get; set; }
 
         public string ToProjectCode { get; set; }

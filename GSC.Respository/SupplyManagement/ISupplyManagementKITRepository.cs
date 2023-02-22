@@ -55,5 +55,11 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementKITSeriesDetailHistoryGridDto> GetKITSeriesDetailHistoryList(int id);
 
         string CheckAvailableQtySequenceKit(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
+
+        void InsertKitSequenceRandomizationDetail(SupplyManagementVisitKITSequenceDetailDto supplyManagementVisitKITDetailDto);
+
+        void InsertKitSequenceHistory(SupplyManagementKITSeriesDetailHistory supplyManagementVisitKITDetailHistory);
+
+        void returnVerificationStatusSequence(SupplyManagementKITReturnVerificationSequenceDto data);
     }
 }

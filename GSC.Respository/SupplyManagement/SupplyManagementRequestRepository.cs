@@ -105,80 +105,148 @@ namespace GSC.Respository.SupplyManagement
             }
             return isAvailable;
         }
-        public int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId)
+        public int GetAvailableRemainingQty(int SupplyManagementRequestId, SupplyManagementKitNumberSettings supplyManagementKitNumberSettings)
         {
-
-            var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
-                 && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
-                 && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
-                 .Sum(z => z.RemainingQuantity);
-            if (RemainingQuantity > 0)
-            {
-                var approvedQty = _context.SupplyManagementShipment.Where(x => x.DeletedDate == null
-                 && x.SupplyManagementRequest.FromProject.ParentProjectId == ProjectId && x.SupplyManagementRequest.StudyProductTypeId == PharmacyStudyProductTypeId
-                 && x.Status == SupplyMangementShipmentStatus.Approved).Sum(x => x.ApprovedQty);
-
-                var finalRemainingQty = RemainingQuantity - approvedQty;
-                return finalRemainingQty;
-
-            }
-
-            return 0;
-        }
-        public int GetAvailableRemainingKit(int SupplyManagementRequestId)
-        {
-            int remainingKit;
-            var obj = All.Include(x => x.FromProject).Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
+            int remainingKit = 0;
+            var obj = All.Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
             if (obj == null)
                 return 0;
-            if (obj.IsSiteRequest)
+            if (supplyManagementKitNumberSettings == null)
             {
-                remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                        x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId &&
-                        x.SupplyManagementShipmentId == null
-                        && x.SupplyManagementKIT.SiteId != null
-                        && x.SupplyManagementKIT.SiteId == obj.ToProjectId
-                        && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                        && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                        && x.DeletedDate == null).Count();
+                remainingKit = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == obj.FromProject.ParentProjectId
+                    && x.ProductReceipt.PharmacyStudyProductTypeId == obj.StudyProductTypeId
+                    && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
+                    .Sum(z => z.RemainingQuantity);
+                if (remainingKit > 0)
+                {
+                    var approvedQty = _context.SupplyManagementShipment.Where(x => x.DeletedDate == null
+                     && x.SupplyManagementRequest.FromProject.ParentProjectId == obj.FromProject.ParentProjectId && x.SupplyManagementRequest.StudyProductTypeId == obj.StudyProductTypeId
+                     && x.Status == SupplyMangementShipmentStatus.Approved).Sum(x => x.ApprovedQty);
+
+                    var finalRemainingQty = remainingKit - approvedQty;
+                    return finalRemainingQty;
+
+                }
+            }
+
+            if (supplyManagementKitNumberSettings.IsBlindedStudy == true)
+            {
+                if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
+                {
+                    if (obj.IsSiteRequest)
+                    {
+                        remainingKit = _context.SupplyManagementKITDetail.Where(x =>
+                                x.SupplyManagementShipmentId == null
+                                && x.SupplyManagementKIT.SiteId != null
+                                && x.SupplyManagementKIT.SiteId == obj.ToProjectId
+                                && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                && x.DeletedDate == null).Count();
+                    }
+                    else
+                    {
+                        remainingKit = _context.SupplyManagementKITDetail.Where(x =>
+                                          x.SupplyManagementKIT.SiteId == null
+                                         && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                         && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                         && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
+                                         && x.DeletedDate == null).Count();
+                    }
+                }
+                if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.SequenceWise)
+                {
+                    if (obj.IsSiteRequest)
+                    {
+                        remainingKit = _context.SupplyManagementKITSeries.Where(x =>
+                                x.SupplyManagementShipmentId == null
+                                && x.SiteId == obj.ToProjectId
+                                && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                && x.DeletedDate == null).Count();
+                    }
+                    else
+                    {
+                        remainingKit = _context.SupplyManagementKITSeries.Where(x =>
+                                          x.SiteId == null
+                                         && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                         && x.ProjectId == obj.FromProject.ParentProjectId
+                                         && x.DeletedDate == null).Count();
+                    }
+                }
             }
             else
             {
-                remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                                 x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId
-                                 && x.SupplyManagementKIT.SiteId == null
-                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                                 && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                                 && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
-                                 && x.DeletedDate == null).Count();
+                if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
+                {
+                    if (obj.PharmacyStudyProductType != null && obj.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
+                    {
+                        if (obj.IsSiteRequest)
+                        {
+                            remainingKit = _context.SupplyManagementKITDetail.Where(x =>
+                                    x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId &&
+                                    x.SupplyManagementShipmentId == null
+                                    && x.SupplyManagementKIT.SiteId != null
+                                    && x.SupplyManagementKIT.SiteId == obj.ToProjectId
+                                    && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                    && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                    && x.DeletedDate == null).Count();
+                        }
+                        else
+                        {
+                            remainingKit = _context.SupplyManagementKITDetail.Where(x =>
+                                             x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId &&
+                                             x.SupplyManagementKIT.SiteId == null
+                                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                             && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                             && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
+                                             && x.DeletedDate == null).Count();
+                        }
+                    }
+                    else
+                    {
+                        if (obj.IsSiteRequest)
+                        {
+                            remainingKit = _context.SupplyManagementKITDetail.Where(x =>
+                                    x.SupplyManagementShipmentId == null
+                                    && x.SupplyManagementKIT.SiteId != null
+                                    && x.SupplyManagementKIT.SiteId == obj.ToProjectId
+                                    && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                    && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                    && x.DeletedDate == null).Count();
+                        }
+                        else
+                        {
+                            remainingKit = _context.SupplyManagementKITDetail.Where(x =>
+                                              x.SupplyManagementKIT.SiteId == null
+                                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                             && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                             && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
+                                             && x.DeletedDate == null).Count();
+                        }
+                    }
+                }
+                if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.SequenceWise)
+                {
+                    if (obj.IsSiteRequest)
+                    {
+                        remainingKit = _context.SupplyManagementKITSeries.Where(x =>
+                                x.SupplyManagementShipmentId == null
+                                && x.SiteId == obj.ToProjectId
+                                && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                && x.DeletedDate == null).Count();
+                    }
+                    else
+                    {
+                        remainingKit = _context.SupplyManagementKITSeries.Where(x =>
+                                          x.SiteId == null
+                                         && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                         && x.ProjectId == obj.FromProject.ParentProjectId
+                                         && x.DeletedDate == null).Count();
+                    }
+                }
+
             }
-            return remainingKit;
-        }
-        public int GetAvailableRemainingKitBlindedStudy(int SupplyManagementRequestId)
-        {
-            int remainingKit;
-            var obj = All.Include(x => x.FromProject).Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
-            if (obj == null)
-                return 0;
-            if (obj.IsSiteRequest)
-            {
-                remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                        x.SupplyManagementShipmentId == null
-                        && x.SupplyManagementKIT.SiteId != null
-                        && x.SupplyManagementKIT.SiteId == obj.ToProjectId
-                        && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                        && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                        && x.DeletedDate == null).Count();
-            }
-            else
-            {
-                remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                                  x.SupplyManagementKIT.SiteId == null
-                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                                 && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                                 && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
-                                 && x.DeletedDate == null).Count();
-            }
+
+
             return remainingKit;
         }
         public List<KitListApprove> GetAvailableKit(int SupplyManagementRequestId)
@@ -188,13 +256,16 @@ namespace GSC.Respository.SupplyManagement
                 return new List<KitListApprove>();
             var data = new List<KitListApprove>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.FromProject.ParentProjectId).FirstOrDefault();
-            if (setting != null && setting.IsBlindedStudy == true)
+            if (setting == null)
+                return new List<KitListApprove>();
+
+            if (setting.KitCreationType == KitCreationType.KitWise)
             {
                 if (obj.IsSiteRequest)
                 {
                     data = _context.SupplyManagementKITDetail.Where(x =>
-
-                            x.SupplyManagementShipmentId == null
+                            x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
+                            && x.SupplyManagementShipmentId == null
                             && x.SupplyManagementKIT.SiteId != null
                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                             && x.SupplyManagementKIT.SiteId == obj.ToProjectId
@@ -212,6 +283,7 @@ namespace GSC.Respository.SupplyManagement
                 {
                     data = _context.SupplyManagementKITDetail.Where(x =>
                                  x.SupplyManagementKIT.SiteId == null
+                                 && x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
                                  && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                  && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
                                  && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
@@ -230,20 +302,16 @@ namespace GSC.Respository.SupplyManagement
 
                 if (obj.IsSiteRequest)
                 {
-                    data = _context.SupplyManagementKITDetail.Where(x =>
-                            x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId &&
+                    data = _context.SupplyManagementKITSeries.Where(x =>
                             x.SupplyManagementShipmentId == null
-                            && x.SupplyManagementKIT.SiteId != null
+                            && x.SiteId != null
                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                            && x.SupplyManagementKIT.SiteId == obj.ToProjectId
-                            && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                            && x.SiteId == obj.ToProjectId
                             && x.DeletedDate == null).Select(x => new KitListApprove
                             {
                                 Id = x.Id,
                                 KitNo = x.KitNo,
-                                VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                                SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                                ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
+                                ProjectCode = x.Project.ProjectCode
                             }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
 
 
@@ -251,20 +319,17 @@ namespace GSC.Respository.SupplyManagement
                 else
                 {
 
-                    data = _context.SupplyManagementKITDetail.Where(x =>
-                                     x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId
-                                     && x.SupplyManagementKIT.SiteId == null
-                                     && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                                     && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
-                                     && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                                     && x.DeletedDate == null).Select(x => new KitListApprove
-                                     {
-                                         Id = x.Id,
-                                         KitNo = x.KitNo,
-                                         VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                                         SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                                         ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
-                                     }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
+                    data = _context.SupplyManagementKITSeries.Where(x =>
+                            x.SupplyManagementShipmentId == null
+                            && x.SiteId == null
+                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                            && x.ProjectId == obj.FromProject.ParentProjectId
+                            && x.DeletedDate == null).Select(x => new KitListApprove
+                            {
+                                Id = x.Id,
+                                KitNo = x.KitNo,
+                                ProjectCode = x.Project.ProjectCode
+                            }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
 
 
                 }
@@ -338,7 +403,8 @@ namespace GSC.Respository.SupplyManagement
                         {
                             iWRSEmailModel.RequestType = "Site to Study Request";
                         }
-                        iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
+                        if (request.ProjectDesignVisit != null)
+                            iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
 
                         _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
                         foreach (var item in details)

@@ -25,9 +25,13 @@ namespace GSC.Data.Entities.SupplyManagement
         public AuditReason AuditReason { get; set; }
         public KitStatus Status { get; set; }
         public KitStatus? PrevStatus { get; set; }
+
+        public string Comments { get; set; }
         public Entities.Master.Project Project { get; set; }
         public SupplyManagementShipment SupplyManagementShipment { get; set; }
         public Randomization Randomization { get; set; }
+
+        public bool? IsUnUsed { get; set; }
 
     }
 }

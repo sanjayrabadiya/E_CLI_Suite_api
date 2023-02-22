@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 return BadRequest();
             }
-            var shipmentdata = _supplyManagementRequestRepository.All.Include(x => x.PharmacyStudyProductType).Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
+            var shipmentdata = _supplyManagementRequestRepository.All.Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
             if (shipmentdata == null)
             {
                 ModelState.AddModelError("Message", "Shipment request is not available!");
@@ -92,16 +92,13 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentData.FromProject.ParentProjectId).FirstOrDefault();
-            if (setting != null && setting.IsBlindedStudy == true)
+            if (setting == null)
             {
-                return Ok(_supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(SupplyManagementRequestId));
+                ModelState.AddModelError("Message", "Please set kit number setting!");
+                return BadRequest(ModelState);
+
             }
-            else
-            {
-                if (shipmentData.PharmacyStudyProductType != null && shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
-                    return Ok(_supplyManagementRequestRepository.GetAvailableRemainingKit(SupplyManagementRequestId));
-            }
-            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty((int)shipmentData.FromProject.ParentProjectId, (int)shipmentData.StudyProductTypeId));
+            return Ok(_supplyManagementRequestRepository.GetAvailableRemainingQty(SupplyManagementRequestId, setting));
         }
 
         [HttpGet]

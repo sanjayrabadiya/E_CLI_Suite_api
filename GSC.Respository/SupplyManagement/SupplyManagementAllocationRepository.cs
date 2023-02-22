@@ -127,6 +127,7 @@ namespace GSC.Respository.SupplyManagement
 
         public string CheckDuplicate(SupplyManagementAllocation obj)
         {
+
             if (obj.Id > 0)
             {
                 var data = All.Where(x => x.Id != obj.Id && x.DeletedDate == null
@@ -146,7 +147,6 @@ namespace GSC.Respository.SupplyManagement
             }
             return "";
         }
-
         public List<DropDownDto> GetPharmacyStudyProductTypeDropDown(int ProjectId)
         {
             return _context.ProductReceipt.Where(c => c.ProjectId == ProjectId && c.DeletedDate == null

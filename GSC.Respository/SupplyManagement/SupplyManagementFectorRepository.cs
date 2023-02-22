@@ -530,15 +530,15 @@ namespace GSC.Respository.SupplyManagement
                                 {
                                     var rule = splitRules[(int)index].Trim();
                                     var ratio = splitRatio[(int)index].Trim();
-
                                     int count = 0;
                                     int rationcount = 0;
+
                                     foreach (var item in splitproduct)
                                     {
                                         var treatment = "'" + item + "'";
                                         string sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
                                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                                        if (finaldata.Count >= Convert.ToInt32(ratio))
+                                        if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                         {
                                             rationcount++;
                                         }
@@ -557,6 +557,7 @@ namespace GSC.Respository.SupplyManagement
                                     if (rationcount == splitproduct.Count)
                                         isRationOver = true;
 
+
                                 }
                             }
                         }
@@ -566,12 +567,14 @@ namespace GSC.Respository.SupplyManagement
                             var ratio = ratios;
                             int count = 0;
                             int rationcount = 0;
+
+
                             foreach (var item in splitproduct)
                             {
                                 var treatment = "'" + item + "'";
                                 string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment + " AND " + rule + "";
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                                if (finaldata.Count >= Convert.ToInt32(ratio))
+                                if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
                                     rationcount++;
                                 }
@@ -587,6 +590,7 @@ namespace GSC.Respository.SupplyManagement
                             }
                             if (rationcount == splitproduct.Count)
                                 isRationOver = true;
+
 
                         }
 
@@ -608,7 +612,7 @@ namespace GSC.Respository.SupplyManagement
 
                                 string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                                if (finaldata.Count >= Convert.ToInt32(ratio))
+                                if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
                                     isRationOver = true;
                                 }
@@ -617,6 +621,7 @@ namespace GSC.Respository.SupplyManagement
                                     isRationOver = false;
                                     products = producttype;
                                 }
+
                             }
                         }
                     }
@@ -628,7 +633,7 @@ namespace GSC.Respository.SupplyManagement
 
                         string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                        if (finaldata.Count >= Convert.ToInt32(ratio))
+                        if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                         {
                             isRationOver = true;
                         }
@@ -637,6 +642,7 @@ namespace GSC.Respository.SupplyManagement
                             isRationOver = false;
                             products = producttype;
                         }
+
 
                     }
                 }
@@ -657,7 +663,7 @@ namespace GSC.Respository.SupplyManagement
 
                             string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
                             var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                            if (finaldata.Count >= Convert.ToInt32(ratio))
+                            if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                             {
                                 isRationOver = true;
                             }
@@ -665,6 +671,7 @@ namespace GSC.Respository.SupplyManagement
                             {
                                 isRationOver = false;
                             }
+
                         }
                     }
                 }
@@ -675,7 +682,7 @@ namespace GSC.Respository.SupplyManagement
 
                     string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
                     var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                    if (finaldata.Count >= Convert.ToInt32(ratio))
+                    if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                     {
                         isRationOver = true;
                     }
@@ -683,6 +690,7 @@ namespace GSC.Respository.SupplyManagement
                     {
                         isRationOver = false;
                     }
+
 
                 }
 

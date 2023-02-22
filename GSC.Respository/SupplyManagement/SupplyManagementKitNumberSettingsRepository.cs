@@ -43,6 +43,25 @@ namespace GSC.Respository.SupplyManagement
             return _context.SupplyManagementKitNumberSettings.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
                    ProjectTo<SupplyManagementKitNumberSettingsGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
-      
+        public string CheckKitCreateion(SupplyManagementKitNumberSettings obj)
+        {
+            
+            if (obj.KitCreationType == KitCreationType.KitWise)
+            {
+                if (_context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Count(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == obj.ProjectId) > 0)
+                {
+                    return "Kits are already been preapared you can not modify or delete";
+                }
+            }
+            if (obj.KitCreationType == KitCreationType.SequenceWise)
+            {
+                if (_context.SupplyManagementKITSeries.Count(x => x.DeletedDate == null && x.ProjectId == obj.ProjectId) > 0)
+                {
+                    return "Kits are already been preapared you can not modify or delete";
+                }
+            }
+
+            return "";
+        }
     }
 }

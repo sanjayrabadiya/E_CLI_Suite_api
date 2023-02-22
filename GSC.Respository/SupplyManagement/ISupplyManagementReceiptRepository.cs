@@ -13,5 +13,9 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementReceiptHistoryGridDto> GetSupplyShipmentReceiptHistory(int id);
 
         List<KitAllocatedList> GetKitAllocatedList(int id, string Type);
+
+        void UpdateKitStatus(SupplyManagementReceiptDto supplyManagementshipmentDto, SupplyManagementShipment supplyManagementShipment);
+
+        string CheckValidationKitReciept(SupplyManagementReceiptDto supplyManagementshipmentDto);
     }
 }

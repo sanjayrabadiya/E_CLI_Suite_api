@@ -429,6 +429,7 @@ namespace GSC.Api.Helpers
                   .ReverseMap();
             CreateMap<SupplyManagementShipment, SupplyManagementShipmentGridDto>()
                   .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.FromProject.ProjectCode))
+                  .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.SupplyManagementRequest.FromProject.ParentProjectId))
                   .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.SupplyManagementRequest.ToProject.ProjectCode))
                   .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
                   .ForMember(x => x.IsSiteRequest, x => x.MapFrom(a => a.SupplyManagementRequest.IsSiteRequest))
@@ -619,6 +620,17 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.KitNo, x => x.MapFrom(a => a.SupplyManagementKITSeries.KitNo))
               .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementKITSeries.Status.GetDescription()))
               .ReverseMap();
+
+            CreateMap<SupplyManagementVisitKITSequenceDetail, SupplyManagementVisitKITDetailGridDto>()
+             .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.ProjectCode))
+             .ForMember(x => x.ParentProjectId, x => x.MapFrom(a => a.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id))
+             .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Randomization.Project.ProjectCode))
+             .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.Randomization.Project.Id))
+             .ForMember(x => x.ReasonName, x => x.MapFrom(a => a.AuditReason.ReasonName))
+             .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+             .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
+             .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+             .ReverseMap();
 
         }
     }

@@ -10,5 +10,7 @@ namespace GSC.Respository.SupplyManagement
     public interface ISupplyManagementKitNumberSettingsRepository : IGenericRepository<SupplyManagementKitNumberSettings>
     {
         List<SupplyManagementKitNumberSettingsGridDto> GetKITNumberList(bool isDeleted, int ProjectId);
+
+        string CheckKitCreateion(SupplyManagementKitNumberSettings obj);
     }
 }

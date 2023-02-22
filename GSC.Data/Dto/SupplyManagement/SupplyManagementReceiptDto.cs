@@ -22,6 +22,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? FromProjectId { get; set; }
         public int? ToProjectId { get; set; }
 
+        public int? ProjectId { get; set; }
+
         public int SupplyManagementShipmentId { get; set; }
         public bool? WithIssue { get; set; }
         public string ReasonOth { get; set; }
@@ -77,6 +79,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ActivityBy { get; set; }
 
         public DateTime? ActivityDate { get; set; }
+
+        public int? ProjectId { get; set; }
     }
     public class KitAllocatedList
     {

@@ -32,9 +32,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ReturnImp { get; set; }
         public string ProductTypeName { get; set; }
         public int SupplyManagementKITDetailId { get; set; }
-
+        public int SupplyManagementKITSeriesId { get; set; }
         public int? SupplyManagementKITReturnId { get; set; }
-
+        public int? SupplyManagementKITReturnSeriesId { get; set; }
+        public int? SupplyManagementKITReturnVerificationId { get; set; }
+        public int? SupplyManagementKITReturnVerificationSeriesId { get; set; }
         public string ScreeningNo { get; set; }
         public string RandomizationNo { get; set; }
         public int? RandomizationId { get; set; }
@@ -60,6 +62,14 @@ namespace GSC.Data.Dto.SupplyManagement
         public string StatusName { get; set; }
 
         public bool? IsUnUsed { get; set; }
+
+        public string ReturnVerificationBy { get; set; }
+
+        public DateTime? ReturnVerificationDate { get; set; }
+
+        public string ReturnVerificationReason { get; set; }
+
+        public string ReturnVerificationReasonOth { get; set; }
 
 
     }
@@ -130,6 +140,15 @@ namespace GSC.Data.Dto.SupplyManagement
     {
         public int SupplyManagementKITDetailId { get; set; }
         public KitStatus Status { get; set; }
+        public int? AuditReasonId { get; set; }
+        public string ReasonOth { get; set; }
+    }
+    public class SupplyManagementKITReturnVerificationSequenceDto
+    {
+        public int SupplyManagementKITSeriesId { get; set; }
+        public KitStatus Status { get; set; }
+        public int? AuditReasonId { get; set; }
+        public string ReasonOth { get; set; }
     }
 
 }

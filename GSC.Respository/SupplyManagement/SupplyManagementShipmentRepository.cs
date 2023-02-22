@@ -78,6 +78,7 @@ namespace GSC.Respository.SupplyManagement
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     obj.StudyProjectCode = study != null ? study.ProjectCode : "";
+                    obj.ProjectId = study.Id;
                 }
                 t.SiteRequest = t.IsSiteRequest ? "Site to Site" : "Site to Study";
                 FinalData.Add(obj);
@@ -104,6 +105,11 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "From project code not found!";
             }
+            var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
+            if (settings == null)
+            {
+                return "Please set kit number setting!";
+            }
             var productreciept = _context.ProductReceipt.Where(x => x.ProjectId == project.ParentProjectId
                                 && x.Status == Helper.ProductVerificationStatus.Approved).FirstOrDefault();
             if (productreciept == null)
@@ -118,18 +124,12 @@ namespace GSC.Respository.SupplyManagement
             }
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == project.ParentProjectId
-                                && x.DeletedDate == null && x.IsBlindedStudy == true).FirstOrDefault();
-                if (settings != null)
+                if (settings != null && settings.IsBlindedStudy == true)
                 {
                     if (supplyManagementshipmentDto.Kits != null)
                     {
-                        //var data1 = supplyManagementshipmentDto.Kits.GroupBy(x => x.ProductCode).ToList();
-                        //if (data1.Count > 1)
-                        //{
-                        //    return "You can't select different product!";
-                        //}
-                        if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKitBlindedStudy(supplyManagementshipmentDto.SupplyManagementRequestId))
+
+                        if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingQty(supplyManagementshipmentDto.SupplyManagementRequestId, settings))
                         {
                             return "Entered quantity is higher than available quantity!";
                         }
@@ -147,7 +147,7 @@ namespace GSC.Respository.SupplyManagement
 
                 else if (shipmentData.PharmacyStudyProductType != null && shipmentData.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
                 {
-                    if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingKit(supplyManagementshipmentDto.SupplyManagementRequestId))
+                    if (supplyManagementshipmentDto.ApprovedQty > _supplyManagementRequestRepository.GetAvailableRemainingQty(supplyManagementshipmentDto.SupplyManagementRequestId, settings))
                     {
                         return "Entered quantity is higher than available quantity!";
                     }
@@ -198,17 +198,17 @@ namespace GSC.Respository.SupplyManagement
         }
         public void Assignkits(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto)
         {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentdata.FromProject.ParentProjectId).FirstOrDefault();
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                if (supplyManagementshipmentDto.Kits.Count > 0)
+                if (setting.KitCreationType == KitCreationType.KitWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {
-                    var shipmentkitid = 0;
+                    
                     foreach (var item in supplyManagementshipmentDto.Kits)
                     {
                         var kit = _context.SupplyManagementKITDetail.Where(x => x.Id == item.Id).FirstOrDefault();
                         if (kit != null && supplyManagementshipmentDto.Id > 0)
                         {
-                            shipmentkitid = kit.SupplyManagementKITId;
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
                             _context.SupplyManagementKITDetail.Update(kit);
@@ -221,14 +221,27 @@ namespace GSC.Respository.SupplyManagement
                             _uow.Save();
                         }
                     }
+                }
+                if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
+                {
+                    foreach (var item in supplyManagementshipmentDto.Kits)
+                    {
+                        var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (kit != null && supplyManagementshipmentDto.Id > 0)
+                        {
+                            
+                            kit.Status = Helper.KitStatus.Shipped;
+                            kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
+                            _context.SupplyManagementKITSeries.Update(kit);
 
-                    //var kitmaster = _context.SupplyManagementKIT.Where(x => x.Id == shipmentkitid).FirstOrDefault();
-                    //if (kitmaster != null)
-                    //{
-                    //    kitmaster.SiteId = shipmentdata.FromProjectId;
-                    //}
-                    //_context.SupplyManagementKIT.Update(kitmaster);
-                    _uow.Save();
+                            SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
+                            history.SupplyManagementKITSeriesId = item.Id;
+                            history.Status = KitStatus.Shipped;
+                            history.RoleId = _jwtTokenAccesser.RoleId;
+                            _context.SupplyManagementKITSeriesDetailHistory.Add(history);
+                            _uow.Save();
+                        }
+                    }
                 }
             }
         }

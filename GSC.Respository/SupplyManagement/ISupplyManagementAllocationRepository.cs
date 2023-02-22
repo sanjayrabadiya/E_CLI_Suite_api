@@ -28,5 +28,7 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetTreatmentTypeKitSequence(int ProjectId);
 
         List<DropDownDto> GetPharmacyStudyProductTypeDropDownKitSequence(int ProjectId, string TreatmentType, int VisitId);
+
+        
     }
 }

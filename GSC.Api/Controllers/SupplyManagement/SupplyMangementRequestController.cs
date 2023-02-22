@@ -52,6 +52,12 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "From site not found");
                 return BadRequest(ModelState);
             }
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == project.ParentProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                ModelState.AddModelError("Message", "Please set kit number setting!");
+                return BadRequest(ModelState);
+            }
 
             supplyManagementRequestDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementRequest>(supplyManagementRequestDto);

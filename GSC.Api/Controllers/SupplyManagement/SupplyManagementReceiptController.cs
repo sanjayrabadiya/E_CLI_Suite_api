@@ -7,6 +7,7 @@ using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,75 +22,46 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementReceiptRepository _supplyManagementReceiptRepository;
+        private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
         private readonly IUnitOfWork _uow;
-        private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
-        private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
+
         public SupplyManagementReceiptController(ISupplyManagementReceiptRepository supplyManagementReceiptRepository,
             IUnitOfWork uow, IMapper mapper,
-            ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKITRepository supplyManagementKITRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementShipmentRepository supplyManagementShipmentRepository)
         {
             _supplyManagementReceiptRepository = supplyManagementReceiptRepository;
             _uow = uow;
             _mapper = mapper;
-            _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
-            _supplyManagementKITRepository = supplyManagementKITRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _supplyManagementShipmentRepository = supplyManagementShipmentRepository;
         }
         [HttpPost]
         public IActionResult Post([FromBody] SupplyManagementReceiptDto supplyManagementshipmentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            if (supplyManagementshipmentDto.WithIssue && string.IsNullOrEmpty(supplyManagementshipmentDto.Description))
+            //if (supplyManagementshipmentDto.WithIssue && string.IsNullOrEmpty(supplyManagementshipmentDto.Description))
+            //{
+            //    ModelState.AddModelError("Message", "Description is mandatory!");
+            //    return BadRequest(ModelState);
+            //}
+            var shipment = _supplyManagementShipmentRepository.All.Include(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementShipmentId).FirstOrDefault();
+            if (shipment == null)
             {
-                ModelState.AddModelError("Message", "Description is mandatory!");
+
+                ModelState.AddModelError("Message", "Shipment does not exist!");
+                return BadRequest(ModelState);
+            }
+            var message = _supplyManagementReceiptRepository.CheckValidationKitReciept(supplyManagementshipmentDto);
+            if (!string.IsNullOrEmpty(message))
+            {
+                ModelState.AddModelError("Message", message);
                 return BadRequest(ModelState);
             }
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementReceipt>(supplyManagementshipmentDto);
 
             _supplyManagementReceiptRepository.Add(supplyManagementRequest);
-            if (supplyManagementshipmentDto.Kits != null)
-            {
-
-                foreach (var item in supplyManagementshipmentDto.Kits)
-                {
-                    if (item.Status == 0)
-                    {
-                        ModelState.AddModelError("Message", "Please select kit type!");
-                        return BadRequest(ModelState);
-                    }
-                    if (item.Status != Helper.KitStatus.WithoutIssue)
-                    {
-                        if (string.IsNullOrEmpty(item.Comments))
-                        {
-                            ModelState.AddModelError("Message", "Please enter comments!");
-                            return BadRequest(ModelState);
-                        }
-                    }
-                    var data = _supplyManagementKITDetailRepository.All.Where(x => x.Id == item.Id).FirstOrDefault();
-                    if (data != null)
-                    {
-                        data.Status = item.Status;
-                        data.Comments = item.Comments;
-                        _supplyManagementKITDetailRepository.Update(data);
-                        // _uow.Save();
-
-                    }
-                }
-            }
-            if (_uow.Save() <= 0) throw new Exception("Creating shipment receipt failed on save.");
-            if (supplyManagementshipmentDto.Kits != null)
-            {
-                foreach (var item in supplyManagementshipmentDto.Kits)
-                {
-                    SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
-                    history.SupplyManagementKITDetailId = item.Id;
-                    history.Status = item.Status;
-                    history.RoleId = _jwtTokenAccesser.RoleId;
-                    _supplyManagementKITRepository.InsertKitHistory(history);
-                }
-            }
+            _supplyManagementReceiptRepository.UpdateKitStatus(supplyManagementshipmentDto, shipment);
             return Ok(supplyManagementRequest.Id);
         }
 

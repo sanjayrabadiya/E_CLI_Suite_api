@@ -452,7 +452,13 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementKITSeriesDetailHistory> SupplyManagementKITSeriesDetailHistory { get; set; }
 
+        public DbSet<SupplyManagementVisitKITSequenceDetail> SupplyManagementVisitKITSequenceDetail { get; set; }
 
+        public DbSet<SupplyManagementKITReturnVerification> SupplyManagementKITReturnVerification { get; set; }
+
+        public DbSet<SupplyManagementKITReturnSeries> SupplyManagementKITReturnSeries { get; set; }
+
+        public DbSet<SupplyManagementKITReturnVerificationSeries> SupplyManagementKITReturnVerificationSeries { get; set; }
 
     }
 

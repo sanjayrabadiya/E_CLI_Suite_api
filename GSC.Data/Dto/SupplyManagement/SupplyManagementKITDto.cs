@@ -72,6 +72,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string SiteCode { get; set; }
 
         public string ProductCode { get; set; }
+
+        public string ProjectCode { get; set; }
     }
 
     public class KitListApproved

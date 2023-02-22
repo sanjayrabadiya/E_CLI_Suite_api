@@ -15,15 +15,9 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementRequestGridDto> GetShipmentRequestList(int parentProjectId, int SiteId, bool isDeleted);
 
         bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId);
-
-        int GetAvailableRemainingQty(int ProjectId, int PharmacyStudyProductTypeId);
-
         List<KitListApprove> GetAvailableKit(int SupplyManagementRequestId);
 
-        int GetAvailableRemainingKit(int SupplyManagementRequestId);
-
-        int GetAvailableRemainingKitBlindedStudy(int SupplyManagementRequestId);
-
+        int GetAvailableRemainingQty(int SupplyManagementRequestId, SupplyManagementKitNumberSettings supplyManagementKitNumberSettings);
         void SendrequestEmail(int id);
 
 

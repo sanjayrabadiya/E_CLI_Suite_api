@@ -122,14 +122,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (record == null)
                 return NotFound();
 
-            var kit = _context.SupplyManagementKIT.Where(x => x.Id == record.SupplyManagementKITId).FirstOrDefault();
-            if (kit != null)
-            {
-                var kitnumber = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == kit.ProjectId && x.DeletedDate == null).FirstOrDefault();
-                kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
-                _context.SupplyManagementKitNumberSettings.Update(kitnumber);
-            }
-
             if (record.Status != KitStatus.AllocationPending)
             {
                 ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
@@ -159,13 +151,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 var record = _supplyManagementKITDetailRepository.Find(item);
 
-                var kit = _context.SupplyManagementKIT.Where(x => x.Id == record.SupplyManagementKITId).FirstOrDefault();
-                if (kit != null)
-                {
-                    var kitnumber = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == kit.ProjectId && x.DeletedDate == null).FirstOrDefault();
-                    kitnumber.KitNoseries = kitnumber.KitNoseries - 1;
-                    _context.SupplyManagementKitNumberSettings.Update(kitnumber);
-                }
+               
                 if (record.Status != KitStatus.AllocationPending)
                 {
                     ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
@@ -316,7 +302,14 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementKITRepository.returnVerificationStatus(supplyManagementKITReturnVerificationDto);
             return Ok();
         }
+        [HttpPost]
+        [Route("returnVerificationStatusSequence")]
+        public IActionResult returnVerificationStatusSequence([FromBody] SupplyManagementKITReturnVerificationSequenceDto supplyManagementKITReturnVerificationDto)
+        {
+            _supplyManagementKITRepository.returnVerificationStatusSequence(supplyManagementKITReturnVerificationDto);
+            return Ok();
+        }
 
-       
+
     }
 }
