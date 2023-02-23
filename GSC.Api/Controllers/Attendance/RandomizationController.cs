@@ -447,7 +447,7 @@ namespace GSC.Api.Controllers.Attendance
                     ModelState.AddModelError("Message", "Kit is not available");
                     return BadRequest(ModelState);
                 }
-                if (string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                if (numerformate.IsIGT == true && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
                 {
                     ModelState.AddModelError("Message", "Please upload randomization sheet");
                     return BadRequest(ModelState);

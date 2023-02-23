@@ -1207,6 +1207,35 @@ namespace GSC.Respository.Master
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
+        public List<ProjectDropDown> GetProjectDropDownIWRSUnblind()
+        {
+
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var list = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && projectList.Contains(x.ProjectId) && x.IsIWRS == true).Select(x => x.ProjectId).ToList();
+            if (list == null && list.Count == 0)
+                return null;
+            var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && list.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            if (numbersetting == null || numbersetting.Count == 0)
+                return null;
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null
+                    && x.ProjectCode != null
+                    && numbersetting.Contains(x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsSendEmail = c.IsSendEmail,
+                    IsSendSMS = c.IsSendSMS,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).Distinct().OrderBy(o => o.Value).ToList();
+        }
 
     }
 }

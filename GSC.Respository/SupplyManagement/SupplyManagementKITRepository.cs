@@ -327,7 +327,7 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<DropDownDto> GetRandomizationDropdownKit(int projectid)
         {
-            return _context.Randomization.Where(a => a.DeletedDate == null && a.ProjectId == projectid)
+            return _context.Randomization.Where(a => a.DeletedDate == null && a.ProjectId == projectid && a.RandomizationNumber != null)
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,
@@ -1234,6 +1234,98 @@ namespace GSC.Respository.SupplyManagement
 
 
             return "";
+        }
+
+        public void UnblindTreatment(SupplyManagementUnblindTreatmentDto data)
+        {
+            if (data != null && data.list.Count > 0)
+            {
+                foreach (var item in data.list)
+                {
+                    var datakit = _context.SupplyManagementUnblindTreatment.Where(x => x.RandomizationId == item.RandomizationId && x.DeletedDate == null).FirstOrDefault();
+                    if (datakit == null)
+                    {
+                        SupplyManagementUnblindTreatment supplyManagementUnblindTreatment = new SupplyManagementUnblindTreatment();
+                        supplyManagementUnblindTreatment.RoleId = _jwtTokenAccesser.RoleId;
+                        supplyManagementUnblindTreatment.ReasonOth = data.ReasonOth;
+                        supplyManagementUnblindTreatment.AuditReasonId = data.AuditReasonId;
+                        supplyManagementUnblindTreatment.RandomizationId = item.RandomizationId;
+                        supplyManagementUnblindTreatment.TypeofUnblind = data.TypeofUnblind;
+                        _context.SupplyManagementUnblindTreatment.Add(supplyManagementUnblindTreatment);
+                        _context.Save();
+                    }
+
+                }
+            }
+
+        }
+
+        public List<SupplyManagementUnblindTreatmentGridDto> GetUnblindList(int projectId, int? siteId, int? randomizationId)
+        {
+            var data = _context.Randomization.Include(x => x.Project).Where(x => x.DeletedDate == null && x.Project.ParentProjectId == projectId && x.RandomizationNumber != null).
+                    ProjectTo<SupplyManagementUnblindTreatmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            if (data == null || data.Count == 0)
+                return new List<SupplyManagementUnblindTreatmentGridDto>();
+
+            if (siteId > 0)
+            {
+                data = data.Where(x => x.ProjectId == siteId).ToList();
+            }
+            if (randomizationId > 0)
+            {
+                data = data.Where(x => x.Id == randomizationId).ToList();
+            }
+
+            data.ForEach(x =>
+            {
+                if (x.ParentProjectId > 0)
+                {
+                    x.StudyCode = _context.Project.Where(z => z.Id == x.ParentProjectId).FirstOrDefault().ProjectCode;
+                }
+                var unblind = _context.SupplyManagementUnblindTreatment.Include(x => x.AuditReason).Where(z => z.RandomizationId == x.RandomizationId).FirstOrDefault();
+                if (unblind != null)
+                {
+                    x.TypeofUnblindName = unblind.TypeofUnblind.GetDescription();
+                    x.ReasonOth = unblind.ReasonOth;
+                    x.Reason = unblind.AuditReasonId > 0 ? unblind.AuditReason.ReasonName : "";
+                    x.ActionBy = _context.Users.Where(z => z.Id == unblind.CreatedBy).FirstOrDefault().UserName;
+                    x.ActionDate = unblind.CreatedDate;
+                    x.ActionByRole = _context.SecurityRole.Where(s => s.Id == unblind.RoleId).FirstOrDefault().RoleName;
+
+                    var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == x.ParentProjectId).FirstOrDefault();
+
+                    if (setting != null)
+                    {
+                        if (setting.KitCreationType == KitCreationType.KitWise)
+                        {
+                            var visits = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
+                             .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.ProjectDesignVisit.DisplayName).ToList();
+                            if (visits.Count > 0)
+                                x.VisitName = string.Join(",", visits);
+
+                            var treatment = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
+                            .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
+                            if (visits.Count > 0)
+                                x.TreatmentType = string.Join(",", treatment.Distinct());
+                        }
+                        else
+                        {
+                            var visits = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
+                             .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
+                            if (visits.Count > 0)
+                                x.VisitName = string.Join(",", visits);
+
+                            var treatment = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
+                            .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
+                            if (visits.Count > 0)
+                                x.TreatmentType = string.Join(",", treatment.Distinct());
+                        }
+                    }
+                }
+            });
+
+            return data;
+
         }
     }
 }

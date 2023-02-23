@@ -460,6 +460,8 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementKITReturnVerificationSeries> SupplyManagementKITReturnVerificationSeries { get; set; }
 
+        public DbSet<SupplyManagementUnblindTreatment> SupplyManagementUnblindTreatment { get; set; }
+
     }
 
 

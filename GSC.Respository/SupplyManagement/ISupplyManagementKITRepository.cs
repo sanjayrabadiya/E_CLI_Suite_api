@@ -61,5 +61,9 @@ namespace GSC.Respository.SupplyManagement
         void InsertKitSequenceHistory(SupplyManagementKITSeriesDetailHistory supplyManagementVisitKITDetailHistory);
 
         void returnVerificationStatusSequence(SupplyManagementKITReturnVerificationSequenceDto data);
+
+        void UnblindTreatment(SupplyManagementUnblindTreatmentDto data);
+
+        List<SupplyManagementUnblindTreatmentGridDto> GetUnblindList(int projectId, int? siteId, int? randomizationId);
     }
 }

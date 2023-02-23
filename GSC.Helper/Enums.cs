@@ -1029,5 +1029,11 @@ namespace GSC.Helper
         [Description("Unblind")] Unblind = 9
     }
 
+    public enum TreatmentUnblindType : int
+    {
+        [Description("Emeregency")] Emeregency = 1,
+        [Description("Planned")] Planned = 2
+    }
+
 
 }

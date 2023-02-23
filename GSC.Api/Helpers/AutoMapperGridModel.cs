@@ -632,6 +632,14 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
              .ReverseMap();
 
+            CreateMap<Randomization, SupplyManagementUnblindTreatmentGridDto>()
+             .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Project.ProjectCode))
+             .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.ScreeningNumber))
+             .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.RandomizationNumber))
+             .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.ProjectId))
+             .ForMember(x => x.ParentProjectId, x => x.MapFrom(a => a.Project.ParentProjectId))
+             .ForMember(x => x.RandomizationId, x => x.MapFrom(a => a.Id))
+             .ReverseMap();
         }
     }
 }

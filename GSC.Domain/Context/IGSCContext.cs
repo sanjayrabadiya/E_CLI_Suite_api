@@ -404,6 +404,8 @@ namespace GSC.Domain.Context
 
         DbSet<SupplyManagementKITReturnVerificationSeries> SupplyManagementKITReturnVerificationSeries { get; set; }
 
+        DbSet<SupplyManagementUnblindTreatment> SupplyManagementUnblindTreatment { get; set; }
+
 
 
 

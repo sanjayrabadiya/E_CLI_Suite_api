@@ -151,7 +151,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 var record = _supplyManagementKITDetailRepository.Find(item);
 
-               
+
                 if (record.Status != KitStatus.AllocationPending)
                 {
                     ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
@@ -309,7 +309,18 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementKITRepository.returnVerificationStatusSequence(supplyManagementKITReturnVerificationDto);
             return Ok();
         }
-
-
+        [HttpPost]
+        [Route("UnblindTreatment")]
+        public IActionResult UnblindTreatment([FromBody] SupplyManagementUnblindTreatmentDto supplyManagementUnblindTreatmentDto)
+        {
+            _supplyManagementKITRepository.UnblindTreatment(supplyManagementUnblindTreatmentDto);
+            return Ok();
+        }
+        [HttpGet]
+        [Route("GetUnblindList/{projectId}/{siteId?}/{randomizationId?}")]
+        public IActionResult GetUnblindList(int projectId, int? siteId, int? randomizationId)
+        {
+            return Ok(_supplyManagementKITRepository.GetUnblindList(projectId, siteId, randomizationId));
+        }
     }
 }

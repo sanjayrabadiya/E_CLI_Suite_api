@@ -1635,13 +1635,13 @@ namespace GSC.Respository.Attendance
                 }
             }
             var randomization = All.Where(x => x.Id == obj.Id).FirstOrDefault();
-            if (randomization != null)
+            if (randomization != null && randomizationNumberDto.IsIGT)
             {
                 randomization.ProductCode = randomizationNumberDto.ProductCode;
                 _context.Randomization.Update(randomization);
                 _context.Save();
             }
-            if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
+            if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber) && randomizationNumberDto.IsIGT)
                 UpdateRandomizationIdForIWRS(obj);
 
 
