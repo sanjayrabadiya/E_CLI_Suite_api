@@ -1219,7 +1219,7 @@ namespace GSC.Respository.SupplyManagement
                     foreach (var item in data)
                     {
                         var Total = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Where(x => x.PharmacyStudyProductTypeId == item.Id).Sum(z => z.NoOfImp * supplyManagementKITSeriesDto.NoofPatient);
-                        var availableqty = GetAvailableRemainingkitCount(supplyManagementKITSeriesDto.ProjectId, item.Id);
+                        var availableqty = GetAvailableRemainingkitSequenceCount(supplyManagementKITSeriesDto.ProjectId, item.Id);
                         if (availableqty < Total)
                         {
                             var PharmacyStudyProductType = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.DeletedDate == null && x.Id == item.Id && x.ProjectId == supplyManagementKITSeriesDto.ProjectId).FirstOrDefault();
@@ -1326,6 +1326,25 @@ namespace GSC.Respository.SupplyManagement
 
             return data;
 
+        }
+        public int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId)
+        {
+
+            var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
+                 && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
+                 .Sum(z => z.RemainingQuantity);
+            if (RemainingQuantity > 0)
+            {
+                var approvedQty = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Where(x => x.DeletedDate == null
+                   && x.SupplyManagementKITSeries.ProjectId == ProjectId && x.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                   && x.SupplyManagementKITSeries.DeletedDate == null
+                 ).Sum(x => x.NoOfImp);
+
+                var finalRemainingQty = RemainingQuantity - approvedQty;
+                return (int)finalRemainingQty;
+            }
+            return 0;
         }
     }
 }

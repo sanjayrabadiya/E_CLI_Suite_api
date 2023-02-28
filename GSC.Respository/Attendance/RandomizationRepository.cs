@@ -361,16 +361,16 @@ namespace GSC.Respository.Attendance
 
                     if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                     {
-                        kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
-                                          x.DeletedDate == null
-                                          && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
-                                          && x.SupplyManagementKIT.ProjectId == projectid
-                                          && productarray.Contains(x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode)
-                                          && x.SupplyManagementShipmentId != null
-                                          && x.SupplyManagementKIT.DeletedDate == null
-                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
-                                          && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
-                                          && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
+                        kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                                                x.DeletedDate == null
+                                                && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
+                                                && x.SupplyManagementKIT.ProjectId == projectid
+                                                && productarray.Contains(x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode)
+                                                && x.SupplyManagementShipmentId != null
+                                                && x.SupplyManagementKIT.DeletedDate == null
+                                                && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
+                                                && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                                                && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
                         randomizationNumberDto.KitCount = kitdata.Count;
 
@@ -442,6 +442,27 @@ namespace GSC.Respository.Attendance
                             }
                         }
                     }
+                    if (string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
+                    {
+                        if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
+                        {
+                            if (kitdata.Count > 0)
+                            {
+                                randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
+                                return randomizationNumberDto;
+
+                            }
+                        }
+                        else
+                        {
+                            if (kitSequencedata.Count > 0)
+                            {
+                                randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
+                                return randomizationNumberDto;
+                            }
+                        }
+                    }
+
                     return randomizationNumberDto;
                 }
                 else

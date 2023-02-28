@@ -322,5 +322,11 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             return Ok(_supplyManagementKITRepository.GetUnblindList(projectId, siteId, randomizationId));
         }
+        [HttpGet]
+        [Route("GetAvailableRemainingkitSequenceCount/{projectId}/{pharmacyStudyProductTypeId}")]
+        public IActionResult GetAvailableRemainingkitSequenceCount(int projectId, int pharmacyStudyProductTypeId)
+        {
+            return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitSequenceCount(projectId, pharmacyStudyProductTypeId));
+        }
     }
 }

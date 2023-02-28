@@ -65,5 +65,7 @@ namespace GSC.Respository.SupplyManagement
         void UnblindTreatment(SupplyManagementUnblindTreatmentDto data);
 
         List<SupplyManagementUnblindTreatmentGridDto> GetUnblindList(int projectId, int? siteId, int? randomizationId);
+
+        int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId);
     }
 }

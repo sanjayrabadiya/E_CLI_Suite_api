@@ -83,10 +83,11 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            var setting = _supplyManagementKitNumberSettingsRepository.Find(supplyManagementKitNumberSettingsDto.Id);
             var supplyManagementKitNumberSettings = _mapper.Map<SupplyManagementKitNumberSettings>(supplyManagementKitNumberSettingsDto);
             supplyManagementKitNumberSettings.KitNoseries = supplyManagementKitNumberSettingsDto.KitNumberStartWIth;
             _supplyManagementKitNumberSettingsRepository.Update(supplyManagementKitNumberSettings);
-            var mesage = _supplyManagementKitNumberSettingsRepository.CheckKitCreateion(supplyManagementKitNumberSettings);
+            var mesage = _supplyManagementKitNumberSettingsRepository.CheckKitCreateion(setting);
             if(!string.IsNullOrEmpty(mesage))
             {
                 ModelState.AddModelError("Message", mesage);

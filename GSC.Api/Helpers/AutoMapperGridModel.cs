@@ -618,7 +618,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<SupplyManagementKITSeriesDetailHistory, SupplyManagementKITSeriesDetailHistoryGridDto>()
               .ForMember(x => x.KitNo, x => x.MapFrom(a => a.SupplyManagementKITSeries.KitNo))
-              .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementKITSeries.Status.GetDescription()))
+              .ForMember(x => x.StatusName, x => x.MapFrom(a => a.Status.GetDescription()))
               .ReverseMap();
 
             CreateMap<SupplyManagementVisitKITSequenceDetail, SupplyManagementVisitKITDetailGridDto>()
