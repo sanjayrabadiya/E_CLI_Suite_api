@@ -190,7 +190,9 @@ namespace GSC.Respository.Etmf
         {
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
 
-            var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == id).Include(x => x.ProjectWorkPlace)
+            var _docuService = new DocumentService();
+
+           var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == id).Include(x => x.ProjectWorkPlace)
                 .ThenInclude(x => x.ProjectWorkPlace).FirstOrDefault();
 
             var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == artificate.ProjectWorkPlace.ProjectWorkPlace.EtmfProjectWorkPlaceId
@@ -267,9 +269,16 @@ namespace GSC.Respository.Etmf
                 obj.SectionName = _etmfMasterLibraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.EtmfSectionMasterLibraryId).SectionName;
                 obj.ZoneName = _etmfMasterLibraryRepository.Find(item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbrary.EtmfSectionMasterLibrary.EtmfMasterLibraryId).ZonName;
                 obj.DocumentName = item.DocumentName;
-                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
+                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                if (item.Status == ArtifactDocStatusType.Final)
+                {                  
+                    var changeDocumentName = _docuService.GetEtmfOldFileName(obj.FullDocPath, obj.ExtendedName);
+                    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, changeDocumentName);
+                    obj.DocumentName = changeDocumentName;
+                }
+                else
+                    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.Reviewer = users.OrderBy(x => x.SequenceNo).OrderBy(x => x.CreatedDate).ToList();
                 obj.CreatedDate = item.CreatedDate;

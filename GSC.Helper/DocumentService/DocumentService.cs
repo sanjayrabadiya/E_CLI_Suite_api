@@ -2,6 +2,7 @@
 using ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -139,6 +140,36 @@ namespace GSC.Shared.DocumentService
 
             return fileName;
         }
+
+
+        public string GetEtmfOldFileName(string path, string Filename)
+        {
+            string[] paths = { path };
+            var fullPath = Path.Combine(paths);
+            if (Directory.Exists(fullPath))
+            {
+                List<EtmfFileNameModel> fileNames = new List<EtmfFileNameModel>();
+                var allFiles = Directory.GetFiles(fullPath).Where(x => x.Contains(Filename));
+                foreach (var item in allFiles)
+                {
+                    var fileName = Path.GetFileNameWithoutExtension(item);
+                    var model = new EtmfFileNameModel()
+                    {
+                        FileCodeName = fileName.Substring(fileName.LastIndexOf('_') + 1),
+                        FileName = Path.GetFileName(item),
+                        FileCreateDate = new DateTime(Convert.ToInt64(fileName.Substring(fileName.LastIndexOf('_') + 1)))
+                    };
+                    fileNames.Add(model);
+                }
+
+                var oldFile = fileNames.OrderBy(x => x.FileCreateDate).FirstOrDefault();
+
+                return oldFile.FileName;
+            }
+
+            return "";
+        }
+
 
         public static string SaveETMFDocument(FileModel file, string path, FolderType folderType, string Version)
         {
