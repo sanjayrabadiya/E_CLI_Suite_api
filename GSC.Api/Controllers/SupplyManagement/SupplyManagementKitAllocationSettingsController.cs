@@ -85,10 +85,31 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Put([FromBody] SupplyManagementKitAllocationSettingsDto supplyManagementKitAllocationSettingsDto)
         {
-            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.DeletedDate == null && x.Id != supplyManagementKitAllocationSettingsDto.Id && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.DeletedDate == null && x.Id != supplyManagementKitAllocationSettingsDto.Id && x.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
             {
                 ModelState.AddModelError("Message", "You already added visit!");
                 return BadRequest(ModelState);
+            }
+            var project = _context.ProjectDesignVisit.Include(x => x.ProjectDesignPeriod).ThenInclude(x => x.ProjectDesign).Where(x => x.DeletedDate == null && x.Id == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId).FirstOrDefault();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId).FirstOrDefault();
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    if (_context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Any(z => z.DeletedDate == null && z.SupplyManagementKIT.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId))
+                    {
+                        ModelState.AddModelError("Message", "Kit already been prepared you can not modify record!");
+                        return BadRequest(ModelState);
+                    }
+                }
+                else
+                {
+                    if (_context.SupplyManagementKITSeries.Any(z => z.DeletedDate == null && z.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId))
+                    {
+                        ModelState.AddModelError("Message", "Kit already been prepared you can not modify record!");
+                        return BadRequest(ModelState);
+                    }
+                }
             }
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);

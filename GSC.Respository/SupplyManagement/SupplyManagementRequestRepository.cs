@@ -136,8 +136,7 @@ namespace GSC.Respository.SupplyManagement
                     if (obj.IsSiteRequest)
                     {
                         remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                                x.SupplyManagementShipmentId == null
-                                && x.SupplyManagementKIT.SiteId != null
+                                 x.SupplyManagementKIT.SiteId != null
                                 && x.SupplyManagementKIT.SiteId == obj.ToProjectId
                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                 && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
@@ -158,8 +157,7 @@ namespace GSC.Respository.SupplyManagement
                     if (obj.IsSiteRequest)
                     {
                         remainingKit = _context.SupplyManagementKITSeries.Where(x =>
-                                x.SupplyManagementShipmentId == null
-                                && x.SiteId == obj.ToProjectId
+                                x.SiteId == obj.ToProjectId
                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                 && x.DeletedDate == null).Count();
                     }
@@ -182,8 +180,7 @@ namespace GSC.Respository.SupplyManagement
                         if (obj.IsSiteRequest)
                         {
                             remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                                    x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId &&
-                                    x.SupplyManagementShipmentId == null
+                                    x.SupplyManagementKIT.PharmacyStudyProductTypeId == obj.StudyProductTypeId
                                     && x.SupplyManagementKIT.SiteId != null
                                     && x.SupplyManagementKIT.SiteId == obj.ToProjectId
                                     && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
@@ -206,8 +203,7 @@ namespace GSC.Respository.SupplyManagement
                         if (obj.IsSiteRequest)
                         {
                             remainingKit = _context.SupplyManagementKITDetail.Where(x =>
-                                    x.SupplyManagementShipmentId == null
-                                    && x.SupplyManagementKIT.SiteId != null
+                                    x.SupplyManagementKIT.SiteId != null
                                     && x.SupplyManagementKIT.SiteId == obj.ToProjectId
                                     && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                     && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
@@ -229,8 +225,7 @@ namespace GSC.Respository.SupplyManagement
                     if (obj.IsSiteRequest)
                     {
                         remainingKit = _context.SupplyManagementKITSeries.Where(x =>
-                                x.SupplyManagementShipmentId == null
-                                && x.SiteId == obj.ToProjectId
+                                x.SiteId == obj.ToProjectId
                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                 && x.DeletedDate == null).Count();
                     }
@@ -265,7 +260,6 @@ namespace GSC.Respository.SupplyManagement
                 {
                     data = _context.SupplyManagementKITDetail.Where(x =>
                             x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
-                            && x.SupplyManagementShipmentId == null
                             && x.SupplyManagementKIT.SiteId != null
                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                             && x.SupplyManagementKIT.SiteId == obj.ToProjectId
@@ -303,8 +297,7 @@ namespace GSC.Respository.SupplyManagement
                 if (obj.IsSiteRequest)
                 {
                     data = _context.SupplyManagementKITSeries.Where(x =>
-                            x.SupplyManagementShipmentId == null
-                            && x.SiteId != null
+                            x.SiteId != null
                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                             && x.SiteId == obj.ToProjectId
                             && x.DeletedDate == null).Select(x => new KitListApprove
@@ -320,8 +313,7 @@ namespace GSC.Respository.SupplyManagement
                 {
 
                     data = _context.SupplyManagementKITSeries.Where(x =>
-                            x.SupplyManagementShipmentId == null
-                            && x.SiteId == null
+                            x.SiteId == null
                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                             && x.ProjectId == obj.FromProject.ParentProjectId
                             && x.DeletedDate == null).Select(x => new KitListApprove

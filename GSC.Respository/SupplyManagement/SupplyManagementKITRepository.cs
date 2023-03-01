@@ -1129,6 +1129,8 @@ namespace GSC.Respository.SupplyManagement
                 supplyManagementKITReturnVerification.AuditReasonId = data.AuditReasonId;
                 supplyManagementKITReturnVerification.ReasonOth = data.ReasonOth;
 
+                _context.SupplyManagementKITReturnVerification.Add(supplyManagementKITReturnVerification);
+
                 SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                 history.SupplyManagementKITDetailId = data.SupplyManagementKITDetailId;
                 history.Status = data.Status;
@@ -1150,6 +1152,7 @@ namespace GSC.Respository.SupplyManagement
                 supplyManagementKITReturnVerification.Status = data.Status;
                 supplyManagementKITReturnVerification.AuditReasonId = data.AuditReasonId;
                 supplyManagementKITReturnVerification.ReasonOth = data.ReasonOth;
+                _context.SupplyManagementKITReturnVerificationSeries.Add(supplyManagementKITReturnVerification);
 
                 SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
                 history.SupplyManagementKITSeriesId = data.SupplyManagementKITSeriesId;
