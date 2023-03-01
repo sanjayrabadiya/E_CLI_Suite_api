@@ -142,17 +142,18 @@ namespace GSC.Api.Controllers.CTMS
             foreach (var item in AllProject)
             {
                 var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate != null && x.ProjectId == item.Id).FirstOrDefault();
-                if (data == null)
-                    return NotFound();
-                var validatecode = _studyPlanRepository.Duplicate(data);
-                if (!string.IsNullOrEmpty(validatecode))
+                if (data != null)
                 {
-                    ModelState.AddModelError("Message", validatecode);
-                    return BadRequest(ModelState);
+                    var validatecode = _studyPlanRepository.Duplicate(data);
+                    if (string.IsNullOrEmpty(validatecode))
+                    {
+                        //ModelState.AddModelError("Message", validatecode);
+                        //return BadRequest(ModelState);
+                        data.DeletedBy = null;
+                        data.DeletedDate = null;
+                        _studyPlanRepository.Active(data);
+                    }
                 }
-                data.DeletedBy = null;
-                data.DeletedDate = null;
-                _studyPlanRepository.Active(data);
             }
             _uow.Save();
 
