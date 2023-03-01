@@ -122,7 +122,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
 
-            
+
             var visitdetails = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == record.Id).ToList();
             if (visitdetails != null && visitdetails.Count > 0)
             {
@@ -159,10 +159,10 @@ namespace GSC.Api.Controllers.SupplyManagement
                     return NotFound();
                 if (record.Status != KitStatus.AllocationPending)
                 {
-                    ModelState.AddModelError("Message", "Kit " + record.KitNo + " should not be deleted once the shipment/receipt has been generated!");
+                    ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
                     return BadRequest(ModelState);
                 }
-                
+
                 var visitdetails = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == record.Id).ToList();
                 if (visitdetails != null && visitdetails.Count > 0)
                 {
