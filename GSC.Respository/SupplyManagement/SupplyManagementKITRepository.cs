@@ -431,10 +431,9 @@ namespace GSC.Respository.SupplyManagement
                                             && x.ProjectDesignVisitId == visit.ProjectDesignVisitId
                                             && x.SupplyManagementKITSeries.ProjectId == obj.ParentProjectId
                                             && x.SupplyManagementKITSeries.Status == KitStatus.Allocated
-                                            && x.SupplyManagementKITSeries.RandomizationId == obj.RandomizationId
                                             && x.SupplyManagementKITSeries.DeletedDate == null
                                             && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ProjectId
-                                            && x.RandomizationId == null).FirstOrDefault();
+                                            && x.SupplyManagementKITSeries.RandomizationId == obj.RandomizationId).FirstOrDefault();
 
                 if (kitSequencedata == null)
                     return obj;
