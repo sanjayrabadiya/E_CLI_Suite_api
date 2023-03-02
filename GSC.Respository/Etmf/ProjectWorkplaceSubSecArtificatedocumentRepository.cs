@@ -159,7 +159,7 @@ namespace GSC.Respository.Etmf
             var documentList = All.Include(x => x.ProjectWorkplaceSubSectionArtifact)
                 .Include(x => x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
                 .Include(x => x.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
-                .Where(x => x.DeletedDate == null && x.ExpiryDate != null && x.Status== ArtifactDocStatusType.Expired && x.ProjectWorkplaceSubSectionArtifact.ProjectId == projectId && (x.CreatedBy == _jwtTokenAccesser.UserId ||
+                .Where(x => x.DeletedDate == null && x.ExpiryDate != null && x.Status == ArtifactDocStatusType.Expired && x.ProjectWorkplaceSubSectionArtifact.ProjectId == projectId && (x.CreatedBy == _jwtTokenAccesser.UserId ||
               _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
               || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)))
               .ToList().OrderByDescending(x => x.Id);
@@ -216,6 +216,7 @@ namespace GSC.Respository.Etmf
                         .OrderByDescending(x => x.Id).FirstOrDefault();
 
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+            var _docService = new DocumentService();
             var reviewdocument = _context.ProjectSubSecArtificateDocumentReview.Where(c => c.DeletedDate == null
             && c.UserId == _jwtTokenAccesser.UserId).Select(x => x.ProjectWorkplaceSubSecArtificateDocumentId).ToList();
 
@@ -284,12 +285,19 @@ namespace GSC.Respository.Etmf
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceSubSectionArtifactId;
                 obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
                 obj.DocumentName = item.DocumentName;
-                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                 obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
+                if (item.Status == ArtifactDocStatusType.Final)
+                {
+                    var changeDocumentName = _docService.GetEtmfOldFileName(obj.FullDocPath, obj.ExtendedName);
+                    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, changeDocumentName);
+                    obj.DocumentName = changeDocumentName;
+                }
+                else
+                    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
-                obj.Level = 5.2;
-                obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                obj.Level = 5.2;               
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
