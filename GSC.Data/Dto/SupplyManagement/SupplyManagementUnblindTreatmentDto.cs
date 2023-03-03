@@ -15,6 +15,12 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? RoleId { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+        public int ProjectId { get; set; }
+        public int? SiteId { get; set; }
+        public string Treatment { get; set; }
+        public DateTime? UnblindDatetime { get; set; }
+
+        public int? RandomizationId { get; set; }
 
     }
 

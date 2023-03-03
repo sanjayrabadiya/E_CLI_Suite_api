@@ -62,6 +62,10 @@ namespace GSC.Data.Dto.Attendance
         public int VisitId { get; set; }
 
         public int KitCount { get; set; }
+
+        public int KitDetailId { get; set; }
+
+        public string ErrorMessage { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto

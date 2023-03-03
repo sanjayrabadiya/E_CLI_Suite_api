@@ -831,8 +831,26 @@ namespace GSC.Respository.EmailSender
             }
             if (email.RemainingKit > 0)
             {
-                str = Regex.Replace(str, "##RemainingKit##", email.RemainingKit.ToString(), RegexOptions.IgnoreCase); 
+                str = Regex.Replace(str, "##RemainingKit##", email.RemainingKit.ToString(), RegexOptions.IgnoreCase);
 
+            }
+            if (!string.IsNullOrEmpty(email.ReasonForUnblind))
+            {
+                str = Regex.Replace(str, "##ReasonForUnblind##", email.ReasonForUnblind, RegexOptions.IgnoreCase);
+
+            }
+            if (!string.IsNullOrEmpty(email.UnblindBy))
+            {
+                str = Regex.Replace(str, "##UnblindBy##", email.UnblindBy, RegexOptions.IgnoreCase);
+
+            }
+            if (email.UnblindDatetime != null)
+            {
+                str = Regex.Replace(str, "##UnblindDatetime##", email.UnblindDatetime.ToString("dddd, dd MMMM yyyy HH:mm"), RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.Treatment))
+            {
+                str = Regex.Replace(str, "##Treatment##", email.Treatment, RegexOptions.IgnoreCase);
             }
             return str;
         }

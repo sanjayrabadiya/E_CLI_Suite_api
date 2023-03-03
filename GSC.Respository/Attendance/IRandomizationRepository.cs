@@ -68,5 +68,7 @@ namespace GSC.Respository.Attendance
         void SendRandomizationIWRSEMail(RandomizationDto obj);
 
         void SendRandomizationThresholdEMail(RandomizationDto obj);
+
+        bool CheckDUplicateRandomizationNumber(RandomizationDto obj);
     }
 }

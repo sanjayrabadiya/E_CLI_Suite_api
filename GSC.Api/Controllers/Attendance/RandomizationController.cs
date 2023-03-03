@@ -409,7 +409,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId).FirstOrDefault();
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
 
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
             randno = randomization.RandomizationNumber;
@@ -419,7 +419,7 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            if (randomization.RandomizationNumber != randomizationDto.RandomizationNumber && !_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
+            if (string.IsNullOrEmpty(randno) && !_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
             {
                 ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
                 return BadRequest(ModelState);
@@ -439,24 +439,50 @@ namespace GSC.Api.Controllers.Attendance
 
             if (string.IsNullOrEmpty(randno))
             {
-                randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
-                if (string.IsNullOrEmpty(randomizationDto.KitNo) && numerformate.IsIWRS == true)
-                {
-                    _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
-
-                    ModelState.AddModelError("Message", "Kit is not available");
-                    return BadRequest(ModelState);
-                }
-                if (numerformate.IsIGT == true && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
-                {
-                    ModelState.AddModelError("Message", "Please upload randomization sheet");
-                    return BadRequest(ModelState);
-                }
-                _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
                 if (numerformate.IsIWRS)
                 {
+                    randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
+                    if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
+                    {
+                        ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
+                        return BadRequest(ModelState);
+                    }
+                    if (string.IsNullOrEmpty(randomizationDto.KitNo))
+                    {
+                        _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
+
+                        ModelState.AddModelError("Message", "Kit is not available");
+                        return BadRequest(ModelState);
+                    }
+                }
+                if (numerformate.IsIGT)
+                {
+                    if (numerformate.IsIGT == true && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                    {
+                        ModelState.AddModelError("Message", "Please upload randomization sheet");
+                        return BadRequest(ModelState);
+                    }
+                    if (!_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
+                    {
+                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                        return BadRequest(ModelState);
+                    }
+                    if (!_randomizationRepository.CheckDUplicateRandomizationNumber(randomizationDto))
+                    {
+                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                        return BadRequest(ModelState);
+                    }
+
+                }
+
+               
+                if (numerformate.IsIWRS)
+                {
+                    _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
                     _randomizationRepository.SendRandomizationThresholdEMail(randomizationDto);
                 }
+
+
             }
 
 

@@ -122,6 +122,10 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "Product verification is pending!";
             }
+            if (supplyManagementshipmentDto.Kits.Count == 0)
+            {
+                return "Please select kit!";
+            }
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
                 if (settings != null && settings.IsBlindedStudy == true)
@@ -203,7 +207,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (setting.KitCreationType == KitCreationType.KitWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {
-                    
+
                     foreach (var item in supplyManagementshipmentDto.Kits)
                     {
                         var kit = _context.SupplyManagementKITDetail.Where(x => x.Id == item.Id).FirstOrDefault();
@@ -229,7 +233,7 @@ namespace GSC.Respository.SupplyManagement
                         var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
                         if (kit != null && supplyManagementshipmentDto.Id > 0)
                         {
-                            
+
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
                             _context.SupplyManagementKITSeries.Update(kit);

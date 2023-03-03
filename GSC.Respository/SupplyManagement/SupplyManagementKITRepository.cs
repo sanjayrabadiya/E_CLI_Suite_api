@@ -1255,6 +1255,9 @@ namespace GSC.Respository.SupplyManagement
                         supplyManagementUnblindTreatment.TypeofUnblind = data.TypeofUnblind;
                         _context.SupplyManagementUnblindTreatment.Add(supplyManagementUnblindTreatment);
                         _context.Save();
+                        data.UnblindDatetime = supplyManagementUnblindTreatment.CreatedDate;
+                        data.RandomizationId = item.RandomizationId;
+                        SendKitUnblindEmail(data);
                     }
 
                 }
@@ -1347,6 +1350,80 @@ namespace GSC.Respository.SupplyManagement
                 return (int)finalRemainingQty;
             }
             return 0;
+        }
+        public void SendKitUnblindEmail(SupplyManagementUnblindTreatmentDto obj)
+        {
+
+            SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
+            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+
+            var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.Unblind).ToList();
+            if (emailconfiglist != null && emailconfiglist.Count > 0)
+            {
+
+                emailconfig = emailconfiglist.FirstOrDefault();
+
+                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                if (details.Count() > 0)
+                {
+                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault().ProjectCode;
+
+                    if (obj.SiteId > 0)
+                    {
+                        var site = _context.Project.Where(x => x.Id == obj.SiteId).FirstOrDefault();
+                        if (site != null)
+                        {
+                            iWRSEmailModel.SiteCode = site.ProjectCode;
+                            var managesite = _context.ManageSite.Where(x => x.Id == site.ManageSiteId).FirstOrDefault();
+                            if (managesite != null)
+                            {
+                                iWRSEmailModel.SiteName = managesite.SiteName;
+                            }
+                        }
+                    }
+
+                    iWRSEmailModel.UnblindDatetime = (DateTime)obj.UnblindDatetime;
+                    if (!string.IsNullOrEmpty(obj.ReasonOth))
+                        iWRSEmailModel.ReasonForUnblind = obj.ReasonOth;
+                    else
+                        iWRSEmailModel.ReasonForUnblind = _context.AuditReason.Where(s => s.Id == obj.AuditReasonId).FirstOrDefault().ReasonName;
+                    iWRSEmailModel.UnblindBy = _context.Users.Where(s => s.Id == _jwtTokenAccesser.UserId).FirstOrDefault().UserName;
+
+                    var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == obj.ProjectId).FirstOrDefault();
+
+                    if (setting != null)
+                    {
+                        if (setting.KitCreationType == KitCreationType.KitWise)
+                        {
+                            var treatment = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
+                            .Where(s => s.RandomizationId == obj.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
+                            if (treatment.Count > 0)
+                                iWRSEmailModel.Treatment = string.Join(",", treatment.Distinct());
+                        }
+                        else
+                        {
+                            var treatment = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
+                            .Where(s => s.RandomizationId == obj.RandomizationId && s.DeletedDate == null).Select(z => z.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
+                            if (treatment.Count > 0)
+                                iWRSEmailModel.Treatment = string.Join(",", treatment.Distinct());
+                        }
+                    }
+                    if (obj.RandomizationId > 0)
+                    {
+                        iWRSEmailModel.RandomizationNo = _context.Randomization.Where(x => x.Id == obj.RandomizationId).FirstOrDefault().RandomizationNumber;
+                    }
+
+                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
+                    foreach (var item in details)
+                    {
+                        SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
+                        history.SupplyManagementEmailConfigurationDetailId = item.Id;
+                        _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+                        _context.Save();
+                    }
+                }
+            }
+
         }
     }
 }

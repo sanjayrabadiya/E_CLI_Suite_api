@@ -1587,6 +1587,7 @@ namespace GSC.Respository.Attendance
             obj.ProductCode = randomizationNumberDto.ProductCode;
             obj.VisitId = randomizationNumberDto.VisitId;
             obj.KitCount = randomizationNumberDto.KitCount;
+            obj.KitDetailId = randomizationNumberDto.KitDetailId;
 
             if (randomizationNumberDto.IsIWRS && !string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
             {
@@ -1648,9 +1649,7 @@ namespace GSC.Respository.Attendance
                         history.Status = KitStatus.Allocated;
                         history.RoleId = _jwtTokenAccesser.RoleId;
                         _supplyManagementKITRepository.InsertKitSequenceHistory(history);
-
                         _context.Save();
-
                         obj.KitNo = randomizationNumberDto.KitNo;
                     }
                 }
@@ -1703,14 +1702,12 @@ namespace GSC.Respository.Attendance
                 data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
                 && x.DeletedDate == null && x.RandomizationId == obj.Id && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
-
             }
 
-            var data1 = _context.SupplyManagementUploadFileDetail.Where(x => x.Id == data.Id && x.RandomizationId == obj.Id).FirstOrDefault();
-            if (data1 != null)
+            if (data != null)
             {
-                data1.RandomizationId = null;
-                _context.SupplyManagementUploadFileDetail.Update(data1);
+                data.RandomizationId = null;
+                _context.SupplyManagementUploadFileDetail.Update(data);
                 _context.Save();
             }
         }
@@ -1877,6 +1874,85 @@ namespace GSC.Respository.Attendance
                 }
             }
 
+        }
+        public bool CheckDUplicateRandomizationNumber(RandomizationDto obj)
+        {
+            var randomization = _context.Randomization.Include(x => x.Project).Where(x => x.DeletedDate == null && x.RandomizationNumber == obj.RandomizationNumber && x.Project.ParentProjectId == obj.ParentProjectId).ToList();
+            if (randomization.Count > 1)
+            {
+                UpdateRandmizationKitNotAssigned(obj);
+                var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
+                if (numbersetting != null && numbersetting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var kitdata = _context.SupplyManagementKITDetail.Where(x => x.Id == obj.KitDetailId).FirstOrDefault();
+                    if (kitdata != null)
+                    {
+                        var kithistory = _context.SupplyManagementKITDetailHistory.Where(x => x.SupplyManagementKITDetailId == obj.KitDetailId && x.Status != KitStatus.Allocated).OrderByDescending(x => x.Id).FirstOrDefault();
+                        if (kithistory != null)
+                        {
+                            kitdata.RandomizationId = null;
+                            kitdata.Status = (KitStatus)kithistory.Status;
+                            _context.SupplyManagementKITDetail.Update(kitdata);
+                        }
+                        
+                        var supplyManagementVisitKITDetail = _context.SupplyManagementVisitKITDetail.Where(s => s.SupplyManagementKITDetailId == obj.KitDetailId).FirstOrDefault();
+                        if (supplyManagementVisitKITDetail != null)
+                        {
+                            supplyManagementVisitKITDetail.DeletedBy = _jwtTokenAccesser.UserId;
+                            supplyManagementVisitKITDetail.DeletedDate = DateTime.Now;
+                            _context.SupplyManagementVisitKITDetail.Update(supplyManagementVisitKITDetail);
+                        }
+                        var history = _context.SupplyManagementKITDetailHistory.Where(x => x.SupplyManagementKITDetailId == obj.KitDetailId && x.Status == KitStatus.Allocated).FirstOrDefault();
+                        if (history != null)
+                        {
+                            history.DeletedBy = _jwtTokenAccesser.UserId;
+                            history.DeletedDate = DateTime.Now;
+                            _context.SupplyManagementKITDetailHistory.Update(history);
+                        }
+                        _context.Save();
+
+                    }
+                }
+                else
+                {
+                    var kitdata = _context.SupplyManagementKITSeriesDetail.Where(x => x.Id == obj.KitDetailId).FirstOrDefault();
+                    if (kitdata != null && kitdata.RandomizationId != null)
+                    {
+                        kitdata.RandomizationId = null;
+                        _context.SupplyManagementKITSeriesDetail.Update(kitdata);
+
+                        var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == kitdata.SupplyManagementKITSeriesId).FirstOrDefault();
+                        if (kit != null)
+                        {
+                            var kithistory = _context.SupplyManagementKITSeriesDetailHistory.Where(x => x.SupplyManagementKITSeriesId == kitdata.SupplyManagementKITSeriesId && x.Status != KitStatus.Allocated).OrderByDescending(x => x.Id).FirstOrDefault();
+                            if (kithistory != null)
+                            {
+                                kit.RandomizationId = null;
+                                kit.Status = (KitStatus)kithistory.Status;
+                                _context.SupplyManagementKITSeries.Update(kit);
+                            }
+                            var supplyManagementVisitKITDetail = _context.SupplyManagementVisitKITSequenceDetail.Where(s => s.SupplyManagementKITSeriesdetailId == obj.KitDetailId).FirstOrDefault();
+                            if (supplyManagementVisitKITDetail != null)
+                            {
+                                supplyManagementVisitKITDetail.DeletedBy = _jwtTokenAccesser.UserId;
+                                supplyManagementVisitKITDetail.DeletedDate = DateTime.Now;
+                                _context.SupplyManagementVisitKITSequenceDetail.Update(supplyManagementVisitKITDetail);
+                            }
+                            var history = _context.SupplyManagementKITSeriesDetailHistory.Where(x => x.SupplyManagementKITSeriesId == kitdata.SupplyManagementKITSeriesId && x.Status == KitStatus.Allocated).FirstOrDefault();
+                            if (history != null)
+                            {
+                                history.DeletedBy = _jwtTokenAccesser.UserId;
+                                history.DeletedDate = DateTime.Now;
+                                _context.SupplyManagementKITSeriesDetailHistory.Update(history);
+                            }
+                        }
+                        _context.Save();
+                        
+                    }
+                }
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -4,6 +4,7 @@ using GSC.Data.Entities.Location;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -97,6 +98,12 @@ namespace GSC.Data.Dto.SupplyManagement
         public string TypeOfKitReturn { get; set; }
 
         public int NoOfKitReturn { get; set; }
+
+        public string Treatment { get; set; }
+
+        public string ReasonForUnblind { get; set; }
+        public DateTime UnblindDatetime { get; set; }
+        public string UnblindBy { get; set; }
 
 
     }
