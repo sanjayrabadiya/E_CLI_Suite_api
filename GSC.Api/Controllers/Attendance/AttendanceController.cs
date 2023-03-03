@@ -101,7 +101,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (record.IsProcessed)
             {
-                ModelState.AddModelError("Message", "Can not delete Attendance, because this record in under process.");
+                ModelState.AddModelError("Message", "Can not delete Attendance, because this record is under process.");
                 return BadRequest(ModelState);
             }
 
