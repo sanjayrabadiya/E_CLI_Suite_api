@@ -1100,6 +1100,15 @@ namespace GSC.Report
                                     }
                                     else
                                     {
+                                        if (!string.IsNullOrEmpty(variable.ScreeningValue))
+                                        {
+                                            var date1 = variable.ScreeningValue.Split(" ");
+                                            if (date1 != null && date1.Length > 0)
+                                            {
+                                                var date = date1[0].Split("/");
+                                                variable.ScreeningValue = date[2].TrimEnd(',') + "/" + date[0] + "/" + date[1];
+                                            }
+                                        }
                                         var dt = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.ScreeningValue : "";
 
                                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
@@ -1121,6 +1130,7 @@ namespace GSC.Report
                                     }
                                     else
                                     {
+
                                         var dttime = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variable.ScreeningValue : "";
 
                                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());
@@ -1856,6 +1866,15 @@ namespace GSC.Report
                                     }
                                     else
                                     {
+                                        if (!string.IsNullOrEmpty(variable.ScreeningValue))
+                                        {
+                                            var date1 = variable.ScreeningValue.Split(" ");
+                                            if (date1 != null && date1.Length > 0)
+                                            {
+                                                var date = date1[0].Split("/");
+                                                variable.ScreeningValue = date[2].TrimEnd(',') + "/" + date[0] + "/" + date[1];
+                                            }
+                                        }
                                         var dt = !string.IsNullOrEmpty(variable.ScreeningValue) ? DateTime.TryParse(variable.ScreeningValue, out dDate) ? DateTime.Parse(variable.ScreeningValue).UtcDateTime().ToString(GeneralSettings.DateFormat) : variable.ScreeningValue : "";
 
                                         PdfTextBoxField textBoxField = new PdfTextBoxField(result.Page, variable.Id.ToString());

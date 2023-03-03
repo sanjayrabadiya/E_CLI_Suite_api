@@ -78,7 +78,7 @@ namespace GSC.Respository.SupplyManagement
 
             });
 
-            return data.Where(x => x.Status == null || x.Status == "" || x.Status == "Reject").ToList();
+            return data.Where(x => x.Status == null || x.Status == "" || x.Status == "Rejected").ToList();
         }
         public bool CheckAvailableRemainingQty(int reqQty, int ProjectId, int PharmacyStudyProductTypeId)
         {
@@ -304,8 +304,9 @@ namespace GSC.Respository.SupplyManagement
                             {
                                 Id = x.Id,
                                 KitNo = x.KitNo,
-                                ProjectCode = x.Project.ProjectCode
-                            }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
+                                ProjectCode = x.Project.ProjectCode,
+                                TreatmentType = x.TreatmentType
+                            }).OrderBy(x => x.KitNo).ToList();
 
 
                 }
@@ -320,8 +321,9 @@ namespace GSC.Respository.SupplyManagement
                             {
                                 Id = x.Id,
                                 KitNo = x.KitNo,
-                                ProjectCode = x.Project.ProjectCode
-                            }).OrderBy(x => x.KitNo).Take(obj.RequestQty).ToList();
+                                ProjectCode = x.Project.ProjectCode,
+                                TreatmentType = x.TreatmentType
+                            }).OrderBy(x => x.KitNo).ToList();
 
 
                 }

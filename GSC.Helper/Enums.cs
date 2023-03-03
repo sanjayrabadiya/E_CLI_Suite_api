@@ -913,8 +913,8 @@ namespace GSC.Helper
     }
     public enum KitCreationType : int
     {
-        [Description("Kit Wise")] KitWise = 1,
-        [Description("Sequence Wise")] SequenceWise = 2
+        [Description("Individual Kit")] KitWise = 1,
+        [Description("Kit Pack")] SequenceWise = 2
     }
     public enum KitStatus : int
     {

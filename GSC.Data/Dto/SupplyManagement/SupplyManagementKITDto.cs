@@ -74,6 +74,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ProductCode { get; set; }
 
         public string ProjectCode { get; set; }
+
+        public string TreatmentType { get; set; }
     }
 
     public class KitListApproved
