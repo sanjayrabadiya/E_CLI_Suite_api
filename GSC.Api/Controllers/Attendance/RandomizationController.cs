@@ -267,7 +267,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!_randomizationRepository.All.Any(x => x.Id == id && (x.PatientStatusId == ScreeningPatientStatus.PreScreening || x.PatientStatusId == null)))
             {
-                ModelState.AddModelError("Message", "Can not delete , because this record in under process.");
+                ModelState.AddModelError("Message", "Can not delete , because this record is under process.");
                 return BadRequest(ModelState);
             }
 
