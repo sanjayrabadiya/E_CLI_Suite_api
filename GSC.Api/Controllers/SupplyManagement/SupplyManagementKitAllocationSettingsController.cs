@@ -67,11 +67,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementKitAllocationSettingsDto.Id = 0;
-            //if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
-            //{
-            //    ModelState.AddModelError("Message", "You already added visit!");
-            //    return BadRequest(ModelState);
-            //}
+            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.DeletedDate == null && x.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            {
+                ModelState.AddModelError("Message", "You already added visit!");
+                return BadRequest(ModelState);
+            }
 
             var supplyManagementKitAllocationSettings = _mapper.Map<SupplyManagementKitAllocationSettings>(supplyManagementKitAllocationSettingsDto);
             _supplyManagementKitAllocationSettingsRepository.Add(supplyManagementKitAllocationSettings);

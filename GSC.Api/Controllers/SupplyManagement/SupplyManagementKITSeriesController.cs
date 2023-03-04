@@ -86,17 +86,30 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             for (int i = 0; i < supplyManagementKITSeriesDto.NoofPatient; i++)
             {
-                supplyManagementKITSeriesDto.Id = 0;
-                var kitnoseriese = kitsettings.KitNoseries;
-                var supplyManagementKitSeries = _mapper.Map<SupplyManagementKITSeries>(supplyManagementKITSeriesDto);
-                supplyManagementKitSeries.Status = KitStatus.AllocationPending;
-                supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, kitnoseriese);
-                _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
-                if (_uow.Save() <= 0) throw new Exception("Creating Kit Series Creation failed on save.");
+                bool isexist = false;
+                while (!isexist)
+                {
 
-                supplyManagementKITSeriesDto.Id = supplyManagementKitSeries.Id;
-                _supplyManagementKITSeriesRepository.AddKitSeriesVisitDetail(supplyManagementKITSeriesDto);
-                ++kitsettings.KitNoseries;
+                    supplyManagementKITSeriesDto.Id = 0;
+                    var kitnoseriese = kitsettings.KitNoseries;
+                    var supplyManagementKitSeries = _mapper.Map<SupplyManagementKITSeries>(supplyManagementKITSeriesDto);
+                    supplyManagementKitSeries.Status = KitStatus.AllocationPending;
+                    supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, kitnoseriese);
+                    _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
+                    if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo))
+                    {
+                        if (_uow.Save() <= 0) throw new Exception("Creating Kit Series Creation failed on save.");
+
+                        supplyManagementKITSeriesDto.Id = supplyManagementKitSeries.Id;
+                        _supplyManagementKITSeriesRepository.AddKitSeriesVisitDetail(supplyManagementKITSeriesDto);
+                        isexist = true;
+                    }
+                    else
+                    {
+                        isexist = false;
+                    }
+                    ++kitsettings.KitNoseries;
+                }
             }
             _context.SupplyManagementKitNumberSettings.Update(kitsettings);
             _uow.Save();
