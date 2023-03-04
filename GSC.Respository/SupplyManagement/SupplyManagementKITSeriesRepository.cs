@@ -31,9 +31,9 @@ namespace GSC.Respository.SupplyManagement
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IEmailSenderRespository _emailSenderRespository;
+        
         public SupplyManagementKITSeriesRepository(IGSCContext context,
-        IMapper mapper, IJwtTokenAccesser jwtTokenAccesser, IEmailSenderRespository emailSenderRespository)
+        IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
 
@@ -41,7 +41,7 @@ namespace GSC.Respository.SupplyManagement
             _mapper = mapper;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _emailSenderRespository = emailSenderRespository;
+            
         }
 
         public void AddKitSeriesVisitDetail(SupplyManagementKITSeriesDto data)
@@ -67,6 +67,31 @@ namespace GSC.Respository.SupplyManagement
                 _context.SupplyManagementKITSeriesDetailHistory.Add(history);
                 _context.Save();
             }
+        }
+
+        public string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
+        {
+            var isnotexist = false;
+            string kitno1 = string.Empty;
+            while (!isnotexist)
+            {
+                var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+                if (!string.IsNullOrEmpty(kitno))
+                {
+                    var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno).FirstOrDefault();
+                    if (data == null)
+                    {
+                        isnotexist = true;
+                        kitno1 = kitno;
+                        break;
+
+                    }
+                    else
+                        noseriese++;
+
+                }
+            }
+            return kitno1;
         }
     }
 }

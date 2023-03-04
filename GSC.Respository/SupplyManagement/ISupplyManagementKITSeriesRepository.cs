@@ -11,5 +11,7 @@ namespace GSC.Respository.SupplyManagement
     public interface ISupplyManagementKITSeriesRepository : IGenericRepository<SupplyManagementKITSeries>
     {
         void AddKitSeriesVisitDetail(SupplyManagementKITSeriesDto data);
+
+        string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese);
     }
 }

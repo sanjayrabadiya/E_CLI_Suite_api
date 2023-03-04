@@ -90,7 +90,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 var kitnoseriese = kitsettings.KitNoseries;
                 var supplyManagementKitSeries = _mapper.Map<SupplyManagementKITSeries>(supplyManagementKITSeriesDto);
                 supplyManagementKitSeries.Status = KitStatus.AllocationPending;
-                supplyManagementKitSeries.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, kitnoseriese);
+                supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, kitnoseriese);
                 _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
                 if (_uow.Save() <= 0) throw new Exception("Creating Kit Series Creation failed on save.");
 

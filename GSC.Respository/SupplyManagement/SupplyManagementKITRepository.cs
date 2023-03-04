@@ -150,8 +150,27 @@ namespace GSC.Respository.SupplyManagement
         }
         public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
         {
-            var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
-            return kitno;
+            var isnotexist = false;
+            string kitno1 = string.Empty;
+            while (!isnotexist)
+            {
+                var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+                if (!string.IsNullOrEmpty(kitno))
+                {
+                    var data = _context.SupplyManagementKITDetail.Where(x => x.KitNo == kitno).FirstOrDefault();
+                    if (data == null)
+                    {
+                        isnotexist = true;
+                        kitno1 = kitno;
+                        break;
+
+                    }
+                    else
+                        noseriese++;
+
+                }
+            }
+            return kitno1;
         }
 
         public int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId)
