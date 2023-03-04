@@ -852,6 +852,14 @@ namespace GSC.Respository.EmailSender
             {
                 str = Regex.Replace(str, "##Treatment##", email.Treatment, RegexOptions.IgnoreCase);
             }
+            if (!string.IsNullOrEmpty(email.TypeOfKitReturn))
+            {
+                str = Regex.Replace(str, "##TypeOfKitReturn##", email.TypeOfKitReturn, RegexOptions.IgnoreCase);
+            }
+            if (email.NoOfKitReturn > 0)
+            {
+                str = Regex.Replace(str, "##NoOfKitReturn##", email.NoOfKitReturn.ToString(), RegexOptions.IgnoreCase);
+            }
             return str;
         }
 
