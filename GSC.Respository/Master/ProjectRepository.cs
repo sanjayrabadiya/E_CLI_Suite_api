@@ -1236,6 +1236,28 @@ namespace GSC.Respository.Master
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
+        public List<ProjectDropDown> GetChildProjectDropDownIWRS(int parentProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null && x.ParentProjectId == parentProjectId
+                    && x.IsTestSite == false
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                    CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsTestSite = c.IsTestSite,
+                    ParentProjectId = c.ParentProjectId ?? 0,
+                    AttendanceLimit = c.AttendanceLimit ?? 0, //Add for site limt (Tinku Mahato)
+                }).OrderBy(o => o.Value).ToList();
+        }
 
     }
 }

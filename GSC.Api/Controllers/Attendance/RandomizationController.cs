@@ -419,11 +419,6 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            if (string.IsNullOrEmpty(randno) && !_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
-            {
-                ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
-                return BadRequest(ModelState);
-            }
 
             var validaterandomizationno = _randomizationRepository.ValidateRandomizationNumber(randomizationDto);
             if (!string.IsNullOrEmpty(validaterandomizationno))
@@ -436,10 +431,16 @@ namespace GSC.Api.Controllers.Attendance
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
+            var validateduplicate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
+            if (!string.IsNullOrEmpty(validateduplicate))
+            {
+                ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                return BadRequest(ModelState);
+            }
 
             if (string.IsNullOrEmpty(randno))
             {
-                if (numerformate.IsIWRS)
+                if (numerformate.IsIWRS || numerformate.IsIGT)
                 {
                     randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
                     if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
@@ -447,16 +448,13 @@ namespace GSC.Api.Controllers.Attendance
                         ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
                         return BadRequest(ModelState);
                     }
-                    if (string.IsNullOrEmpty(randomizationDto.KitNo))
+                    if (numerformate.IsIWRS == true && string.IsNullOrEmpty(randomizationDto.KitNo))
                     {
                         _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
 
                         ModelState.AddModelError("Message", "Kit is not available");
                         return BadRequest(ModelState);
                     }
-                }
-                if (numerformate.IsIGT)
-                {
                     if (numerformate.IsIGT == true && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
                     {
                         ModelState.AddModelError("Message", "Please upload randomization sheet");
@@ -472,20 +470,10 @@ namespace GSC.Api.Controllers.Attendance
                         ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
                         return BadRequest(ModelState);
                     }
-
-                }
-
-               
-                if (numerformate.IsIWRS)
-                {
                     _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
                     _randomizationRepository.SendRandomizationThresholdEMail(randomizationDto);
                 }
-
-
             }
-
-
             return Ok(randomizationDto);
         }
 

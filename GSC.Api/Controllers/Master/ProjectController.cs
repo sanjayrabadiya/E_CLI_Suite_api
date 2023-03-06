@@ -645,5 +645,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_projectRepository.GetProjectDropDownIWRSUnblind());
         }
+
+        [HttpGet]
+        [Route("GetChildProjectDropDownIWRS/{parentProjectId}")]
+        public IActionResult GetChildProjectDropDownIWRS(int parentProjectId)
+        {
+            return Ok(_projectRepository.GetChildProjectDropDownIWRS(parentProjectId));
+        }
     }
 }

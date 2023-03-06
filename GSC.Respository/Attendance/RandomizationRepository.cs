@@ -899,7 +899,14 @@ namespace GSC.Respository.Attendance
             if (All.Any(x =>
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
                 x.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&
-                x.DeletedDate == null)) return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
+                x.DeletedDate == null))
+            {
+
+                var randomization = All.Where(X => X.Id == objSave.Id).FirstOrDefault();
+                _context.Randomization.Update(randomization);
+                _context.Save();
+                return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
+            }
 
             return "";
         }
@@ -1588,6 +1595,17 @@ namespace GSC.Respository.Attendance
             obj.VisitId = randomizationNumberDto.VisitId;
             obj.KitCount = randomizationNumberDto.KitCount;
             obj.KitDetailId = randomizationNumberDto.KitDetailId;
+            if (ValidateRandomizationIdForIWRS(obj))
+            {
+                obj.ErrorMessage = "Randmization Number Already assigned please try again!";
+                return obj;
+            }
+            var checkduplicate = Duplicate(obj, obj.ParentProjectId);
+            if (!string.IsNullOrEmpty(checkduplicate))
+            {
+                obj.ErrorMessage = checkduplicate;
+                return obj;
+            }
 
             if (randomizationNumberDto.IsIWRS && !string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
             {
@@ -1654,8 +1672,9 @@ namespace GSC.Respository.Attendance
                     }
                 }
             }
+
             var randomization = All.Where(x => x.Id == obj.Id).FirstOrDefault();
-            if (randomization != null && randomizationNumberDto.IsIGT)
+            if (randomization != null && randomizationNumberDto.IsIGT && !string.IsNullOrEmpty(randomizationNumberDto.ProductCode))
             {
                 randomization.ProductCode = randomizationNumberDto.ProductCode;
                 _context.Randomization.Update(randomization);
@@ -1894,7 +1913,7 @@ namespace GSC.Respository.Attendance
                             kitdata.Status = (KitStatus)kithistory.Status;
                             _context.SupplyManagementKITDetail.Update(kitdata);
                         }
-                        
+
                         var supplyManagementVisitKITDetail = _context.SupplyManagementVisitKITDetail.Where(s => s.SupplyManagementKITDetailId == obj.KitDetailId).FirstOrDefault();
                         if (supplyManagementVisitKITDetail != null)
                         {
@@ -1916,7 +1935,7 @@ namespace GSC.Respository.Attendance
                 else
                 {
                     var kitdata = _context.SupplyManagementKITSeriesDetail.Where(x => x.Id == obj.KitDetailId).FirstOrDefault();
-                    if (kitdata != null && kitdata.RandomizationId != null)
+                    if (kitdata != null)
                     {
                         kitdata.RandomizationId = null;
                         _context.SupplyManagementKITSeriesDetail.Update(kitdata);
@@ -1947,7 +1966,7 @@ namespace GSC.Respository.Attendance
                             }
                         }
                         _context.Save();
-                        
+
                     }
                 }
                 return false;
