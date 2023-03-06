@@ -1921,7 +1921,7 @@ namespace GSC.Respository.Attendance
                             supplyManagementVisitKITDetail.DeletedDate = DateTime.Now;
                             _context.SupplyManagementVisitKITDetail.Update(supplyManagementVisitKITDetail);
                         }
-                        var history = _context.SupplyManagementKITDetailHistory.Where(x => x.SupplyManagementKITDetailId == obj.KitDetailId && x.Status == KitStatus.Allocated).FirstOrDefault();
+                        var history = _context.SupplyManagementKITDetailHistory.Where(x => x.SupplyManagementKITDetailId == obj.KitDetailId).OrderByDescending(x => x.Id).FirstOrDefault();
                         if (history != null)
                         {
                             history.DeletedBy = _jwtTokenAccesser.UserId;
@@ -1957,7 +1957,7 @@ namespace GSC.Respository.Attendance
                                 supplyManagementVisitKITDetail.DeletedDate = DateTime.Now;
                                 _context.SupplyManagementVisitKITSequenceDetail.Update(supplyManagementVisitKITDetail);
                             }
-                            var history = _context.SupplyManagementKITSeriesDetailHistory.Where(x => x.SupplyManagementKITSeriesId == kitdata.SupplyManagementKITSeriesId && x.Status == KitStatus.Allocated).FirstOrDefault();
+                            var history = _context.SupplyManagementKITSeriesDetailHistory.Where(x => x.SupplyManagementKITSeriesId == kitdata.SupplyManagementKITSeriesId).OrderByDescending(x => x.Id).FirstOrDefault();
                             if (history != null)
                             {
                                 history.DeletedBy = _jwtTokenAccesser.UserId;
