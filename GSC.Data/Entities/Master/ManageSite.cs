@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.Master
         public string SiteAddress { get; set; }
         public bool Status { get; set; }
         public int CityId { get; set; }
+        public string Facilities { get; set; }
         public int? CompanyId { get; set; }
         public City City { get; set; }
         public List<ManageSiteRole> ManageSiteRole { get; set; } = null;

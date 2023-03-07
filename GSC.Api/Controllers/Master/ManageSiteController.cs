@@ -67,6 +67,7 @@ namespace GSC.Api.Controllers.Master
                 manageSite.ManageSiteRole = manageSite.ManageSiteRole.Where(x => x.DeletedDate == null).ToList();
 
             var manageSiteDto = _mapper.Map<ManageSiteDto>(manageSite);
+            manageSiteDto.Facilities = manageSite.Facilities?.Split(',').ToList();
             manageSiteDto.StateId = manageSite.City.State.Id;
             manageSiteDto.CountryId = manageSite.City.State.Country.Id;
 
@@ -82,7 +83,7 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             manageSiteDto.Id = 0;
             var manageSite = _mapper.Map<ManageSite>(manageSiteDto);
-
+            manageSite.Facilities = manageSiteDto.Facilities?.Aggregate((a, b) => a + "," + b);
             var validate = _manageSiteRepository.Duplicate(manageSite);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -108,6 +109,7 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var manageSite = _mapper.Map<ManageSite>(manageSiteDto);
+            manageSite.Facilities = manageSiteDto.Facilities?.Aggregate((a, b) => a + "," + b);
 
             var validate = _manageSiteRepository.Duplicate(manageSite);
             if (!string.IsNullOrEmpty(validate))
@@ -119,7 +121,7 @@ namespace GSC.Api.Controllers.Master
             _manageSiteRepository.UpdateRole(manageSite);
             /* Added by Darshil for effective Date on 24-07-2020 */
             _manageSiteRepository.Update(manageSite);
-            
+
             if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
             return Ok(manageSite.Id);
         }
