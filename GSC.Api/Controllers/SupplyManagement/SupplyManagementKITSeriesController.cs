@@ -91,10 +91,9 @@ namespace GSC.Api.Controllers.SupplyManagement
                 {
 
                     supplyManagementKITSeriesDto.Id = 0;
-                    var kitnoseriese = kitsettings.KitNoseries;
                     var supplyManagementKitSeries = _mapper.Map<SupplyManagementKITSeries>(supplyManagementKITSeriesDto);
                     supplyManagementKitSeries.Status = KitStatus.AllocationPending;
-                    supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, kitnoseriese);
+                    supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, 1);
                     _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
                     if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo))
                     {
@@ -108,11 +107,10 @@ namespace GSC.Api.Controllers.SupplyManagement
                     {
                         isexist = false;
                     }
-                    ++kitsettings.KitNoseries;
+                    
                 }
             }
-            _context.SupplyManagementKitNumberSettings.Update(kitsettings);
-            _uow.Save();
+            
             return Ok(supplyManagementKITSeriesDto.Id);
 
         }

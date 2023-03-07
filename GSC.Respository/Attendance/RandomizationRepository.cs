@@ -1595,7 +1595,7 @@ namespace GSC.Respository.Attendance
             obj.VisitId = randomizationNumberDto.VisitId;
             obj.KitCount = randomizationNumberDto.KitCount;
             obj.KitDetailId = randomizationNumberDto.KitDetailId;
-            if (ValidateRandomizationIdForIWRS(obj))
+            if (!ValidateRandomizationIdForIWRS(obj))
             {
                 obj.ErrorMessage = "Randmization Number Already assigned please try again!";
                 return obj;

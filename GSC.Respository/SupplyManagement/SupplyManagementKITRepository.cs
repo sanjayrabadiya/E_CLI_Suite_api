@@ -157,6 +157,9 @@ namespace GSC.Respository.SupplyManagement
                 var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
                 if (!string.IsNullOrEmpty(kitno))
                 {
+                    ++kitsettings.KitNoseries;
+                    _context.SupplyManagementKitNumberSettings.Update(kitsettings);
+                    _context.Save();
                     var data = _context.SupplyManagementKITDetail.Where(x => x.KitNo == kitno).FirstOrDefault();
                     if (data == null)
                     {
@@ -165,8 +168,7 @@ namespace GSC.Respository.SupplyManagement
                         break;
 
                     }
-                    else
-                        noseriese++;
+                    
 
                 }
             }

@@ -75,9 +75,12 @@ namespace GSC.Respository.SupplyManagement
             string kitno1 = string.Empty;
             while (!isnotexist)
             {
-                var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+                var kitno = kitsettings.Prefix + kitsettings.KitNoseries.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
                 if (!string.IsNullOrEmpty(kitno))
                 {
+                    ++kitsettings.KitNoseries;
+                    _context.SupplyManagementKitNumberSettings.Update(kitsettings);
+                    _context.Save();
                     var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno).FirstOrDefault();
                     if (data == null)
                     {
@@ -86,9 +89,6 @@ namespace GSC.Respository.SupplyManagement
                         break;
 
                     }
-                    else
-                        noseriese++;
-
                 }
             }
             return kitno1;

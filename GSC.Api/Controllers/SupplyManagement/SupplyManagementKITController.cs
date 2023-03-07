@@ -89,9 +89,9 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             for (int i = 0; i < supplyManagementUploadFile.NoofPatient; i++)
             {
-                var kitnoseriese = kitsettings.KitNoseries;
+                
                 SupplyManagementKITDetail obj = new SupplyManagementKITDetail();
-                obj.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, kitnoseriese);
+                obj.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, 1);
                 obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
                 obj.Status = KitStatus.AllocationPending;
                 obj.NoOfImp = supplyManagementUploadFileDto.NoOfImp;
@@ -105,10 +105,9 @@ namespace GSC.Api.Controllers.SupplyManagement
                 _supplyManagementKITRepository.InsertKitHistory(history);
                 _uow.Save();
 
-                ++kitsettings.KitNoseries;
+                
             }
-            _context.SupplyManagementKitNumberSettings.Update(kitsettings);
-            _uow.Save();
+            
             return Ok(supplyManagementUploadFile.Id);
 
         }
