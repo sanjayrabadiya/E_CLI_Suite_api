@@ -1600,12 +1600,19 @@ namespace GSC.Respository.Attendance
                 obj.ErrorMessage = "Randmization Number Already assigned please try again!";
                 return obj;
             }
+            if (obj.RandomizationNumber != randomizationNumberDto.RandomizationNumber)
+            {
+                obj.ErrorMessage = "Randmization Number Already assigned please try again!";
+                return obj;
+            }
             var checkduplicate = Duplicate(obj, obj.ParentProjectId);
             if (!string.IsNullOrEmpty(checkduplicate))
             {
                 obj.ErrorMessage = checkduplicate;
                 return obj;
             }
+            if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber) && randomizationNumberDto.IsIGT)
+                UpdateRandomizationIdForIWRS(obj);
 
             if (randomizationNumberDto.IsIWRS && !string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
             {
@@ -1680,10 +1687,6 @@ namespace GSC.Respository.Attendance
                 _context.Randomization.Update(randomization);
                 _context.Save();
             }
-            if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber) && randomizationNumberDto.IsIGT)
-                UpdateRandomizationIdForIWRS(obj);
-
-
             return obj;
         }
         public void UpdateRandmizationKitNotAssigned(RandomizationDto obj)
