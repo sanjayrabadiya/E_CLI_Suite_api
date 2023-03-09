@@ -900,11 +900,7 @@ namespace GSC.Respository.Attendance
                 x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber &&
                 x.ProjectId == projectId && !string.IsNullOrEmpty(x.RandomizationNumber) &&
                 x.DeletedDate == null))
-            {
-
-                var randomization = All.Where(X => X.Id == objSave.Id).FirstOrDefault();
-                _context.Randomization.Update(randomization);
-                _context.Save();
+            {              
                 return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
             }
 
@@ -1590,7 +1586,6 @@ namespace GSC.Respository.Attendance
         {
             var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
             var randomizationNumberDto = GenerateRandomizationNumber(obj.Id);
-            obj.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
             obj.ProductCode = randomizationNumberDto.ProductCode;
             obj.VisitId = randomizationNumberDto.VisitId;
             obj.KitCount = randomizationNumberDto.KitCount;
@@ -1614,6 +1609,7 @@ namespace GSC.Respository.Attendance
                 obj.ErrorMessage = checkduplicate;
                 return obj;
             }
+            obj.RandomizationNumber = randomizationNumberDto.RandomizationNumber;
             if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber) && randomizationNumberDto.IsIGT)
                 UpdateRandomizationIdForIWRS(obj);
 
