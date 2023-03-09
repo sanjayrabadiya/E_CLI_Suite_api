@@ -1597,17 +1597,20 @@ namespace GSC.Respository.Attendance
             obj.KitDetailId = randomizationNumberDto.KitDetailId;
             if (!ValidateRandomizationIdForIWRS(obj))
             {
+                UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = "Randmization Number Already assigned please try again!";
                 return obj;
             }
             if (obj.RandomizationNumber != randomizationNumberDto.RandomizationNumber)
             {
+                UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = "Randmization Number Already assigned please try again!";
                 return obj;
             }
             var checkduplicate = Duplicate(obj, obj.ParentProjectId);
             if (!string.IsNullOrEmpty(checkduplicate))
             {
+                UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = checkduplicate;
                 return obj;
             }

@@ -431,17 +431,19 @@ namespace GSC.Api.Controllers.Attendance
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
-            var validateduplicate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
-            if (!string.IsNullOrEmpty(validateduplicate))
-            {
-                ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
-                return BadRequest(ModelState);
-            }
+          
 
             if (string.IsNullOrEmpty(randno))
             {
                 if (numerformate.IsIWRS || numerformate.IsIGT)
                 {
+                    var validateduplicate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
+                    if (!string.IsNullOrEmpty(validateduplicate))
+                    {
+                        _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
+                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                        return BadRequest(ModelState);
+                    }
                     randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
                     if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
                     {
