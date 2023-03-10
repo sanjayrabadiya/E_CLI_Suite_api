@@ -52,6 +52,10 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (x.RandomizationId > 0)
                     x.RandomizationNo = _context.Randomization.Where(z => z.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+                //if (x.ToSiteId > 0)
+                //{
+                //    x.SiteCode = _context.Project.Where(z => z.Id == x.ToSiteId).FirstOrDefault().ProjectCode;
+                //}
                 if (x.SupplyManagementShipmentId > 0)
                 {
                     var request = _context.SupplyManagementShipment.Include(r => r.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(z => z.Id == x.SupplyManagementShipmentId).FirstOrDefault();
@@ -154,7 +158,7 @@ namespace GSC.Respository.SupplyManagement
             string kitno1 = string.Empty;
             while (!isnotexist)
             {
-                var kitno = kitsettings.Prefix + noseriese.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+                var kitno = kitsettings.Prefix + kitsettings.KitNoseries.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
                 if (!string.IsNullOrEmpty(kitno))
                 {
                     ++kitsettings.KitNoseries;
@@ -168,7 +172,7 @@ namespace GSC.Respository.SupplyManagement
                         break;
 
                     }
-                    
+
 
                 }
             }
@@ -1189,10 +1193,15 @@ namespace GSC.Respository.SupplyManagement
                    ProjectTo<SupplyManagementKITSeriesGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(x =>
             {
-                if (x.SiteId > 0)
+                if (x.ToSiteId > 0)
+                {
+                    x.SiteCode = _context.Project.Where(z => z.Id == x.ToSiteId).FirstOrDefault().ProjectCode;
+                }
+                else if (x.SiteId > 0)
                 {
                     x.SiteCode = _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode;
                 }
+                
                 if (x.SupplyManagementShipmentId > 0)
                 {
                     var request = _context.SupplyManagementShipment.Include(r => r.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(z => z.Id == x.SupplyManagementShipmentId).FirstOrDefault();

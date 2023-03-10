@@ -89,22 +89,34 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             for (int i = 0; i < supplyManagementUploadFile.NoofPatient; i++)
             {
-                
-                SupplyManagementKITDetail obj = new SupplyManagementKITDetail();
-                obj.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, 1);
-                obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
-                obj.Status = KitStatus.AllocationPending;
-                obj.NoOfImp = supplyManagementUploadFileDto.NoOfImp;
-                _supplyManagementKITDetailRepository.Add(obj);
-                _uow.Save();
+                bool isexist = false;
+                while (!isexist)
+                {
 
-                SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
-                history.SupplyManagementKITDetailId = obj.Id;
-                history.Status = KitStatus.AllocationPending;
-                history.RoleId = _jwtTokenAccesser.RoleId;
-                _supplyManagementKITRepository.InsertKitHistory(history);
-                _uow.Save();
+                    SupplyManagementKITDetail obj = new SupplyManagementKITDetail();
+                    obj.KitNo = _supplyManagementKITRepository.GenerateKitNo(kitsettings, 1);
+                    obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
+                    obj.Status = KitStatus.AllocationPending;
+                    obj.NoOfImp = supplyManagementUploadFileDto.NoOfImp;
+                    _supplyManagementKITDetailRepository.Add(obj);
+                    if (!_supplyManagementKITDetailRepository.All.Any(x => x.KitNo == obj.KitNo))
+                    {
+                        if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
 
+                        SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
+                        history.SupplyManagementKITDetailId = obj.Id;
+                        history.Status = KitStatus.AllocationPending;
+                        history.RoleId = _jwtTokenAccesser.RoleId;
+                        _supplyManagementKITRepository.InsertKitHistory(history);
+                        _uow.Save();
+                        isexist = true;
+                    }
+                    else
+                    {
+                        isexist = false;
+                    }
+                   
+                }
                 
             }
             
