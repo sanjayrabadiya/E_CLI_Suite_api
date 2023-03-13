@@ -200,7 +200,7 @@ namespace GSC.Respository.Screening
                     ScheduleDate = a.ScheduleDate,
                     IsSchedule = a.IsSchedule,
                     DesignOrder = a.ProjectDesignVisit.DesignOrder,
-                    IsLocked = a.ScreeningTemplates.All(x => x.IsLocked == false) ? false : true,
+                    IsLocked = a.ScreeningTemplates.Any(x => x.IsLocked == false) ? false : true,
                     StudyVersion = a.ProjectDesignVisit.StudyVersion
                 }).OrderBy(b => b.DesignOrder).ToList()
 
