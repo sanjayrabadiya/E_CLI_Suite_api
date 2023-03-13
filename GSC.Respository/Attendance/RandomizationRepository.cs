@@ -413,14 +413,14 @@ namespace GSC.Respository.Attendance
 
                     foreach (var visititem in visit)
                     {
-                        if (productarray.Contains(visititem.Value) && string.IsNullOrEmpty(randomizationNumberDto.KitNo))
+                        if (productarray.Contains(visititem.Value.Trim()) && string.IsNullOrEmpty(randomizationNumberDto.KitNo))
                         {
                             randomizationNumberDto.RandomizationNumber = Convert.ToString(visititem.SupplyManagementUploadFileDetail.RandomizationNo);
                             randomizationNumberDto.ProductCode = visititem.Value;
 
                             if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                             {
-                                var kit = kitdata.Where(x => x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visititem.Value).OrderBy(x => x.Id).FirstOrDefault();
+                                var kit = kitdata.Where(x => x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visititem.Value.Trim()).OrderBy(x => x.Id).FirstOrDefault();
 
                                 if (kit != null)
                                 {
