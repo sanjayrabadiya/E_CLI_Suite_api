@@ -12,5 +12,6 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetManageSiteDropDown();
         IList<ManageSiteDto> GetManageSiteList(int Id);
         void UpdateRole(ManageSite ManageSite);
+        List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter);
     }
 }

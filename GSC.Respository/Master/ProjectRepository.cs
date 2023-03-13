@@ -30,32 +30,28 @@ namespace GSC.Respository.Master
 {
     public class ProjectRepository : GenericRespository<Data.Entities.Master.Project>, IProjectRepository
     {
+        Dictionary<int, int> templateIdMap = new Dictionary<int, int>();
+        Dictionary<int, int> variableIdMap = new Dictionary<int, int>();
+        Dictionary<int, int> variableValueIdMap = new Dictionary<int, int>();
+
         private readonly ICountryRepository _countryRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IDesignTrialRepository _designTrialRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IProjectSettingsRepository _projectSettingsRepository;
         private readonly IProjectRightRepository _projectRightRepository;
-        private readonly IAttendanceRepository _attendanceRepository;
-        private readonly IVolunteerRepository _volunteerRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly ISiteTeamRepository _siteTeamRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
 
         public ProjectRepository(IGSCContext context,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             INumberFormatRepository numberFormatRepository,
             IProjectSettingsRepository projectSettingsRepository,
             ICountryRepository countryRepository,
             IDesignTrialRepository designTrialRepository,
             IProjectRightRepository projectRightRepository,
-            IAttendanceRepository attendanceRepository,
-            IVolunteerRepository volunteerRepository,
             IMapper mapper,
             ISiteTeamRepository siteTeamRepository,
             IStudyVersionRepository studyVersionRepository)
@@ -63,14 +59,10 @@ namespace GSC.Respository.Master
         {
             _numberFormatRepository = numberFormatRepository;
             _projectSettingsRepository = projectSettingsRepository;
-            _companyRepository = companyRepository;
-            _userRepository = userRepository;
             _countryRepository = countryRepository;
             _designTrialRepository = designTrialRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
-            _attendanceRepository = attendanceRepository;
-            _volunteerRepository = volunteerRepository;
             _mapper = mapper;
             _context = context;
             _siteTeamRepository = siteTeamRepository;
@@ -866,6 +858,9 @@ namespace GSC.Respository.Master
 
         public void CloneStudy(int cloneProjectId, Data.Entities.Master.Project project)
         {
+            Dictionary<int, int> periodIdMap = new Dictionary<int, int>();
+            Dictionary<int, int> visitIdMap = new Dictionary<int, int>();
+
             var projectDesign = _context.ProjectDesign.FirstOrDefault(q => q.ProjectId == cloneProjectId && q.DeletedDate == null);
             var projectDesignId = projectDesign.Id;
 
@@ -898,19 +893,15 @@ namespace GSC.Respository.Master
                 _context.TemplateVariableSequenceNoSetting.Add(sequences);
             }
 
-            var studyVersions = _context.StudyVersion.Where(q => q.ProjectId == cloneProjectId && q.ProjectDesignId == projectDesignId && q.DeletedDate == null);
-            foreach (var version in studyVersions)
-            {
-                version.ProjectId = project.Id;
-                version.ProjectDesignId = projectDesign.Id;
-                version.Id = 0;
-                version.ModifiedBy = null;
-                version.ModifiedDate = null;
-                version.DeletedBy = null;
-                version.DeletedDate = null;
-
-                _context.StudyVersion.Add(version);
-            }
+            var version = new StudyVersion();
+            version.ProjectId = project.Id;
+            version.ProjectDesignId = projectDesign.Id;
+            version.VersionNumber = 1;
+            version.VersionStatus = VersionStatus.OnTrial;
+            version.IsMinor = false;
+            version.CreatedBy = _jwtTokenAccesser.UserId;
+            version.CreatedDate = _jwtTokenAccesser.GetClientDate();
+            _context.StudyVersion.Add(version);
             _context.Save();
 
             var designPeriods = _context.ProjectDesignPeriod.Where(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null).ToList();
@@ -929,6 +920,8 @@ namespace GSC.Respository.Master
                 _context.ProjectDesignPeriod.Add(period);
                 _context.Save();
 
+                periodIdMap.Add(designPeriodId, period.Id);
+
                 var projectVisits = _context.ProjectDesignVisit.Where(q => q.ProjectDesignPeriodId == designPeriodId && q.DeletedDate == null).ToList();
 
                 foreach (var visit in projectVisits)
@@ -943,7 +936,7 @@ namespace GSC.Respository.Master
                     _context.ProjectDesignVisit.Add(visit);
                     _context.Save();
 
-
+                    visitIdMap.Add(visitId, visit.Id);
                     var visitLanguageList = _context.VisitLanguage.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null).ToList();
                     visitLanguageList.ForEach(m =>
                     {
@@ -966,10 +959,215 @@ namespace GSC.Respository.Master
 
                         foreach (var temp in cloneTemplates)
                         {
-                            SaveCloneTemplate(visit.Id, template, templateId);
+                            SaveCloneTemplate(visit.Id, temp, templateId);
                         }
                     }
 
+                }
+            }
+
+
+
+            //WorkFlow
+
+            var workflows = _context.ProjectWorkflow.Where(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null).ToList();
+            foreach (var workflow in workflows)
+            {
+                var workflowId = workflow.Id;
+                workflow.ProjectDesignId = projectDesign.Id;
+                workflow.Id = 0;
+                workflow.ModifiedBy = null;
+                workflow.ModifiedDate = null;
+
+                _context.ProjectWorkflow.Add(workflow);
+                _context.Save();
+
+                var workflowIndependents = _context.ProjectWorkflowIndependent.Where(q => q.ProjectWorkflowId == workflowId && q.DeletedDate == null).ToList();
+
+                foreach (var workflowIndependent in workflowIndependents)
+                {
+                    workflowIndependent.Id = 0;
+                    workflowIndependent.ProjectWorkflowId = workflow.Id;
+                    workflowIndependent.ModifiedBy = null;
+                    workflowIndependent.ModifiedDate = null;
+                    _context.ProjectWorkflowIndependent.Add(workflowIndependent);
+                    _context.Save();
+                }
+
+                var workflowLevels = _context.ProjectWorkflowLevel.Where(q => q.ProjectWorkflowId == workflowId && q.DeletedDate == null).ToList();
+
+                foreach (var workflowLevel in workflowLevels)
+                {
+                    workflowLevel.Id = 0;
+                    workflowLevel.ProjectWorkflowId = workflow.Id;
+                    workflowLevel.ModifiedBy = null;
+                    workflowLevel.ModifiedDate = null;
+                    _context.ProjectWorkflowLevel.Add(workflowLevel);
+                    _context.Save();
+                }
+
+            }
+
+
+            // Editcheck Clone
+
+            var editchecks = _context.EditCheck.Where(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null).ToList();
+            foreach (var editcheck in editchecks)
+            {
+                var editcheckId = editcheck.Id;
+                editcheck.ProjectDesignId = projectDesign.Id;
+                editcheck.Id = 0;
+                editcheck.ModifiedBy = null;
+                editcheck.ModifiedDate = null;
+                _context.EditCheck.Add(editcheck);
+                _context.Save();
+
+                var editcheckDetails = _context.EditCheckDetail.Where(q => q.EditCheckId == editcheckId && q.DeletedDate == null).ToList();
+
+                foreach (var editcheckDetail in editcheckDetails)
+                {
+                    editcheckDetail.Id = 0;
+                    editcheckDetail.EditCheckId = editcheck.Id;
+                    editcheckDetail.ModifiedBy = null;
+                    editcheckDetail.ModifiedDate = null;
+
+                    //Discuss
+                    int value = 0;
+                    if (editcheckDetail.ProjectDesignTemplateId != null)
+                        templateIdMap.TryGetValue((int)editcheckDetail.ProjectDesignTemplateId, out value);
+                    editcheckDetail.ProjectDesignTemplateId = editcheckDetail.ProjectDesignTemplateId != null ? value : editcheckDetail.ProjectDesignTemplateId;
+
+                    if (editcheckDetail.ProjectDesignVariableId != null)
+                        variableIdMap.TryGetValue((int)editcheckDetail.ProjectDesignVariableId, out value);
+                    editcheckDetail.ProjectDesignVariableId = editcheckDetail.ProjectDesignVariableId != null ? value : editcheckDetail.ProjectDesignVariableId;
+
+                    if (editcheckDetail.FetchingProjectDesignTemplateId != null)
+                        templateIdMap.TryGetValue((int)editcheckDetail.FetchingProjectDesignTemplateId, out value);
+                    editcheckDetail.FetchingProjectDesignTemplateId = editcheckDetail.FetchingProjectDesignTemplateId != null ? value : editcheckDetail.FetchingProjectDesignTemplateId;
+
+                    if (editcheckDetail.FetchingProjectDesignTemplateId != null)
+                        variableIdMap.TryGetValue((int)editcheckDetail.FetchingProjectDesignVariableId, out value);
+                    editcheckDetail.FetchingProjectDesignVariableId = editcheckDetail.FetchingProjectDesignVariableId != null ? value : editcheckDetail.FetchingProjectDesignVariableId;
+
+                    if (editcheckDetail.ProjectDesignVariableId != null)
+                    {
+                        var collectionSource = _context.ProjectDesignVariable.Find(editcheckDetail.ProjectDesignVariableId).CollectionSource;
+
+                        if (collectionSource == CollectionSources.ComboBox || collectionSource == CollectionSources.RadioButton || collectionSource == CollectionSources.CheckBox
+                           || collectionSource == CollectionSources.MultiCheckBox)
+                        {
+                            if (editcheckDetail.Operator != Operator.In && editcheckDetail.Operator != Operator.NotIn && collectionSource != CollectionSources.MultiCheckBox)
+                            {
+                                if (editcheckDetail.CollectionValue != null)
+                                    variableValueIdMap.TryGetValue(Convert.ToInt32(editcheckDetail.CollectionValue), out value);
+                                editcheckDetail.CollectionValue = editcheckDetail.CollectionValue != null ? value.ToString() : editcheckDetail.CollectionValue;
+
+                                if (editcheckDetail.CollectionValue2 != null)
+                                    variableValueIdMap.TryGetValue(Convert.ToInt32(editcheckDetail.CollectionValue2), out value);
+                                editcheckDetail.CollectionValue2 = editcheckDetail.CollectionValue2 != null ? value.ToString() : editcheckDetail.CollectionValue2;
+                            }
+                            else
+                            {
+                                if (editcheckDetail.CollectionValue != null)
+                                {
+                                    var CollectionValues = editcheckDetail.CollectionValue.Split(',').ToArray();
+
+                                    string values = "";
+                                    int index = 0;
+                                    foreach (var item in CollectionValues)
+                                    {
+                                        variableValueIdMap.TryGetValue(Convert.ToInt32(item), out value);
+                                        if (index == 0)
+                                            values = value.ToString();
+                                        else
+                                            values = values + ',' + value;
+                                        index++;
+                                    }
+
+                                    editcheckDetail.CollectionValue = values;
+                                }
+
+                                if (editcheckDetail.CollectionValue2 != null)
+                                {
+                                    var CollectionValues = editcheckDetail.CollectionValue2.Split(',').ToArray();
+
+                                    string values = "";
+                                    int index = 0;
+                                    foreach (var item in CollectionValues)
+                                    {
+                                        variableValueIdMap.TryGetValue(Convert.ToInt32(item), out value);
+                                        if (index == 0)
+                                            values = value.ToString();
+                                        else
+                                            values = values + ',' + value;
+                                        index++;
+                                    }
+
+                                    editcheckDetail.CollectionValue2 = values;
+                                }
+                            }
+                        }
+                    }
+                    _context.EditCheckDetail.Add(editcheckDetail);
+                    _context.Save();
+                }
+            }
+
+            // Schedule Clone
+
+            var projectSchedules = _context.ProjectSchedule.Where(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null).ToList();
+            foreach (var projectSchedule in projectSchedules)
+            {
+                var projectScheduleId = projectSchedule.Id;
+                projectSchedule.ProjectDesignId = projectDesign.Id;
+                projectSchedule.ProjectId = project.Id;
+                projectSchedule.Id = 0;
+                projectSchedule.ModifiedBy = null;
+                projectSchedule.ModifiedDate = null;
+
+                //Discuss 
+                int value = 0;
+
+                periodIdMap.TryGetValue(projectSchedule.ProjectDesignPeriodId, out value);
+                projectSchedule.ProjectDesignPeriodId = value;
+
+                visitIdMap.TryGetValue(projectSchedule.ProjectDesignVisitId, out value);
+                projectSchedule.ProjectDesignVisitId = value;
+
+                templateIdMap.TryGetValue(projectSchedule.ProjectDesignTemplateId, out value);
+                projectSchedule.ProjectDesignTemplateId = value;
+
+                variableIdMap.TryGetValue(projectSchedule.ProjectDesignVariableId, out value);
+                projectSchedule.ProjectDesignVariableId = value;
+
+                _context.ProjectSchedule.Add(projectSchedule);
+                _context.Save();
+
+                var projectScheduleTemplates = _context.ProjectScheduleTemplate.Where(q => q.ProjectScheduleId == projectScheduleId && q.DeletedDate == null).ToList();
+
+                foreach (var projectScheduleTemplate in projectScheduleTemplates)
+                {
+                    projectScheduleTemplate.Id = 0;
+                    projectScheduleTemplate.ProjectScheduleId = projectSchedule.Id;
+                    projectScheduleTemplate.ModifiedBy = null;
+                    projectScheduleTemplate.ModifiedDate = null;
+
+                    //Discuss 
+
+                    periodIdMap.TryGetValue(projectScheduleTemplate.ProjectDesignPeriodId, out value);
+                    projectScheduleTemplate.ProjectDesignPeriodId = value;
+
+                    visitIdMap.TryGetValue(projectScheduleTemplate.ProjectDesignVisitId, out value);
+                    projectScheduleTemplate.ProjectDesignVisitId = value;
+
+                    templateIdMap.TryGetValue(projectScheduleTemplate.ProjectDesignTemplateId, out value);
+                    projectScheduleTemplate.ProjectDesignTemplateId = value;
+
+                    variableIdMap.TryGetValue(projectScheduleTemplate.ProjectDesignVariableId, out value);
+                    projectScheduleTemplate.ProjectDesignVariableId = value;
+
+                    _context.ProjectScheduleTemplate.Add(projectScheduleTemplate);
+                    _context.Save();
                 }
             }
 
@@ -988,7 +1186,7 @@ namespace GSC.Respository.Master
             template.DeletedDate = null;
             _context.ProjectDesignTemplate.Add(template);
             _context.Save();
-
+            templateIdMap.Add(templateId, template.Id);
             var templateLanguage = _context.TemplateLanguage.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
             templateLanguage.ForEach(x =>
             {
@@ -1042,6 +1240,7 @@ namespace GSC.Respository.Master
                 x.DeletedDate = null;
                 _context.ProjectDesignVariable.Add(x);
                 _context.Save();
+                variableIdMap.Add(variableId, x.Id);
 
                 var projectDesignVariableValues = _context.ProjectDesignVariableValue.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
                 projectDesignVariableValues.ForEach(s =>
@@ -1055,7 +1254,7 @@ namespace GSC.Respository.Master
                     s.DeletedDate = null;
                     _context.ProjectDesignVariableValue.Add(s);
                     _context.Save();
-
+                    variableValueIdMap.Add(varialbeValueId, s.Id);
                     var varialbeValueLanguages = _context.VariableValueLanguage.Where(q => q.ProjectDesignVariableValueId == varialbeValueId && q.DeletedDate == null).ToList();
                     varialbeValueLanguages.ForEach(m =>
                     {

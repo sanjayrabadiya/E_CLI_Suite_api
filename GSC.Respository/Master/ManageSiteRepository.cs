@@ -9,6 +9,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
@@ -91,6 +92,32 @@ namespace GSC.Respository.Master
                     _context.ManageSiteRole.Update(t);
                 }
             });
+        }
+
+
+
+        public List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter)
+        {
+            var experiences = _context.Project.Where(q => q.DesignTrialId == experienceFillter.DesignTrialId
+            && q.DeletedDate == null)
+                .Include(x => x.DesignTrial)
+                 .Include(x => x.DesignTrial.TrialType)
+                .Include(x => x.Drug)
+                .Include(x => x.InvestigatorContact)
+                .Select(s => new ExperienceModel()
+                {
+                    DrugName = s.Drug.DrugName,
+                    InvestigatorName = s.InvestigatorContact.NameOfInvestigator,
+                    NumberOfPatients = s.AttendanceLimit,
+                    ProjectStatus = "",
+                    SiteName = s.SiteName,
+                    StudyDuration = "",
+                    Submission = "",
+                    TherapeuticIndication = s.DesignTrial.TrialType.TrialTypeName,
+                    TypeOfTrial = s.DesignTrial.DesignTrialName
+                }).ToList();
+
+            return experiences;
         }
     }
 }

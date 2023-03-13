@@ -1,10 +1,11 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
+using System;
 using System.Collections.Generic;
 
 namespace GSC.Data.Dto.Master
 {
-   public class ManageSiteDto : BaseDto
+    public class ManageSiteDto : BaseDto
     {
         public string SiteName { get; set; }
         public string ContactName { get; set; }
@@ -23,7 +24,7 @@ namespace GSC.Data.Dto.Master
         public List<string> Facilities { get; set; }
     }
 
-     public class ManageSiteGridDto : BaseAuditDto
+    public class ManageSiteGridDto : BaseAuditDto
     {
         public string SiteName { get; set; }
         public string ContactName { get; set; }
@@ -36,5 +37,31 @@ namespace GSC.Data.Dto.Master
         public string CityName { get; set; }
         public string TherapeuticIndicationName { get; set; }
         public string Facilities { get; set; }
+    }
+
+    public class ExperienceFillter
+    {
+        public int? TrialTypeId { get; set; }
+        public int? DesignTrialId { get; set; }
+        public int? InvestigatorId { get; set; }
+        public int? DrugId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+    }
+
+
+    public class ExperienceModel
+    {
+        public string TypeOfTrial { get; set; }
+        public string TherapeuticIndication { get; set; }
+        public string DrugName { get; set; }
+        public string StudyDuration { get; set; }
+        public string SiteName { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
+        public int? NumberOfPatients { get; set; }
+        public string ProjectStatus { get; set; }
+        public string Submission { get; set; }
+        public string InvestigatorName { get; set; }
     }
 }

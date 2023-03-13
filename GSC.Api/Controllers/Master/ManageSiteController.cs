@@ -159,5 +159,13 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_manageSiteRepository.GetManageSiteDropDown());
         }
+
+        [HttpPost]
+        [Route("GetExperienceDetails")]
+        public IActionResult GetExperienceDetails([FromBody] ExperienceFillter experience)
+        {
+            var data = _manageSiteRepository.GetExperienceDetails(experience);
+            return Ok(data);
+        }
     }
 }
