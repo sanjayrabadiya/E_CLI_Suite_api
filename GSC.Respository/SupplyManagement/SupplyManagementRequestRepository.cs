@@ -51,7 +51,7 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementRequestGridDto> GetShipmentRequestList(int parentProjectId, int SiteId, bool isDeleted)
         {
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.FromProjectId == SiteId).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && (x.FromProjectId == SiteId || x.ToProjectId == SiteId)).
                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(t =>
             {
@@ -305,7 +305,8 @@ namespace GSC.Respository.SupplyManagement
                                 Id = x.Id,
                                 KitNo = x.KitNo,
                                 ProjectCode = x.Project.ProjectCode,
-                                TreatmentType = x.TreatmentType
+                                TreatmentType = x.TreatmentType,
+                                SiteCode = x.SiteId > 0 ? _context.Project.Where(s => s.Id == x.SiteId).FirstOrDefault().ProjectCode : ""
                             }).OrderBy(x => x.KitNo).ToList();
 
 

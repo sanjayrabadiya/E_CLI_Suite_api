@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.SupplyManagement
     {
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
+        public int? ToSiteId { get; set; }
         public int NoofPatient { get; set; }
         public string TreatmentType { get; set; }
         public string KitNo { get; set; }

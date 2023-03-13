@@ -52,10 +52,10 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (x.RandomizationId > 0)
                     x.RandomizationNo = _context.Randomization.Where(z => z.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
-                //if (x.ToSiteId > 0)
-                //{
-                //    x.SiteCode = _context.Project.Where(z => z.Id == x.ToSiteId).FirstOrDefault().ProjectCode;
-                //}
+                if (x.ToSiteId > 0)
+                {
+                    x.SiteCode = _context.Project.Where(z => z.Id == x.ToSiteId).FirstOrDefault().ProjectCode;
+                }
                 if (x.SupplyManagementShipmentId > 0)
                 {
                     var request = _context.SupplyManagementShipment.Include(r => r.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(z => z.Id == x.SupplyManagementShipmentId).FirstOrDefault();
@@ -596,8 +596,8 @@ namespace GSC.Respository.SupplyManagement
                                                                   CreatedDate = x.CreatedDate,
                                                                   ModifiedDate = x.ModifiedDate,
                                                                   DeletedDate = x.DeletedDate,
-                                                                  SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
-                                                                  SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
+                                                                  SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId) : 0,
+                                                                  SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                                                   ActionBy = x.ReturnBy,
                                                                   ActionDate = x.ReturnDate,
                                                                   IsUnUsed = x.IsUnUsed
@@ -1201,7 +1201,7 @@ namespace GSC.Respository.SupplyManagement
                 {
                     x.SiteCode = _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode;
                 }
-                
+
                 if (x.SupplyManagementShipmentId > 0)
                 {
                     var request = _context.SupplyManagementShipment.Include(r => r.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(z => z.Id == x.SupplyManagementShipmentId).FirstOrDefault();

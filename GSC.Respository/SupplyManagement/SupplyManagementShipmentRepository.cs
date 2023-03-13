@@ -44,11 +44,11 @@ namespace GSC.Respository.SupplyManagement
         public List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(int parentProjectId, int SiteId, bool isDeleted)
         {
             List<SupplyManagementShipmentGridDto> FinalData = new List<SupplyManagementShipmentGridDto>();
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.SupplyManagementRequest.FromProjectId == SiteId).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && (x.SupplyManagementRequest.FromProjectId == SiteId || x.SupplyManagementRequest.ToProjectId == SiteId)).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                       && x.FromProjectId == SiteId && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
+                       && (x.FromProjectId == SiteId || x.ToProjectId == SiteId) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
                      ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {

@@ -41,6 +41,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? CountryId { get; set; }
         public int? SiteId { get; set; }
 
+        public int? ToSiteId { get; set; }
+
         public int SupplyManagementKITId { get; set; }
 
         public int? SupplyManagementShipmentId { get; set; }

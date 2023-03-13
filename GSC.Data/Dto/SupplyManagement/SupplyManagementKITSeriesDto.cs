@@ -48,6 +48,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string TreatmentType { get; set; }
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
+        public int? ToSiteId { get; set; }
         public int? SupplyManagementShipmentId { get; set; }
         public string RandomizationNo { get; set; }
         public int? RandomizationId { get; set; }

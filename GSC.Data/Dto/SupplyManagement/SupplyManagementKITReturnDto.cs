@@ -49,6 +49,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int? SiteId { get; set; }
 
+        public int? ToSiteId { get; set; }
+
         public string ReturnBy { get; set; }
 
         public DateTime? ReturnDate { get; set; }

@@ -37,7 +37,8 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementReceiptGridDto> GetSupplyShipmentReceiptList(int parentProjectId, int SiteId, bool isDeleted)
         {
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == SiteId).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && (x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == SiteId
+            || x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId == SiteId)).
                     ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             data.ForEach(t =>
@@ -55,7 +56,7 @@ namespace GSC.Respository.SupplyManagement
 
             var requestdata = _context.SupplyManagementShipment.Where(x =>
                 !data.Select(x => x.SupplyManagementShipmentId).Contains(x.Id)
-                && x.SupplyManagementRequest.FromProjectId == SiteId
+                && (x.SupplyManagementRequest.FromProjectId == SiteId || x.SupplyManagementRequest.ToProjectId == SiteId)
                 && x.Status == SupplyMangementShipmentStatus.Approved && x.DeletedDate == null).
                  ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>
@@ -68,7 +69,7 @@ namespace GSC.Respository.SupplyManagement
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
                 obj.WithIssue = null;
-                
+
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
@@ -178,7 +179,7 @@ namespace GSC.Respository.SupplyManagement
                                         Id = x.Id,
                                         KitNo = x.KitNo,
                                         VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
+                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                         Comments = x.Comments,
                                         Status = KitStatus.Shipped.ToString()
                                     }).OrderByDescending(x => x.KitNo).ToList();
@@ -191,7 +192,7 @@ namespace GSC.Respository.SupplyManagement
                                     {
                                         Id = x.Id,
                                         KitNo = x.KitNo,
-                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
+                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                         Comments = x.Comments,
                                         Status = KitStatus.Shipped.ToString()
                                     }).OrderByDescending(x => x.KitNo).ToList();
@@ -264,6 +265,7 @@ namespace GSC.Respository.SupplyManagement
 
         public void UpdateKitStatus(SupplyManagementReceiptDto supplyManagementshipmentDto, SupplyManagementShipment supplyManagementShipment)
         {
+            var request = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementShipment.SupplyManagementRequestId).FirstOrDefault();
             var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == supplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
             if (settings.KitCreationType == KitCreationType.KitWise)
             {
@@ -271,12 +273,18 @@ namespace GSC.Respository.SupplyManagement
                 {
                     foreach (var item in supplyManagementshipmentDto.Kits)
                     {
-                        var data = _supplyManagementKITDetailRepository.All.Where(x => x.Id == item.Id).FirstOrDefault();
+                        var data = _supplyManagementKITDetailRepository.All.Include(x => x.SupplyManagementKIT).Where(x => x.Id == item.Id).FirstOrDefault();
                         if (data != null)
                         {
                             data.Status = item.Status;
                             data.Comments = item.Comments;
                             _supplyManagementKITDetailRepository.Update(data);
+                            if (request.IsSiteRequest && data.SupplyManagementKIT != null)
+                            {
+                                var kit = data.SupplyManagementKIT;
+                                kit.ToSiteId = request.FromProjectId;
+                                _supplyManagementKITRepository.Update(kit);
+                            }
                         }
                     }
                 }
@@ -305,8 +313,13 @@ namespace GSC.Respository.SupplyManagement
                         {
                             data.Status = item.Status;
                             data.Comments = item.Comments;
+                            if (request.IsSiteRequest)
+                            {
+                                data.ToSiteId = request.FromProjectId;
+                            }
                             _context.SupplyManagementKITSeries.Update(data);
                         }
+
                     }
                 }
 
