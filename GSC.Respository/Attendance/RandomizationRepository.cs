@@ -1903,6 +1903,17 @@ namespace GSC.Respository.Attendance
         public bool CheckDUplicateRandomizationNumber(RandomizationDto obj)
         {
             var randomization = _context.Randomization.Include(x => x.Project).Where(x => x.DeletedDate == null && x.RandomizationNumber == obj.RandomizationNumber && x.Project.ParentProjectId == obj.ParentProjectId).ToList();
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            if (SupplyManagementUploadFile == null)
+            {
+                return false;
+            }
+
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site || SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+            {
+                randomization = randomization.Where(x => x.ProjectId == obj.ProjectId).ToList();
+            }
+            
             if (randomization.Count > 1)
             {
                 UpdateRandmizationKitNotAssigned(obj);
