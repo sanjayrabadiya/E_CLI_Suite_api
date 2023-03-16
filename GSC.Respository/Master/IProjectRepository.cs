@@ -47,7 +47,7 @@ namespace GSC.Respository.Master
         string GetParentProjectCode(int ProjectId);
         string GetProjectSitesCode(Data.Entities.Master.Project project);
 
-        void CloneStudy(int cloneProjectId, Data.Entities.Master.Project project);//Clone Study Tinku Mahato (01-04-2022)
+        void CloneStudy(CloneProjectDto cloneProject, Data.Entities.Master.Project project);//Clone Study Tinku Mahato (01-04-2022)
 
         List<ProjectDropDown> GetParentProjectDropDownForAddProjectNo();//prakash for volunteer screening project no add
 
