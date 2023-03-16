@@ -851,7 +851,7 @@ namespace GSC.Respository.Master
             var CountAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001") && x.Status > ScreeningTemplateStatus.Pending).Count();
             var Count7AE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "AE001" && x.Status > ScreeningTemplateStatus.Pending && (x.CreatedDate <= DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7)))).Count();
             var CountSAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001") && x.Status > ScreeningTemplateStatus.Pending).Count();
-            var Count7SAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001" && x.Status > ScreeningTemplateStatus.Pending && (x.CreatedDate <= DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7) ))).Count();
+            var Count7SAE = _screeningTemplateRepository.All.Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (x.ProjectDesignTemplate.TemplateCode == "SAE001" && x.Status > ScreeningTemplateStatus.Pending && (x.CreatedDate <= DateTime.Today.AddDays(-7) || x.CreatedDate >= DateTime.Today.AddDays(-7)))).Count();
 
             return new { CountAE, Count7AE, CountSAE, Count7SAE };
         }
@@ -861,8 +861,15 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "V003" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
-            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
-      //      var ser = _context.VariableValue.Where(x => x.Variable.VariableCode == "V003").ToList();
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+            && x.ProjectDesignVariable.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null
+            && x.DeletedDate == null
+            ).ToList();
+
+
+            //      var ser = _context.VariableValue.Where(x => x.Variable.VariableCode == "V003").ToList();
             var tenoResult = _screeningTemplateValueRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
                 && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
@@ -873,9 +880,9 @@ namespace GSC.Respository.Master
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
-                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault(),
                     Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "001")
-                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
                 }).ToList();
 
             var result = new List<DynamicAeChart>();
@@ -884,7 +891,7 @@ namespace GSC.Respository.Master
             {
                 var r = new DynamicAeChart();
                 r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName,"001");
+                r.Data = GetDetails(tenoResult, t.ValueName, "001");
                 result.Add(r);
             }
 
@@ -897,7 +904,11 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             //var ser = _context.VariableValue.Where(x => x.Variable.VariableCode == "V004").ToList();
             var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "V004" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
-            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+             && x.ProjectDesignVariable.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null
+            && x.DeletedDate == null).ToList();
 
             var tenoResult = _screeningTemplateValueRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
@@ -909,9 +920,9 @@ namespace GSC.Respository.Master
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
-                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault(),
                     Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "001")
-                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
                 }).ToList();
 
             var result = new List<DynamicAeChart>();
@@ -921,7 +932,7 @@ namespace GSC.Respository.Master
             {
                 var r = new DynamicAeChart();
                 r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName,"001");
+                r.Data = GetDetails(tenoResult, t.ValueName, "001");
                 result.Add(r);
             }
 
@@ -929,7 +940,7 @@ namespace GSC.Respository.Master
 
         }
 
-      //  public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser)
+        //  public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser)
         //{
         //    var types = _context.VariableValue.Where(x => x.Variable.VariableCode == "001").Select(x => x.ValueName).ToList();
         //    var r = new List<DynamicAeChartDetails>();
@@ -950,7 +961,11 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "SAE003" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "SAE001"
-            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+             && x.ProjectDesignVariable.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null
+            && x.DeletedDate == null).ToList();
 
             var tenoResult = _screeningTemplateValueRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
@@ -962,9 +977,9 @@ namespace GSC.Respository.Master
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
-                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault(),
                     Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "SAE001")
-                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
                 }).ToList();
 
             var result = new List<DynamicAeChart>();
@@ -987,7 +1002,11 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "SAE002" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "SAE001"
-            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
+             && x.ProjectDesignVariable.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.DeletedDate == null
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null
+            && x.DeletedDate == null).ToList();
 
             var tenoResult = _screeningTemplateValueRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
@@ -999,9 +1018,9 @@ namespace GSC.Respository.Master
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
-                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault(),
                     Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "SAE001")
-                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value) && m.DeletedDate == null).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
                 }).ToList();
 
             var result = new List<DynamicAeChart>();
@@ -1140,7 +1159,7 @@ namespace GSC.Respository.Master
 
         public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser, string vCode)
         {
-            var types = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == vCode).Select(x => x.ValueName).ToList();
+            var types = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == vCode && x.DeletedDate == null).Select(x => x.ValueName).ToList();
             var r = new List<DynamicAeChartDetails>();
 
             foreach (var item in types)
