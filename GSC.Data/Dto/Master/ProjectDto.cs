@@ -218,4 +218,14 @@ namespace GSC.Data.Dto.Master
         public string ReasonOth { get; set; }
     }
 
+    public class CloneProjectDto
+    {
+        public int CloneProjectId { get; set; }
+        public bool EditcheckClone { get; set; }
+
+        public bool ScheduleClone { get; set; }
+
+        public bool WorkflowClone { get; set; }
+    }
+
 }
