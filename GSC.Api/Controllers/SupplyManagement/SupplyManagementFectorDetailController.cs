@@ -71,13 +71,18 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!_supplyManagementFectorDetailRepository.CheckType(supplyManagementFectorDetailDto))
             {
-                ModelState.AddModelError("Message", "You can not change type!");
+                ModelState.AddModelError("Message", "You can not change type");
                 return BadRequest(ModelState);
             }
 
             if (!_supplyManagementFectorDetailRepository.CheckrandomizationStarted(supplyManagementFectorDetailDto.SupplyManagementFectorId))
             {
-                ModelState.AddModelError("Message", "You can't update the factor once the Randomization is started!");
+                ModelState.AddModelError("Message", "You can't update the factor once the Randomization is started");
+                return BadRequest(ModelState);
+            }
+            if (!_supplyManagementFectorDetailRepository.CheckUploadRandomizationsheet(supplyManagementFectorDetailDto))
+            {
+                ModelState.AddModelError("Message", "Please select type as you uploaded for randomization sheet");
                 return BadRequest(ModelState);
             }
             var supplyManagementFectorDetail = _mapper.Map<SupplyManagementFectorDetail>(supplyManagementFectorDetailDto);
@@ -100,6 +105,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (!_supplyManagementFectorDetailRepository.CheckrandomizationStarted(supplyManagementFectorDetailDto.SupplyManagementFectorId))
             {
                 ModelState.AddModelError("Message", "You can't update the factor once the Randomization is started!");
+                return BadRequest(ModelState);
+            }
+            if (!_supplyManagementFectorDetailRepository.CheckUploadRandomizationsheet(supplyManagementFectorDetailDto))
+            {
+                ModelState.AddModelError("Message", "Please select type as you uploaded for randomization sheet");
                 return BadRequest(ModelState);
             }
             var supplyManagementFectorDetail = _mapper.Map<SupplyManagementFectorDetail>(supplyManagementFectorDetailDto);

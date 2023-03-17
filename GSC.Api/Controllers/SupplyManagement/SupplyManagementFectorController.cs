@@ -78,6 +78,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "You can't add the factor once the Randomization is started!");
                 return BadRequest(ModelState);
             }
+            if (!_supplyManagementFectorRepository.CheckUploadRandomizationsheet(supplyManagementFectorDto.ProjectId))
+            {
+                ModelState.AddModelError("Message", "Please upload randomization sheet!");
+                return BadRequest(ModelState);
+            }
             supplyManagementFectorDto.Id = 0;
             var supplyManagementFector = _mapper.Map<SupplyManagementFector>(supplyManagementFectorDto);
 

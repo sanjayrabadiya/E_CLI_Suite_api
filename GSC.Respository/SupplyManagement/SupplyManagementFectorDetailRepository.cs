@@ -160,5 +160,24 @@ namespace GSC.Respository.SupplyManagement
             }
             return true;
         }
+
+        public bool CheckUploadRandomizationsheet(SupplyManagementFectorDetailDto supplyManagementFectorDetailDto)
+        {
+            var randomization = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == supplyManagementFectorDetailDto.ProjectId
+            && x.Status == LabManagementUploadStatus.Approve && x.DeletedDate == null).FirstOrDefault();
+            if (randomization != null && supplyManagementFectorDetailDto.Type == FectoreType.StudyLevel && randomization.SupplyManagementUploadFileLevel != SupplyManagementUploadFileLevel.Study)
+            {
+                return false;
+            }
+            if (randomization != null && supplyManagementFectorDetailDto.Type == FectoreType.SiteLevel && randomization.SupplyManagementUploadFileLevel != SupplyManagementUploadFileLevel.Site)
+            {
+                return false;
+            }
+            if (randomization != null && supplyManagementFectorDetailDto.Type == FectoreType.CountryLevel && randomization.SupplyManagementUploadFileLevel != SupplyManagementUploadFileLevel.Country)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }

@@ -13,5 +13,7 @@ namespace GSC.Respository.SupplyManagement
         bool CheckType(SupplyManagementFectorDetailDto supplyManagementFectorDetailDto);
 
         bool CheckrandomizationStarted(int id);
+
+        bool CheckUploadRandomizationsheet(SupplyManagementFectorDetailDto supplyManagementFectorDetailDto);
     }
 }

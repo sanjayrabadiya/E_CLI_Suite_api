@@ -9,6 +9,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -309,7 +310,17 @@ namespace GSC.Respository.SupplyManagement
 
         public FactorCheckResult ValidateSubjecWithFactor(Randomization randomization)
         {
-            var projectid = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault().ParentProjectId;
+            int projectid = 0;
+            int siteId = 0;
+            int manageSiteId = 0;
+            var project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
+            if (project != null)
+            {
+                projectid = (int)project.ParentProjectId;
+                siteId = project.Id;
+                if (project.ManageSiteId > 0)
+                    manageSiteId = (int)project.ManageSiteId;
+            }
             var supplyManagementFector = _context.SupplyManagementFector.Where(x => x.ProjectId == projectid && x.DeletedDate == null).FirstOrDefault();
             var result = new FactorCheckResult();
             if (supplyManagementFector == null)
@@ -365,10 +376,12 @@ namespace GSC.Respository.SupplyManagement
 
             });
 
-            result = ValidateFactorSubject(data, (int)projectid);
+
+
+            result = ValidateFactorSubject(data, (int)projectid, siteId, manageSiteId);
             return result;
         }
-        public FactorCheckResult ValidateFactorSubject(List<SupplyManagementFectorDetailDto> editCheck, int projectid)
+        public FactorCheckResult ValidateFactorSubject(List<SupplyManagementFectorDetailDto> editCheck, int projectid, int siteId, int manageSiteId)
         {
             var dt = new DataTable();
             string ruleStr = "";
@@ -466,21 +479,21 @@ namespace GSC.Respository.SupplyManagement
                                     var ProducttypeArray = productType.Split("OR").ToArray();
                                     result.ProductType = ProducttypeArray[r].Trim();
                                     if (!string.IsNullOrEmpty(ratios))
-                                        result = CheckRatio(result, ruleStrRatio, ratios, ProducttypeArray[r].Trim(), r, projectid);
+                                        result = CheckRatio(result, ruleStrRatio, ratios, ProducttypeArray[r].Trim(), r, projectid, siteId, manageSiteId);
 
                                 }
                                 else
                                 {
                                     result.ProductType = productType.Trim();
                                     if (!string.IsNullOrEmpty(ratios))
-                                        result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, r, projectid);
+                                        result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, r, projectid, siteId, manageSiteId);
                                 }
                                 return result;
                             }
                             else
                             {
                                 if (!string.IsNullOrEmpty(ratios))
-                                    result = CheckRatio(result, ruleStrRatio, ratios, null, r, projectid);
+                                    result = CheckRatio(result, ruleStrRatio, ratios, null, r, projectid, siteId, manageSiteId);
                             }
 
 
@@ -497,22 +510,26 @@ namespace GSC.Respository.SupplyManagement
                     {
                         result.ProductType = productType.Trim();
                         if (!string.IsNullOrEmpty(ratios))
-                            result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, null, projectid);
+                            result = CheckRatio(result, ruleStrRatio, ratios, result.ProductType, null, projectid, siteId, manageSiteId);
                     }
                     else
                     {
                         if (!string.IsNullOrEmpty(ratios))
-                            result = CheckRatio(result, ruleStrRatio, ratios, null, null, projectid);
+                            result = CheckRatio(result, ruleStrRatio, ratios, null, null, projectid, siteId, manageSiteId);
                     }
                 }
             }
 
             return result;
         }
-        public FactorCheckResult CheckRatio(FactorCheckResult result, string ratiostr, string ratios, string producttype, int? index, int projectid)
+        public FactorCheckResult CheckRatio(FactorCheckResult result, string ratiostr, string ratios, string producttype, int? index, int projectid, int siteId, int manageSiteId)
         {
             var isRationOver = false;
             var products = "";
+            var uploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == projectid && x.DeletedDate == null && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            if (uploadFile == null)
+                return result;
+
             if (!string.IsNullOrEmpty(producttype))
             {
                 if (producttype.Contains(','))
@@ -535,8 +552,30 @@ namespace GSC.Respository.SupplyManagement
 
                                     foreach (var item in splitproduct)
                                     {
+                                        string sqlqry = String.Empty;
+
                                         var treatment = "'" + item + "'";
-                                        string sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+
+                                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                                        {
+                                            sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                        }
+                                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                                        {
+                                            sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                        }
+                                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                        {
+                                            var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
+
+                                            sqlqry = @"select * from Randomization r
+                                                        INNER JOIN Project p ON p.Id = r.ProjectId
+                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
+                                                        INNER JOIN City c ON c.Id = m.CityId
+                                                        INNER JOIN State s ON s.Id = c.StateId
+                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+
+                                        }
                                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                                         if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                         {
@@ -571,8 +610,28 @@ namespace GSC.Respository.SupplyManagement
 
                             foreach (var item in splitproduct)
                             {
+                                string sqlqry = String.Empty;
                                 var treatment = "'" + item + "'";
-                                string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment + " AND " + rule + "";
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                                {
+                                    sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                }
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                                {
+                                    sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                }
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                {
+                                    var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
+
+                                    sqlqry = @"select * from Randomization r
+                                                        INNER JOIN Project p ON p.Id = r.ProjectId
+                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
+                                                        INNER JOIN City c ON c.Id = m.CityId
+                                                        INNER JOIN State s ON s.Id = c.StateId
+                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+
+                                }
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                                 if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
@@ -610,7 +669,27 @@ namespace GSC.Respository.SupplyManagement
                                 var ratio = splitRatio[(int)index].Trim();
                                 var product = "'" + producttype + "'";
 
-                                string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+                                string sqlqry = String.Empty;
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                                {
+                                    sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+                                }
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                                {
+                                    sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + product + " AND " + rule + "";
+                                }
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                {
+                                    var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
+
+                                    sqlqry = @"select * from Randomization r
+                                                        INNER JOIN Project p ON p.Id = r.ProjectId
+                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
+                                                        INNER JOIN City c ON c.Id = m.CityId
+                                                        INNER JOIN State s ON s.Id = c.StateId
+                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+
+                                }
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                                 if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
@@ -630,8 +709,28 @@ namespace GSC.Respository.SupplyManagement
                         var rule = ratiostr;
                         var ratio = ratios;
                         var product = "'" + producttype + "'";
+                        string sqlqry = String.Empty;
+                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                        {
+                            sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+                        }
+                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                        {
+                            sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + product + " AND " + rule + "";
+                        }
+                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                        {
+                            var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
 
-                        string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+                            sqlqry = @"select * from Randomization r
+                                                        INNER JOIN Project p ON p.Id = r.ProjectId
+                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
+                                                        INNER JOIN City c ON c.Id = m.CityId
+                                                        INNER JOIN State s ON s.Id = c.StateId
+                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+
+                        }
+                        
                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                         if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                         {
@@ -661,7 +760,29 @@ namespace GSC.Respository.SupplyManagement
                             var rule = splitRules[(int)index].Trim();
                             var ratio = splitRatio[(int)index].Trim();
 
-                            string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+                            
+                            string sqlqry = String.Empty;
+                            if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                            {
+                                sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+                            }
+                            if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                            {
+                                sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND " + rule + "";
+                            }
+                            if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                            {
+                                var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
+
+                                sqlqry = @"select * from Randomization r
+                                                        INNER JOIN Project p ON p.Id = r.ProjectId
+                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
+                                                        INNER JOIN City c ON c.Id = m.CityId
+                                                        INNER JOIN State s ON s.Id = c.StateId
+                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+
+                            }
+
                             var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                             if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                             {
@@ -680,7 +801,28 @@ namespace GSC.Respository.SupplyManagement
                     var rule = ratiostr;
                     var ratio = ratios;
 
-                    string sqlqry = @"select * from Randomization where projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+
+                    string sqlqry = String.Empty;
+                    if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+                    {
+                        sqlqry = @"select * from Randomization WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+                    }
+                    if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+                    {
+                        sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND " + rule + "";
+                    }
+                    if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                    {
+                        var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
+
+                        sqlqry = @"select * from Randomization r
+                                                        INNER JOIN Project p ON p.Id = r.ProjectId
+                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
+                                                        INNER JOIN City c ON c.Id = m.CityId
+                                                        INNER JOIN State s ON s.Id = c.StateId
+                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+
+                    }
                     var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
                     if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                     {
@@ -743,6 +885,16 @@ namespace GSC.Respository.SupplyManagement
                 return false;
             }
             return true;
+        }
+        public bool CheckUploadRandomizationsheet(int projectId)
+        {
+            var randomization = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == projectId
+            && x.Status == LabManagementUploadStatus.Approve && x.DeletedDate == null).FirstOrDefault();
+            if (randomization != null)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }

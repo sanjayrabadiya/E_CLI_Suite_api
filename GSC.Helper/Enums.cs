@@ -988,6 +988,7 @@ namespace GSC.Helper
     {
         [Description("Study Level")] StudyLevel = 1,
         [Description("Site Level")] SiteLevel = 2,
+        [Description("Country Level")] CountryLevel = 3
     }
     public enum DaitoryFector : short
     {
