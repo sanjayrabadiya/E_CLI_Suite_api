@@ -75,5 +75,7 @@ namespace GSC.Data.Entities.Volunteer
         public decimal? Height { get; set; }
         public decimal? Weight { get; set; }
         public decimal? BMI { get; set; }
+
+        public string RandomizationNumber { get; set; }
     }
 }
