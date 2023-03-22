@@ -154,6 +154,7 @@ namespace GSC.Respository.Attendance
                 PeriodNo = x.PeriodNo,
                 IsStandby = x.IsStandby ? "Yes" : "No",
                 SubjectNumber = x.ProjectSubject != null ? x.ProjectSubject.Number : "",
+                RandomizationNumber=x.Volunteer.RandomizationNumber,
                 AttendanceType = x.AttendanceType,
                 Status = x.Status,
                 AttendaceStatusName = x.Status != null ? x.Status.GetDescription() : "",

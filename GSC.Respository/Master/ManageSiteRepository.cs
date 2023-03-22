@@ -98,24 +98,43 @@ namespace GSC.Respository.Master
 
         public List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter)
         {
-            var experiences = _context.Project.Where(q => q.DesignTrialId == experienceFillter.DesignTrialId
-            && q.DeletedDate == null)
-                .Include(x => x.DesignTrial)
-                 .Include(x => x.DesignTrial.TrialType)
-                .Include(x => x.Drug)
-                .Include(x => x.InvestigatorContact)
-                .Select(s => new ExperienceModel()
+            var experiences = new List<ExperienceModel>();
+
+            var data = _context.Site.Include(x => x.ManageSite).Include(x => x.InvestigatorContact)
+                .Where(x => (experienceFillter.InvestigatorId != null ? x.InvestigatorContactId == experienceFillter.InvestigatorId : true)
+                && (experienceFillter.TrialTypeId != null ? x.InvestigatorContact.TrialTypeId == experienceFillter.TrialTypeId : true))
+                .Select(s => new
                 {
-                    DrugName = s.Drug.DrugName,
-                    InvestigatorName = s.InvestigatorContact.NameOfInvestigator,
-                    NumberOfPatients = s.AttendanceLimit,
-                    ProjectStatus = "",
-                    SiteName = s.SiteName,
-                    StudyDuration = "",
-                    Submission = "",
-                    TherapeuticIndication = s.DesignTrial.TrialType.TrialTypeName,
-                    TypeOfTrial = s.DesignTrial.DesignTrialName
+                    Site = s.ManageSite,
+                    Investigator = s.InvestigatorContact,
+                    TrialType = s.InvestigatorContact.TrialType
                 }).ToList();
+
+            foreach (var item in data)
+            {
+                var project = _context.Project.Where(q => q.DeletedDate == null && _context.ProjectRight.Any(c => c.DeletedDate == null
+                                                                     && c.ProjectId == q.Id
+                                                                     && c.UserId == _jwtTokenAccesser.UserId
+                                                                     && c.RoleId == _jwtTokenAccesser.RoleId) && q.DeletedDate == null && q.ManageSiteId == item.Site.Id)
+                          .Include(x => x.DesignTrial)
+                          .Include(x => x.Drug)
+                          .Where(x => (experienceFillter.DesignTrialId != null ? x.DesignTrialId == experienceFillter.DesignTrialId : true)
+                          && (experienceFillter.DrugId != null ? x.DrugId == experienceFillter.DrugId : true))
+                             .Select(s => new ExperienceModel()
+                             {
+                                 DrugName = s.Drug.DrugName,
+                                 InvestigatorName = item.Investigator.NameOfInvestigator,
+                                 NumberOfPatients = s.AttendanceLimit,
+                                 ProjectStatus = "",
+                                 SiteName = item.Site.SiteName,
+                                 StudyDuration = "",
+                                 Submission = "",
+                                 TherapeuticIndication = item.TrialType.TrialTypeName,
+                                 TypeOfTrial = s.DesignTrial.DesignTrialName
+                             }).ToList();
+
+                experiences.AddRange(project);
+            }
 
             return experiences;
         }

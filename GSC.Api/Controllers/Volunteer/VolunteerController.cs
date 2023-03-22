@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using Futronic.SDKHelper;
 using GSC.Data.Entities.Volunteer;
 using System.Linq;
+using GSC.Data.Entities.Audit;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -260,6 +261,37 @@ namespace GSC.Api.Controllers.Volunteer
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Activated, record.Id,
                 null, null);
+
+            return Ok();
+        }
+
+
+        [HttpPut]
+        [Route("assignRandomizationNumberToVoluteer/{volunteerId}/{randomizationNumber}/{reasonId}/{reasonAuth}")]
+        public ActionResult AssignRandomizationNumberToVoluteer(int volunteerId,string randomizationNumber, int reasonId, string reasonAuth)
+        {
+            var record = _volunteerRepository.Find(volunteerId);
+
+            if (record == null)
+                return NotFound();
+            record.RandomizationNumber = randomizationNumber;
+            _volunteerRepository.Update(record);
+
+            _uow.Save();
+
+            VolunteerAuditTrail Changes = new VolunteerAuditTrail();
+
+            Changes.ColumnName = "RandomizationNumber";
+            Changes.LabelName = "Randomization Number";
+            Changes.NewValue = randomizationNumber;
+            Changes.ReasonOth = reasonAuth;
+            Changes.ReasonId = reasonId;
+
+            List<VolunteerAuditTrail> change = new List<VolunteerAuditTrail>();
+            change.Add(Changes);
+
+            _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, record.Id,
+                null, change);
 
             return Ok();
         }
