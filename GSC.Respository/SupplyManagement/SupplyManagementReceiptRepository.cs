@@ -281,10 +281,12 @@ namespace GSC.Respository.SupplyManagement
                             _supplyManagementKITDetailRepository.Update(data);
                             if (request.IsSiteRequest && data.SupplyManagementKIT != null)
                             {
-                                var kit = data.SupplyManagementKIT;
+                                var kit = _context.SupplyManagementKIT.Where(x => x.Id == data.SupplyManagementKITId).FirstOrDefault();
                                 kit.ToSiteId = request.FromProjectId;
                                 _supplyManagementKITRepository.Update(kit);
+                                _context.Entry(kit).State = EntityState.Detached;
                             }
+
                         }
                     }
                 }

@@ -640,6 +640,15 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ParentProjectId, x => x.MapFrom(a => a.Project.ParentProjectId))
              .ForMember(x => x.RandomizationId, x => x.MapFrom(a => a.Id))
              .ReverseMap();
+
+            CreateMap<SupplyManagementFactorMapping, SupplyManagementFactorMappingGridDto>()
+           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+           .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+           .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+           .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+           .ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+           .ForMember(x => x.FactorName, x => x.MapFrom(a => a.Factor.GetDescription()))
+           .ReverseMap();
         }
     }
 }

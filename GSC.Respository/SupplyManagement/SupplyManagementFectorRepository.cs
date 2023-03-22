@@ -174,6 +174,20 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
+            if (fector == Fector.Eligibility)
+            {
+                if (Collectionavalue != null)
+                {
+                    if (Collectionavalue == "1")
+                    {
+                        return "Yes";
+                    }
+                    if (Collectionavalue == "2")
+                    {
+                        return "No";
+                    }
+                }
+            }
             if (fector == Fector.Diatory)
             {
                 if (Collectionavalue != null)
@@ -363,6 +377,11 @@ namespace GSC.Respository.SupplyManagement
                     x.InputValue = randomization.Jointfactor.GetDescription();
                     x.dataType = DataType.Character;
                 }
+                else if (x.Fector == Fector.Eligibility && randomization.Eligibilityfactor != null)
+                {
+                    x.InputValue = randomization.Eligibilityfactor.GetDescription();
+                    x.dataType = DataType.Character;
+                }
                 else if (x.Fector == Fector.BMI && !string.IsNullOrEmpty(randomization.BMIfactor))
                 {
                     x.InputValue = randomization.BMIfactor;
@@ -373,6 +392,7 @@ namespace GSC.Respository.SupplyManagement
                     x.InputValue = randomization.Agefactor;
                     x.dataType = DataType.Numeric;
                 }
+
 
             });
 
@@ -442,6 +462,8 @@ namespace GSC.Respository.SupplyManagement
                     colrandomizationName = "BMIfactor";
                 if (r.Fector == Fector.Joint)
                     colrandomizationName = "Jointfactor";
+                if (r.Fector == Fector.Eligibility)
+                    colrandomizationName = "Eligibilityfactor";
                 ruleStrRatio = ruleStrRatio + $"{r.StartParens}{colrandomizationName} {r.Operator.GetDescription()} {singleQuote}{r.CollectionValue}{singleQuote}";
                 ruleStrRatio = ruleStrRatio + $"{r.EndParens} {r.LogicalOperator} ";
 
@@ -564,19 +586,31 @@ namespace GSC.Respository.SupplyManagement
                                         {
                                             sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
                                         }
+                                        List<int> managesite = new List<int>();
                                         if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                                         {
                                             var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
 
+                                            managesite = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.City.State.CountryId == site.City.State.CountryId && x.DeletedDate == null).Select(x => x.Id).ToList();
+
+
                                             sqlqry = @"select * from Randomization r
-                                                        INNER JOIN Project p ON p.Id = r.ProjectId
-                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
-                                                        INNER JOIN City c ON c.Id = m.CityId
-                                                        INNER JOIN State s ON s.Id = c.StateId
-                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                                        WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
 
                                         }
+
                                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                        {
+                                            if (finaldata.Count > 0)
+                                            {
+                                                if (managesite.Count > 0)
+                                                {
+                                                    var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                                    finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+                                                }
+                                            }
+                                        }
                                         if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                         {
                                             rationcount++;
@@ -620,19 +654,31 @@ namespace GSC.Respository.SupplyManagement
                                 {
                                     sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
                                 }
+                                List<int> managesite = new List<int>();
                                 if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                                 {
                                     var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
 
+                                    managesite = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.City.State.CountryId == site.City.State.CountryId && x.DeletedDate == null).Select(x => x.Id).ToList();
+
+
                                     sqlqry = @"select * from Randomization r
-                                                        INNER JOIN Project p ON p.Id = r.ProjectId
-                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
-                                                        INNER JOIN City c ON c.Id = m.CityId
-                                                        INNER JOIN State s ON s.Id = c.StateId
-                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
+                                                        WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + treatment.ToString() + " AND " + rule + "";
 
                                 }
+
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                {
+                                    if (finaldata.Count > 0)
+                                    {
+                                        if (managesite.Count > 0)
+                                        {
+                                            var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                            finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+                                        }
+                                    }
+                                }
                                 if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
                                     rationcount++;
@@ -678,19 +724,28 @@ namespace GSC.Respository.SupplyManagement
                                 {
                                     sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + product + " AND " + rule + "";
                                 }
+                                List<int> managesite = new List<int>();
                                 if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                                 {
                                     var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
+                                    managesite = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.City.State.CountryId == site.City.State.CountryId && x.DeletedDate == null).Select(x => x.Id).ToList();
 
                                     sqlqry = @"select * from Randomization r
-                                                        INNER JOIN Project p ON p.Id = r.ProjectId
-                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
-                                                        INNER JOIN City c ON c.Id = m.CityId
-                                                        INNER JOIN State s ON s.Id = c.StateId
-                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+                                                        WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
 
                                 }
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                {
+                                    if (finaldata.Count > 0)
+                                    {
+                                        if (managesite.Count > 0)
+                                        {
+                                            var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                            finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+                                        }
+                                    }
+                                }
                                 if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
                                     isRationOver = true;
@@ -718,20 +773,30 @@ namespace GSC.Respository.SupplyManagement
                         {
                             sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND ProductCode = " + product + " AND " + rule + "";
                         }
+                        List<int> managesite = new List<int>();
                         if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                         {
                             var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
 
-                            sqlqry = @"select * from Randomization r
-                                                        INNER JOIN Project p ON p.Id = r.ProjectId
-                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
-                                                        INNER JOIN City c ON c.Id = m.CityId
-                                                        INNER JOIN State s ON s.Id = c.StateId
-                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
+                            managesite = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.City.State.CountryId == site.City.State.CountryId && x.DeletedDate == null).Select(x => x.Id).ToList();
+
+                            sqlqry = @"SELECT * FROM Randomization r
+                                      WHERE  projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
 
                         }
                         
                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                        {
+                            if (finaldata.Count > 0)
+                            {
+                                if (managesite.Count > 0)
+                                {
+                                    var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                    finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+                                }
+                            }
+                        }
                         if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                         {
                             isRationOver = true;
@@ -770,20 +835,30 @@ namespace GSC.Respository.SupplyManagement
                             {
                                 sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND " + rule + "";
                             }
+                            List<int> managesite = new List<int>();
                             if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                             {
                                 var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
 
-                                sqlqry = @"select * from Randomization r
-                                                        INNER JOIN Project p ON p.Id = r.ProjectId
-                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
-                                                        INNER JOIN City c ON c.Id = m.CityId
-                                                        INNER JOIN State s ON s.Id = c.StateId
-                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+                                managesite = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.City.State.CountryId == site.City.State.CountryId && x.DeletedDate == null).Select(x => x.Id).ToList();
+
+                                sqlqry = @"select * from Randomization 
+                                           WHERE  projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
 
                             }
 
                             var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                            if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                            {
+                                if (finaldata.Count > 0)
+                                {
+                                    if (managesite.Count > 0)
+                                    {
+                                        var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                        finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+                                    }
+                                }
+                            }
                             if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                             {
                                 isRationOver = true;
@@ -811,19 +886,29 @@ namespace GSC.Respository.SupplyManagement
                     {
                         sqlqry = @"select * from Randomization WHERE projectId =" + siteId + " AND " + rule + "";
                     }
+                    List<int> managesite = new List<int>();
                     if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                     {
                         var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == manageSiteId).FirstOrDefault();
 
+                        managesite = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.City.State.CountryId == site.City.State.CountryId && x.DeletedDate == null).Select(x => x.Id).ToList();
                         sqlqry = @"select * from Randomization r
-                                                        INNER JOIN Project p ON p.Id = r.ProjectId
-                                                        Inner JOIN ManageSite m ON m.Id = p.ManageSiteId
-                                                        INNER JOIN City c ON c.Id = m.CityId
-                                                        INNER JOIN State s ON s.Id = c.StateId
-                                                        WHERE s.CountryId = " + site.City.State.CountryId + " AND projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
+                                                        
+                                                        WHERE projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND " + rule + "";
 
                     }
                     var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
+                    if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                    {
+                        if (finaldata.Count > 0)
+                        {
+                            if (managesite.Count > 0)
+                            {
+                                var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+                            }
+                        }
+                    }
                     if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                     {
                         isRationOver = true;

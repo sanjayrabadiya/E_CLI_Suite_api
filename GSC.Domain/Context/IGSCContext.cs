@@ -406,6 +406,8 @@ namespace GSC.Domain.Context
 
         DbSet<SupplyManagementUnblindTreatment> SupplyManagementUnblindTreatment { get; set; }
 
+        DbSet<SupplyManagementFactorMapping> SupplyManagementFactorMapping { get; set; }
+
 
 
 

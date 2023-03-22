@@ -70,6 +70,8 @@ namespace GSC.Data.Entities.Attendance
 
         public Jointfactor? Jointfactor { get; set; }
 
+        public Eligibilityfactor? Eligibilityfactor { get; set; }
+
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
         public string ProductCode { get; set; }

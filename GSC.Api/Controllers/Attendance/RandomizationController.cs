@@ -651,6 +651,7 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto.IsAgeFactor = factorData.Any(x => x.Fector == Fector.Age);
                 randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
                 randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
+                randomizationDto.IsEligibilityFactor = factorData.Any(x => x.Fector == Fector.Eligibility);
                 randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
             }
             return Ok(randomizationDto);

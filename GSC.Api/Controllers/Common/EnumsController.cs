@@ -836,10 +836,23 @@ namespace GSC.Api.Controllers.Common
             return Ok(fectore);
         }
         [HttpGet]
+        [Route("GetELigibilityfactor")]
+        public IActionResult GetELigibilityfactor()
+        {
+            var fectore = Enum.GetValues(typeof(Eligibilityfactor))
+                .Cast<Eligibilityfactor>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
+        [HttpGet]
         [Route("GetFactorsOperators/{id}")]
         public IActionResult GetFactorsOperators(int id)
         {
-            if (id == 1 || id == 2 || id == 5)
+            if (id == 1 || id == 2 || id == 5 || id == 6)
             {
                 var fectore = Enum.GetValues(typeof(FectorOperator))
                     .Cast<FectorOperator>().Select(e => new DropDownEnum

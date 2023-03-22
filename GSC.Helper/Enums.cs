@@ -974,6 +974,7 @@ namespace GSC.Helper
         [Description("BMI")] BMI = 3,
         [Description("Age")] Age = 4,
         [Description("Joint")] Joint = 5,
+        [Description("Eligibility")] Eligibility = 6
     }
     public enum FectorOperator : short
     {
@@ -1016,6 +1017,11 @@ namespace GSC.Helper
     {
         [Description("Knee")] Knee = 1,
         [Description("Hip")] Hip = 2
+    }
+    public enum Eligibilityfactor : short
+    {
+        [Description("Yes")] Yes = 1,
+        [Description("No")] No = 2
     }
     public enum SupplyManagementEmailTriggers : short
     {
