@@ -275,6 +275,13 @@ namespace GSC.Api.Controllers.Volunteer
             if (record == null)
                 return NotFound();
             record.RandomizationNumber = randomizationNumber;
+            var validate = _volunteerRepository.DuplicateRandomizationNumber(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+            
             _volunteerRepository.Update(record);
 
             _uow.Save();
