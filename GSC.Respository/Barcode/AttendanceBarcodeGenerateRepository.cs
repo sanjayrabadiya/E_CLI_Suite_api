@@ -106,7 +106,7 @@ namespace GSC.Respository.Barcode
 
 
             if (ColumnName == "ProjectId")
-                return _context.Project.Find(tableRepository.ProjectId).ProjectCode;
+                return _context.Project.Find(_context.Project.Find(tableRepository.ProjectId).ParentProjectId).ProjectCode;
 
             if (ColumnName == "VolunteerId")
                 return _context.Volunteer.Find(tableRepository.VolunteerId).VolunteerNo;
