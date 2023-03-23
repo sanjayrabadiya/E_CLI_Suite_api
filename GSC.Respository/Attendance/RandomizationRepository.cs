@@ -273,7 +273,7 @@ namespace GSC.Respository.Attendance
             }
             else
             {
-                if (randomization.DateOfScreening != null && randomization.DateOfRandomization == null)
+                if (randomization.DateOfScreening != null)
                 {
                     var result = _supplyManagementFectorRepository.ValidateSubjecWithFactor(randomization);
                     if (result != null)
@@ -2014,13 +2014,13 @@ namespace GSC.Respository.Attendance
                                 if (screeningTemplate != null)
                                 {
                                     var screeningtemplateValue = _context.ScreeningTemplateValue.Where(x => x.ScreeningTemplateId == screeningTemplate.Id && x.ProjectDesignVariableId == item.ProjectDesignVariableId).FirstOrDefault();
-                                    if (screeningtemplateValue != null)
+                                    if (screeningtemplateValue != null && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
                                     {
-                                        if (item.Factor == Fector.Age && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                        if (item.Factor == Fector.Age)
                                         {
                                             randomizationDto.Agefactor = screeningtemplateValue.Value;
                                         }
-                                        if (item.Factor == Fector.BMI && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                        if (item.Factor == Fector.BMI)
                                         {
                                             randomizationDto.BMIfactor = screeningtemplateValue.Value;
                                         }
@@ -2031,7 +2031,7 @@ namespace GSC.Respository.Attendance
                                             if (screeningTemplateValueChild != null)
                                             {
 
-                                                if (item.Factor == Fector.Diatory && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                if (item.Factor == Fector.Diatory)
                                                 {
                                                     if (screeningTemplateValueChild.ValueName.ToLower().Contains("non"))
                                                     {
@@ -2042,7 +2042,7 @@ namespace GSC.Respository.Attendance
                                                         randomizationDto.Diatoryfactor = DaitoryFector.Veg;
                                                     }
                                                 }
-                                                if (item.Factor == Fector.Joint && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                if (item.Factor == Fector.Joint)
                                                 {
                                                     if (screeningTemplateValueChild.ValueName.ToLower().Contains("knee"))
                                                     {
@@ -2054,7 +2054,7 @@ namespace GSC.Respository.Attendance
                                                     }
 
                                                 }
-                                                if (item.Factor == Fector.Gender && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                if (item.Factor == Fector.Gender)
                                                 {
 
                                                     if (screeningTemplateValueChild.ValueName.ToLower().Contains("fe"))
@@ -2066,7 +2066,7 @@ namespace GSC.Respository.Attendance
                                                         randomizationDto.Genderfactor = Gender.Male;
                                                     }
                                                 }
-                                                if (item.Factor == Fector.Eligibility && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                if (item.Factor == Fector.Eligibility)
                                                 {
                                                     if (screeningTemplateValueChild.ValueName.ToLower().Contains("yes"))
                                                     {
