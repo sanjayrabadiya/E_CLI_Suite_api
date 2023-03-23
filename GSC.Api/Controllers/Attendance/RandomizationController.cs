@@ -120,7 +120,8 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest();
 
             var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
-
+            if (randomization.DateOfScreening != null && randomization.RandomizationNumber == null)
+                _randomizationRepository.SetFactorMappingData(randomization);
             return Ok(randomizationDto);
         }
 
@@ -431,7 +432,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
-          
+
 
             if (string.IsNullOrEmpty(randno))
             {
@@ -544,6 +545,10 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult GetRandomizationNumber(int id)
         {
             var randdata = _randomizationRepository.All.Where(x => x.Id == id).FirstOrDefault();
+
+            if (randdata.DateOfScreening != null && randdata.RandomizationNumber == null)
+                _randomizationRepository.SetFactorMappingData(randdata);
+
             var isvalid = _randomizationRepository.IsRandomFormatSetInStudy(id);
             if (isvalid == true)
             {

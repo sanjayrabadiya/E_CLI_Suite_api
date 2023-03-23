@@ -9,6 +9,10 @@ namespace GSC.Respository.SupplyManagement
     public interface ISupplyManagementFactorMappingRepository : IGenericRepository<SupplyManagementFactorMapping>
     {
         List<SupplyManagementFactorMappingGridDto> GetSupplyFactorMappingList(bool isDeleted, int ProjectId);
-        
+
+
+        string Validation(SupplyManagementFactorMapping obj);
+
+
     }
 }

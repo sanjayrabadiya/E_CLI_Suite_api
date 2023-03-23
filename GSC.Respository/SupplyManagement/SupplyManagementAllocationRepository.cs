@@ -116,6 +116,19 @@ namespace GSC.Respository.SupplyManagement
                 }).Distinct().ToList();
             return templates;
         }
+        public IList<DropDownDto> GetfactorMappingVariableDropDownByTemplateId(int templateId)
+        {
+            var templates = _context.ProjectDesignVariable.Where(x =>
+            x.ProjectDesignTemplateId == templateId
+            && (x.CollectionSource == CollectionSources.TextBox || x.CollectionSource == CollectionSources.RadioButton || x.CollectionSource == CollectionSources.ComboBox)
+            && x.DeletedDate == null)
+                .Select(x => new DropDownDto
+                {
+                    Id = x.Id,
+                    Value = x.VariableName,
+                }).Distinct().ToList();
+            return templates;
+        }
         public object GetProductTypeByVisit(int visitId)
         {
             var templates = _context.SupplyManagementUploadFileVisit.Where(x =>

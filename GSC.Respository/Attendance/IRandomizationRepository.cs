@@ -70,5 +70,7 @@ namespace GSC.Respository.Attendance
         void SendRandomizationThresholdEMail(RandomizationDto obj);
 
         bool CheckDUplicateRandomizationNumber(RandomizationDto obj);
+
+        void SetFactorMappingData(Randomization randomizationDto);
     }
 }

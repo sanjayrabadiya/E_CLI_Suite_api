@@ -59,13 +59,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             centralDepotDto.Id = 0;
             var centralDepot = _mapper.Map<SupplyManagementFactorMapping>(centralDepotDto);
 
-            //var validate = _supplyManagementAllocationRepository.CheckDuplicate(centralDepot);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
+            var validate = _supplyManagementFactorMappingRepository.Validation(centralDepot);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _supplyManagementFactorMappingRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating factor mapping failed on save.");
             return Ok(centralDepot.Id);
@@ -80,13 +79,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var centralDepot = _mapper.Map<SupplyManagementFactorMapping>(centralDepotDto);
-            
-            //var validate = _supplyManagementAllocationRepository.CheckDuplicate(centralDepot);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+
+            var validate = _supplyManagementFactorMappingRepository.Validation(centralDepot);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             centralDepot.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
             centralDepot.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
             _supplyManagementFactorMappingRepository.Update(centralDepot);
@@ -102,6 +101,11 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
+            record.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+            record.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            _supplyManagementFactorMappingRepository.Update(record);
+            _uow.Save();
+
             _supplyManagementFactorMappingRepository.Delete(record);
             _uow.Save();
 

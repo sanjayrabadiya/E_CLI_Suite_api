@@ -273,20 +273,22 @@ namespace GSC.Respository.Attendance
             }
             else
             {
-                var result = _supplyManagementFectorRepository.ValidateSubjecWithFactor(randomization);
-                if (result != null)
+                if (randomization.DateOfScreening != null && randomization.DateOfRandomization == null)
                 {
-                    if (!string.IsNullOrEmpty(result.ErrorMessage))
+                    var result = _supplyManagementFectorRepository.ValidateSubjecWithFactor(randomization);
+                    if (result != null)
                     {
-                        randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                        if (!string.IsNullOrEmpty(result.ErrorMessage))
+                        {
+                            randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                        }
+                        if (!string.IsNullOrEmpty(result.Result))
+                        {
+                            randomizationNumberDto.ErrorMessage = result.Result;
+                        }
+                        if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
+                            randomizationNumberDto = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType, randomizationNumberDto, randomization, studydata.IsIWRS);
                     }
-                    if (!string.IsNullOrEmpty(result.Result))
-                    {
-                        randomizationNumberDto.ErrorMessage = result.Result;
-
-                    }
-                    if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
-                        randomizationNumberDto = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType, randomizationNumberDto, randomization, studydata.IsIWRS);
                 }
             }
             return randomizationNumberDto;
@@ -1913,7 +1915,7 @@ namespace GSC.Respository.Attendance
             {
                 randomization = randomization.Where(x => x.ProjectId == obj.ProjectId).ToList();
             }
-            
+
             if (randomization.Count > 1)
             {
                 UpdateRandmizationKitNotAssigned(obj);
@@ -1989,6 +1991,105 @@ namespace GSC.Respository.Attendance
                 return false;
             }
             return true;
+        }
+
+        public void SetFactorMappingData(Randomization randomizationDto)
+        {
+            var parentproject = _context.Project.Where(x => x.Id == randomizationDto.ProjectId).FirstOrDefault();
+            var setting = _context.RandomizationNumberSettings.Where(x => x.ProjectId == parentproject.ParentProjectId).FirstOrDefault();
+            if (setting != null && (setting.IsIGT || setting.IsIWRS))
+            {
+                var mappingdata = _context.SupplyManagementFactorMapping.Where(s => s.ProjectId == parentproject.ParentProjectId && s.DeletedDate == null).ToList();
+                if (mappingdata.Count > 0)
+                {
+                    foreach (var item in mappingdata)
+                    {
+                        var screeningEntry = _context.ScreeningEntry.Where(x => x.RandomizationId == randomizationDto.Id).FirstOrDefault();
+                        if (screeningEntry != null)
+                        {
+                            var screeningvisit = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == screeningEntry.Id && x.ProjectDesignVisitId == item.ProjectDesignVisitId).FirstOrDefault();
+                            if (screeningvisit != null)
+                            {
+                                var screeningTemplate = _context.ScreeningTemplate.Where(x => x.ScreeningVisitId == screeningvisit.Id && x.ProjectDesignTemplateId == item.ProjectDesignTemplateId).FirstOrDefault();
+                                if (screeningTemplate != null)
+                                {
+                                    var screeningtemplateValue = _context.ScreeningTemplateValue.Where(x => x.ScreeningTemplateId == screeningTemplate.Id && x.ProjectDesignVariableId == item.ProjectDesignVariableId).FirstOrDefault();
+                                    if (screeningtemplateValue != null)
+                                    {
+                                        if (item.Factor == Fector.Age && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                        {
+                                            randomizationDto.Agefactor = screeningtemplateValue.Value;
+                                        }
+                                        if (item.Factor == Fector.BMI && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                        {
+                                            randomizationDto.BMIfactor = screeningtemplateValue.Value;
+                                        }
+                                        if (!string.IsNullOrEmpty(screeningtemplateValue.Value))
+                                        {
+                                            var screeningTemplateValueChild = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningtemplateValue.Value)).FirstOrDefault();
+
+                                            if (screeningTemplateValueChild != null)
+                                            {
+
+                                                if (item.Factor == Fector.Diatory && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                {
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("non"))
+                                                    {
+                                                        randomizationDto.Diatoryfactor = DaitoryFector.NonVeg;
+                                                    }
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("veg"))
+                                                    {
+                                                        randomizationDto.Diatoryfactor = DaitoryFector.Veg;
+                                                    }
+                                                }
+                                                if (item.Factor == Fector.Joint && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                {
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("knee"))
+                                                    {
+                                                        randomizationDto.Jointfactor = Jointfactor.Knee;
+                                                    }
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("hip"))
+                                                    {
+                                                        randomizationDto.Jointfactor = Jointfactor.Hip;
+                                                    }
+
+                                                }
+                                                if (item.Factor == Fector.Gender && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                {
+
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("fe"))
+                                                    {
+                                                        randomizationDto.Genderfactor = Gender.Female;
+                                                    }
+                                                    if (screeningTemplateValueChild.ValueName.ToLower() == "male")
+                                                    {
+                                                        randomizationDto.Genderfactor = Gender.Male;
+                                                    }
+                                                }
+                                                if (item.Factor == Fector.Eligibility && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
+                                                {
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("yes"))
+                                                    {
+                                                        randomizationDto.Eligibilityfactor = Eligibilityfactor.Yes;
+                                                    }
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("no"))
+                                                    {
+                                                        randomizationDto.Eligibilityfactor = Eligibilityfactor.No;
+                                                    }
+
+                                                }
+                                            }
+                                        }
+
+                                        Update(randomizationDto);
+                                        _context.Save();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
