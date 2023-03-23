@@ -92,10 +92,10 @@ namespace GSC.Respository.Attendance
                                                        && projectList.Any(c => c == t.ProjectId));
 
 
-            var role = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_underTesting");
+            //var role = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_underTesting");
 
-            if (!role.IsView)
-                result = result.Where(x => !x.IsTesting);
+            //if (!role.IsView)
+            //    result = result.Where(x => !x.IsTesting);
 
             if (attendanceSearch.Id > 0)
             {
@@ -154,7 +154,7 @@ namespace GSC.Respository.Attendance
                 PeriodNo = x.PeriodNo,
                 IsStandby = x.IsStandby ? "Yes" : "No",
                 SubjectNumber = x.ProjectSubject != null ? x.ProjectSubject.Number : "",
-                RandomizationNumber=x.Volunteer.RandomizationNumber,
+                RandomizationNumber = x.Volunteer.RandomizationNumber,
                 AttendanceType = x.AttendanceType,
                 Status = x.Status,
                 AttendaceStatusName = x.Status != null ? x.Status.GetDescription() : "",
@@ -347,7 +347,7 @@ namespace GSC.Respository.Attendance
         {
             if (attendanceDto.AttendanceType == DataEntryType.Screening)
                 if (All.Any(x =>
-                    x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening &&
+                    x.VolunteerId == attendanceDto.VolunteerId && x.AttendanceType == DataEntryType.Screening && x.ProjectId == attendanceDto.ProjectId &&
                     //Convert.ToDateTime(x.AttendanceDate).ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString()  &&
                     x.AttendanceDate.Day.CompareTo(attendanceDto.AttendanceDate.Day) == 0 && //_jwtTokenAccesser.GetClientDate().Date &&
                                                                                              //x.AttendanceDate.ToShortDateString() == _jwtTokenAccesser.GetClientDate().ToShortDateString() &&
