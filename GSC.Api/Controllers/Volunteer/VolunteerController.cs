@@ -460,5 +460,12 @@ namespace GSC.Api.Controllers.Volunteer
                 return BadRequest(ModelState);
             }
         }
+
+        [HttpGet]
+        [Route("GetVolunteerForPKBarcode")]
+        public ActionResult GetVolunteerForPKBarcode()
+        {
+            return Ok(_volunteerRepository.GetVolunteerDropDownForPKBarcode());
+        }
     }
 }
