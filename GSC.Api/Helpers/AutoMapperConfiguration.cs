@@ -489,7 +489,7 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementVisitKITSequenceDetail, SupplyManagementVisitKITSequenceDetailDto>().ReverseMap();
             CreateMap<SupplyManagementFactorMapping, SupplyManagementFactorMappingDto>().ReverseMap();
 
-
+            CreateMap<PKBarcode,PKBarcodeDto>().ReverseMap();
         }
     }
 }

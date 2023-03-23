@@ -1042,5 +1042,11 @@ namespace GSC.Helper
         [Description("Planned")] Planned = 2
     }
 
-
+    public enum PKBarcodeOption : int
+    {
+        [Description("Duplicate")] Duplicate = 1,
+        [Description("Triplicate")] Triplicate = 2,
+        [Description("Singlicate")] Singlicate = 3,
+        [Description("Replicate")] Replicate = 4
+    }
 }

@@ -463,8 +463,8 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementUnblindTreatment> SupplyManagementUnblindTreatment { get; set; }
 
         public DbSet<SupplyManagementFactorMapping> SupplyManagementFactorMapping { get; set; }
+        public DbSet<PKBarcode> PKBarcode { get; set; }
 
-        
 
     }
 

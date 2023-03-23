@@ -329,6 +329,22 @@ namespace GSC.Respository.Project.Design
         }
 
 
+        public IList<DropDownDto> GetTemplateCRFDropDown(int projectDesignVisitId)
+        {
+            var templates = All.Where(x => x.DeletedDate == null && x.VariableTemplate.ActivityMode == ActivityMode.SubjectSpecific
+                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.DesignOrder).Select(
+                t => new DropDownDto
+                {
+                    Id = t.Id,
+                    Value = t.TemplateName,
+                    Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
+                    InActive = t.InActiveVersion != null
+                }).ToList();
+
+            return templates;
+        }
+
+
         public IList<DropDownDto> GetTemplateDropDownForProjectSchedule(int projectDesignVisitId, int? collectionSource, int? refVariable)
         {
             var templates = All.Where(x => x.DeletedDate == null

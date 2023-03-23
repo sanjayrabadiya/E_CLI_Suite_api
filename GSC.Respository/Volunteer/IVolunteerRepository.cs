@@ -20,6 +20,6 @@ namespace GSC.Respository.Volunteer
         List<DropDownDto> GetPopulationTypeDropDownList(); //Add function to get used population type dropdown by Tinku Mahato (07/07/2022)
         List<DropDownDto> GetVolunteerDropDown();
         string DuplicateRandomizationNumber(Data.Entities.Volunteer.Volunteer objSave);
-
+        List<DropDownDto> GetVolunteerDropDownForPKBarcode();
     }
 }

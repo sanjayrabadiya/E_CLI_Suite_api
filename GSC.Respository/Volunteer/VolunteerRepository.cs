@@ -453,5 +453,12 @@ namespace GSC.Respository.Volunteer
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
+
+        public List<DropDownDto> GetVolunteerDropDownForPKBarcode()
+        {
+            return All.Where(x => x.RandomizationNumber != null && x.DeletedDate == null &&
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+        }
     }
 }
