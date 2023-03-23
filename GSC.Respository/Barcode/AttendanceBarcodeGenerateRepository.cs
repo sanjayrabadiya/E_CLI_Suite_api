@@ -104,9 +104,26 @@ namespace GSC.Respository.Barcode
             var tableRepository = _context.Attendance.Where(x => x.Id == id).Select(e => e).FirstOrDefault();
             if (tableRepository == null) return "";
 
+
+            if (ColumnName == "ProjectId")
+                return _context.Project.Find(_context.Project.Find(tableRepository.ProjectId).ParentProjectId).ProjectCode;
+
+            if (ColumnName == "VolunteerId")
+                return _context.Volunteer.Find(tableRepository.VolunteerId).VolunteerNo;
+
             var _value = tableRepository.GetType().GetProperties().Where(a => a.Name == ColumnName).Select(p => p.GetValue(tableRepository, null)).FirstOrDefault();
 
             return _value != null ? _value.ToString() : "";
+        }
+
+        public string GetBarcodeString(int id)
+        {
+            var attendanceData = _context.Attendance.Where(x => x.Id == id).FirstOrDefault();
+            if (attendanceData == null) return "";
+            var volunteerNo = _context.Volunteer.Find(attendanceData.VolunteerId).VolunteerNo;
+            var projectCode = _context.Project.Find(attendanceData.ProjectId).ProjectCode;
+            
+            return projectCode+volunteerNo;
         }
 
     }

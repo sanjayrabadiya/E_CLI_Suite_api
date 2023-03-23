@@ -431,6 +431,13 @@ namespace GSC.Respository.Volunteer
             return "";
         }
 
+        public string DuplicateRandomizationNumber(Data.Entities.Volunteer.Volunteer objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber && x.DeletedDate == null))
+                return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
+            return "";
+        }
+
 
         //Add function to get used population type dropdown by Tinku Mahato (07/07/2022)
         public List<DropDownDto> GetPopulationTypeDropDownList()

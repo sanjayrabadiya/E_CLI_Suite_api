@@ -11,5 +11,6 @@ namespace GSC.Respository.Barcode
     {
         List<AttendanceBarcodeGenerateGridDto> GetReprintBarcodeGenerateData(int[] Ids);
         List<AttendanceBarcodeGenerateGridDto> GetBarcodeDetail(int attendanceId);
+        string GetBarcodeString(int id);
     }
 }
