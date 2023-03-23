@@ -287,7 +287,10 @@ namespace GSC.Respository.Attendance
                             randomizationNumberDto.ErrorMessage = result.Result;
                         }
                         if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
+                        {
                             randomizationNumberDto = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType, randomizationNumberDto, randomization, studydata.IsIWRS);
+                            
+                        }
                     }
                 }
             }
@@ -2004,6 +2007,7 @@ namespace GSC.Respository.Attendance
                 {
                     foreach (var item in mappingdata)
                     {
+                        var Isexist = false;
                         var screeningEntry = _context.ScreeningEntry.Where(x => x.RandomizationId == randomizationDto.Id).FirstOrDefault();
                         if (screeningEntry != null)
                         {
@@ -2019,12 +2023,14 @@ namespace GSC.Respository.Attendance
                                         if (item.Factor == Fector.Age)
                                         {
                                             randomizationDto.Agefactor = screeningtemplateValue.Value;
+                                            Isexist = true;
                                         }
                                         if (item.Factor == Fector.BMI)
                                         {
                                             randomizationDto.BMIfactor = screeningtemplateValue.Value;
+                                            Isexist = true;
                                         }
-                                        if (!string.IsNullOrEmpty(screeningtemplateValue.Value))
+                                        if (!string.IsNullOrEmpty(screeningtemplateValue.Value) && Isexist)
                                         {
                                             var screeningTemplateValueChild = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningtemplateValue.Value)).FirstOrDefault();
 
