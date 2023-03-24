@@ -1044,9 +1044,9 @@ namespace GSC.Helper
 
     public enum PKBarcodeOption : int
     {
-        [Description("Duplicate")] Duplicate = 1,
-        [Description("Triplicate")] Triplicate = 2,
-        [Description("Singlicate")] Singlicate = 3,
+        [Description("Duplicate")] Duplicate = 2,
+        [Description("Triplicate")] Triplicate = 3,
+        [Description("Singlicate")] Singlicate = 1,
         [Description("Replicate")] Replicate = 4
     }
 }

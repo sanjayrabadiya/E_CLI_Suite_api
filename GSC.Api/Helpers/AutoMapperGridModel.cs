@@ -652,7 +652,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<PKBarcode, PKBarcodeGridDto>()
             .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectName))
-            .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ProjectName))
+            .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
             .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
             .ForMember(x => x.Template, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
             .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
@@ -663,7 +663,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<SampleBarcode, SampleBarcodeGridDto>()
            .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectName))
-           .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ProjectName))
+           .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
            .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
            .ForMember(x => x.Template, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
            .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
