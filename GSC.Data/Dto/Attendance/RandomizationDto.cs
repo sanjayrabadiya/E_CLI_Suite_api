@@ -141,6 +141,14 @@ namespace GSC.Data.Dto.Attendance
         public Jointfactor? Jointfactor { get; set; }
 
         public Eligibilityfactor? Eligibilityfactor { get; set; }
+
+        public string GenderfactorName { get; set; }
+        public string DiatoryfactorName { get; set; }
+
+        public string JointfactorName { get; set; }
+
+        public string EligibilityfactorName { get; set; }
+
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
 
@@ -191,5 +199,7 @@ namespace GSC.Data.Dto.Attendance
         public bool IsJointFactor { get; set; }
         public bool IsEligibilityFactor { get; set; }
         public bool IsIWRS { get; set; }
+
+        public bool IsDisable { get; set; }
     }
 }

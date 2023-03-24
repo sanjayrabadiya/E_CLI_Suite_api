@@ -172,7 +172,7 @@ namespace GSC.Respository.Screening
             {
                 return;
             }
-            var verifyuploadsheetdata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.ProjectId == projectdata.ProjectId && x.RandomizationNo.ToString() == Convert.ToString(projectdata.RandomizationNo) && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+            var verifyuploadsheetdata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.ProjectId == projectdata.ProjectId && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
 
             if (RandomizationSetting.IsIGT && verifyuploadsheetdata != null)
             {
@@ -186,7 +186,7 @@ namespace GSC.Respository.Screening
                         variable.IsDisabled = true;
                         if (allocationsetting.Type == SupplyManagementAllocationType.RandomizationNo)
                         {
-                            value = Convert.ToString(verifyuploadsheetdata.RandomizationNo);
+                            value = projectdata.RandomizationNo;
                         }
                         if (allocationsetting.Type == SupplyManagementAllocationType.ProductCode)
                         {

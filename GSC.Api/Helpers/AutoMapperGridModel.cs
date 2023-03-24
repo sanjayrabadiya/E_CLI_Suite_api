@@ -146,6 +146,10 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.LegalRelationship, x => x.MapFrom(a => a.LegalRelationship.GetDescription()))
                 .ForMember(x => x.PatientStatusName, x => x.MapFrom(a => a.PatientStatusId.GetDescription()))
                 .ForMember(x => x.IsFirstTime, x => x.MapFrom(a => a.User == null ? false : a.User.IsFirstTime))
+                .ForMember(x => x.GenderfactorName, x => x.MapFrom(a => a.Genderfactor.GetDescription()))
+                .ForMember(x => x.DiatoryfactorName, x => x.MapFrom(a => a.Diatoryfactor.GetDescription()))
+                .ForMember(x => x.JointfactorName, x => x.MapFrom(a => a.Jointfactor.GetDescription()))
+                .ForMember(x => x.EligibilityfactorName, x => x.MapFrom(a => a.Eligibilityfactor.GetDescription()))
                 .ReverseMap();
 
             CreateMap<EtmfProjectWorkPlace, ETMFWorkplaceGridDto>()

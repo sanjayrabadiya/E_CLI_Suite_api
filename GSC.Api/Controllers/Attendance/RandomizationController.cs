@@ -118,7 +118,7 @@ namespace GSC.Api.Controllers.Attendance
                 .SingleOrDefault();
             if (randomization == null)
                 return BadRequest();
-           
+
             if (randomization.DateOfScreening != null && randomization.RandomizationNumber == null)
                 _randomizationRepository.SetFactorMappingData(randomization);
 
@@ -659,6 +659,7 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
                 randomizationDto.IsEligibilityFactor = factorData.Any(x => x.Fector == Fector.Eligibility);
                 randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
+                randomizationDto.IsDisable = _context.SupplyManagementFactorMapping.Any(x => x.DeletedDate == null && x.ProjectId == id) ? true : false;
             }
             return Ok(randomizationDto);
         }
