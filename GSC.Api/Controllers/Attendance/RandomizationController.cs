@@ -118,10 +118,11 @@ namespace GSC.Api.Controllers.Attendance
                 .SingleOrDefault();
             if (randomization == null)
                 return BadRequest();
-
-            var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
+           
             if (randomization.DateOfScreening != null && randomization.RandomizationNumber == null)
                 _randomizationRepository.SetFactorMappingData(randomization);
+
+            var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
             return Ok(randomizationDto);
         }
 

@@ -421,7 +421,7 @@ namespace GSC.Respository.SupplyManagement
 
         public string validateProductType(DataTable dt, int ProjectId)
         {
-            var productTypes = _pharmacyStudyProductTypeRepository.All.Where(x => x.ProjectId == ProjectId).
+            var productTypes = _pharmacyStudyProductTypeRepository.All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).
                 Select(a => new { ProductTypeCode = a.ProductType.ProductTypeCode.ToString().Trim() }).Distinct().ToList();
 
             for (int i = 0; i < dt.Rows.Count; i++)

@@ -80,6 +80,11 @@ namespace GSC.Api.Controllers.Master
                         return BadRequest(ModelState);
                     }
                 }
+                if (randomizationNumberSettingsDto.IsIGT || randomizationNumberSettingsDto.IsIWRS)
+                {
+                    ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
+                    return BadRequest(ModelState);
+                }
             }
             if (randomizationNumberSettingsDto.IsIGT == false)
             {
@@ -93,6 +98,7 @@ namespace GSC.Api.Controllers.Master
                 }
             }
 
+
             //var randomizationNumberSettings = _randomizationNumberSettingsRepository.Find(randomizationNumberSettingsDto.Id);
             randomizationNumberSettings.RandomNoLength = randomizationNumberSettingsDto.RandomNoLength;
             randomizationNumberSettings.IsManualRandomNo = randomizationNumberSettingsDto.IsManualRandomNo;
@@ -101,6 +107,7 @@ namespace GSC.Api.Controllers.Master
             randomizationNumberSettings.IsSiteDependentRandomNo = randomizationNumberSettingsDto.IsSiteDependentRandomNo;
             randomizationNumberSettings.IsIGT = randomizationNumberSettingsDto.IsIGT;
             randomizationNumberSettings.IsIWRS = randomizationNumberSettingsDto.IsIWRS;
+            randomizationNumberSettings.PrefixRandomNo = randomizationNumberSettingsDto.PrefixRandomNo;
             if (randomizationNumberSettings.IsManualRandomNo == false && randomizationNumberSettingsDto.IsIGT == false)
             {
                 if (randomizationNumberSettings.IsSiteDependentRandomNo == true)
