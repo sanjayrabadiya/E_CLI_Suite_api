@@ -410,6 +410,6 @@ namespace GSC.Domain.Context
 
         DbSet<PKBarcode> PKBarcode { get; set; }
 
-
+        DbSet<SampleBarcode> SampleBarcode { get; set; }
     }
 }

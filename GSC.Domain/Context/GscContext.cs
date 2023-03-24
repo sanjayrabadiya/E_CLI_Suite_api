@@ -368,7 +368,7 @@ namespace GSC.Domain.Context
         public DbSet<LabManagementUploadData> LabManagementUploadData { get; set; }
         public DbSet<LabManagementUploadExcelData> LabManagementUploadExcelData { get; set; }
         public DbSet<EconsentReviewDetailsAudit> EconsentReviewDetailsAudit { get; set; }
-        
+
         public DbSet<SyncConfigurationMaster> SyncConfigurationMaster { get; set; }
         public DbSet<SyncConfigurationMasterDetails> SyncConfigurationMasterDetails { get; set; }
         public DbSet<SyncConfigurationMasterDetailsAudit> SyncConfigurationMasterDetailsAudit { get; set; }
@@ -464,8 +464,7 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementFactorMapping> SupplyManagementFactorMapping { get; set; }
         public DbSet<PKBarcode> PKBarcode { get; set; }
-
-
+        public DbSet<SampleBarcode> SampleBarcode { get; set; }
     }
 
 
