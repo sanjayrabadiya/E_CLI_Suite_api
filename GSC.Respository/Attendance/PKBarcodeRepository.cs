@@ -57,9 +57,18 @@ namespace GSC.Respository.Attendance
             var volunteer = _context.Volunteer.FirstOrDefault(x => x.Id == objSave.VolunteerId);
             var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
             var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == objSave.TemplateId);
-
-            barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
-            return barcode;
+            if (objSave.PKBarcodeOption > 1)
+            {
+                for (int i = 1; i <= objSave.PKBarcodeOption; i++)
+                {
+                    barcode = barcode + "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + "0" + i + ",";
+                }
+            }
+            else
+            {
+                barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
+            }
+            return barcode.TrimEnd(',');
         }
 
         public void UpdateBarcode(List<int> ids)

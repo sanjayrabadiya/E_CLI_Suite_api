@@ -63,8 +63,18 @@ namespace GSC.Respository.Attendance
             var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
             var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == objSave.TemplateId);
 
-            barcode = "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
-            return barcode;
+            if (objSave.PKBarcodeOption > 1)
+            {
+                for (int i = 1; i <= objSave.PKBarcodeOption; i++)
+                {
+                    barcode = barcode + "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + "0" + i + ",";
+                }
+            }
+            else
+            {
+                barcode = "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
+            }
+            return barcode.TrimEnd(',');
         }
 
         public List<ProjectDropDown> GetProjectDropdown()
