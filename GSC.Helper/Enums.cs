@@ -1049,4 +1049,12 @@ namespace GSC.Helper
         [Description("Singlicate")] Singlicate = 1,
         [Description("Replicate")] Replicate = 4
     }
+
+    public enum BarcodeGenerationType : int
+    {
+        [Description("Subject Barcode")] SubjectBarcode = 1,
+        [Description("Pk Barcode")] PkBarocde = 2,
+        [Description("Sample Barcode")] SampleBarcode = 3,
+        [Description("Dossing Barcode")] DossingBarcode = 4
+    }
 }
