@@ -170,7 +170,7 @@ namespace GSC.Respository.Attendance
                 IsLocked = !_screeningTemplateRepository.All.Any(t => t.ScreeningVisit.ScreeningEntryId == x.ScreeningEntry.Id && !t.IsLocked),
                 IsBarcodeGenerated = _attendanceBarcodeGenerateRepository.All.Any(t => t.AttendanceId == x.Id && t.DeletedBy == null),//x.AttendanceBarcodeGenerate != null ? true : false,
                 AttendanceBarcodeGenerateId = _attendanceBarcodeGenerateRepository.All.Where(t => t.AttendanceId == x.Id && t.DeletedBy == null).FirstOrDefault().Id//x.AttendanceBarcodeGenerate.Id
-            }).ToList().OrderBy(x => x.Id).ToList();
+            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return items;
         }
