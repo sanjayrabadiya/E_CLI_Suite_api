@@ -12,6 +12,6 @@ namespace GSC.Respository.SupplyManagement
     {
         void AddKitSeriesVisitDetail(SupplyManagementKITSeriesDto data);
 
-        string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese);
+        string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese,SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
     }
 }

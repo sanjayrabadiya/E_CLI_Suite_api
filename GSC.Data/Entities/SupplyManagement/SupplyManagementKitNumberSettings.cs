@@ -24,6 +24,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int KitNoseries { get; set; }
         public bool? IsBlindedStudy { get; set; }
         public int? ThresholdValue { get; set; }
+        public bool IsUploadWithKit { get; set; }
 
     }
 }

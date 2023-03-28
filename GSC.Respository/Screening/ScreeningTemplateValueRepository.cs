@@ -172,6 +172,9 @@ namespace GSC.Respository.Screening
             {
                 return;
             }
+            var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectdata.ProjectId).FirstOrDefault();
+            if (numbersetting == null)
+                return;
             var verifyuploadsheetdata = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.ProjectId == projectdata.ProjectId && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
 
             if (RandomizationSetting.IsIGT && verifyuploadsheetdata != null)
@@ -204,9 +207,18 @@ namespace GSC.Respository.Screening
                         }
                         if (allocationsetting.Type == SupplyManagementAllocationType.KitNo)
                         {
-                            var producttype = _context.SupplyManagementKITDetail.Include(x=>x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
-                            && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
-                            value = producttype != null ? producttype.KitNo : "";
+                            if (numbersetting.KitCreationType == KitCreationType.KitWise)
+                            {
+                                var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                  && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+                                value = producttype != null ? producttype.KitNo : "";
+                            }
+                            if (numbersetting.KitCreationType == KitCreationType.SequenceWise)
+                            {
+                                var producttype = _context.SupplyManagementKITSeriesDetail.Include(x=>x.SupplyManagementKITSeries).Where(x => x.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                  && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+                                value = producttype != null ? producttype.SupplyManagementKITSeries.KitNo : "";
+                            }
                         }
                         var screeningTemplateValue = new ScreeningTemplateValue
                         {

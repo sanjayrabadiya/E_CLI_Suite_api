@@ -154,7 +154,8 @@ namespace GSC.Helper
         [Description("Lab Management")] LabManagement = 20,
         [Description("ICF Detail Report")] ICFDetailReport = 21,
         [Description("RoleIcon")] RoleIcon = 22,
-        [Description("Ctms")] Ctms = 23
+        [Description("Ctms")] Ctms = 23,
+        [Description("Randomization Upload")] RandomizationUpload = 24
     }
 
     public enum AuditModule : short

@@ -8,9 +8,9 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ISupplyManagementUploadFileRepository : IGenericRepository<SupplyManagementUploadFile>
     {
-        FileStreamResult DownloadFormat(SupplyManagementUploadFileDto supplyManagementUploadFile);
+        FileStreamResult DownloadFormat(SupplyManagementUploadFileDto supplyManagementUploadFile, SupplyManagementKitNumberSettings setting);
         List<SupplyManagementUploadFileGridDto> GetSupplyManagementUploadFileList(bool isDeleted, int ProjectId);
-        string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile);
+        string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile, SupplyManagementKitNumberSettings setting);
 
         bool CheckUploadApproalPending(int ProjectId, int SiteId, int CountryId);
 

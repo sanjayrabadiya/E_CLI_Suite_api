@@ -13,7 +13,11 @@ namespace GSC.Data.Entities.SupplyManagement
         public int RandomizationNo { get; set; }
         public string TreatmentType { get; set; }
 
+        public string KitNo { get; set; }
+
         public int? RandomizationId { get; set; }
+
+        public int? SupplyManagementKITSeriesId { get; set; }
         public IList<SupplyManagementUploadFileVisit> Visits { get; set; } = null;
         public SupplyManagementUploadFile SupplyManagementUploadFile { get; set; }
 

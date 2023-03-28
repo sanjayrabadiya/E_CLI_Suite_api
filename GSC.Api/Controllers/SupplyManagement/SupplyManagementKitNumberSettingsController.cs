@@ -159,5 +159,19 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             return Ok(Isblined);
         }
+        [HttpGet("CheckKitMappingWithSheet/{projectId}")]
+        public IActionResult CheckKitMappingWithSheet(int projectId)
+        {
+            bool Isblined = false;
+            if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsUploadWithKit == true))
+            {
+                Isblined = true;
+            }
+            else
+            {
+                Isblined = false;
+            }
+            return Ok(Isblined);
+        }
     }
 }

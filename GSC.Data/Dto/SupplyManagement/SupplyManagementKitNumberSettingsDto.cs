@@ -24,6 +24,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int? ThresholdValue { get; set; }
 
+        public bool IsUploadWithKit { get; set; }
+
     }
 
     public class SupplyManagementKitNumberSettingsGridDto : BaseAuditDto
@@ -39,6 +41,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool? IsBlindedStudy { get; set; }
         public int? ThresholdValue { get; set; }
         public string  KitCreationTypeName { get; set; }
+
+        public bool IsUploadWithKit { get; set; }
     }
 
 }

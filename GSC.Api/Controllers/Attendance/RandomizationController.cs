@@ -439,39 +439,10 @@ namespace GSC.Api.Controllers.Attendance
             {
                 if (numerformate.IsIWRS || numerformate.IsIGT)
                 {
-                    var validateduplicate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
-                    if (!string.IsNullOrEmpty(validateduplicate))
+                    var message = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
+                    if (!string.IsNullOrEmpty(message))
                     {
-                        _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
-                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
-                        return BadRequest(ModelState);
-                    }
-                    randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
-                    if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
-                    {
-                        ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
-                        return BadRequest(ModelState);
-                    }
-                    if (numerformate.IsIWRS == true && string.IsNullOrEmpty(randomizationDto.KitNo))
-                    {
-                        _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
-
-                        ModelState.AddModelError("Message", "Kit is not available");
-                        return BadRequest(ModelState);
-                    }
-                    if (numerformate.IsIGT == true && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
-                    {
-                        ModelState.AddModelError("Message", "Please upload randomization sheet");
-                        return BadRequest(ModelState);
-                    }
-                    if (!_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
-                    {
-                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
-                        return BadRequest(ModelState);
-                    }
-                    if (!_randomizationRepository.CheckDUplicateRandomizationNumber(randomizationDto))
-                    {
-                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                        ModelState.AddModelError("Message", message);
                         return BadRequest(ModelState);
                     }
                     _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);

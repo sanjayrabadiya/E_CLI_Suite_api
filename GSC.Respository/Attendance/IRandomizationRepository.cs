@@ -6,6 +6,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.Attendance;
+using GSC.Data.Entities.Master;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Security;
@@ -72,5 +73,9 @@ namespace GSC.Respository.Attendance
         bool CheckDUplicateRandomizationNumber(RandomizationDto obj);
 
         void SetFactorMappingData(Randomization randomizationDto);
+
+        void RevertKitData(RandomizationDto obj);
+
+        string CheckDuplicateRandomizationNumberIWRS(RandomizationDto obj, RandomizationNumberSettings numerformate);
     }
 }
