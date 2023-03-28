@@ -327,7 +327,7 @@ namespace GSC.Respository.SupplyManagement
                                 {
                                     if (i > 0)
                                     {
-                                        return "Duplicate kit number found in sheet";
+                                        return item + " Duplicate kit number found in sheet";
                                     }
                                     i++;
                                 }
