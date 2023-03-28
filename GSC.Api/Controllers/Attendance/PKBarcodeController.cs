@@ -58,7 +58,7 @@ namespace GSC.Api.Controllers.Attendance
             }
             barcode.BarcodeString = _pkBarcodeRepository.GenerateBarcodeString(pkBarcodeDto);
             _pkBarcodeRepository.Add(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
+            if (_uow.Save() <= 0) throw new Exception("Creating PK barcode failed on save.");
             return Ok(barcode.Id);
         }
 
