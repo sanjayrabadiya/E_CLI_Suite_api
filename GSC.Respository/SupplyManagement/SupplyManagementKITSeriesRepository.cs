@@ -102,7 +102,7 @@ namespace GSC.Respository.SupplyManagement
                         ++kitsettings.KitNoseries;
                         _context.SupplyManagementKitNumberSettings.Update(kitsettings);
                         _context.Save();
-                        var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno).FirstOrDefault();
+                        var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno && x.DeletedDate == null).FirstOrDefault();
                         if (data == null)
                         {
                             isnotexist = true;
