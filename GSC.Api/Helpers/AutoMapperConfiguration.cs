@@ -491,6 +491,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<PKBarcode, PKBarcodeDto>().ReverseMap();
             CreateMap<SampleBarcode, SampleBarcodeDto>().ReverseMap();
+            CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
         }
     }
 }
