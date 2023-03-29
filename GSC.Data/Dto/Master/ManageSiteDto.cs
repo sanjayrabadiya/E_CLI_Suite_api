@@ -43,6 +43,7 @@ namespace GSC.Data.Dto.Master
     {
         public int? TrialTypeId { get; set; }
         public int? DesignTrialId { get; set; }
+        public int? RegulatoryId { get; set; }
         public int? InvestigatorId { get; set; }
         public int? DrugId { get; set; }
         public DateTime? StartDate { get; set; }
@@ -52,10 +53,12 @@ namespace GSC.Data.Dto.Master
 
     public class ExperienceModel
     {
+        public int? ProjectId { get; set; }
         public string TypeOfTrial { get; set; }
         public string TherapeuticIndication { get; set; }
         public string DrugName { get; set; }
         public string StudyDuration { get; set; }
+        public string StudyName { get; set; }
         public string SiteName { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
