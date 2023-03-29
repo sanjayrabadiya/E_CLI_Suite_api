@@ -66,15 +66,16 @@ namespace GSC.Respository.SupplyManagement
                 history.RoleId = _jwtTokenAccesser.RoleId;
                 _context.SupplyManagementKITSeriesDetailHistory.Add(history);
 
-                var filedetail = _context.SupplyManagementUploadFileDetail.Where(x => x.KitNo == data.KitNo && x.SupplyManagementKITSeriesId == null).FirstOrDefault();
+                var filedetail = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve &&
+                    x.SupplyManagementUploadFile.ProjectId == data.ProjectId && x.KitNo == data.KitNo && x.SupplyManagementKITSeriesId == null).FirstOrDefault();
                 if (filedetail != null)
                 {
                     filedetail.SupplyManagementKITSeriesId = data.Id;
                     _context.SupplyManagementUploadFileDetail.Update(filedetail);
-                    _context.Save();
+
                 }
 
-                _context.Save();
+                //_context.Save();
             }
         }
 

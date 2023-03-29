@@ -114,6 +114,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                         supplyManagementKITSeriesDto.KitNo = supplyManagementKitSeries.KitNo;
                         _supplyManagementKITSeriesRepository.AddKitSeriesVisitDetail(supplyManagementKITSeriesDto);
                         isexist = true;
+                        _uow.Save();
                     }
                     else
                     {
@@ -122,6 +123,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
                 }
             }
+            
 
             return Ok(supplyManagementKITSeriesDto.Id);
 
