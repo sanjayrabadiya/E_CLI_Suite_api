@@ -348,10 +348,9 @@ namespace GSC.Respository.Attendance
                             return randomizationNumberDto;
                         }
 
-                        if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
-                        {
-                            visit = visit.Where(x => x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.SiteId == siteId).ToList();
-                        }
+
+                        visit = visit.Where(x => x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.ProjectId == projectid).ToList();
+
 
                         if (visit == null || visit.Count == 0)
                         {
