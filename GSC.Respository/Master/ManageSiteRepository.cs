@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -100,9 +101,12 @@ namespace GSC.Respository.Master
         {
             var experiences = new List<ExperienceModel>();
 
+
+            var designIds = _context.DesignTrial.Where(x => x.TrialTypeId == experienceFillter.TrialTypeId && x.DeletedDate == null).Select(s => s.Id).ToList();
+
             var data = _context.Site.Include(x => x.ManageSite).Include(x => x.InvestigatorContact)
                 .Where(x => (experienceFillter.InvestigatorId != null ? x.InvestigatorContactId == experienceFillter.InvestigatorId : true)
-                && (experienceFillter.TrialTypeId != null ? x.InvestigatorContact.TrialTypeId == experienceFillter.TrialTypeId : true))
+                && x.DeletedDate == null)
                 .Select(s => new
                 {
                     Site = s.ManageSite,
@@ -118,25 +122,44 @@ namespace GSC.Respository.Master
                                                                      && c.RoleId == _jwtTokenAccesser.RoleId) && q.DeletedDate == null && q.ManageSiteId == item.Site.Id)
                           .Include(x => x.DesignTrial)
                           .Include(x => x.Drug)
+                          .Include(x => x.RegulatoryType)
                           .Where(x => (experienceFillter.DesignTrialId != null ? x.DesignTrialId == experienceFillter.DesignTrialId : true)
+                           && (experienceFillter.TrialTypeId != null ? designIds.Contains(x.DesignTrialId) : true)
+                          && (experienceFillter.RegulatoryId != null ? x.RegulatoryTypeId == experienceFillter.RegulatoryId : true)
                           && (experienceFillter.DrugId != null ? x.DrugId == experienceFillter.DrugId : true))
                              .Select(s => new ExperienceModel()
                              {
+                                 ProjectId = s.Id,
                                  DrugName = s.Drug.DrugName,
                                  InvestigatorName = item.Investigator.NameOfInvestigator,
                                  NumberOfPatients = s.AttendanceLimit,
-                                 ProjectStatus = "",
+                                 ProjectStatus = _context.ProjectStatus.FirstOrDefault(x => x.ProjectId == s.ParentProjectId && x.DeletedDate == null).Status.GetDescription(),
                                  SiteName = item.Site.SiteName,
+                                 StudyName = s.ProjectName,
                                  StudyDuration = "",
-                                 Submission = "",
+                                 Submission = s.RegulatoryType.RegulatoryTypeName,
                                  TherapeuticIndication = item.TrialType.TrialTypeName,
                                  TypeOfTrial = s.DesignTrial.DesignTrialName
                              }).ToList();
 
                 experiences.AddRange(project);
             }
+            experiences.ForEach(x =>
+            {
+                var ctms = _context.StudyPlan.Where(q => q.ProjectId == x.ProjectId).ToList();
+                if (ctms.Count() > 0)
+                {
+                    var data = ctms.FirstOrDefault();
+                    x.StartDate = data.StartDate;
+                    x.EndDate = data.EndDate;
+                    var date = data.EndDate.Subtract(data.StartDate);
+                    x.StudyDuration = date.Days + " Days";
+                }
+            });
 
-            return experiences;
+            var fillterData = experiences.Where(x => (experienceFillter.StartDate != null && experienceFillter.EndDate == null) ? x.StartDate > experienceFillter.StartDate : (experienceFillter.StartDate == null && experienceFillter.EndDate != null) ? x.EndDate < experienceFillter.EndDate : (experienceFillter.StartDate != null && experienceFillter.EndDate != null) ? x.StartDate > experienceFillter.StartDate && x.EndDate < experienceFillter.EndDate : true);
+
+            return fillterData.ToList();
         }
     }
 }
