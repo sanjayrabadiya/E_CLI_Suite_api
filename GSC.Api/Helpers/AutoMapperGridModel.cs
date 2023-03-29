@@ -675,6 +675,18 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
            .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
            .ReverseMap();
+
+
+            CreateMap<DossingBarcode, DossingBarcodeGridDto>()
+           .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectName))
+           .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
+           .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+           .ForMember(x => x.Template, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+           .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
+           .ForMember(x => x.BarcodeType, x => x.MapFrom(a => a.BarcodeType.BarcodeTypeName))
+           .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
+           .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
+           .ReverseMap();
         }
     }
 }

@@ -409,6 +409,7 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementFactorMapping> SupplyManagementFactorMapping { get; set; }
 
         DbSet<PKBarcode> PKBarcode { get; set; }
+        DbSet<DossingBarcode> DossingBarcode { get; set; }
 
         DbSet<SampleBarcode> SampleBarcode { get; set; }
     }
