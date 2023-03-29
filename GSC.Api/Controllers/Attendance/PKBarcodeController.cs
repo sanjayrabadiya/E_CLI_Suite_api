@@ -124,5 +124,13 @@ namespace GSC.Api.Controllers.Attendance
             _uow.Save();
             return Ok();
         }
+
+        [HttpGet]
+        [Route("GetPkSubjectDetails/{siteId}/{templateId}")]
+        public IActionResult GetPkSubjectDetails(int siteId, int templateId)
+        {
+            return Ok(_pkBarcodeRepository.GetPkSubjectDetails(siteId, templateId));
+        }
+
     }
 }

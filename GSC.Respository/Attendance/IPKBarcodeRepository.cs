@@ -15,5 +15,6 @@ namespace GSC.Respository.Attendance
         void UpdateBarcode(List<int> ids);
         void BarcodeReprint(List<int> ids);
         void DeleteBarcode(List<int> ids);
+        List<BarcodeDataEntrySubject> GetPkSubjectDetails(int siteId, int templateId);
     }
 }

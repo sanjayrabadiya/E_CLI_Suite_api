@@ -132,4 +132,18 @@ namespace GSC.Data.Dto.Attendance
         public string PreLabel { get; set; }
     }
 
+    public class BarcodeDataEntrySubject 
+    {
+        public int AttendanceId { get; set; }
+      //  public int VolunteerId { get; set; }
+        public string ProjectAttendanceBarcodeString { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
+        public string BarcodeString { get; set; }
+        public string VolunteerNo { get; set; }
+        public PKBarcodeOption PKBarcodeOption { get; set; }
+        public DateTime? ScheduleDate { get; set; }
+    }
+
 }
