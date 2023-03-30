@@ -115,8 +115,11 @@ namespace GSC.Respository.Attendance
                 if (attendanceSearch.IsFromScreening)
                     result = result.Where(x => !x.IsProcessed);
 
+                if (attendanceSearch.StudyId > 0)
+                    result = result.Where(x => x.ProjectId == attendanceSearch.StudyId);
+
                 if (attendanceSearch.ProjectId > 0)
-                    result = result.Where(x => x.ProjectId == attendanceSearch.ProjectId);
+                    result = result.Where(x => x.SiteId == attendanceSearch.ProjectId);
 
                 if (attendanceSearch.PeriodNo > 0)
                     result = result.Where(x => x.PeriodNo == attendanceSearch.PeriodNo);
