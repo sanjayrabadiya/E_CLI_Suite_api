@@ -32,5 +32,6 @@ namespace GSC.Data.Dto.Attendance
         public int? PeriodNo { get; set; }
         public bool IsStandby { get; set; }
         public double? StudyVersion { get; set; }
+        public int? SiteId { get; set; }
     }
 }
