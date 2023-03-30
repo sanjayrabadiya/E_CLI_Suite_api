@@ -17,7 +17,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using GSC.Api.Hosted;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace GSC.Api
 {
