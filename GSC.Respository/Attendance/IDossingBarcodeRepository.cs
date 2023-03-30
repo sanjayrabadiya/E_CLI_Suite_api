@@ -14,7 +14,7 @@ namespace GSC.Respository.Attendance
         List<DossingBarcodeGridDto> GetDossingBarcodeList(bool isDeleted);
         string Duplicate(DossingBarcodeDto objSave);
         string GenerateBarcodeString(DossingBarcode objSave);
-        List<DossingBarcodeDto> UpdateBarcode(List<int> ids);
+        List<DossingBarcodeGridDto> UpdateBarcode(List<int> ids);
         void BarcodeReprint(List<int> ids);
         void DeleteBarcode(List<int> ids);
     }

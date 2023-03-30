@@ -82,20 +82,20 @@ namespace GSC.Respository.Attendance
                 var content = randomization.SupplyManagementUploadFileDetail.TreatmentType;
                 if (content.Contains(','))
                 {
-                    barcode = volunteer.RandomizationNumber + peroid.Id + objSave.VisitId + template.Id + content[0];
+                    barcode = "DB" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + content[0];
                 }
                 else
                 {
-                    barcode = volunteer.RandomizationNumber + peroid.Id + objSave.VisitId + +template.Id + content;
+                    barcode = "DB" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + content;
                 }
             }
             return barcode;
         }
 
-        public List<DossingBarcodeDto> UpdateBarcode(List<int> ids)
+        public List<DossingBarcodeGridDto> UpdateBarcode(List<int> ids)
         {
             var barcodes = _context.DossingBarcode.Where(x => ids.Contains(x.Id)).ToList();
-            List<DossingBarcodeDto> gridDtos = new List<DossingBarcodeDto>();
+            List<int> barcodeIds = new List<int>();
             foreach (var barcode in barcodes)
             {
                 //barcode.IsBarcodeReprint = true;
@@ -105,14 +105,16 @@ namespace GSC.Respository.Attendance
                     barcode.BarcodeString = strBarcode;
                     barcode.BarcodeDate = DateTime.Now;
                     _context.DossingBarcode.Update(barcode);
-                    var gridDto = _mapper.Map<DossingBarcodeDto>(barcode);
-                    gridDtos.Add(gridDto);
+                    barcodeIds.Add(barcode.Id);
                 }
             }
 
             _context.Save();
 
-            return gridDtos;
+
+            var data = All.Include(x => x.BarcodeType).Where(x => barcodeIds.Contains(x.Id));
+            var gridDto = _mapper.Map<List<DossingBarcodeGridDto>>(data);
+            return gridDto;
         }
 
         public void BarcodeReprint(List<int> ids)
