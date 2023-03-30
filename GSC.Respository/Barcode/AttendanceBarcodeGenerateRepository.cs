@@ -71,7 +71,7 @@ namespace GSC.Respository.Barcode
                 .Where(x => x.DeletedBy == null && Ids.Contains(x.Id)).OrderByDescending(m => m.Id).ToList();
 
             List<AttendanceBarcodeGenerateGridDto> lst = new List<AttendanceBarcodeGenerateGridDto>();
-            
+
             foreach (var item in barcodeGenerator)
             {
                 var sublst = new AttendanceBarcodeGenerateGridDto
@@ -102,11 +102,17 @@ namespace GSC.Respository.Barcode
         string GetColumnValue(int id, string TableName, string ColumnName)
         {
             var tableRepository = _context.Attendance.Where(x => x.Id == id).Select(e => e).FirstOrDefault();
+
             if (tableRepository == null) return "";
 
 
             if (ColumnName == "ProjectId")
-                return _context.Project.Find(_context.Project.Find(tableRepository.ProjectId).ParentProjectId).ProjectCode;
+                return _context.Project.Find(tableRepository.ProjectId).ProjectCode;
+
+            if (ColumnName == "SiteId")
+            {
+                return _context.Project.Include(x => x.ManageSite).FirstOrDefault(x => x.Id == tableRepository.SiteId).ManageSite.SiteName;
+            }
 
             if (ColumnName == "VolunteerId")
                 return _context.Volunteer.Find(tableRepository.VolunteerId).VolunteerNo;
@@ -122,8 +128,8 @@ namespace GSC.Respository.Barcode
             if (attendanceData == null) return "";
             var volunteerNo = _context.Volunteer.Find(attendanceData.VolunteerId).VolunteerNo;
             var projectCode = _context.Project.Find(attendanceData.ProjectId).ProjectCode;
-            
-            return projectCode+volunteerNo;
+
+            return projectCode + volunteerNo;
         }
 
     }
