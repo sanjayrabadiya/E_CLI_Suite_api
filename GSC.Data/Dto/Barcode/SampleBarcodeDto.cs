@@ -13,7 +13,7 @@ namespace GSC.Data.Dto.Barcode
         public int? VisitId { get; set; }
         public int? TemplateId { get; set; }
         public int? BarcodeTypeId { get; set; }
-        public int? PKBarcodeId { get; set; }
+        //public int? PKBarcodeId { get; set; }
         public int? PKBarcodeOption { get; set; }
         //public string Anticogulant { get; set; }
         //public string MLSample { get; set; }

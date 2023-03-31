@@ -45,14 +45,13 @@ namespace GSC.Respository.Attendance
         public string Duplicate(SampleBarcodeDto objSave)
         {
             if (All.Any(
-                x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId
-                && x.VisitId == objSave.VisitId
-                && x.TemplateId == objSave.TemplateId
-                && x.SiteId == objSave.SiteId
-                && x.VolunteerId == objSave.VolunteerId
-                && x.PKBarcodeId == objSave.PKBarcodeId
-                && x.DeletedDate == null))
-                return "Duplicate Sample Barcode";
+               x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId
+               && x.VisitId == objSave.VisitId
+               && x.TemplateId == objSave.TemplateId
+               && x.SiteId == objSave.SiteId
+               && x.VolunteerId == objSave.VolunteerId
+               && x.DeletedDate == null))
+                return "Duplicate sample barcode";
             return "";
         }
 
@@ -146,18 +145,24 @@ namespace GSC.Respository.Attendance
             return templateList;
         }
 
-        public List<DropDownDto> GetVolunteerList(int projectId, int siteId, int visitId, int templateId)
+        public List<DropDownDto> GetVolunteerList(int siteId)
         {
-            var templateList = _context.PKBarcode.Include(x => x.Volunteer)
-                .Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.SiteId == siteId && x.VisitId == visitId && x.TemplateId == templateId && x.BarcodeDate != null)
-                .Select(t => new DropDownDto
-                {
-                    Id = t.Id,
-                    Code = t.VolunteerId.ToString(),
-                    Value = t.Volunteer.FirstName + " " + t.Volunteer.LastName
-                }).Distinct().ToList();
+            var subjectList = _context.PKBarcode.Where(x => x.SiteId == siteId && x.DeletedDate == null).Select(x => x.VolunteerId).Distinct().ToList();
+            return _context.Volunteer.Where(x => x.RandomizationNumber != null && x.DeletedDate == null &&
+            subjectList.Contains(x.Id) &&
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
 
-            return templateList;
+            //var templateList = _context.PKBarcode.Include(x => x.Volunteer)
+            //    .Where(x => x.DeletedDate == null && x.SiteId == siteId && x.BarcodeDate != null)
+            //    .Select(t => new DropDownDto
+            //    {
+            //        Id = t.VolunteerId ?? 0,
+            //        Code = "",
+            //        Value = t.Volunteer.FirstName + " " + t.Volunteer.LastName
+            //    }).Distinct().ToList();
+
+            //return templateList;
         }
 
         public void UpdateBarcode(List<int> ids)

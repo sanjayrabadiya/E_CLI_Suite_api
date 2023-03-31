@@ -153,10 +153,10 @@ namespace GSC.Api.Controllers.Attendance
             var projectList = _sampleBarcodeRepository.GetTemplateList(projectId, siteId, visitId);
             return Ok(projectList);
         }
-        [HttpGet("GetVolunteerList/{projectId}/{siteId}/{visitId}/{templateId}")]
-        public ActionResult GetVolunteerList(int projectId, int siteId, int visitId, int templateId)
+        [HttpGet("GetVolunteerList/{siteId}")]
+        public ActionResult GetVolunteerList(int siteId)
         {
-            var projectList = _sampleBarcodeRepository.GetVolunteerList(projectId, siteId, visitId, templateId);
+            var projectList = _sampleBarcodeRepository.GetVolunteerList( siteId);
             return Ok(projectList);
         }
     }
