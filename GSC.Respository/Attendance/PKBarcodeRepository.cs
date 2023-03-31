@@ -7,6 +7,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Screening;
 using GSC.Respository.Volunteer;
 using GSC.Shared.JWTAuth;
@@ -119,30 +120,49 @@ namespace GSC.Respository.Attendance
             _context.Save();
         }
 
-        public List<BarcodeDataEntrySubject> GetPkSubjectDetails(int siteId, int templateId)
+        public List<BarcodeDataEntrySubject> GetSubjectDetails(int siteId, int templateId, BarcodeGenerationType generationType)
         {
-            var pkDetails = All.Where(r => r.SiteId == siteId && r.TemplateId == templateId).ToList();
-          //  var AttendanceDetails = _attendanceRepository.All.Where(r => r.ProjectId == siteId).Select(x=>x.Id).ToList();
 
-           var projectdata= _context.ScreeningTemplate
-                                        .Include(x => x.ScreeningVisit)
-                                        .ThenInclude(x => x.ScreeningEntry)
-                                        .ThenInclude(x => x.Attendance)
-                                        .ThenInclude(x=>x.Volunteer)
-                                        .Where(x => x.ProjectDesignTemplateId == templateId && x.Status < Helper.ScreeningTemplateStatus.Submitted).Select(x =>
-                                      new BarcodeDataEntrySubject
-                                      {
-                                          VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo +" "+ x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
-                                          AttendanceId = (int)x.ScreeningVisit.ScreeningEntry.AttendanceId,
-                                          ProjectAttendanceBarcodeString = _context.AttendanceBarcodeGenerate.Where(r=>r.AttendanceId== x.ScreeningVisit.ScreeningEntry.AttendanceId && r.DeletedDate==null).FirstOrDefault().BarcodeString,
-                                          ProjectDesignTemplateId = x.ProjectDesignTemplateId,
-                                          ScreeningTemplateId = x.Id,
-                                          Status=x.Status,
-                                          ScheduleDate=x.ScheduleDate,
-                                          BarcodeString = All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId).FirstOrDefault().BarcodeString //pkDetails.Where(t=>t.VolunteerId == x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId).FirstOrDefault().BarcodeString,
-                                      }).ToList();
+            var project = _context.Project.Find(siteId).ParentProjectId; 
+            var projectdata = _context.ScreeningTemplate
+                                         .Include(x => x.ScreeningVisit)
+                                         .ThenInclude(x => x.ScreeningEntry)
+                                         .ThenInclude(x => x.Attendance)
+                                         .ThenInclude(x => x.Volunteer)
+                                         .Where(x => x.ProjectDesignTemplateId == templateId && x.Status < Helper.ScreeningTemplateStatus.Submitted && x.ScreeningVisit.ScreeningEntry.ProjectId== project).Select(x =>
+                                       new BarcodeDataEntrySubject
+                                       {
+                                           VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo + " " + x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                                           AttendanceId = (int)x.ScreeningVisit.ScreeningEntry.AttendanceId,
+                                           ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
+                                           ProjectAttendanceBarcodeString = _context.AttendanceBarcodeGenerate.Where(r => r.AttendanceId == x.ScreeningVisit.ScreeningEntry.AttendanceId && r.DeletedDate == null).FirstOrDefault().BarcodeString,
+                                           ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                                           ScreeningTemplateId = x.Id,
+                                           Status = x.Status,
+                                           ScheduleDate = x.ScheduleDate,
+                                           VolunteerId= (int)x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId
+                                           //BarcodeString = BarcodeString(siteId, templateId, (int)x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId, generationType),
+                                       }).ToList();
+
+            projectdata.ForEach(x =>
+            {
+                x.BarcodeString = BarcodeString(siteId, x.ProjectDesignTemplateId, x.VolunteerId, generationType);
+            });
+
 
             return projectdata.ToList();
+        }
+
+        string BarcodeString(int siteId, int templateId, int VolunteerId, BarcodeGenerationType generationType)
+        {
+            if (generationType == BarcodeGenerationType.PkBarocde)
+                return All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+            else if (generationType == BarcodeGenerationType.SampleBarcode)
+                return _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+            else if (generationType == BarcodeGenerationType.DossingBarcode)
+                return _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+            else
+                return "";
         }
     }
 }

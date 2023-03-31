@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -15,6 +16,6 @@ namespace GSC.Respository.Attendance
         void UpdateBarcode(List<int> ids);
         void BarcodeReprint(List<int> ids);
         void DeleteBarcode(List<int> ids);
-        List<BarcodeDataEntrySubject> GetPkSubjectDetails(int siteId, int templateId);
+        List<BarcodeDataEntrySubject> GetSubjectDetails(int siteId, int templateId, BarcodeGenerationType generationType);
     }
 }

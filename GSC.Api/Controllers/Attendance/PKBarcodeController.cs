@@ -7,6 +7,7 @@ using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Master;
+using GSC.Helper;
 using GSC.Respository.Attendance;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -126,10 +127,10 @@ namespace GSC.Api.Controllers.Attendance
         }
 
         [HttpGet]
-        [Route("GetPkSubjectDetails/{siteId}/{templateId}")]
-        public IActionResult GetPkSubjectDetails(int siteId, int templateId)
+        [Route("GetSubjectDetails/{siteId}/{templateId}/{generationType}")]
+        public IActionResult GetSubjectDetails(int siteId, int templateId, BarcodeGenerationType generationType)
         {
-            return Ok(_pkBarcodeRepository.GetPkSubjectDetails(siteId, templateId));
+            return Ok(_pkBarcodeRepository.GetSubjectDetails(siteId, templateId, generationType));
         }
 
     }

@@ -111,7 +111,7 @@ namespace GSC.Respository.Barcode
 
             if (ColumnName == "SiteId")
             {
-                return _context.Project.Include(x => x.ManageSite).FirstOrDefault(x => x.Id == tableRepository.SiteId).ManageSite.SiteName;
+                return _context.Project.Find(tableRepository.SiteId).ProjectCode;//Include(x => x.ManageSite).FirstOrDefault(x => x.Id == tableRepository.SiteId).ManageSite.SiteName;
             }
 
             if (ColumnName == "VolunteerId")
