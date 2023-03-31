@@ -31,6 +31,8 @@ namespace GSC.Data.Dto.Barcode
         public string Site { get; set; }
         public string Visit { get; set; }
         public string Template { get; set; }
+        public string ProjectCode { get; set; }
+        public string SiteCode { get; set; }
         public string BarcodeType { get; set; }
         public string PKBarcodeOption { get; set; }
         //public string Anticogulant { get; set; }
