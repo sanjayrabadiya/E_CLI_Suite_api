@@ -112,7 +112,10 @@ namespace GSC.Respository.Attendance
             _context.Save();
 
 
-            var data = All.Include(x => x.BarcodeType).Where(x => barcodeIds.Contains(x.Id));
+            var data = All.Include(x => x.BarcodeType)
+                .Include(x => x.Project)
+                .Include(x => x.Site.ManageSite)
+                .Where(x => barcodeIds.Contains(x.Id));
             var gridDto = _mapper.Map<List<DossingBarcodeGridDto>>(data);
             return gridDto;
         }
