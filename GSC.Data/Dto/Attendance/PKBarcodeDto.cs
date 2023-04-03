@@ -28,6 +28,8 @@ namespace GSC.Data.Dto.Attendance
         public string Project { get; set; }
         public string VolunteerName { get; set; }
         public string Site { get; set; }
+        public string ProjectCode { get; set; }
+        public string SiteCode { get; set; }
         public string Visit { get; set; }
         public string Template { get; set; }
         public string BarcodeType { get; set; }
