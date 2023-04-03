@@ -135,6 +135,7 @@ namespace GSC.Respository.Attendance
                                            VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo + " " + x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                                            AttendanceId = (int)x.ScreeningVisit.ScreeningEntry.AttendanceId,
                                            ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
+                                           ProjectDesignVisitId = x.ScreeningVisit.ProjectDesignVisitId,
                                            ProjectAttendanceBarcodeString = _context.AttendanceBarcodeGenerate.Where(r => r.AttendanceId == x.ScreeningVisit.ScreeningEntry.AttendanceId && r.DeletedDate == null).FirstOrDefault().BarcodeString,
                                            ProjectDesignTemplateId = x.ProjectDesignTemplateId,
                                            ScreeningTemplateId = x.Id,
@@ -147,8 +148,16 @@ namespace GSC.Respository.Attendance
             projectdata.ForEach(x =>
             {
                 x.BarcodeString = BarcodeString(siteId, x.ProjectDesignTemplateId, x.VolunteerId, generationType);
+                if (generationType == BarcodeGenerationType.PkBarocde)
+                    x.PKBarcodeOption = All.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+                else if (generationType == BarcodeGenerationType.SampleBarcode)
+                {
+                    x.PKBarcodeOption = _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+                    x.ProjectAttendanceBarcodeString = _context.PKBarcode.Where(r => r.SiteId == siteId && r.VisitId==x.ProjectDesignVisitId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().BarcodeString;
+                }
+                else if (generationType == BarcodeGenerationType.DossingBarcode)
+                    x.PKBarcodeOption = _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
             });
-
 
             return projectdata.ToList();
         }

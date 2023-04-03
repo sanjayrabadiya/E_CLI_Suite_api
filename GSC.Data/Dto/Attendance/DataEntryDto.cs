@@ -138,11 +138,12 @@ namespace GSC.Data.Dto.Attendance
         public int VolunteerId { get; set; }
         public string ProjectAttendanceBarcodeString { get; set; }
         public int ProjectDesignTemplateId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
         public int ScreeningTemplateId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public string BarcodeString { get; set; }
         public string VolunteerNo { get; set; }
-        public PKBarcodeOption PKBarcodeOption { get; set; }
+        public PKBarcodeOption? PKBarcodeOption { get; set; }
         public DateTime? ScheduleDate { get; set; }
         public int ScreeningEntryId { get; set; }
     }
