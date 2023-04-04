@@ -412,5 +412,6 @@ namespace GSC.Domain.Context
         DbSet<DossingBarcode> DossingBarcode { get; set; }
 
         DbSet<SampleBarcode> SampleBarcode { get; set; }
+        DbSet<ManageSiteAddress> ManageSiteAddress { get; set; }
     }
 }

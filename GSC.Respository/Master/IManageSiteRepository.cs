@@ -13,5 +13,6 @@ namespace GSC.Respository.Master
         IList<ManageSiteDto> GetManageSiteList(int Id);
         void UpdateRole(ManageSite ManageSite);
         List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter);
+        void UpdateSiteAddress(ManageSite objSave);
     }
 }

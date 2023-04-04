@@ -53,8 +53,11 @@ namespace GSC.Respository.Master
 
         public string Duplicate(ManageSite objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.SiteAddress == objSave.SiteAddress.Trim() && x.DeletedDate == null))
-                return "Duplicate Site Address: " + objSave.SiteAddress;
+            foreach (var item in objSave.ManageSiteAddress)
+            {
+                if (_context.ManageSiteAddress.Any(x => x.Id != item.Id && x.SiteAddress == item.SiteAddress.Trim() && x.DeletedDate == null))
+                    return "Duplicate Site Address: " + item.SiteAddress;
+            }
 
             return "";
         }
@@ -93,6 +96,33 @@ namespace GSC.Respository.Master
                     _context.ManageSiteRole.Update(t);
                 }
             });
+        }
+
+        public void UpdateSiteAddress(ManageSite objSave)
+        {
+            foreach (var item in objSave.ManageSiteAddress)
+            {
+                var orginalAddress = _context.ManageSiteAddress.Find(item.Id);
+                if (orginalAddress != null)
+                {
+                    if (orginalAddress.SiteAddress != item.SiteAddress)
+                    {
+                        _context.ManageSiteAddress.Update(item);
+                    }
+                }
+
+                if (item.DeletedDate != null)
+                {
+                    item.DeletedDate = DateTime.Now;
+                    item.DeletedBy = _jwtTokenAccesser.UserId;
+                    _context.ManageSiteAddress.Update(item);
+                }
+
+                if (item.Id == 0 && orginalAddress == null)
+                {
+                    _context.ManageSiteAddress.Add(item);
+                }
+            }
         }
 
 

@@ -20,5 +20,6 @@ namespace GSC.Data.Entities.Master
         public City City { get; set; }
         public List<ManageSiteRole> ManageSiteRole { get; set; } = null;
         public List<Iecirb> Iecirb { get; set; } = null;
+        public List<ManageSiteAddress> ManageSiteAddress { get; set;} = null;
     }
 }
