@@ -516,8 +516,8 @@ namespace GSC.Api.Controllers.Master
 
         //Code for clone Study Tinku Mahato (01-04-2022)
 
-        [HttpPost("{cloneProjectId}/{cloneDto}")]
-        public IActionResult Post([FromRoute]int cloneProjectId, CloneProjectDto cloneDto, [FromBody] ProjectDto projectDto)
+        [HttpPost("{cloneProjectId}")]
+        public IActionResult Post([FromRoute]int cloneProjectId, [FromBody] ProjectDto projectDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectDto.Id = 0;
@@ -576,8 +576,8 @@ namespace GSC.Api.Controllers.Master
 
             _uow.Save();
             if (cloneProjectId != 0)
-                cloneDto.CloneProjectId = cloneProjectId;
-            _projectRepository.CloneStudy(cloneDto, project);
+                projectDto.CloneProjectDto.CloneProjectId = cloneProjectId;
+            _projectRepository.CloneStudy(projectDto.CloneProjectDto, project);
 
             _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
             {

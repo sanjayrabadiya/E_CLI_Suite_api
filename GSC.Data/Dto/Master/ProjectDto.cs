@@ -60,6 +60,7 @@ namespace GSC.Data.Dto.Master
         public bool IsSendSMS { get; set; }
         public bool IsSendEmail { get; set; }
         public int? Recruitment { get; set; }
+        public CloneProjectDto CloneProjectDto { get; set; }
     }
 
 
