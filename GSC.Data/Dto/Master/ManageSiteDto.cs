@@ -32,6 +32,7 @@ namespace GSC.Data.Dto.Master
         public string SiteEmail { get; set; }
         public string ContactNumber { get; set; }
         public string SiteAddress { get; set; }
+        public List<string> SiteAddresses { get; set; }
         public bool Status { get; set; }
         public string StateName { get; set; }
         public string CountryName { get; set; }
@@ -55,17 +56,27 @@ namespace GSC.Data.Dto.Master
     public class ExperienceModel
     {
         public int? ProjectId { get; set; }
+        public int? SiteId { get; set; }
+        public int? InvestigatorId { get; set; }
+        public int? CountryId { get; set; }
         public string TypeOfTrial { get; set; }
         public string TherapeuticIndication { get; set; }
         public string DrugName { get; set; }
         public string StudyDuration { get; set; }
         public string StudyName { get; set; }
+        public string StudyCode { get; set; }
         public string SiteName { get; set; }
+        public List<string> SiteNames { get; set; }
+        public int? NoOfSite { get; set; }
+        public int? NoOfCountry { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public int? NumberOfPatients { get; set; }
+        public int? TargetedSubject { get; set; }
+        public List<int?> TargetedSubjects { get; set; }
         public string ProjectStatus { get; set; }
         public string Submission { get; set; }
         public string InvestigatorName { get; set; }
+        public List<string> InvestigatorNames { get; set; }
     }
 }

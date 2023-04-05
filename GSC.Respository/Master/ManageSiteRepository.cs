@@ -30,9 +30,8 @@ namespace GSC.Respository.Master
 
         public List<ManageSiteGridDto> GetManageSites(bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-                   ProjectTo<ManageSiteGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).Include(x => x.ManageSiteAddress)
+            .ProjectTo<ManageSiteGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public IList<ManageSiteDto> GetManageSiteList(int Id)
@@ -130,66 +129,92 @@ namespace GSC.Respository.Master
         public List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter)
         {
             var experiences = new List<ExperienceModel>();
-
-
             var designIds = _context.DesignTrial.Where(x => x.TrialTypeId == experienceFillter.TrialTypeId && x.DeletedDate == null).Select(s => s.Id).ToList();
 
-            var data = _context.Site.Include(x => x.ManageSite).Include(x => x.InvestigatorContact)
-                .Where(x => (experienceFillter.InvestigatorId != null ? x.InvestigatorContactId == experienceFillter.InvestigatorId : true)
-                && x.DeletedDate == null)
-                .Select(s => new
-                {
-                    Site = s.ManageSite,
-                    Investigator = s.InvestigatorContact,
-                    TrialType = s.InvestigatorContact.TrialType
-                }).ToList();
+            var data = (from p in _context.Project.Where(q => q.DeletedDate == null && q.ParentProjectId == null && _context.ProjectRight.Any(c => c.DeletedDate == null
+                                                                && c.ProjectId == q.Id
+                                                                && c.UserId == _jwtTokenAccesser.UserId
+                                                                && c.RoleId == _jwtTokenAccesser.RoleId)).Include(x => x.DesignTrial)
+                                                          .Include(x => x.Drug)
+                                                          .Include(x => x.RegulatoryType)
+                                                          .Include(x => x.DesignTrial.TrialType)
+                                                          .Where(x => (experienceFillter.DesignTrialId != null ? x.DesignTrialId == experienceFillter.DesignTrialId : true)
+                                                          && (experienceFillter.TrialTypeId != null ? designIds.Contains(x.DesignTrialId) : true)
+                                                          && (experienceFillter.RegulatoryId != null ? x.RegulatoryTypeId == experienceFillter.RegulatoryId : true)
+                                                          && (experienceFillter.DrugId != null ? x.DrugId == experienceFillter.DrugId : true))
+                        join ps in _context.ProjectStatus.Where(q => q.DeletedDate == null) on p.Id equals ps.ProjectId into p_ps
+                        from subProjectStatus in p_ps.DefaultIfEmpty()
+                        join cp in _context.Project.Where(q => q.DeletedDate == null && q.ParentProjectId != null) on p.Id equals cp.ParentProjectId into p_cp
+                        from subChildProject in p_cp.DefaultIfEmpty()
+                        join ms in _context.ManageSite.Where(q => q.DeletedDate == null) on subChildProject.ManageSiteId equals ms.Id into p_ms
+                        from subMangeSite in p_ms.DefaultIfEmpty()
+                        join s in _context.Site.Where(q => q.DeletedDate == null) on subMangeSite.Id equals s.ManageSiteId into p_s
+                        from subSite in p_s.DefaultIfEmpty()
+                        join c in _context.InvestigatorContact.Where(q => q.DeletedDate == null) on subSite.InvestigatorContactId equals c.Id into p_c
+                        from subInvestiator in p_c.DefaultIfEmpty()
+                        join sp in _context.StudyPlan.Where(q => q.DeletedDate == null) on p.Id equals sp.ProjectId into p_sp
+                        from subStudyPlan in p_sp.DefaultIfEmpty()
+                        select new
+                        {
+                            Project = p,
+                            ChildProject = subChildProject,
+                            ManageSite = subMangeSite,
+                            Investigator = subInvestiator,
+                            StudyPlan = subStudyPlan,
+                            ProjectStatus = subProjectStatus,
+                        });
 
-            foreach (var item in data)
+            foreach (var pro in data)
             {
-                var project = _context.Project.Where(q => q.DeletedDate == null && _context.ProjectRight.Any(c => c.DeletedDate == null
-                                                                     && c.ProjectId == q.Id
-                                                                     && c.UserId == _jwtTokenAccesser.UserId
-                                                                     && c.RoleId == _jwtTokenAccesser.RoleId) && q.DeletedDate == null && q.ManageSiteId == item.Site.Id)
-                          .Include(x => x.DesignTrial)
-                          .Include(x => x.Drug)
-                          .Include(x => x.RegulatoryType)
-                          .Where(x => (experienceFillter.DesignTrialId != null ? x.DesignTrialId == experienceFillter.DesignTrialId : true)
-                           && (experienceFillter.TrialTypeId != null ? designIds.Contains(x.DesignTrialId) : true)
-                          && (experienceFillter.RegulatoryId != null ? x.RegulatoryTypeId == experienceFillter.RegulatoryId : true)
-                          && (experienceFillter.DrugId != null ? x.DrugId == experienceFillter.DrugId : true))
-                             .Select(s => new ExperienceModel()
-                             {
-                                 ProjectId = s.Id,
-                                 DrugName = s.Drug.DrugName,
-                                 InvestigatorName = item.Investigator.NameOfInvestigator,
-                                 NumberOfPatients = s.AttendanceLimit,
-                                 ProjectStatus = _context.ProjectStatus.FirstOrDefault(x => x.ProjectId == s.ParentProjectId && x.DeletedDate == null).Status.GetDescription(),
-                                 SiteName = item.Site.SiteName,
-                                 StudyName = s.ProjectName,
-                                 StudyDuration = "",
-                                 Submission = s.RegulatoryType.RegulatoryTypeName,
-                                 TherapeuticIndication = item.TrialType.TrialTypeName,
-                                 TypeOfTrial = s.DesignTrial.DesignTrialName
-                             }).ToList();
-
-                experiences.AddRange(project);
+                var exp = new ExperienceModel();
+                exp.ProjectId = pro.Project.Id;
+                exp.InvestigatorId = pro.Investigator?.Id ?? 0;
+                exp.SiteId = pro.ChildProject?.Id ?? 0;
+                exp.DrugName = pro.Project.Drug.DrugName;
+                exp.InvestigatorName = pro.Investigator?.NameOfInvestigator ?? "";
+                exp.NumberOfPatients = pro.Project.AttendanceLimit;
+                exp.ProjectStatus = pro.ProjectStatus?.Status.GetDescription() ?? "";
+                exp.StudyName = pro.Project.ProjectName;
+                exp.StudyCode = pro.Project.ProjectCode;
+                exp.StudyDuration = "";
+                exp.StartDate = pro.StudyPlan?.StartDate ?? null;
+                exp.SiteName = pro.ManageSite?.SiteName ?? "";
+                exp.EndDate = pro.StudyPlan?.EndDate ?? null;
+                exp.Submission = pro.Project.RegulatoryType.RegulatoryTypeName;
+                exp.TherapeuticIndication = pro.Project.DesignTrial.TrialType.TrialTypeName;
+                exp.TypeOfTrial = pro.Project.DesignTrial.DesignTrialName;
+                exp.TargetedSubject = pro.ChildProject?.AttendanceLimit ?? 0;
+                exp.CountryId = pro.ChildProject?.CountryId ?? 0;
+                experiences.Add(exp);
             }
-            experiences.ForEach(x =>
-            {
-                var ctms = _context.StudyPlan.Where(q => q.ProjectId == x.ProjectId).ToList();
-                if (ctms.Count() > 0)
+
+
+
+            var fillterData = experiences.Where(x => (experienceFillter.StartDate != null && experienceFillter.EndDate == null) ? x.StartDate > experienceFillter.StartDate : (experienceFillter.StartDate == null && experienceFillter.EndDate != null) ? x.EndDate < experienceFillter.EndDate : (experienceFillter.StartDate != null && experienceFillter.EndDate != null) ? x.StartDate > experienceFillter.StartDate && x.EndDate < experienceFillter.EndDate : true
+            && (experienceFillter.InvestigatorId != null ? x.InvestigatorId == experienceFillter.InvestigatorId : true));
+
+            var groupData = fillterData.GroupBy(x => x.ProjectId)
+                .Select(s => new ExperienceModel()
                 {
-                    var data = ctms.FirstOrDefault();
-                    x.StartDate = data.StartDate;
-                    x.EndDate = data.EndDate;
-                    var date = data.EndDate.Subtract(data.StartDate);
-                    x.StudyDuration = date.Days + " Days";
-                }
-            });
+                    ProjectId = s.Key,
+                    StudyName = s.FirstOrDefault().StudyName,
+                    InvestigatorNames = s.Select(s => s.InvestigatorName).Distinct().ToList(),
+                    StartDate = s.FirstOrDefault().StartDate,
+                    EndDate = s.FirstOrDefault().EndDate,
+                    ProjectStatus = s.FirstOrDefault().ProjectStatus,
+                    NoOfSite = s.Where(q => q.SiteId > 0).Select(s => s.SiteId).Distinct().Count(),
+                    TargetedSubjects = s.Select(q => q.TargetedSubject).Distinct().ToList(),
+                    SiteNames = s.Select(s => s.SiteName).Distinct().ToList(),
+                    NumberOfPatients = s.FirstOrDefault().NumberOfPatients,
+                    DrugName = s.FirstOrDefault().DrugName,
+                    Submission = s.FirstOrDefault().Submission,
+                    TypeOfTrial = s.FirstOrDefault().TypeOfTrial,
+                    TherapeuticIndication = s.FirstOrDefault().TherapeuticIndication,
+                    NoOfCountry = s.Where(q => q.CountryId > 0).Select(s => s.CountryId).Distinct().Count(),
+                    StudyCode = s.FirstOrDefault().StudyCode
+                });
 
-            var fillterData = experiences.Where(x => (experienceFillter.StartDate != null && experienceFillter.EndDate == null) ? x.StartDate > experienceFillter.StartDate : (experienceFillter.StartDate == null && experienceFillter.EndDate != null) ? x.EndDate < experienceFillter.EndDate : (experienceFillter.StartDate != null && experienceFillter.EndDate != null) ? x.StartDate > experienceFillter.StartDate && x.EndDate < experienceFillter.EndDate : true);
-
-            return fillterData.ToList();
+            return groupData.ToList();
         }
     }
 }
