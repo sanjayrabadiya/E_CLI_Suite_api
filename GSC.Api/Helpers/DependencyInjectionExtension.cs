@@ -396,6 +396,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementFactorMappingRepository, SupplyManagementFactorMappingRepository>();
             services.AddScoped<IPKBarcodeRepository, PKBarcodeRepository>();
             services.AddScoped<ISampleBarcodeRepository, SampleBarcodeRepository>();
+            services.AddScoped<IDossingBarcodeRepository, DossingBarcodeRepository>();
             services.AddScoped<IPharmacyReportRepository, PharmacyReportRepository>();
         }
     }

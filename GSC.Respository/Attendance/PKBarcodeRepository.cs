@@ -7,6 +7,8 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
+using GSC.Helper;
+using GSC.Respository.Screening;
 using GSC.Respository.Volunteer;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -14,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Attendance
 {
@@ -22,13 +25,18 @@ namespace GSC.Respository.Attendance
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IVolunteerRepository _volunteerRepository;
+        private readonly IAttendanceRepository _attendanceRepository;
+
+
         private readonly IMapper _mapper;
         public PKBarcodeRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
+            IAttendanceRepository attendanceRepository,
             IVolunteerRepository volunteerRepository, IMapper mapper) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _volunteerRepository = volunteerRepository;
+            _attendanceRepository = attendanceRepository;
             _mapper = mapper;
         }
 
@@ -110,6 +118,60 @@ namespace GSC.Respository.Attendance
             }
 
             _context.Save();
+        }
+
+        public List<BarcodeDataEntrySubject> GetSubjectDetails(int siteId, int templateId, BarcodeGenerationType generationType)
+        {
+
+            var project = _context.Project.Find(siteId).ParentProjectId; 
+            var projectdata = _context.ScreeningTemplate
+                                         .Include(x => x.ScreeningVisit)
+                                         .ThenInclude(x => x.ScreeningEntry)
+                                         .ThenInclude(x => x.Attendance)
+                                         .ThenInclude(x => x.Volunteer)
+                                         .Where(x => x.ProjectDesignTemplateId == templateId && x.Status < Helper.ScreeningTemplateStatus.Submitted && x.ScreeningVisit.ScreeningEntry.ProjectId== project).Select(x =>
+                                       new BarcodeDataEntrySubject
+                                       {
+                                           VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo + " " + x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                                           AttendanceId = (int)x.ScreeningVisit.ScreeningEntry.AttendanceId,
+                                           ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
+                                           ProjectDesignVisitId = x.ScreeningVisit.ProjectDesignVisitId,
+                                           ProjectAttendanceBarcodeString = _context.AttendanceBarcodeGenerate.Where(r => r.AttendanceId == x.ScreeningVisit.ScreeningEntry.AttendanceId && r.DeletedDate == null).FirstOrDefault().BarcodeString,
+                                           ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                                           ScreeningTemplateId = x.Id,
+                                           Status = x.Status,
+                                           ScheduleDate = x.ScheduleDate,
+                                           VolunteerId= (int)x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId
+                                           //BarcodeString = BarcodeString(siteId, templateId, (int)x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId, generationType),
+                                       }).ToList();
+
+            projectdata.ForEach(x =>
+            {
+                x.BarcodeString = BarcodeString(siteId, x.ProjectDesignTemplateId, x.VolunteerId, generationType);
+                if (generationType == BarcodeGenerationType.PkBarocde)
+                    x.PKBarcodeOption = All.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+                else if (generationType == BarcodeGenerationType.SampleBarcode)
+                {
+                    x.PKBarcodeOption = _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+                    x.ProjectAttendanceBarcodeString = _context.PKBarcode.Where(r => r.SiteId == siteId && r.VisitId==x.ProjectDesignVisitId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().BarcodeString;
+                }
+                else if (generationType == BarcodeGenerationType.DossingBarcode)
+                    x.PKBarcodeOption = _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+            });
+
+            return projectdata.ToList();
+        }
+
+        string BarcodeString(int siteId, int templateId, int VolunteerId, BarcodeGenerationType generationType)
+        {
+            if (generationType == BarcodeGenerationType.PkBarocde)
+                return All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+            else if (generationType == BarcodeGenerationType.SampleBarcode)
+                return _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+            else if (generationType == BarcodeGenerationType.DossingBarcode)
+                return _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+            else
+                return "";
         }
     }
 }

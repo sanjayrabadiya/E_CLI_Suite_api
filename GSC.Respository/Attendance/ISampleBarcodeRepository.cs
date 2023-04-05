@@ -20,6 +20,6 @@ namespace GSC.Respository.Attendance
         List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId);
         List<DropDownDto> GetVisitList(int projectId, int siteId);
         List<DropDownDto> GetTemplateList(int projectId, int siteId, int visitId);
-        List<DropDownDto> GetVolunteerList(int projectId, int siteId, int visitId, int templateId);
+        List<DropDownDto> GetVolunteerList(int siteId);
     }
 }

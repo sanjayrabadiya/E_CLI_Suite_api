@@ -181,6 +181,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
+                //.ForMember(x => x.SiteAddress, x => x.MapFrom(a => a.ManageSiteAddress.Select(s => s.SiteAddress).Aggregate((a, b) => a + "<br/>" + b)))
                 .ForMember(x => x.TherapeuticIndicationName, x => x.MapFrom(a => string.Join(", ", a.ManageSiteRole.Where(x => x.DeletedDate == null).Select(s => s.TrialType.TrialTypeName).ToList())))
                 .ReverseMap();
             //tinku
@@ -657,6 +658,8 @@ namespace GSC.Api.Helpers
             CreateMap<PKBarcode, PKBarcodeGridDto>()
             .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectName))
             .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
+            .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+            .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
             .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
             .ForMember(x => x.Template, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
             .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
@@ -668,6 +671,22 @@ namespace GSC.Api.Helpers
             CreateMap<SampleBarcode, SampleBarcodeGridDto>()
            .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectName))
            .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
+           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+           .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
+           .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+           .ForMember(x => x.Template, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+           .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
+           .ForMember(x => x.BarcodeType, x => x.MapFrom(a => a.BarcodeType.BarcodeTypeName))
+           .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
+           .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
+           .ReverseMap();
+
+
+            CreateMap<DossingBarcode, DossingBarcodeGridDto>()
+           .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectName))
+           .ForMember(x => x.Site, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
+           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+           .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
            .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
            .ForMember(x => x.Template, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
            .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))

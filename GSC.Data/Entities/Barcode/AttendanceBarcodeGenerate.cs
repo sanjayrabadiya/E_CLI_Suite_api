@@ -13,6 +13,6 @@ namespace GSC.Data.Entities.Barcode
         public string BarcodeString { get; set; }
         public bool? IsRePrint { get; set; }
         public BarcodeConfig BarcodeConfig { get; set; }
-        //public Attendance Attendance { get; set; }
+        public Data.Entities.Attendance.Attendance Attendance { get; set; }
     }
 }

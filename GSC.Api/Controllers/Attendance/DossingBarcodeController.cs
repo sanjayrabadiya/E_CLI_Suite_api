@@ -4,10 +4,11 @@ using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
+using GSC.Data.Dto.Barcode;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Attendance;
+using GSC.Data.Entities.Barcode;
 using GSC.Data.Entities.Master;
-using GSC.Helper;
 using GSC.Respository.Attendance;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,14 +18,14 @@ namespace GSC.Api.Controllers.Attendance
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class PKBarcodeController : BaseController
+    public class DossingBarcodeController : BaseController
     {
-        private readonly IPKBarcodeRepository _pkBarcodeRepository;
+        private readonly IDossingBarcodeRepository _dossingBarcodeRepository;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        public PKBarcodeController(IPKBarcodeRepository pKBarcodeRepository, IUnitOfWork uow, IMapper mapper)
+        public DossingBarcodeController(IDossingBarcodeRepository dossingBarcodeRepository, IUnitOfWork uow, IMapper mapper)
         {
-            _pkBarcodeRepository = pKBarcodeRepository;
+            _dossingBarcodeRepository = dossingBarcodeRepository;
             _uow = uow;
             _mapper = mapper;
         }
@@ -32,7 +33,7 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var pkbarcodeList = _pkBarcodeRepository.GetPKBarcodeList(isDeleted);
+            var pkbarcodeList = _dossingBarcodeRepository.GetDossingBarcodeList(isDeleted);
             return Ok(pkbarcodeList);
         }
 
@@ -40,42 +41,42 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var pkBarcode = _pkBarcodeRepository.Find(id);
-            var pkBarcodeDto = _mapper.Map<PKBarcodeDto>(pkBarcode);
-            return Ok(pkBarcodeDto);
+            var DossingBarcode = _dossingBarcodeRepository.Find(id);
+            var DossingBarcodeDto = _mapper.Map<DossingBarcodeDto>(DossingBarcode);
+            return Ok(DossingBarcodeDto);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] PKBarcodeDto pkBarcodeDto)
+        public IActionResult Post([FromBody] DossingBarcodeDto dossingBarcodeDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            pkBarcodeDto.Id = 0;
-            var barcode = _mapper.Map<PKBarcode>(pkBarcodeDto);
-            var validate = _pkBarcodeRepository.Duplicate(pkBarcodeDto);
+            dossingBarcodeDto.Id = 0;
+            var barcode = _mapper.Map<DossingBarcode>(dossingBarcodeDto);
+            var validate = _dossingBarcodeRepository.Duplicate(dossingBarcodeDto);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            barcode.BarcodeString = _pkBarcodeRepository.GenerateBarcodeString(pkBarcodeDto);
-            _pkBarcodeRepository.Add(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Creating PK barcode failed on save.");
+            //barcode.BarcodeString = _dossingBarcodeRepository.GenerateBarcodeString(dossingBarcodeDto);
+            _dossingBarcodeRepository.Add(barcode);
+            if (_uow.Save() <= 0) throw new Exception("Creating dossing barcode failed on save.");
             return Ok(barcode.Id);
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] PKBarcodeDto pkBarcodeDto)
+        public IActionResult Put([FromBody] DossingBarcodeDto DossingBarcodeDto)
         {
-            if (pkBarcodeDto.Id <= 0) return BadRequest();
+            if (DossingBarcodeDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var barcode = _mapper.Map<PKBarcode>(pkBarcodeDto);
-            //var validate = _pkBarcodeRepository.Duplicate(pkBarcodeDto);
+            var barcode = _mapper.Map<DossingBarcode>(DossingBarcodeDto);
+            //var validate = _dossingBarcodeRepository.Duplicate(DossingBarcodeDto);
             //if (!string.IsNullOrEmpty(validate))
             //{
             //    ModelState.AddModelError("Message", validate);
             //    return BadRequest(ModelState);
             //}
-            _pkBarcodeRepository.Update(barcode);
+            _dossingBarcodeRepository.Update(barcode);
             if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
             return Ok(barcode.Id);
         }
@@ -83,33 +84,33 @@ namespace GSC.Api.Controllers.Attendance
         [HttpPost("UpdateBarcode")]
         public IActionResult UpdateBarcode([FromBody] int[] ids)
         {
-            _pkBarcodeRepository.UpdateBarcode(ids.ToList());
-            return Ok(1);
+            var gridDtos = _dossingBarcodeRepository.UpdateBarcode(ids.ToList());
+            return Ok(gridDtos);
         }
 
         [HttpPost("DeleteBarcode")]
         public IActionResult DeleteBarcode([FromBody] int[] ids)
         {
-            _pkBarcodeRepository.DeleteBarcode(ids.ToList());
+            _dossingBarcodeRepository.DeleteBarcode(ids.ToList());
             return Ok(1);
         }
 
         [HttpPost("ReprintBarcode")]
         public IActionResult ReprintBarcode([FromBody] int[] ids)
         {
-            _pkBarcodeRepository.BarcodeReprint(ids.ToList());
+            _dossingBarcodeRepository.BarcodeReprint(ids.ToList());
             return Ok(1);
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _pkBarcodeRepository.Find(id);
+            var record = _dossingBarcodeRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            _pkBarcodeRepository.Delete(record);
+            _dossingBarcodeRepository.Delete(record);
             _uow.Save();
 
             return Ok();
@@ -118,20 +119,12 @@ namespace GSC.Api.Controllers.Attendance
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _pkBarcodeRepository.Find(id);
+            var record = _dossingBarcodeRepository.Find(id);
             if (record == null)
                 return NotFound();
-            _pkBarcodeRepository.Active(record);
+            _dossingBarcodeRepository.Active(record);
             _uow.Save();
             return Ok();
         }
-
-        [HttpGet]
-        [Route("GetSubjectDetails/{siteId}/{templateId}/{generationType}")]
-        public IActionResult GetSubjectDetails(int siteId, int templateId, BarcodeGenerationType generationType)
-        {
-            return Ok(_pkBarcodeRepository.GetSubjectDetails(siteId, templateId, generationType));
-        }
-
     }
 }

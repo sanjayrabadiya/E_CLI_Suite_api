@@ -22,6 +22,7 @@ namespace GSC.Data.Dto.Master
         public string StateName { get; set; }
         public string CountryName { get; set; }
         public List<string> Facilities { get; set; }
+        public List<ManageSiteAddress> ManageSiteAddress { get; set; }
     }
 
     public class ManageSiteGridDto : BaseAuditDto
