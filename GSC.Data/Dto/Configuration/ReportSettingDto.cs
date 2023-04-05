@@ -110,4 +110,29 @@ namespace GSC.Data.Dto.Configuration
         public ProjectDetails ProjectDetails { get; set; }
         public List<ProjectDesignPeriodReportDto> Period { get; set; }
     }
+    public class RandomizationIWRSReport
+    {
+        public int ProjectId { get; set; }
+        public int SiteId { get; set; }
+        public int[] VisitIds { get; set; }
+    }
+    public class RandomizationIWRSReportData
+    {
+        public string ProjectCode { get; set; }
+        public string SiteCode { get; set; }
+        public string Visit { get; set; }
+        public string Treatment { get; set; }
+        public string KitNo { get; set; }
+        public string ScreeningNo { get; set; }
+        public string RandomizationNumber { get; set; }
+        public DateTime? RandomizationDate { get; set; }
+
+        public int ProjectId { get; set; }
+
+        public int? RandomizationId { get; set; }
+
+        public int SiteId { get; set; }
+
+        public int? VisitId { get; set; }
+    }
 }
