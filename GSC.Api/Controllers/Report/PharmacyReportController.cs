@@ -54,5 +54,18 @@ namespace GSC.Api.Controllers.Report
             }
             return _pharmacyReportRepository.GetRandomizationKitReport(search);
         }
+
+        [HttpPost]
+        [Route("GetProductAccountabilityCentralReport")]
+        public IActionResult GetProductAccountabilityCentralReport([FromBody] ProductAccountabilityCentralReportSearch search)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                ModelState.AddModelError("Message", "Please set kit number setting");
+                return BadRequest(ModelState);
+            }
+            return _pharmacyReportRepository.GetProductAccountabilityCentralReport(search);
+        }
     }
 }

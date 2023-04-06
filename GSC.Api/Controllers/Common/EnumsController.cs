@@ -1010,6 +1010,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(pkenum);
         }
+        [HttpGet]
+        [Route("GetProductAccountabilityActions")]
+        public IActionResult ProductAccountabilityActions()
+        {
+            var pkenum = Enum.GetValues(typeof(ProductAccountabilityActions))
+                .Cast<ProductAccountabilityActions>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(pkenum);
+        }
 
     }
 }

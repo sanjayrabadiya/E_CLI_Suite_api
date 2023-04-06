@@ -134,5 +134,43 @@ namespace GSC.Data.Dto.Configuration
         public int SiteId { get; set; }
 
         public int? VisitId { get; set; }
+
+        public string AllocatedBy { get; set; }
+
+        public DateTime? Allocatedate { get; set; }
+    }
+
+
+    public class ProductAccountabilityCentralReport
+    {
+        public string ProjectCode { get; set; }
+        public string ProductTypeCode { get; set; }
+        public string VisitName { get; set; }
+        public string SiteCode { get; set; }
+        public string ActionName { get; set; }
+        public int NoofBoxorBottle { get; set; }
+        public int Noofimp { get; set; }
+        public string StorageLocation { get; set; }
+        public string StorageConditionTemprature { get; set; }
+        public int RetentionQty { get; set; }
+        public int UsedVerificationQty { get; set; }
+        public string LotBatchNo { get; set; }
+        public DateTime? RetestExpiryDate { get; set; }
+        public string Comments { get; set; }
+        public int TotalIMP { get; set; }
+        public string ActionBy { get; set; }
+        public DateTime? ActionDate { get; set; }
+        public string ReceiptStatus { get; set; }
+        public int SiteId { get; set; }
+        public int StudyProductTypeId { get; set; }
+    }
+
+    public class ProductAccountabilityCentralReportSearch
+    {
+        public int ProjectId { get; set; }
+        public int SiteId { get; set; }
+        public int productTypeId { get; set; }
+        public ProductAccountabilityActions ActionType { get; set; }
+        public string LotNo { get; set; }
     }
 }

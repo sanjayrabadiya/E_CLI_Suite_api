@@ -12,5 +12,7 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetProductReceipteDropDown(int ProjectId);
         List<ProductReceiptGridDto> GetProductReceiptList(int ProjectId, bool isDeleted);
         string StudyProductTypeAlreadyUse(int PharmacyStudyProductTypeId);
+
+        List<DropDownDto> GetLotBatchList(int ProjectId);
     }
 }

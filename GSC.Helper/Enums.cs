@@ -1058,4 +1058,13 @@ namespace GSC.Helper
         [Description("Sample Barcode")] SampleBarcode = 3,
         [Description("Dossing Barcode")] DossingBarcode = 4
     }
+
+    public enum ProductAccountabilityActions : int
+    {
+        [Description("Product Receipt")] ProductReciept = 1,
+        [Description("Verification")] ProductVerification = 2,
+        [Description("Pack")] KitPack = 3,
+        [Description("Kit")] Kit = 4,
+        [Description("Individual")] Individual = 5
+    }
 }

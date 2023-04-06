@@ -184,5 +184,11 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             return Ok(_centralDepotRepository.IsCentralExists(projectId));
         }
+        [HttpGet]
+        [Route("GetLotBatchList/{projectId}")]
+        public IActionResult GetLotBatchList(int projectId)
+        {
+            return Ok(_productReceiptRepository.GetLotBatchList(projectId));
+        }
     }
 }
