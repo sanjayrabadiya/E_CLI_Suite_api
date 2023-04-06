@@ -181,7 +181,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName))
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
-                //.ForMember(x => x.SiteAddress, x => x.MapFrom(a => a.ManageSiteAddress.Select(s => s.SiteAddress).Aggregate((a, b) => a + "<br/>" + b)))
+                .ForMember(x => x.SiteAddresses, x => x.MapFrom(a => a.ManageSiteAddress.Select(s => s.SiteAddress).ToList()))
                 .ForMember(x => x.TherapeuticIndicationName, x => x.MapFrom(a => string.Join(", ", a.ManageSiteRole.Where(x => x.DeletedDate == null).Select(s => s.TrialType.TrialTypeName).ToList())))
                 .ReverseMap();
             //tinku
