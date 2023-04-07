@@ -249,8 +249,8 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.NoofBoxorBottle = (int)verificationdetail.NumberOfBox;
                         productAccountabilityCentralReport.Noofimp = (int)verificationdetail.NumberOfQty;
                         productAccountabilityCentralReport.TotalIMP = ((int)verificationdetail.NumberOfQty * (int)verificationdetail.NumberOfBox);
-                        productAccountabilityCentralReport.UsedVerificationQty = (int)verificationdetail.QuantityVerification;
-                        productAccountabilityCentralReport.RetentionQty = (int)verificationdetail.RetentionSampleQty;
+                        productAccountabilityCentralReport.UsedVerificationQty = verificationdetail.QuantityVerification == null ? 0 : (int)verificationdetail.QuantityVerification;
+                        productAccountabilityCentralReport.RetentionQty = verificationdetail.RetentionSampleQty == null ? 0 : (int)verificationdetail.RetentionSampleQty;
                         list.Add(productAccountabilityCentralReport);
                     }
                 });
@@ -363,7 +363,7 @@ namespace GSC.Respository.Reports
             }
 
             list = list.OrderBy(x => x.ActionDate).ToList();
-           
+
             if (randomizationIWRSReport.ActionType == ProductAccountabilityActions.ProductReciept)
             {
                 list = list.Where(x => x.ActionName == "Product Reciept").ToList();
