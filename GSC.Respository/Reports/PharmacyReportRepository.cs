@@ -248,6 +248,7 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.TotalIMP = ((int)verificationdetail.NumberOfQty * (int)verificationdetail.NumberOfBox);
                         productAccountabilityCentralReport.UsedVerificationQty = verificationdetail.QuantityVerification == null ? 0 : (int)verificationdetail.QuantityVerification;
                         productAccountabilityCentralReport.RetentionQty = verificationdetail.RetentionSampleQty == null ? 0 : (int)verificationdetail.RetentionSampleQty;
+                        productAccountabilityCentralReport.TotalIMP = (productAccountabilityCentralReport.TotalIMP - productAccountabilityCentralReport.UsedVerificationQty - productAccountabilityCentralReport.RetentionQty);
                         list.Add(productAccountabilityCentralReport);
                     }
                 });
