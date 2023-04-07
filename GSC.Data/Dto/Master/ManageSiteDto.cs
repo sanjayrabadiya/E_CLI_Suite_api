@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 
@@ -48,6 +49,8 @@ namespace GSC.Data.Dto.Master
         public int? RegulatoryId { get; set; }
         public int? InvestigatorId { get; set; }
         public int? DrugId { get; set; }
+        public int? ClientId { get; set; }
+        public ProjectStatusEnum? ProjectStatusId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
@@ -57,6 +60,7 @@ namespace GSC.Data.Dto.Master
     {
         public int? ProjectId { get; set; }
         public int? SiteId { get; set; }
+        public ProjectStatusEnum? ProjectStatusId { get; set; }
         public int? InvestigatorId { get; set; }
         public int? CountryId { get; set; }
         public string TypeOfTrial { get; set; }
@@ -75,6 +79,7 @@ namespace GSC.Data.Dto.Master
         public int? TargetedSubject { get; set; }
         public List<int?> TargetedSubjects { get; set; }
         public string ProjectStatus { get; set; }
+        public string ClientName { get; set; }
         public string Submission { get; set; }
         public string InvestigatorName { get; set; }
         public List<string> InvestigatorNames { get; set; }
