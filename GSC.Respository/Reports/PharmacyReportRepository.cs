@@ -199,10 +199,9 @@ namespace GSC.Respository.Reports
                     if (verification != null)
                     {
                         productAccountabilityCentralReport.LotBatchNo = verification.BatchLotNumber;
-                        if (verification.RetestExpiryId == ReTestExpiry.Expiry)
-                        {
-                            productAccountabilityCentralReport.RetestExpiryDate = verification.RetestExpiryDate;
-                        }
+                        productAccountabilityCentralReport.RetestExpiryId = verification.RetestExpiryId;
+                        productAccountabilityCentralReport.RetestExpiryDate = verification.RetestExpiryDate;
+
                     }
                     var verificationdetail = _context.ProductVerificationDetail.Where(s => s.ProductReceiptId == x.Id && s.DeletedDate == null).FirstOrDefault();
                     if (verificationdetail != null)
@@ -242,15 +241,14 @@ namespace GSC.Respository.Reports
                     if (verificationdetail != null && verification != null)
                     {
                         productAccountabilityCentralReport.LotBatchNo = verification.BatchLotNumber;
-                        if (verification.RetestExpiryId == ReTestExpiry.Expiry)
-                        {
-                            productAccountabilityCentralReport.RetestExpiryDate = verification.RetestExpiryDate;
-                        }
+                        productAccountabilityCentralReport.RetestExpiryDate = verification.RetestExpiryDate;
+                        productAccountabilityCentralReport.RetestExpiryId = verification.RetestExpiryId;
                         productAccountabilityCentralReport.NoofBoxorBottle = (int)verificationdetail.NumberOfBox;
                         productAccountabilityCentralReport.Noofimp = (int)verificationdetail.NumberOfQty;
                         productAccountabilityCentralReport.TotalIMP = ((int)verificationdetail.NumberOfQty * (int)verificationdetail.NumberOfBox);
-                        productAccountabilityCentralReport.UsedVerificationQty = (int)verificationdetail.QuantityVerification;
-                        productAccountabilityCentralReport.RetentionQty = (int)verificationdetail.RetentionSampleQty;
+                        productAccountabilityCentralReport.UsedVerificationQty = verificationdetail.QuantityVerification == null ? 0 : (int)verificationdetail.QuantityVerification;
+                        productAccountabilityCentralReport.RetentionQty = verificationdetail.RetentionSampleQty == null ? 0 : (int)verificationdetail.RetentionSampleQty;
+                        productAccountabilityCentralReport.TotalIMP = (productAccountabilityCentralReport.TotalIMP - productAccountabilityCentralReport.UsedVerificationQty - productAccountabilityCentralReport.RetentionQty);
                         list.Add(productAccountabilityCentralReport);
                     }
                 });
@@ -304,6 +302,9 @@ namespace GSC.Respository.Reports
                                .Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null && s.PharmacyStudyProductTypeId == randomizationIWRSReport.productTypeId).Select(z => z.NoOfImp).Sum();
                             productAccountabilityCentralReport.TotalIMP = (noofimp * 1);
                             productAccountabilityCentralReport.Noofimp = noofimp;
+                            productAccountabilityCentralReport.NoofBoxorBottle = 1;
+                            if (visits.Count > 0)
+                                list.Add(productAccountabilityCentralReport);
                         }
                         else
                         {
@@ -316,9 +317,10 @@ namespace GSC.Respository.Reports
                                .Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null).Select(z => z.NoOfImp).Sum();
                             productAccountabilityCentralReport.TotalIMP = (noofimp * 1);
                             productAccountabilityCentralReport.Noofimp = noofimp;
+                            productAccountabilityCentralReport.NoofBoxorBottle = 1;
+                            list.Add(productAccountabilityCentralReport);
                         }
-                        productAccountabilityCentralReport.NoofBoxorBottle = 1;
-                        list.Add(productAccountabilityCentralReport);
+
                     });
                 }
             }
@@ -363,7 +365,7 @@ namespace GSC.Respository.Reports
             }
 
             list = list.OrderBy(x => x.ActionDate).ToList();
-           
+
             if (randomizationIWRSReport.ActionType == ProductAccountabilityActions.ProductReciept)
             {
                 list = list.Where(x => x.ActionName == "Product Reciept").ToList();
@@ -395,7 +397,7 @@ namespace GSC.Respository.Reports
                 worksheet.Cell(1, 9).Value = "Storage location";
                 worksheet.Cell(1, 10).Value = "Retention";
                 worksheet.Cell(1, 11).Value = "Lot/Batch No";
-                worksheet.Cell(1, 12).Value = "Expiry Date";
+                worksheet.Cell(1, 12).Value = "Retest/Expiry Date";
                 worksheet.Cell(1, 13).Value = "Unused";
                 worksheet.Cell(1, 14).Value = "Total IMP remaining";
                 worksheet.Cell(1, 15).Value = "Action By";
@@ -416,7 +418,16 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(9).SetValue(d.StorageLocation);
                     worksheet.Row(j).Cell(10).SetValue(d.RetentionQty);
                     worksheet.Row(j).Cell(11).SetValue(d.LotBatchNo);
-                    worksheet.Row(j).Cell(12).SetValue(d.RetestExpiryDate != null ? Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy") : "");
+                    if (d.RetestExpiryDate != null && d.RetestExpiryId == ReTestExpiry.ReTest)
+                    {
+                        worksheet.Row(j).Cell(12).SetValue("ReTest - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
+                    }
+                    else if (d.RetestExpiryDate != null && d.RetestExpiryId == ReTestExpiry.Expiry)
+                    {
+                        worksheet.Row(j).Cell(12).SetValue("Expiry - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
+                    }
+                    else
+                        worksheet.Row(j).Cell(12).SetValue("");
                     worksheet.Row(j).Cell(13).SetValue(d.UsedVerificationQty);
                     worksheet.Row(j).Cell(14).SetValue(d.TotalIMP);
                     worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
@@ -426,7 +437,8 @@ namespace GSC.Respository.Reports
 
                 worksheet.Cell(list.Count + 3, 13).Value = "Under quarentine";
                 worksheet.Cell(list.Count + 4, 13).Value = "Verified Qty for dispensing";
-                worksheet.Cell(list.Count + 5, 13).Value = "Remaining Qty";
+                worksheet.Cell(list.Count + 5, 13).Value = "Qty Used in Kit";
+                worksheet.Cell(list.Count + 6, 13).Value = "Remaining Qty";
 
                 var underQuarentine = list.Where(x => x.ReceiptStatus == "Quarantine" || x.ReceiptStatus == "SentForApproval").Sum(x => x.TotalIMP);
                 var verifiedQty = list.Where(x => x.ReceiptStatus == "Approved" && x.ActionName == "Verification").Sum(x => x.TotalIMP);
@@ -434,7 +446,8 @@ namespace GSC.Respository.Reports
 
                 worksheet.Row(list.Count + 3).Cell(14).SetValue(underQuarentine);
                 worksheet.Row(list.Count + 4).Cell(14).SetValue(verifiedQty);
-                worksheet.Row(list.Count + 5).Cell(14).SetValue(verifiedQty - kits);
+                worksheet.Row(list.Count + 5).Cell(14).SetValue(kits);
+                worksheet.Row(list.Count + 6).Cell(14).SetValue(verifiedQty - kits);
 
 
 

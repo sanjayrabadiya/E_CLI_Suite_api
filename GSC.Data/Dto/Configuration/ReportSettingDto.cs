@@ -156,6 +156,8 @@ namespace GSC.Data.Dto.Configuration
         public int UsedVerificationQty { get; set; }
         public string LotBatchNo { get; set; }
         public DateTime? RetestExpiryDate { get; set; }
+
+        public ReTestExpiry? RetestExpiryId { get; set; }
         public string Comments { get; set; }
         public int TotalIMP { get; set; }
         public string ActionBy { get; set; }
