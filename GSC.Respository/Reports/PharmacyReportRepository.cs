@@ -302,7 +302,8 @@ namespace GSC.Respository.Reports
                             productAccountabilityCentralReport.TotalIMP = (noofimp * 1);
                             productAccountabilityCentralReport.Noofimp = noofimp;
                             productAccountabilityCentralReport.NoofBoxorBottle = 1;
-                            list.Add(productAccountabilityCentralReport);
+                            if (visits.Count > 0)
+                                list.Add(productAccountabilityCentralReport);
                         }
                         else
                         {
@@ -318,7 +319,7 @@ namespace GSC.Respository.Reports
                             productAccountabilityCentralReport.NoofBoxorBottle = 1;
                             list.Add(productAccountabilityCentralReport);
                         }
-                        
+
                     });
                 }
             }
@@ -426,8 +427,6 @@ namespace GSC.Respository.Reports
                     }
                     else
                         worksheet.Row(j).Cell(12).SetValue("");
-
-                    worksheet.Row(j).Cell(12).SetValue(d.RetestExpiryDate != null ? Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy") : "");
                     worksheet.Row(j).Cell(13).SetValue(d.UsedVerificationQty);
                     worksheet.Row(j).Cell(14).SetValue(d.TotalIMP);
                     worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
