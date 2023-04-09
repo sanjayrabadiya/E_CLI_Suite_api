@@ -7,10 +7,8 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Linq;
 
 namespace GSC.Api.Controllers.Project.Design
@@ -25,10 +23,11 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IGSCContext _context;
         private readonly IStudyVersionStatusRepository _studyVersionVisitStatusRepository;
         private readonly IVersionEffectRepository _versionEffectRepository;
+        private readonly IVersionEffectWithEditCheck _versionEffectWithEditCheck;
 
         public StudyVersionController(IStudyVersionRepository studyVersionRepository,
             IUnitOfWork uow, IMapper mapper, IGSCContext context, IStudyVersionStatusRepository studyVersionVisitStatusRepository,
-            IVersionEffectRepository versionEffectRepository)
+            IVersionEffectRepository versionEffectRepository, IVersionEffectWithEditCheck versionEffectWithEditCheck)
         {
             _studyVersionRepository = studyVersionRepository;
             _uow = uow;
@@ -36,6 +35,7 @@ namespace GSC.Api.Controllers.Project.Design
             _context = context;
             _studyVersionVisitStatusRepository = studyVersionVisitStatusRepository;
             _versionEffectRepository = versionEffectRepository;
+            _versionEffectWithEditCheck = versionEffectWithEditCheck;
         }
 
 
@@ -161,13 +161,12 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
-        [HttpGet]
-        [Route("GoLiveT")]
-        public IActionResult GoLiveT()
-        {
-            _versionEffectRepository.ApplyNewVersion(210, true, 1.2);
-            _uow.Save();
 
+        [HttpPost]
+        [Route("ApplyEditCheck")]
+        public IActionResult ApplyEditCheck([FromBody] StudyGoLiveDto studyGoLiveDto)
+        {
+            _versionEffectWithEditCheck.ApplyEditCheck(studyGoLiveDto.ProjectDesignId, studyGoLiveDto.IsOnTrial, studyGoLiveDto.VersionNumber);
             return Ok();
         }
 
