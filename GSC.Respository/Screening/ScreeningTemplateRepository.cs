@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Configuration;
@@ -26,7 +24,6 @@ using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Screening
@@ -841,7 +838,7 @@ namespace GSC.Respository.Screening
                 {
                     workFlowButton.Generate = false;
                     workFlowButton.SelfCorrection = false;
-                    workFlowButton.Update = false;
+                    //workFlowButton.Update = false;
                     workFlowButton.Acknowledge = false;
                 }
             }
