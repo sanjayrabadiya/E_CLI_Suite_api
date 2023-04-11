@@ -399,6 +399,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IDossingBarcodeRepository, DossingBarcodeRepository>();
             services.AddScoped<IPharmacyReportRepository, PharmacyReportRepository>();
             services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
+            services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
         }
     }
 }

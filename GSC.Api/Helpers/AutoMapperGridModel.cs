@@ -123,7 +123,10 @@ namespace GSC.Api.Helpers
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
-            CreateMap<Iecirb, IecirbGridDto>().ReverseMap();
+            CreateMap<Iecirb, IecirbGridDto>()
+                .ForMember(x=>x.SiteAddress,x=>x.MapFrom(a=>a.ManageSiteAddress.SiteAddress+", "
+                +a.ManageSiteAddress.City.CityName+", "+a.ManageSiteAddress.City.State.StateName+", "+a.ManageSiteAddress.City.State.Country.CountryName))
+                .ReverseMap();
             CreateMap<User, UserGridDto>()
                 .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ", a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
                 .ForMember(x => x.ScreeningNumber, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
@@ -694,6 +697,12 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
            .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
            .ReverseMap();
+
+            CreateMap<ManageSiteAddress, ManageSiteAddressGridDto>()
+          .ForMember(x => x.City, x => x.MapFrom(a => a.City.CityName))
+          .ForMember(x => x.State, x => x.MapFrom(a => a.City.State.StateName))
+          .ForMember(x => x.Country, x => x.MapFrom(a => a.City.State.Country.CountryName))
+          .ReverseMap();
         }
     }
 }
