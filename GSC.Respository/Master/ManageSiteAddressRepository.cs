@@ -52,5 +52,20 @@ namespace GSC.Respository.Master
 
             return dropList;
         }
+
+        public List<DropDownDto> GetSiteAddressDropdownForMangeStudy(int projectId, int manageSiteId)
+        {
+            var selectedList = _context.ProjectSiteAddress.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.ManageSiteId == manageSiteId)
+                .Select(s => s.ManageSiteAddressId).ToList();
+
+            var dropList = All.Where(x => x.DeletedDate == null && x.ManageSiteId == manageSiteId && !selectedList.Contains(x.Id))
+                .Select(s => new DropDownDto()
+                {
+                    Id = s.Id,
+                    Value = s.SiteAddress + ", " + s.City.CityName + ", " + s.City.State.StateName + ", " + s.City.State.Country.CountryName
+                }).ToList();
+
+            return dropList;
+        }
     }
 }

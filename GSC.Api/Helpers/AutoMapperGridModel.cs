@@ -124,8 +124,8 @@ namespace GSC.Api.Helpers
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
             CreateMap<Iecirb, IecirbGridDto>()
-                .ForMember(x=>x.SiteAddress,x=>x.MapFrom(a=>a.ManageSiteAddress.SiteAddress+", "
-                +a.ManageSiteAddress.City.CityName+", "+a.ManageSiteAddress.City.State.StateName+", "+a.ManageSiteAddress.City.State.Country.CountryName))
+                .ForMember(x => x.SiteAddress, x => x.MapFrom(a => a.ManageSiteAddress.SiteAddress + ", "
+                + a.ManageSiteAddress.City.CityName + ", " + a.ManageSiteAddress.City.State.StateName + ", " + a.ManageSiteAddress.City.State.Country.CountryName))
                 .ReverseMap();
             CreateMap<User, UserGridDto>()
                 .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ", a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))
@@ -699,10 +699,22 @@ namespace GSC.Api.Helpers
            .ReverseMap();
 
             CreateMap<ManageSiteAddress, ManageSiteAddressGridDto>()
-          .ForMember(x => x.City, x => x.MapFrom(a => a.City.CityName))
-          .ForMember(x => x.State, x => x.MapFrom(a => a.City.State.StateName))
-          .ForMember(x => x.Country, x => x.MapFrom(a => a.City.State.Country.CountryName))
-          .ReverseMap();
+           .ForMember(x => x.City, x => x.MapFrom(a => a.City.CityName))
+           .ForMember(x => x.State, x => x.MapFrom(a => a.City.State.StateName))
+           .ForMember(x => x.Country, x => x.MapFrom(a => a.City.State.Country.CountryName))
+           .ReverseMap();
+
+            CreateMap<ProjectSiteAddress, ProjectSiteAddressGridDto>()
+           .ForMember(x => x.City, x => x.MapFrom(a => a.ManageSiteAddress.City.CityName))
+           .ForMember(x => x.State, x => x.MapFrom(a => a.ManageSiteAddress.City.State.StateName))
+           .ForMember(x => x.Country, x => x.MapFrom(a => a.ManageSiteAddress.City.State.Country.CountryName))
+           .ForMember(x=>x.ContactNumber,x=>x.MapFrom(a=>a.ManageSiteAddress.ContactNumber))
+           .ForMember(x => x.ContactName, x => x.MapFrom(a => a.ManageSiteAddress.ContactName))
+           .ForMember(x => x.SiteAddress, x => x.MapFrom(a => a.ManageSiteAddress.SiteAddress))
+           .ForMember(x => x.SiteEmail, x => x.MapFrom(a => a.ManageSiteAddress.SiteEmail))
+           .ForMember(x => x.Facilities, x => x.MapFrom(a => a.ManageSiteAddress.Facilities))
+           .ReverseMap();
+
         }
     }
 }

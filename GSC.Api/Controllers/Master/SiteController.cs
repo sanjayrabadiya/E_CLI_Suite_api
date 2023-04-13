@@ -136,5 +136,12 @@ namespace GSC.Api.Controllers.Master
 
             return Ok();
         }
+
+        [HttpGet("GetAllInvestigatorDropDown/{id}")]
+        public ActionResult GetAllInvestigatorDropDown(int id)
+        {
+            var data = _siteRepository.GetAllInvestigatorDropDown(id);
+            return Ok(data);
+        }
     }
 }

@@ -400,6 +400,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPharmacyReportRepository, PharmacyReportRepository>();
             services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
             services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
+            services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();
         }
     }
 }

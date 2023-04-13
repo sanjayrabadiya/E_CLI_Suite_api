@@ -493,6 +493,7 @@ namespace GSC.Api.Helpers
             CreateMap<SampleBarcode, SampleBarcodeDto>().ReverseMap();
             CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
             CreateMap<ManageSiteAddress, ManageSiteAddressDto>().ReverseMap();
+            CreateMap<ProjectSiteAddress, ProjectSiteAddressDto>().ReverseMap();
         }
     }
 }

@@ -12,5 +12,6 @@ namespace GSC.Respository.Master
         List<ManageSiteAddressGridDto> GetManageSiteAddress(int id, bool isDeleted);
         string Duplicate(ManageSiteAddress objSave);
         List<DropDownDto> GetSiteAddressDropdown(int id);
+        List<DropDownDto> GetSiteAddressDropdownForMangeStudy(int projectId, int manageSiteId);
     }
 }
