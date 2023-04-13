@@ -584,6 +584,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Word", DisplayName = "Word" });
             _dictionaries.Add(new Dictionary { FieldName = "WordMeaning", DisplayName = "Word Meaning" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "Recruitment", DisplayName = "Recruitment Rate" });
+
         }
 
 
