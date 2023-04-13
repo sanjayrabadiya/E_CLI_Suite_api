@@ -7,6 +7,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -62,6 +63,19 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+
+            var projectSiteAddress = _projectSiteAddressRepository.All.Where(q => q.ProjectId == ProjectSiteAddressDto.ProjectId && q.ManageSiteId == ProjectSiteAddressDto.ManageSiteId && q.DeletedDate == null).Select(q => q.Id).ToList();
+            projectSiteAddress.ForEach(x =>
+            {
+                Delete(x);
+            });
+
+
+            var manageSiteAddress = _context.ManageSiteAddress.FirstOrDefault(q => q.Id == ProjectSiteAddressDto.ManageSiteAddressId);
+            var mangeSite = _context.ManageSite.FirstOrDefault(q => q.Id == ProjectSiteAddressDto.ManageSiteId);
+            mangeSite.CityId = manageSiteAddress.CityId;
+            _context.ManageSite.Update(mangeSite);
+
 
             _projectSiteAddressRepository.Add(ProjectSiteAddress);
             if (_uow.Save() <= 0) throw new Exception("Creating Project Site Address failed on save.");
