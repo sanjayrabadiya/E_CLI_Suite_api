@@ -141,5 +141,11 @@ namespace GSC.Api.Controllers.Master
             return Ok(_manageSiteAddressRepository.GetSiteAddressDropdown(id));
         }
 
+        [HttpGet("GetSiteAddressDropdownForMangeStudy/{projectId}/{manageSiteId}")]
+        public IActionResult GetSiteAddressDropdownForMangeStudy(int projectId, int manageSiteId)
+        {
+            return Ok(_manageSiteAddressRepository.GetSiteAddressDropdownForMangeStudy(projectId, manageSiteId));
+        }
+
     }
 }
