@@ -1056,7 +1056,7 @@ namespace GSC.Helper
         [Description("Subject Barcode")] SubjectBarcode = 1,
         [Description("Pk Barcode")] PkBarocde = 2,
         [Description("Sample Barcode")] SampleBarcode = 3,
-        [Description("Dossing Barcode")] DossingBarcode = 4
+        [Description("Dosing Barcode")] DosingBarcode = 4
     }
 
     public enum ProductAccountabilityActions : int

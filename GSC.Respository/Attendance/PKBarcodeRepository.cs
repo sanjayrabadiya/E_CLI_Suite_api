@@ -155,7 +155,7 @@ namespace GSC.Respository.Attendance
                     x.PKBarcodeOption = _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
                     x.ProjectAttendanceBarcodeString = _context.PKBarcode.Where(r => r.SiteId == siteId && r.VisitId==x.ProjectDesignVisitId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().BarcodeString;
                 }
-                else if (generationType == BarcodeGenerationType.DossingBarcode)
+                else if (generationType == BarcodeGenerationType.DosingBarcode)
                     x.PKBarcodeOption = _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
             });
 
@@ -168,7 +168,7 @@ namespace GSC.Respository.Attendance
                 return All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
             else if (generationType == BarcodeGenerationType.SampleBarcode)
                 return _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
-            else if (generationType == BarcodeGenerationType.DossingBarcode)
+            else if (generationType == BarcodeGenerationType.DosingBarcode)
                 return _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
             else
                 return "";
