@@ -10,6 +10,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int SupplyManagementUploadFileId { get; set; }
         public int RandomizationNo { get; set; }
         public string TreatmentType { get; set; }
+        public string KitNo { get; set; }
         public IList<SupplyManagementUploadFileVisitDto> Visits { get; set; } = null;
 
         public string ScreeningNumber { get; set; }

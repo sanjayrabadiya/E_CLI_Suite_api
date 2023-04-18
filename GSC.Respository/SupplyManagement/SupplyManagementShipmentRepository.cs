@@ -122,7 +122,7 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "Product verification is pending!";
             }
-            if (supplyManagementshipmentDto.Kits.Count == 0)
+            if (supplyManagementshipmentDto.Kits != null && supplyManagementshipmentDto.Kits.Count == 0)
             {
                 return "Please select kit!";
             }

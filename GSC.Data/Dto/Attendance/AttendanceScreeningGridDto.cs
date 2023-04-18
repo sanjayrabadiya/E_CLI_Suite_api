@@ -53,6 +53,8 @@ namespace GSC.Data.Dto.Attendance
         public string StudyCode { get; set; }
 
         public string Notes { get; set; }
+
+        public string RandomizationNumber { get; set; }
     }
 
     public class ScreeningGridDto

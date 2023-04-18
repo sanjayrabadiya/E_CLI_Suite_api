@@ -425,7 +425,7 @@ namespace GSC.Api.Helpers
             CreateMap<LabManagementConfiguration, LabManagementConfigurationDto>().ReverseMap();
             CreateMap<LabManagementUploadData, LabManagementUploadDataDto>().ReverseMap();
             CreateMap<LabManagementUploadExcelData, LabManagementUploadExcelDataDto>().ReverseMap();
-           
+
             CreateMap<SyncConfigurationMaster, SyncConfigurationMasterDto>().ReverseMap();
             CreateMap<SyncConfigurationMasterDetails, ConfigurationData>()
                 .ForMember(x => x.WorkPlaceFolderName, x => x.MapFrom(a => a.WorkPlaceFolder.GetDescription()))
@@ -487,8 +487,13 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementEmailConfigurationDto, SupplyManagementEmailConfiguration>().ReverseMap();
             CreateMap<SupplyManagementKITSeries, SupplyManagementKITSeriesDto>().ReverseMap();
             CreateMap<SupplyManagementVisitKITSequenceDetail, SupplyManagementVisitKITSequenceDetailDto>().ReverseMap();
+            CreateMap<SupplyManagementFactorMapping, SupplyManagementFactorMappingDto>().ReverseMap();
 
-
+            CreateMap<PKBarcode, PKBarcodeDto>().ReverseMap();
+            CreateMap<SampleBarcode, SampleBarcodeDto>().ReverseMap();
+            CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
+            CreateMap<ManageSiteAddress, ManageSiteAddressDto>().ReverseMap();
+            CreateMap<ProjectSiteAddress, ProjectSiteAddressDto>().ReverseMap();
         }
     }
 }

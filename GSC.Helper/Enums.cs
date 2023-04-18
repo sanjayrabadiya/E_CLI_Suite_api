@@ -154,7 +154,8 @@ namespace GSC.Helper
         [Description("Lab Management")] LabManagement = 20,
         [Description("ICF Detail Report")] ICFDetailReport = 21,
         [Description("RoleIcon")] RoleIcon = 22,
-        [Description("Ctms")] Ctms = 23
+        [Description("Ctms")] Ctms = 23,
+        [Description("Randomization Upload")] RandomizationUpload = 24
     }
 
     public enum AuditModule : short
@@ -975,6 +976,7 @@ namespace GSC.Helper
         [Description("BMI")] BMI = 3,
         [Description("Age")] Age = 4,
         [Description("Joint")] Joint = 5,
+        [Description("Eligibility")] Eligibility = 6
     }
     public enum FectorOperator : short
     {
@@ -1018,6 +1020,11 @@ namespace GSC.Helper
         [Description("Knee")] Knee = 1,
         [Description("Hip")] Hip = 2
     }
+    public enum Eligibilityfactor : short
+    {
+        [Description("Yes")] Yes = 1,
+        [Description("No")] No = 2
+    }
     public enum SupplyManagementEmailTriggers : short
     {
         [Description("Threshold")] Threshold = 1,
@@ -1037,5 +1044,28 @@ namespace GSC.Helper
         [Description("Planned")] Planned = 2
     }
 
+    public enum PKBarcodeOption : int
+    {
+        [Description("Duplicate")] Duplicate = 2,
+        [Description("Triplicate")] Triplicate = 3,
+        [Description("Singlicate")] Singlicate = 1,
+        [Description("Replicate")] Replicate = 4
+    }
 
+    public enum BarcodeGenerationType : int
+    {
+        [Description("Subject Barcode")] SubjectBarcode = 1,
+        [Description("Pk Barcode")] PkBarocde = 2,
+        [Description("Sample Barcode")] SampleBarcode = 3,
+        [Description("Dosing Barcode")] DosingBarcode = 4
+    }
+
+    public enum ProductAccountabilityActions : int
+    {
+        [Description("Product Receipt")] ProductReciept = 1,
+        [Description("Verification")] ProductVerification = 2,
+        [Description("Pack")] KitPack = 3,
+        [Description("Kit")] Kit = 4,
+        [Description("Individual")] Individual = 5
+    }
 }

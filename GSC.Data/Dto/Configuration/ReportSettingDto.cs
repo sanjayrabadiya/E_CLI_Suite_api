@@ -110,4 +110,69 @@ namespace GSC.Data.Dto.Configuration
         public ProjectDetails ProjectDetails { get; set; }
         public List<ProjectDesignPeriodReportDto> Period { get; set; }
     }
+    public class RandomizationIWRSReport
+    {
+        public int ProjectId { get; set; }
+        public int SiteId { get; set; }
+        public int[] VisitIds { get; set; }
+    }
+    public class RandomizationIWRSReportData
+    {
+        public string ProjectCode { get; set; }
+        public string SiteCode { get; set; }
+        public string Visit { get; set; }
+        public string Treatment { get; set; }
+        public string KitNo { get; set; }
+        public string ScreeningNo { get; set; }
+        public string RandomizationNumber { get; set; }
+        public DateTime? RandomizationDate { get; set; }
+
+        public int ProjectId { get; set; }
+
+        public int? RandomizationId { get; set; }
+
+        public int SiteId { get; set; }
+
+        public int? VisitId { get; set; }
+
+        public string AllocatedBy { get; set; }
+
+        public DateTime? Allocatedate { get; set; }
+    }
+
+
+    public class ProductAccountabilityCentralReport
+    {
+        public string ProjectCode { get; set; }
+        public string ProductTypeCode { get; set; }
+        public string VisitName { get; set; }
+        public string SiteCode { get; set; }
+        public string ActionName { get; set; }
+        public int NoofBoxorBottle { get; set; }
+        public int Noofimp { get; set; }
+        public string StorageLocation { get; set; }
+        public string StorageConditionTemprature { get; set; }
+        public int RetentionQty { get; set; }
+        public int UsedVerificationQty { get; set; }
+        public string LotBatchNo { get; set; }
+        public DateTime? RetestExpiryDate { get; set; }
+
+        public ReTestExpiry? RetestExpiryId { get; set; }
+        public string Comments { get; set; }
+        public int TotalIMP { get; set; }
+        public string ActionBy { get; set; }
+        public DateTime? ActionDate { get; set; }
+        public string ReceiptStatus { get; set; }
+        public int SiteId { get; set; }
+        public int StudyProductTypeId { get; set; }
+    }
+
+    public class ProductAccountabilityCentralReportSearch
+    {
+        public int ProjectId { get; set; }
+        public int SiteId { get; set; }
+        public int productTypeId { get; set; }
+        public ProductAccountabilityActions ActionType { get; set; }
+        public string LotNo { get; set; }
+    }
 }

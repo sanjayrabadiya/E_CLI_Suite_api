@@ -4,6 +4,7 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
@@ -12,6 +13,7 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Linq;
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -25,12 +27,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IProjectRepository _projectRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
         public SupplyManagementUploadFileController(ISupplyManagementUploadFileRepository supplyManagementUploadFileRepository,
             IUnitOfWork uow, IMapper mapper,
             IUploadSettingRepository uploadSettingRepository,
             IProjectRepository projectRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
         {
             _supplyManagementUploadFileRepository = supplyManagementUploadFileRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -38,6 +41,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _mapper = mapper;
             _projectRepository = projectRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}/{projectId}")]
@@ -52,12 +56,18 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementUploadFileDto.Id = 0;
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == supplyManagementUploadFileDto.ProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                ModelState.AddModelError("Message", "Please set kit number setting");
+                return BadRequest(ModelState);
+            }
             string SiteCode = "";
             //set file path and extension
             if (supplyManagementUploadFileDto.FileModel?.Base64?.Length > 0)
             {
                 SiteCode = _projectRepository.GetStudyCode(supplyManagementUploadFileDto.ProjectId);
-                supplyManagementUploadFileDto.PathName = DocumentService.SaveUploadDocument(supplyManagementUploadFileDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), SiteCode, FolderType.LabManagement, "");
+                supplyManagementUploadFileDto.PathName = DocumentService.SaveUploadDocument(supplyManagementUploadFileDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), SiteCode, FolderType.RandomizationUpload, "");
                 supplyManagementUploadFileDto.MimeType = supplyManagementUploadFileDto.FileModel.Extension;
                 supplyManagementUploadFileDto.FileName = "SupplyManagementData_" + DateTime.Now.Ticks + "." + supplyManagementUploadFileDto.FileModel.Extension;
             }
@@ -65,7 +75,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             var supplyManagementUploadFile = _mapper.Map<SupplyManagementUploadFile>(supplyManagementUploadFileDto);
 
             //Upload Excel data into database table
-            var validate = _supplyManagementUploadFileRepository.InsertExcelDataIntoDatabaseTable(supplyManagementUploadFile);
+            var validate = _supplyManagementUploadFileRepository.InsertExcelDataIntoDatabaseTable(supplyManagementUploadFile, setting);
 
             if (!string.IsNullOrEmpty(validate))
             {
@@ -82,7 +92,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("DownloadFormat")]
         public IActionResult DownloadFormat([FromBody] SupplyManagementUploadFileDto search)
         {
-            return _supplyManagementUploadFileRepository.DownloadFormat(search);
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                ModelState.AddModelError("Message", "Please set kit number setting");
+                return BadRequest(ModelState);
+            }
+            return _supplyManagementUploadFileRepository.DownloadFormat(search, setting);
         }
 
         [HttpPut]

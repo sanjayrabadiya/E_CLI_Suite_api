@@ -431,6 +431,13 @@ namespace GSC.Respository.Volunteer
             return "";
         }
 
+        public string DuplicateRandomizationNumber(Data.Entities.Volunteer.Volunteer objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.RandomizationNumber == objSave.RandomizationNumber && x.DeletedDate == null))
+                return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
+            return "";
+        }
+
 
         //Add function to get used population type dropdown by Tinku Mahato (07/07/2022)
         public List<DropDownDto> GetPopulationTypeDropDownList()
@@ -443,6 +450,13 @@ namespace GSC.Respository.Volunteer
         public List<DropDownDto> GetVolunteerDropDown()
         {
             return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+        }
+
+        public List<DropDownDto> GetVolunteerDropDownForPKBarcode()
+        {
+            return All.Where(x => x.RandomizationNumber != null && x.DeletedDate == null &&
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }

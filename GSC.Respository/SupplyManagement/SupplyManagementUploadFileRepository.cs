@@ -67,7 +67,7 @@ namespace GSC.Respository.SupplyManagement
 
 
         // Upload excel data insert into database
-        public string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile)
+        public string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile, SupplyManagementKitNumberSettings setting)
         {
             // check level for the upload file
             var validate = All.Where(x => x.ProjectId == supplyManagementUploadFile.ProjectId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).FirstOrDefault();
@@ -92,7 +92,7 @@ namespace GSC.Respository.SupplyManagement
                 return "File is not Compatible";
             }
             // validate excel file
-            var isValid = validateExcel(results, supplyManagementUploadFile);
+            var isValid = validateExcel(results, supplyManagementUploadFile, setting);
 
             if (isValid != "")
                 return isValid;
@@ -120,13 +120,13 @@ namespace GSC.Respository.SupplyManagement
                 return productType;
 
             // insert data into table if excel is valid
-            InserFileData(results, supplyManagementUploadFile);
+            InserFileData(results, supplyManagementUploadFile, setting);
 
             return "";
         }
 
         // Generate excecl format for download
-        public FileStreamResult DownloadFormat(SupplyManagementUploadFileDto supplyManagementUploadFile)
+        public FileStreamResult DownloadFormat(SupplyManagementUploadFileDto supplyManagementUploadFile, SupplyManagementKitNumberSettings setting)
         {
             var studyCode = GetProjectCode(supplyManagementUploadFile.ProjectId);
             string site = "";
@@ -151,8 +151,15 @@ namespace GSC.Respository.SupplyManagement
                 worksheet.Range("A5:B5").Style.Font.SetBold();
                 worksheet.Cell(5, 1).Value = "Randomization No";
                 worksheet.Cell(5, 2).Value = "Product Code";
+                if (setting.IsUploadWithKit)
+                {
+                    worksheet.Row(5).Cell(3).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                    worksheet.Row(5).Cell(3).Style.Font.SetBold();
+                    worksheet.Cell(5, 3).Value = "Kit No";
+                }
 
-                var j = 3;
+
+                var j = setting.IsUploadWithKit ? 4 : 3;
                 projectDesignVisits.ForEach(d =>
                 {
                     worksheet.Row(5).Cell(j).Style.Fill.BackgroundColor = XLColor.LightGreen;
@@ -192,7 +199,7 @@ namespace GSC.Respository.SupplyManagement
                                         && x.DeletedDate == null && x.InActiveVersion == null).ToList();
         }
 
-        public string validateExcel(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile)
+        public string validateExcel(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile, SupplyManagementKitNumberSettings setting)
         {
             var study = results.Tables[0].Rows[0].ItemArray[1].ToString().Trim();
             var country = results.Tables[0].Rows[1].ItemArray[1].ToString().Trim();
@@ -246,23 +253,52 @@ namespace GSC.Respository.SupplyManagement
 
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
-                selectQuery += "Column" + j + " is null or ";
-                if (j >= 2)
+                if (setting.IsUploadWithKit)
                 {
-                    var r = projectDesignVisits.Any(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
-                    if (!r)
-                        return "Visit name not match with design visit.";
+                    selectQuery += "Column" + j + " is null or ";
+                    if (j > 2)
+                    {
+                        var r = projectDesignVisits.Any(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                        if (!r)
+                            return "Visit name not match with design visit.";
+                    }
+                    else
+                    {
+                        if (j == 0)
+                            if (item.ToString().Trim().ToLower() != "randomization no")
+                                return "File is not Compatible!";
+                        if (j == 1)
+                            if (item.ToString().Trim().ToLower() != "product code")
+                                return "File is not Compatible!";
+                        if (j == 2)
+                            if (item.ToString().Trim().ToLower() != "kit no")
+                                return "File is not Compatible!";
+
+                    }
+                    j++;
                 }
                 else
                 {
-                    if (j == 0)
-                        if (item.ToString().Trim().ToLower() != "randomization no")
-                            return "File is not Compatible!";
-                    if (j == 1)
-                        if (item.ToString().Trim().ToLower() != "product code")
-                            return "File is not Compatible!";
+                    selectQuery += "Column" + j + " is null or ";
+                    if (j >= 2)
+                    {
+                        var r = projectDesignVisits.Any(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                        if (!r)
+                            return "Visit name not match with design visit.";
+                    }
+                    else
+                    {
+                        if (j == 0)
+                            if (item.ToString().Trim().ToLower() != "randomization no")
+                                return "File is not Compatible!";
+                        if (j == 1)
+                            if (item.ToString().Trim().ToLower() != "product code")
+                                return "File is not Compatible!";
+
+                    }
+                    j++;
                 }
-                j++;
+
             }
 
 
@@ -272,19 +308,48 @@ namespace GSC.Respository.SupplyManagement
                 if (dr.Length != 0)
                     return "Please fill required randomization details!";
                 else
+                {
+                    if (setting.IsUploadWithKit)
+                    {
+
+                        var kits = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).Select(k => k.Field<string>("Column2")).Distinct().OrderBy(k => k).ToArray();
+                        foreach (string item in kits)
+                        {
+                            var kit = _context.SupplyManagementKITSeries.Where(x => x.DeletedDate == null && x.KitNo == item && x.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
+                            if (kit != null)
+                            {
+                                return item + " kit number is already created or assigned";
+                            }
+                            int i = 0;
+                            foreach (DataRow row in results.Tables[0].Rows)
+                            {
+                                if (row["Column2"].ToString() == item)
+                                {
+                                    if (i > 0)
+                                    {
+                                        return item + " Duplicate kit number found in sheet";
+                                    }
+                                    i++;
+                                }
+                            }
+                        }
+                    }
                     return "";
+                }
+
 
             }
             else
+            {
                 return "Please fill required randomization details.";
-
-
+            }
 
 
         }
 
-        public string InserFileData(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile)
+        public string InserFileData(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile, SupplyManagementKitNumberSettings setting)
         {
+
             DataTable dt = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable();
             var visitIds = GetVisitId(results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != "").ToList(), supplyManagementUploadFile);
             if (dt.Rows.Count > 0)
@@ -299,6 +364,8 @@ namespace GSC.Respository.SupplyManagement
                 supplyManagementUploadFileDetail.SupplyManagementUploadFileId = supplyManagementUploadFile.Id;
                 supplyManagementUploadFileDetail.RandomizationNo = Convert.ToInt32(dt.Rows[i][0]);
                 supplyManagementUploadFileDetail.TreatmentType = dt.Rows[i][1].ToString();
+                if (setting.IsUploadWithKit)
+                    supplyManagementUploadFileDetail.KitNo = dt.Rows[i][2].ToString();
 
                 _supplyManagementUploadFileDetailRepository.Add(supplyManagementUploadFileDetail);
                 _context.Save();
@@ -310,7 +377,10 @@ namespace GSC.Respository.SupplyManagement
                     supplyManagementUploadFileVisit.Id = 0;
                     supplyManagementUploadFileVisit.SupplyManagementUploadFileDetailId = supplyManagementUploadFileDetail.Id;
                     supplyManagementUploadFileVisit.ProjectDesignVisitId = visitIds[j];
-                    supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 2].ToString();
+                    if (setting.IsUploadWithKit)
+                        supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 3].ToString();
+                    else
+                        supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 2].ToString();
                     if (j == 0)
                     {
                         supplyManagementUploadFileVisit.Isfirstvisit = true;
@@ -421,7 +491,7 @@ namespace GSC.Respository.SupplyManagement
 
         public string validateProductType(DataTable dt, int ProjectId)
         {
-            var productTypes = _pharmacyStudyProductTypeRepository.All.Where(x => x.ProjectId == ProjectId).
+            var productTypes = _pharmacyStudyProductTypeRepository.All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).
                 Select(a => new { ProductTypeCode = a.ProductType.ProductTypeCode.ToString().Trim() }).Distinct().ToList();
 
             for (int i = 0; i < dt.Rows.Count; i++)
@@ -449,7 +519,7 @@ namespace GSC.Respository.SupplyManagement
                     if (!result)
                         return "Product code not match.";
 
-                    string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).ToArray();
+                    string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).ToArray();
                     var cellResult = dataRow.All(m => str1.Contains(m.Trim()));
 
                     if (!cellResult)

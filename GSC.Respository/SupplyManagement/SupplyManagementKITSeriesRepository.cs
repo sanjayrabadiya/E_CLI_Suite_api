@@ -31,7 +31,7 @@ namespace GSC.Respository.SupplyManagement
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        
+
         public SupplyManagementKITSeriesRepository(IGSCContext context,
         IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
@@ -41,7 +41,7 @@ namespace GSC.Respository.SupplyManagement
             _mapper = mapper;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            
+
         }
 
         public void AddKitSeriesVisitDetail(SupplyManagementKITSeriesDto data)
@@ -58,40 +58,65 @@ namespace GSC.Respository.SupplyManagement
                     obj.PharmacyStudyProductTypeId = item.PharmacyStudyProductTypeId;
                     obj.TotalUnits = (item.NoOfImp * data.NoofPatient);
                     _context.SupplyManagementKITSeriesDetail.Add(obj);
-                    
+
                 }
                 SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
                 history.SupplyManagementKITSeriesId = data.Id;
                 history.Status = KitStatus.AllocationPending;
                 history.RoleId = _jwtTokenAccesser.RoleId;
                 _context.SupplyManagementKITSeriesDetailHistory.Add(history);
-                _context.Save();
+
+                var filedetail = _context.SupplyManagementUploadFileDetail.Include(x => x.SupplyManagementUploadFile).Where(x => x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve &&
+                    x.SupplyManagementUploadFile.ProjectId == data.ProjectId && x.KitNo == data.KitNo && x.SupplyManagementKITSeriesId == null).FirstOrDefault();
+                if (filedetail != null)
+                {
+                    filedetail.SupplyManagementKITSeriesId = data.Id;
+                    _context.SupplyManagementUploadFileDetail.Update(filedetail);
+
+                }
+
+                //_context.Save();
             }
         }
 
-        public string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
+        public string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese, SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
         {
             var isnotexist = false;
-            string kitno1 = string.Empty;
-            while (!isnotexist)
+            if (kitsettings.IsUploadWithKit)
             {
-                var kitno = kitsettings.Prefix + kitsettings.KitNoseries.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
-                if (!string.IsNullOrEmpty(kitno))
+                var uploadedkits = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(s => s.SupplyManagementUploadFile.ProjectId == supplyManagementKITSeriesDto.ProjectId
+                                    && s.TreatmentType.ToLower() == supplyManagementKITSeriesDto.TreatmentType.ToLower() && s.SupplyManagementKITSeriesId == null && s.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve && s.DeletedDate == null)
+                    .OrderBy(x => x.Id).FirstOrDefault();
+                if (uploadedkits != null)
                 {
-                    ++kitsettings.KitNoseries;
-                    _context.SupplyManagementKitNumberSettings.Update(kitsettings);
-                    _context.Save();
-                    var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno).FirstOrDefault();
-                    if (data == null)
-                    {
-                        isnotexist = true;
-                        kitno1 = kitno;
-                        break;
-
-                    }
+                    return uploadedkits.KitNo;
                 }
             }
-            return kitno1;
+            else
+            {
+                string kitno1 = string.Empty;
+                while (!isnotexist)
+                {
+                    var kitno = kitsettings.Prefix + kitsettings.KitNoseries.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+                    if (!string.IsNullOrEmpty(kitno))
+                    {
+                        ++kitsettings.KitNoseries;
+                        _context.SupplyManagementKitNumberSettings.Update(kitsettings);
+                        _context.Save();
+                        var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno && x.DeletedDate == null).FirstOrDefault();
+                        if (data == null)
+                        {
+                            isnotexist = true;
+                            kitno1 = kitno;
+                            break;
+
+                        }
+                    }
+                }
+                return kitno1;
+            }
+
+            return "";
         }
     }
 }

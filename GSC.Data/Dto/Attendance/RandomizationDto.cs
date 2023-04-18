@@ -52,6 +52,8 @@ namespace GSC.Data.Dto.Attendance
         public Gender? Genderfactor { get; set; }
         public DaitoryFector? Diatoryfactor { get; set; }
         public Jointfactor? Jointfactor { get; set; }
+
+        public Eligibilityfactor? Eligibilityfactor { get; set; }
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
 
@@ -135,6 +137,18 @@ namespace GSC.Data.Dto.Attendance
         public double? StudyVersion { get; set; }
         public Gender? Genderfactor { get; set; }
         public DaitoryFector? Diatoryfactor { get; set; }
+
+        public Jointfactor? Jointfactor { get; set; }
+
+        public Eligibilityfactor? Eligibilityfactor { get; set; }
+
+        public string GenderfactorName { get; set; }
+        public string DiatoryfactorName { get; set; }
+
+        public string JointfactorName { get; set; }
+
+        public string EligibilityfactorName { get; set; }
+
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
 
@@ -183,7 +197,9 @@ namespace GSC.Data.Dto.Attendance
         public bool IsAgeFactor { get; set; }
         public bool IsBMIFactor { get; set; }
         public bool IsJointFactor { get; set; }
-
+        public bool IsEligibilityFactor { get; set; }
         public bool IsIWRS { get; set; }
+
+        public bool IsDisable { get; set; }
     }
 }

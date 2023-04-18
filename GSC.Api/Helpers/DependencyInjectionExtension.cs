@@ -393,7 +393,14 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementKitNumberSettingsRepository, SupplyManagementKitNumberSettingsRepository>();
             services.AddScoped<ISupplyManagementEmailConfigurationRepository, SupplyManagementEmailConfigurationRepository>();
             services.AddScoped<ISupplyManagementKITSeriesRepository, SupplyManagementKITSeriesRepository>();
-
+            services.AddScoped<ISupplyManagementFactorMappingRepository, SupplyManagementFactorMappingRepository>();
+            services.AddScoped<IPKBarcodeRepository, PKBarcodeRepository>();
+            services.AddScoped<ISampleBarcodeRepository, SampleBarcodeRepository>();
+            services.AddScoped<IDossingBarcodeRepository, DossingBarcodeRepository>();
+            services.AddScoped<IPharmacyReportRepository, PharmacyReportRepository>();
+            services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
+            services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
+            services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();
         }
     }
 }

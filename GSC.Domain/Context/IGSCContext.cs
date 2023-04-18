@@ -406,8 +406,13 @@ namespace GSC.Domain.Context
 
         DbSet<SupplyManagementUnblindTreatment> SupplyManagementUnblindTreatment { get; set; }
 
+        DbSet<SupplyManagementFactorMapping> SupplyManagementFactorMapping { get; set; }
 
+        DbSet<PKBarcode> PKBarcode { get; set; }
+        DbSet<DossingBarcode> DossingBarcode { get; set; }
 
-
+        DbSet<SampleBarcode> SampleBarcode { get; set; }
+        DbSet<ManageSiteAddress> ManageSiteAddress { get; set; }
+        DbSet<ProjectSiteAddress> ProjectSiteAddress { get; set; }
     }
 }

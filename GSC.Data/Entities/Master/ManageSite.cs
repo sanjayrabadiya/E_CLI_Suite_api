@@ -14,11 +14,12 @@ namespace GSC.Data.Entities.Master
         public string ContactNumber { get; set; }
         public string SiteAddress { get; set; }
         public bool Status { get; set; }
-        public int CityId { get; set; }
+        public int? CityId { get; set; }
         public string Facilities { get; set; }
         public int? CompanyId { get; set; }
         public City City { get; set; }
         public List<ManageSiteRole> ManageSiteRole { get; set; } = null;
         public List<Iecirb> Iecirb { get; set; } = null;
+        public List<ManageSiteAddress> ManageSiteAddress { get; set;} = null;
     }
 }

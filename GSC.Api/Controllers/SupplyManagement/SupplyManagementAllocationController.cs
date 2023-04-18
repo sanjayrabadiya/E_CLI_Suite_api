@@ -163,6 +163,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         }
 
         [HttpGet]
+        [Route("GetfactorMappingVariableDropDownByTemplateId/{templateId}")]
+        public IActionResult GetfactorMappingVariableDropDownByTemplateId(int templateId)
+        {
+            return Ok(_supplyManagementAllocationRepository.GetfactorMappingVariableDropDownByTemplateId(templateId));
+        }
+
+        [HttpGet]
         [Route("GetProductTypeByVisit/{visitId}")]
         public IActionResult GetProductTypeByVisit(int visitId)
         {

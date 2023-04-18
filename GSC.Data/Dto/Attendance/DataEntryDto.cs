@@ -88,6 +88,8 @@ namespace GSC.Data.Dto.Attendance
             get => _actualDate.UtcDate();
             set => _actualDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
+        public bool? IsScheduleTerminate { get; set; }
+        public int ScreeningEntryId { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto
@@ -130,6 +132,22 @@ namespace GSC.Data.Dto.Attendance
         public string SubjectNo { get; set; }
         public string RandomizationNumber { get; set; }
         public string PreLabel { get; set; }
+    }
+
+    public class BarcodeDataEntrySubject 
+    {
+        public int AttendanceId { get; set; }
+        public int VolunteerId { get; set; }
+        public string ProjectAttendanceBarcodeString { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public ScreeningTemplateStatus Status { get; set; }
+        public string BarcodeString { get; set; }
+        public string VolunteerNo { get; set; }
+        public PKBarcodeOption? PKBarcodeOption { get; set; }
+        public DateTime? ScheduleDate { get; set; }
+        public int ScreeningEntryId { get; set; }
     }
 
 }

@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Master
         public string IECIRBContactEmail { get; set; }
         [Required(ErrorMessage = "IECIRB Contact Number is required.")]
         public string IECIRBContactNumber { get; set; }
+        public int? ManageSiteAddressId { get; set; }
         public int? CompanyId { get; set; }
     }
 
@@ -26,5 +27,7 @@ namespace GSC.Data.Dto.Master
         public string IECIRBContactName { get; set; }
         public string IECIRBContactEmail { get; set; }
         public string IECIRBContactNumber { get; set; }
+        public string SiteAddress { get; set; }
+        public int? ManageSiteAddressId { get; set; }
     }
 }

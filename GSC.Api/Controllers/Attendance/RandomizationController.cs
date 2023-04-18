@@ -119,8 +119,10 @@ namespace GSC.Api.Controllers.Attendance
             if (randomization == null)
                 return BadRequest();
 
-            var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
+            if (randomization.DateOfScreening != null && randomization.RandomizationNumber == null)
+                _randomizationRepository.SetFactorMappingData(randomization);
 
+            var randomizationDto = _mapper.Map<RandomizationDto>(randomization);
             return Ok(randomizationDto);
         }
 
@@ -431,45 +433,16 @@ namespace GSC.Api.Controllers.Attendance
 
             if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
 
-          
+
 
             if (string.IsNullOrEmpty(randno))
             {
                 if (numerformate.IsIWRS || numerformate.IsIGT)
                 {
-                    var validateduplicate = _randomizationRepository.Duplicate(randomizationDto, randomizationDto.ProjectId);
-                    if (!string.IsNullOrEmpty(validateduplicate))
+                    var message = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
+                    if (!string.IsNullOrEmpty(message))
                     {
-                        _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
-                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
-                        return BadRequest(ModelState);
-                    }
-                    randomizationDto = _randomizationRepository.SetKitNumber(randomizationDto);
-                    if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
-                    {
-                        ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
-                        return BadRequest(ModelState);
-                    }
-                    if (numerformate.IsIWRS == true && string.IsNullOrEmpty(randomizationDto.KitNo))
-                    {
-                        _randomizationRepository.UpdateRandmizationKitNotAssigned(randomizationDto);
-
-                        ModelState.AddModelError("Message", "Kit is not available");
-                        return BadRequest(ModelState);
-                    }
-                    if (numerformate.IsIGT == true && string.IsNullOrEmpty(randomizationDto.RandomizationNumber))
-                    {
-                        ModelState.AddModelError("Message", "Please upload randomization sheet");
-                        return BadRequest(ModelState);
-                    }
-                    if (!_randomizationRepository.ValidateRandomizationIdForIWRS(randomizationDto))
-                    {
-                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
-                        return BadRequest(ModelState);
-                    }
-                    if (!_randomizationRepository.CheckDUplicateRandomizationNumber(randomizationDto))
-                    {
-                        ModelState.AddModelError("Message", "Randmization Number Already assigned please try again!");
+                        ModelState.AddModelError("Message", message);
                         return BadRequest(ModelState);
                     }
                     _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
@@ -544,6 +517,10 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult GetRandomizationNumber(int id)
         {
             var randdata = _randomizationRepository.All.Where(x => x.Id == id).FirstOrDefault();
+
+            if (randdata.DateOfScreening != null && randdata.RandomizationNumber == null)
+                _randomizationRepository.SetFactorMappingData(randdata);
+
             var isvalid = _randomizationRepository.IsRandomFormatSetInStudy(id);
             if (isvalid == true)
             {
@@ -651,7 +628,9 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto.IsAgeFactor = factorData.Any(x => x.Fector == Fector.Age);
                 randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
                 randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
+                randomizationDto.IsEligibilityFactor = factorData.Any(x => x.Fector == Fector.Eligibility);
                 randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
+                randomizationDto.IsDisable = _context.SupplyManagementFactorMapping.Any(x => x.DeletedDate == null && x.ProjectId == id) ? true : false;
             }
             return Ok(randomizationDto);
         }

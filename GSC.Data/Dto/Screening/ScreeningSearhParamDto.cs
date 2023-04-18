@@ -21,7 +21,7 @@ namespace GSC.Data.Dto.Screening
         public int ProjectId { get; set; }
         public int? StudyId { get; set; }
         public int VisitId { get; set; }
-
+        public int? SiteId { get; set; }
         public int PeriodNo { get; set; }
     }
 }

@@ -41,5 +41,6 @@ namespace GSC.Data.Entities.Attendance
         public AttendanceHistory AttendanceHistory { get; set; }
         public virtual ScreeningEntry ScreeningEntry { get; set; }
         public double? StudyVersion { get; set; }
+        public int? SiteId { get; set; }
     }
 }

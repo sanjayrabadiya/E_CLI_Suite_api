@@ -84,6 +84,17 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
 
+            if (kitsettings.IsUploadWithKit)
+            {
+                var uploadedkits = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(s => s.SupplyManagementUploadFile.ProjectId == supplyManagementKITSeriesDto.ProjectId
+                                    && s.TreatmentType.ToLower() == supplyManagementKITSeriesDto.TreatmentType.ToLower() && s.SupplyManagementKITSeriesId == null && s.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve && s.DeletedDate == null).Count();
+                if (uploadedkits < supplyManagementKITSeriesDto.NoofPatient)
+                {
+                    ModelState.AddModelError("Message", "You can not create kits more than mention into the randomization sheet");
+                    return BadRequest(ModelState);
+                }
+            }
+
             for (int i = 0; i < supplyManagementKITSeriesDto.NoofPatient; i++)
             {
                 bool isexist = false;
@@ -93,24 +104,27 @@ namespace GSC.Api.Controllers.SupplyManagement
                     supplyManagementKITSeriesDto.Id = 0;
                     var supplyManagementKitSeries = _mapper.Map<SupplyManagementKITSeries>(supplyManagementKITSeriesDto);
                     supplyManagementKitSeries.Status = KitStatus.AllocationPending;
-                    supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, 1);
+                    supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, 1, supplyManagementKITSeriesDto);
                     _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
-                    if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo))
+                    if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo && x.ProjectId == supplyManagementKITSeriesDto.ProjectId && x.DeletedDate == null))
                     {
                         if (_uow.Save() <= 0) throw new Exception("Creating Kit Series Creation failed on save.");
 
                         supplyManagementKITSeriesDto.Id = supplyManagementKitSeries.Id;
+                        supplyManagementKITSeriesDto.KitNo = supplyManagementKitSeries.KitNo;
                         _supplyManagementKITSeriesRepository.AddKitSeriesVisitDetail(supplyManagementKITSeriesDto);
                         isexist = true;
+                        _uow.Save();
                     }
                     else
                     {
                         isexist = false;
                     }
-                    
+
                 }
             }
             
+
             return Ok(supplyManagementKITSeriesDto.Id);
 
         }

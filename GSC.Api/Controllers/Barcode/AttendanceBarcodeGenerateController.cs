@@ -79,7 +79,7 @@ namespace GSC.Api.Controllers.Barcode
             {
                 item.Id = 0;
                 item.BarcodeConfigId = barcodeConfig.Id;
-                item.BarcodeString = (Convert.ToInt64(DateTime.Now.ToString("yyMMddHHmmssff")) + item.AttendanceId).ToString();
+                item.BarcodeString = _attendanceBarcodeGenerateRepository.GetBarcodeString(item.AttendanceId); //(Convert.ToInt64(DateTime.Now.ToString("yyMMddHHmmssff")) + item.AttendanceId).ToString();
                 var attendanceBarcode = _mapper.Map<AttendanceBarcodeGenerate>(item);
                 _attendanceBarcodeGenerateRepository.Add(attendanceBarcode);
                 _uow.Save();

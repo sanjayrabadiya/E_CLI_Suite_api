@@ -86,13 +86,22 @@ namespace GSC.Respository.Master
             {
                 var temCountries = new List<string>();
 
-                var countries = _context.Project
-               .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
-               {
-                   Id = (int)r.ManageSite.City.State.CountryId,
-                   CountryName = r.ManageSite.City.State.Country.CountryName,
-                   CountryCode = r.ManageSite.City.State.Country.CountryCode
-               }).Distinct().OrderBy(o => o.CountryCode).ToList();
+               // var countries = _context.Project
+               //.Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
+               //{
+               //    Id = (int)r.ManageSite.City.State.CountryId,
+               //    CountryName =r.ManageSite.City.State.Country.CountryName,
+               //    CountryCode =r.ManageSite.City.State.Country.CountryCode
+               //}).Distinct().OrderBy(o => o.CountryCode).ToList();
+
+                var countries = _context.ProjectSiteAddress.Where(x=>x.DeletedDate==null && x.Project.ParentProjectId==item.ProjectId)
+                .Select(r => new
+                {
+                    Id = (int)r.ManageSiteAddress.City.State.CountryId,
+                    CountryName = r.ManageSiteAddress.City.State.Country.CountryName,
+                    CountryCode = r.ManageSiteAddress.City.State.Country.CountryCode
+                }).Distinct().OrderBy(o => o.CountryCode).ToList();
+
                 var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
                     ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
                 foreach (var country in countries)
@@ -922,13 +931,14 @@ namespace GSC.Respository.Master
 
                 periodIdMap.Add(designPeriodId, period.Id);
 
-                var projectVisits = _context.ProjectDesignVisit.Where(q => q.ProjectDesignPeriodId == designPeriodId && q.DeletedDate == null).ToList();
+                var projectVisits = _context.ProjectDesignVisit.Where(q => q.ProjectDesignPeriodId == designPeriodId && q.DeletedDate == null && q.InActiveVersion == null).ToList();
 
                 foreach (var visit in projectVisits)
                 {
                     var visitId = visit.Id;
                     visit.Id = 0;
                     visit.ProjectDesignPeriodId = period.Id;
+                    visit.StudyVersion = null;
 
                     if (!cloneProject.ScheduleClone)
                         visit.IsSchedule = false;
@@ -954,10 +964,10 @@ namespace GSC.Respository.Master
                         _context.Save();
                     });
 
-                    var projectTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null && q.ParentId == null).ToList();
+                    var projectTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null && q.InActiveVersion == null && q.ParentId == null).ToList();
                     foreach (var template in projectTemplates)
                     {
-                        var cloneTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null && q.ParentId == template.Id).ToList();
+                        var cloneTemplates = _context.ProjectDesignTemplate.Where(q => q.ProjectDesignVisitId == visitId && q.DeletedDate == null && q.InActiveVersion == null && q.ParentId == template.Id).ToList();
 
                         var templateId = SaveCloneTemplate(visit.Id, template, null);
 
@@ -1189,6 +1199,7 @@ namespace GSC.Respository.Master
             template.ModifiedDate = null;
             template.DeletedBy = null;
             template.DeletedDate = null;
+            template.StudyVersion = null;
             _context.ProjectDesignTemplate.Add(template);
             _context.Save();
             templateIdMap.Add(templateId, template.Id);
@@ -1233,7 +1244,7 @@ namespace GSC.Respository.Master
             });
 
 
-            var projectDesignVariables = _context.ProjectDesignVariable.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
+            var projectDesignVariables = _context.ProjectDesignVariable.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null && q.InActiveVersion == null).ToList();
             projectDesignVariables.ForEach(x =>
             {
                 var variableId = x.Id;
@@ -1243,11 +1254,12 @@ namespace GSC.Respository.Master
                 x.ModifiedDate = null;
                 x.DeletedBy = null;
                 x.DeletedDate = null;
+                x.StudyVersion = null;
                 _context.ProjectDesignVariable.Add(x);
                 _context.Save();
                 variableIdMap.Add(variableId, x.Id);
 
-                var projectDesignVariableValues = _context.ProjectDesignVariableValue.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null).ToList();
+                var projectDesignVariableValues = _context.ProjectDesignVariableValue.Where(q => q.ProjectDesignVariableId == variableId && q.DeletedDate == null && q.InActiveVersion == null).ToList();
                 projectDesignVariableValues.ForEach(s =>
                 {
                     var varialbeValueId = s.Id;
@@ -1257,6 +1269,7 @@ namespace GSC.Respository.Master
                     s.ModifiedDate = null;
                     s.DeletedBy = null;
                     s.DeletedDate = null;
+                    s.StudyVersion = null;
                     _context.ProjectDesignVariableValue.Add(s);
                     _context.Save();
                     variableValueIdMap.Add(varialbeValueId, s.Id);
