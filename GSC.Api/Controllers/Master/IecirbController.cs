@@ -65,9 +65,12 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
             _iecirbRepository.Add(iecirb);
+
+
             if (_uow.Save() <= 0) throw new Exception("Creating IEC/IRB failed on save.");
+            iecirbDto.Id = iecirb.Id;
+            _iecirbRepository.AddSiteAddress(iecirbDto);
             return Ok(iecirb.Id);
         }
 
@@ -89,6 +92,8 @@ namespace GSC.Api.Controllers.Master
             }
 
             iecirb.Id = iecirbDto.Id;
+
+            _iecirbRepository.UpdateSiteAddress(iecirbDto);
 
             /* Added by Darshil for effective Date on 24-07-2020 */
             _iecirbRepository.AddOrUpdate(iecirb);

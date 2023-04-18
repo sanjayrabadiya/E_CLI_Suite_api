@@ -468,6 +468,7 @@ namespace GSC.Domain.Context
         public DbSet<SampleBarcode> SampleBarcode { get; set; }
         public DbSet<ManageSiteAddress> ManageSiteAddress { get; set; }
         public DbSet<ProjectSiteAddress> ProjectSiteAddress { get; set; }
+        public DbSet<IecirbSiteAddress> IecirbSiteAddress { get; set; }
     }
 
 

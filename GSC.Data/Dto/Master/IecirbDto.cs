@@ -1,4 +1,7 @@
-﻿using GSC.Data.Entities.Common;
+﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Master;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
@@ -16,7 +19,7 @@ namespace GSC.Data.Dto.Master
         public string IECIRBContactEmail { get; set; }
         [Required(ErrorMessage = "IECIRB Contact Number is required.")]
         public string IECIRBContactNumber { get; set; }
-        public int? ManageSiteAddressId { get; set; }
+        public List<int> manageSiteAddressId { get; set; }
         public int? CompanyId { get; set; }
     }
 
@@ -28,6 +31,6 @@ namespace GSC.Data.Dto.Master
         public string IECIRBContactEmail { get; set; }
         public string IECIRBContactNumber { get; set; }
         public string SiteAddress { get; set; }
-        public int? ManageSiteAddressId { get; set; }
+        public List<int> manageSiteAddressId { get; set; }
     }
 }
