@@ -757,7 +757,7 @@ namespace GSC.Respository.Master
                             && (siteId == 0 ? (!x.Project.IsTestSite) : true)
                             && x.DeletedDate == null)
                 .Select(b => new CtmsMonitoringPlanDashoardDto
-                {
+                {   
                     Id = b.Id,
                     Activity = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
                     ScheduleStartDate = b.ScheduleStartDate,
@@ -771,6 +771,7 @@ namespace GSC.Respository.Master
                 foreach (var item in list)
                 {
                     item.Status = GetMonitoringStatus(item);
+                    item.visitStatus = GetVisitgStatus(item);
                 }
             }
 
@@ -794,6 +795,24 @@ namespace GSC.Respository.Master
             {
                 return "Final";
             }
+            return "";
+        }
+
+        public string GetVisitgStatus(CtmsMonitoringPlanDashoardDto obj)
+        {
+            if (obj.ScheduleStartDate != null && obj.ActualStartDate == null)
+            {
+                return "Planned";
+            }
+            else if(obj.ScheduleStartDate == obj.ActualStartDate )
+            {
+                return "Initiated";
+            }
+             else if(obj.ScheduleStartDate < obj.ActualStartDate )
+            {
+                return "Overdue";
+            }
+           
             return "";
         }
 

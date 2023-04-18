@@ -141,7 +141,8 @@ namespace GSC.Respository.CTMS
                               ApproveDate = review.ApproveDate,
                               IsApproved = review.IsApproved,
                               Reason = auditreason.Reason,
-                              ReasonOth = auditreason.ReasonOth
+                              ReasonOth = auditreason.ReasonOth,
+                              ReportStatus = review.CtmsMonitoringReport.ReportStatus.ToString()
                           }).OrderByDescending(x => x.Id).ToList();
 
             return result;
