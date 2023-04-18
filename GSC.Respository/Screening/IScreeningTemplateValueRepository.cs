@@ -30,5 +30,7 @@ namespace GSC.Respository.Screening
         void UpdateDefaultValue(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId);
         void DeleteRepeatTemplateValue(int Id);
         void UpdateTemplateConfigurationUploadRandomizationValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId);
+
+        bool IsEligible(int VolunteerId);
     }
 }

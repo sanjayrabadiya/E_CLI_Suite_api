@@ -1478,5 +1478,15 @@ namespace GSC.Respository.Screening
                 });
             }
         }
+
+        public bool IsEligible(int VolunteerId)
+        {
+            return All.Any(x => x.DeletedDate == null &&
+                                x.ProjectDesignVariable.Annotation == "DCP" &&
+                                x.ProjectDesignVariable.Values != null &&
+                                x.ProjectDesignVariable.ProjectDesignTemplate.Domain.DomainCode == "EC01" &&
+                                x.ProjectDesignVariable.Values.Any(r => r.ValueCode == "01")
+                                && x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == VolunteerId);
+        }
     }
 }
