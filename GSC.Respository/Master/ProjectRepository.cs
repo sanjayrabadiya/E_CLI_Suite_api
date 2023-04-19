@@ -86,21 +86,13 @@ namespace GSC.Respository.Master
             {
                 var temCountries = new List<string>();
 
-               // var countries = _context.Project
-               //.Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
-               //{
-               //    Id = (int)r.ManageSite.City.State.CountryId,
-               //    CountryName =r.ManageSite.City.State.Country.CountryName,
-               //    CountryCode =r.ManageSite.City.State.Country.CountryCode
-               //}).Distinct().OrderBy(o => o.CountryCode).ToList();
-
-                var countries = _context.ProjectSiteAddress.Where(x=>x.DeletedDate==null && x.Project.ParentProjectId==item.ProjectId)
-                .Select(r => new
-                {
-                    Id = (int)r.ManageSiteAddress.City.State.CountryId,
-                    CountryName = r.ManageSiteAddress.City.State.Country.CountryName,
-                    CountryCode = r.ManageSiteAddress.City.State.Country.CountryCode
-                }).Distinct().OrderBy(o => o.CountryCode).ToList();
+                var countries = _context.Project
+              .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
+              {
+                  Id = (int)r.ManageSite.City.State.CountryId,
+                  CountryName = r.ManageSite.City.State.Country.CountryName,
+                  CountryCode = r.ManageSite.City.State.Country.CountryCode
+              }).Distinct().OrderBy(o => o.CountryCode).ToList();
 
                 var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
                     ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();

@@ -71,12 +71,6 @@ namespace GSC.Api.Controllers.Master
             });
 
 
-            var manageSiteAddress = _context.ManageSiteAddress.FirstOrDefault(q => q.Id == ProjectSiteAddressDto.ManageSiteAddressId);
-            var mangeSite = _context.ManageSite.FirstOrDefault(q => q.Id == ProjectSiteAddressDto.ManageSiteId);
-            mangeSite.CityId = manageSiteAddress.CityId;
-            _context.ManageSite.Update(mangeSite);
-
-
             _projectSiteAddressRepository.Add(ProjectSiteAddress);
             if (_uow.Save() <= 0) throw new Exception("Creating Project Site Address failed on save.");
             return Ok(ProjectSiteAddress.Id);

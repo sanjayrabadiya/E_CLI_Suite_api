@@ -124,7 +124,6 @@ namespace GSC.Api.Helpers
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
             CreateMap<SecurityRole, SecurityRoleGridDto>().ReverseMap();
             CreateMap<Iecirb, IecirbGridDto>()
-                .ForMember(x => x.manageSiteAddressId, x => x.MapFrom(a => a.IecirbSiteAddress.Where(x => x.DeletedDate == null).Select(s => s.ManageSiteAddressId).ToList()))
                 .ReverseMap();
             CreateMap<User, UserGridDto>()
                 .ForMember(x => x.Role, x => x.MapFrom(a => string.Join(", ", a.UserRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleName).ToList())))

@@ -52,9 +52,8 @@ namespace GSC.Respository.Master
 
         public string Duplicate(ManageSite objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.SiteName == objSave.SiteName && x.DeletedDate == null))
-                return "Duplicate Site Name : " + objSave.SiteName;
-
+            if (All.Any(x => x.Id != objSave.Id && x.SiteAddress == objSave.SiteAddress.Trim() && x.DeletedDate == null))
+                return "Duplicate Site Address: " + objSave.SiteAddress;
 
             return "";
         }

@@ -9,7 +9,5 @@ namespace GSC.Respository.Master
     {
         string Duplicate(Iecirb objSave);
         List<DropDownDto> GetIecirbDropDown();
-        void AddSiteAddress(IecirbDto iecirbDto);
-        void UpdateSiteAddress(IecirbDto iecirbDto);
     }
 }

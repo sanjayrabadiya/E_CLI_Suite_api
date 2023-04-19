@@ -41,7 +41,6 @@ namespace GSC.Api.Controllers.Master
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
-        private readonly IProjectSiteAddressRepository _projectSiteAddressRepository;
         private readonly IGSCContext _context;
 
         public ProjectController(IProjectRepository projectRepository,
@@ -58,7 +57,6 @@ namespace GSC.Api.Controllers.Master
             IRandomizationRepository randomizationRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
-            IProjectSiteAddressRepository projectSiteAddressRepository,
             IGSCContext context
             )
         {
@@ -77,7 +75,6 @@ namespace GSC.Api.Controllers.Master
             _randomizationRepository = randomizationRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
-            _projectSiteAddressRepository = projectSiteAddressRepository;
             _context = context;
         }
 
@@ -221,18 +218,6 @@ namespace GSC.Api.Controllers.Master
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
-            }
-
-            if (projectDto.ManageSiteId != details.ManageSiteId)
-            {
-                var manageSiteAddress = _projectSiteAddressRepository.All.Where(x => x.DeletedDate == null
-                && x.ManageSiteId == details.ManageSiteId
-                && x.ProjectId == details.Id).Select(q => q.Id).ToList();
-
-                manageSiteAddress.ForEach(x =>
-                {
-                    _projectSiteAddressRepository.Delete(x);
-                });
             }
 
             _projectRepository.Update(project);
