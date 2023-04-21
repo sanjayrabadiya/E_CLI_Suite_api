@@ -470,6 +470,7 @@ namespace GSC.Domain.Context
         public DbSet<ProjectSiteAddress> ProjectSiteAddress { get; set; }
         public DbSet<Centrifugation> Centrifugation { get; set; }
         public DbSet<CentrifugationDetails> CentrifugationDetails { get; set; }
+        public DbSet<SampleSeparation> SampleSeparation { get; set; }
     }
 
 

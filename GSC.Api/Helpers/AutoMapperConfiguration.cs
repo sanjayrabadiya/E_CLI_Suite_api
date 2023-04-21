@@ -498,6 +498,7 @@ namespace GSC.Api.Helpers
            // CreateMap<CustomReport, CustomReportDto>().ReverseMap();
             CreateMap<Centrifugation, CentrifugationDto>().ReverseMap();
             CreateMap<CentrifugationDetails, CentrifugationDetailsDto>().ReverseMap();
+            CreateMap<SampleSeparation, SampleSeparationDto>().ReverseMap();
         }
     }
 }

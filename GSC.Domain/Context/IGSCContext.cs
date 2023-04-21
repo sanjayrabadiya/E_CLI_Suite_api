@@ -417,5 +417,6 @@ namespace GSC.Domain.Context
 
         DbSet<Centrifugation> Centrifugation { get; set; }
         DbSet<CentrifugationDetails> CentrifugationDetails { get; set; }
+        DbSet<SampleSeparation> SampleSeparation { get; set; }
     }
 }
