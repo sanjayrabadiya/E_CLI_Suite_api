@@ -81,7 +81,7 @@ namespace GSC.Respository.Barcode
                                                          CentrifugationStartTime = null,
                                                          CentrifugationByUser = null,
                                                          CentrifugationOn = null,
-                                                         Status = null,
+                                                         Status = "Remaining",
                                                          ReCentrifugationByUser = null,
                                                          ReCentrifugationOn = null,
                                                          AuditReason = null,
@@ -89,6 +89,7 @@ namespace GSC.Respository.Barcode
                                                          MissedBy = null,
                                                          MissedOn = null
                                                      }).FirstOrDefault();
+                if(data!=null)
                 listci.Add(data);
 
             }
@@ -119,7 +120,8 @@ namespace GSC.Respository.Barcode
                                                          MissedBy = centrifugationData.MissedBy != null ? _userRepository.All.Where(x => x.Id == centrifugationData.MissedBy).FirstOrDefault().UserName : null,
                                                          MissedOn = centrifugationData.MissedOn
                                                      }).FirstOrDefault();
-                listci.Add(data);
+                if (data != null)
+                    listci.Add(data);
             }
         });
             return listci;
