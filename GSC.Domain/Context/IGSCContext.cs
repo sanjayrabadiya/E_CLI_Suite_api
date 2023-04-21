@@ -414,5 +414,8 @@ namespace GSC.Domain.Context
         DbSet<SampleBarcode> SampleBarcode { get; set; }
         DbSet<ManageSiteAddress> ManageSiteAddress { get; set; }
         DbSet<ProjectSiteAddress> ProjectSiteAddress { get; set; }
+
+        DbSet<Centrifugation> Centrifugation { get; set; }
+        DbSet<CentrifugationDetails> CentrifugationDetails { get; set; }
     }
 }

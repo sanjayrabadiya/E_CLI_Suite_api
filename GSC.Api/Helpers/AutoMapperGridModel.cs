@@ -713,6 +713,17 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.Facilities, x => x.MapFrom(a => a.ManageSiteAddress.Facilities))
            .ReverseMap();
 
+            CreateMap<CentrifugationDetails, CentrifugationDetailsGridDto>()
+           .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.PKBarcode.Project.ProjectCode))
+           .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.PKBarcode.Site.ProjectCode))
+           .ForMember(x => x.RandomizationNumber, x => x.MapFrom(a => a.PKBarcode.Volunteer.RandomizationNumber))
+           .ForMember(x => x.PKBarcode, x => x.MapFrom(a => a.PKBarcode.BarcodeString))
+           .ForMember(x => x.CentrifugationByUser, x => x.MapFrom(a => a.Centrifugationed.UserName))
+           .ForMember(x => x.ReCentrifugationByUser, x => x.MapFrom(a => a.ReCentrifugation.UserName))
+           .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
+           .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
+           .ReverseMap();
+
         }
     }
 }

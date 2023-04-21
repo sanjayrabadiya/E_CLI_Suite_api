@@ -1068,4 +1068,20 @@ namespace GSC.Helper
         [Description("Kit")] Kit = 4,
         [Description("Individual")] Individual = 5
     }
+
+    public enum CentrifugationFilter : short
+    {
+        [Description("Centrifugation")] Centrifugation = 1,
+        [Description("Remaining")] Remaining = 2,
+        [Description("Missed")] Missed = 3,
+        [Description("Re-Centrifugation")] ReCentrifugation = 4
+    }
+
+    public enum SampleSeparationFilter : short
+    {
+        [Description("Separated")] Separated = 1,
+        [Description("Remaining")] Remaining = 2,
+        [Description("Missed")] Missed = 3,
+        [Description("Hemolized")] Hemolized = 4
+    }
 }

@@ -401,6 +401,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
             services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
             services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();
+           // services.AddScoped<ICustomReportRepository, CustomReportRepository>();
+            services.AddScoped<ICentrifugationRepository, CentrifugationRepository>();
+            services.AddScoped<ICentrifugationDetailsRepository, CentrifugationDetailsRepository>();
         }
     }
 }
