@@ -64,11 +64,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            var projectSiteAddress = _projectSiteAddressRepository.All.Where(q => q.ProjectId == ProjectSiteAddressDto.ProjectId && q.ManageSiteId == ProjectSiteAddressDto.ManageSiteId && q.DeletedDate == null).Select(q => q.Id).ToList();
-            projectSiteAddress.ForEach(x =>
-            {
-                Delete(x);
-            });
+            //var projectSiteAddress = _projectSiteAddressRepository.All.Where(q => q.ProjectId == ProjectSiteAddressDto.ProjectId && q.ManageSiteId == ProjectSiteAddressDto.ManageSiteId && q.DeletedDate == null).Select(q => q.Id).ToList();
+            //projectSiteAddress.ForEach(x =>
+            //{
+            //    Delete(x);
+            //});
 
 
             _projectSiteAddressRepository.Add(ProjectSiteAddress);
