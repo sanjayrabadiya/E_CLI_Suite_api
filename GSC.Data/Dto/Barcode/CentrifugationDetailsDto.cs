@@ -39,5 +39,15 @@ namespace GSC.Data.Dto.Barcode
         public string ReasonOth { get; set; }
         public string MissedBy { get; set; }
         public DateTime? MissedOn { get; set; }
+        public string ReCentrifugateReason { get; set; }
+        public string ReCentrifugateReasonOth { get; set; }
     }
+
+    public class ReCentrifugationDto : BaseDto
+    {
+        public int[] Ids { get; set; }
+        public int AuditReasonId { get; set; }
+        public string ReasonOth { get; set; }
+    }
+
 }

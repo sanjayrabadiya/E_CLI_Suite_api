@@ -49,7 +49,7 @@ namespace GSC.Api.Controllers.Barcode
 
             _sampleSeparationRepository.StartSampleSaparation(sampleSaveSeparationDto);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating SampleSaparation Details failed on save.");
+            if (_uow.Save() <= 0) throw new Exception("Creating Sample Separation Details failed on save.");
             return Ok();
         }
 
@@ -63,12 +63,13 @@ namespace GSC.Api.Controllers.Barcode
             if (record == null)
                 return NotFound();
 
-            record.ReasonOth = ReasonOth;
+            if (ReasonOth != "null")
+                record.ReasonOth = ReasonOth;
             record.AuditReasonId = AuditReasonId;
             record.Status = Helper.SampleSeparationFilter.Missed;
 
             _sampleSeparationRepository.Update(record);
-            if (_uow.Save() <= 0) throw new Exception("Sample Saparation missed failed on save.");
+            if (_uow.Save() <= 0) throw new Exception("Sample Separation missed failed on save.");
 
             return Ok();
         }
@@ -84,12 +85,14 @@ namespace GSC.Api.Controllers.Barcode
 
             foreach (var record in item)
             {
-                record.ReasonOth = ReasonOth;
+                if (ReasonOth != "null")
+                    record.ReasonOth = ReasonOth;
+               // record.ReasonOth = ReasonOth;
                 record.AuditReasonId = AuditReasonId;
                 record.Status = Helper.SampleSeparationFilter.Hemolized;
 
                 _sampleSeparationRepository.Update(record);
-                if (_uow.Save() <= 0) throw new Exception("Sample Saparation hemolized failed on save.");
+                if (_uow.Save() <= 0) throw new Exception("Sample Separation hemolized failed on save.");
             }
 
             return Ok();

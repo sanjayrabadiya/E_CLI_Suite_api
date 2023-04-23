@@ -32,5 +32,8 @@ namespace GSC.Data.Entities.Barcode
 
         public int? MissedBy { get; set; }
         public DateTime? MissedOn { get; set; }
+
+        public int? ReCentrifugateReason { get; set; }
+        public string ReCentrifugateReasonOth { get; set; }
     }
 }

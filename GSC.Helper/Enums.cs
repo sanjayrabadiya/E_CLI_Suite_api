@@ -1071,10 +1071,10 @@ namespace GSC.Helper
 
     public enum CentrifugationFilter : short
     {
-        [Description("Centrifugation")] Centrifugation = 1,
+        [Description("Centrifuged")] Centrifugation = 1,
         [Description("Remaining")] Remaining = 2,
         [Description("Missed")] Missed = 3,
-        [Description("Re-Centrifugation")] ReCentrifugation = 4
+        [Description("Recentrifuged")] ReCentrifugation = 4
     }
 
     public enum SampleSeparationFilter : short

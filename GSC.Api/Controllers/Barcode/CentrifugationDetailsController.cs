@@ -94,11 +94,11 @@ namespace GSC.Api.Controllers.Barcode
         [HttpPost]
         [TransactionRequired]
         [Route("InsertReCentrifugationData")]
-        public ActionResult InsertReCentrifugationData([FromBody] int[] ids)
+        public ActionResult InsertReCentrifugationData([FromBody] ReCentrifugationDto dto)
         {
-            if (ids == null) return new UnprocessableEntityObjectResult(ModelState);
+            if (dto == null) return new UnprocessableEntityObjectResult(ModelState);
 
-            _centrifugationDetailsRepository.StartReCentrifugation(ids.ToList());
+            _centrifugationDetailsRepository.StartReCentrifugation(dto);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Re-Centrifugation Details failed on save.");
             return Ok();
@@ -114,7 +114,9 @@ namespace GSC.Api.Controllers.Barcode
             if (record == null)
                 return NotFound();
 
-            record.ReasonOth = ReasonOth;
+            if (ReasonOth != "null")
+                record.ReasonOth = ReasonOth;
+          //  record.ReasonOth = ReasonOth;
             record.AuditReasonId = AuditReasonId;
             record.Status = Helper.CentrifugationFilter.Missed;
             record.MissedOn = _jwtTokenAccesser.GetClientDate();

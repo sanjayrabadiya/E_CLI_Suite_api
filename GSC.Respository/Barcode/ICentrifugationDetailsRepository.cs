@@ -10,6 +10,6 @@ namespace GSC.Respository.Barcode
         List<CentrifugationDetailsGridDto> GetCentrifugationDetails(int siteId);
         List<CentrifugationDetailsGridDto> GetCentrifugationDetailsByPKBarcode(string PkBarcodeString);
         void StartCentrifugation(List<int> ids);
-        void StartReCentrifugation(List<int> ids);
+        void StartReCentrifugation(ReCentrifugationDto dto);
     }
 }

@@ -87,7 +87,9 @@ namespace GSC.Respository.Barcode
                                                          AuditReason = null,
                                                          ReasonOth = null,
                                                          MissedBy = null,
-                                                         MissedOn = null
+                                                         MissedOn = null,
+                                                         ReCentrifugateReason=null,
+                                                         ReCentrifugateReasonOth = null
                                                      }).FirstOrDefault();
                 if(data!=null)
                 listci.Add(data);
@@ -118,7 +120,9 @@ namespace GSC.Respository.Barcode
                                                          AuditReason = centrifugationData.AuditReasonId != null ? _auditReasonRepository.All.Where(x => x.Id == centrifugationData.AuditReasonId).FirstOrDefault().ReasonName : null,
                                                          ReasonOth = centrifugationData.ReasonOth,
                                                          MissedBy = centrifugationData.MissedBy != null ? _userRepository.All.Where(x => x.Id == centrifugationData.MissedBy).FirstOrDefault().UserName : null,
-                                                         MissedOn = centrifugationData.MissedOn
+                                                         MissedOn = centrifugationData.MissedOn,
+                                                         ReCentrifugateReason = centrifugationData.ReCentrifugateReason != null ? _auditReasonRepository.All.Where(x => x.Id == centrifugationData.ReCentrifugateReason).FirstOrDefault().ReasonName : null,
+                                                         ReCentrifugateReasonOth = centrifugationData.ReCentrifugateReasonOth
                                                      }).FirstOrDefault();
                 if (data != null)
                     listci.Add(data);
@@ -184,14 +188,16 @@ namespace GSC.Respository.Barcode
             }
         }
 
-        public void StartReCentrifugation(List<int> ids)
+        public void StartReCentrifugation(ReCentrifugationDto dto)
         {
-            var details = All.Where(x => ids.Contains(x.PKBarcodeId)).ToList();
+            var details = All.Where(x => dto.Ids.Contains(x.PKBarcodeId)).ToList();
             foreach (var detail in details)
             {
                 detail.CentrifugationStartTime = _jwtTokenAccesser.GetClientDate();
                 detail.ReCentrifugationBy = _jwtTokenAccesser.UserId;
                 detail.ReCentrifugationOn = _jwtTokenAccesser.GetClientDate();
+                detail.ReCentrifugateReason = dto.AuditReasonId;
+                    detail.ReCentrifugateReasonOth = dto.ReasonOth;
                 detail.Status = CentrifugationFilter.ReCentrifugation;
                 Update(detail);
             }
