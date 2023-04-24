@@ -88,6 +88,8 @@ namespace GSC.Data.Dto.Attendance
             get => _actualDate.UtcDate();
             set => _actualDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
+        public bool? IsScheduleTerminate { get; set; }
+        public int ScreeningEntryId { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto

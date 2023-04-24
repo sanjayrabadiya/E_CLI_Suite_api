@@ -517,7 +517,7 @@ namespace GSC.Api.Controllers.Master
         //Code for clone Study Tinku Mahato (01-04-2022)
 
         [HttpPost("{cloneProjectId}")]
-        public IActionResult Post([FromRoute]int cloneProjectId, [FromBody] ProjectDto projectDto)
+        public IActionResult Post([FromRoute] int cloneProjectId, [FromBody] ProjectDto projectDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectDto.Id = 0;

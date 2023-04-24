@@ -11,5 +11,6 @@ namespace GSC.Respository.Master
         List<SiteGridDto> GetSiteList(bool isDeleted);
         List<SiteGridDto> GetSiteById(int InvestigatorContactId, bool isDeleted);
         string DeleteSite(SiteDto objSave);
+        List<DropDownDto> GetAllInvestigatorDropDown(int SiteId);
     }
 }

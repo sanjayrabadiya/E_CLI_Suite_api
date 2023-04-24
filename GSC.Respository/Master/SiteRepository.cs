@@ -56,9 +56,17 @@ namespace GSC.Respository.Master
             foreach (var item in Sites)
             {
                 Delete(item);
-                 _context.Save();
+                _context.Save();
             }
             return "";
+        }
+
+        public List<DropDownDto> GetAllInvestigatorDropDown(int SiteId)
+        {
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.ManageSiteId == SiteId)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.InvestigatorContact.NameOfInvestigator, IsDeleted = c.DeletedDate != null })
+                .OrderBy(o => o.Value).ToList();
         }
 
     }

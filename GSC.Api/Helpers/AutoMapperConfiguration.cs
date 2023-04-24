@@ -26,6 +26,7 @@ using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
+//using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Dto.UserMgt;
@@ -492,6 +493,12 @@ namespace GSC.Api.Helpers
             CreateMap<PKBarcode, PKBarcodeDto>().ReverseMap();
             CreateMap<SampleBarcode, SampleBarcodeDto>().ReverseMap();
             CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
+            CreateMap<ManageSiteAddress, ManageSiteAddressDto>().ReverseMap();
+            CreateMap<ProjectSiteAddress, ProjectSiteAddressDto>().ReverseMap();
+           // CreateMap<CustomReport, CustomReportDto>().ReverseMap();
+            CreateMap<Centrifugation, CentrifugationDto>().ReverseMap();
+            CreateMap<CentrifugationDetails, CentrifugationDetailsDto>().ReverseMap();
+            CreateMap<SampleSeparation, SampleSeparationDto>().ReverseMap();
         }
     }
 }

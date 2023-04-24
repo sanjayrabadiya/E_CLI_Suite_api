@@ -1,4 +1,7 @@
-﻿using GSC.Data.Entities.Common;
+﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Master;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master

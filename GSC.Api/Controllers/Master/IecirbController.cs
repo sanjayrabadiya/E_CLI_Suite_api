@@ -65,8 +65,9 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
             _iecirbRepository.Add(iecirb);
+
+
             if (_uow.Save() <= 0) throw new Exception("Creating IEC/IRB failed on save.");
             return Ok(iecirb.Id);
         }

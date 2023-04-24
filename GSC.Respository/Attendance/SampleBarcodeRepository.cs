@@ -66,12 +66,12 @@ namespace GSC.Respository.Attendance
             {
                 for (int i = 1; i <= objSave.PKBarcodeOption; i++)
                 {
-                    barcode = barcode + "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + "0" + i + ",";
+                    barcode = barcode + "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + "0" + i + ",";
                 }
             }
             else
             {
-                barcode = "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
+                barcode = "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode;
             }
             return barcode.TrimEnd(',');
         }

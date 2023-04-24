@@ -41,5 +41,6 @@ namespace GSC.Data.Dto.CTMS
         public string Message { get; set; }
         public string Reason { get; set; }
         public string ReasonOth { get; set; }
+        public string ReportStatus { get; set; }
     }
 }

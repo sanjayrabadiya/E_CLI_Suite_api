@@ -58,17 +58,15 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             var manageSite = _manageSiteRepository
-                    .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country, x => x.ManageSiteRole, x => x.ManageSiteAddress)
+                    .FindByInclude(x => x.Id == id, x => x.City, x => x.City.State, x => x.City.State.Country, x => x.ManageSiteRole)
                     .SingleOrDefault();
             if (manageSite == null)
                 return BadRequest();
 
             if (manageSite != null && manageSite.ManageSiteRole != null)
                 manageSite.ManageSiteRole = manageSite.ManageSiteRole.Where(x => x.DeletedDate == null).ToList();
-            manageSite.ManageSiteAddress.ForEach(x => x.ManageSite = null);
+
             var manageSiteDto = _mapper.Map<ManageSiteDto>(manageSite);
-            manageSiteDto.ManageSiteAddress = manageSite.ManageSiteAddress.Where(x => x.DeletedDate == null).ToList();
-            manageSiteDto.Facilities = manageSite.Facilities?.Split(',').ToList();
             manageSiteDto.StateId = manageSite.City.State.Id;
             manageSiteDto.CountryId = manageSite.City.State.Country.Id;
 
@@ -84,8 +82,6 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             manageSiteDto.Id = 0;
             var manageSite = _mapper.Map<ManageSite>(manageSiteDto);
-            manageSite.Facilities = manageSiteDto.Facilities?.Aggregate((a, b) => a + "," + b);
-            manageSite.SiteAddress = manageSiteDto.ManageSiteAddress?.Where(x => x.DeletedDate == null).Select(s => s.SiteAddress).Aggregate((a, b) => a + "|" + b);
             var validate = _manageSiteRepository.Duplicate(manageSite);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -98,11 +94,6 @@ namespace GSC.Api.Controllers.Master
             {
                 _context.ManageSiteRole.Add(x);
             });
-            manageSite.ManageSiteAddress.ForEach(x =>
-            {
-                _context.ManageSiteAddress.Add(x);
-            });
-
             if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
             return Ok(manageSite.Id);
         }
@@ -116,8 +107,7 @@ namespace GSC.Api.Controllers.Master
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var manageSite = _mapper.Map<ManageSite>(manageSiteDto);
-            manageSite.Facilities = manageSiteDto.Facilities?.Aggregate((a, b) => a + "," + b);
-            manageSite.SiteAddress = manageSiteDto.ManageSiteAddress?.Where(x => x.DeletedDate == null).Select(s => s.SiteAddress).Aggregate((a, b) => a + "|" + b);
+
             var validate = _manageSiteRepository.Duplicate(manageSite);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -128,7 +118,6 @@ namespace GSC.Api.Controllers.Master
             _manageSiteRepository.UpdateRole(manageSite);
             /* Added by Darshil for effective Date on 24-07-2020 */
             _manageSiteRepository.Update(manageSite);
-            _manageSiteRepository.UpdateSiteAddress(manageSite);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
             return Ok(manageSite.Id);

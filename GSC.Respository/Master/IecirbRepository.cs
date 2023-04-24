@@ -13,11 +13,13 @@ namespace GSC.Respository.Master
     public class IecirbRepository : GenericRespository<Iecirb>, IIecirbRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IGSCContext _context;
         public IecirbRepository(IGSCContext context,
         IJwtTokenAccesser jwtTokenAccesser)
         : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         public string Duplicate(Iecirb objSave)

@@ -23,6 +23,7 @@ using Futronic.SDKHelper;
 using GSC.Data.Entities.Volunteer;
 using System.Linq;
 using GSC.Data.Entities.Audit;
+using GSC.Respository.Screening;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -40,6 +41,7 @@ namespace GSC.Api.Controllers.Volunteer
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IVolunteerSummaryReport _volunteerSummaryReport;
         private readonly IVolunteerFingerRepository _volunteerFingerRepository;
+        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
 
         public VolunteerController(IVolunteerRepository volunteerRepository,
             IUnitOfWork uow, IMapper mapper,
@@ -50,7 +52,8 @@ namespace GSC.Api.Controllers.Volunteer
             IRolePermissionRepository rolePermissionRepository,
             IAttendanceRepository attendanceRepository,
             IVolunteerSummaryReport volunteerSummaryReport,
-            IVolunteerFingerRepository volunteerFingerRepository)
+            IVolunteerFingerRepository volunteerFingerRepository,
+            IScreeningTemplateValueRepository screeningTemplateValueRepository)
         {
             _volunteerRepository = volunteerRepository;
             _uow = uow;
@@ -63,6 +66,7 @@ namespace GSC.Api.Controllers.Volunteer
             _attendanceRepository = attendanceRepository;
             _volunteerSummaryReport = volunteerSummaryReport;
             _volunteerFingerRepository = volunteerFingerRepository;
+            _screeningTemplateValueRepository = screeningTemplateValueRepository;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -274,6 +278,15 @@ namespace GSC.Api.Controllers.Volunteer
 
             if (record == null)
                 return NotFound();
+
+            var isEligible = _screeningTemplateValueRepository.IsEligible(volunteerId);
+
+            if (!isEligible)
+            {
+                ModelState.AddModelError("Message", "Volunteer not Eligible for Randomization number");
+                return BadRequest(ModelState);
+            }
+
             record.RandomizationNumber = randomizationNumber;
             var validate = _volunteerRepository.DuplicateRandomizationNumber(record);
             if (!string.IsNullOrEmpty(validate))

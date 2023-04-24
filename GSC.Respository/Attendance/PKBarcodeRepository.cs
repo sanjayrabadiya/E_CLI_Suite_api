@@ -69,12 +69,12 @@ namespace GSC.Respository.Attendance
             {
                 for (int i = 1; i <= objSave.PKBarcodeOption; i++)
                 {
-                    barcode = barcode + "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + "0" + i + ",";
+                    barcode = barcode + "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + "0" + i + ",";
                 }
             }
             else
             {
-                barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
+                barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode;
             }
             return barcode.TrimEnd(',');
         }
@@ -129,7 +129,7 @@ namespace GSC.Respository.Attendance
                                          .ThenInclude(x => x.ScreeningEntry)
                                          .ThenInclude(x => x.Attendance)
                                          .ThenInclude(x => x.Volunteer)
-                                         .Where(x => x.ProjectDesignTemplateId == templateId && x.Status < Helper.ScreeningTemplateStatus.Submitted && x.ScreeningVisit.ScreeningEntry.ProjectId== project).Select(x =>
+                                         .Where(x => x.ProjectDesignTemplateId == templateId && x.Status < Helper.ScreeningTemplateStatus.Submitted && x.ScreeningVisit.ScreeningEntry.ProjectId== project && x.DeletedDate == null).Select(x =>
                                        new BarcodeDataEntrySubject
                                        {
                                            VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo + " " + x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
@@ -155,7 +155,7 @@ namespace GSC.Respository.Attendance
                     x.PKBarcodeOption = _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
                     x.ProjectAttendanceBarcodeString = _context.PKBarcode.Where(r => r.SiteId == siteId && r.VisitId==x.ProjectDesignVisitId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().BarcodeString;
                 }
-                else if (generationType == BarcodeGenerationType.DossingBarcode)
+                else if (generationType == BarcodeGenerationType.DosingBarcode)
                     x.PKBarcodeOption = _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
             });
 
@@ -168,7 +168,7 @@ namespace GSC.Respository.Attendance
                 return All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
             else if (generationType == BarcodeGenerationType.SampleBarcode)
                 return _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
-            else if (generationType == BarcodeGenerationType.DossingBarcode)
+            else if (generationType == BarcodeGenerationType.DosingBarcode)
                 return _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
             else
                 return "";

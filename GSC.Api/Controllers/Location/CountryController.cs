@@ -102,7 +102,7 @@ namespace GSC.Api.Controllers.Location
             }
 
             /* Added by swati for effective Date on 02-06-2019 */
-            _countryRepository.AddOrUpdate(country);
+            _countryRepository.Update(country);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Country failed on save.");
 

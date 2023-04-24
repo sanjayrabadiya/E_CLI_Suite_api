@@ -82,11 +82,11 @@ namespace GSC.Respository.Attendance
                 var content = randomization.SupplyManagementUploadFileDetail.TreatmentType;
                 if (content.Contains(','))
                 {
-                    barcode = "DB" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + content[0];
+                    barcode = "DB" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + content[0];
                 }
                 else
                 {
-                    barcode = "DB" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + content;
+                    barcode = "DB" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + content;
                 }
             }
             return barcode;

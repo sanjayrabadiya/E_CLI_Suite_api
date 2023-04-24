@@ -398,6 +398,13 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISampleBarcodeRepository, SampleBarcodeRepository>();
             services.AddScoped<IDossingBarcodeRepository, DossingBarcodeRepository>();
             services.AddScoped<IPharmacyReportRepository, PharmacyReportRepository>();
+            services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
+            services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
+            services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();
+           // services.AddScoped<ICustomReportRepository, CustomReportRepository>();
+            services.AddScoped<ICentrifugationRepository, CentrifugationRepository>();
+            services.AddScoped<ICentrifugationDetailsRepository, CentrifugationDetailsRepository>();
+            services.AddScoped<ISampleSeparationRepository, SampleSeparationRepository>();
         }
     }
 }

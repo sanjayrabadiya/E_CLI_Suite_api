@@ -769,6 +769,7 @@ namespace GSC.Helper
         [Description("Terminated")] Terminated = 3,
         [Description("On Hold")] OnHold = 4,
         [Description("Close Out")] CloseOut = 5,
+        [Description("Active")] Action = 6,
     }
 
 
@@ -1056,7 +1057,7 @@ namespace GSC.Helper
         [Description("Subject Barcode")] SubjectBarcode = 1,
         [Description("Pk Barcode")] PkBarocde = 2,
         [Description("Sample Barcode")] SampleBarcode = 3,
-        [Description("Dossing Barcode")] DossingBarcode = 4
+        [Description("Dosing Barcode")] DosingBarcode = 4
     }
 
     public enum ProductAccountabilityActions : int
@@ -1066,5 +1067,21 @@ namespace GSC.Helper
         [Description("Pack")] KitPack = 3,
         [Description("Kit")] Kit = 4,
         [Description("Individual")] Individual = 5
+    }
+
+    public enum CentrifugationFilter : short
+    {
+        [Description("Centrifuged")] Centrifugation = 1,
+        [Description("Remaining")] Remaining = 2,
+        [Description("Missed")] Missed = 3,
+        [Description("Recentrifuged")] ReCentrifugation = 4
+    }
+
+    public enum SampleSeparationFilter : short
+    {
+        [Description("Separated")] Separated = 1,
+        [Description("Remaining")] Remaining = 2,
+        [Description("Missed")] Missed = 3,
+        [Description("Hemolized")] Hemolized = 4
     }
 }

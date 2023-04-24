@@ -519,12 +519,14 @@ namespace GSC.Respository.ProjectRight
                 var temCountries = new List<string>();
 
                 var countries = _context.Project
-               .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
-               {
-                   Id = (int)r.ManageSite.City.State.CountryId,
-                   CountryName = r.ManageSite.City.State.Country.CountryName,
-                   CountryCode = r.ManageSite.City.State.Country.CountryCode
-               }).Distinct().OrderBy(o => o.CountryCode).ToList();
+              .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
+              {
+                  Id = (int)r.ManageSite.City.State.CountryId,
+                  CountryName = r.ManageSite.City.State.Country.CountryName,
+                  CountryCode = r.ManageSite.City.State.Country.CountryCode
+              }).Distinct().OrderBy(o => o.CountryCode).ToList();
+
+
 
                 //var countries = _context.Project.Include(i => i.Country).Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null);
 
@@ -607,8 +609,8 @@ namespace GSC.Respository.ProjectRight
 
                 //if (!projectDocumentReview.IsReview)
                 //{
-                    var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-                    projectDocumentReview.DocumentPath = documentUrl + projectDocumentReview.DocumentPath;
+                var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+                projectDocumentReview.DocumentPath = documentUrl + projectDocumentReview.DocumentPath;
                 //}
             });
 
@@ -630,7 +632,7 @@ namespace GSC.Respository.ProjectRight
             return countTraining;
         }
 
-        
+
 
 
     }

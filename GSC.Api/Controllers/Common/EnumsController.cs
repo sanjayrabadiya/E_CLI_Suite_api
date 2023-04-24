@@ -1024,5 +1024,33 @@ namespace GSC.Api.Controllers.Common
             return Ok(pkenum);
         }
 
+        [HttpGet]
+        [Route("GetCentrifugationFilter")]
+        public IActionResult GetCentrifugationFilter()
+        {
+            var centri = Enum.GetValues(typeof(CentrifugationFilter))
+                .Cast<CentrifugationFilter>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
+
+        [HttpGet]
+        [Route("GetSampleSeparationFilter")]
+        public IActionResult GetSampleSeparationFilter()
+        {
+            var centri = Enum.GetValues(typeof(SampleSeparationFilter))
+                .Cast<SampleSeparationFilter>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
+
     }
 }

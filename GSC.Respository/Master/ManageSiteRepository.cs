@@ -52,11 +52,8 @@ namespace GSC.Respository.Master
 
         public string Duplicate(ManageSite objSave)
         {
-            foreach (var item in objSave.ManageSiteAddress)
-            {
-                if (_context.ManageSiteAddress.Any(x => x.Id != item.Id && x.SiteAddress == item.SiteAddress.Trim() && x.DeletedDate == null))
-                    return "Duplicate Site Address: " + item.SiteAddress;
-            }
+            if (All.Any(x => x.Id != objSave.Id && x.SiteAddress == objSave.SiteAddress.Trim() && x.DeletedDate == null))
+                return "Duplicate Site Address: " + objSave.SiteAddress;
 
             return "";
         }
@@ -124,23 +121,20 @@ namespace GSC.Respository.Master
             }
         }
 
-
-
         public List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter)
         {
             var experiences = new List<ExperienceModel>();
             var designIds = _context.DesignTrial.Where(x => x.TrialTypeId == experienceFillter.TrialTypeId && x.DeletedDate == null).Select(s => s.Id).ToList();
 
-            var data = (from p in _context.Project.Where(q => q.DeletedDate == null && q.ParentProjectId == null && _context.ProjectRight.Any(c => c.DeletedDate == null
-                                                                && c.ProjectId == q.Id
-                                                                && c.UserId == _jwtTokenAccesser.UserId
-                                                                && c.RoleId == _jwtTokenAccesser.RoleId)).Include(x => x.DesignTrial)
+            var data = (from p in _context.Project.Where(q => q.DeletedDate == null && q.ParentProjectId == null && _context.Users.Any(x => x.Id == q.CreatedBy)).Include(x => x.DesignTrial)
                                                           .Include(x => x.Drug)
                                                           .Include(x => x.RegulatoryType)
                                                           .Include(x => x.DesignTrial.TrialType)
+                                                          .Include(x => x.Client)
                                                           .Where(x => (experienceFillter.DesignTrialId != null ? x.DesignTrialId == experienceFillter.DesignTrialId : true)
                                                           && (experienceFillter.TrialTypeId != null ? designIds.Contains(x.DesignTrialId) : true)
                                                           && (experienceFillter.RegulatoryId != null ? x.RegulatoryTypeId == experienceFillter.RegulatoryId : true)
+                                                          && (experienceFillter.ClientId != null ? x.ClientId == experienceFillter.ClientId : true)
                                                           && (experienceFillter.DrugId != null ? x.DrugId == experienceFillter.DrugId : true))
                         join ps in _context.ProjectStatus.Where(q => q.DeletedDate == null) on p.Id equals ps.ProjectId into p_ps
                         from subProjectStatus in p_ps.DefaultIfEmpty()
@@ -185,13 +179,16 @@ namespace GSC.Respository.Master
                 exp.TypeOfTrial = pro.Project.DesignTrial.DesignTrialName;
                 exp.TargetedSubject = pro.ChildProject?.AttendanceLimit ?? 0;
                 exp.CountryId = pro.ChildProject?.CountryId ?? 0;
+                exp.ProjectStatusId = pro.ProjectStatus?.Status;
+                exp.ClientName = pro.Project.Client?.ClientName ?? "";
                 experiences.Add(exp);
             }
 
 
 
             var fillterData = experiences.Where(x => (experienceFillter.StartDate != null && experienceFillter.EndDate == null) ? x.StartDate > experienceFillter.StartDate : (experienceFillter.StartDate == null && experienceFillter.EndDate != null) ? x.EndDate < experienceFillter.EndDate : (experienceFillter.StartDate != null && experienceFillter.EndDate != null) ? x.StartDate > experienceFillter.StartDate && x.EndDate < experienceFillter.EndDate : true
-            && (experienceFillter.InvestigatorId != null ? x.InvestigatorId == experienceFillter.InvestigatorId : true));
+            && (experienceFillter.InvestigatorId != null ? x.InvestigatorId == experienceFillter.InvestigatorId : true)
+            && (experienceFillter.ProjectStatusId != null ? x.ProjectStatusId == experienceFillter.ProjectStatusId : true));
 
             var groupData = fillterData.GroupBy(x => x.ProjectId)
                 .Select(s => new ExperienceModel()
@@ -211,7 +208,8 @@ namespace GSC.Respository.Master
                     TypeOfTrial = s.FirstOrDefault().TypeOfTrial,
                     TherapeuticIndication = s.FirstOrDefault().TherapeuticIndication,
                     NoOfCountry = s.Where(q => q.CountryId > 0).Select(s => s.CountryId).Distinct().Count(),
-                    StudyCode = s.FirstOrDefault().StudyCode
+                    StudyCode = s.FirstOrDefault().StudyCode,
+                    ClientName = s.FirstOrDefault().ClientName
                 });
 
             return groupData.ToList();

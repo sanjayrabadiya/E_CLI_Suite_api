@@ -1,5 +1,7 @@
-﻿using GSC.Common.Base;
+﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using GSC.Common.Base;
 using GSC.Common.Common;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Master
