@@ -10,8 +10,10 @@ using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
+using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -1487,6 +1489,89 @@ namespace GSC.Respository.Screening
                                 x.ProjectDesignVariable.ProjectDesignTemplate.Domain.DomainCode == "EC01" &&
                                 x.ProjectDesignVariable.Values.Any(r => r.ValueCode == "01")
                                 && x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == VolunteerId);
+        }
+
+        public void UpdateDefaultValueForDosing(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId,bool IsDosing)
+        {
+            var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
+            if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
+                return;
+
+            var templateVariable = variableList.Where(r => !screeningDesignVariableId.Contains(r.Id)
+            && r.CollectionSource != CollectionSources.HorizontalScale
+            ).ToList();
+
+
+            // Save date for the default
+            if (templateVariable.Count != 0)
+            {
+                var screeningTemplateValue = new ScreeningTemplateValue
+                {
+                    ScreeningTemplateId = screeningTemplateId,
+                    ProjectDesignVariableId = variableList[0].Id,
+                    Value = _jwtTokenAccesser.GetClientDate().ToString("MM/dd/yyyy HH:mm:ss"),
+                };
+
+                Add(screeningTemplateValue);
+
+                var audit = new ScreeningTemplateValueAudit
+                {
+                    ScreeningTemplateValue = screeningTemplateValue,
+                    Value = string.IsNullOrEmpty(variableList[0].DefaultValue) ? "" : variableList[0].DefaultValue,
+                    OldValue = null,
+                    Note = "Submitted with actual date by scan barcode."
+                };
+                _screeningTemplateValueAuditRepository.Save(audit);
+
+                if (IsDosing)
+                {
+                    var TemplateVariableProductType = variableList.Where(r => r.VariableCode == "PT").FirstOrDefault();
+
+                    if (TemplateVariableProductType != null)
+                    {
+                        var visitID = _context.ScreeningTemplate
+                            .Include(c => c.ScreeningVisit)
+                            .Where(x => x.Id == screeningTemplateId).Select(r => r.ScreeningVisit.ProjectDesignVisitId).FirstOrDefault();
+                        if (visitID != null)
+                        {
+                            var RandomizationNumber = _context.ScreeningTemplate
+                                .Include(c => c.ScreeningVisit)
+                                .ThenInclude(c => c.ScreeningEntry)
+                                .ThenInclude(c => c.Attendance)
+                                .ThenInclude(c => c.Volunteer)
+                                .Where(x => x.Id == screeningTemplateId)
+                                .Select(r => r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.RandomizationNumber).FirstOrDefault();
+                            if (RandomizationNumber != null)
+                            {
+                                var randomization = _context.SupplyManagementUploadFileVisit.Include(x => x.SupplyManagementUploadFileDetail)
+                                .Where(q => q.ProjectDesignVisitId == visitID &&
+                                    q.SupplyManagementUploadFileDetail.RandomizationNo == Convert.ToInt32(RandomizationNumber)).FirstOrDefault();
+
+                                var content = randomization.SupplyManagementUploadFileDetail.TreatmentType;
+
+                                var screeningTValue = new ScreeningTemplateValue
+                                {
+                                    ScreeningTemplateId = screeningTemplateId,
+                                    ProjectDesignVariableId = TemplateVariableProductType.Id,
+                                    Value = content,
+                                };
+
+                                Add(screeningTValue);
+
+                                var saudit = new ScreeningTemplateValueAudit
+                                {
+                                    ScreeningTemplateValue = screeningTValue,
+                                    Value = string.IsNullOrEmpty(TemplateVariableProductType.DefaultValue) ? "" : TemplateVariableProductType.DefaultValue,
+                                    OldValue = null,
+                                    Note = "Submitted with product type by scan barcode."
+                                };
+                                _screeningTemplateValueAuditRepository.Save(saudit);
+                            }
+                        }
+                    }
+                }
+            }
+            _context.Save();
         }
     }
 }
