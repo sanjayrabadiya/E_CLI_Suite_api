@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.Etmf
             var validate = _projectWorkplaceDetailRepository.FindByInclude(t => t.DeletedDate == null && t.ProjectWorkPlace.ProjectId == (ParentProject != null ? ParentProject : ProjectId));
             if (validate.Count() == 0)
             {
-                ModelState.AddModelError("Message", "Worksplace Not Created.");
+                ModelState.AddModelError("Message", "Workplace is not created");
                 return BadRequest(ModelState);
             }
             var permissionDtos = _etmfUserPermissionRepository.GetByUserId(UserId, roleId, ProjectId, ParentProject);
