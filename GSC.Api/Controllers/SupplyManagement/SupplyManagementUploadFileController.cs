@@ -124,5 +124,16 @@ namespace GSC.Api.Controllers.SupplyManagement
             var productVerification = _supplyManagementUploadFileRepository.CheckUploadApproalPending(ProjectId, SiteId, CountryId);
             return Ok(productVerification);
         }
+        [HttpGet("Checknumbersetting/{ProjectId}")]
+        public IActionResult Checknumbersetting(int ProjectId)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == ProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                return Ok(false);
+            }
+            return Ok(true);
+        }
+
     }
 }

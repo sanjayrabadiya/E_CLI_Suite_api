@@ -143,8 +143,10 @@ namespace GSC.Data.Dto.Configuration
 
     public class ProductAccountabilityCentralReport
     {
+        public int Id { get; set; }
         public string ProjectCode { get; set; }
         public string ProductTypeCode { get; set; }
+        public string KitNo { get; set; }
         public string VisitName { get; set; }
         public string SiteCode { get; set; }
         public string ActionName { get; set; }
@@ -153,6 +155,8 @@ namespace GSC.Data.Dto.Configuration
         public string StorageLocation { get; set; }
         public string StorageConditionTemprature { get; set; }
         public int RetentionQty { get; set; }
+
+        public int RequestedQty { get; set; }
         public int UsedVerificationQty { get; set; }
         public string LotBatchNo { get; set; }
         public DateTime? RetestExpiryDate { get; set; }
@@ -165,6 +169,22 @@ namespace GSC.Data.Dto.Configuration
         public string ReceiptStatus { get; set; }
         public int SiteId { get; set; }
         public int StudyProductTypeId { get; set; }
+        public KitStatus Status { get; set; }
+
+        public KitStatus? PreStatus { get; set; }
+
+        public string KitStatus { get; set; }
+
+        public int? ToSiteId { get; set; }
+
+        public string RequestedFrom { get; set; }
+        public string RequestedTo { get; set; }
+
+        public string Type { get; set; }
+
+        public string CourierName { get; set; }
+
+        public string TrackingNumber { get; set; }
     }
 
     public class ProductAccountabilityCentralReportSearch

@@ -12,5 +12,9 @@ namespace GSC.Respository.Reports
         FileStreamResult GetRandomizationKitReport(RandomizationIWRSReport randomizationIWRSReport);
 
         FileStreamResult GetProductAccountabilityCentralReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
+
+        FileStreamResult GetProductAccountabilitySiteReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
+
+        FileStreamResult GetProductShipmentReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
     }
 }

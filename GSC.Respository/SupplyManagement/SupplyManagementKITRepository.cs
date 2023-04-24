@@ -567,7 +567,8 @@ namespace GSC.Respository.SupplyManagement
         public List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
-
+            if (setting == null)
+              return  new List<SupplyManagementKITReturnGridDto>();
             if (setting.KitCreationType == KitCreationType.KitWise)
             {
                 var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Include(x => x.SupplyManagementKIT)

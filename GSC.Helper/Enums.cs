@@ -919,7 +919,7 @@ namespace GSC.Helper
     }
     public enum KitStatus : int
     {
-        [Description("Allocation Pending")] AllocationPending = 1,
+        [Description("Created")] AllocationPending = 1,
         [Description("Shipped")] Shipped = 2,
         [Description("Returned")] Returned = 3,
         [Description("Missing")] Missing = 4,
