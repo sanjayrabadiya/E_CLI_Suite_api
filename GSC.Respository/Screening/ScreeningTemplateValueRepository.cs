@@ -1502,6 +1502,9 @@ namespace GSC.Respository.Screening
             // Save date for the default
             if (templateVariable.Count != 0)
             {
+                var screeningDesignVariable = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == variableList[0].Id)
+                    .Select(r => r.ProjectDesignVariableId).ToList();
+
                 var screeningTemplateValue = new ScreeningTemplateValue
                 {
                     ScreeningTemplateId = screeningTemplateId,
@@ -1509,12 +1512,17 @@ namespace GSC.Respository.Screening
                     Value = _jwtTokenAccesser.GetClientDate().ToString("MM/dd/yyyy HH:mm:ss"),
                 };
 
-                Add(screeningTemplateValue);
+                if (screeningDesignVariable.Count == 0 || screeningDesignVariable == null)
+                    Add(screeningTemplateValue);
+                else
+                    Update(screeningTemplateValue);
+
+                //Add(screeningTemplateValue);
 
                 var audit = new ScreeningTemplateValueAudit
                 {
                     ScreeningTemplateValue = screeningTemplateValue,
-                    Value = string.IsNullOrEmpty(variableList[0].DefaultValue) ? "" : variableList[0].DefaultValue,
+                    Value = null,
                     OldValue = null,
                     Note = "Submitted with actual date by scan barcode."
                 };
@@ -1546,6 +1554,9 @@ namespace GSC.Respository.Screening
 
                                 var content = randomization.SupplyManagementUploadFileDetail.TreatmentType;
 
+                                var screeningDesignVariablePT = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == TemplateVariableProductType.Id)
+                    .Select(r => r.ProjectDesignVariableId).ToList();
+
                                 var screeningTValue = new ScreeningTemplateValue
                                 {
                                     ScreeningTemplateId = screeningTemplateId,
@@ -1553,12 +1564,17 @@ namespace GSC.Respository.Screening
                                     Value = content,
                                 };
 
-                                Add(screeningTValue);
+                                if (screeningDesignVariable.Count == 0 || screeningDesignVariable == null)
+                                    Add(screeningTValue);
+                                else
+                                    Update(screeningTValue);
+
+                              //  Add(screeningTValue);
 
                                 var saudit = new ScreeningTemplateValueAudit
                                 {
                                     ScreeningTemplateValue = screeningTValue,
-                                    Value = string.IsNullOrEmpty(TemplateVariableProductType.DefaultValue) ? "" : TemplateVariableProductType.DefaultValue,
+                                    Value = null,
                                     OldValue = null,
                                     Note = "Submitted with product type by scan barcode."
                                 };
