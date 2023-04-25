@@ -1502,36 +1502,36 @@ namespace GSC.Respository.Screening
             // Save date for the default
             if (templateVariable.Count != 0)
             {
-                var screeningDesignVariable = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == variableList[0].Id)
-                    .Select(r => r.Id).FirstOrDefault();
+                //var screeningDesignVariable = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == variableList[0].Id)
+                //    .Select(r => r.Id).FirstOrDefault();
 
-                if (variableList[0].CollectionSource == CollectionSources.DateTime || variableList[0].CollectionSource == CollectionSources.Date || variableList[0].CollectionSource == CollectionSources.Time)
-                {
-                    var screeningTemplateValue = new ScreeningTemplateValue
-                    {
-                        ScreeningTemplateId = screeningTemplateId,
-                        ProjectDesignVariableId = variableList[0].Id,
-                        Value = _jwtTokenAccesser.GetClientDate().ToString("MM/dd/yyyy HH:mm:ss"),
-                    };
+                //if (variableList[0].CollectionSource == CollectionSources.DateTime || variableList[0].CollectionSource == CollectionSources.Date || variableList[0].CollectionSource == CollectionSources.Time)
+                //{
+                //    var screeningTemplateValue = new ScreeningTemplateValue
+                //    {
+                //        ScreeningTemplateId = screeningTemplateId,
+                //        ProjectDesignVariableId = variableList[0].Id,
+                //        Value = _jwtTokenAccesser.GetClientDate().ToString("MM/dd/yyyy HH:mm:ss"),
+                //    };
 
-                    if (screeningDesignVariable == 0)
-                        Add(screeningTemplateValue);
-                    else
-                    {
-                        screeningTemplateValue.Id = screeningDesignVariable;
-                        Update(screeningTemplateValue);
-                    }
-                    //Add(screeningTemplateValue);
+                //    if (screeningDesignVariable == 0)
+                //        Add(screeningTemplateValue);
+                //    else
+                //    {
+                //        screeningTemplateValue.Id = screeningDesignVariable;
+                //        Update(screeningTemplateValue);
+                //    }
+                //    //Add(screeningTemplateValue);
 
-                    var audit = new ScreeningTemplateValueAudit
-                    {
-                        ScreeningTemplateValue = screeningTemplateValue,
-                        Value = null,
-                        OldValue = null,
-                        Note = "Submitted with actual date by scan barcode."
-                    };
-                    _screeningTemplateValueAuditRepository.Save(audit);
-                }
+                //    var audit = new ScreeningTemplateValueAudit
+                //    {
+                //        ScreeningTemplateValue = screeningTemplateValue,
+                //        Value = null,
+                //        OldValue = null,
+                //        Note = "Submitted with actual date by scan barcode."
+                //    };
+                //    _screeningTemplateValueAuditRepository.Save(audit);
+                //}
                 if (IsDosing)
                 {
                     var TemplateVariableProductType = variableList.Where(r => r.VariableCode == "PT").FirstOrDefault();
