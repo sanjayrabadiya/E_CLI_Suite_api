@@ -1571,8 +1571,10 @@ namespace GSC.Respository.Screening
                                 if (screeningDesignVariablePT == 0)
                                     Add(screeningTValue);
                                 else
+                                {
+                                    screeningTValue.Id = screeningDesignVariablePT;
                                     Update(screeningTValue);
-
+                                }
                               //  Add(screeningTValue);
 
                                 var saudit = new ScreeningTemplateValueAudit
