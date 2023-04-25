@@ -1494,13 +1494,10 @@ namespace GSC.Respository.Screening
         public void UpdateDefaultValueForDosing(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId,bool IsDosing)
         {
             var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
-            if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
-                return;
+            //if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
+            //    return;
 
-            var templateVariable = variableList.Where(r => !screeningDesignVariableId.Contains(r.Id)
-            && r.CollectionSource != CollectionSources.HorizontalScale
-            ).ToList();
-
+            var templateVariable = variableList.ToList();
 
             // Save date for the default
             if (templateVariable.Count != 0)
