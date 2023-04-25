@@ -455,12 +455,12 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetTemplateForBarcode/{id}/{projectDesignTemplateId}/{isDosing}")]
-        public IActionResult GetTemplateForBarcode([FromRoute] int id, int projectDesignTemplateId, bool isDosing)
+        [Route("GetTemplateForBarcode/{id}/{projectDesignTemplateId}/{isDosing}/{firstTime}")]
+        public IActionResult GetTemplateForBarcode([FromRoute] int id, int projectDesignTemplateId, bool isDosing, bool firstTime)
         {
             var designTemplate = _projectDesignTemplateRepository.GetTemplate(projectDesignTemplateId);
 
-            return Ok(_screeningTemplateRepository.GetTemplateForBarcode(designTemplate, id, isDosing));
+            return Ok(_screeningTemplateRepository.GetTemplateForBarcode(designTemplate, id, isDosing, firstTime));
         }
 
     }

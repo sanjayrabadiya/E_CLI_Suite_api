@@ -1588,7 +1588,7 @@ namespace GSC.Respository.Screening
             }
         }
 
-        public DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing)
+        public DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing,bool firstTime)
         {
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
 
@@ -1621,6 +1621,7 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
                 _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
 
+            if(!firstTime)
             _screeningTemplateValueRepository.UpdateDefaultValueForDosing(designTemplateDto.Variables, screeningTemplateId,IsDosing);
 
             SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);

@@ -46,6 +46,6 @@ namespace GSC.Respository.Screening
 
         void DeleteRepeatVisitTemplate(int Id);
         IList<ReviewDto> GetScreeningReviewReportList(ScreeningQuerySearchDto filters);
-        DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing);
+        DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing, bool firstTime);
     }
 }

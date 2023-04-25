@@ -1503,31 +1503,35 @@ namespace GSC.Respository.Screening
             if (templateVariable.Count != 0)
             {
                 var screeningDesignVariable = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == variableList[0].Id)
-                    .Select(r => r.ProjectDesignVariableId).ToList();
+                    .Select(r => r.Id).FirstOrDefault();
 
-                var screeningTemplateValue = new ScreeningTemplateValue
+                if (variableList[0].CollectionSource == CollectionSources.DateTime || variableList[0].CollectionSource == CollectionSources.Date || variableList[0].CollectionSource == CollectionSources.Time)
                 {
-                    ScreeningTemplateId = screeningTemplateId,
-                    ProjectDesignVariableId = variableList[0].Id,
-                    Value = _jwtTokenAccesser.GetClientDate().ToString("MM/dd/yyyy HH:mm:ss"),
-                };
+                    var screeningTemplateValue = new ScreeningTemplateValue
+                    {
+                        ScreeningTemplateId = screeningTemplateId,
+                        ProjectDesignVariableId = variableList[0].Id,
+                        Value = _jwtTokenAccesser.GetClientDate().ToString("MM/dd/yyyy HH:mm:ss"),
+                    };
 
-                if (screeningDesignVariable.Count == 0 || screeningDesignVariable == null)
-                    Add(screeningTemplateValue);
-                else
-                    Update(screeningTemplateValue);
+                    if (screeningDesignVariable == 0)
+                        Add(screeningTemplateValue);
+                    else
+                    {
+                        screeningTemplateValue.Id = screeningDesignVariable;
+                        Update(screeningTemplateValue);
+                    }
+                    //Add(screeningTemplateValue);
 
-                //Add(screeningTemplateValue);
-
-                var audit = new ScreeningTemplateValueAudit
-                {
-                    ScreeningTemplateValue = screeningTemplateValue,
-                    Value = null,
-                    OldValue = null,
-                    Note = "Submitted with actual date by scan barcode."
-                };
-                _screeningTemplateValueAuditRepository.Save(audit);
-
+                    var audit = new ScreeningTemplateValueAudit
+                    {
+                        ScreeningTemplateValue = screeningTemplateValue,
+                        Value = null,
+                        OldValue = null,
+                        Note = "Submitted with actual date by scan barcode."
+                    };
+                    _screeningTemplateValueAuditRepository.Save(audit);
+                }
                 if (IsDosing)
                 {
                     var TemplateVariableProductType = variableList.Where(r => r.VariableCode == "PT").FirstOrDefault();
@@ -1555,7 +1559,7 @@ namespace GSC.Respository.Screening
                                 var content = randomization.SupplyManagementUploadFileDetail.TreatmentType;
 
                                 var screeningDesignVariablePT = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == TemplateVariableProductType.Id)
-                    .Select(r => r.ProjectDesignVariableId).ToList();
+                    .Select(r => r.Id).FirstOrDefault();
 
                                 var screeningTValue = new ScreeningTemplateValue
                                 {
@@ -1564,7 +1568,7 @@ namespace GSC.Respository.Screening
                                     Value = content,
                                 };
 
-                                if (screeningDesignVariable.Count == 0 || screeningDesignVariable == null)
+                                if (screeningDesignVariablePT == 0)
                                     Add(screeningTValue);
                                 else
                                     Update(screeningTValue);
