@@ -202,6 +202,7 @@ namespace GSC.Respository.SupplyManagement
         }
         public void Assignkits(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto)
         {
+            var request = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentdata.FromProject.ParentProjectId).FirstOrDefault();
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
@@ -222,6 +223,15 @@ namespace GSC.Respository.SupplyManagement
                             history.Status = KitStatus.Shipped;
                             history.RoleId = _jwtTokenAccesser.RoleId;
                             _context.SupplyManagementKITDetailHistory.Add(history);
+
+                            var kitdata = _context.SupplyManagementKIT.Where(x => x.Id == kit.SupplyManagementKITId).FirstOrDefault();
+                            if (request.IsSiteRequest && kitdata != null)
+                            {
+                                kitdata.ToSiteId = request.FromProjectId;
+                                _context.SupplyManagementKIT.Update(kitdata);
+                                _context.Entry(kit).State = EntityState.Detached;
+                            }
+
                             _uow.Save();
                         }
                     }
@@ -236,6 +246,10 @@ namespace GSC.Respository.SupplyManagement
 
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
+                            if (request.IsSiteRequest)
+                            {
+                                kit.ToSiteId = request.FromProjectId;
+                            }
                             _context.SupplyManagementKITSeries.Update(kit);
 
                             SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
