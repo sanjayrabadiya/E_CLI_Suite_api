@@ -32,5 +32,7 @@ namespace GSC.Respository.Screening
         void UpdateTemplateConfigurationUploadRandomizationValue(DesignScreeningTemplateDto designScreeningTemplateDto, int screeningTemplateId);
 
         bool IsEligible(int VolunteerId);
+
+        void UpdateDefaultValueForDosing(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId, bool IsDosing);
     }
 }

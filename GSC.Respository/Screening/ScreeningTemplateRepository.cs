@@ -1588,6 +1588,63 @@ namespace GSC.Respository.Screening
             }
         }
 
+        public DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing,bool firstTime)
+        {
+            var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
+
+            var statusId = (int)screeningTemplateBasic.Status;
+
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningTemplateBasic.ProjectDesignId);
+
+            designTemplateDto.ScreeningTemplateId = screeningTemplateId;
+            designTemplateDto.IsSubmittedButton = statusId < 3 && workflowlevel.IsStartTemplate;
+            designTemplateDto.IsUnSubmittedButton = screeningTemplateBasic.Status == ScreeningTemplateStatus.Submitted && workflowlevel.IsStartTemplate;
+
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Reviewed)
+                designTemplateDto.IsUnReviewedButton = workflowlevel.LevelNo == screeningTemplateBasic.LastReviewLevel;
+
+            if (workflowlevel.LevelNo >= 0 && designTemplateDto.IsRepeated)
+                designTemplateDto.IsRepeated = workflowlevel.IsStartTemplate;
+            //if (screeningTemplateBasic.ParentId != null)
+            //    designTemplateDto.IsRepeated = false;
+
+            designTemplateDto.MyReview = workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel;
+            designTemplateDto.ScreeningTemplateId = screeningTemplateBasic.Id;
+            designTemplateDto.ParentId = screeningTemplateBasic.ParentId;
+            designTemplateDto.IsLocked = screeningTemplateBasic.IsLocked;
+            designTemplateDto.Status = screeningTemplateBasic.Status;
+            designTemplateDto.StatusName = GetStatusName(screeningTemplateBasic, workflowlevel.LevelNo == screeningTemplateBasic.ReviewLevel, workflowlevel);
+
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+                _screeningTemplateValueRepository.UpdateDefaultValue(designTemplateDto.Variables, screeningTemplateId);
+
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+                _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
+
+            if(!firstTime)
+            _screeningTemplateValueRepository.UpdateDefaultValueForDosing(designTemplateDto.Variables, screeningTemplateId,IsDosing);
+
+            SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);
+
+            if (designTemplateDto.Status == ScreeningTemplateStatus.Pending && designTemplateDto.IsSchedule &&
+                (screeningTemplateBasic.PatientStatus == ScreeningPatientStatus.ScreeningFailure ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Withdrawal ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.Missed ||
+               screeningTemplateBasic.VisitStatus == ScreeningVisitStatus.OnHold))
+                designTemplateDto.IsSubmittedButton = false;
+
+            designTemplateDto.Variables.Where(x => x.IsEncrypt == true).ToList().ForEach(c =>
+            {
+                c.ScreeningValueOld = null;
+                c.ScreeningValue = null;
+                c.HasQueries = false;
+                c.WorkFlowButton = null;
+                c.EditCheckValidation = null;
+            });
+
+            return designTemplateDto;
+        }
+
     }
 }
 
