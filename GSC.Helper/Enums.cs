@@ -1064,8 +1064,8 @@ namespace GSC.Helper
     {
         [Description("Product Receipt")] ProductReciept = 1,
         [Description("Verification")] ProductVerification = 2,
-        [Description("Pack")] KitPack = 3,
-        [Description("Kit")] Kit = 4,
+        [Description("Kit Pack")] KitPack = 3,
+        [Description("Individual Kit")] Kit = 4,
         [Description("Individual")] Individual = 5
     }
 

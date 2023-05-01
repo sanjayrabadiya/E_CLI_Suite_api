@@ -152,7 +152,7 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
                 _screeningTemplateValueRepository.UpdateDefaultValue(designTemplateDto.Variables, screeningTemplateId);
 
-            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending || screeningTemplateBasic.Status == ScreeningTemplateStatus.InProcess)
                 _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
 
             SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);
@@ -1588,7 +1588,7 @@ namespace GSC.Respository.Screening
             }
         }
 
-        public DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing,bool firstTime)
+        public DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing, bool firstTime)
         {
             var screeningTemplateBasic = GetScreeningTemplateBasic(screeningTemplateId);
 
@@ -1621,8 +1621,8 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
                 _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
 
-            if(!firstTime)
-            _screeningTemplateValueRepository.UpdateDefaultValueForDosing(designTemplateDto.Variables, screeningTemplateId,IsDosing);
+            if (!firstTime)
+                _screeningTemplateValueRepository.UpdateDefaultValueForDosing(designTemplateDto.Variables, screeningTemplateId, IsDosing);
 
             SetScreeningValue(designTemplateDto, screeningTemplateBasic, workflowlevel);
 

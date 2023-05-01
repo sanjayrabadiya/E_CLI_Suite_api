@@ -217,8 +217,8 @@ namespace GSC.Respository.Screening
                             }
                             if (numbersetting.KitCreationType == KitCreationType.SequenceWise)
                             {
-                                var producttype = _context.SupplyManagementKITSeriesDetail.Include(x=>x.SupplyManagementKITSeries).Where(x => x.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
-                                  && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+                                var producttype = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Where(x => x.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                    && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
                                 value = producttype != null ? producttype.SupplyManagementKITSeries.KitNo : "";
                             }
                         }
@@ -229,10 +229,10 @@ namespace GSC.Respository.Screening
                             Value = value,
 
                         };
-                        if (screeningDesignVariableId.Count == 0 || screeningDesignVariableId == null)
+                        if (string.IsNullOrEmpty(variable.ScreeningValue))
                             Add(screeningTemplateValue);
 
-                        if (screeningDesignVariableId.Count == 0 || screeningDesignVariableId == null)
+                        if (string.IsNullOrEmpty(variable.ScreeningValue))
                         {
                             var audit = new ScreeningTemplateValueAudit
                             {
@@ -1491,7 +1491,7 @@ namespace GSC.Respository.Screening
                                 && x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == VolunteerId);
         }
 
-        public void UpdateDefaultValueForDosing(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId,bool IsDosing)
+        public void UpdateDefaultValueForDosing(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId, bool IsDosing)
         {
             var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
             //if (screeningDesignVariableId != null && screeningDesignVariableId.Count > 0)
@@ -1575,7 +1575,7 @@ namespace GSC.Respository.Screening
                                     screeningTValue.Id = screeningDesignVariablePT;
                                     Update(screeningTValue);
                                 }
-                              //  Add(screeningTValue);
+                                //  Add(screeningTValue);
 
                                 var saudit = new ScreeningTemplateValueAudit
                                 {

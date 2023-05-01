@@ -91,5 +91,12 @@ namespace GSC.Api.Controllers.Report
             }
             return _pharmacyReportRepository.GetProductShipmentReport(search);
         }
+
+        [HttpGet]
+        [Route("GetPharmacyStudyProductTypeDropDownPharmacyReport/{projectId}")]
+        public IActionResult GetPharmacyStudyProductTypeDropDownPharmacyReport(int projectId)
+        {
+            return Ok(_pharmacyReportRepository.GetPharmacyStudyProductTypeDropDownPharmacyReport(projectId));
+        }
     }
 }

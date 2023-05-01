@@ -16,5 +16,7 @@ namespace GSC.Respository.Reports
         FileStreamResult GetProductAccountabilitySiteReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
 
         FileStreamResult GetProductShipmentReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
+
+        List<DropDownDto> GetPharmacyStudyProductTypeDropDownPharmacyReport(int ProjectId);
     }
 }

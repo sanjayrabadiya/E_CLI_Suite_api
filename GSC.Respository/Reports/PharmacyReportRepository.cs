@@ -2,6 +2,7 @@ using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
@@ -387,6 +388,10 @@ namespace GSC.Respository.Reports
             if (randomizationIWRSReport.ActionType == ProductAccountabilityActions.Kit)
             {
                 list = list.Where(x => x.ActionName == "Kit").ToList();
+            }
+            if (randomizationIWRSReport.ActionType == ProductAccountabilityActions.Individual)
+            {
+                list = list.Where(x => x.ActionName == "Individual").ToList();
             }
             #region Excel Report Design
             using (var workbook = new XLWorkbook())
@@ -806,123 +811,125 @@ namespace GSC.Respository.Reports
                         shipmentobj.CourierName = shipment.CourierName;
                         shipmentobj.TrackingNumber = shipment.CourierTrackingNo;
                         list.Add(shipmentobj);
-                    }
-                    var receipt = _context.SupplyManagementReceipt.Where(s => s.SupplyManagementShipmentId == shipment.Id).FirstOrDefault();
-                    if (receipt != null)
-                    {
-                        if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
+
+                        var receipt = _context.SupplyManagementReceipt.Where(s => s.SupplyManagementShipmentId == shipment.Id).FirstOrDefault();
+                        if (receipt != null)
                         {
-                            var kitpack = _context.SupplyManagementKITSeries.Where(s => s.DeletedDate == null && s.SupplyManagementShipmentId == shipment.Id).ToList();
-
-                            if (kitpack.Count > 0)
+                            if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
                             {
-                                kitpack.ForEach(s =>
-                                {
-                                    ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
-                                    recieptobj.ProjectCode = project.ProjectCode;
-                                    recieptobj.RequestedFrom = x.FromProject.ProjectCode;
-                                    if (x.IsSiteRequest)
-                                    {
-                                        recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
-                                    }
-                                    else
-                                    {
-                                        recieptobj.RequestedTo = project.ProjectCode;
-                                    }
+                                var kitpack = _context.SupplyManagementKITSeries.Where(s => s.DeletedDate == null && s.SupplyManagementShipmentId == shipment.Id).ToList();
 
-                                    if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
+                                if (kitpack.Count > 0)
+                                {
+                                    kitpack.ForEach(s =>
                                     {
-                                        recieptobj.Type = "Kit pack";
-                                    }
-                                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
-                                    {
-                                        if (x.StudyProductTypeId > 0)
+                                        ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
+                                        recieptobj.ProjectCode = project.ProjectCode;
+                                        recieptobj.RequestedFrom = x.FromProject.ProjectCode;
+                                        if (x.IsSiteRequest)
                                         {
-                                            type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
+                                            recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
+                                        }
+                                        else
+                                        {
+                                            recieptobj.RequestedTo = project.ProjectCode;
+                                        }
+
+                                        if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
+                                        {
+                                            recieptobj.Type = "Kit pack";
+                                        }
+                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                                        {
+                                            if (x.StudyProductTypeId > 0)
                                             {
-                                                recieptobj.Type = "Kit";
-                                            }
-                                            else
-                                            {
-                                                recieptobj.Type = "Individual";
+                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
+                                                {
+                                                    recieptobj.Type = "Kit";
+                                                }
+                                                else
+                                                {
+                                                    recieptobj.Type = "Individual";
+                                                }
                                             }
                                         }
-                                    }
-                                    recieptobj.ActionDate = receipt.CreatedDate;
-                                    recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
-                                    recieptobj.ActionName = "Receipt";
-                                    recieptobj.CourierName = shipment.CourierName;
-                                    recieptobj.TrackingNumber = shipment.CourierTrackingNo;
-                                    recieptobj.KitNo = s.KitNo;
-                                    recieptobj.KitStatus = s.Status.GetDescription();
-                                    recieptobj.ProductTypeCode = s.TreatmentType;
-                                    recieptobj.Comments = s.Comments;
-                                    var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
-                                     .Where(s => s.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
-                                    if (visits.Count > 0)
-                                        recieptobj.VisitName = string.Join(",", visits.Distinct());
+                                        recieptobj.ActionDate = receipt.CreatedDate;
+                                        recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionName = "Receipt";
+                                        recieptobj.CourierName = shipment.CourierName;
+                                        recieptobj.TrackingNumber = shipment.CourierTrackingNo;
+                                        recieptobj.KitNo = s.KitNo;
+                                        recieptobj.KitStatus = s.Status.GetDescription();
+                                        recieptobj.ProductTypeCode = s.TreatmentType;
+                                        recieptobj.Comments = s.Comments;
+                                        var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
+                                         .Where(s => s.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
+                                        if (visits.Count > 0)
+                                            recieptobj.VisitName = string.Join(",", visits.Distinct());
 
-                                    list.Add(recieptobj);
-                                });
+                                        list.Add(recieptobj);
+                                    });
+                                }
                             }
-                        }
-                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
-                        {
-                            var kit = _context.SupplyManagementKITDetail.Include(a => a.SupplyManagementKIT).ThenInclude(a => a.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Where(s => s.DeletedDate == null && s.SupplyManagementShipmentId == shipment.Id).ToList();
-                            if (kit.Count > 0)
+                            if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
                             {
-                                kit.ForEach(s =>
+                                var kit = _context.SupplyManagementKITDetail.Include(a => a.SupplyManagementKIT).ThenInclude(a => a.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Where(s => s.DeletedDate == null && s.SupplyManagementShipmentId == shipment.Id).ToList();
+                                if (kit.Count > 0)
                                 {
-                                    ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
-                                    recieptobj.ProjectCode = project.ProjectCode;
-                                    recieptobj.RequestedFrom = x.FromProject.ProjectCode;
-                                    if (x.IsSiteRequest)
+                                    kit.ForEach(s =>
                                     {
-                                        recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
-                                    }
-                                    else
-                                    {
-                                        recieptobj.RequestedTo = project.ProjectCode;
-                                    }
-
-                                    if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
-                                    {
-                                        recieptobj.Type = "Kit pack";
-                                    }
-                                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
-                                    {
-                                        if (x.StudyProductTypeId > 0)
+                                        ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
+                                        recieptobj.ProjectCode = project.ProjectCode;
+                                        recieptobj.RequestedFrom = x.FromProject.ProjectCode;
+                                        if (x.IsSiteRequest)
                                         {
-                                            type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
+                                            recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
+                                        }
+                                        else
+                                        {
+                                            recieptobj.RequestedTo = project.ProjectCode;
+                                        }
+
+                                        if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
+                                        {
+                                            recieptobj.Type = "Kit pack";
+                                        }
+                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                                        {
+                                            if (x.StudyProductTypeId > 0)
                                             {
-                                                recieptobj.Type = "Kit";
-                                            }
-                                            else
-                                            {
-                                                recieptobj.Type = "Individual";
+                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
+                                                {
+                                                    recieptobj.Type = "Kit";
+                                                }
+                                                else
+                                                {
+                                                    recieptobj.Type = "Individual";
+                                                }
                                             }
                                         }
-                                    }
-                                    if (x.ProjectDesignVisit != null)
-                                    {
-                                        recieptobj.VisitName = x.ProjectDesignVisit.DisplayName;
-                                    }
-                                    recieptobj.ActionDate = receipt.CreatedDate;
-                                    recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
-                                    recieptobj.ActionName = "Receipt";
-                                    recieptobj.CourierName = shipment.CourierName;
-                                    recieptobj.TrackingNumber = shipment.CourierTrackingNo;
-                                    recieptobj.KitNo = s.KitNo;
-                                    recieptobj.KitStatus = s.Status.GetDescription();
-                                    recieptobj.ProductTypeCode = s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
-                                    recieptobj.Comments = s.Comments;
-                                    list.Add(recieptobj);
-                                });
+                                        if (x.ProjectDesignVisit != null)
+                                        {
+                                            recieptobj.VisitName = x.ProjectDesignVisit.DisplayName;
+                                        }
+                                        recieptobj.ActionDate = receipt.CreatedDate;
+                                        recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionName = "Receipt";
+                                        recieptobj.CourierName = shipment.CourierName;
+                                        recieptobj.TrackingNumber = shipment.CourierTrackingNo;
+                                        recieptobj.KitNo = s.KitNo;
+                                        recieptobj.KitStatus = s.Status.GetDescription();
+                                        recieptobj.ProductTypeCode = s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                                        recieptobj.Comments = s.Comments;
+                                        list.Add(recieptobj);
+                                    });
+                                }
                             }
                         }
                     }
+                   
 
                 });
             }
@@ -989,6 +996,12 @@ namespace GSC.Respository.Reports
                 return fileStreamResult;
             }
 
+        }
+
+        public List<DropDownDto> GetPharmacyStudyProductTypeDropDownPharmacyReport(int ProjectId)
+        {
+            return _context.ProductReceipt.Where(c => c.ProjectId == ProjectId && c.DeletedDate == null).Select(c => new DropDownDto { Id = c.PharmacyStudyProductType.Id, Value = c.PharmacyStudyProductType.ProductType.ProductTypeCode + "-" + c.PharmacyStudyProductType.ProductType.ProductTypeName })
+                .OrderBy(o => o.Value).Distinct().ToList();
         }
     }
 }
