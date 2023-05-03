@@ -752,14 +752,14 @@ namespace GSC.Helper
         [Description("Pending")] Pending = 1,
         [Description("Final")] Final = 2
     }
-
+    //Changes made by Sachin
     public enum MonitoringReportStatus : short
     {
-        [Description("Not Initiated")] NotInitiated = 1,
-        [Description("Initiated")] Initiated = 2,
-        [Description("Send For Review")] SendForReview = 3,
-        [Description("Query Generated")] QueryGenerated = 4,
-        [Description("Form Approved")] FormApproved = 5,
+        [Description("On Going")] OnGoing = 1,
+        //[Description("Ongoing")] Ongoing = 2,
+        [Description("Under Review")] UnderReview = 3,
+        [Description("Review In Progress")] ReviewInProgress = 4,
+        [Description("Approved")] Approved = 5,
     }
 
     public enum MonitoringSiteStatus : short

@@ -69,7 +69,8 @@ namespace GSC.Api.Controllers.CTMS
             _ctmsMonitoringReportReviewRepository.SaveTemplateReview(ctmsMonitoringReportReviewDto);
 
             var manageMonitoringReport = _ctmsMonitoringReportRepository.Find(ctmsMonitoringReportReviewDto[0].CtmsMonitoringReportId);
-            manageMonitoringReport.ReportStatus = MonitoringReportStatus.SendForReview;
+            //Changes made by Sachin
+            manageMonitoringReport.ReportStatus = MonitoringReportStatus.UnderReview;
             _ctmsMonitoringReportRepository.Update(manageMonitoringReport);
 
             if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
@@ -90,8 +91,9 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsMonitoringReportReview = _mapper.Map<CtmsMonitoringReportReview>(ctmsMonitoringReportReviewDto);
             _ctmsMonitoringReportReviewRepository.Update(ctmsMonitoringReportReview);
 
+            //Changes made by Sachin
             var ctmsMonitoringReport = _ctmsMonitoringReportRepository.Find(ctmsMonitoringReportReviewDto.CtmsMonitoringReportId);
-            ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.FormApproved;
+            ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.Approved;
             _ctmsMonitoringReportRepository.Update(ctmsMonitoringReport);
 
             var ctmsMonitoring = _ctmsMonitoringRepository.Find(ctmsMonitoringReport.CtmsMonitoringId);

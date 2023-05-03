@@ -61,7 +61,7 @@ namespace GSC.Respository.CTMS
                 ? ctmsMonitoringReportVariableValueQueryDto.Value
                 : ctmsMonitoringReportVariableValueQueryDto.ValueName;
 
-            var updateQueryStatus = ctmsMonitoringReportVariableValueQueryDto.Value == CtmsMonitoringReportVariableValueQuery.Value
+            var updateQueryStatus = ctmsMonitoringReportVariableValueQueryDto.OldValue == CtmsMonitoringReportVariableValueQuery.Value
                 ? CtmsCommentStatus.Answered
                 : CtmsCommentStatus.Resolved;
 

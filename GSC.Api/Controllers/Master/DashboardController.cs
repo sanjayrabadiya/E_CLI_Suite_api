@@ -119,6 +119,23 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
+        [Route("GetDashboardMonitoringReportGrid/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardMonitoringReportGrid(int projectId, int countryId, int siteId)
+        {
+            var reportGrid = _dashboardRepository.GetDashboardMonitoringReportGrid(projectId, countryId, siteId);
+            return Ok(reportGrid);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardMonitoringReportGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardMonitoringReportGraph(int projectId, int countryId, int siteId)
+        {
+            var screeningVisits = _dashboardRepository.GetDashboardMonitoringReportGraph(projectId, countryId, siteId);
+            return Ok(screeningVisits);
+        }
+
+
+        [HttpGet]
         [Route("ScreenedToRandomizedGraph/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult ScreenedToRandomizedGraph(int projectId, int countryId, int siteId)
         {
@@ -254,6 +271,22 @@ namespace GSC.Api.Controllers.Master
         public IActionResult getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
         {
             var queries = _dashboardRepository.getCTMSMonitoringActionPointChartDashboard(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetCTMSMonitoringActionPointGridDashboard/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetCTMSMonitoringActionPointGridDashboard(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.getCTMSOpenActionDashboard(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetCTMSMonitoringQueriesGridDashboard/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetCTMSMonitoringQueriesGridDashboard(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.getCTMSQueriesDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
 

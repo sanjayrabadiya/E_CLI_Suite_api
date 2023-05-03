@@ -33,5 +33,7 @@ namespace GSC.Data.Dto.CTMS
         public string CloseBy { get; set; }
         public DateTime? CloseDate { get; set; }
         public string Activity { get; set; }
+        public string Site { get; set; }
+        public int? AvgOpenQueries { get; set; }
     }
 }

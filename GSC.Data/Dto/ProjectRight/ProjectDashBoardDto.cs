@@ -251,6 +251,9 @@ namespace GSC.Data.Dto.ProjectRight
         public string visitStatus { get; set; }
         public string Country { get; set; }
         public string Site { get; set; }
+        public int AvgReviewDay { get; set; }
+
+        public DateTime? sendForReviewDate { get; set; }
     }
 
     public class DynamicAeChart

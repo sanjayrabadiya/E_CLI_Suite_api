@@ -91,7 +91,7 @@ namespace GSC.Respository.CTMS
                     x.ReportStatus = CtmsMonitoringReport.FirstOrDefault().ReportStatus.GetDescription();
                     x.ReportStatusId = (int)CtmsMonitoringReport.FirstOrDefault().ReportStatus;
                     x.IsSender = CtmsMonitoringReport.FirstOrDefault().CreatedBy == _jwtTokenAccesser.UserId;
-                    x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved);
+                    x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.Approved);//Changes made by Sachin
                 }
             });
 
@@ -174,7 +174,8 @@ namespace GSC.Respository.CTMS
                     x.ReportStatus = CtmsMonitoringReport.FirstOrDefault().ReportStatus.GetDescription();
                     x.ReportStatusId = (int)CtmsMonitoringReport.FirstOrDefault().ReportStatus;
                     x.IsSender = CtmsMonitoringReport.FirstOrDefault().CreatedBy == _jwtTokenAccesser.UserId;
-                    x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.FormApproved);
+                    //Changes made by Sachin
+                    x.IsReviewerApprovedForm = CtmsMonitoringReport.Count() != 0 && CtmsMonitoringReport.All(z => z.ReportStatus == MonitoringReportStatus.Approved);
                 }
             });
 

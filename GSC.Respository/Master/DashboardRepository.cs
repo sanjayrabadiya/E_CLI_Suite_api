@@ -1,10 +1,16 @@
-﻿using GSC.Data.Dto.Master;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using DocumentFormat.OpenXml.Vml;
+using DocumentFormat.OpenXml.Wordprocessing;
+using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
+using GSC.Respository.CTMS;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
@@ -30,6 +36,7 @@ namespace GSC.Respository.Master
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IProjectDocumentReviewRepository _projectDocumentReviewRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
+        private readonly ICtmsActivityRepository _CtmsActivityRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
@@ -45,6 +52,7 @@ namespace GSC.Respository.Master
             IProjectWorkflowRepository projectWorkflowRepository,
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
+             ICtmsActivityRepository ctmsActivityRepository,
             IProjectDesignRepository projectDesignRepository,
             IProjectRepository projectRepository,
             IProjectRightRepository projectRightRepository,
@@ -131,6 +139,63 @@ namespace GSC.Respository.Master
                 });
 
             return screeningVisits;
+        }
+        public dynamic GetDashboardMonitoringReportGrid(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var list = _context.CtmsMonitoringReport
+               .Include(z => z.CtmsMonitoring)
+               .ThenInclude(i => i.Project)
+               .Where(z => projectIds.Contains(z.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.CtmsMonitoring.StudyLevelFormId)
+                && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true) && z.DeletedDate == null)
+               .Select(b => new CtmsMonitoringPlanDashoardDto
+               {
+                   Id = b.Id,
+                   Site = b.CtmsMonitoring.Project.ProjectCode,
+                   Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                   Country = b.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
+                   Status = b.ReportStatus.ToString(),
+               }).ToList();
+
+            return list;
+        }
+
+        public dynamic GetDashboardMonitoringReportGraph(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var list = _context.CtmsMonitoringReport
+                .Include(z => z.CtmsMonitoring)
+                .ThenInclude(i => i.StudyLevelForm)
+                .ThenInclude(i => i.Activity)
+                .ThenInclude(i => i.CtmsActivity)
+                .Where(z => projectIds.Contains(z.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.CtmsMonitoring.StudyLevelFormId)
+                 && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true) && z.DeletedDate == null).ToList()
+                .GroupBy(x => new { x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName, x.ReportStatus })
+                .Select(s => new
+                {
+                    name = s.Key.ActivityName,
+                    NotInitiated = s.Where(q => q.ReportStatus == MonitoringReportStatus.OnGoing).Count(),
+                    SendForReview = s.Where(q => q.ReportStatus == MonitoringReportStatus.UnderReview).Count(),
+                    QueryGenerated = s.Where(q => q.ReportStatus == MonitoringReportStatus.ReviewInProgress).Count(),
+                    FormApproved = s.Where(q => q.ReportStatus == MonitoringReportStatus.Approved).Count(),
+                });
+            return list;
         }
 
         public dynamic ScreenedToRandomizedGraph(int projectId, int countryId, int siteId)
@@ -654,14 +719,15 @@ namespace GSC.Respository.Master
                     EntrollCount = 0
                 }).ToList();
 
-                var result1 = _context.Randomization.Where(x => asd.Select(z => z.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).GroupBy(x => x.ProjectId).Select(x => x.Key).Count();
-                var result3 = new CtmsMonitoringStatusChartDto
-                {
-                    ActivityName = "Enrolled",
-                    EntrollCount = result1
+                //Remove by mitul on 20-04-2023 (Deshbord ->site monitoring->Site Status->Enrolled
+                //var result1 = _context.Randomization.Where(x => asd.Select(z => z.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null).GroupBy(x => x.ProjectId).Select(x => x.Key).Count();
+                //var result3 = new CtmsMonitoringStatusChartDto
+                //{
+                //    ActivityName = "Enrolled",
+                //    EntrollCount = result1
 
-                };
-                result.Add(result3);
+                //};
+                //result.Add(result3);
                 List<CtmsMonitoringStatusPIChartDto> list = new List<CtmsMonitoringStatusPIChartDto>();
                 if (result.Count > 0)
                 {
@@ -716,19 +782,20 @@ namespace GSC.Respository.Master
                                 list.Add(obj);
                             }
                         }
-                        if (item.ActivityName == "Enrolled")
-                        {
-                            if (item.EntrollCount > 0)
-                            {
-                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
-                                obj.Text = item.ActivityName + " " + item.EntrollCount;
-                                obj.Lable = item.ActivityName;
-                                obj.Count = item.EntrollCount;
-                                obj.Status = "Enrolled";
-                                list.Add(obj);
-                            }
+                        //Remove by mitul on 20-04-2023 (Deshbord ->site monitoring->Site Status->Enrolled
+                        //if (item.ActivityName == "Enrolled")
+                        //{
+                        //    if (item.EntrollCount > 0)
+                        //    {
+                        //        CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                        //        obj.Text = item.ActivityName + " " + item.EntrollCount;
+                        //        obj.Lable = item.ActivityName;
+                        //        obj.Count = item.EntrollCount;
+                        //        obj.Status = "Enrolled";
+                        //        list.Add(obj);
+                        //    }
 
-                        }
+                        //}
 
                     }
                 }
@@ -739,9 +806,112 @@ namespace GSC.Respository.Master
 
         public List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId)
         {
+            var today = DateTime.Now;
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            //Changes made by Sachin
+            var list = _context.CtmsMonitoringReportReview 
+                .Include(x => x.CtmsMonitoringReport)
+                .ThenInclude(x => x.CtmsMonitoring)
+                .ThenInclude(x => x.Project)
+                .ThenInclude(x => x.ManageSite)
+                .Where(x => projectIds.Contains(x.CtmsMonitoringReport.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoringReport.CtmsMonitoring.StudyLevelFormId)
+                            && (siteId == 0 ? (!x.CtmsMonitoringReport.CtmsMonitoring.Project.IsTestSite) : true)
+                            && x.DeletedDate == null)
+                .Select(b => new CtmsMonitoringPlanDashoardDto
+                {
+                    Id = b.Id,
+                    Activity = b.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    ScheduleStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleStartDate,
+                    ActualStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualStartDate,
+                    Site = b.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode,
+                    Country = b.CtmsMonitoringReport.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
+                    Status = b.CtmsMonitoringReport.ReportStatus.ToString(),
+                    sendForReviewDate = b.CreatedDate
+
+                }).ToList();
+            int Total = 0, Count = 0;
+            if (list.Count > 0)
+            {
+                foreach (var item in list)
+                {
+                    //item.Status = GetMonitoringStatus(item);
+                    item.visitStatus = GetVisitgStatus(item);
+
+                    if (item.Status == "UnderReview")
+                    {
+                        TimeSpan v = (TimeSpan)(today - item.sendForReviewDate);
+                        Total = Total + v.Days;
+                        Count++;
+                    }
+                }
+                list[0].AvgReviewDay = Total != 0 ? (Total / Count) : 0;
+            }
+           
+            return list;
+        }
+
+        //Add by mitul on 24-04-2024
+        public List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId)
+        {
+            var today = DateTime.Now;
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var asd = _context.CtmsActionPoint.Include(x => x.CtmsMonitoring).ThenInclude(x => x.Project).Where(x => projectIds.Contains(x.CtmsMonitoring.ProjectId)
+             && (siteId == 0 ? (!x.CtmsMonitoring.Project.IsTestSite) : true)
+             && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.DeletedDate == null)
+                .Select(b => new CtmsActionPointGridDto
+                {
+                    Id = b.Id,
+                    Site = b.CtmsMonitoring.Project.ProjectCode,
+                    Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                    StatusName = b.Status.ToString(),
+                    QueryDescription = b.QueryDescription,
+                    QueryBy = b.CreatedByUser.UserName,
+                    QueryDate = Convert.ToDateTime(b.CreatedDate),
+                    CloseBy = b.CloseUser.UserName,
+                    CloseDate = b.CloseDate
+                }).ToList();
+            int Total = 0, Count = 0;
+            if (asd.Count > 0)
+            {
+                foreach (var item in asd)
+                {
+                    if (item.StatusName == "Open")
+                    {
+                        TimeSpan v = (TimeSpan)(today - item.QueryDate);
+                        Total = Total + v.Days;
+                        Count++;
+                    }
+                }
+                asd[0].AvgOpenQueries = Total != 0 ? (Total / Count) : 0;
+            }
+            return asd;
+        }
+
+        //Add by mitul on 24-04-2024
+        public List<CtmsMonitoringReportVariableValueQueryDto> getCTMSQueriesDashboard(int projectId, int countryId, int siteId)
+        {
+            var today = DateTime.Now;
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 
@@ -750,36 +920,44 @@ namespace GSC.Respository.Master
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
 
-            var list = _context.CtmsMonitoring
-                .Include(x => x.Project)
-                .ThenInclude(x => x.ManageSite)
-                .Where(x => projectIds.Contains(x.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId)
-                            && (siteId == 0 ? (!x.Project.IsTestSite) : true)
-                            && x.DeletedDate == null)
-                .Select(b => new CtmsMonitoringPlanDashoardDto
-                {   
-                    Id = b.Id,
-                    Activity = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
-                    ScheduleStartDate = b.ScheduleStartDate,
-                    ActualStartDate = b.ActualStartDate,
-                    Site = b.Project.ProjectCode,
-                    Country = b.Project.ManageSite.City.State.Country.CountryName
+            var asd = _context.CtmsMonitoringReportVariableValueQuery.Include(x => x.CtmsMonitoringReportVariableValue).ThenInclude(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.Project).Where(x => projectIds.Contains(x.CtmsMonitoringReportVariableValue.CtmsMonitoringReport.CtmsMonitoring.ProjectId)
+            && (siteId == 0 ? (!x.CtmsMonitoringReportVariableValue.CtmsMonitoringReport.CtmsMonitoring.Project.IsTestSite) : true)
+            && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoringReportVariableValue.CtmsMonitoringReport.CtmsMonitoring.StudyLevelFormId))
+              //&& x.QueryParentId != null)
+              .Select(b => new CtmsMonitoringReportVariableValueQueryDto
+              {
+                  Id = b.Id,
+                  Site = b.CtmsMonitoringReportVariableValue.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode,
+                  Activity = b.CtmsMonitoringReportVariableValue.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                  CreatedDate = b.CreatedDate,
+                  ReasonName = b.Reason.ReasonName,
+                  ReasonOth = b.ReasonOth,
+                  StatusName = b.QueryStatus.GetDescription(),
+                  Value = b.Value,
+                  OldValue = b.OldValue,
+                  CreatedByName = b.UserName + "(" + b.UserRole + ")",
+                  QueryBy = b.CtmsMonitoringReportVariableValue.CreatedByUser.UserName,
+                  Note = string.IsNullOrEmpty(b.Note) ? b.ReasonOth : b.Note,
+              }).ToList();
 
-                }).ToList();
-            if (list.Count > 0)
+            int Total = 0, Count = 0;
+            if (asd.Count > 0)
             {
-                foreach (var item in list)
+                foreach (var item in asd)
                 {
-                    item.Status = GetMonitoringStatus(item);
-                    item.visitStatus = GetVisitgStatus(item);
+                    if (item.StatusName == "Open")
+                    {
+                        TimeSpan v = (TimeSpan)(today - item.CreatedDate);
+                        Total = Total + v.Days;
+                        Count++;
+                    }
                 }
+                asd[0].AvgOpenQueries = Total != 0 ? (Total / Count) : 0;
             }
 
 
-
-            return list;
+            return asd;
         }
-
         public string GetMonitoringStatus(CtmsMonitoringPlanDashoardDto obj)
         {
             var data = _context.CtmsMonitoringReportReview.Include(x => x.CtmsMonitoringReport).Where(x => x.CtmsMonitoringReport.CtmsMonitoringId == obj.Id).FirstOrDefault();
@@ -804,15 +982,15 @@ namespace GSC.Respository.Master
             {
                 return "Planned";
             }
-            else if(obj.ScheduleStartDate == obj.ActualStartDate )
+            else if (obj.ScheduleStartDate == obj.ActualStartDate)
             {
                 return "Initiated";
             }
-             else if(obj.ScheduleStartDate < obj.ActualStartDate )
+            else if (obj.ScheduleStartDate < obj.ActualStartDate)
             {
                 return "Overdue";
             }
-           
+
             return "";
         }
 
@@ -821,7 +999,7 @@ namespace GSC.Respository.Master
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 

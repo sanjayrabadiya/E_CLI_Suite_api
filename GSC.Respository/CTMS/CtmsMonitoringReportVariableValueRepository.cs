@@ -178,8 +178,9 @@ namespace GSC.Respository.CTMS
                     }
                 }
 
+                //Changes made by Sachin
                 var ctmsMonitoringReport = _context.CtmsMonitoringReport.Where(x => x.Id == ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList[0].CtmsMonitoringReportId).FirstOrDefault();
-                ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.Initiated;
+                ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.OnGoing;
                 _context.CtmsMonitoringReport.Update(ctmsMonitoringReport);
             }
 

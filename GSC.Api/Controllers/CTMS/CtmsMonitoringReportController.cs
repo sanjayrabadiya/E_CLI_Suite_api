@@ -39,7 +39,8 @@ namespace GSC.Api.Controllers.Master
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             ctmsMonitoringReportDto.Id = 0;
-            ctmsMonitoringReportDto.ReportStatus = MonitoringReportStatus.NotInitiated;
+            //Changes made by Sachin
+            ctmsMonitoringReportDto.ReportStatus = MonitoringReportStatus.OnGoing;
             var ctmsMonitoringReport = _mapper.Map<CtmsMonitoringReport>(ctmsMonitoringReportDto);
 
             _ctmsMonitoringReportRepository.Add(ctmsMonitoringReport);
@@ -59,7 +60,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", result);
                 return BadRequest(ModelState);
             }
-            
+
             return Ok();
         }
     }

@@ -77,7 +77,7 @@ namespace GSC.Api.Controllers.Screening
 
             var ctmsMonitoringReportVariableValue = _ctmsMonitoringReportVariableValueRepository.Find(ctmsMonitoringReportVariableValueQueryDto.CtmsMonitoringReportVariableValueId);
             var comment = _ctmsMonitoringReportVariableValueQueryRepository.All.Where(x => x.CtmsMonitoringReportVariableValueId == ctmsMonitoringReportVariableValueQueryDto.CtmsMonitoringReportVariableValueId).OrderByDescending(x => x.Id).FirstOrDefault();
-            if (comment != null && comment.QueryStatus  == CtmsCommentStatus.Open)
+            if (comment != null && comment.QueryStatus == CtmsCommentStatus.Open)
             {
                 ModelState.AddModelError("Message", "Query is already generated.");
                 return BadRequest(ModelState);
@@ -87,9 +87,10 @@ namespace GSC.Api.Controllers.Screening
             _ctmsMonitoringReportVariableValueQueryRepository.GenerateQuery(ctmsMonitoringReportVariableValueQueryDto, ctmsMonitoringReportVariableValueQuery, ctmsMonitoringReportVariableValue);
 
             var ctmsMonitoringReport = _ctmsMonitoringReportRepository.Find(ctmsMonitoringReportVariableValue.CtmsMonitoringReportId);
-            ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.QueryGenerated;
+            //Changes made by Sachin
+            ctmsMonitoringReport.ReportStatus = MonitoringReportStatus.ReviewInProgress;
             _ctmsMonitoringReportRepository.Update(ctmsMonitoringReport);
-           
+
             _uow.Save();
 
             return Ok(ctmsMonitoringReportVariableValueQuery.Id);

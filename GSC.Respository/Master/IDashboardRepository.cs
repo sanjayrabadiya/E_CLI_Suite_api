@@ -1,4 +1,5 @@
-﻿using GSC.Data.Dto.ProjectRight;
+﻿using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.ProjectRight;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -9,6 +10,8 @@ namespace GSC.Respository.Master
     {
         dynamic GetDashboardPatientStatus(int projectId, int countryId, int siteId);
         dynamic GetDashboardVisitGraph(int projectId, int countryId, int siteId);
+        dynamic GetDashboardMonitoringReportGraph(int projectId, int countryId, int siteId);
+        dynamic GetDashboardMonitoringReportGrid(int projectId, int countryId, int siteId);
         dynamic ScreenedToRandomizedGraph(int projectId, int countryId, int siteId);
         dynamic GetRandomizedProgressGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardQueryGraph(int projectId, int countryId, int siteId);
@@ -27,6 +30,8 @@ namespace GSC.Respository.Master
         dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId);
 
         List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId);
+        List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId);
+        List<CtmsMonitoringReportVariableValueQueryDto> getCTMSQueriesDashboard(int projectId, int countryId, int siteId);
 
         dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId);
         dynamic GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId);

@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.CTMS
         public string ReasonName { get; set; }
         public CtmsCommentStatus? QueryStatus { get; set; }
         public string CreatedByName { get; set; }
+        public string QueryBy { get; set; }
         public string Note { get; set; }
         public DateTime? CreatedDate
         {
@@ -32,9 +33,12 @@ namespace GSC.Data.Dto.CTMS
         public bool IsSystem { get; set; }
         public string TimeZone { get; set; }
         public int? QueryParentId { get; set; }
+        public int? AvgOpenQueries  { get; set; }
         public DateTime? PreviousQueryDate { get; set; }
         public ICollection<CtmsMonitoringReportVariableValueChild> Children { get; set; }
         public CollectionSources? CollectionSource { get; set; }
+        public string Activity { get; set; }
+        public string Site { get; set; }
 
     }
 }
