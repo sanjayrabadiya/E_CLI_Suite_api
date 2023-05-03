@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            barcode.BarcodeString = _pkBarcodeRepository.GenerateBarcodeString(pkBarcodeDto);
+            //barcode.BarcodeString = _pkBarcodeRepository.GenerateBarcodeString(pkBarcodeDto);
             _pkBarcodeRepository.Add(barcode);
             if (_uow.Save() <= 0) throw new Exception("Creating PK barcode failed on save.");
             return Ok(barcode.Id);

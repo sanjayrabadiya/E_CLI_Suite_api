@@ -364,6 +364,7 @@ namespace GSC.Api.Helpers
             CreateMap<BarcodeConfig, BarcodeConfigGridDto>()
                 .ForMember(x => x.BarcodeTypeName, x => x.MapFrom(a => a.BarcodeType.BarcodeTypeName))
                 .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.AppScreen.ScreenName))
+                .ForMember(x => x.PageName, x => x.MapFrom(a => a.Page.ScreenName))
                 .ForMember(x => x.BarcodeCombination, x => x.MapFrom(a => string.Join(",", a.BarcodeCombination.Where(x => x.DeletedDate == null).Select(s => s.TableFieldName.LabelName).ToList())))
                 .ForMember(x => x.BarcodeDisplayInfo, x => x.MapFrom(a => string.Join(",", a.BarcodeDisplayInfo.Where(x => x.DeletedDate == null).Select(s => s.TableFieldName.LabelName).ToList())))
                 .ReverseMap();

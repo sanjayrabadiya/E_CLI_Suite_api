@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Entities.Attendance;
+using GSC.Data.Entities.Barcode;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Volunteer;
@@ -27,8 +28,15 @@ namespace GSC.Respository.Attendance
 
         public List<PKBarcodeGridDto> GetPKBarcodeList(bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var list = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<PKBarcodeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            list.ForEach(x =>
+            {
+                x.isBarcodeGenerated = _context.PkBarcodeGenerate.Any(t => t.PKBarcodeId == x.Id && t.DeletedBy == null);
+                //x.PKBarcodeGenerateId = _context.PkBarcodeGenerate.Where(t => t.PKBarcodeId == x.Id && t.DeletedBy == null).FirstOrDefault()?.Id ?? 0;
+            });
+
+            return list;
         }
 
         public string Duplicate(PKBarcodeDto objSave)
@@ -108,18 +116,18 @@ namespace GSC.Respository.Attendance
                                          && x.ScreeningVisit.ScreeningEntry.Attendance.DeletedDate == null
                                          && x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.DeletedDate == null).Select(x =>
                                          new BarcodeDataEntrySubject
-                                       {
-                                           VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo + " " + x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
-                                           AttendanceId = (int)x.ScreeningVisit.ScreeningEntry.AttendanceId,
-                                           ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
-                                           ProjectDesignVisitId = x.ScreeningVisit.ProjectDesignVisitId,
-                                           ProjectAttendanceBarcodeString = _context.AttendanceBarcodeGenerate.Where(r => r.AttendanceId == x.ScreeningVisit.ScreeningEntry.AttendanceId && r.DeletedDate == null).FirstOrDefault().BarcodeString,
-                                           ProjectDesignTemplateId = x.ProjectDesignTemplateId,
-                                           ScreeningTemplateId = x.Id,
-                                           Status = x.Status,
-                                           ScheduleDate = x.ScheduleDate,
-                                           VolunteerId = (int)x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId
-                                       }).ToList();
+                                         {
+                                             VolunteerNo = x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo + " " + x.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+                                             AttendanceId = (int)x.ScreeningVisit.ScreeningEntry.AttendanceId,
+                                             ScreeningEntryId = x.ScreeningVisit.ScreeningEntryId,
+                                             ProjectDesignVisitId = x.ScreeningVisit.ProjectDesignVisitId,
+                                             ProjectAttendanceBarcodeString = _context.AttendanceBarcodeGenerate.Where(r => r.AttendanceId == x.ScreeningVisit.ScreeningEntry.AttendanceId && r.DeletedDate == null).FirstOrDefault().BarcodeString,
+                                             ProjectDesignTemplateId = x.ProjectDesignTemplateId,
+                                             ScreeningTemplateId = x.Id,
+                                             Status = x.Status,
+                                             ScheduleDate = x.ScheduleDate,
+                                             VolunteerId = (int)x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId
+                                         }).ToList();
 
             projectdata.ForEach(x =>
             {

@@ -39,5 +39,6 @@ namespace GSC.Data.Dto.Attendance
         public string BarcodeString { get; set; }
         public DateTime? BarcodeDate { get; set; }
         public bool IsBarcodeReprint { get; set; }
+        public int? PKBarcodeGenerateId { get; set; }
     }
 }

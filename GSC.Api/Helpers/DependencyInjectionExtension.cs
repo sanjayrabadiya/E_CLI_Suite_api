@@ -405,6 +405,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<ICentrifugationRepository, CentrifugationRepository>();
             services.AddScoped<ICentrifugationDetailsRepository, CentrifugationDetailsRepository>();
             services.AddScoped<ISampleSeparationRepository, SampleSeparationRepository>();
+            services.AddScoped<IPkBarcodeGenerateRepository, PkBarcodeGenerateRepository>();
+            services.AddScoped<ISampleBarcodeGenerateRepository, SampleBarcodeGenerateRepository>();
+            services.AddScoped<IDossingBarcodeGenerateRepository, DossingBarcodeGenerateRepository>();
         }
     }
 }

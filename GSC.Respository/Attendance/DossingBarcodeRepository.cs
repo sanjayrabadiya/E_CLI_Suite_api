@@ -36,8 +36,16 @@ namespace GSC.Respository.Attendance
 
         public List<DossingBarcodeGridDto> GetDossingBarcodeList(bool isDeleted)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var list = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<DossingBarcodeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            list.ForEach(x =>
+            {
+                x.isBarcodeGenerated = _context.DossingBarcodeGenerate.Any(t => t.DossingBarcodeId == x.Id && t.DeletedBy == null);
+                //x.PKBarcodeGenerateId = _context.PkBarcodeGenerate.Where(t => t.PKBarcodeId == x.Id && t.DeletedBy == null).FirstOrDefault()?.Id ?? 0;
+            });
+
+            return list;
         }
 
         public string Duplicate(DossingBarcodeDto objSave)
