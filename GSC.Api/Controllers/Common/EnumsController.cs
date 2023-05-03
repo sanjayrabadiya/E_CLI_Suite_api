@@ -1019,7 +1019,7 @@ namespace GSC.Api.Controllers.Common
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
-                }).OrderBy(o => o.Id).ToList();
+                }).Where(x => x.Id == 3 || x.Id == 4).OrderBy(o => o.Id).ToList();
 
             return Ok(pkenum);
         }

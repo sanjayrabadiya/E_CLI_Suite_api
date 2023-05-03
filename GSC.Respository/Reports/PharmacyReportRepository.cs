@@ -154,7 +154,7 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(7).SetValue(d.RandomizationNumber);
                     worksheet.Row(j).Cell(8).SetValue(Convert.ToDateTime(d.RandomizationDate).ToString("dddd, dd MMMM yyyy"));
                     worksheet.Row(j).Cell(9).SetValue(d.AllocatedBy);
-                    worksheet.Row(j).Cell(10).SetValue(Convert.ToDateTime(d.Allocatedate).ToString("dddd, dd MMMM yyyy"));
+                    worksheet.Row(j).Cell(10).SetValue(Convert.ToDateTime(d.Allocatedate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
 
@@ -295,7 +295,8 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.ActionName = "KitPack";
                         productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
                         productAccountabilityCentralReport.ActionDate = x.CreatedDate;
-
+                        productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
+                        productAccountabilityCentralReport.Status = x.Status;
 
                         if (randomizationIWRSReport.productTypeId > 0)
                         {
@@ -363,6 +364,8 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
                         productAccountabilityCentralReport.ActionDate = x.CreatedDate;
                         productAccountabilityCentralReport.VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
+                        productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
+                        productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.NoofBoxorBottle = 1;
                         productAccountabilityCentralReport.Noofimp = (int)x.NoOfImp;
                         productAccountabilityCentralReport.TotalIMP = ((int)x.NoOfImp * 1);
@@ -404,15 +407,16 @@ namespace GSC.Respository.Reports
                 worksheet.Cell(1, 5).Value = "No of Boxes/kit";
                 worksheet.Cell(1, 6).Value = "No of IMP/box/kit";
                 worksheet.Cell(1, 7).Value = "Visit";
-                worksheet.Cell(1, 8).Value = "Storage Condition";
-                worksheet.Cell(1, 9).Value = "Storage location";
-                worksheet.Cell(1, 10).Value = "Retention";
-                worksheet.Cell(1, 11).Value = "Lot/Batch No";
-                worksheet.Cell(1, 12).Value = "Retest/Expiry Date";
-                worksheet.Cell(1, 13).Value = "Unused";
-                worksheet.Cell(1, 14).Value = "Total IMP remaining";
-                worksheet.Cell(1, 15).Value = "Action By";
-                worksheet.Cell(1, 16).Value = "Action On";
+                worksheet.Cell(1, 8).Value = "Status";
+                worksheet.Cell(1, 9).Value = "Storage Condition";
+                worksheet.Cell(1, 10).Value = "Storage location";
+                worksheet.Cell(1, 11).Value = "Retention";
+                worksheet.Cell(1, 12).Value = "Lot/Batch No";
+                worksheet.Cell(1, 13).Value = "Retest/Expiry Date";
+                worksheet.Cell(1, 14).Value = "Qty used for Verification";
+                worksheet.Cell(1, 15).Value = "Total IMP remaining";
+                worksheet.Cell(1, 16).Value = "Action By";
+                worksheet.Cell(1, 17).Value = "Action On";
 
                 var j = 2;
 
@@ -425,41 +429,44 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(5).SetValue(d.NoofBoxorBottle);
                     worksheet.Row(j).Cell(6).SetValue(d.Noofimp);
                     worksheet.Row(j).Cell(7).SetValue(d.VisitName);
-                    worksheet.Row(j).Cell(8).SetValue(d.StorageConditionTemprature);
-                    worksheet.Row(j).Cell(9).SetValue(d.StorageLocation);
-                    worksheet.Row(j).Cell(10).SetValue(d.RetentionQty);
-                    worksheet.Row(j).Cell(11).SetValue(d.LotBatchNo);
+                    worksheet.Row(j).Cell(8).SetValue(d.KitStatus);
+                    worksheet.Row(j).Cell(9).SetValue(d.StorageConditionTemprature);
+                    worksheet.Row(j).Cell(10).SetValue(d.StorageLocation);
+                    worksheet.Row(j).Cell(11).SetValue(d.RetentionQty);
+                    worksheet.Row(j).Cell(12).SetValue(d.LotBatchNo);
                     if (d.RetestExpiryDate != null && d.RetestExpiryId == ReTestExpiry.ReTest)
                     {
-                        worksheet.Row(j).Cell(12).SetValue("ReTest - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
+                        worksheet.Row(j).Cell(13).SetValue("ReTest - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
                     }
                     else if (d.RetestExpiryDate != null && d.RetestExpiryId == ReTestExpiry.Expiry)
                     {
-                        worksheet.Row(j).Cell(12).SetValue("Expiry - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
+                        worksheet.Row(j).Cell(13).SetValue("Expiry - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
                     }
                     else
-                        worksheet.Row(j).Cell(12).SetValue("");
-                    worksheet.Row(j).Cell(13).SetValue(d.UsedVerificationQty);
-                    worksheet.Row(j).Cell(14).SetValue(d.TotalIMP);
-                    worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
-                    worksheet.Row(j).Cell(16).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy"));
+                        worksheet.Row(j).Cell(13).SetValue("");
+                    worksheet.Row(j).Cell(14).SetValue(d.UsedVerificationQty);
+                    worksheet.Row(j).Cell(15).SetValue(d.TotalIMP);
+                    worksheet.Row(j).Cell(16).SetValue(d.ActionBy);
+                    worksheet.Row(j).Cell(17).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
 
-                worksheet.Cell(list.Count + 3, 13).Value = "Under quarentine";
-                worksheet.Cell(list.Count + 4, 13).Value = "Verified Qty for dispensing";
-                worksheet.Cell(list.Count + 5, 13).Value = "Qty Used in Kit";
-                worksheet.Cell(list.Count + 6, 13).Value = "Remaining Qty";
+                worksheet.Cell(list.Count + 3, 14).Value = "Under quarentine";
+                worksheet.Cell(list.Count + 4, 14).Value = "Verified Qty for dispensing";
+                worksheet.Cell(list.Count + 5, 14).Value = "Qty Used in Kit";
+                worksheet.Cell(list.Count + 6, 14).Value = "Remaining Qty";
+                worksheet.Cell(list.Count + 7, 14).Value = "Available Kit";
 
                 var underQuarentine = list.Where(x => x.ReceiptStatus == "Quarantine" || x.ReceiptStatus == "SentForApproval").Sum(x => x.TotalIMP);
                 var verifiedQty = list.Where(x => x.ReceiptStatus == "Approved" && x.ActionName == "Verification").Sum(x => x.TotalIMP);
                 var kits = list.Where(x => x.ActionName == "KitPack" || x.ActionName == "Kit").Sum(x => x.TotalIMP);
+                var avaialblekits = list.Count(x => x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
 
-                worksheet.Row(list.Count + 3).Cell(14).SetValue(underQuarentine);
-                worksheet.Row(list.Count + 4).Cell(14).SetValue(verifiedQty);
-                worksheet.Row(list.Count + 5).Cell(14).SetValue(kits);
-                worksheet.Row(list.Count + 6).Cell(14).SetValue(verifiedQty - kits);
-
+                worksheet.Row(list.Count + 3).Cell(15).SetValue(underQuarentine);
+                worksheet.Row(list.Count + 4).Cell(15).SetValue(verifiedQty);
+                worksheet.Row(list.Count + 5).Cell(15).SetValue(kits);
+                worksheet.Row(list.Count + 6).Cell(15).SetValue(verifiedQty - kits);
+                worksheet.Row(list.Count + 7).Cell(15).SetValue(avaialblekits);
 
 
                 #endregion ProjectDesignPeriod sheet
@@ -480,12 +487,12 @@ namespace GSC.Respository.Reports
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
 
-            if (setting.KitCreationType == KitCreationType.SequenceWise)
+            if (randomizationIWRSReport.ActionType == ProductAccountabilityActions.KitPack)
             {
                 var kitpack = _context.SupplyManagementKITSeries.Include(x => x.Project).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId && x.SupplyManagementShipmentId != null).ToList();
                 if (randomizationIWRSReport.SiteId > 0)
                 {
-                    kitpack = kitpack.Where(x => x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == randomizationIWRSReport.SiteId || x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId == randomizationIWRSReport.SiteId).ToList();
+                    kitpack = kitpack.Where(x => x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == randomizationIWRSReport.SiteId).ToList();
                 }
                 if (kitpack.Count > 0)
                 {
@@ -497,17 +504,21 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.KitNo = x.KitNo;
                         if (x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId > 0)
                         {
-                            productAccountabilityCentralReport.SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
+                            productAccountabilityCentralReport.RequestedFrom = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId;
                             if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                                 productAccountabilityCentralReport.ToSiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId;
                         }
-                        else if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
+                        if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                         {
-                            productAccountabilityCentralReport.SiteCode = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault().ProjectCode;
+                            productAccountabilityCentralReport.RequestedTo = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault().ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId;
                             if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                                 productAccountabilityCentralReport.ToSiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId;
+                        }
+                        else
+                        {
+                            productAccountabilityCentralReport.RequestedTo = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
                         productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
@@ -559,7 +570,11 @@ namespace GSC.Respository.Reports
                 }
                 if (randomizationIWRSReport.SiteId > 0)
                 {
-                    kitpack = kitpack.Where(x => x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == randomizationIWRSReport.SiteId || x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId == randomizationIWRSReport.SiteId).ToList();
+                    kitpack = kitpack.Where(x => x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == randomizationIWRSReport.SiteId).ToList();
+                }
+                if (randomizationIWRSReport.VisitId > 0)
+                {
+                    kitpack = kitpack.Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == randomizationIWRSReport.VisitId).ToList();
                 }
                 if (kitpack.Count > 0)
                 {
@@ -571,17 +586,21 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.KitNo = x.KitNo;
                         if (x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId > 0)
                         {
-                            productAccountabilityCentralReport.SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
+                            productAccountabilityCentralReport.RequestedFrom = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId;
                             if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                                 productAccountabilityCentralReport.ToSiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId;
                         }
-                        else if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
+                        if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                         {
-                            productAccountabilityCentralReport.SiteCode = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault().ProjectCode;
+                            productAccountabilityCentralReport.RequestedTo = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault().ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId;
                             if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                                 productAccountabilityCentralReport.ToSiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId;
+                        }
+                        else
+                        {
+                            productAccountabilityCentralReport.RequestedTo = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
@@ -606,52 +625,55 @@ namespace GSC.Respository.Reports
             {
                 IXLWorksheet worksheet = workbook.Worksheets.Add("Sheet1");
                 worksheet.Cell(1, 1).Value = "Study";
-                worksheet.Cell(1, 2).Value = "Site";
-                worksheet.Cell(1, 3).Value = "Product Type";
-                worksheet.Cell(1, 4).Value = "Visit";
-                worksheet.Cell(1, 5).Value = "Kit No";
-                worksheet.Cell(1, 6).Value = "Status";
-                worksheet.Cell(1, 7).Value = "No of pack/kit";
-                worksheet.Cell(1, 8).Value = "No of IMP/box/kit";
-                worksheet.Cell(1, 9).Value = "Total IMP";
-                worksheet.Cell(1, 10).Value = "Action By";
-                worksheet.Cell(1, 11).Value = "Action On";
+                worksheet.Cell(1, 2).Value = "Requested from";
+                worksheet.Cell(1, 3).Value = "Requested to";
+                worksheet.Cell(1, 4).Value = "Product Type";
+                worksheet.Cell(1, 5).Value = "Visit";
+                worksheet.Cell(1, 6).Value = "Kit No";
+                worksheet.Cell(1, 7).Value = "Status";
+                worksheet.Cell(1, 8).Value = "No of pack/kit";
+                worksheet.Cell(1, 9).Value = "No of IMP/box/kit";
+                worksheet.Cell(1, 10).Value = "Total IMP";
+                worksheet.Cell(1, 11).Value = "Action By";
+                worksheet.Cell(1, 12).Value = "Action On";
 
                 var j = 2;
 
                 list.ToList().ForEach(d =>
                 {
                     worksheet.Row(j).Cell(1).SetValue(d.ProjectCode);
-                    worksheet.Row(j).Cell(2).SetValue(d.SiteCode);
-                    worksheet.Row(j).Cell(3).SetValue(d.ProductTypeCode);
-                    worksheet.Row(j).Cell(4).SetValue(d.VisitName);
-                    worksheet.Row(j).Cell(5).SetValue(d.KitNo);
-                    worksheet.Row(j).Cell(6).SetValue(d.KitStatus);
-                    worksheet.Row(j).Cell(7).SetValue(d.NoofBoxorBottle);
-                    worksheet.Row(j).Cell(8).SetValue(d.Noofimp);
-                    worksheet.Row(j).Cell(9).SetValue(d.TotalIMP);
-                    worksheet.Row(j).Cell(10).SetValue(d.ActionBy);
-                    worksheet.Row(j).Cell(11).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy"));
+                    worksheet.Row(j).Cell(2).SetValue(d.RequestedFrom);
+                    worksheet.Row(j).Cell(3).SetValue(d.RequestedTo);
+                    worksheet.Row(j).Cell(4).SetValue(d.ProductTypeCode);
+                    worksheet.Row(j).Cell(5).SetValue(d.VisitName);
+                    worksheet.Row(j).Cell(6).SetValue(d.KitNo);
+                    worksheet.Row(j).Cell(7).SetValue(d.KitStatus);
+                    worksheet.Row(j).Cell(8).SetValue(d.NoofBoxorBottle);
+                    worksheet.Row(j).Cell(9).SetValue(d.Noofimp);
+                    worksheet.Row(j).Cell(10).SetValue(d.TotalIMP);
+                    worksheet.Row(j).Cell(11).SetValue(d.ActionBy);
+                    worksheet.Row(j).Cell(12).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
 
-                worksheet.Cell(list.Count + 3, 6).Value = "No of kits";
-                worksheet.Cell(list.Count + 4, 6).Value = "No of Imp";
-                worksheet.Cell(list.Count + 5, 6).Value = "Kit Created";
-                worksheet.Cell(list.Count + 6, 6).Value = "No of kit with issue/without issue";
-                worksheet.Cell(list.Count + 7, 6).Value = "No of damage";
-                worksheet.Cell(list.Count + 8, 6).Value = "No of missing";
-                worksheet.Cell(list.Count + 9, 6).Value = "No of discard";
-                worksheet.Cell(list.Count + 10, 6).Value = "No of used/Allocated";
-                worksheet.Cell(list.Count + 11, 6).Value = "Return without verification";
-                worksheet.Cell(list.Count + 12, 6).Value = "Return receive";
-                worksheet.Cell(list.Count + 13, 6).Value = "Return receive missing";
-                worksheet.Cell(list.Count + 14, 6).Value = "Return receive damaged";
-                worksheet.Cell(list.Count + 15, 6).Value = "Return only unused";
-                worksheet.Cell(list.Count + 16, 6).Value = "No of shipped to other site(unused only)";
-                worksheet.Cell(list.Count + 17, 6).Value = "Send to sponser";
-                worksheet.Cell(list.Count + 18, 6).Value = "Total kit";
-                worksheet.Cell(list.Count + 19, 6).Value = "Total IMP";
+                worksheet.Cell(list.Count + 3, 7).Value = "No of kits";
+                worksheet.Cell(list.Count + 4, 7).Value = "No of Imp";
+                worksheet.Cell(list.Count + 5, 7).Value = "Kit Created";
+                worksheet.Cell(list.Count + 6, 7).Value = "No of kit with issue/without issue";
+                worksheet.Cell(list.Count + 7, 7).Value = "No of damage";
+                worksheet.Cell(list.Count + 8, 7).Value = "No of missing";
+                worksheet.Cell(list.Count + 9, 7).Value = "No of discard";
+                worksheet.Cell(list.Count + 10, 7).Value = "No of used/Allocated";
+                worksheet.Cell(list.Count + 11, 7).Value = "Return without verification";
+                worksheet.Cell(list.Count + 12, 7).Value = "Return receive";
+                worksheet.Cell(list.Count + 13, 7).Value = "Return receive missing";
+                worksheet.Cell(list.Count + 14, 7).Value = "Return receive damaged";
+                worksheet.Cell(list.Count + 15, 7).Value = "Return only unused";
+                worksheet.Cell(list.Count + 16, 7).Value = "No of shipped to other site(unused only)";
+                worksheet.Cell(list.Count + 17, 7).Value = "Send to sponsor";
+                worksheet.Cell(list.Count + 18, 7).Value = "Shipped";
+                worksheet.Cell(list.Count + 19, 7).Value = "Total kit";
+                worksheet.Cell(list.Count + 20, 7).Value = "Total IMP";
 
                 var noofkis = list.Sum(x => x.NoofBoxorBottle);
                 var noofimp = list.Sum(x => x.Noofimp);
@@ -668,25 +690,27 @@ namespace GSC.Respository.Reports
                 var returnreceivedamage = list.Count(x => x.Status == KitStatus.ReturnReceiveDamaged);
                 var returnkit = list.Count(x => x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
                 var shiipedtoothersite = list.Count(x => x.ToSiteId != null && x.ToSiteId != x.SiteId && (x.PreStatus == KitStatus.ReturnReceiveWithIssue || x.PreStatus == KitStatus.ReturnReceiveWithoutIssue));
+                var shipped = list.Count(x => x.Status == KitStatus.Shipped);
                 var totalkit = withwithoutissue + kitcreated;
                 var totalimp = list.Where(x => x.Status == KitStatus.AllocationPending || x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue).Sum(x => x.TotalIMP);
-                worksheet.Row(list.Count + 3).Cell(7).SetValue(noofkis);
-                worksheet.Row(list.Count + 4).Cell(7).SetValue(noofimp);
-                worksheet.Row(list.Count + 5).Cell(7).SetValue(kitcreated);
-                worksheet.Row(list.Count + 6).Cell(7).SetValue(withwithoutissue);
-                worksheet.Row(list.Count + 7).Cell(7).SetValue(damaged);
-                worksheet.Row(list.Count + 8).Cell(7).SetValue(missiing);
-                worksheet.Row(list.Count + 9).Cell(7).SetValue(discard);
-                worksheet.Row(list.Count + 10).Cell(7).SetValue(allocated);
-                worksheet.Row(list.Count + 11).Cell(7).SetValue(returns);
-                worksheet.Row(list.Count + 12).Cell(7).SetValue(returnreceive);
-                worksheet.Row(list.Count + 13).Cell(7).SetValue(returnreceivemissing);
-                worksheet.Row(list.Count + 14).Cell(7).SetValue(returnreceivedamage);
-                worksheet.Row(list.Count + 15).Cell(7).SetValue(returnkit);
-                worksheet.Row(list.Count + 16).Cell(7).SetValue(shiipedtoothersite);
-                worksheet.Row(list.Count + 17).Cell(7).SetValue(sendtosponser);
-                worksheet.Row(list.Count + 18).Cell(7).SetValue(totalkit);
-                worksheet.Row(list.Count + 19).Cell(7).SetValue(totalimp);
+                worksheet.Row(list.Count + 3).Cell(8).SetValue(noofkis);
+                worksheet.Row(list.Count + 4).Cell(8).SetValue(noofimp);
+                worksheet.Row(list.Count + 5).Cell(8).SetValue(kitcreated);
+                worksheet.Row(list.Count + 6).Cell(8).SetValue(withwithoutissue);
+                worksheet.Row(list.Count + 7).Cell(8).SetValue(damaged);
+                worksheet.Row(list.Count + 8).Cell(8).SetValue(missiing);
+                worksheet.Row(list.Count + 9).Cell(8).SetValue(discard);
+                worksheet.Row(list.Count + 10).Cell(8).SetValue(allocated);
+                worksheet.Row(list.Count + 11).Cell(8).SetValue(returns);
+                worksheet.Row(list.Count + 12).Cell(8).SetValue(returnreceive);
+                worksheet.Row(list.Count + 13).Cell(8).SetValue(returnreceivemissing);
+                worksheet.Row(list.Count + 14).Cell(8).SetValue(returnreceivedamage);
+                worksheet.Row(list.Count + 15).Cell(8).SetValue(returnkit);
+                worksheet.Row(list.Count + 16).Cell(8).SetValue(shiipedtoothersite);
+                worksheet.Row(list.Count + 17).Cell(8).SetValue(sendtosponser);
+                worksheet.Row(list.Count + 18).Cell(8).SetValue(shipped);
+                worksheet.Row(list.Count + 19).Cell(8).SetValue(totalkit);
+                worksheet.Row(list.Count + 20).Cell(8).SetValue(totalimp);
 
 
 
@@ -736,7 +760,7 @@ namespace GSC.Respository.Reports
                     {
                         if (x.StudyProductTypeId > 0)
                         {
-                            type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                            type = _context.PharmacyStudyProductType.Include(k => k.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
                             if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                             {
                                 requestobj.Type = "Kit";
@@ -784,7 +808,7 @@ namespace GSC.Respository.Reports
                         {
                             if (x.StudyProductTypeId > 0)
                             {
-                                type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
                                 if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                 {
                                     shipmentobj.Type = "Kit";
@@ -799,7 +823,7 @@ namespace GSC.Respository.Reports
                                 }
                             }
                         }
-                       
+
                         if (x.ProjectDesignVisit != null)
                         {
                             requestobj.VisitName = x.ProjectDesignVisit.DisplayName;
@@ -843,7 +867,7 @@ namespace GSC.Respository.Reports
                                         {
                                             if (x.StudyProductTypeId > 0)
                                             {
-                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
                                                 if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                                 {
                                                     recieptobj.Type = "Kit";
@@ -860,11 +884,18 @@ namespace GSC.Respository.Reports
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
                                         recieptobj.KitNo = s.KitNo;
-                                        recieptobj.KitStatus = s.Status.GetDescription();
+                                        if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                        {
+                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                        }
+                                        else
+                                        {
+                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                        }
                                         recieptobj.ProductTypeCode = s.TreatmentType;
                                         recieptobj.Comments = s.Comments;
                                         var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
-                                         .Where(s => s.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
+                                         .Where(d => d.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
                                         if (visits.Count > 0)
                                             recieptobj.VisitName = string.Join(",", visits.Distinct());
 
@@ -899,7 +930,7 @@ namespace GSC.Respository.Reports
                                         {
                                             if (x.StudyProductTypeId > 0)
                                             {
-                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductUnitType).Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
                                                 if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                                 {
                                                     recieptobj.Type = "Kit";
@@ -920,7 +951,15 @@ namespace GSC.Respository.Reports
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
                                         recieptobj.KitNo = s.KitNo;
-                                        recieptobj.KitStatus = s.Status.GetDescription();
+                                        if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                        {
+                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                        }
+                                        else
+                                        {
+                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                        }
+                                        
                                         recieptobj.ProductTypeCode = s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                                         recieptobj.Comments = s.Comments;
                                         list.Add(recieptobj);
@@ -929,7 +968,7 @@ namespace GSC.Respository.Reports
                             }
                         }
                     }
-                   
+
 
                 });
             }
@@ -978,7 +1017,7 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(13).SetValue("");
                     worksheet.Row(j).Cell(14).SetValue("");
                     worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
-                    worksheet.Row(j).Cell(16).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy"));
+                    worksheet.Row(j).Cell(16).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
 

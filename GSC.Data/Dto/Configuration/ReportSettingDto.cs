@@ -194,5 +194,7 @@ namespace GSC.Data.Dto.Configuration
         public int productTypeId { get; set; }
         public ProductAccountabilityActions ActionType { get; set; }
         public string LotNo { get; set; }
+
+        public int VisitId { get; set; }
     }
 }

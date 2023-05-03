@@ -229,20 +229,32 @@ namespace GSC.Respository.Screening
                             Value = value,
 
                         };
-                        if (string.IsNullOrEmpty(variable.ScreeningValue))
+
+                        var data = All.Where(x => x.ScreeningTemplateId == screeningTemplateId && x.ProjectDesignVariableId == variable.Id).FirstOrDefault();
+                        if (data == null)
+                        {
+
                             Add(screeningTemplateValue);
 
-                        if (string.IsNullOrEmpty(variable.ScreeningValue))
-                        {
-                            var audit = new ScreeningTemplateValueAudit
+                            if (string.IsNullOrEmpty(variable.ScreeningValue))
                             {
-                                ScreeningTemplateValue = screeningTemplateValue,
-                                Value = value,
-                                OldValue = null,
-                                Note = "Submitted with IWRS data"
-                            };
-                            _screeningTemplateValueAuditRepository.Save(audit);
+                                var audit = new ScreeningTemplateValueAudit
+                                {
+                                    ScreeningTemplateValue = screeningTemplateValue,
+                                    Value = value,
+                                    OldValue = null,
+                                    Note = "Submitted with IWRS data"
+                                };
+                                _screeningTemplateValueAuditRepository.Save(audit);
+                            }
                         }
+                        if (data != null)
+                        {
+                            data.Value = value;
+                            Update(data);
+                        }
+
+                        
 
                     }
 
