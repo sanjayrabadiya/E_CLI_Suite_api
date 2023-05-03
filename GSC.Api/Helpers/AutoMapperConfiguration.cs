@@ -495,10 +495,14 @@ namespace GSC.Api.Helpers
             CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
             CreateMap<ManageSiteAddress, ManageSiteAddressDto>().ReverseMap();
             CreateMap<ProjectSiteAddress, ProjectSiteAddressDto>().ReverseMap();
-           // CreateMap<CustomReport, CustomReportDto>().ReverseMap();
+            // CreateMap<CustomReport, CustomReportDto>().ReverseMap();
             CreateMap<Centrifugation, CentrifugationDto>().ReverseMap();
             CreateMap<CentrifugationDetails, CentrifugationDetailsDto>().ReverseMap();
             CreateMap<SampleSeparation, SampleSeparationDto>().ReverseMap();
+
+            CreateMap<PkBarcodeGenerate, PkBarcodeGenerateDto>().ReverseMap();
+            CreateMap<SampleBarcodeGenerate, SampleBarcodeGenerateDto>().ReverseMap();
+            CreateMap<DossingBarcodeGenerate, DossingBarcodeGenerateDto>().ReverseMap();
         }
     }
 }

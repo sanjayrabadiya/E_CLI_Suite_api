@@ -58,7 +58,7 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            barcode.BarcodeString = _sampleBarcodeRepository.GenerateBarcodeString(sampleBarcodeDto);
+            //barcode.BarcodeString = _sampleBarcodeRepository.GenerateBarcodeString(sampleBarcodeDto);
             _sampleBarcodeRepository.Add(barcode);
             if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
             return Ok(barcode.Id);

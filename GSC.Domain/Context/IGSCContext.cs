@@ -418,5 +418,8 @@ namespace GSC.Domain.Context
         DbSet<Centrifugation> Centrifugation { get; set; }
         DbSet<CentrifugationDetails> CentrifugationDetails { get; set; }
         DbSet<SampleSeparation> SampleSeparation { get; set; }
+        DbSet<PkBarcodeGenerate> PkBarcodeGenerate { get; set; }
+        DbSet<SampleBarcodeGenerate> SampleBarcodeGenerate { get; set; }
+        DbSet<DossingBarcodeGenerate> DossingBarcodeGenerate { get; set; }
     }
 }

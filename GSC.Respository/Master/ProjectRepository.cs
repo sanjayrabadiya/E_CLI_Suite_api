@@ -910,8 +910,8 @@ namespace GSC.Respository.Master
             {
                 var designPeriodId = period.Id;
                 period.ProjectDesignId = projectDesign.Id;
-                period.DisplayName = project.ProjectName;
-                period.Description = project.ProjectName;
+                period.DisplayName = period.DisplayName;
+                period.Description = period.Description;
                 period.Id = 0;
                 period.ModifiedBy = null;
                 period.ModifiedDate = null;
