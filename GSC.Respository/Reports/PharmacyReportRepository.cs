@@ -518,7 +518,7 @@ namespace GSC.Respository.Reports
                         }
                         else
                         {
-                            productAccountabilityCentralReport.RequestedTo = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
+                            productAccountabilityCentralReport.RequestedTo = x.Project.ProjectCode;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
                         productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
@@ -600,7 +600,7 @@ namespace GSC.Respository.Reports
                         }
                         else
                         {
-                            productAccountabilityCentralReport.RequestedTo = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
+                            productAccountabilityCentralReport.RequestedTo = x.SupplyManagementKIT.Project.ProjectCode;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
