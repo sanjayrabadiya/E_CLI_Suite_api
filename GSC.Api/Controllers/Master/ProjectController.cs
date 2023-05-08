@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
+using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
@@ -515,7 +516,7 @@ namespace GSC.Api.Controllers.Master
 
 
         //Code for clone Study Tinku Mahato (01-04-2022)
-
+        [TransactionRequired]
         [HttpPost("{cloneProjectId}")]
         public IActionResult Post([FromRoute] int cloneProjectId, [FromBody] ProjectDto projectDto)
         {
@@ -574,7 +575,8 @@ namespace GSC.Api.Controllers.Master
             randomizationNumberSettings.PrefixRandomNo = "";
             _randomizationNumberSettingsRepository.Add(randomizationNumberSettings);
 
-            _uow.Save();
+            if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
+
             if (cloneProjectId != 0)
                 projectDto.CloneProjectDto.CloneProjectId = cloneProjectId;
             _projectRepository.CloneStudy(projectDto.CloneProjectDto, project);
