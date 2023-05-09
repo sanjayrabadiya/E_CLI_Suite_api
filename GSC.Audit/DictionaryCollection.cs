@@ -375,6 +375,10 @@ namespace GSC.Audit
             //Task Master
             _dictionaries.Add(new Dictionary { FieldName = "TaskName", DisplayName = "Task Name" });
             _dictionaries.Add(new Dictionary { FieldName = "Duration", DisplayName = "Duration" });
+            _dictionaries.Add(new Dictionary { FieldName = "DependentTaskId", DisplayName = "Dependency" });  //Field added by Sachin on 09/05/2023
+            _dictionaries.Add(new Dictionary { FieldName = "OffSet", DisplayName = "OffSet" });               //Field added by Sachin on 09/05/2023
+            _dictionaries.Add(new Dictionary { FieldName = "RefrenceType", DisplayName = "Reference Type" }); //Field added by Sachin on 09/05/2023
+            _dictionaries.Add(new Dictionary { FieldName = "ActivityType", DisplayName = "Activity Type" });  //Field added by Sachin on 09/05/2023
 
             // _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "TaskTemplateId", DisplayName = "Template", SourceColumn = "TemplateCode", TableName = "TaskTemplate", PkName = "Id" });
@@ -420,7 +424,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MaxHumidity", DisplayName = "Max Humidity" });
 
             //Version
-           // _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignId", DisplayName = "Project Design" });
+            // _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignId", DisplayName = "Project Design" });
             _dictionaries.Add(new Dictionary { FieldName = "VersionNumber", DisplayName = "Version Number" });
             _dictionaries.Add(new Dictionary { FieldName = "StudyVerionId", DisplayName = "Study Verion" });
             _dictionaries.Add(new Dictionary { FieldName = "VisitStatusId", DisplayName = "Visit Status" });
@@ -443,7 +447,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsRead", DisplayName = "Read" });
             _dictionaries.Add(new Dictionary { FieldName = "IsWrite", DisplayName = "Write" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSpeak", DisplayName = "Speak" });
-          //  _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
+            //  _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
             _dictionaries.Add(new Dictionary { FieldName = "DocumentNameId", DisplayName = "Document Name", SourceColumn = "Name", TableName = "DocumentName", PkName = "Id" });
 
             _dictionaries.Add(new Dictionary { FieldName = "AttendanceTemplateId", DisplayName = "Fitness", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
@@ -474,7 +478,7 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "Display", DisplayName = "Conversion" });
             _dictionaries.Add(new Dictionary { FieldName = "IsParticipantView", DisplayName = "Is ParticipantView" });
-            
+
             // Project design template note
             _dictionaries.Add(new Dictionary { FieldName = "IsPreview", DisplayName = "Is Printable?" });
 
@@ -560,7 +564,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "RepeatSeqNo", DisplayName = "Repeat Sequence No" });
             _dictionaries.Add(new Dictionary { FieldName = "RepeatSubSeqNo", DisplayName = "Repeat Sub-Sequence No" });
             _dictionaries.Add(new Dictionary { FieldName = "SeparateSign", DisplayName = "Separate Sign" });
-            _dictionaries.Add(new Dictionary { FieldName = "IsTemplateSeqNo", DisplayName = "Is Template Sequence No. Enabled?" }); 
+            _dictionaries.Add(new Dictionary { FieldName = "IsTemplateSeqNo", DisplayName = "Is Template Sequence No. Enabled?" });
             _dictionaries.Add(new Dictionary { FieldName = "IsVariableSeqNo", DisplayName = "Is variable Sequence No. Enabled?" });
 
             _dictionaries.Add(new Dictionary { FieldName = "ResourceName", DisplayName = "Resource Name" });

@@ -56,7 +56,7 @@ namespace GSC.Respository.CTMS
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
 
             string ActivityCode = tabNumber == 0 ? "act_001" : tabNumber == 1 ? "act_002" : tabNumber == 2 ? "act_003" :
-                tabNumber == 3 ? "act_004" : "act_005";
+                tabNumber == 3 ? "act_004" :  tabNumber == 4 ? "act_005" : "act_006";
 
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == ActivityCode && x.DeletedDate == null).FirstOrDefault();
 
