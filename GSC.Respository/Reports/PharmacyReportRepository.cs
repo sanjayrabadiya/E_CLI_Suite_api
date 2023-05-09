@@ -465,7 +465,7 @@ namespace GSC.Respository.Reports
                 worksheet.Row(list.Count + 3).Cell(15).SetValue(underQuarentine);
                 worksheet.Row(list.Count + 4).Cell(15).SetValue(verifiedQty);
                 worksheet.Row(list.Count + 5).Cell(15).SetValue(kits);
-                worksheet.Row(list.Count + 6).Cell(15).SetValue(verifiedQty - kits);
+                worksheet.Row(list.Count + 6).Cell(15).SetValue(verifiedQty > 0 ? verifiedQty - kits : 0);
                 worksheet.Row(list.Count + 7).Cell(15).SetValue(avaialblekits);
 
 
