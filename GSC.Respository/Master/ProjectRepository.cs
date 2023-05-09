@@ -1028,7 +1028,9 @@ namespace GSC.Respository.Master
                     _context.EditCheck.Add(editcheck);
                     _context.Save();
 
-                    var editcheckDetails = _context.EditCheckDetail.Where(q => q.EditCheckId == editcheckId && q.DeletedDate == null).ToList();
+                    var editcheckDetails = _context.EditCheckDetail.Where(q => q.EditCheckId == editcheckId && q.DeletedDate == null
+                    && _context.ProjectDesignTemplate.Any(pdt => pdt.Id == q.ProjectDesignTemplateId && pdt.DeletedDate == null)
+                    && _context.ProjectDesignVariable.Any(pd => pd.Id == q.ProjectDesignVariableId && pd.DeletedDate == null)).ToList();
 
                     foreach (var editcheckDetail in editcheckDetails)
                     {
@@ -1119,10 +1121,14 @@ namespace GSC.Respository.Master
                     }
                 }
             }
+
             // Schedule Clone
             if (cloneProject.ScheduleClone)
             {
-                var projectSchedules = _context.ProjectSchedule.Where(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null).ToList();
+                var projectSchedules = _context.ProjectSchedule.Where(q => q.ProjectDesignId == projectDesignId && q.DeletedDate == null
+                && _context.ProjectDesignVisit.Any(pdv => pdv.Id == q.ProjectDesignVisitId && pdv.DeletedDate == null)
+                    && _context.ProjectDesignTemplate.Any(pdt => pdt.Id == q.ProjectDesignTemplateId && pdt.DeletedDate == null)
+                    && _context.ProjectDesignVariable.Any(pd => pd.Id == q.ProjectDesignVariableId && pd.DeletedDate == null)).ToList();
                 foreach (var projectSchedule in projectSchedules)
                 {
                     var projectScheduleId = projectSchedule.Id;
@@ -1150,7 +1156,10 @@ namespace GSC.Respository.Master
                     _context.ProjectSchedule.Add(projectSchedule);
                     _context.Save();
 
-                    var projectScheduleTemplates = _context.ProjectScheduleTemplate.Where(q => q.ProjectScheduleId == projectScheduleId && q.DeletedDate == null).ToList();
+                    var projectScheduleTemplates = _context.ProjectScheduleTemplate.Where(q => q.ProjectScheduleId == projectScheduleId && q.DeletedDate == null
+                    && _context.ProjectDesignVisit.Any(pdv=>pdv.Id == q.ProjectDesignVisitId && pdv.DeletedDate == null)
+                    && _context.ProjectDesignTemplate.Any(pdt => pdt.Id == q.ProjectDesignTemplateId && pdt.DeletedDate == null)
+                    && _context.ProjectDesignVariable.Any(pd => pd.Id == q.ProjectDesignVariableId && pd.DeletedDate == null)).ToList();
 
                     foreach (var projectScheduleTemplate in projectScheduleTemplates)
                     {
