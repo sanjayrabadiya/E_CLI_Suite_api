@@ -396,8 +396,11 @@ namespace GSC.Respository.Reports
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
                         productAccountabilityCentralReport.ActionName = "KitPack";
-                        productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                      
+
+                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
 
@@ -474,8 +477,8 @@ namespace GSC.Respository.Reports
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                         productAccountabilityCentralReport.ActionName = "Kit";
-                        productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                         productAccountabilityCentralReport.VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
@@ -641,8 +644,8 @@ namespace GSC.Respository.Reports
                             productAccountabilityCentralReport.RequestedTo = x.Project.ProjectCode;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
-                        productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.PreStatus = x.PrevStatus;
@@ -739,8 +742,8 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.PreStatus = x.PrevStatus;
-                        productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0  ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0  ? x.ModifiedDate : x.CreatedDate;
                         productAccountabilityCentralReport.VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                         productAccountabilityCentralReport.NoofBoxorBottle = 1;
                         productAccountabilityCentralReport.Noofimp = (int)x.NoOfImp;
@@ -1021,8 +1024,10 @@ namespace GSC.Respository.Reports
                                                 }
                                             }
                                         }
-                                        recieptobj.ActionDate = receipt.CreatedDate;
-                                        recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
+
+                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1088,8 +1093,8 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.VisitName = x.ProjectDesignVisit.DisplayName;
                                         }
-                                        recieptobj.ActionDate = receipt.CreatedDate;
-                                        recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1132,11 +1137,10 @@ namespace GSC.Respository.Reports
                 worksheet.Cell(1, 10).Value = "Requested/Approved Imp/Kit";
                 worksheet.Cell(1, 11).Value = "Comments";
                 worksheet.Cell(1, 12).Value = "Courier Details";
-                worksheet.Cell(1, 13).Value = "Tracking Number";
-                worksheet.Cell(1, 14).Value = "Expiry";
-                worksheet.Cell(1, 15).Value = "Lot No.";
-                worksheet.Cell(1, 16).Value = "Action By";
-                worksheet.Cell(1, 17).Value = "Action On";
+                worksheet.Cell(1, 13).Value = "Expiry";
+                worksheet.Cell(1, 14).Value = "Lot No.";
+                worksheet.Cell(1, 15).Value = "Action By";
+                worksheet.Cell(1, 16).Value = "Action On";
 
                 var j = 2;
 
@@ -1154,11 +1158,10 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(10).SetValue(d.KitNo);
                     worksheet.Row(j).Cell(11).SetValue(d.Comments);
                     worksheet.Row(j).Cell(12).SetValue(d.CourierName);
-                    worksheet.Row(j).Cell(13).SetValue(d.TrackingNumber);
+                    worksheet.Row(j).Cell(13).SetValue("");
                     worksheet.Row(j).Cell(14).SetValue("");
-                    worksheet.Row(j).Cell(15).SetValue("");
-                    worksheet.Row(j).Cell(16).SetValue(d.ActionBy);
-                    worksheet.Row(j).Cell(17).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
+                    worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
+                    worksheet.Row(j).Cell(16).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
 
@@ -1340,8 +1343,8 @@ namespace GSC.Respository.Reports
                                                 }
                                             }
                                         }
-                                        recieptobj.ActionDate = receipt.CreatedDate;
-                                        recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1407,8 +1410,8 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.VisitName = x.ProjectDesignVisit.DisplayName;
                                         }
-                                        recieptobj.ActionDate = receipt.CreatedDate;
-                                        recieptobj.ActionBy = _context.Users.Where(s => s.Id == receipt.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
