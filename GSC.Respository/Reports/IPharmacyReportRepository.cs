@@ -11,6 +11,8 @@ namespace GSC.Respository.Reports
     {
         FileStreamResult GetRandomizationKitReport(RandomizationIWRSReport randomizationIWRSReport);
 
+        List<RandomizationIWRSReportData> GetRandomizationKitReportData(RandomizationIWRSReport randomizationIWRSReport);
+
         FileStreamResult GetProductAccountabilityCentralReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
 
         FileStreamResult GetProductAccountabilitySiteReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
@@ -18,5 +20,7 @@ namespace GSC.Respository.Reports
         FileStreamResult GetProductShipmentReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
 
         List<DropDownDto> GetPharmacyStudyProductTypeDropDownPharmacyReport(int ProjectId);
+
+        List<ProductAccountabilityCentralReport> GetProductShipmentReportData(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
     }
 }
