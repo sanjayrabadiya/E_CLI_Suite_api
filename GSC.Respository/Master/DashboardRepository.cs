@@ -144,7 +144,7 @@ namespace GSC.Respository.Master
         {
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 
@@ -173,7 +173,7 @@ namespace GSC.Respository.Master
         {
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
             var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
                                .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
@@ -509,6 +509,51 @@ namespace GSC.Respository.Master
             return result;
         }
 
+       public dynamic getVisitStatuschart(int projectId, int countryId, int siteId)
+        {
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var list = _context.CtmsMonitoringReportReview
+                .Include(x => x.CtmsMonitoringReport)
+                .ThenInclude(x => x.CtmsMonitoring)
+                .ThenInclude(x => x.Project)
+                .ThenInclude(x => x.ManageSite)
+                .Where(x => projectIds.Contains(x.CtmsMonitoringReport.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoringReport.CtmsMonitoring.StudyLevelFormId)
+                            && (siteId == 0 ? (!x.CtmsMonitoringReport.CtmsMonitoring.Project.IsTestSite) : true)
+                            && x.DeletedDate == null)
+                .Select(b => new CtmsMonitoringPlanDashoardDto
+                {
+                    Id = b.Id,
+                    ScheduleStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleStartDate,
+                    SchedulEndtDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleEndDate,
+                    ActualStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualStartDate,
+                    ActualEndDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualEndDate,
+                }).ToList();
+            if (list.Count > 0)
+            {
+                foreach (var item in list)
+                {
+                    item.visitStatus = GetVisitgStatus(item);                  
+                }             
+            }
+            var groupedCustomerList = list
+            .GroupBy(u => u.visitStatus)
+            .Select(b => new CtmsMonitoringPlanDashoardDto
+            {
+               DisplayName = b.Key,
+               Total = b.Count()
+            }).ToList();
+            return groupedCustomerList;
+        }
+
         public List<DashboardQueryGraphFinalDto> GetNewDashboardQueryGraphData(int projectId, int countryId, int siteId)
         {
             try
@@ -809,7 +854,7 @@ namespace GSC.Respository.Master
             var today = DateTime.Now;
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 
@@ -831,7 +876,9 @@ namespace GSC.Respository.Master
                     Id = b.Id,
                     Activity = b.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
                     ScheduleStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleStartDate,
+                    SchedulEndtDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleEndDate,
                     ActualStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualStartDate,
+                    ActualEndDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualEndDate,
                     Site = b.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode,
                     Country = b.CtmsMonitoringReport.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
                     Status = b.CtmsMonitoringReport.ReportStatus.ToString(),
@@ -865,7 +912,7 @@ namespace GSC.Respository.Master
             var today = DateTime.Now;
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 
@@ -911,7 +958,7 @@ namespace GSC.Respository.Master
             var today = DateTime.Now;
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 
@@ -978,19 +1025,31 @@ namespace GSC.Respository.Master
 
         public string GetVisitgStatus(CtmsMonitoringPlanDashoardDto obj)
         {
-            if (obj.ScheduleStartDate != null && obj.ActualStartDate == null)
+            var today = DateTime.Now;
+            if (obj.ScheduleStartDate == obj.ActualStartDate)
             {
-                return "Planned";
+                return "On Track ";
             }
-            else if (obj.ScheduleStartDate == obj.ActualStartDate)
+            else if (obj.ScheduleStartDate == obj.ActualStartDate && obj.SchedulEndtDate == obj.ActualEndDate)
             {
-                return "Initiated";
+                return "Completed";
+            }
+            else if (obj.ScheduleStartDate > today)
+            {
+                return "Upcoming";
             }
             else if (obj.ScheduleStartDate < obj.ActualStartDate)
             {
                 return "Overdue";
             }
-
+            else if (obj.ScheduleStartDate < today)
+            {
+                return "Unnoticed";
+            }
+            else if (obj.ScheduleStartDate > obj.ActualStartDate)
+            {
+                return "Prearranged";
+            }
             return "";
         }
 
@@ -999,7 +1058,7 @@ namespace GSC.Respository.Master
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" && x.DeletedDate == null).ToList();
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
 

@@ -189,7 +189,7 @@ namespace GSC.Respository.CTMS
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
 
             string ActivityCode = tabNumber == 0 ? "act_001" : tabNumber == 1 ? "act_002" : tabNumber == 2 ? "act_003" :
-                tabNumber == 3 ? "act_004" : "act_005";
+                tabNumber == 3 ? "act_004" : tabNumber == 4 ? "act_005" : "act_006";
 
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == ActivityCode && x.DeletedDate == null).FirstOrDefault();
 
@@ -199,13 +199,26 @@ namespace GSC.Respository.CTMS
                                 .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
                                 && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
-            var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
-                                       && x.CtmsMonitoring.DeletedDate == null).ToList();
+            if(ActivityCode != "act_004")
+            {
+                var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+                                     && x.CtmsMonitoring.DeletedDate == null).ToList();
 
-            if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
-                return "Please Approve " + CtmsActivity.ActivityName + " .";
+                if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
+                    return "Please Approve " + CtmsActivity.ActivityName + " .";
 
-            return "";
+                return "";
+            }
+            else
+            {
+                var CtmsMonitoringStatus = _context.CtmsMonitoringReport.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
+                                      && x.CtmsMonitoring.DeletedDate == null).ToList();
+
+                if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().ReportStatus == MonitoringReportStatus.Approved))
+                    return "Please Approve " + CtmsActivity.ActivityName + " .";
+
+                return "";
+            }
         }
         private List<CtmsMonitoringReportVariableValueChild> GetCTMSTemplateValueChild(int CtmsMonitoringReportVariableValueId)
         {

@@ -246,7 +246,9 @@ namespace GSC.Data.Dto.ProjectRight
         public int Id { get; set; }
         public string Activity { get; set; }
         public DateTime? ScheduleStartDate { get; set; }
+        public DateTime? SchedulEndtDate { get; set; }
         public DateTime? ActualStartDate { get; set; }
+        public DateTime? ActualEndDate { get; set; }
         public string Status { get; set; }
         public string visitStatus { get; set; }
         public string Country { get; set; }
@@ -254,6 +256,8 @@ namespace GSC.Data.Dto.ProjectRight
         public int AvgReviewDay { get; set; }
 
         public DateTime? sendForReviewDate { get; set; }
+        public string DisplayName { get; set; }
+        public int? Total { get; set; }
     }
 
     public class DynamicAeChart

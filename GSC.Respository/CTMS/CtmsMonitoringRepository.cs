@@ -137,7 +137,8 @@ namespace GSC.Respository.CTMS
                     ScreenCode = x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_001" ? "mnu_feasibility" :
                                  x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_002" ? "mnu_siteselection" :
                                  x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_003" ? "mnu_siteinitiate" :
-                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_004" ? "mnu_monitoringvisit" : ""
+                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_004" ? "mnu_monitoringvisit" :
+                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_005" ? "mnu_closeout" : ""
                 }).ToList();
 
             var StudyLevelFormList = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
@@ -160,7 +161,8 @@ namespace GSC.Respository.CTMS
                 ScreenCode = x.Activity.CtmsActivity.ActivityCode == "act_001" ? "mnu_feasibility" :
                                  x.Activity.CtmsActivity.ActivityCode == "act_002" ? "mnu_siteselection" :
                                  x.Activity.CtmsActivity.ActivityCode == "act_003" ? "mnu_siteinitiate" :
-                                 x.Activity.CtmsActivity.ActivityCode == "act_004" ? "mnu_monitoringvisit" : ""
+                                 x.Activity.CtmsActivity.ActivityCode == "act_004" ? "mnu_monitoringvisit" : 
+                                 x.Activity.CtmsActivity.ActivityCode == "act_005" ? "mnu_monitoringvisit" : ""
             }).ToList();
 
             var result = ctmsMonitorings.Count() == 0 ? StudyLevelFormList : ctmsMonitorings;

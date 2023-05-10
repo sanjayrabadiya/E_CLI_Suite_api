@@ -202,6 +202,14 @@ namespace GSC.Api.Controllers.Master
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("getVisitStatuschart/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult getVisitStatuschart(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.getVisitStatuschart(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
         #endregion
 
         //Add By Tinku on 07/06/2022 for dasboard tranning data
