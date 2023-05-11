@@ -509,7 +509,7 @@ namespace GSC.Respository.Master
             return result;
         }
 
-       public dynamic getVisitStatuschart(int projectId, int countryId, int siteId)
+        public dynamic getVisitStatuschart(int projectId, int countryId, int siteId)
         {
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
@@ -541,15 +541,15 @@ namespace GSC.Respository.Master
             {
                 foreach (var item in list)
                 {
-                    item.visitStatus = GetVisitgStatus(item);                  
-                }             
+                    item.visitStatus = GetVisitgStatus(item);
+                }
             }
             var groupedCustomerList = list
             .GroupBy(u => u.visitStatus)
             .Select(b => new CtmsMonitoringPlanDashoardDto
             {
-               DisplayName = b.Key,
-               Total = b.Count()
+                DisplayName = b.Key,
+                Total = b.Count()
             }).ToList();
             return groupedCustomerList;
         }
@@ -862,29 +862,28 @@ namespace GSC.Respository.Master
                                .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
-            //Changes made by Sachin
-            var list = _context.CtmsMonitoringReportReview 
-                .Include(x => x.CtmsMonitoringReport)
-                .ThenInclude(x => x.CtmsMonitoring)
-                .ThenInclude(x => x.Project)
-                .ThenInclude(x => x.ManageSite)
-                .Where(x => projectIds.Contains(x.CtmsMonitoringReport.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoringReport.CtmsMonitoring.StudyLevelFormId)
-                            && (siteId == 0 ? (!x.CtmsMonitoringReport.CtmsMonitoring.Project.IsTestSite) : true)
-                            && x.DeletedDate == null)
-                .Select(b => new CtmsMonitoringPlanDashoardDto
-                {
-                    Id = b.Id,
-                    Activity = b.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
-                    ScheduleStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleStartDate,
-                    SchedulEndtDate = b.CtmsMonitoringReport.CtmsMonitoring.ScheduleEndDate,
-                    ActualStartDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualStartDate,
-                    ActualEndDate = b.CtmsMonitoringReport.CtmsMonitoring.ActualEndDate,
-                    Site = b.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectCode,
-                    Country = b.CtmsMonitoringReport.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
-                    Status = b.CtmsMonitoringReport.ReportStatus.ToString(),
-                    sendForReviewDate = b.CreatedDate
-
-                }).ToList();
+            //Changes made by Mitul
+            var list = _context.CtmsMonitoringReport
+           .Include(z => z.CtmsMonitoring)
+           .ThenInclude(i => i.Project)
+            .ThenInclude(i => i.ManageSite)
+           .Where(z => projectIds.Contains(z.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.CtmsMonitoring.StudyLevelFormId)
+            && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true) 
+            && z.DeletedDate == null)
+            .Select
+            (b => new CtmsMonitoringPlanDashoardDto
+            {
+                Id = b.Id,
+                Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                ScheduleStartDate = b.CtmsMonitoring.ScheduleStartDate,
+                SchedulEndtDate = b.CtmsMonitoring.ScheduleEndDate,
+                ActualStartDate = b.CtmsMonitoring.ActualStartDate,
+                ActualEndDate = b.CtmsMonitoring.ActualEndDate,
+                Site = b.CtmsMonitoring.Project.ProjectCode == null ? b.CtmsMonitoring.Project.ManageSite.SiteName : b.CtmsMonitoring.Project.ProjectCode,
+                Country = b.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
+                Status = b.ReportStatus.ToString(),
+                sendForReviewDate = b.CreatedDate
+            }).ToList();
             int Total = 0, Count = 0;
             if (list.Count > 0)
             {
@@ -893,8 +892,7 @@ namespace GSC.Respository.Master
                     //item.Status = GetMonitoringStatus(item);
                     item.visitStatus = GetVisitgStatus(item);
 
-                    if (item.Status == "UnderReview")
-                    {
+                    if (item.Status == "UnderReview") { 
                         TimeSpan v = (TimeSpan)(today - item.sendForReviewDate);
                         Total = Total + v.Days;
                         Count++;
@@ -902,7 +900,7 @@ namespace GSC.Respository.Master
                 }
                 list[0].AvgReviewDay = Total != 0 ? (Total / Count) : 0;
             }
-           
+
             return list;
         }
 
@@ -1027,29 +1025,17 @@ namespace GSC.Respository.Master
         {
             var today = DateTime.Now;
             if (obj.ScheduleStartDate == obj.ActualStartDate)
-            {
                 return "On Track ";
-            }
             else if (obj.ScheduleStartDate == obj.ActualStartDate && obj.SchedulEndtDate == obj.ActualEndDate)
-            {
                 return "Completed";
-            }
-            else if (obj.ScheduleStartDate > today)
-            {
+            else if (obj.ScheduleStartDate > today && obj.ActualStartDate == null)
                 return "Upcoming";
-            }
             else if (obj.ScheduleStartDate < obj.ActualStartDate)
-            {
                 return "Overdue";
-            }
-            else if (obj.ScheduleStartDate < today)
-            {
+            else if (obj.ScheduleStartDate < today && obj.ActualStartDate == null)
                 return "Unnoticed";
-            }
             else if (obj.ScheduleStartDate > obj.ActualStartDate)
-            {
                 return "Prearranged";
-            }
             return "";
         }
 
@@ -1077,9 +1063,6 @@ namespace GSC.Respository.Master
                     Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
                     Status = b.Status
                 }).ToList();
-
-
-
 
             if (asd.Count > 0)
             {
