@@ -1023,9 +1023,10 @@ namespace GSC.Respository.Master
 
         public string GetVisitgStatus(CtmsMonitoringPlanDashoardDto obj)
         {
+            #region visit status Add by mitul
             var today = DateTime.Now;
             if (obj.ScheduleStartDate == obj.ActualStartDate)
-                return "On Track ";
+                return "On Track";
             else if (obj.ScheduleStartDate == obj.ActualStartDate && obj.SchedulEndtDate == obj.ActualEndDate)
                 return "Completed";
             else if (obj.ScheduleStartDate > today && obj.ActualStartDate == null)
@@ -1037,6 +1038,7 @@ namespace GSC.Respository.Master
             else if (obj.ScheduleStartDate > obj.ActualStartDate)
                 return "Prearranged";
             return "";
+            #endregion
         }
 
         public dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
@@ -1047,7 +1049,7 @@ namespace GSC.Respository.Master
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
-
+            
             var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
                                .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();

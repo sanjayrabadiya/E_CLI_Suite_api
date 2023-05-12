@@ -55,8 +55,9 @@ namespace GSC.Respository.CTMS
             designTemplateDto.IsSender = ctmsMonitoringReport.CreatedBy == _jwtTokenAccesser.UserId;
             designTemplateDto.ReportStatus = ctmsMonitoringReport.ReportStatus;
             //Changes made by Sachin
-            designTemplateDto.VariableDisable = ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.OnGoing
-                || ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.ReviewInProgress
+            designTemplateDto.VariableDisable =
+                 //ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.OnGoing
+                 ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.ReviewInProgress
                 || ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.Approved;
 
             var reviewPerson = _ctmsMonitoringReportReviewRepository.GetReview(CtmsMonitoringReportId);
