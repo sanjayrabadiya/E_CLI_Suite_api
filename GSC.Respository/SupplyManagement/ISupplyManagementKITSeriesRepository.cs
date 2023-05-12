@@ -4,6 +4,7 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 
 namespace GSC.Respository.SupplyManagement
@@ -13,5 +14,9 @@ namespace GSC.Respository.SupplyManagement
         void AddKitSeriesVisitDetail(SupplyManagementKITSeriesDto data);
 
         string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese,SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
+
+        string CheckExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
+
+        DateTime GetExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
     }
 }

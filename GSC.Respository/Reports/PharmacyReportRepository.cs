@@ -804,11 +804,11 @@ namespace GSC.Respository.Reports
                 //worksheet.Cell(list.Count + 13, 7).Value = "Return receive missing";
                 //worksheet.Cell(list.Count + 14, 7).Value = "Return receive damaged";
                 //worksheet.Cell(list.Count + 15, 7).Value = "Return only unused";
-                worksheet.Cell(list.Count + 11, 7).Value = "No of shipped to other site(unused only)";
-                worksheet.Cell(list.Count + 12, 7).Value = "Send to sponsor";
-                worksheet.Cell(list.Count + 13, 7).Value = "Shipped";
-                worksheet.Cell(list.Count + 14, 7).Value = "Total kit";
-                worksheet.Cell(list.Count + 15, 7).Value = "Total IMP";
+                //worksheet.Cell(list.Count + 11, 7).Value = "No of shipped to other site(unused only)";
+                worksheet.Cell(list.Count + 11, 7).Value = "Send to sponsor";
+                worksheet.Cell(list.Count + 12, 7).Value = "Shipped";
+                worksheet.Cell(list.Count + 13, 7).Value = "Total kit";
+                worksheet.Cell(list.Count + 14, 7).Value = "Total IMP";
 
                 var noofkis = list.Sum(x => x.NoofBoxorBottle);
                 var noofimp = list.Sum(x => x.Noofimp);
@@ -824,7 +824,7 @@ namespace GSC.Respository.Reports
                 //var returnreceivemissing = list.Count(x => x.Status == KitStatus.ReturnReceiveMissing);
                 //var returnreceivedamage = list.Count(x => x.Status == KitStatus.ReturnReceiveDamaged);
                 //var returnkit = list.Count(x => x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
-                var shiipedtoothersite = list.Count(x => x.ToSiteId != null && x.ToSiteId != x.SiteId && (x.PreStatus == KitStatus.ReturnReceiveWithIssue || x.PreStatus == KitStatus.ReturnReceiveWithoutIssue));
+                //var shiipedtoothersite = list.Count(x => x.ToSiteId != null && x.ToSiteId != x.SiteId && (x.PreStatus == KitStatus.ReturnReceiveWithIssue || x.PreStatus == KitStatus.ReturnReceiveWithoutIssue));
                 var shipped = list.Count(x => x.Status == KitStatus.Shipped);
                 //var totalkit = withwithoutissue + kitcreated;
                 var totalkit = withwithoutissue;
@@ -842,11 +842,11 @@ namespace GSC.Respository.Reports
                 //worksheet.Row(list.Count + 13).Cell(8).SetValue(returnreceivemissing);
                 //worksheet.Row(list.Count + 14).Cell(8).SetValue(returnreceivedamage);
                 //worksheet.Row(list.Count + 15).Cell(8).SetValue(returnkit);
-                worksheet.Row(list.Count + 11).Cell(8).SetValue(shiipedtoothersite);
-                worksheet.Row(list.Count + 12).Cell(8).SetValue(sendtosponser);
-                worksheet.Row(list.Count + 13).Cell(8).SetValue(shipped);
-                worksheet.Row(list.Count + 14).Cell(8).SetValue(totalkit);
-                worksheet.Row(list.Count + 15).Cell(8).SetValue(totalimp);
+                //worksheet.Row(list.Count + 11).Cell(8).SetValue(shiipedtoothersite);
+                worksheet.Row(list.Count + 11).Cell(8).SetValue(sendtosponser);
+                worksheet.Row(list.Count + 12).Cell(8).SetValue(shipped);
+                worksheet.Row(list.Count + 13).Cell(8).SetValue(totalkit);
+                worksheet.Row(list.Count + 14).Cell(8).SetValue(totalimp);
 
 
 

@@ -84,6 +84,13 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return BadRequest(ModelState);
             }
 
+            var expire = _supplyManagementKITSeriesRepository.CheckExpiryDateSequenceWise(supplyManagementKITSeriesDto);
+            if (!string.IsNullOrEmpty(expire))
+            {
+                ModelState.AddModelError("Message", expire);
+                return BadRequest(ModelState);
+            }
+
             if (kitsettings.IsUploadWithKit)
             {
                 var uploadedkits = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(s => s.SupplyManagementUploadFile.ProjectId == supplyManagementKITSeriesDto.ProjectId
@@ -105,6 +112,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                     var supplyManagementKitSeries = _mapper.Map<SupplyManagementKITSeries>(supplyManagementKITSeriesDto);
                     supplyManagementKitSeries.Status = KitStatus.AllocationPending;
                     supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, 1, supplyManagementKITSeriesDto);
+                    supplyManagementKitSeries.KitExpiryDate = _supplyManagementKITSeriesRepository.GetExpiryDateSequenceWise(supplyManagementKITSeriesDto);
                     _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
                     if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo && x.ProjectId == supplyManagementKITSeriesDto.ProjectId && x.DeletedDate == null))
                     {
@@ -123,7 +131,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
                 }
             }
-            
+
 
             return Ok(supplyManagementKITSeriesDto.Id);
 
@@ -211,7 +219,32 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             return Ok();
         }
+        [HttpGet]
+        [Route("GetExpiryDate/{id}")]
+        public IActionResult GetExpiryDate(int id)
+        {
 
+            KitListApprove obj = new KitListApprove();
+            var expirydate = _context.ProductVerification.Include(x => x.ProductReceipt)
+                .Where(x => x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved
+                       && x.ProductReceiptId == id).FirstOrDefault();
+            if (expirydate != null)
+            {
+                obj.RetestExpirystr = Convert.ToDateTime(expirydate.RetestExpiryDate).ToString("dd MMM yyyy");
+                
+            }
+            return Ok(obj);
+        }
 
+        [HttpGet]
+        [Route("GetLotBatchList/{projectId}/{pharmacyStudyProductTypeId}")]
+        public IActionResult GetLotBatchList(int projectId, int pharmacyStudyProductTypeId)
+        {
+            var data = _context.ProductVerification.Include(x => x.ProductReceipt)
+                .Where(x => x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved
+                && x.ProductReceipt.PharmacyStudyProductTypeId == pharmacyStudyProductTypeId
+                      && x.ProductReceipt.ProjectId == projectId).Select(x => new { Id = x.ProductReceiptId, Value = x.BatchLotNumber }).Distinct().ToList();
+            return Ok(data);
+        }
     }
 }

@@ -71,6 +71,19 @@ namespace GSC.Respository.SupplyManagement
 
                     }
                 }
+                var kit = _context.SupplyManagementKIT.Where(s => s.Id == x.SupplyManagementKITId).FirstOrDefault();
+
+                if (kit != null && kit.ProductReceiptId > 0)
+                {
+                    var productreciept = _context.ProductVerification.Include(a => a.ProductReceipt).Where(a => a.ProductReceiptId == kit.ProductReceiptId).FirstOrDefault();
+                    if (productreciept != null)
+                    {
+                        x.ExpiryDate = productreciept.RetestExpiryDate;
+                        x.LotBatchNo = productreciept.BatchLotNumber;
+                    }
+                }
+
+
             });
             return data;
         }
@@ -110,7 +123,9 @@ namespace GSC.Respository.SupplyManagement
                             Id = x.Id,
                             KitNo = x.KitNo,
                             VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                            SiteCode = x.SupplyManagementKIT.Site.ProjectCode
+                            SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
+                            RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                            LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
 
                         }).OrderByDescending(x => x.KitNo).ToList();
                 foreach (var item in data)
@@ -135,7 +150,9 @@ namespace GSC.Respository.SupplyManagement
                         {
                             Id = x.Id,
                             KitNo = x.KitNo,
-                            SiteCode = x.SiteId > 0 ? _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode : ""
+                            SiteCode = x.SiteId > 0 ? _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
+                            //RetestExpiry = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                            //LotBatchNo = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
                         }).OrderByDescending(x => x.KitNo).ToList();
                 foreach (var item in data)
                 {
@@ -179,17 +196,25 @@ namespace GSC.Respository.SupplyManagement
             return kitno1;
         }
 
-        public int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId)
+        public int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId)
         {
-
+            var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == productReceiptId).FirstOrDefault();
+            if (productreciept == null)
+                return 0;
+            var verification = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.BatchLotNumber == productreciept.BatchLotNumber
+            && x.ProductReceipt.ProjectId == ProjectId && x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved).Select(x => x.ProductReceiptId).ToList();
+            if (verification.Count == 0)
+                return 0;
             var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
                  && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && verification.Contains(x.ProductReceiptId)
                  && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
                  .Sum(z => z.RemainingQuantity);
             if (RemainingQuantity > 0)
             {
                 var approvedQty = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
                  && x.SupplyManagementKIT.ProjectId == ProjectId && x.SupplyManagementKIT.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && verification.Contains(x.SupplyManagementKIT.ProductReceiptId)
                  ).Sum(x => x.NoOfImp);
 
                 var finalRemainingQty = RemainingQuantity - approvedQty;
@@ -415,38 +440,51 @@ namespace GSC.Respository.SupplyManagement
 
             if (setting.KitCreationType == KitCreationType.KitWise)
             {
+                var kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                                    x.DeletedDate == null
+                                    && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
+                                    && x.SupplyManagementKIT.ProjectId == obj.ParentProjectId
+                                    && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visit.Value
+                                    && x.SupplyManagementKIT.DeletedDate == null
+                                    && x.SupplyManagementKIT.ProjectId == obj.ProjectId
+                                    && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                                    && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
-                var kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
-                                  x.DeletedDate == null
-                                  && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
-                                  && x.SupplyManagementKIT.ProjectId == obj.ParentProjectId
-                                  && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visit.Value
-                                  && x.SupplyManagementShipmentId != null
-                                  && x.SupplyManagementKIT.DeletedDate == null
-                                  && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ProjectId
-                                  && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
-                                  && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
                 kitcount = kitdata.Count;
                 if (kitdata == null || kitdata.Count == 0)
                     return obj;
-                var kit = kitdata.FirstOrDefault();
-                kit.RandomizationId = obj.RandomizationId;
-                kit.Status = KitStatus.Allocated;
-                _context.SupplyManagementKITDetail.Update(kit);
-                var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+
+                foreach (var kit in kitdata)
                 {
-                    RandomizationId = obj.RandomizationId,
-                    ProjectDesignVisitId = visit.ProjectDesignVisitId,
-                    KitNo = kit.KitNo,
-                    ProductCode = visit.Value,
-                    ReasonOth = obj.ReasonOth,
-                    AuditReasonId = obj.AuditReasonId,
-                    SupplyManagementKITDetailId = kit.Id
-                };
-                InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
-                _context.Save();
-                obj.KitNo = kit.KitNo;
-                SendRandomizationThresholdEMail(obj, kitcount);
+                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
+                    var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
+                    var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
+                    if (productreciept != null && Convert.ToDateTime(productreciept.RetestExpiryDate).Date > date.Date)
+                    {
+                        kit.RandomizationId = obj.RandomizationId;
+                        kit.Status = KitStatus.Allocated;
+                        _context.SupplyManagementKITDetail.Update(kit);
+                        var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+                        {
+                            RandomizationId = obj.RandomizationId,
+                            ProjectDesignVisitId = visit.ProjectDesignVisitId,
+                            KitNo = kit.KitNo,
+                            ProductCode = visit.Value,
+                            ReasonOth = obj.ReasonOth,
+                            AuditReasonId = obj.AuditReasonId,
+                            SupplyManagementKITDetailId = kit.Id
+                        };
+                        InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
+                        _context.Save();
+                        obj.KitNo = kit.KitNo;
+                        SendRandomizationThresholdEMail(obj, kitcount);
+                    }
+                    else
+                    {
+                        obj.ExpiryMesage = "Kit is expired";
+                        return obj;
+                    }
+                }
             }
             if (setting.KitCreationType == KitCreationType.SequenceWise)
             {
@@ -463,21 +501,33 @@ namespace GSC.Respository.SupplyManagement
                 if (kitSequencedata == null)
                     return obj;
 
-                kitSequencedata.RandomizationId = obj.RandomizationId;
-                _context.SupplyManagementKITSeriesDetail.Update(kitSequencedata);
-
-
-                var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITSequenceDetailDto
+                var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kitSequencedata.ProductReceiptId).FirstOrDefault();
+                var currentdate = DateTime.Now.Date;
+                var kitExpiryDate = kitSequencedata.SupplyManagementKITSeries.KitExpiryDate;
+                var tempdate = kitSequencedata.CreatedDate;
+                var visitdate = tempdate.Value.AddDays((int)kitSequencedata.Days).Date;
+                if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate > Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
                 {
-                    RandomizationId = obj.RandomizationId,
-                    ProjectDesignVisitId = kitSequencedata.ProjectDesignVisitId,
-                    KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo,
-                    ProductCode = visit.Value,
-                    SupplyManagementKITSeriesdetailId = kitSequencedata.Id
-                };
-                InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
-                obj.KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo;
-                _context.Save();
+                    kitSequencedata.RandomizationId = obj.RandomizationId;
+                    _context.SupplyManagementKITSeriesDetail.Update(kitSequencedata);
+
+                    var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITSequenceDetailDto
+                    {
+                        RandomizationId = obj.RandomizationId,
+                        ProjectDesignVisitId = kitSequencedata.ProjectDesignVisitId,
+                        KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo,
+                        ProductCode = visit.Value,
+                        SupplyManagementKITSeriesdetailId = kitSequencedata.Id
+                    };
+                    InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
+                    obj.KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo;
+                    _context.Save();
+                }
+                else
+                {
+                    obj.ExpiryMesage = "Kit is expired";
+                    return obj;
+                }
 
             }
 
@@ -559,6 +609,41 @@ namespace GSC.Respository.SupplyManagement
             {
                 x.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
                 x.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                if (x.SupplyManagementShipmentId > 0)
+                {
+                    var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                    if (shipment != null)
+                    {
+                        if (shipment.SupplyManagementRequest.IsSiteRequest)
+                        {
+                            x.FromProjectCode = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                            if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                            {
+                                var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                if (project != null)
+                                {
+                                    x.ToProjectCode = project.ProjectCode;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            x.FromProjectCode = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                            if (project != null)
+                            {
+                                var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                if (parentproject != null)
+                                {
+                                    x.ToProjectCode = parentproject.ProjectCode;
+
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
             return data;
@@ -568,7 +653,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
             if (setting == null)
-              return  new List<SupplyManagementKITReturnGridDto>();
+                return new List<SupplyManagementKITReturnGridDto>();
             if (setting.KitCreationType == KitCreationType.KitWise)
             {
                 var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Include(x => x.SupplyManagementKIT)
@@ -887,6 +972,7 @@ namespace GSC.Respository.SupplyManagement
 
                             SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                             history.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                            history.SupplyManagementShipmentId = datakit.SupplyManagementShipmentId;
                             history.Status = KitStatus.Returned;
                             history.RoleId = _jwtTokenAccesser.RoleId;
                             _context.SupplyManagementKITDetailHistory.Add(history);
@@ -919,6 +1005,7 @@ namespace GSC.Respository.SupplyManagement
 
                             SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
                             history.SupplyManagementKITSeriesId = obj.SupplyManagementKITSeriesId;
+                            history.SupplyManagementShipmentId = datakit.SupplyManagementShipmentId;
                             history.Status = KitStatus.Returned;
                             history.RoleId = _jwtTokenAccesser.RoleId;
                             _context.SupplyManagementKITSeriesDetailHistory.Add(history);
@@ -1051,6 +1138,7 @@ namespace GSC.Respository.SupplyManagement
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                         history.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        history.SupplyManagementShipmentId = datakit.SupplyManagementShipmentId;
                         history.Status = KitStatus.Discard;
                         history.RoleId = _jwtTokenAccesser.RoleId;
                         _context.SupplyManagementKITDetailHistory.Add(history);
@@ -1085,6 +1173,7 @@ namespace GSC.Respository.SupplyManagement
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                         history.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
+                        history.SupplyManagementShipmentId = datakit.SupplyManagementShipmentId;
                         history.Status = KitStatus.Sendtosponser;
                         history.RoleId = _jwtTokenAccesser.RoleId;
                         _context.SupplyManagementKITDetailHistory.Add(history);
@@ -1158,6 +1247,7 @@ namespace GSC.Respository.SupplyManagement
 
                 SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                 history.SupplyManagementKITDetailId = data.SupplyManagementKITDetailId;
+                history.SupplyManagementShipmentId = datakit.SupplyManagementShipmentId;
                 history.Status = data.Status;
                 history.RoleId = _jwtTokenAccesser.RoleId;
                 _context.SupplyManagementKITDetailHistory.Add(history);
@@ -1181,6 +1271,7 @@ namespace GSC.Respository.SupplyManagement
 
                 SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
                 history.SupplyManagementKITSeriesId = data.SupplyManagementKITSeriesId;
+                history.SupplyManagementShipmentId = datakit.SupplyManagementShipmentId;
                 history.Status = data.Status;
                 history.RoleId = _jwtTokenAccesser.RoleId;
                 _context.SupplyManagementKITSeriesDetailHistory.Add(history);
@@ -1226,6 +1317,19 @@ namespace GSC.Respository.SupplyManagement
         {
             var data = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == id).
                    ProjectTo<SupplyManagementKITSeriesDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            data.ForEach(x =>
+            {
+                if (x.ProductReceiptId > 0)
+                {
+                    var productreciept = _context.ProductVerification.Include(a => a.ProductReceipt).Where(a => a.ProductReceiptId == x.ProductReceiptId).FirstOrDefault();
+                    if (productreciept != null)
+                    {
+                        x.ExpiryDate = productreciept.RetestExpiryDate;
+                        x.LotBatchNo = productreciept.BatchLotNumber;
+                    }
+                }
+
+            });
             return data;
         }
         public List<SupplyManagementKITSeriesDetailHistoryGridDto> GetKITSeriesDetailHistoryList(int id)
@@ -1235,6 +1339,45 @@ namespace GSC.Respository.SupplyManagement
             data.ForEach(x =>
             {
                 x.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+
+
+                if (x.SupplyManagementShipmentId > 0)
+                {
+                    var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                    if (shipment != null)
+                    {
+                        if (shipment.SupplyManagementRequest.IsSiteRequest)
+                        {
+                            x.FromProjectCode = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                            if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                            {
+                                var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                if (project != null)
+                                {
+                                    x.ToProjectCode = project.ProjectCode;
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            x.FromProjectCode = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                            if (project != null)
+                            {
+                                var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                if (parentproject != null)
+                                {
+                                    x.ToProjectCode = parentproject.ProjectCode;
+
+                                }
+                            }
+                        }
+                    }
+                }
+
+
             });
             return data;
         }
@@ -1244,7 +1387,8 @@ namespace GSC.Respository.SupplyManagement
             {
                 var data = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.GroupBy(x => x.PharmacyStudyProductTypeId).Select(x => new
                 {
-                    Id = x.Key
+                    Id = x.Key,
+                    ProductReceiptId = x.FirstOrDefault().ProductReceiptId
                 }).ToList();
 
                 if (data.Count > 0)
@@ -1252,7 +1396,7 @@ namespace GSC.Respository.SupplyManagement
                     foreach (var item in data)
                     {
                         var Total = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Where(x => x.PharmacyStudyProductTypeId == item.Id).Sum(z => z.NoOfImp * supplyManagementKITSeriesDto.NoofPatient);
-                        var availableqty = GetAvailableRemainingkitSequenceCount(supplyManagementKITSeriesDto.ProjectId, item.Id);
+                        var availableqty = GetAvailableRemainingkitSequenceCount(supplyManagementKITSeriesDto.ProjectId, item.Id, item.ProductReceiptId);
                         if (availableqty < Total)
                         {
                             var PharmacyStudyProductType = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.DeletedDate == null && x.Id == item.Id && x.ProjectId == supplyManagementKITSeriesDto.ProjectId).FirstOrDefault();
@@ -1261,11 +1405,8 @@ namespace GSC.Respository.SupplyManagement
                             return "Quantity is not available for " + PharmacyStudyProductType.ProductType.ProductTypeCode;
                         }
                     }
-
                 }
             }
-
-
             return "";
         }
 
@@ -1363,17 +1504,25 @@ namespace GSC.Respository.SupplyManagement
             return data;
 
         }
-        public int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId)
+        public int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId)
         {
+            var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == productReceiptId).FirstOrDefault();
+            if (productreciept == null)
+                return 0;
+            var verification = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceipt.ProjectId == ProjectId && x.BatchLotNumber == productreciept.BatchLotNumber && x.ProductReceipt.Status == ProductVerificationStatus.Approved).Select(x => x.ProductReceiptId).ToList();
+            if (verification.Count == 0)
+                return 0;
 
             var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
                  && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                 && verification.Contains(x.ProductReceiptId)
                  && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
                  .Sum(z => z.RemainingQuantity);
             if (RemainingQuantity > 0)
             {
                 var approvedQty = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Where(x => x.DeletedDate == null
                    && x.SupplyManagementKITSeries.ProjectId == ProjectId && x.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId
+                   && verification.Contains(x.ProductReceiptId)
                    && x.SupplyManagementKITSeries.DeletedDate == null
                  ).Sum(x => x.NoOfImp);
 
@@ -1456,5 +1605,22 @@ namespace GSC.Respository.SupplyManagement
             }
 
         }
+
+        public string CheckExpiryDate(SupplyManagementKITDto supplyManagementUploadFileDto)
+        {
+            var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == supplyManagementUploadFileDto.ProductReceiptId).FirstOrDefault();
+            if (productreciept == null)
+                return "Product receipt not found";
+
+            var currentdate = DateTime.Now.Date;
+            var date = currentdate.AddDays(supplyManagementUploadFileDto.Days);
+            if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < date.Date)
+            {
+                return "Product is expired";
+            }
+
+            return "";
+        }
+
     }
 }

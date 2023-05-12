@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ReasonName { get; set; }
 
+        public int Days { get; set; }
         public int PharmacyStudyProductTypeId { get; set; }
 
         public string ProductName { get; set; }

@@ -6,6 +6,7 @@ using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -33,6 +34,6 @@ namespace GSC.Data.Entities.SupplyManagement
         public Randomization Randomization { get; set; }
 
         public bool? IsUnUsed { get; set; }
-
+        public DateTime? KitExpiryDate { get; set; }
     }
 }

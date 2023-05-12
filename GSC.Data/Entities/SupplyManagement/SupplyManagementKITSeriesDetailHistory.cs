@@ -17,6 +17,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int SupplyManagementKITSeriesId { get; set; }
         public KitStatus? Status { get; set; }
         public int RoleId { get; set; }
+
+        public int? SupplyManagementShipmentId { get; set; }
+
         public SupplyManagementKITSeries SupplyManagementKITSeries { get; set; }
         
 

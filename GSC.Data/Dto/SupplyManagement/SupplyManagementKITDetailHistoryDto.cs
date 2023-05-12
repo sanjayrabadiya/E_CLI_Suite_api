@@ -18,6 +18,12 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string KitNo { get; set; }
 
+        public string FromProjectCode { get; set; }
+
+        public string ToProjectCode { get; set; }
+
+        public int? SupplyManagementShipmentId { get; set; }
+
     }
    
 }

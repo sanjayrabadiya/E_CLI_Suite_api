@@ -3,6 +3,7 @@ using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -20,6 +21,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public KitStatus Status { get; set; }
         public KitStatus? PrevStatus { get; set; }
 
+        public DateTime? KitExpiryDate { get; set; }
+
         [NotMapped]
         public IList<SupplyManagementKITSeriesDetailDto> SupplyManagementKITSeriesDetail { get; set; }
 
@@ -36,6 +39,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int NoofPatient { get; set; }
         public int TotalUnits { get; set; }
         public bool? IsUnUsed { get; set; }
+        public int Days { get; set; }
+        public int ProductReceiptId { get; set; }
 
     }
 
@@ -61,6 +66,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         //public string ReasonOth { get; set; }
 
+        public DateTime? KitExpiryDate { get; set; }
+
     }
     public class SupplyManagementKITSeriesDetailGridDto : BaseAuditDto
     {
@@ -75,8 +82,12 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ProductType { get; set; }
         public string RandomizationNo { get; set; }
         public string VisitName { get; set; }
-
         public string KitNo { get; set; }
+
+        public DateTime? ExpiryDate { get; set; }
+
+        public int? ProductReceiptId { get; set; }
+        public string LotBatchNo { get; set; }
 
     }
 
@@ -88,6 +99,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public string KitNo { get; set; }
         public string StatusName { get; set; }
         public string RoleName { get; set; }
+
+        public string FromProjectCode { get; set; }
+
+        public string ToProjectCode { get; set; }
+        public int? SupplyManagementShipmentId { get; set; }
     }
 
 }

@@ -39,11 +39,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult Post([FromBody] SupplyManagementReceiptDto supplyManagementshipmentDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            //if (supplyManagementshipmentDto.WithIssue && string.IsNullOrEmpty(supplyManagementshipmentDto.Description))
-            //{
-            //    ModelState.AddModelError("Message", "Description is mandatory!");
-            //    return BadRequest(ModelState);
-            //}
+          
             var shipment = _supplyManagementShipmentRepository.All.Include(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementShipmentId).FirstOrDefault();
             if (shipment == null)
             {
@@ -87,6 +83,19 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             var data = _supplyManagementReceiptRepository.GetKitAllocatedList(id, type);
             return Ok(data);
+        }
+
+        [HttpGet]
+        [Route("CheckExpiryOnReceipt/{projectId}/{id}")]
+        public IActionResult CheckExpiryOnReceipt(int projectId, int id)
+        {
+            var data = _supplyManagementReceiptRepository.CheckExpiryOnReceipt(projectId, id);
+            if (!string.IsNullOrEmpty(data))
+            {
+                ModelState.AddModelError("Message", data);
+                return BadRequest(ModelState);
+            }
+            return Ok(true);
         }
     }
 }

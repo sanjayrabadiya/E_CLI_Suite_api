@@ -18,6 +18,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
 
+        public DateTime? EstimatedCourierDate { get; set; }
         public List<KitListApprove> Kits { get; set; }
     }
     public class SupplyManagementShipmentGridDto : BaseAuditDto

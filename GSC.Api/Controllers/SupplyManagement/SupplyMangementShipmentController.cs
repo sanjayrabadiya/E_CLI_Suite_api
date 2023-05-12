@@ -57,7 +57,12 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", message);
                 return BadRequest(ModelState);
             }
-
+            var expire = _supplyManagementShipmentRepository.ExpiryDateShipmentValidation(shipmentdata, supplyManagementshipmentDto);
+            if (!string.IsNullOrEmpty(expire))
+            {
+                ModelState.AddModelError("Message", expire);
+                return BadRequest(ModelState);
+            }
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementShipment>(supplyManagementshipmentDto);
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)

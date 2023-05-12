@@ -22,6 +22,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int NoofPatient { get; set; }
         public int TotalUnits { get; set; }
         public bool? IsUnUsed { get; set; }
+        public int? Days { get; set; }
+
+        public int? ProductReceiptId { get; set; }
         public SupplyManagementKITSeries SupplyManagementKITSeries { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public Randomization Randomization { get; set; }

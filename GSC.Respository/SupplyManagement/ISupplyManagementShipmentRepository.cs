@@ -19,5 +19,7 @@ namespace GSC.Respository.SupplyManagement
         void Assignkits(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto);
 
         void SendShipmentApproveRejecttEmail(int id, SupplyManagementShipment shipment);
+
+        string ExpiryDateShipmentValidation(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto);
     }
 }

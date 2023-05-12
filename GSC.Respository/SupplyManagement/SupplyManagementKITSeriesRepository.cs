@@ -56,6 +56,8 @@ namespace GSC.Respository.SupplyManagement
                     obj.NoofPatient = data.NoofPatient;
                     obj.ProjectDesignVisitId = item.ProjectDesignVisitId;
                     obj.PharmacyStudyProductTypeId = item.PharmacyStudyProductTypeId;
+                    obj.Days = item.Days;
+                    obj.ProductReceiptId = item.ProductReceiptId;
                     obj.TotalUnits = (item.NoOfImp * data.NoofPatient);
                     _context.SupplyManagementKITSeriesDetail.Add(obj);
 
@@ -117,6 +119,36 @@ namespace GSC.Respository.SupplyManagement
             }
 
             return "";
+        }
+        public string CheckExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
+        {
+            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count() > 0)
+            {
+                var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
+                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                if (productreciept == null)
+                    return "Product receipt not found";
+
+                var days = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Sum(x => x.Days);
+                var currentdate = DateTime.Now.Date;
+                var date = currentdate.AddDays(days);
+                if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < date.Date)
+                {
+                    return "Product is expired";
+                }
+            }
+            return "";
+        }
+        public DateTime GetExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
+        {
+            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count() > 0)
+            {
+                var days = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Sum(x => x.Days);
+                var currentdate = DateTime.Now.Date;
+                var date = currentdate.AddDays(days);
+                return date;
+            }
+            return new DateTime();
         }
     }
 }

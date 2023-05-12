@@ -17,5 +17,7 @@ namespace GSC.Respository.SupplyManagement
         void UpdateKitStatus(SupplyManagementReceiptDto supplyManagementshipmentDto, SupplyManagementShipment supplyManagementShipment);
 
         string CheckValidationKitReciept(SupplyManagementReceiptDto supplyManagementshipmentDto);
+
+        string CheckExpiryOnReceipt(int projectId, int id);
     }
 }

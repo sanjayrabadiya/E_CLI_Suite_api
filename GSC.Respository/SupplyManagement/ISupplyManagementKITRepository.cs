@@ -18,7 +18,7 @@ namespace GSC.Respository.SupplyManagement
 
         string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese);
 
-        int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId);
+        int GetAvailableRemainingkitCount(int ProjectId, int PharmacyStudyProductTypeId,int productReceiptId);
 
         void InsertKitRandomizationDetail(SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto);
 
@@ -66,6 +66,9 @@ namespace GSC.Respository.SupplyManagement
 
         List<SupplyManagementUnblindTreatmentGridDto> GetUnblindList(int projectId, int? siteId, int? randomizationId);
 
-        int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId);
+        int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId);
+
+        string CheckExpiryDate(SupplyManagementKITDto supplyManagementUploadFileDto);
+        
     }
 }

@@ -74,10 +74,16 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "please set kit number formate!");
                 return BadRequest(ModelState);
             }
+            var expire = _supplyManagementKITRepository.CheckExpiryDate(supplyManagementUploadFileDto);
+            if (!string.IsNullOrEmpty(expire))
+            {
+                ModelState.AddModelError("Message", expire);
+                return BadRequest(ModelState);
+            }
             var supplyManagementUploadFile = _mapper.Map<SupplyManagementKIT>(supplyManagementUploadFileDto);
             supplyManagementUploadFile.TotalUnits = (supplyManagementUploadFileDto.NoOfImp * supplyManagementUploadFileDto.NoofPatient);
 
-            var availableqty = _supplyManagementKITRepository.GetAvailableRemainingkitCount(supplyManagementUploadFileDto.ProjectId, supplyManagementUploadFileDto.PharmacyStudyProductTypeId);
+            var availableqty = _supplyManagementKITRepository.GetAvailableRemainingkitCount(supplyManagementUploadFileDto.ProjectId, supplyManagementUploadFileDto.PharmacyStudyProductTypeId, supplyManagementUploadFileDto.ProductReceiptId);
             if (availableqty < supplyManagementUploadFile.TotalUnits)
             {
                 ModelState.AddModelError("Message", "Quantity is not available");
@@ -115,11 +121,11 @@ namespace GSC.Api.Controllers.SupplyManagement
                     {
                         isexist = false;
                     }
-                   
+
                 }
-                
+
             }
-            
+
             return Ok(supplyManagementUploadFile.Id);
 
         }
@@ -222,10 +228,10 @@ namespace GSC.Api.Controllers.SupplyManagement
         }
 
         [HttpGet]
-        [Route("GetAvailableRemainingkitCount/{projectId}/{projecttypeId}")]
-        public IActionResult GetAvailableRemainingkitCount(int projectId, int projecttypeId)
+        [Route("GetAvailableRemainingkitCount/{projectId}/{projecttypeId}/{productReceiptId}")]
+        public IActionResult GetAvailableRemainingkitCount(int projectId, int projecttypeId, int productReceiptId)
         {
-            return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitCount(projectId, projecttypeId));
+            return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitCount(projectId, projecttypeId, productReceiptId));
         }
 
         [HttpGet("GetRandomizationKitNumberAssignList/{projectId}/{siteId}/{id}")]
@@ -245,7 +251,28 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("AssignKitNumber")]
         public IActionResult AssignKitNumber([FromBody] SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto)
         {
+            var randdata = _context.Randomization.Where(x => x.Id == supplyManagementVisitKITDetailDto.RandomizationId).FirstOrDefault();
+            if (randdata != null && randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
+            {
+                ModelState.AddModelError("Message", "Patient status is not eligible for randomization");
+                return BadRequest(ModelState);
+            }
+            var screeningentry = _context.ScreeningEntry.Where(x => x.RandomizationId == supplyManagementVisitKITDetailDto.RandomizationId).FirstOrDefault();
+            if (screeningentry != null)
+            {
+                var screeningvisit = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == screeningentry.Id && x.ProjectDesignVisitId == supplyManagementVisitKITDetailDto.ProjectDesignVisitId && x.Status == ScreeningVisitStatus.Missed).FirstOrDefault();
+                if (screeningvisit != null)
+                {
+                    ModelState.AddModelError("Message", "Patient Visit status is not eligible for randomization");
+                    return BadRequest(ModelState);
+                }
+            }
             supplyManagementVisitKITDetailDto = _supplyManagementKITRepository.SetKitNumber(supplyManagementVisitKITDetailDto);
+            if (!string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.ExpiryMesage))
+            {
+                ModelState.AddModelError("Message", supplyManagementVisitKITDetailDto.ExpiryMesage);
+                return BadRequest(ModelState);
+            }
             if (string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.KitNo))
             {
                 ModelState.AddModelError("Message", "Kit is not available");
@@ -334,10 +361,10 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(_supplyManagementKITRepository.GetUnblindList(projectId, siteId, randomizationId));
         }
         [HttpGet]
-        [Route("GetAvailableRemainingkitSequenceCount/{projectId}/{pharmacyStudyProductTypeId}")]
-        public IActionResult GetAvailableRemainingkitSequenceCount(int projectId, int pharmacyStudyProductTypeId)
+        [Route("GetAvailableRemainingkitSequenceCount/{projectId}/{pharmacyStudyProductTypeId}/{productReceiptId}")]
+        public IActionResult GetAvailableRemainingkitSequenceCount(int projectId, int pharmacyStudyProductTypeId, int productReceiptId)
         {
-            return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitSequenceCount(projectId, pharmacyStudyProductTypeId));
+            return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitSequenceCount(projectId, pharmacyStudyProductTypeId, productReceiptId));
         }
     }
 }

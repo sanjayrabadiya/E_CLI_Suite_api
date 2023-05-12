@@ -51,7 +51,7 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementRequestGridDto> GetShipmentRequestList(int parentProjectId, int SiteId, bool isDeleted)
         {
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && (x.FromProjectId == SiteId || x.ToProjectId == SiteId)).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.FromProjectId == SiteId).
                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(t =>
             {
@@ -300,7 +300,10 @@ namespace GSC.Respository.SupplyManagement
                                 KitNo = x.KitNo,
                                 VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                 SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                                ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
+                                ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s=>s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+
                             }).OrderBy(x => x.KitNo).ToList();
 
 
@@ -316,7 +319,9 @@ namespace GSC.Respository.SupplyManagement
                                       KitNo = x.KitNo,
                                       VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                       SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode,
-                                      ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
+                                      ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                      RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                      LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
                                   }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
@@ -335,7 +340,9 @@ namespace GSC.Respository.SupplyManagement
                                      KitNo = x.KitNo,
                                      VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                      SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                                     ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
+                                     ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                     RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                     LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
                                  }).OrderBy(x => x.KitNo).ToList();
                 }
             }
@@ -366,7 +373,9 @@ namespace GSC.Respository.SupplyManagement
                                        KitNo = x.KitNo,
                                        ProjectCode = x.Project.ProjectCode,
                                        TreatmentType = x.TreatmentType,
-                                       SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode
+                                       SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode,
+                                       //RetestExpiry = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                       //LotBatchNo = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
                                    }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
@@ -385,7 +394,9 @@ namespace GSC.Respository.SupplyManagement
                                 Id = x.Id,
                                 KitNo = x.KitNo,
                                 ProjectCode = x.Project.ProjectCode,
-                                TreatmentType = x.TreatmentType
+                                TreatmentType = x.TreatmentType,
+                                //RetestExpiry = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                //LotBatchNo = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
                             }).OrderBy(x => x.KitNo).ToList();
 
 

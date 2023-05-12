@@ -21,6 +21,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public string CourierTrackingNo { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public DateTime? EstimatedCourierDate { get; set; }
         public SupplyManagementRequest SupplyManagementRequest { get; set; }
 
         //public AuditReason AuditReason { get; set; }

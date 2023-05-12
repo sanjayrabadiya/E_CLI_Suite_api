@@ -37,9 +37,8 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementReceiptGridDto> GetSupplyShipmentReceiptList(int parentProjectId, int SiteId, bool isDeleted)
         {
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && (x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == SiteId
-            || x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId == SiteId)).
-                    ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == SiteId
+            ).ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             data.ForEach(t =>
             {
@@ -56,7 +55,7 @@ namespace GSC.Respository.SupplyManagement
 
             var requestdata = _context.SupplyManagementShipment.Where(x =>
                 !data.Select(x => x.SupplyManagementShipmentId).Contains(x.Id)
-                && (x.SupplyManagementRequest.FromProjectId == SiteId || x.SupplyManagementRequest.ToProjectId == SiteId)
+                && x.SupplyManagementRequest.FromProjectId == SiteId
                 && x.Status == SupplyMangementShipmentStatus.Approved && x.DeletedDate == null).
                  ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>
@@ -299,6 +298,11 @@ namespace GSC.Respository.SupplyManagement
                         history.SupplyManagementKITDetailId = item.Id;
                         history.Status = item.Status;
                         history.RoleId = _jwtTokenAccesser.RoleId;
+                        var data = _supplyManagementKITDetailRepository.All.Include(x => x.SupplyManagementKIT).Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (data != null)
+                        {
+                            history.SupplyManagementShipmentId = data.SupplyManagementShipmentId;
+                        }
                         _supplyManagementKITRepository.InsertKitHistory(history);
                     }
                 }
@@ -331,12 +335,60 @@ namespace GSC.Respository.SupplyManagement
                     {
                         SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
                         history.SupplyManagementKITSeriesId = item.Id;
+                        var data = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (data != null)
+                        {
+                            history.SupplyManagementShipmentId = data.SupplyManagementShipmentId;
+                        }
                         history.Status = item.Status;
                         history.RoleId = _jwtTokenAccesser.RoleId;
                         _supplyManagementKITRepository.InsertKitSequenceHistory(history);
                     }
                 }
             }
+        }
+
+        public string CheckExpiryOnReceipt(int projectId, int id)
+        {
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+            if (setting != null)
+            {
+
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.Id == id).FirstOrDefault();
+                    if (kit != null)
+                    {
+                        var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
+                        if (productreciept == null)
+                            return "Product receipt not found";
+
+                        var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
+                        var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
+                        if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < date.Date)
+                        {
+                            return "Product is expired";
+                        }
+
+                    }
+
+                }
+                if (setting.KitCreationType == KitCreationType.SequenceWise)
+                {
+                    var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == id).FirstOrDefault();
+                    if (kit != null)
+                    {
+                        var currentdate = DateTime.Now.Date;
+                        if (Convert.ToDateTime(kit.KitExpiryDate).Date < currentdate.Date)
+                        {
+                            return "Product is expired";
+                        }
+                    }
+                }
+            }
+
+            return "";
         }
     }
 }

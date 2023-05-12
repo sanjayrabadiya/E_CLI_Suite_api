@@ -23,6 +23,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int PharmacyStudyProductTypeId { get; set; }
         public Entities.Master.Project Project { get; set; }
 
+        public int? Days { get; set; }
+        public int? ProductReceiptId { get; set; }
+
         [ForeignKey("SiteId")]
         public Entities.Master.Project Site { get; set; }
         public int? AuditReasonId { get; set; }

@@ -3,6 +3,7 @@ using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
+using System;
 using System.Collections.Generic;
 
 namespace GSC.Data.Dto.SupplyManagement
@@ -20,6 +21,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public int PharmacyStudyProductTypeId { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public int ProductReceiptId { get; set; }
+
+        public int Days { get; set; }
 
 
     }
@@ -59,6 +64,9 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string RequestToSiteOrStudy { get; set; }
 
+        public DateTime? ExpiryDate { get; set; }
+        public string LotBatchNo { get; set; }
+
 
     }
 
@@ -78,6 +86,12 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ProjectCode { get; set; }
 
         public string TreatmentType { get; set; }
+
+        public string LotBatchNo { get; set; }
+
+        public DateTime? RetestExpiry { get; set; }
+
+        public string RetestExpirystr { get; set; }
     }
 
     public class KitListApproved
@@ -90,6 +104,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string Comments { get; set; }
 
         public KitStatus Status { get; set; }
+
+        public string LotBatchNo { get; set; }
+
+        public DateTime? RetestExpiry { get; set; }
 
         public List<DropDownStudyDto> StatusList { get; set; }
     }

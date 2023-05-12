@@ -44,11 +44,13 @@ namespace GSC.Respository.SupplyManagement
         public List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(int parentProjectId, int SiteId, bool isDeleted)
         {
             List<SupplyManagementShipmentGridDto> FinalData = new List<SupplyManagementShipmentGridDto>();
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && (x.SupplyManagementRequest.FromProjectId == SiteId || x.SupplyManagementRequest.ToProjectId == SiteId)).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && ((x.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementRequest.ToProjectId == SiteId)
+            || (x.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementRequest.FromProjectId == SiteId))).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                       && (x.FromProjectId == SiteId || x.ToProjectId == SiteId) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
+                       && ((x.IsSiteRequest == true && x.ToProjectId == SiteId)
+            || (x.IsSiteRequest == false && x.FromProjectId == SiteId)) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
                      ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {
@@ -220,21 +222,33 @@ namespace GSC.Respository.SupplyManagement
 
                             SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                             history.SupplyManagementKITDetailId = item.Id;
+                            history.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
                             history.Status = KitStatus.Shipped;
                             history.RoleId = _jwtTokenAccesser.RoleId;
                             _context.SupplyManagementKITDetailHistory.Add(history);
+                            _uow.Save();
 
-                            var kitdata = _context.SupplyManagementKIT.Where(x => x.Id == kit.SupplyManagementKITId).FirstOrDefault();
+
+
+                        }
+                    }
+
+                    foreach (var item in supplyManagementshipmentDto.Kits)
+                    {
+                        var kit1 = _context.SupplyManagementKITDetail.Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (kit1 != null && supplyManagementshipmentDto.Id > 0)
+                        {
+                            var kitdata = _context.SupplyManagementKIT.Where(x => x.Id == kit1.SupplyManagementKITId).FirstOrDefault();
                             if (request.IsSiteRequest && kitdata != null)
                             {
                                 kitdata.ToSiteId = request.FromProjectId;
                                 _context.SupplyManagementKIT.Update(kitdata);
-                                _context.Entry(kit).State = EntityState.Detached;
+                                _context.Entry(kit1).State = EntityState.Detached;
+                                _uow.Save();
                             }
-
-                            _uow.Save();
                         }
                     }
+
                 }
                 if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {
@@ -254,6 +268,7 @@ namespace GSC.Respository.SupplyManagement
 
                             SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
                             history.SupplyManagementKITSeriesId = item.Id;
+                            history.SupplyManagementShipmentId = kit.SupplyManagementShipmentId;
                             history.Status = KitStatus.Shipped;
                             history.RoleId = _jwtTokenAccesser.RoleId;
                             _context.SupplyManagementKITSeriesDetailHistory.Add(history);
@@ -346,6 +361,65 @@ namespace GSC.Respository.SupplyManagement
                 }
             }
 
+        }
+
+        public string ExpiryDateShipmentValidation(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto)
+        {
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentdata.FromProject.ParentProjectId).FirstOrDefault();
+            if (setting != null)
+            {
+                if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
+                {
+                    if (setting.KitCreationType == KitCreationType.KitWise && supplyManagementshipmentDto.Kits.Count > 0)
+                    {
+
+                        foreach (var item in supplyManagementshipmentDto.Kits)
+                        {
+                            var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.Id == item.Id).FirstOrDefault();
+                            if (kit != null)
+                            {
+                                var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
+                                if (productreciept == null)
+                                    return "Product receipt not found";
+
+                                var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
+                                var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
+                                if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < date.Date)
+                                {
+                                    return "Product is expired";
+                                }
+                                if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < Convert.ToDateTime(supplyManagementshipmentDto.EstimatedCourierDate).Date)
+                                {
+                                    return "Product is expired before estimated courier date";
+                                }
+                            }
+                        }
+                    }
+                    if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
+                    {
+                        foreach (var item in supplyManagementshipmentDto.Kits)
+                        {
+                            var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
+                            if (kit != null)
+                            {
+
+                                var currentdate = DateTime.Now.Date;
+                                if (Convert.ToDateTime(kit.KitExpiryDate).Date < currentdate.Date)
+                                {
+                                    return "Product is expired";
+                                }
+                                if (Convert.ToDateTime(kit.KitExpiryDate).Date < Convert.ToDateTime(supplyManagementshipmentDto.EstimatedCourierDate).Date)
+                                {
+                                    return "Product is expired before estimated courier date";
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return "";
         }
     }
 }
