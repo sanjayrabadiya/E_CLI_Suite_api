@@ -225,6 +225,8 @@ namespace GSC.Api.Controllers.Screening
             screeningTemplate.IsDisable = false;
             screeningTemplate.IsHide = false;
 
+            screeningTemplate.Progress = 100; // Add by Tinku progress 100% if form is submited
+
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, 0);
 
             _screeningTemplateValueRepository.UpdateVariableOnSubmit(screeningTemplate.ProjectDesignTemplateId, screeningTemplate.Id);
