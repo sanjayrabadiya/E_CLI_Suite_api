@@ -761,6 +761,7 @@ namespace GSC.Respository.Master
                     TerminatedCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Terminated).Count(),
                     OnHoldCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.OnHold).Count(),
                     CloseOutCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.CloseOut).Count(),
+                    ActiveCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Active).Count(),
                     EntrollCount = 0
                 }).ToList();
 
@@ -824,6 +825,15 @@ namespace GSC.Respository.Master
                                 obj.Lable = item.ActivityName + " Close Out ";
                                 obj.Count = item.CloseOutCount;
                                 obj.Status = "CloseOut";
+                                list.Add(obj);
+                            }
+                            if (item.ActiveCount > 0)
+                            {
+                                CtmsMonitoringStatusPIChartDto obj = new CtmsMonitoringStatusPIChartDto();
+                                obj.Text = item.ActivityName + " Active " + item.ActiveCount;
+                                obj.Lable = item.ActivityName + " Active ";
+                                obj.Count = item.ActiveCount;
+                                obj.Status = "Active";
                                 list.Add(obj);
                             }
                         }

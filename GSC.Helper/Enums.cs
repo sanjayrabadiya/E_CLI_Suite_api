@@ -769,7 +769,7 @@ namespace GSC.Helper
         [Description("Terminated")] Terminated = 3,
         [Description("On Hold")] OnHold = 4,
         [Description("Close Out")] CloseOut = 5,
-        [Description("Active")] Action = 6,
+        [Description("Active")] Active = 6,
     }
 
 
