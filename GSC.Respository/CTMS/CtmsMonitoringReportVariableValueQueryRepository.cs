@@ -110,6 +110,7 @@ namespace GSC.Respository.CTMS
             else
             {
                 queryOldValue = ctmsMonitoringReportVariableValueQueryDto.OldValue;
+                queryValue = ctmsMonitoringReportVariableValueQuery.QueryStatus == CtmsCommentStatus.Resolved ? ctmsMonitoringReportVariableValueQuery.Value : queryValue;
             }
 
             ctmsMonitoringReportVariableValueQuery.Value = queryValue;

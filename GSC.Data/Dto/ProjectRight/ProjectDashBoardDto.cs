@@ -230,6 +230,7 @@ namespace GSC.Data.Dto.ProjectRight
 
         public int CloseOutCount { get; set; }
 
+        public int ActiveCount { get; set; }
         public int EntrollCount { get; set; }
     }
 
