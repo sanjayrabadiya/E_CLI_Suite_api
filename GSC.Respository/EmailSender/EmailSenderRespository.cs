@@ -745,8 +745,22 @@ namespace GSC.Respository.EmailSender
                     _emailService.SendMail(emailMessage);
                 }
             }
+        }
 
+        public void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.Subject = "Shipment Request Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
+            emailMessage.MessageBody = ReplaceBodyForIWRSEmail(supplyManagementEmailConfiguration.EmailTemplate, iWRSEmailModel);
 
+            if (toMails != null && toMails.Count > 0)
+            {
+                foreach (var item in toMails)
+                {
+                    emailMessage.SendTo = item;
+                    _emailService.SendMail(emailMessage);
+                }
+            }
         }
         private string ReplaceBodyForIWRSEmail(string body, IWRSEmailModel email)
         {
@@ -759,6 +773,18 @@ namespace GSC.Respository.EmailSender
             if (!string.IsNullOrEmpty(email.SiteCode))
             {
                 str = Regex.Replace(str, "##SiteCode##", email.SiteCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteName))
+            {
+                str = Regex.Replace(str, "##SiteName##", email.SiteName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.RequestFromSiteCode))
+            {
+                str = Regex.Replace(str, "##RequestFromSiteCode##", email.RequestFromSiteCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.RequestFromSiteName))
+            {
+                str = Regex.Replace(str, "##RequestFromSiteName##", email.RequestFromSiteName, RegexOptions.IgnoreCase);
             }
             if (!string.IsNullOrEmpty(email.SiteName))
             {

@@ -67,6 +67,20 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string SiteRequest { get; set; }
         public int? StudyProductTypeId { get; set; }
+
+        public bool IsWorkflowApproval { get; set; }
+
+        public int WorkflowId { get; set; }
+        public string WorkflowApprovalName { get; set; }
+
+        public DateTime? WorkflowDate { get; set; }
+
+        public string WorkflowApprovalRoleName { get; set; }
+
+        public string WorkflowComments { get; set; }
+
+        public SupplyManagementApprovalStatus WorkflowStatus { get; set; }
+
     }
 
 }

@@ -66,6 +66,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (_uow.Save() <= 0) throw new Exception("Creating request failed on save.");
 
             _supplyManagementRequestRepository.SendrequestEmail(supplyManagementRequest.Id);
+            _supplyManagementRequestRepository.SendrequestApprovalEmail(supplyManagementRequest.Id);
 
             return Ok(supplyManagementRequest.Id);
         }

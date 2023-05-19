@@ -105,6 +105,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime UnblindDatetime { get; set; }
         public string UnblindBy { get; set; }
 
+        public string RequestFromSiteCode { get; set; }
+
+        public string RequestFromSiteName { get; set; }
+
 
     }
     public class SupplyManagementEmailConfigurationDetailHistoryGridDto : BaseAuditDto

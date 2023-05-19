@@ -1052,5 +1052,19 @@ namespace GSC.Api.Controllers.Common
             return Ok(centri);
         }
 
+        [HttpGet]
+        [Route("GetSupplyManagementApprovalType")]
+        public IActionResult GetSupplyManagementApprovalType()
+        {
+            var centri = Enum.GetValues(typeof(SupplyManagementApprovalType))
+                .Cast<SupplyManagementApprovalType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
+
     }
 }

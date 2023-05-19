@@ -161,6 +161,8 @@ namespace GSC.Data.Dto.Configuration
         public string LotBatchNo { get; set; }
         public DateTime? RetestExpiryDate { get; set; }
 
+        public string RetestExpiryDatestr { get; set; }
+
         public ReTestExpiry? RetestExpiryId { get; set; }
         public string Comments { get; set; }
         public int TotalIMP { get; set; }

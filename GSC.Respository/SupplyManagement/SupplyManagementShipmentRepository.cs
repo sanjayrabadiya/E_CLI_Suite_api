@@ -83,6 +83,35 @@ namespace GSC.Respository.SupplyManagement
                     obj.ProjectId = study.Id;
                 }
                 t.SiteRequest = t.IsSiteRequest ? "Site to Site" : "Site to Study";
+
+                var workflowdetail = _context.SupplyManagementApprovalDetails.Include(a => a.SupplyManagementApproval)
+               .Where(s => s.DeletedDate == null && s.SupplyManagementApproval.ProjectId == parentProjectId).ToList();
+                if (workflowdetail.Count > 0)
+                {
+                    var workflow = workflowdetail.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.SupplyManagementApproval.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+
+                    var supplyManagementShipmentApproval = _context.SupplyManagementShipmentApproval.Include(a => a.Users).Where(z => z.SupplyManagementRequestId == t.SupplyManagementRequestId).FirstOrDefault();
+
+                    if (workflow != null && supplyManagementShipmentApproval == null)
+                    {
+                        obj.IsWorkflowApproval = true;
+                    }
+                    if (supplyManagementShipmentApproval != null)
+                    {
+                        obj.WorkflowApprovalName = supplyManagementShipmentApproval.Users.UserName;
+                        obj.WorkflowApprovalRoleName = _context.SecurityRole.Where(a => a.Id == supplyManagementShipmentApproval.RoleId).FirstOrDefault().RoleName;
+                        obj.WorkflowDate = supplyManagementShipmentApproval.CreatedDate;
+                        obj.WorkflowId = supplyManagementShipmentApproval.Id;
+                        obj.WorkflowComments = supplyManagementShipmentApproval.Comments;
+                        obj.WorkflowStatus = supplyManagementShipmentApproval.Status;
+                        obj.IsWorkflowApproval = false;
+                    }
+                }
+                else
+                {
+                    obj.WorkflowStatus = SupplyManagementApprovalStatus.Approved;
+                }
+
                 FinalData.Add(obj);
 
             });

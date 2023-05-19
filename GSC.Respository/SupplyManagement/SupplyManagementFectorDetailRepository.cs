@@ -127,7 +127,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                     if (Collectionavalue == "2")
                     {
-                        return "Hip";
+                        return "Spine";
                     }
                 }
             }

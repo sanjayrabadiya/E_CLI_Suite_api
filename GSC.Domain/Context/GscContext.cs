@@ -474,6 +474,12 @@ namespace GSC.Domain.Context
         public DbSet<PkBarcodeGenerate> PkBarcodeGenerate { get; set; }
         public DbSet<SampleBarcodeGenerate> SampleBarcodeGenerate { get; set; }
         public DbSet<DossingBarcodeGenerate> DossingBarcodeGenerate { get; set; }
+
+        public DbSet<SupplyManagementApproval> SupplyManagementApproval { get; set; }
+
+        public DbSet<SupplyManagementApprovalDetails> SupplyManagementApprovalDetails { get; set; }
+
+        public DbSet<SupplyManagementShipmentApproval> SupplyManagementShipmentApproval { get; set; }
     }
 
 

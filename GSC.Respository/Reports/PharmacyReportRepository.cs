@@ -302,6 +302,14 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.LotBatchNo = verification.BatchLotNumber;
                         productAccountabilityCentralReport.RetestExpiryId = verification.RetestExpiryId;
                         productAccountabilityCentralReport.RetestExpiryDate = verification.RetestExpiryDate;
+                        if (verification.RetestExpiryDate != null && verification.RetestExpiryId == ReTestExpiry.ReTest)
+                        {
+                            productAccountabilityCentralReport.RetestExpiryDatestr = "ReTest - " + Convert.ToDateTime(verification.RetestExpiryDate).ToString("dddd, dd MMMM yyyy");
+                        }
+                        else if (verification.RetestExpiryDate != null && verification.RetestExpiryId == ReTestExpiry.Expiry)
+                        {
+                            productAccountabilityCentralReport.RetestExpiryDatestr = "Expiry - " + Convert.ToDateTime(verification.RetestExpiryDate).ToString("dddd, dd MMMM yyyy");
+                        }
 
                     }
                     var verificationdetail = _context.ProductVerificationDetail.Where(s => s.ProductReceiptId == x.Id && s.DeletedDate == null).FirstOrDefault();
@@ -346,6 +354,14 @@ namespace GSC.Respository.Reports
                     if (verificationdetail != null && verification != null)
                     {
                         productAccountabilityCentralReport.LotBatchNo = verification.BatchLotNumber;
+                        if (verification.RetestExpiryDate != null && verification.RetestExpiryId == ReTestExpiry.ReTest)
+                        {
+                            productAccountabilityCentralReport.RetestExpiryDatestr = "ReTest - " + Convert.ToDateTime(verification.RetestExpiryDate).ToString("dddd, dd MMMM yyyy");
+                        }
+                        else if (verification.RetestExpiryDate != null && verification.RetestExpiryId == ReTestExpiry.Expiry)
+                        {
+                            productAccountabilityCentralReport.RetestExpiryDatestr = "Expiry - " + Convert.ToDateTime(verification.RetestExpiryDate).ToString("dddd, dd MMMM yyyy");
+                        }
                         productAccountabilityCentralReport.RetestExpiryDate = verification.RetestExpiryDate;
                         productAccountabilityCentralReport.RetestExpiryId = verification.RetestExpiryId;
                         productAccountabilityCentralReport.NoofBoxorBottle = (int)verificationdetail.NumberOfBox;
@@ -363,10 +379,12 @@ namespace GSC.Respository.Reports
             {
                 list = list.Where(x => x.StudyProductTypeId == randomizationIWRSReport.productTypeId).ToList();
             }
+
             if (!string.IsNullOrEmpty(randomizationIWRSReport.LotNo))
             {
                 list = list.Where(x => x.LotBatchNo == randomizationIWRSReport.LotNo).ToList();
             }
+
             if (setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 var kitpack = _context.SupplyManagementKITSeries.
@@ -396,7 +414,7 @@ namespace GSC.Respository.Reports
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
                         productAccountabilityCentralReport.ActionName = "KitPack";
-                      
+
 
                         productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
                         productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
@@ -404,6 +422,44 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
 
+                        if (!string.IsNullOrEmpty(randomizationIWRSReport.LotNo))
+                        {
+                            var productrecieptIds = _context.SupplyManagementKITSeriesDetail.Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null).Select(z => z.ProductReceiptId).ToList();
+                            if (productrecieptIds.Count > 0)
+                            {
+                                var batclotnumbers = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId) && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.BatchLotNumber).ToList();
+                                if (batclotnumbers.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                }
+                                var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId) && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.RetestExpiryDate).ToList();
+                                if (expiry.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                }
+                            }
+                        }
+                        else
+                        {
+                            var productrecieptIds = _context.SupplyManagementKITSeriesDetail.Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null).Select(z => z.ProductReceiptId).ToList();
+                            if (productrecieptIds.Count > 0)
+                            {
+                                var batclotnumbers = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.BatchLotNumber).ToList();
+                                if (batclotnumbers.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                }
+                                var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.RetestExpiryDate).ToList();
+                                if (expiry.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                }
+                            }
+                        }
                         if (randomizationIWRSReport.productTypeId > 0)
                         {
                             var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
@@ -434,6 +490,8 @@ namespace GSC.Respository.Reports
                             productAccountabilityCentralReport.NoofBoxorBottle = 1;
                             list.Add(productAccountabilityCentralReport);
                         }
+
+
 
                     });
                 }
@@ -485,10 +543,51 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.NoofBoxorBottle = 1;
                         productAccountabilityCentralReport.Noofimp = (int)x.NoOfImp;
                         productAccountabilityCentralReport.TotalIMP = ((int)x.NoOfImp * 1);
+
+                        if (!string.IsNullOrEmpty(randomizationIWRSReport.LotNo))
+                        {
+
+                            if (x.SupplyManagementKIT.ProductReceiptId > 0)
+                            {
+                                var batclotnumbers = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.BatchLotNumber).ToList();
+                                if (batclotnumbers.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+                                }
+                                var expiry = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.RetestExpiryDate).ToList();
+                                if (expiry.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                }
+                            }
+                        }
+                        else
+                        {
+
+                            if (x.SupplyManagementKIT.ProductReceiptId > 0)
+                            {
+                                var batclotnumbers = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).Select(s => s.BatchLotNumber).ToList();
+                                if (batclotnumbers.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                }
+                                var expiry = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).Select(s => s.RetestExpiryDate).ToList();
+                                if (expiry.Count > 0)
+                                {
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                }
+                            }
+                        }
+
                         list.Add(productAccountabilityCentralReport);
                     });
                 }
             }
+
+
 
             list = list.OrderBy(x => x.ActionDate).ToList();
 
@@ -550,16 +649,7 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(10).SetValue(d.StorageLocation);
                     worksheet.Row(j).Cell(11).SetValue(d.RetentionQty);
                     worksheet.Row(j).Cell(12).SetValue(d.LotBatchNo);
-                    if (d.RetestExpiryDate != null && d.RetestExpiryId == ReTestExpiry.ReTest)
-                    {
-                        worksheet.Row(j).Cell(13).SetValue("ReTest - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
-                    }
-                    else if (d.RetestExpiryDate != null && d.RetestExpiryId == ReTestExpiry.Expiry)
-                    {
-                        worksheet.Row(j).Cell(13).SetValue("Expiry - " + Convert.ToDateTime(d.RetestExpiryDate).ToString("dddd, dd MMMM yyyy"));
-                    }
-                    else
-                        worksheet.Row(j).Cell(13).SetValue("");
+                    worksheet.Row(j).Cell(13).SetValue(d.RetestExpiryDatestr);
                     worksheet.Row(j).Cell(14).SetValue(d.UsedVerificationQty);
                     worksheet.Row(j).Cell(15).SetValue(d.TotalIMP);
                     worksheet.Row(j).Cell(16).SetValue(d.ActionBy);
@@ -742,8 +832,8 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.PreStatus = x.PrevStatus;
-                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0  ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0  ? x.ModifiedDate : x.CreatedDate;
+                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                         productAccountabilityCentralReport.VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                         productAccountabilityCentralReport.NoofBoxorBottle = 1;
                         productAccountabilityCentralReport.Noofimp = (int)x.NoOfImp;
@@ -1047,6 +1137,26 @@ namespace GSC.Respository.Reports
                                         if (visits.Count > 0)
                                             recieptobj.VisitName = string.Join(",", visits.Distinct());
 
+
+
+                                        var productrecieptIds = _context.SupplyManagementKITSeriesDetail.Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null).Select(z => z.ProductReceiptId).ToList();
+                                        if (productrecieptIds.Count > 0)
+                                        {
+                                            var batclotnumbers = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.BatchLotNumber).ToList();
+                                            if (batclotnumbers.Count > 0)
+                                            {
+                                                recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                            }
+                                            var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.RetestExpiryDate).ToList();
+                                            if (expiry.Count > 0)
+                                            {
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                            }
+                                        }
+
+
                                         list.Add(recieptobj);
                                     });
                                 }
@@ -1110,14 +1220,29 @@ namespace GSC.Respository.Reports
 
                                         recieptobj.ProductTypeCode = s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                                         recieptobj.Comments = s.Comments;
+
+                                        if (s.SupplyManagementKIT.ProductReceiptId > 0)
+                                        {
+                                            var batclotnumbers = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).Select(a => a.BatchLotNumber).ToList();
+                                            if (batclotnumbers.Count > 0)
+                                            {
+                                                recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                            }
+                                            var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).Select(a => a.RetestExpiryDate).ToList();
+                                            if (expiry.Count > 0)
+                                            {
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                            }
+                                        }
+
                                         list.Add(recieptobj);
                                     });
                                 }
                             }
                         }
                     }
-
-
                 });
             }
 
@@ -1158,15 +1283,12 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(10).SetValue(d.KitNo);
                     worksheet.Row(j).Cell(11).SetValue(d.Comments);
                     worksheet.Row(j).Cell(12).SetValue(d.CourierName);
-                    worksheet.Row(j).Cell(13).SetValue("");
-                    worksheet.Row(j).Cell(14).SetValue("");
+                    worksheet.Row(j).Cell(13).SetValue(d.RetestExpiryDatestr);
+                    worksheet.Row(j).Cell(14).SetValue(d.LotBatchNo);
                     worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
                     worksheet.Row(j).Cell(16).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
-
-
-
 
 
                 #endregion
@@ -1364,6 +1486,22 @@ namespace GSC.Respository.Reports
                                         if (visits.Count > 0)
                                             recieptobj.VisitName = string.Join(",", visits.Distinct());
 
+                                        var productrecieptIds = _context.SupplyManagementKITSeriesDetail.Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null).Select(z => z.ProductReceiptId).ToList();
+                                        if (productrecieptIds.Count > 0)
+                                        {
+                                            var batclotnumbers = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.BatchLotNumber).ToList();
+                                            if (batclotnumbers.Count > 0)
+                                            {
+                                                recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                            }
+                                            var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.RetestExpiryDate).ToList();
+                                            if (expiry.Count > 0)
+                                            {
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                            }
+                                        }
                                         list.Add(recieptobj);
                                     });
                                 }
@@ -1426,6 +1564,22 @@ namespace GSC.Respository.Reports
                                         }
 
                                         recieptobj.ProductTypeCode = s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+
+                                        if (s.SupplyManagementKIT.ProductReceiptId > 0)
+                                        {
+                                            var batclotnumbers = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).Select(a => a.BatchLotNumber).ToList();
+                                            if (batclotnumbers.Count > 0)
+                                            {
+                                                recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
+
+                                            }
+                                            var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).Select(a => a.RetestExpiryDate).ToList();
+                                            if (expiry.Count > 0)
+                                            {
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+
+                                            }
+                                        }
                                         recieptobj.Comments = s.Comments;
                                         list.Add(recieptobj);
                                     });

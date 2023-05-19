@@ -489,7 +489,6 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementKITSeries, SupplyManagementKITSeriesDto>().ReverseMap();
             CreateMap<SupplyManagementVisitKITSequenceDetail, SupplyManagementVisitKITSequenceDetailDto>().ReverseMap();
             CreateMap<SupplyManagementFactorMapping, SupplyManagementFactorMappingDto>().ReverseMap();
-
             CreateMap<PKBarcode, PKBarcodeDto>().ReverseMap();
             CreateMap<SampleBarcode, SampleBarcodeDto>().ReverseMap();
             CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
@@ -499,10 +498,11 @@ namespace GSC.Api.Helpers
             CreateMap<Centrifugation, CentrifugationDto>().ReverseMap();
             CreateMap<CentrifugationDetails, CentrifugationDetailsDto>().ReverseMap();
             CreateMap<SampleSeparation, SampleSeparationDto>().ReverseMap();
-
             CreateMap<PkBarcodeGenerate, PkBarcodeGenerateDto>().ReverseMap();
             CreateMap<SampleBarcodeGenerate, SampleBarcodeGenerateDto>().ReverseMap();
             CreateMap<DossingBarcodeGenerate, DossingBarcodeGenerateDto>().ReverseMap();
+            CreateMap<SupplyManagementApproval, SupplyManagementApprovalDto>().ReverseMap();
+            CreateMap<SupplyManagementShipmentApproval, SupplyManagementShipmentApprovalDto>().ReverseMap();
         }
     }
 }

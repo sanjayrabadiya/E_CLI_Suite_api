@@ -725,6 +725,11 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
            .ReverseMap();
 
+            CreateMap<SupplyManagementApproval, SupplyManagementApprovalGridDto>()
+             .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+             .ForMember(x => x.ApprovalTypeName, x => x.MapFrom(a => a.ApprovalType.GetDescription()))
+             .ReverseMap();
+
         }
     }
 }

@@ -301,7 +301,7 @@ namespace GSC.Respository.SupplyManagement
                                 VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                 SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
                                 ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
-                                RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s=>s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                 LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
 
                             }).OrderBy(x => x.KitNo).ToList();
@@ -404,6 +404,71 @@ namespace GSC.Respository.SupplyManagement
             }
             return data;
         }
+        public void SendrequestApprovalEmail(int id)
+        {
+            SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
+            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == id).FirstOrDefault();
+            if (request != null)
+            {
+                var emailconfiglist = _context.SupplyManagementApprovalDetails.Include(s => s.Users).Include(s => s.SupplyManagementApproval).ThenInclude(s => s.Project).Where(x => x.DeletedDate == null && x.SupplyManagementApproval.ProjectId == request.FromProject.ParentProjectId).ToList();
+                if (emailconfiglist != null && emailconfiglist.Count > 0)
+                {
+                    var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
+
+
+                    if (request.PharmacyStudyProductType != null && request.PharmacyStudyProductType.ProductType != null)
+                        iWRSEmailModel.ProductType = request.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                    if (allocation != null && allocation.IsBlindedStudy == true)
+                    {
+                        iWRSEmailModel.ProductType = "Blinded study";
+                    }
+                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault().ProjectCode;
+                    iWRSEmailModel.RequestFromSiteCode = request.FromProject.ProjectCode;
+                    var managesite = _context.ManageSite.Where(x => x.Id == request.FromProject.ManageSiteId).FirstOrDefault();
+                    if (managesite != null)
+                    {
+                        iWRSEmailModel.RequestFromSiteName = managesite.SiteName;
+                    }
+                    iWRSEmailModel.RequestedBy = _jwtTokenAccesser.UserName;
+                    iWRSEmailModel.RequestedQty = request.RequestQty;
+                    if (request.IsSiteRequest)
+                    {
+                        iWRSEmailModel.RequestType = "Site to Site Request";
+                        if (request.ToProjectId > 0)
+                        {
+                            var toproject = _context.Project.Where(x => x.Id == request.ToProjectId).FirstOrDefault();
+                            if (toproject != null)
+                            {
+                                iWRSEmailModel.RequestToSiteCode = toproject.ProjectCode;
+                                var tomanagesite = _context.ManageSite.Where(x => x.Id == toproject.ManageSiteId).FirstOrDefault();
+                                if (tomanagesite != null)
+                                {
+                                    iWRSEmailModel.RequestToSiteName = tomanagesite.SiteName;
+                                }
+
+                            }
+                            var Projectrights = _context.ProjectRight.Where(x => x.DeletedDate == null && x.ProjectId == request.ToProjectId).ToList();
+                            if (Projectrights.Count > 0)
+                                emailconfiglist = emailconfiglist.Where(x => Projectrights.Select(z => z.UserId).Contains(x.UserId)).ToList();
+
+                        }
+                    }
+                    else
+                    {
+                        iWRSEmailModel.RequestType = "Site to Study Request";
+                    }
+                    if (request.ProjectDesignVisit != null)
+                        iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
+
+                    _emailSenderRespository.SendforShipmentApprovalEmailIWRS(iWRSEmailModel, emailconfiglist.Select(x => x.Users.Email).Distinct().ToList(), emailconfiglist.FirstOrDefault().SupplyManagementApproval);
+
+
+                }
+            }
+
+        }
+
         public void SendrequestEmail(int id)
         {
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();

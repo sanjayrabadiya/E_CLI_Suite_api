@@ -20,6 +20,8 @@ namespace GSC.Respository.SupplyManagement
         int GetAvailableRemainingQty(int SupplyManagementRequestId, SupplyManagementKitNumberSettings supplyManagementKitNumberSettings);
         void SendrequestEmail(int id);
 
+        void SendrequestApprovalEmail(int id);
+
 
     }
 }

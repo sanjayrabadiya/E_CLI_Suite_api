@@ -924,7 +924,7 @@ namespace GSC.Helper
         [Description("Shipped")] Shipped = 2,
         [Description("Returned")] Returned = 3,
         [Description("Missing")] Missing = 4,
-        [Description("Damaged/Expiry")] Damaged = 5,
+        [Description("Damage/Expiry")] Damaged = 5,
         [Description("Receipt With Issues")] WithIssue = 6,
         [Description("Receipt Without Issues")] WithoutIssue = 7,
         [Description("Allocated")] Allocated = 8,
@@ -1018,7 +1018,7 @@ namespace GSC.Helper
     public enum Jointfactor : short
     {
         [Description("Knee")] Knee = 1,
-        [Description("Hip")] Hip = 2
+        [Description("Spine")] Spine = 2
     }
     public enum Eligibilityfactor : short
     {
@@ -1084,4 +1084,16 @@ namespace GSC.Helper
         [Description("Missed")] Missed = 3,
         [Description("Hemolized")] Hemolized = 4
     }
+
+    public enum SupplyManagementApprovalType : short
+    {
+        [Description("Shipment Approval")] ShipmentApproval = 1
+    }
+
+    public enum SupplyManagementApprovalStatus : short
+    {
+        [Description("Approved")] Approved = 1,
+        [Description("Rejected")] Rejected = 2
+    }
+
 }

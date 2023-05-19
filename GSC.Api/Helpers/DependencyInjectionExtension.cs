@@ -408,6 +408,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPkBarcodeGenerateRepository, PkBarcodeGenerateRepository>();
             services.AddScoped<ISampleBarcodeGenerateRepository, SampleBarcodeGenerateRepository>();
             services.AddScoped<IDossingBarcodeGenerateRepository, DossingBarcodeGenerateRepository>();
+            services.AddScoped<ISupplyManagementApprovalRepository, SupplyManagementApprovalRepository>();
         }
     }
 }
