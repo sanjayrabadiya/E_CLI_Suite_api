@@ -54,11 +54,11 @@ namespace GSC.Api.Controllers.SupplyManagement
             return Ok(centralDepoDto);
         }
 
-        [HttpGet("GetKITList/{projectId}/{isDeleted:bool?}")]
-        public IActionResult Get(int projectId, bool isDeleted)
+        [HttpGet("GetKITList/{projectId}/{siteId}/{isDeleted:bool?}")]
+        public IActionResult Get(int projectId,int siteId, bool isDeleted)
         {
-            var productTypes = _supplyManagementKITRepository.GetKITList(isDeleted, projectId);
-            return Ok(productTypes);
+            var kits = _supplyManagementKITRepository.GetKITList(isDeleted, projectId, siteId);
+            return Ok(kits);
         }
 
         [HttpPost]

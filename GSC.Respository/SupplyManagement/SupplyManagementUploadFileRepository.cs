@@ -205,7 +205,7 @@ namespace GSC.Respository.SupplyManagement
             var country = results.Tables[0].Rows[1].ItemArray[1].ToString().Trim();
             var site = results.Tables[0].Rows[2].ItemArray[1].ToString().Trim();
 
-            if (study.Trim().ToLower() != Convert.ToString(GetProjectCode(supplyManagementUploadFile.ProjectId)).ToLower())
+            if (study.Trim().ToLower() != Convert.ToString(GetProjectCode(supplyManagementUploadFile.ProjectId)).ToLower().Trim())
                 return "Please check study code";
 
             if (supplyManagementUploadFile.SupplyManagementUploadFileLevel == Helper.SupplyManagementUploadFileLevel.Study)

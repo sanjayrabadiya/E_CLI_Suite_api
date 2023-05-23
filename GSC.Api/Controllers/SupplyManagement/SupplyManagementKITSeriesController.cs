@@ -45,10 +45,10 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementKITSeriesRepository = supplyManagementKITSeriesRepository;
         }
 
-        [HttpGet("GetKITSeriesList/{projectId}/{isDeleted:bool?}")]
-        public IActionResult GetKITSeriesList(int projectId, bool isDeleted)
+        [HttpGet("GetKITSeriesList/{projectId}/{siteId}/{isDeleted:bool?}")]
+        public IActionResult GetKITSeriesList(int projectId,int siteId, bool isDeleted)
         {
-            var productTypes = _supplyManagementKITRepository.GetKITSeriesList(isDeleted, projectId);
+            var productTypes = _supplyManagementKITRepository.GetKITSeriesList(isDeleted, projectId, siteId);
             return Ok(productTypes);
         }
         [HttpGet("GetKITSeriesDetailList/{id}")]

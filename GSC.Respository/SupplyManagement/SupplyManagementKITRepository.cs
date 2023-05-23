@@ -44,10 +44,17 @@ namespace GSC.Respository.SupplyManagement
             _emailSenderRespository = emailSenderRespository;
         }
 
-        public List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId)
+        public List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId, int siteId)
         {
-            var data = _context.SupplyManagementKITDetail.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SupplyManagementKIT.ProjectId == ProjectId).
-                   ProjectTo<SupplyManagementKITGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var data = _context.SupplyManagementKITDetail.
+                Include(s => s.SupplyManagementShipment).
+                ThenInclude(s => s.SupplyManagementRequest).
+                Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SupplyManagementKIT.ProjectId == ProjectId).
+                ProjectTo<SupplyManagementKITGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            if (siteId > 0 && data.Count > 0)
+            {
+                data = data.Where(s => s.SupplyManagementShipment != null && s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId).ToList();
+            }
             data.ForEach(x =>
             {
                 if (x.RandomizationId > 0)
@@ -446,7 +453,7 @@ namespace GSC.Respository.SupplyManagement
                                     && x.SupplyManagementKIT.ProjectId == obj.ParentProjectId
                                     && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visit.Value
                                     && x.SupplyManagementKIT.DeletedDate == null
-                                    && x.SupplyManagementKIT.ProjectId == obj.ProjectId
+                                    && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ProjectId
                                     && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                     && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
@@ -454,35 +461,40 @@ namespace GSC.Respository.SupplyManagement
                 if (kitdata == null || kitdata.Count == 0)
                     return obj;
 
+
                 foreach (var kit in kitdata)
                 {
-                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
-                    var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
-                    var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
-                    if (productreciept != null && Convert.ToDateTime(productreciept.RetestExpiryDate).Date > date.Date)
+                    if (string.IsNullOrEmpty(obj.KitNo))
                     {
-                        kit.RandomizationId = obj.RandomizationId;
-                        kit.Status = KitStatus.Allocated;
-                        _context.SupplyManagementKITDetail.Update(kit);
-                        var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+                        var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
+                        var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
+                        var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
+                        if (productreciept != null && Convert.ToDateTime(productreciept.RetestExpiryDate).Date > date.Date)
                         {
-                            RandomizationId = obj.RandomizationId,
-                            ProjectDesignVisitId = visit.ProjectDesignVisitId,
-                            KitNo = kit.KitNo,
-                            ProductCode = visit.Value,
-                            ReasonOth = obj.ReasonOth,
-                            AuditReasonId = obj.AuditReasonId,
-                            SupplyManagementKITDetailId = kit.Id
-                        };
-                        InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
-                        _context.Save();
-                        obj.KitNo = kit.KitNo;
-                        SendRandomizationThresholdEMail(obj, kitcount);
-                    }
-                    else
-                    {
-                        obj.ExpiryMesage = "Kit is expired";
-                        return obj;
+                            kit.RandomizationId = obj.RandomizationId;
+                            kit.Status = KitStatus.Allocated;
+                            _context.SupplyManagementKITDetail.Update(kit);
+                            var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+                            {
+                                RandomizationId = obj.RandomizationId,
+                                ProjectDesignVisitId = visit.ProjectDesignVisitId,
+                                KitNo = kit.KitNo,
+                                ProductCode = visit.Value,
+                                ReasonOth = obj.ReasonOth,
+                                AuditReasonId = obj.AuditReasonId,
+                                SupplyManagementKITDetailId = kit.Id
+                            };
+                            InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
+                            _context.Save();
+                            obj.KitNo = kit.KitNo;
+                            SendRandomizationThresholdEMail(obj, kitcount);
+                            return obj;
+                        }
+                        else
+                        {
+                            obj.ExpiryMesage = "Kit is expired";
+                            return obj;
+                        }
                     }
                 }
             }
@@ -1279,10 +1291,17 @@ namespace GSC.Respository.SupplyManagement
             }
         }
 
-        public List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId)
+        public List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId, int siteId)
         {
-            var data = _context.SupplyManagementKITSeries.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
+            var data = _context.SupplyManagementKITSeries
+                .Include(s => s.SupplyManagementShipment)
+                .ThenInclude(s => s.SupplyManagementRequest)
+                .Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
                    ProjectTo<SupplyManagementKITSeriesGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            if (siteId > 0 && data.Count > 0)
+            {
+                data = data.Where(x => x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId).ToList();
+            }
             data.ForEach(x =>
             {
                 if (x.ToSiteId > 0)

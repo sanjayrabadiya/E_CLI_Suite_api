@@ -550,7 +550,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.SupplyManagementKIT.Site.ProjectCode))
                .ForMember(x => x.VisitName, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectDesignVisit.DisplayName))
                .ForMember(x => x.ProductTypeName, x => x.MapFrom(a => a.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode))
-               .ForMember(x => x.Status, x => x.MapFrom(a => a.Status.GetDescription()))
+               .ForMember(x => x.KitStatus, x => x.MapFrom(a => a.Status.GetDescription()))
                .ForMember(x => x.NoOfImp, x => x.MapFrom(a => a.SupplyManagementKIT.NoOfImp))
                .ForMember(x => x.NoofPatient, x => x.MapFrom(a => a.SupplyManagementKIT.NoofPatient))
                .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectId))

@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System;
@@ -62,11 +63,15 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string statusName { get; set; }
 
+        public KitStatus Status { get; set; }
+
         //public string Reason { get; set; }
 
         //public string ReasonOth { get; set; }
 
         public DateTime? KitExpiryDate { get; set; }
+
+        public SupplyManagementShipment SupplyManagementShipment { get; set; }
 
     }
     public class SupplyManagementKITSeriesDetailGridDto : BaseAuditDto

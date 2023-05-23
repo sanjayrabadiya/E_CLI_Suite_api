@@ -925,16 +925,16 @@ namespace GSC.Helper
         [Description("Returned")] Returned = 3,
         [Description("Missing")] Missing = 4,
         [Description("Damage/Expiry")] Damaged = 5,
-        [Description("Receipt With Issues")] WithIssue = 6,
-        [Description("Receipt Without Issues")] WithoutIssue = 7,
+        [Description("Valid")] WithIssue = 6,
+        [Description("Valid")] WithoutIssue = 7,
         [Description("Allocated")] Allocated = 8,
         [Description("Discard")] Discard = 9,
         [Description("Send to sponsor")] Sendtosponser = 10,
-        [Description("Return Receive")] ReturnReceive = 11,
-        [Description("Return Receive With Issue")] ReturnReceiveWithIssue = 12,
-        [Description("Return Receive Without Issue")] ReturnReceiveWithoutIssue = 13,
-        [Description("Return Receive Missing")] ReturnReceiveMissing = 14,
-        [Description("Return Receive Damaged")] ReturnReceiveDamaged = 15
+        [Description("Invalid")] ReturnReceive = 11,
+        [Description("Valid")] ReturnReceiveWithIssue = 12,
+        [Description("Valid")] ReturnReceiveWithoutIssue = 13,
+        [Description("Invalid")] ReturnReceiveMissing = 14,
+        [Description("Damage/Expiry")] ReturnReceiveDamaged = 15
     }
 
     public enum ScreeningReport : short
@@ -1018,7 +1018,7 @@ namespace GSC.Helper
     public enum Jointfactor : short
     {
         [Description("Knee")] Knee = 1,
-        [Description("Spine")] Spine = 2
+        [Description("Low Back")] LowBack = 2
     }
     public enum Eligibilityfactor : short
     {

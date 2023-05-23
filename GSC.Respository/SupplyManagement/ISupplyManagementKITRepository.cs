@@ -10,7 +10,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public interface ISupplyManagementKITRepository : IGenericRepository<SupplyManagementKIT>
     {
-        List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId);
+        List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId,int siteId);
 
         IList<DropDownDto> GetVisitDropDownByAllocation(int projectId);
 
@@ -48,7 +48,7 @@ namespace GSC.Respository.SupplyManagement
 
         void returnVerificationStatus(SupplyManagementKITReturnVerificationDto data);
 
-        List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId);
+        List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId,int siteId);
 
         List<SupplyManagementKITSeriesDetailGridDto> GetKITSeriesDetailList(int id);
 

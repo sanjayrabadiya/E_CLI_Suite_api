@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Location;
+using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System;
@@ -54,7 +55,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? PharmacyStudyProductTypeId { get; set; }
         public int? ProjectDesignVisitId { get; set; }
 
-        public string Status { get; set; }
+        public string KitStatus { get; set; }
+
+        public KitStatus Status { get; set; }
 
         public string RandomizationNo { get; set; }
 
@@ -66,6 +69,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public DateTime? ExpiryDate { get; set; }
         public string LotBatchNo { get; set; }
+
+        public SupplyManagementShipment? SupplyManagementShipment { get; set; }
 
 
     }

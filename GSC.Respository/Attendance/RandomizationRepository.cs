@@ -2285,9 +2285,9 @@ namespace GSC.Respository.Attendance
                                                     {
                                                         randomizationDto.Jointfactor = Jointfactor.Knee;
                                                     }
-                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("spine"))
+                                                    if (screeningTemplateValueChild.ValueName.ToLower().Contains("low") || screeningTemplateValueChild.ValueName.ToLower().Contains("back"))
                                                     {
-                                                        randomizationDto.Jointfactor = Jointfactor.Spine;
+                                                        randomizationDto.Jointfactor = Jointfactor.LowBack;
                                                     }
 
                                                 }

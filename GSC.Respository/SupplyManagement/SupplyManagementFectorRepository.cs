@@ -170,7 +170,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                     if (Collectionavalue == "2")
                     {
-                        return "Spine";
+                        return "Low back";
                     }
                 }
             }
