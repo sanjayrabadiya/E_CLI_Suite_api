@@ -2263,7 +2263,7 @@ namespace GSC.Respository.Attendance
                                         }
                                         if (!string.IsNullOrEmpty(screeningtemplateValue.Value) && !Isexist)
                                         {
-                                            var screeningTemplateValueChild = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningtemplateValue.Value)).FirstOrDefault();
+                                            var screeningTemplateValueChild = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningtemplateValue.Value) && x.DeletedDate == null).FirstOrDefault();
 
                                             if (screeningTemplateValueChild != null)
                                             {
