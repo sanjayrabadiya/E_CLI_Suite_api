@@ -1502,13 +1502,13 @@ namespace GSC.Respository.Screening
 
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+            var screeningEntryId = All.Where(x => (x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId) && x.DeletedDate == null).Select(x => x.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
 
             foreach (var item in screeningTemplates)
             {
 
                 var repatTemplate = designTemplateDto.DeepCopy();
                 repatTemplate.DesignOrder = item.RepeatSeqNo.ToString();
-
                 var values = GetScreeningValues(item.Id);
                 values.ForEach(t =>
                 {
@@ -1565,6 +1565,14 @@ namespace GSC.Respository.Screening
                         {
                             var dt = !string.IsNullOrEmpty(t.Value) ? DateTime.Parse(t.Value).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
                             variable.ScreeningValue = dt;
+                        }
+
+                        if (variable.CollectionSource == CollectionSources.Relation && variable.RelationProjectDesignVariableId > 0)
+                        {
+                            variable.Values = _screeningTemplateValueRepository.GetScreeningRelation(variable.RelationProjectDesignVariableId ?? 0, screeningEntryId);
+                            if (variable.Values.Count() > 0)
+                                if (variable.ScreeningValue != null)
+                                    variable.ScreeningValue = variable.Values.Where(x => x.Id == Convert.ToInt32(variable.ScreeningValue)).FirstOrDefault().ValueName;
                         }
 
                     }
