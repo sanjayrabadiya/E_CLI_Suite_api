@@ -1,6 +1,7 @@
 ﻿using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Screening;
 using GSC.Helper;
 using GSC.Respository.Screening;
@@ -160,6 +161,15 @@ namespace GSC.Api.Controllers.Screening
             }
             _uow.Save();
             return Ok();
+        }
+
+
+        // add for filter visit on data entry page on 25/05/2023
+        [HttpGet]
+        [Route("GetVisitForDataEntryDropDown/{ScreeningEntryId}")]
+        public IActionResult GetVisitForDataEntryDropDown(int ScreeningEntryId)
+        {
+            return Ok(_dataEntryRespository.GetVisitForDataEntryDropDown(ScreeningEntryId));
         }
     }
 }
