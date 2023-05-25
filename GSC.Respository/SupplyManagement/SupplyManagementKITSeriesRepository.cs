@@ -125,7 +125,7 @@ namespace GSC.Respository.SupplyManagement
             if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count() > 0)
             {
                 var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
-                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                    .ToList().Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
                 if (productreciept == null)
                     return "Product receipt not found";
 

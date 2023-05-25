@@ -433,10 +433,10 @@ namespace GSC.Respository.Reports
                                     productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                 }
-                                var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId) && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.RetestExpiryDate).ToList();
+                                var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId) && s.BatchLotNumber == randomizationIWRSReport.LotNo).ToList();
                                 if (expiry.Count > 0)
                                 {
-                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                 }
                             }
@@ -452,10 +452,10 @@ namespace GSC.Respository.Reports
                                     productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                 }
-                                var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.RetestExpiryDate).ToList();
+                                var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).ToList();
                                 if (expiry.Count > 0)
                                 {
-                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                 }
                             }
@@ -554,10 +554,10 @@ namespace GSC.Respository.Reports
                                 {
                                     productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
                                 }
-                                var expiry = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.RetestExpiryDate).ToList();
+                                var expiry = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId && s.BatchLotNumber == randomizationIWRSReport.LotNo).ToList();
                                 if (expiry.Count > 0)
                                 {
-                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                 }
                             }
@@ -573,10 +573,10 @@ namespace GSC.Respository.Reports
                                     productAccountabilityCentralReport.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                 }
-                                var expiry = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).Select(s => s.RetestExpiryDate).ToList();
+                                var expiry = _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).ToList();
                                 if (expiry.Count > 0)
                                 {
-                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                    productAccountabilityCentralReport.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                 }
                             }
@@ -1148,10 +1148,10 @@ namespace GSC.Respository.Reports
                                                 recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                             }
-                                            var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.RetestExpiryDate).ToList();
+                                            var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).ToList();
                                             if (expiry.Count > 0)
                                             {
-                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                             }
                                         }
@@ -1229,10 +1229,10 @@ namespace GSC.Respository.Reports
                                                 recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                             }
-                                            var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).Select(a => a.RetestExpiryDate).ToList();
+                                            var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).ToList();
                                             if (expiry.Count > 0)
                                             {
-                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", expiry.Select(s=> Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                             }
                                         }
@@ -1495,10 +1495,10 @@ namespace GSC.Respository.Reports
                                                 recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                             }
-                                            var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).Select(s => s.RetestExpiryDate).ToList();
+                                            var expiry = _context.ProductVerification.Where(s => productrecieptIds.Contains(s.ProductReceiptId)).ToList();
                                             if (expiry.Count > 0)
                                             {
-                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                             }
                                         }
@@ -1573,10 +1573,10 @@ namespace GSC.Respository.Reports
                                                 recieptobj.LotBatchNo = string.Join(",", batclotnumbers.Distinct());
 
                                             }
-                                            var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).Select(a => a.RetestExpiryDate).ToList();
+                                            var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).ToList();
                                             if (expiry.Count > 0)
                                             {
-                                                recieptobj.RetestExpiryDatestr = string.Join(",", Convert.ToDateTime(expiry.Distinct()).ToString("dddd, dd MMMM yyyy"));
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                             }
                                         }
