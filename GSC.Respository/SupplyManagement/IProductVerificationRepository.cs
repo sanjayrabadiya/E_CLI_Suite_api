@@ -12,5 +12,7 @@ namespace GSC.Respository.SupplyManagement
         ProductVerificationDto GetProductVerificationList(int productReceiptId);
         List<ProductVerificationGridDto> GetProductVerification(int ProjectId, bool isDeleted);
         List<ProductVerificationGridDto> GetProductVerificationSummary(int productReceiptId);
+
+        string lotValidation(ProductVerificationDto obj);
     }
 }

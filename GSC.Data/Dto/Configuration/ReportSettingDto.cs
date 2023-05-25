@@ -138,6 +138,8 @@ namespace GSC.Data.Dto.Configuration
         public string AllocatedBy { get; set; }
 
         public DateTime? Allocatedate { get; set; }
+
+        public int? ActionBy { get; set; }
     }
 
 

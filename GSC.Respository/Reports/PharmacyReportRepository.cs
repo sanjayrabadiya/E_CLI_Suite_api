@@ -105,7 +105,7 @@ namespace GSC.Respository.Reports
                                 x.Visit = visit.DisplayName;
                             }
                         }
-                        var Allocationdetail = _context.SupplyManagementVisitKITSequenceDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == x.VisitId && d.RandomizationId == x.RandomizationId).FirstOrDefault();
+                        var Allocationdetail = _context.SupplyManagementVisitKITDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == x.VisitId && d.RandomizationId == x.RandomizationId).FirstOrDefault();
                         if (Allocationdetail != null)
                         {
                             x.AllocatedBy = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault().UserName;
@@ -244,7 +244,7 @@ namespace GSC.Respository.Reports
                                 x.Visit = visit.DisplayName;
                             }
                         }
-                        var Allocationdetail = _context.SupplyManagementVisitKITSequenceDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == x.VisitId && d.RandomizationId == x.RandomizationId).FirstOrDefault();
+                        var Allocationdetail = _context.SupplyManagementVisitKITDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == x.VisitId && d.RandomizationId == x.RandomizationId).FirstOrDefault();
                         if (Allocationdetail != null)
                         {
                             x.AllocatedBy = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault().UserName;
@@ -884,59 +884,46 @@ namespace GSC.Respository.Reports
 
                 worksheet.Cell(list.Count + 3, 7).Value = "No of kits";
                 worksheet.Cell(list.Count + 4, 7).Value = "No of Imp";
-                worksheet.Cell(list.Count + 5, 7).Value = "No of kit with issue/without issue";
-                worksheet.Cell(list.Count + 6, 7).Value = "No of damage";
-                worksheet.Cell(list.Count + 7, 7).Value = "No of missing";
-                worksheet.Cell(list.Count + 8, 7).Value = "No of discard";
-                worksheet.Cell(list.Count + 9, 7).Value = "No of used/Allocated";
-                worksheet.Cell(list.Count + 10, 7).Value = "Returned";
-                //worksheet.Cell(list.Count + 12, 7).Value = "Return receive";
-                //worksheet.Cell(list.Count + 13, 7).Value = "Return receive missing";
-                //worksheet.Cell(list.Count + 14, 7).Value = "Return receive damaged";
-                //worksheet.Cell(list.Count + 15, 7).Value = "Return only unused";
-                //worksheet.Cell(list.Count + 11, 7).Value = "No of shipped to other site(unused only)";
-                worksheet.Cell(list.Count + 11, 7).Value = "Send to sponsor";
-                worksheet.Cell(list.Count + 12, 7).Value = "Shipped";
-                worksheet.Cell(list.Count + 13, 7).Value = "Total kit";
-                worksheet.Cell(list.Count + 14, 7).Value = "Total IMP";
+                worksheet.Cell(list.Count + 5, 7).Value = "No of valid kit";
+                worksheet.Cell(list.Count + 6, 7).Value = "No of invalid kit";
+                worksheet.Cell(list.Count + 7, 7).Value = "No of damage/expiry";
+                worksheet.Cell(list.Count + 8, 7).Value = "No of missing";
+                worksheet.Cell(list.Count + 9, 7).Value = "No of discard";
+                worksheet.Cell(list.Count + 10, 7).Value = "No of used/Allocated";
+                worksheet.Cell(list.Count + 11, 7).Value = "Returned";
+                worksheet.Cell(list.Count + 12, 7).Value = "Send to sponsor";
+                worksheet.Cell(list.Count + 13, 7).Value = "Shipped";
+                worksheet.Cell(list.Count + 14, 7).Value = "Total kit";
+                worksheet.Cell(list.Count + 15, 7).Value = "Total IMP";
 
                 var noofkis = list.Sum(x => x.NoofBoxorBottle);
                 var noofimp = list.Sum(x => x.Noofimp);
-                //var kitcreated = list.Count(x => x.Status == KitStatus.AllocationPending);
-                var withwithoutissue = list.Count(x => x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue);
-                var damaged = list.Count(x => x.Status == KitStatus.Damaged);
+               
+                var withwithoutissue = list.Count(x => x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
+                var invalid = list.Count(x => x.Status == KitStatus.ReturnReceive || x.Status == KitStatus.ReturnReceiveMissing);
+                var damaged = list.Count(x => x.Status == KitStatus.Damaged || x.Status == KitStatus.ReturnReceiveDamaged);
                 var missiing = list.Count(x => x.Status == KitStatus.Missing);
                 var discard = list.Count(x => x.Status == KitStatus.Discard);
                 var sendtosponser = list.Count(x => x.Status == KitStatus.Sendtosponser);
                 var allocated = list.Count(x => x.Status == KitStatus.Allocated);
                 var returns = list.Count(x => x.Status == KitStatus.Returned);
-                //var returnreceive = list.Count(x => x.Status == KitStatus.ReturnReceive);
-                //var returnreceivemissing = list.Count(x => x.Status == KitStatus.ReturnReceiveMissing);
-                //var returnreceivedamage = list.Count(x => x.Status == KitStatus.ReturnReceiveDamaged);
-                //var returnkit = list.Count(x => x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
-                //var shiipedtoothersite = list.Count(x => x.ToSiteId != null && x.ToSiteId != x.SiteId && (x.PreStatus == KitStatus.ReturnReceiveWithIssue || x.PreStatus == KitStatus.ReturnReceiveWithoutIssue));
                 var shipped = list.Count(x => x.Status == KitStatus.Shipped);
-                //var totalkit = withwithoutissue + kitcreated;
+                
                 var totalkit = withwithoutissue;
-                var totalimp = list.Where(x => x.Status == KitStatus.AllocationPending || x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue).Sum(x => x.TotalIMP);
+                var totalimp = list.Where(x => x.Status == KitStatus.AllocationPending || x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue).Sum(x => x.TotalIMP);
                 worksheet.Row(list.Count + 3).Cell(8).SetValue(noofkis);
                 worksheet.Row(list.Count + 4).Cell(8).SetValue(noofimp);
-                //worksheet.Row(list.Count + 5).Cell(8).SetValue(kitcreated);
                 worksheet.Row(list.Count + 5).Cell(8).SetValue(withwithoutissue);
-                worksheet.Row(list.Count + 6).Cell(8).SetValue(damaged);
-                worksheet.Row(list.Count + 7).Cell(8).SetValue(missiing);
-                worksheet.Row(list.Count + 8).Cell(8).SetValue(discard);
-                worksheet.Row(list.Count + 9).Cell(8).SetValue(allocated);
-                worksheet.Row(list.Count + 10).Cell(8).SetValue(returns);
-                //worksheet.Row(list.Count + 12).Cell(8).SetValue(returnreceive);
-                //worksheet.Row(list.Count + 13).Cell(8).SetValue(returnreceivemissing);
-                //worksheet.Row(list.Count + 14).Cell(8).SetValue(returnreceivedamage);
-                //worksheet.Row(list.Count + 15).Cell(8).SetValue(returnkit);
-                //worksheet.Row(list.Count + 11).Cell(8).SetValue(shiipedtoothersite);
-                worksheet.Row(list.Count + 11).Cell(8).SetValue(sendtosponser);
-                worksheet.Row(list.Count + 12).Cell(8).SetValue(shipped);
-                worksheet.Row(list.Count + 13).Cell(8).SetValue(totalkit);
-                worksheet.Row(list.Count + 14).Cell(8).SetValue(totalimp);
+                worksheet.Row(list.Count + 6).Cell(8).SetValue(invalid);
+                worksheet.Row(list.Count + 7).Cell(8).SetValue(damaged);
+                worksheet.Row(list.Count + 8).Cell(8).SetValue(missiing);
+                worksheet.Row(list.Count + 9).Cell(8).SetValue(discard);
+                worksheet.Row(list.Count + 10).Cell(8).SetValue(allocated);
+                worksheet.Row(list.Count + 11).Cell(8).SetValue(returns);
+                worksheet.Row(list.Count + 12).Cell(8).SetValue(sendtosponser);
+                worksheet.Row(list.Count + 13).Cell(8).SetValue(shipped);
+                worksheet.Row(list.Count + 14).Cell(8).SetValue(totalkit);
+                worksheet.Row(list.Count + 15).Cell(8).SetValue(totalimp);
 
 
 

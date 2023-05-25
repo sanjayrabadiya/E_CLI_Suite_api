@@ -142,7 +142,8 @@ namespace GSC.Respository.SupplyManagement
                                         .Cast<KitStatus>().Select(e => new DropDownStudyDto
                                         {
                                             Id = Convert.ToInt16(e),
-                                            Value = e.GetDescription()
+                                            Value = Convert.ToInt16(e) == 6 ? e.GetDescription() + " (With issue)":
+                                            Convert.ToInt16(e) == 7 ? e.GetDescription() + " (Without issue) " : e.GetDescription()
                                         }).Where(x => x.Id == 4 || x.Id == 5 || x.Id == 6 || x.Id == 7).ToList();
                     item.StatusList = refrencetype;
                 }
@@ -168,7 +169,8 @@ namespace GSC.Respository.SupplyManagement
                                         .Cast<KitStatus>().Select(e => new DropDownStudyDto
                                         {
                                             Id = Convert.ToInt16(e),
-                                            Value = e.GetDescription()
+                                            Value = Convert.ToInt16(e) == 6 ? e.GetDescription() + " (With issue)" :
+                                            Convert.ToInt16(e) == 7 ? e.GetDescription() + " (Without issue) " : e.GetDescription()
                                         }).Where(x => x.Id == 4 || x.Id == 5 || x.Id == 6 || x.Id == 7).ToList();
                     item.StatusList = refrencetype;
                 }

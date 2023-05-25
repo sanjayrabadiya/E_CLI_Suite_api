@@ -240,10 +240,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetLotBatchList/{projectId}/{pharmacyStudyProductTypeId}")]
         public IActionResult GetLotBatchList(int projectId, int pharmacyStudyProductTypeId)
         {
-            var data = _context.ProductVerification.Include(x => x.ProductReceipt)
+            var data = _context.ProductVerification.Include(x => x.ProductReceipt).ToList()
                 .Where(x => x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved
                 && x.ProductReceipt.PharmacyStudyProductTypeId == pharmacyStudyProductTypeId
-                      && x.ProductReceipt.ProjectId == projectId).Select(x => new { Id = x.ProductReceiptId, Value = x.BatchLotNumber }).Distinct().ToList();
+                && x.ProductReceipt.ProjectId == projectId)
+                .GroupBy(s=>s.BatchLotNumber)
+                .Select(x => new { Id = x.FirstOrDefault().ProductReceiptId, Value = x.FirstOrDefault().BatchLotNumber })
+                .Distinct()
+                .ToList();
             return Ok(data);
         }
     }

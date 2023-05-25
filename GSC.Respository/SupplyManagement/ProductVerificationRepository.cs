@@ -17,7 +17,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public class ProductVerificationRepository : GenericRespository<ProductVerification>, IProductVerificationRepository
     {
-        
+
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IUploadSettingRepository _uploadSettingRepository;
@@ -169,6 +169,21 @@ namespace GSC.Respository.SupplyManagement
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;
+        }
+        public string lotValidation(ProductVerificationDto obj)
+        {
+            var productreciept = _context.ProductReceipt.Where(s => s.Id == obj.ProductReceiptId).FirstOrDefault();
+            if (productreciept == null)
+                return "Product reciept not found";
+
+            var verification = _context.ProductVerification.Where(s => s.ProductReceipt.ProjectId == productreciept.ProjectId
+                            && s.DeletedDate == null && s.BatchLotNumber == obj.BatchLotNumber).FirstOrDefault();
+            if (verification != null && verification.RetestExpiryDate.Value.Date != obj.RetestExpiryDate.Value.Date)
+            {
+                return "you can not change expiry/re-test date for same lot number";
+            }
+
+            return "";
         }
 
     }

@@ -83,6 +83,12 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             productVerificationDto.Id = 0;
+            var message = _productVerificationRepository.lotValidation(productVerificationDto);
+            if(!string.IsNullOrEmpty(message))
+            {
+                ModelState.AddModelError("Message", message);
+                return BadRequest(ModelState);
+            }
 
             //set file path and extension
             if (productVerificationDto.FileModel?.Base64?.Length > 0)
@@ -106,6 +112,13 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (productVerificationDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            var message = _productVerificationRepository.lotValidation(productVerificationDto);
+            if (!string.IsNullOrEmpty(message))
+            {
+                ModelState.AddModelError("Message", message);
+                return BadRequest(ModelState);
+            }
 
             //added by vipul for if document send empty if they cant want to change docuemnt
             var productRec = _productVerificationRepository.Find(productVerificationDto.Id);
