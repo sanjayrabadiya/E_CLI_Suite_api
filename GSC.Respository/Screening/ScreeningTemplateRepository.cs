@@ -1502,13 +1502,13 @@ namespace GSC.Respository.Screening
 
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+            var screeningEntryId = All.Where(x => (x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId) && x.DeletedDate == null).Select(x => x.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
 
             foreach (var item in screeningTemplates)
             {
 
                 var repatTemplate = designTemplateDto.DeepCopy();
                 repatTemplate.DesignOrder = item.RepeatSeqNo.ToString();
-                var screeningEntryId = All.Where(x => (x.Id == ScreeningTemplateId || x.ParentId == ScreeningTemplateId) && x.DeletedDate == null).Select(x=>x.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
                 var values = GetScreeningValues(item.Id);
                 values.ForEach(t =>
                 {
@@ -1569,7 +1569,7 @@ namespace GSC.Respository.Screening
 
                         if (variable.CollectionSource == CollectionSources.Relation && variable.RelationProjectDesignVariableId > 0)
                         {
-                            variable.Values = GetScreeningRelation(variable.RelationProjectDesignVariableId ?? 0, screeningEntryId);
+                            variable.Values = _screeningTemplateValueRepository.GetScreeningRelation(variable.RelationProjectDesignVariableId ?? 0, screeningEntryId);
                             if (variable.Values.Count() > 0)
                                 if (variable.ScreeningValue != null)
                                     variable.ScreeningValue = variable.Values.Where(x => x.Id == Convert.ToInt32(variable.ScreeningValue)).FirstOrDefault().ValueName;
@@ -1653,63 +1653,6 @@ namespace GSC.Respository.Screening
             return designTemplateDto;
         }
 
-
-        public List<ScreeningVariableValueDto> GetScreeningRelation(int projectDesignVariableId, int screeningEntryId)
-        {
-            var result = _screeningTemplateValueRepository.All.Where(x => x.DeletedDate == null &&
-                                   x.ScreeningTemplate.DeletedDate == null &&
-                                   x.ScreeningTemplate.ScreeningVisit.DeletedDate == null &&
-                                   x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId &&
-                                   x.ProjectDesignVariableId == projectDesignVariableId).OrderBy(o => o.CreatedDate)
-                .Select(c => new
-                {
-                    c.Id,
-                    c.ProjectDesignVariableId,
-                    ValueName = c.Value,
-                    c.ProjectDesignVariable.CollectionSource,
-                    SeqNo = c.ScreeningTemplate.RepeatSeqNo == null ? c.ScreeningTemplate.ProjectDesignTemplate.DesignOrder.ToString() + ".0" : c.ScreeningTemplate.ProjectDesignTemplate.DesignOrder.ToString() + "." + c.ScreeningTemplate.RepeatSeqNo.Value.ToString()
-                }).ToList();
-
-            var relations = new List<ScreeningVariableValueDto>();
-
-            var collectionSource = result.FirstOrDefault()?.CollectionSource;
-            var timeformat = "";
-            var dateformat = "";
-            if (collectionSource != null && (collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Date || collectionSource == CollectionSources.Time))
-            {
-
-                timeformat = _context.AppSetting.Where(x => x.CompanyId == _jwtTokenAccesser.CompanyId && x.KeyName == "GeneralSettingsDto.TimeFormat").Select(t => t.KeyValue).FirstOrDefault();
-                dateformat = _context.AppSetting.Where(x => x.CompanyId == _jwtTokenAccesser.CompanyId && x.KeyName == "GeneralSettingsDto.DateFormat").Select(t => t.KeyValue).FirstOrDefault();
-
-            }
-
-            result.ForEach(x =>
-            {
-                var relationValue = new ScreeningVariableValueDto();
-                relationValue.Id = x.Id;
-                relationValue.ProjectDesignVariableId = x.ProjectDesignVariableId;
-                relationValue.ValueName = x.SeqNo + "- " + x.ValueName;
-                if (x.CollectionSource.IsDropDownCollection())
-                {
-                    int.TryParse(x.ValueName, out int projectDesignVariableValueId);
-                    relationValue.ValueName = x.SeqNo + "- " + _context.ProjectDesignVariableValue.Where(b => b.Id == projectDesignVariableValueId).Select(
-                        t => _jwtTokenAccesser.Language != 1 ? t.VariableValueLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && c.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : t.ValueName).FirstOrDefault();
-
-                }
-                else if (collectionSource == CollectionSources.Date && !string.IsNullOrEmpty(x.ValueName) && !string.IsNullOrEmpty(dateformat))
-                {
-                    relationValue.ValueName = x.SeqNo + "- " + Convert.ToDateTime(x.ValueName).ToString(dateformat);
-                }
-                else if ((collectionSource == CollectionSources.Time || collectionSource == CollectionSources.DateTime) && !string.IsNullOrEmpty(x.ValueName) && !string.IsNullOrEmpty(dateformat))
-                {
-                    relationValue.ValueName = x.SeqNo + "- " + Convert.ToDateTime(x.ValueName).ToString(dateformat + " " + timeformat);
-                }
-                relations.Add(relationValue);
-            });
-
-
-            return relations;
-        }
     }
 }
 
