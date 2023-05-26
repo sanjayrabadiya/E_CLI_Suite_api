@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -512,6 +513,46 @@ namespace GSC.Respository.Screening
                 }
             }
             return str;
+        }
+
+
+        public List<DataEntryVisitTemplateDto> GetVisitForDataEntryDropDown(int ScreeningEntryId)
+        {
+            var visits = _screeningVisitRepository.All.
+              Where(r => r.ScreeningEntryId == ScreeningEntryId && r.DeletedDate == null).Select(a => new DataEntryVisitTemplateDto
+              {
+                  ScreeningVisitId = a.Id,
+                  ProjectDesignVisitId = a.ProjectDesignVisitId,
+                  VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                  VisitStatus = a.Status.GetDescription(),
+                  VisitStatusId = (int)a.Status,
+                  ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
+                  ScheduleDate = a.ScheduleDate,
+                  IsSchedule = a.IsSchedule,
+                  DesignOrder = a.ProjectDesignVisit.DesignOrder,
+                  StudyVersion = a.ProjectDesignVisit.StudyVersion,
+                  IsScheduleTerminate = a.IsScheduleTerminate,
+                  ScreeningEntryId = a.ScreeningEntryId
+              }).ToList();
+
+            //var projectDesignVisit = _projectDesignVisitRepository.All.
+            //    Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
+            //    OrderBy(a => a.DesignOrder).
+            //Select(t => new DataEntryVisitTemplateDto
+            //{
+            //    ProjectDesignVisitId = t.Id,
+            //    VisitName = t.DisplayName,
+            //    VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
+            //    VisitStatusId = (int)ScreeningVisitStatus.NotStarted,
+            //    StudyVersion = t.StudyVersion,
+            //    InActiveVersion = t.InActiveVersion
+            //}).ToList();
+
+            //visits = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= studyVersion) && (t.InActiveVersion == null || t.InActiveVersion > studyVersion)).ToList();
+
+            visits = visits.Where(a => a.ScreeningEntryId == ScreeningEntryId &&
+                 (!a.IsSchedule || a.IsScheduleTerminate == true || a.VisitStatusId > (int)ScreeningVisitStatus.NotStarted)).ToList();
+            return visits;
         }
     }
 }

@@ -878,7 +878,7 @@ namespace GSC.Respository.Master
            .ThenInclude(i => i.Project)
             .ThenInclude(i => i.ManageSite)
            .Where(z => projectIds.Contains(z.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.CtmsMonitoring.StudyLevelFormId)
-            && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true) 
+            && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true)
             && z.DeletedDate == null)
             .Select
             (b => new CtmsMonitoringPlanDashoardDto
@@ -891,7 +891,7 @@ namespace GSC.Respository.Master
                 ActualEndDate = b.CtmsMonitoring.ActualEndDate,
                 Site = b.CtmsMonitoring.Project.ProjectCode == null ? b.CtmsMonitoring.Project.ManageSite.SiteName : b.CtmsMonitoring.Project.ProjectCode,
                 Country = b.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
-                Status = b.ReportStatus.ToString(),
+                Status = b.ReportStatus.GetDescription(),
                 sendForReviewDate = b.CreatedDate
             }).ToList();
             int Total = 0, Count = 0;
@@ -902,7 +902,7 @@ namespace GSC.Respository.Master
                     //item.Status = GetMonitoringStatus(item);
                     item.visitStatus = GetVisitgStatus(item);
 
-                    if (item.Status == "UnderReview") { 
+                    if (item.Status == "UnderReview") {
                         TimeSpan v = (TimeSpan)(today - item.sendForReviewDate);
                         Total = Total + v.Days;
                         Count++;
@@ -1059,7 +1059,7 @@ namespace GSC.Respository.Master
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_001" || x.ActivityCode == "act_002" || x.ActivityCode == "act_003" || x.ActivityCode == "act_004" || x.ActivityCode == "act_005" && x.DeletedDate == null).ToList();
 
             var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
-            
+
             var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
                                .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == projectId
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
