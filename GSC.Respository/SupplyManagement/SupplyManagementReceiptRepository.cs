@@ -277,17 +277,12 @@ namespace GSC.Respository.SupplyManagement
                         {
                             data.Status = item.Status;
                             data.Comments = item.Comments;
-                            _supplyManagementKITDetailRepository.Update(data);
-                            if (request.IsSiteRequest && data.SupplyManagementKIT != null)
-                            {
-                                var kit = _context.SupplyManagementKIT.Where(x => x.Id == data.SupplyManagementKITId).FirstOrDefault();
-                                kit.ToSiteId = request.FromProjectId;
-                                _supplyManagementKITRepository.Update(kit);
-                                _context.Entry(kit).State = EntityState.Detached;
-                            }
+                            _context.SupplyManagementKITDetail.Update(data);
+                            _context.Save();
 
                         }
                     }
+                   
                 }
 
                 if (supplyManagementshipmentDto.Kits != null)
@@ -327,6 +322,7 @@ namespace GSC.Respository.SupplyManagement
                         }
 
                     }
+                    _context.Save();
                 }
 
                 if (supplyManagementshipmentDto.Kits != null)
@@ -346,6 +342,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
+            
         }
 
         public string CheckExpiryOnReceipt(int projectId, int id)
