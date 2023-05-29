@@ -399,7 +399,7 @@ namespace GSC.Respository.Attendance
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
                                     var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate > Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
@@ -484,7 +484,7 @@ namespace GSC.Respository.Attendance
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
                                     var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate > Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
@@ -629,7 +629,7 @@ namespace GSC.Respository.Attendance
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
                                     var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate > Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
@@ -786,7 +786,7 @@ namespace GSC.Respository.Attendance
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
                                     var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate > Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
