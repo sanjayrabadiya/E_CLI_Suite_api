@@ -395,11 +395,9 @@ namespace GSC.Respository.Attendance
 
                                 if (kit != null)
                                 {
-                                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.ProductReceiptId).FirstOrDefault();
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
-                                    var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (Convert.ToDateTime(kitExpiryDate).Date >= currentdate.Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
@@ -480,11 +478,9 @@ namespace GSC.Respository.Attendance
 
                                 if (kit != null)
                                 {
-                                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.ProductReceiptId).FirstOrDefault();
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
-                                    var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (Convert.ToDateTime(kitExpiryDate).Date >= currentdate.Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
@@ -607,15 +603,18 @@ namespace GSC.Respository.Attendance
                                 if (kit != null)
                                 {
                                     var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
-                                    var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
-                                    var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
-                                    if (productreciept != null && Convert.ToDateTime(productreciept.RetestExpiryDate).Date > date.Date)
+                                    if (productreciept != null)
                                     {
-                                        randomizationNumberDto.KitNo = kit.KitNo;
-                                        randomizationNumberDto.KitDetailId = kit.Id;
-                                        randomizationNumberDto.VisitId = visit.FirstOrDefault().ProjectDesignVisitId;
+                                        var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
+                                        var date = expiry.AddDays(-(int)kit.SupplyManagementKIT.Days);
+                                        var currentdate = DateTime.Now.Date;
+                                        if (date > currentdate)
+                                        {
+                                            randomizationNumberDto.KitNo = kit.KitNo;
+                                            randomizationNumberDto.KitDetailId = kit.Id;
+                                            randomizationNumberDto.VisitId = visit.FirstOrDefault().ProjectDesignVisitId;
+                                        }
                                     }
-
                                 }
 
                             }
@@ -625,17 +624,15 @@ namespace GSC.Respository.Attendance
 
                                 if (kit != null)
                                 {
-                                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.ProductReceiptId).FirstOrDefault();
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
-                                    var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (Convert.ToDateTime(kitExpiryDate).Date >= currentdate.Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
                                         randomizationNumberDto.VisitId = visit.FirstOrDefault().ProjectDesignVisitId;
                                     }
-                                   
+
                                 }
 
                             }
@@ -766,13 +763,17 @@ namespace GSC.Respository.Attendance
                                 if (kit != null)
                                 {
                                     var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
-                                    var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
-                                    var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
-                                    if (productreciept != null && Convert.ToDateTime(productreciept.RetestExpiryDate).Date > date.Date)
+                                    if (productreciept != null)
                                     {
-                                        randomizationNumberDto.KitNo = kit.KitNo;
-                                        randomizationNumberDto.KitDetailId = kit.Id;
-                                        randomizationNumberDto.VisitId = visit.FirstOrDefault().ProjectDesignVisitId;
+                                        var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
+                                        var date = expiry.AddDays(-(int)kit.SupplyManagementKIT.Days);
+                                        var currentdate = DateTime.Now.Date;
+                                        if (date > currentdate)
+                                        {
+                                            randomizationNumberDto.KitNo = kit.KitNo;
+                                            randomizationNumberDto.KitDetailId = kit.Id;
+                                            randomizationNumberDto.VisitId = visit.FirstOrDefault().ProjectDesignVisitId;
+                                        }
                                     }
 
                                 }
@@ -782,17 +783,15 @@ namespace GSC.Respository.Attendance
                                 var kit = kitSequencedata.Where(x => x.PharmacyStudyProductType.ProductType.ProductTypeCode == visititem.Value).OrderBy(x => x.Id).FirstOrDefault();
                                 if (kit != null)
                                 {
-                                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.ProductReceiptId).FirstOrDefault();
                                     var currentdate = DateTime.Now.Date;
                                     var kitExpiryDate = kit.SupplyManagementKITSeries.KitExpiryDate;
-                                    var visitdate = kit.CreatedDate.Value.AddDays((int)kit.Days).Date;
-                                    if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate <= Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                                    if (Convert.ToDateTime(kitExpiryDate).Date >= currentdate.Date)
                                     {
                                         randomizationNumberDto.KitNo = kit.SupplyManagementKITSeries.KitNo;
                                         randomizationNumberDto.KitDetailId = kit.Id;
                                         randomizationNumberDto.VisitId = visit.FirstOrDefault().ProjectDesignVisitId;
                                     }
-                                    
+
                                 }
 
                             }

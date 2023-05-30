@@ -469,33 +469,37 @@ namespace GSC.Respository.SupplyManagement
                     if (string.IsNullOrEmpty(obj.KitNo))
                     {
                         var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
-                        var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
-                        var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
-                        if (productreciept != null && Convert.ToDateTime(productreciept.RetestExpiryDate).Date > date.Date)
+                        if (productreciept != null)
                         {
-                            kit.RandomizationId = obj.RandomizationId;
-                            kit.Status = KitStatus.Allocated;
-                            _context.SupplyManagementKITDetail.Update(kit);
-                            var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+                            var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
+                            var date = expiry.AddDays((int)kit.SupplyManagementKIT.Days);
+                            var currentdate = DateTime.Now.Date;
+                            if (currentdate.Date < date.Date)
                             {
-                                RandomizationId = obj.RandomizationId,
-                                ProjectDesignVisitId = visit.ProjectDesignVisitId,
-                                KitNo = kit.KitNo,
-                                ProductCode = visit.Value,
-                                ReasonOth = obj.ReasonOth,
-                                AuditReasonId = obj.AuditReasonId,
-                                SupplyManagementKITDetailId = kit.Id
-                            };
-                            InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
-                            _context.Save();
-                            obj.KitNo = kit.KitNo;
-                            SendRandomizationThresholdEMail(obj, kitcount);
-                            return obj;
-                        }
-                        else
-                        {
-                            obj.ExpiryMesage = "Kit is expired";
-                            return obj;
+                                kit.RandomizationId = obj.RandomizationId;
+                                kit.Status = KitStatus.Allocated;
+                                _context.SupplyManagementKITDetail.Update(kit);
+                                var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+                                {
+                                    RandomizationId = obj.RandomizationId,
+                                    ProjectDesignVisitId = visit.ProjectDesignVisitId,
+                                    KitNo = kit.KitNo,
+                                    ProductCode = visit.Value,
+                                    ReasonOth = obj.ReasonOth,
+                                    AuditReasonId = obj.AuditReasonId,
+                                    SupplyManagementKITDetailId = kit.Id
+                                };
+                                InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
+                                _context.Save();
+                                obj.KitNo = kit.KitNo;
+                                SendRandomizationThresholdEMail(obj, kitcount);
+                                return obj;
+                            }
+                            else
+                            {
+                                obj.ExpiryMesage = "Kit is expired";
+                                return obj;
+                            }
                         }
                     }
                 }
@@ -514,13 +518,10 @@ namespace GSC.Respository.SupplyManagement
 
                 if (kitSequencedata == null)
                     return obj;
-
-                var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kitSequencedata.ProductReceiptId).FirstOrDefault();
+               
                 var currentdate = DateTime.Now.Date;
                 var kitExpiryDate = kitSequencedata.SupplyManagementKITSeries.KitExpiryDate;
-                var tempdate = kitSequencedata.CreatedDate;
-                var visitdate = tempdate.Value.AddDays((int)kitSequencedata.Days).Date;
-                if (productreciept != null && Convert.ToDateTime(kitExpiryDate).Date > currentdate.Date && kitExpiryDate < Convert.ToDateTime(productreciept.RetestExpiryDate).Date && visitdate > Convert.ToDateTime(productreciept.RetestExpiryDate).Date)
+                if (currentdate < kitExpiryDate.Value.Date)
                 {
                     kitSequencedata.RandomizationId = obj.RandomizationId;
                     _context.SupplyManagementKITSeriesDetail.Update(kitSequencedata);

@@ -360,10 +360,10 @@ namespace GSC.Respository.SupplyManagement
                         var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
                         if (productreciept == null)
                             return "Product receipt not found";
-
-                        var currentdate = Convert.ToDateTime(kit.SupplyManagementKIT.CreatedDate).Date;
-                        var date = currentdate.AddDays((int)kit.SupplyManagementKIT.Days);
-                        if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < date.Date)
+                        var currentdate = DateTime.Now.Date;
+                        var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
+                        var date = expiry.AddDays(-(int)kit.SupplyManagementKIT.Days);
+                        if (currentdate.Date < date.Date)
                         {
                             return "Product is expired";
                         }
