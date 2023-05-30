@@ -750,8 +750,9 @@ namespace GSC.Respository.Screening
                 SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
                 ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignId
-                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
-
+                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault(),
+                ReviewBy = r.ScreeningTemplateReview.FirstOrDefault(x => x.IsRepeat == false && x.ReviewLevel == r.ReviewLevel - 1).CreatedByUser.UserName,
+                ReviewedOn = r.ScreeningTemplateReview.FirstOrDefault(x => x.IsRepeat == false && x.ReviewLevel == r.ReviewLevel - 1).CreatedDate
             }).ToList();
         }
 
