@@ -145,8 +145,17 @@ namespace GSC.Respository.SupplyManagement
             {
                 var days = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Sum(x => x.Days);
                 var currentdate = DateTime.Now.Date;
-                var date = currentdate.AddDays(days);
-                return date;
+
+
+                var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
+                   .ToList().Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                if (productreciept != null)
+                {
+                    var date = productreciept.RetestExpiryDate.Value.AddDays(-days);
+                    return date;
+                }
+                return new DateTime();
+
             }
             return new DateTime();
         }
