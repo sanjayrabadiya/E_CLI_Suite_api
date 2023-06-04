@@ -90,6 +90,9 @@ namespace GSC.Data.Dto.Attendance
         }
         public bool? IsScheduleTerminate { get; set; }
         public int ScreeningEntryId { get; set; }
+
+        // changes for visit order in data capture and review column 04/06/2023
+        public int? VisitSeqNo { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto
