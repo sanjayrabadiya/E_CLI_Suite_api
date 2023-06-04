@@ -5,6 +5,7 @@ using GSC.Helper;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.Report
 {
@@ -28,8 +29,10 @@ namespace GSC.Api.Controllers.Report
             if (filters.ProjectId <= 0) return BadRequest();
 
             var auditsDto = _screeningTemplateRepository.GetReviewReportList(filters);
+            // Added for dynamic column 04/06/2023
+            var result = _screeningTemplateReviewRepository.SetReviewHistory(auditsDto);
 
-            return Ok(auditsDto);
+            return Ok(result);
         }
 
         [HttpGet]
