@@ -3,6 +3,7 @@ using GSC.Data.Dto.LabManagement;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -49,5 +50,8 @@ namespace GSC.Respository.EmailSender
         void SendforApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration);
 
         void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration);
+
+        void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, IList<EmailList> toMails, IList<string> tophone);
+
     }
 }

@@ -409,6 +409,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISampleBarcodeGenerateRepository, SampleBarcodeGenerateRepository>();
             services.AddScoped<IDossingBarcodeGenerateRepository, DossingBarcodeGenerateRepository>();
             services.AddScoped<ISupplyManagementApprovalRepository, SupplyManagementApprovalRepository>();
+            services.AddScoped<IEmailConfigurationEditCheckRepository, EmailConfigurationEditCheckRepository>();
+            services.AddScoped<IEmailConfigurationEditCheckDetailRepository, EmailConfigurationEditCheckDetailRepository>();
+            services.AddScoped<IEmailConfigurationEditCheckRoleRepository, EmailConfigurationEditCheckRoleRepository>();
         }
     }
 }

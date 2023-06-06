@@ -159,8 +159,7 @@ namespace GSC.Respository.SupplyManagement
                             Id = x.Id,
                             KitNo = x.KitNo,
                             SiteCode = x.SiteId > 0 ? _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
-                            //RetestExpiry = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
-                            //LotBatchNo = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                            KitValidity = x.KitExpiryDate
                         }).OrderByDescending(x => x.KitNo).ToList();
                 foreach (var item in data)
                 {

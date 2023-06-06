@@ -97,6 +97,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime? RetestExpiry { get; set; }
 
         public string RetestExpirystr { get; set; }
+
+        public DateTime? KitValidity { get; set; }
     }
 
     public class KitListApproved
@@ -113,6 +115,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string LotBatchNo { get; set; }
 
         public DateTime? RetestExpiry { get; set; }
+
+        public DateTime? KitValidity { get; set; }
 
         public List<DropDownStudyDto> StatusList { get; set; }
     }

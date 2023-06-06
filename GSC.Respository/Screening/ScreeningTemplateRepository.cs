@@ -21,6 +21,7 @@ using GSC.Respository.EditCheckImpact;
 using GSC.Respository.EmailSender;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
@@ -46,6 +47,7 @@ namespace GSC.Respository.Screening
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
+        private readonly IEmailConfigurationEditCheckRepository _emailConfigurationEditCheckRepository;
         public ScreeningTemplateRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IUploadSettingRepository uploadSettingRepository, IMapper mapper,
@@ -58,7 +60,8 @@ namespace GSC.Respository.Screening
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IAppSettingRepository appSettingRepository,
              ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
-            IEmailSenderRespository emailSenderRespository)
+            IEmailSenderRespository emailSenderRespository,
+            IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository)
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -76,6 +79,7 @@ namespace GSC.Respository.Screening
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _emailSenderRespository = emailSenderRespository;
+            _emailConfigurationEditCheckRepository = emailConfigurationEditCheckRepository;
         }
 
         private ScreeningTemplateBasic GetScreeningTemplateBasic(int screeningTemplateId)
@@ -1651,6 +1655,22 @@ namespace GSC.Respository.Screening
             });
 
             return designTemplateDto;
+        }
+
+        public void SendEmailOnVaribleConfiguration(int id)
+        {
+            var screeningTemplate = All.
+                Include(s => s.ScreeningTemplateValues).
+                ThenInclude(s => s.ProjectDesignVariable).
+                Include(s => s.ScreeningVisit).
+                ThenInclude(s => s.ScreeningEntry).
+                ThenInclude(s => s.Randomization).
+                ThenInclude(s => s.User).Where(s => s.Id == id).FirstOrDefault();
+            var result = _emailConfigurationEditCheckRepository.ValidatWithScreeningTemplate(screeningTemplate);
+            if (result != null && result.IsValid)
+            {
+                _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfiguration(screeningTemplate);
+            }
         }
 
     }

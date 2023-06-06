@@ -730,6 +730,16 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ApprovalTypeName, x => x.MapFrom(a => a.ApprovalType.GetDescription()))
              .ReverseMap();
 
+            CreateMap<EmailConfigurationEditCheck, EmailConfigurationEditCheckGridDto>()
+             .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+             .ReverseMap();
+
+            CreateMap<EmailConfigurationEditCheckDetail, EmailConfigurationEditCheckDetailGridDto>()
+            .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+            .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+            .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
+            .ForMember(x => x.OperatorName, x => x.MapFrom(a => a.Operator.GetDescription()))
+            .ReverseMap();
         }
     }
 }

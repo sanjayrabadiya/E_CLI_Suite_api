@@ -12,6 +12,7 @@ using GSC.Data.Dto.LabManagement;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
@@ -927,6 +928,67 @@ namespace GSC.Respository.EmailSender
             if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.Unblind)
             {
                 str = "Unblind : " + iWRSEmailModel.StudyCode;
+            }
+
+            return str;
+        }
+
+        public void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, IList<EmailList> toMails, IList<string> tophone)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.Subject = email.Subject;
+            if (toMails != null && toMails.Count > 0)
+            {
+                foreach (var item in toMails)
+                {
+                    emailMessage.SendTo = item.Email;
+                    emailMessage.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, item.UserId);
+                    _emailService.SendMail(emailMessage);
+                }
+            }
+        }
+
+        private string ReplaceBodyForEmailvariableConfiguration(string body, EmailConfigurationEditCheckSendEmail email, int? userId)
+        {
+
+            var str = body;
+            if (userId > 0)
+            {
+                var user = _context.Users.Where(s => s.Id == userId).FirstOrDefault();
+                if (user != null)
+                    str = Regex.Replace(str, "##UserName##", user.UserName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.StudyCode))
+            {
+                str = Regex.Replace(str, "##StudyCode##", email.StudyCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteCode))
+            {
+                str = Regex.Replace(str, "##SiteCode##", email.SiteCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteName))
+            {
+                str = Regex.Replace(str, "##SiteName##", email.SiteName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.VisitName))
+            {
+                str = Regex.Replace(str, "##VisitName##", email.VisitName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.TemplateName))
+            {
+                str = Regex.Replace(str, "##TemplateName##", email.TemplateName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.VariableName))
+            {
+                str = Regex.Replace(str, "##VariableName##", email.VariableName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ScreeningNo))
+            {
+                str = Regex.Replace(str, "##ScreeningNo##", email.ScreeningNo, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.RandomizationNo))
+            {
+                str = Regex.Replace(str, "##RandomizationNo##", email.RandomizationNo, RegexOptions.IgnoreCase);
             }
 
             return str;

@@ -480,6 +480,11 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementApprovalDetails> SupplyManagementApprovalDetails { get; set; }
 
         public DbSet<SupplyManagementShipmentApproval> SupplyManagementShipmentApproval { get; set; }
+
+        public DbSet<EmailConfigurationEditCheck> EmailConfigurationEditCheck { get; set; }
+        public DbSet<EmailConfigurationEditCheckDetail> EmailConfigurationEditCheckDetail { get; set; }
+        public DbSet<EmailConfigurationEditCheckRole> EmailConfigurationEditCheckRole { get; set; }
+
     }
 
 
