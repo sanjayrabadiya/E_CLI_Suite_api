@@ -481,6 +481,8 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementShipmentApproval> SupplyManagementShipmentApproval { get; set; }
         public DbSet<VendorManagement> VendorManagement { get; set; }
+        public DbSet<PlanMetrics> PlanMetrics { get; set; }
+        public DbSet<OverTimeMetrics> OverTimeMetrics { get; set; }
     }
 
 

@@ -373,9 +373,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPageConfigurationRepository, PageConfigurationRepository>();
             services.AddScoped<IPageConfigurationFieldsRepository, PageConfigurationFieldsRepository>();
             services.AddHttpClient<IProjectDataRemoveService, ProjectDataRemoveService>();
-         //   services.AddScoped<IKitManagementRepository, KitManagementRepository>();
+            //   services.AddScoped<IKitManagementRepository, KitManagementRepository>();
             services.AddScoped<ISendEmailOnVariableChangeSettingRepository, SendEmailOnVariableChangeSettingRepository>();
-           // services.AddScoped<IDisplayMessageandLableSettingRepository, DisplayMessageandLableSettingRepository>();
+            // services.AddScoped<IDisplayMessageandLableSettingRepository, DisplayMessageandLableSettingRepository>();
             services.AddScoped<IScheduleTerminateDetailRepository, ScheduleTerminateDetailRepository>();
             services.AddScoped<IScheduleTerminate, ScheduleTerminateRepository>();
             services.AddScoped<ITemplateVariableSequenceNoSettingRepository, TemplateVariableSequenceNoSettingRepository>();
@@ -401,7 +401,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
             services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
             services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();
-           // services.AddScoped<ICustomReportRepository, CustomReportRepository>();
+            // services.AddScoped<ICustomReportRepository, CustomReportRepository>();
             services.AddScoped<ICentrifugationRepository, CentrifugationRepository>();
             services.AddScoped<ICentrifugationDetailsRepository, CentrifugationDetailsRepository>();
             services.AddScoped<ISampleSeparationRepository, SampleSeparationRepository>();
@@ -410,6 +410,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IDossingBarcodeGenerateRepository, DossingBarcodeGenerateRepository>();
             services.AddScoped<ISupplyManagementApprovalRepository, SupplyManagementApprovalRepository>();
             services.AddScoped<IVendorManagementRepository, VendorManagementRepository>();
+            services.AddScoped<IMetricsRepository, MetricsRepository>();
+            services.AddScoped<IOverTimeMetricsRepository, OverTimeMetricsRepository>();
         }
     }
 }
