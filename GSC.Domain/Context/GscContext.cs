@@ -480,6 +480,7 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementApprovalDetails> SupplyManagementApprovalDetails { get; set; }
 
         public DbSet<SupplyManagementShipmentApproval> SupplyManagementShipmentApproval { get; set; }
+        public DbSet<VendorManagement> VendorManagement { get; set; }
     }
 
 

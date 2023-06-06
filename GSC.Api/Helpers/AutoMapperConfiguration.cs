@@ -503,6 +503,7 @@ namespace GSC.Api.Helpers
             CreateMap<DossingBarcodeGenerate, DossingBarcodeGenerateDto>().ReverseMap();
             CreateMap<SupplyManagementApproval, SupplyManagementApprovalDto>().ReverseMap();
             CreateMap<SupplyManagementShipmentApproval, SupplyManagementShipmentApprovalDto>().ReverseMap();
+            CreateMap<VendorManagement, VendorManagementDto>().ReverseMap();
         }
     }
 }

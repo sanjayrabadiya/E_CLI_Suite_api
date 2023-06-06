@@ -409,6 +409,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISampleBarcodeGenerateRepository, SampleBarcodeGenerateRepository>();
             services.AddScoped<IDossingBarcodeGenerateRepository, DossingBarcodeGenerateRepository>();
             services.AddScoped<ISupplyManagementApprovalRepository, SupplyManagementApprovalRepository>();
+            services.AddScoped<IVendorManagementRepository, VendorManagementRepository>();
         }
     }
 }

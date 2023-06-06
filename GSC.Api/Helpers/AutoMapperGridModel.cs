@@ -729,6 +729,7 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
              .ForMember(x => x.ApprovalTypeName, x => x.MapFrom(a => a.ApprovalType.GetDescription()))
              .ReverseMap();
+            CreateMap<VendorManagement, VendorManagementGridDto>().ReverseMap();
 
         }
     }
