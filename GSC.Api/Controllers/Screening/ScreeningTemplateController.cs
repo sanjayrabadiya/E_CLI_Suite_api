@@ -235,6 +235,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
+            _screeningTemplateRepository.SendEmailOnVaribleConfiguration(id);
 
             Ok();
         }

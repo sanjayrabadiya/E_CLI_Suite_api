@@ -124,5 +124,12 @@ namespace GSC.Api.Controllers.CTMS
             _uow.Save();
             return Ok();
         }
+        [HttpGet]
+        [Route("GetChildProjectWithParentProjectDropDown/{parentProjectId}")]
+        public IActionResult GetChildProjectWithParentProjectDropDown(int parentProjectId)
+        {
+            return Ok(_overTimeMetricsRepository.GetChildProjectWithParentProjectDropDown(parentProjectId));
+        }
+
     }
 }

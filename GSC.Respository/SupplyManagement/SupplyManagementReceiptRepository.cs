@@ -239,6 +239,13 @@ namespace GSC.Respository.SupplyManagement
         public string CheckValidationKitReciept(SupplyManagementReceiptDto supplyManagementshipmentDto)
         {
             string Message = string.Empty;
+            var shipment = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == supplyManagementshipmentDto.SupplyManagementShipmentId).FirstOrDefault();
+            if (shipment == null)
+            {
+                Message = "Shipment not found";
+                return Message;
+            }
+
             if (supplyManagementshipmentDto.Kits != null)
             {
 
@@ -257,6 +264,12 @@ namespace GSC.Respository.SupplyManagement
                             return Message;
                         }
                     }
+                    Message = CheckExpiryOnReceipt((int)shipment.SupplyManagementRequest.FromProject.ParentProjectId, item.Id);
+                    if (!string.IsNullOrEmpty(Message))
+                    {
+                        return Message;
+                    }
+
                 }
             }
             return Message;
@@ -282,7 +295,7 @@ namespace GSC.Respository.SupplyManagement
 
                         }
                     }
-                   
+
                 }
 
                 if (supplyManagementshipmentDto.Kits != null)
@@ -342,7 +355,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
-            
+
         }
 
         public string CheckExpiryOnReceipt(int projectId, int id)
@@ -363,9 +376,9 @@ namespace GSC.Respository.SupplyManagement
                         var currentdate = DateTime.Now.Date;
                         var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
                         var date = expiry.AddDays(-(int)kit.SupplyManagementKIT.Days);
-                        if (currentdate.Date < date.Date)
+                        if (currentdate.Date > date.Date)
                         {
-                            return "Product is expired";
+                            return "Product is expired for this kit " + kit.KitNo;
                         }
 
                     }
@@ -379,7 +392,7 @@ namespace GSC.Respository.SupplyManagement
                         var currentdate = DateTime.Now.Date;
                         if (Convert.ToDateTime(kit.KitExpiryDate).Date < currentdate.Date)
                         {
-                            return "Product is expired";
+                            return "Product is expired for this kit " + kit.KitNo;
                         }
                     }
                 }

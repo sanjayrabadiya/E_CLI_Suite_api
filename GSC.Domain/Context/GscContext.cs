@@ -483,6 +483,10 @@ namespace GSC.Domain.Context
         public DbSet<VendorManagement> VendorManagement { get; set; }
         public DbSet<PlanMetrics> PlanMetrics { get; set; }
         public DbSet<OverTimeMetrics> OverTimeMetrics { get; set; }
+
+        public DbSet<EmailConfigurationEditCheck> EmailConfigurationEditCheck { get; set; }
+        public DbSet<EmailConfigurationEditCheckDetail> EmailConfigurationEditCheckDetail { get; set; }
+        public DbSet<EmailConfigurationEditCheckRole> EmailConfigurationEditCheckRole { get; set; }
     }
 
 

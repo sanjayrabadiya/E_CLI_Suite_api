@@ -245,7 +245,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 && x.ProductReceipt.PharmacyStudyProductTypeId == pharmacyStudyProductTypeId
                 && x.ProductReceipt.ProjectId == projectId)
                 .GroupBy(s=>s.BatchLotNumber)
-                .Select(x => new { Id = x.FirstOrDefault().ProductReceiptId, Value = x.FirstOrDefault().BatchLotNumber })
+                .Select(x => new { Id = x.FirstOrDefault().ProductReceiptId, Value = x.FirstOrDefault().BatchLotNumber,Code = x.FirstOrDefault().BatchLotNumber })
                 .Distinct()
                 .ToList();
             return Ok(data);

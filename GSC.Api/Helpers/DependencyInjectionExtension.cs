@@ -412,6 +412,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVendorManagementRepository, VendorManagementRepository>();
             services.AddScoped<IMetricsRepository, MetricsRepository>();
             services.AddScoped<IOverTimeMetricsRepository, OverTimeMetricsRepository>();
+            services.AddScoped<IEmailConfigurationEditCheckRepository, EmailConfigurationEditCheckRepository>();
+            services.AddScoped<IEmailConfigurationEditCheckDetailRepository, EmailConfigurationEditCheckDetailRepository>();
+            services.AddScoped<IEmailConfigurationEditCheckRoleRepository, EmailConfigurationEditCheckRoleRepository>();
         }
     }
 }

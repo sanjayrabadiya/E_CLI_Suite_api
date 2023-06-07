@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using System.Collections.Generic;
 namespace GSC.Respository.CTMS
@@ -12,5 +13,6 @@ namespace GSC.Respository.CTMS
         string UpdatePlanning(OverTimeMetrics objSave);
 
         string UpdateActualNo(OverTimeMetrics objSave);
+        List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId);
     }
 }
