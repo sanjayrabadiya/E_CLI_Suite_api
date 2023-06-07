@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
@@ -163,6 +164,40 @@ namespace GSC.Respository.CTMS
                 overTimeMetricsDto.Actual = ProjectSettings.Count();
             }
             return "";
+        }
+        public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_002" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == parentProjectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var CtmsMonitoring = _context.CtmsMonitoringReport
+               .Include(i => i.CtmsMonitoring).Where(x => StudyLevelForm.Select(v => v.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null && x.ReportStatus == MonitoringReportStatus.Approved).ToList();
+
+            return _context.Project.Where(x => CtmsMonitoring.Select(v => v.CtmsMonitoring.ProjectId).Contains(x.Id) &&
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                    CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsTestSite = c.IsTestSite,
+                    ParentProjectId = c.ParentProjectId ?? 0,
+                    AttendanceLimit = c.AttendanceLimit ?? 0, 
+                }).OrderBy(o => o.Value).ToList();
         }
     }
 }
