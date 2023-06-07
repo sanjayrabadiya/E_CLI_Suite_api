@@ -8,5 +8,6 @@ namespace GSC.Data.Dto.Project.Design
     public class ProjectDesignVisitMobileDto : BaseDto
     {
         public string DisplayName { get; set; }
+        public int ScreeningEntryId { get; set; }
     }
 }
