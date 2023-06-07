@@ -933,19 +933,14 @@ namespace GSC.Respository.EmailSender
             return str;
         }
 
-        public void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, IList<EmailList> toMails, IList<string> tophone)
+        public void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone)
         {
             var emailMessage = ConfigureEmailForVariable();
             emailMessage.Subject = email.Subject;
-            if (toMails != null && toMails.Count > 0)
-            {
-                foreach (var item in toMails)
-                {
-                    emailMessage.SendTo = item.Email;
-                    emailMessage.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, item.UserId);
-                    _emailService.SendMail(emailMessage);
-                }
-            }
+            emailMessage.SendTo = toMails;
+            emailMessage.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, userId);
+            _emailService.SendMail(emailMessage);
+
         }
 
         private string ReplaceBodyForEmailvariableConfiguration(string body, EmailConfigurationEditCheckSendEmail email, int? userId)

@@ -51,7 +51,7 @@ namespace GSC.Respository.EmailSender
 
         void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration);
 
-        void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, IList<EmailList> toMails, IList<string> tophone);
+        void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone);
 
     }
 }

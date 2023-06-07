@@ -1111,7 +1111,7 @@ namespace GSC.Respository.Reports
                                         recieptobj.KitNo = s.KitNo;
                                         if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
                                         {
-                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                            recieptobj.KitStatus = "Returned";
                                         }
                                         else
                                         {
@@ -1198,7 +1198,7 @@ namespace GSC.Respository.Reports
                                         recieptobj.KitNo = s.KitNo;
                                         if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
                                         {
-                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                            recieptobj.KitStatus = "Returned"; 
                                         }
                                         else
                                         {
@@ -1460,7 +1460,7 @@ namespace GSC.Respository.Reports
                                         recieptobj.KitNo = s.KitNo;
                                         if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
                                         {
-                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                            recieptobj.KitStatus = "Returned"; 
                                         }
                                         else
                                         {
@@ -1543,7 +1543,7 @@ namespace GSC.Respository.Reports
                                         recieptobj.KitNo = s.KitNo;
                                         if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
                                         {
-                                            recieptobj.KitStatus = s.Status.GetDescription();
+                                            recieptobj.KitStatus = "Returned";
                                         }
                                         else
                                         {

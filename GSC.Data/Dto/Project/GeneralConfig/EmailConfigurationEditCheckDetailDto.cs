@@ -104,5 +104,7 @@ namespace GSC.Data.Entities.Project.Generalconfig
 
         public int? UserId { get; set; }
 
+        public string Phone { get; set; }
+
     }
 }

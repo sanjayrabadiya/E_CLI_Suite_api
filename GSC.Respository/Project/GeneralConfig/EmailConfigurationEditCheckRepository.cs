@@ -380,8 +380,9 @@ namespace GSC.Respository.Project.GeneralConfig
                                 EmailList obj = new EmailList();
                                 obj.Email = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Email;
                                 obj.UserId = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId;
+                                obj.Phone = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Phone;
                                 emails.Add(obj);
-                                mobile.Add(screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Phone);
+
                             }
                         }
                     }
@@ -399,8 +400,9 @@ namespace GSC.Respository.Project.GeneralConfig
                                 EmailList obj = new EmailList();
                                 obj.Email = item.Email;
                                 obj.UserId = item.Id;
+                                obj.Phone = item.Phone;
                                 emails.Add(obj);
-                                mobile.Add(item.Phone);
+
                             }
                         }
                     }
@@ -435,7 +437,14 @@ namespace GSC.Respository.Project.GeneralConfig
                         {
                             emaildata.VariableName = data.FirstOrDefault().ProjectDesignVariable.VariableName;
                         }
-                        _emailSenderRespository.SendEmailonEmailvariableConfiguration(emaildata, emails, mobile);
+                        if (emails.Count > 0)
+                        {
+                            foreach (var item in emails)
+                            {
+                                _emailSenderRespository.SendEmailonEmailvariableConfiguration(emaildata, (int)item.UserId, item.Email, item.Phone);
+                            }
+                        }
+
                     }
                 }
             }
