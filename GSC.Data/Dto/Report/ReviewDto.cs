@@ -1,4 +1,6 @@
 ﻿using System;
+using GSC.Data.Dto.Attendance;
+using System.Collections.Generic;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
@@ -36,8 +38,20 @@ namespace GSC.Data.Dto.Report
         public string SiteCode { get; set; }
         public string AttendanceDate { get; set; }
         public string ScreeningDate { get; set; }
+        public string ReviewBy { get; set; }
+        public DateTime? ReviewedOn { get; set; }
+        // added for dynamic column 04/06/2023
+        public List<WorkFlowReview> WorkFlowReviewList { get; set; }
     }
-
+    // added for dynamic column 04/06/2023
+    public class WorkFlowReview
+    {
+        public int LevelNo { get; set; }
+        public string ReviewerRole { get; set; }
+        public string ReviewerName { get; set; }
+        public DateTime? ReviewedDate { get; set; }
+    }
+    //
     public class ReviewSearchDto : BaseDto
     {
         public int ProjectId { get; set; }

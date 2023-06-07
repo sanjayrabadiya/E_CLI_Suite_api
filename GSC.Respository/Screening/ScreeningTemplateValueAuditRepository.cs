@@ -527,7 +527,8 @@ namespace GSC.Respository.Screening
             createdBy.Bounds = footer.Bounds;
             createdBy.Draw(footer.Graphics, new PointF(1, footer.Height - 10));
 
-            PdfCompositeField createdDate = new PdfCompositeField(font, brush, "Created On : " + DateTime.Now.ToString());
+            //change on 5/6/2023 report footer date set client date
+            PdfCompositeField createdDate = new PdfCompositeField(font, brush, "Created On : " + _jwtTokenAccesser.GetClientDate());
             createdDate.Bounds = footer.Bounds;
             createdDate.Draw(footer.Graphics, new PointF((footer.Width / 2) - 20, footer.Height - 10));
 

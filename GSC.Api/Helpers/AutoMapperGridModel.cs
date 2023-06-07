@@ -729,6 +729,14 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
              .ForMember(x => x.ApprovalTypeName, x => x.MapFrom(a => a.ApprovalType.GetDescription()))
              .ReverseMap();
+            CreateMap<VendorManagement, VendorManagementGridDto>().ReverseMap();
+
+            CreateMap<PlanMetrics, PlanMetricsGridDto>()
+                   .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                   .ForMember(x => x.MetricsType, x => x.MapFrom(a => a.MetricsType.GetDescription())).ReverseMap();
+            CreateMap<OverTimeMetrics, OverTimeMetricsGridDto>()
+                    .ForMember(x => x.SiteName, x => x.MapFrom(a => a.Project.ProjectCode))
+                    .ForMember(x => x.PlanningType, x => x.MapFrom(a => a.PlanningType.GetDescription())).ReverseMap();
 
             CreateMap<EmailConfigurationEditCheck, EmailConfigurationEditCheckGridDto>()
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))

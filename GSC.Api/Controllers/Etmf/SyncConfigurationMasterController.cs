@@ -182,6 +182,8 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(audit);
         }
 
+
+
         [HttpPost]       
         [Route("GetSyncConfigrationPath")]
         public IActionResult GetSyncConfigrationPath([FromBody] SyncConfigurationParameterDto details)
@@ -200,6 +202,14 @@ namespace GSC.Api.Controllers.Etmf
                 return BadRequest(ModelState);
             }
             return  Ok(new { PathDetail = path });
+        }
+
+        [HttpGet]
+        [Route("GetSyncReport")]
+        public IActionResult GetSyncReport()
+        {
+            var resportScreen = _syncConfigurationMasterRepository.GetReportScreen();
+            return Ok(resportScreen);
         }
     }
 }

@@ -532,23 +532,10 @@ namespace GSC.Respository.Screening
                   DesignOrder = a.ProjectDesignVisit.DesignOrder,
                   StudyVersion = a.ProjectDesignVisit.StudyVersion,
                   IsScheduleTerminate = a.IsScheduleTerminate,
-                  ScreeningEntryId = a.ScreeningEntryId
-              }).ToList();
-
-            //var projectDesignVisit = _projectDesignVisitRepository.All.
-            //    Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.ProjectId == parentProjectId && x.IsSchedule != true).
-            //    OrderBy(a => a.DesignOrder).
-            //Select(t => new DataEntryVisitTemplateDto
-            //{
-            //    ProjectDesignVisitId = t.Id,
-            //    VisitName = t.DisplayName,
-            //    VisitStatus = ScreeningVisitStatus.NotStarted.GetDescription(),
-            //    VisitStatusId = (int)ScreeningVisitStatus.NotStarted,
-            //    StudyVersion = t.StudyVersion,
-            //    InActiveVersion = t.InActiveVersion
-            //}).ToList();
-
-            //visits = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= studyVersion) && (t.InActiveVersion == null || t.InActiveVersion > studyVersion)).ToList();
+                  ScreeningEntryId = a.ScreeningEntryId,
+                  // added for visit order in data capture annd review create 04/06/2023
+                  VisitSeqNo = a.RepeatedVisitNumber
+              }).OrderBy(o => o.DesignOrder).ThenBy(t => t.VisitSeqNo).ToList();
 
             visits = visits.Where(a => a.ScreeningEntryId == ScreeningEntryId &&
                  (!a.IsSchedule || a.IsScheduleTerminate == true || a.VisitStatusId > (int)ScreeningVisitStatus.NotStarted)).ToList();

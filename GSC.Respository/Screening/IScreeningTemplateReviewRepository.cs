@@ -14,5 +14,8 @@ namespace GSC.Respository.Screening
         IList<ReviewDto> GetReviewLevel(int projectId);
         void RollbackReview(RollbackReviewTemplateDto rollbackReviewTemplateDto);
         void Save(int screeningTemplateId, ScreeningTemplateStatus status, short reviewLevel);
+
+        // added for dynamic column 04/06/2023
+         List<ReviewDto> SetReviewHistory(List<ReviewDto> filters);
     }
 }

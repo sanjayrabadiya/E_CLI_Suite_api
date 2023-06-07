@@ -873,25 +873,23 @@ namespace GSC.Respository.Master
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
             //Changes made by Mitul
-            var list = _context.CtmsMonitoringReport
-           .Include(z => z.CtmsMonitoring)
-           .ThenInclude(i => i.Project)
+            var list = _context.CtmsMonitoring
+            .Include(i => i.Project)
             .ThenInclude(i => i.ManageSite)
-           .Where(z => projectIds.Contains(z.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.CtmsMonitoring.StudyLevelFormId)
-            && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true)
+            .Where(z => projectIds.Contains(z.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.StudyLevelFormId)
+            && (siteId == 0 ? (!z.Project.IsTestSite) : true)
             && z.DeletedDate == null)
             .Select
             (b => new CtmsMonitoringPlanDashoardDto
             {
                 Id = b.Id,
-                Activity = b.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName,
-                ScheduleStartDate = b.CtmsMonitoring.ScheduleStartDate,
-                SchedulEndtDate = b.CtmsMonitoring.ScheduleEndDate,
-                ActualStartDate = b.CtmsMonitoring.ActualStartDate,
-                ActualEndDate = b.CtmsMonitoring.ActualEndDate,
-                Site = b.CtmsMonitoring.Project.ProjectCode == null ? b.CtmsMonitoring.Project.ManageSite.SiteName : b.CtmsMonitoring.Project.ProjectCode,
-                Country = b.CtmsMonitoring.Project.ManageSite.City.State.Country.CountryName,
-                Status = b.ReportStatus.GetDescription(),
+                Activity = b.StudyLevelForm.Activity.CtmsActivity.ActivityName,
+                ScheduleStartDate = b.ScheduleStartDate,
+                SchedulEndtDate = b.ScheduleEndDate,
+                ActualStartDate = b.ActualStartDate,
+                ActualEndDate = b.ActualEndDate,
+                Site = b.Project.ProjectCode == null ? b.Project.ManageSite.SiteName : b.Project.ProjectCode,
+                Country = b.Project.ManageSite.City.State.Country.CountryName,
                 sendForReviewDate = b.CreatedDate
             }).ToList();
             int Total = 0, Count = 0;
@@ -899,10 +897,13 @@ namespace GSC.Respository.Master
             {
                 foreach (var item in list)
                 {
+                    var monitoringReport = _context.CtmsMonitoringReport.Where(x => x.CtmsMonitoringId == item.Id).FirstOrDefault();
+                    if (monitoringReport != null)
+                        item.Status = monitoringReport.ReportStatus.ToString();
                     //item.Status = GetMonitoringStatus(item);
                     item.visitStatus = GetVisitgStatus(item);
-
-                    if (item.Status == "UnderReview") {
+                    if (item.Status == "UnderReview")
+                    {
                         TimeSpan v = (TimeSpan)(today - item.sendForReviewDate);
                         Total = Total + v.Days;
                         Count++;
@@ -1013,23 +1014,23 @@ namespace GSC.Respository.Master
 
             return asd;
         }
-        public string GetMonitoringStatus(CtmsMonitoringPlanDashoardDto obj)
-        {
-            var data = _context.CtmsMonitoringReportReview.Include(x => x.CtmsMonitoringReport).Where(x => x.CtmsMonitoringReport.CtmsMonitoringId == obj.Id).FirstOrDefault();
-            if (obj.ScheduleStartDate != null && data == null)
-            {
-                return "In Progress";
-            }
-            if (obj.ScheduleStartDate != null && data != null && !data.IsApproved)
-            {
-                return "In signature/pending review";
-            }
-            if (obj.ScheduleStartDate != null && data != null && data.IsApproved)
-            {
-                return "Final";
-            }
-            return "";
-        }
+        //public string GetMonitoringStatus(CtmsMonitoringPlanDashoardDto obj)
+        //{
+        //    var data = _context.CtmsMonitoringReportReview.Include(x => x.CtmsMonitoringReport).Where(x => x.CtmsMonitoringReport.CtmsMonitoringId == obj.Id).FirstOrDefault();
+        //    if (obj.ScheduleStartDate != null && data == null)
+        //    {
+        //        return "In Progress";
+        //    }
+        //    if (obj.ScheduleStartDate != null && data != null && !data.IsApproved)
+        //    {
+        //        return "In signature/pending review";
+        //    }
+        //    if (obj.ScheduleStartDate != null && data != null && data.IsApproved)
+        //    {
+        //        return "Final";
+        //    }
+        //    return "";
+        //}
 
         public string GetVisitgStatus(CtmsMonitoringPlanDashoardDto obj)
         {

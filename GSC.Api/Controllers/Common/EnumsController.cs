@@ -1067,6 +1067,44 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+        [HttpGet]
+        [Route("GetmMetricsType")]
+        public IActionResult GetmMetricsType()
+        {
+            var metricsType = Enum.GetValues(typeof(MetricsType))
+                .Cast<MetricsType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(metricsType);
+        }
+        [HttpGet]
+        [Route("GetPlannedType")]
+        public IActionResult GetPlannedType()
+        {
+            var plannedType = Enum.GetValues(typeof(PlanningType))
+                .Cast<PlanningType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(plannedType);
+        }
+        // Changes made by Sachin added Vendor Management on 2/6/2023
+        [HttpGet]
+        [Route("GetVendorManagementAudit")]
+        public IActionResult GetVendorManagementAudit()
+        {
+            var audit = Enum.GetValues(typeof(VendorManagementAudit))
+                .Cast<VendorManagementAudit>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+
+            return Ok(audit);
+        }
 
     }
 }

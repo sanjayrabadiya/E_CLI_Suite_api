@@ -265,7 +265,8 @@ namespace GSC.Respository.Project.Design
         //Added method By Vipul for Get Variable By Multiple Template DropDown
         public IList<DropDownDto> GetVariableByMultipleTemplateDropDown(int?[] templateIds)
         {
-            var result = All.Where(x => x.DeletedDate == null && templateIds.Contains(x.ProjectDesignTemplateId));
+            // change  on 5/6/2023 version impact
+            var result = All.Where(x => x.DeletedDate == null && templateIds.Contains(x.ProjectDesignTemplateId) && x.InActiveVersion == null);
             return result.OrderBy(o => o.DesignOrder).Select(c => new DropDownDto
             {
                 Id = c.Id,

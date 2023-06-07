@@ -2,11 +2,15 @@
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.Master;
+using GSC.Data.Dto.UserMgt;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -163,31 +167,33 @@ namespace GSC.Respository.Etmf
             string Version = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == details.ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             var syncConfigDetails = _context.SyncConfigurationMasterDetails.Where(x => x.SyncConfigurationMaster.ReportScreenId == ReportScreenId && x.SyncConfigurationMaster.Version == Version && x.WorkPlaceFolder == workplaceFolder && x.DeletedDate == null && x.SyncConfigurationMaster.DeletedDate == null).FirstOrDefault();
 
+
             var projectDetails = _context.EtmfProjectWorkPlace.Where(x =>
-         x.ProjectWorkPlace.ProjectId == details.ProjectId
-         && x.EtmfArtificateMasterLbraryId == syncConfigDetails.ArtificateMasterLbraryId && x.WorkPlaceFolderId == Convert.ToInt32(syncConfigDetails.WorkPlaceFolder)
-         && x.EtmfMasterLibraryId == syncConfigDetails.SectionMasterLibraryId
-         && x.EtmfMasterLibraryId == syncConfigDetails.ZoneMasterLibraryId
-         && x.ProjectWorkPlace.DeletedDate == null
-         // && syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Site ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.SiteId :(syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == details.CountryId : x.ProjectWorkplaceSection.ProjectWorkPlaceZone.ProjectWorkplaceDetail.ItemId == 0))
-         && (workplaceFolder == WorkPlaceFolder.Site ? x.ItemId == details.SiteId : (syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? x.ItemId == details.CountryId : x.ItemId == 0)))
-           .Select(x => new SyncConfigrationPathDetails
-           {
-               ProjectWorkplaceArtificateId = x.Id,
-               ProjectCode = x.ProjectWorkPlace.Project.ProjectCode,
-               WorkPlaceFolder = ((WorkPlaceFolder)x.WorkPlaceFolderId).GetDescription(),
-               ItemName = x.ItemName,
-               ZonName = x.EtmfMasterLibrary.ZonName,
-               SectionName = x.EtmfMasterLibrary.SectionName,
-               ArtificateName = x.EtmfArtificateMasterLbrary.ArtificateName,
-           }).FirstOrDefault();
+           x.ProjectId == details.ProjectId
+           && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate
+           && x.EtmfArtificateMasterLbraryId == syncConfigDetails.ArtificateMasterLbraryId
+           && x.ProjectWorkPlace.DeletedDate == null).Where(q => q.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId == (int)syncConfigDetails.WorkPlaceFolder
+              && q.ProjectWorkPlace.EtmfMasterLibraryId == syncConfigDetails.SectionMasterLibraryId
+              && q.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibraryId == syncConfigDetails.ZoneMasterLibraryId
+              && (workplaceFolder == WorkPlaceFolder.Site ? q.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemId == details.SiteId : (syncConfigDetails.WorkPlaceFolder == WorkPlaceFolder.Country ? q.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemId == details.CountryId : q.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemId == 0)))
+             .Select(x => new SyncConfigrationPathDetails
+             {
+                 ProjectWorkplaceArtificateId = x.Id,
+                 ProjectCode = x.ProjectWorkPlace.Project.ProjectCode,
+                 WorkPlaceFolder = ((WorkPlaceFolder)x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.WorkPlaceFolderId).GetDescription(),
+                 ItemName = x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ItemName,
+                 ZonName = x.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName,
+                 SectionName = x.ProjectWorkPlace.EtmfMasterLibrary.SectionName,
+                 ArtificateName = x.EtmfArtificateMasterLbrary.ArtificateName,
+             }).FirstOrDefault();
             if (projectDetails == null)
             {
                 ProjectWorkplaceArtificateId = 0;
                 return "";
             }
+            var strProjectName = projectDetails.ProjectCode.Replace("/", "");
             ProjectWorkplaceArtificateId = projectDetails.ProjectWorkplaceArtificateId;
-            string[] paths = { projectDetails.ProjectCode, FolderType.Etmf.GetDescription(), projectDetails.WorkPlaceFolder, projectDetails.ItemName != null ? projectDetails.ItemName : "", projectDetails.ZonName, projectDetails.SectionName, projectDetails.ArtificateName };
+            string[] paths = { strProjectName, FolderType.Etmf.GetDescription(), projectDetails.WorkPlaceFolder, projectDetails.ItemName != null ? projectDetails.ItemName : "", projectDetails.ZonName, projectDetails.SectionName, projectDetails.ArtificateName };
             var fullPath = Path.Combine(paths);
             return fullPath;
         }
@@ -207,6 +213,28 @@ namespace GSC.Respository.Etmf
             _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
             return DocumentPath;
+        }
+
+        public List<DropDownDto> GetReportScreen()
+        {
+            var reportList = _context.SyncConfigurationMaster.Where(q => q.DeletedDate == null)
+                .Include(x => x.ReportScreen).Select(s => new DropDownDto()
+                {
+                    Id=s.ReportScreen.Id,
+                    Code = s.ReportScreen.ReportCode,
+                    Value = s.ReportScreen.ReportName,
+                }).Distinct().ToList();
+
+            DropDownDto reportScreenDto = new DropDownDto()
+            {
+                Id=0,
+                Code = "crf",
+                Value = "CRF"
+            };
+
+            reportList.Insert(0, reportScreenDto);
+
+            return reportList;
         }
     }
 }

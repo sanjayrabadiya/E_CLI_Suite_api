@@ -487,6 +487,7 @@ namespace GSC.Api.Controllers.Master
         [Route("UpdateProjectCodeFromCtms/{ProjectId}/{ProjectCode}")]
         public IActionResult UpdateProjectCodeFromCtms(int ProjectId, string ProjectCode)
         {
+            ProjectCode = ProjectCode.Replace("%2F", "/"); //GS1-I2746 : Add by mitul on 05/06/2023
             if (ProjectId <= 0) return BadRequest();
 
             var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();

@@ -2,9 +2,12 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using DocumentFormat.OpenXml.Wordprocessing;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
@@ -12,6 +15,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
+using GSC.Data.Entities.AdverseEvent;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -61,7 +65,7 @@ namespace GSC.Respository.Screening
             IAppSettingRepository appSettingRepository,
              ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IEmailSenderRespository emailSenderRespository,
-            IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository)
+            IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository) 
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -707,7 +711,8 @@ namespace GSC.Respository.Screening
             return screeningTemplate;
         }
 
-        public IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
+        // changes for dynamic column 04/06/2023
+        public List<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
             int parentprojectid = filters.ProjectId;
             int? siteId = filters.SiteId;
@@ -720,8 +725,13 @@ namespace GSC.Respository.Screening
             {
                 parentIds.Add((int)filters.SiteId);
             }
+            // added for dynamic column 04/06/2023
+            var ID = _context.ProjectDesign.Where(x => x.ProjectId == parentprojectid).FirstOrDefault().Id;
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(ID);
 
+            var result1 = new List<ReviewDto>();
             var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
+            //
             if (filters.ReviewStatus != null)
             {
                 result = result.Where(y => y.Status != ScreeningTemplateStatus.Pending && y.Status != ScreeningTemplateStatus.InProcess);
@@ -754,10 +764,31 @@ namespace GSC.Respository.Screening
                 SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
                 ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignId
-                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault()
-
+                && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault(),
+                // added for dynamic column 04/06/2023
+                WorkFlowReviewList = GetList(r, workflowlevel.WorkFlowText)
             }).ToList();
         }
+        // added for dynamic column 04/06/2023
+        public static List<WorkFlowReview> GetList(ScreeningTemplate r, List<WorkFlowText> WorkFlowText)
+        {
+            var result = new List<WorkFlowReview>();
+
+            foreach (var item in WorkFlowText)
+            {
+                var rs = new WorkFlowReview();
+                rs.ReviewerRole = item.RoleName;
+                rs.LevelNo = item.LevelNo;
+                if (r.ScreeningTemplateReview != null)
+                {
+                    rs.ReviewerName = r.ScreeningTemplateReview.Where(s => s.ScreeningTemplateId == r.Id && s.IsRepeat == false && s.ReviewLevel == item.LevelNo).Select(x => x.CreatedByUser.UserName).FirstOrDefault();
+                    rs.ReviewedDate = r.ScreeningTemplateReview.Where(s => s.ScreeningTemplateId == r.Id && s.IsRepeat == false && s.ReviewLevel == item.LevelNo).Select(x => x.CreatedDate).FirstOrDefault();
+                }
+                result.Add(rs);
+            }
+            return result;
+        }
+        //
 
         public IList<ReviewDto> GetScreeningReviewReportList(ScreeningQuerySearchDto filters)
         {
@@ -1656,6 +1687,7 @@ namespace GSC.Respository.Screening
 
             return designTemplateDto;
         }
+
 
         public void SendEmailOnVaribleConfiguration(int id)
         {

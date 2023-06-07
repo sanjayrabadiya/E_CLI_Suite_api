@@ -1096,4 +1096,24 @@ namespace GSC.Helper
         [Description("Rejected")] Rejected = 2
     }
 
+    // Changes made by Sachin added Vendor Management on 2/6/2023
+    public enum VendorManagementAudit : short
+    {
+        [Description("Yes")] Yes = 1,
+        [Description("No")] No = 2,
+        [Description("N/A")] NA = 3
+    }
+    public enum MetricsType : short
+    {
+        [Description("Enrolled")] Enrolled = 1,
+        [Description("Screened")] Screened = 2,
+        [Description("Randomized")] Randomized = 3
+    }
+    public enum PlanningType : short
+    {
+        [Description("Day")] Day = 1,
+        [Description("Week")] Week = 2,
+        [Description("Month")] Month = 3,
+        [Description("Year")] Year = 4
+    }
 }

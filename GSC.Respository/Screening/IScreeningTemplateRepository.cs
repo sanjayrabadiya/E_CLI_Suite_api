@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Master;
@@ -22,7 +23,9 @@ namespace GSC.Respository.Screening
 
         DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto,
             int screeningTemplateId);
-        IList<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
+
+        // changes for dynamic column 04/06/2023
+        List<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
         List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams);
         
         ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource);
