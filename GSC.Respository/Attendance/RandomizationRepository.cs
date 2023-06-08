@@ -1439,35 +1439,15 @@ namespace GSC.Respository.Attendance
         {
             var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
             if (randomization == null) return new List<ProjectDesignVisitMobileDto>();
-            //string sqlquery = @"select d.Id,d.DisplayName
-            //                    from
-            //                    Randomization a,
-            //                    screeningentry b,
-            //                    ScreeningVisit c,
-            //                    ProjectDesignVisit d
-            //                    where
-            //                    a.Id = " + randomization.Id + @" and
-            //                    a.Id = b.RandomizationId and
-            //                    b.Id = c.ScreeningEntryId and
-            //                    c.ProjectDesignVisitId = d.Id";
-
-            //var data = (from screeningentry in _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id)
-            //            join ScreeningVisit in _context.ScreeningVisit.Where(x => x.DeletedDate == null) on screeningentry.Id equals ScreeningVisit.ScreeningEntryId
-            //            join ProjectDesignVisit in _context.ProjectDesignVisit.Where(x => x.DeletedDate == null) on ScreeningVisit.ProjectDesignVisitId equals ProjectDesignVisit.Id
-
-            //            select new ProjectDesignVisitMobileDto
-            //            {
-            //                Id = ScreeningVisit.Id,
-            //                DisplayName = ProjectDesignVisit.DisplayName,
-            //            }).ToList();
-
+            
             var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
                         Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && (int)x.Status >= 4 && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && x.ScreeningTemplates.Any(x => x.ProjectDesignTemplate.IsParticipantView == true)).
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
                             DisplayName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
-                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName) //r.ProjectDesignVisit.DisplayName,
+                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName), //r.ProjectDesignVisit.DisplayName,
+                            ScreeningEntryId=r.ScreeningEntryId
                         }).ToList();
 
             return data;
