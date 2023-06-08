@@ -226,6 +226,7 @@ namespace GSC.Respository.Project.Design
             {
 
                 var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null
+                && t.InActiveVersion == null 
                  && (t.CollectionSource == CollectionSources.Date || t.CollectionSource == CollectionSources.DateTime
                  || t.CollectionSource == CollectionSources.MultilineTextBox || t.CollectionSource == CollectionSources.RadioButton))
                     .Select(x => new DesignScreeningVariableDto
@@ -271,7 +272,7 @@ namespace GSC.Respository.Project.Design
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
-                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null && x.InActiveVersion == null).Select(c => new ScreeningVariableValueDto
                      {
                          Id = c.Id,
                          ProjectDesignVariableId = c.ProjectDesignVariableId,
