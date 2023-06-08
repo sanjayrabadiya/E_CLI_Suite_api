@@ -104,5 +104,12 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             return Ok();
         }
+
+        [HttpGet("GetEmailConfigurationEditCheckSendMailHistory/{id}")]
+        public IActionResult GetEmailConfigurationEditCheckSendMailHistory(int id)
+        {
+            var productVerification = _emailConfigurationEditCheckRepository.GetEmailConfigurationEditCheckSendMailHistory(id);
+            return Ok(productVerification);
+        }
     }
 }

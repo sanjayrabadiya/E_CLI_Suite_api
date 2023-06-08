@@ -97,12 +97,16 @@ namespace GSC.Data.Entities.Project.Generalconfig
 
         public string Subject { get; set; }
         public string EmailBody { get; set; }
+
+        public int EmailConfigurationEditCheckId { get; set; }
     }
     public class EmailList
     {
         public string Email { get; set; }
 
         public int? UserId { get; set; }
+
+        public int RoleId { get; set; }
 
         public string Phone { get; set; }
 

@@ -133,7 +133,8 @@ namespace GSC.Api.Controllers.Screening
             var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
             //for variable email .prakash chauhan 14-05-2022
             if (screeningTemplateValueDto.CollectionSource == CollectionSources.RadioButton)
-                _screeningTemplateRepository.SendVariableEmail(screeningTemplateValueDto, null);
+                _screeningTemplateRepository.SendEmailOnVaribleConfiguration(screeningTemplateValue.ScreeningTemplateId);
+           
 
             return Ok(result);
         }

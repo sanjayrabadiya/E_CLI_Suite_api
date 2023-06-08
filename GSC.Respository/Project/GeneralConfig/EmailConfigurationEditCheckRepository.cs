@@ -381,6 +381,11 @@ namespace GSC.Respository.Project.GeneralConfig
                                 obj.Email = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Email;
                                 obj.UserId = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId;
                                 obj.Phone = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Phone;
+
+                                var patientRole = _context.UserRole.Where(s => s.UserId == screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId).FirstOrDefault();
+                                if (patientRole != null)
+                                    obj.RoleId = patientRole.UserRoleId;
+
                                 emails.Add(obj);
 
                             }
@@ -391,16 +396,17 @@ namespace GSC.Respository.Project.GeneralConfig
 
                     if (roles.Count > 0)
                     {
-                        var roleusers = _context.ProjectRight.Where(s => s.DeletedDate == null && roles.Contains(s.RoleId) && s.ProjectId == screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ProjectId).Select(s => s.User).ToList();
+                        var roleusers = _context.ProjectRight.Include(s => s.User).Where(s => s.DeletedDate == null && roles.Contains(s.RoleId) && s.ProjectId == screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ProjectId).ToList();
                         if (roleusers.Count > 0)
                         {
                             foreach (var item in roleusers)
                             {
 
                                 EmailList obj = new EmailList();
-                                obj.Email = item.Email;
-                                obj.UserId = item.Id;
-                                obj.Phone = item.Phone;
+                                obj.Email = item.User.Email;
+                                obj.UserId = item.User.Id;
+                                obj.Phone = item.User.Phone;
+                                obj.RoleId = item.RoleId;
                                 emails.Add(obj);
 
                             }
@@ -410,6 +416,7 @@ namespace GSC.Respository.Project.GeneralConfig
                     {
                         emaildata.Subject = emailconfig.Subject;
                         emaildata.EmailBody = emailconfig.EmailBody;
+                        emaildata.EmailConfigurationEditCheckId = emailconfig.Id;
                         var screeningdata = _context.ScreeningEntry.Include(x => x.Randomization).ThenInclude(x => x.Project).ThenInclude(x => x.ManageSite).Include(x => x.Project).Where(x => x.Id == screeningTemplate.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
                         if (screeningdata != null)
                         {
@@ -442,6 +449,12 @@ namespace GSC.Respository.Project.GeneralConfig
                             foreach (var item in emails)
                             {
                                 _emailSenderRespository.SendEmailonEmailvariableConfiguration(emaildata, (int)item.UserId, item.Email, item.Phone);
+                                EmailConfigurationEditCheckSendMailHistory obj = new EmailConfigurationEditCheckSendMailHistory();
+                                obj.RoleId = item.RoleId;
+                                obj.UserId = (int)item.UserId;
+                                obj.EmailConfigurationEditCheckId = emailconfig.Id;
+                                _context.EmailConfigurationEditCheckSendMailHistory.Add(obj);
+                                _context.Save();
                             }
                         }
 
@@ -449,6 +462,14 @@ namespace GSC.Respository.Project.GeneralConfig
                 }
             }
 
+        }
+
+        public List<EmailConfigurationEditCheckMailHistoryGridDto> GetEmailConfigurationEditCheckSendMailHistory(int Id)
+        {
+            var data = _context.EmailConfigurationEditCheckSendMailHistory.Where(x => x.EmailConfigurationEditCheckId == Id).
+                    ProjectTo<EmailConfigurationEditCheckMailHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+           
+            return data;
         }
     }
 }

@@ -748,6 +748,11 @@ namespace GSC.Api.Helpers
             .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
             .ForMember(x => x.OperatorName, x => x.MapFrom(a => a.Operator.GetDescription()))
             .ReverseMap();
+
+            CreateMap<EmailConfigurationEditCheckSendMailHistory, EmailConfigurationEditCheckMailHistoryGridDto>()
+           .ForMember(x => x.Email, x => x.MapFrom(a => a.User.Email))
+           .ForMember(x => x.RoleName, x => x.MapFrom(a => a.Role.RoleName))
+           .ReverseMap();
         }
     }
 }

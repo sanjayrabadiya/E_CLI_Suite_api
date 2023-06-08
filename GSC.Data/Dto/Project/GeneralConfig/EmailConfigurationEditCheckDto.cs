@@ -44,4 +44,12 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public string EditCheckRoleReasonOth { get; set; }
         public string EditCheckRoleAuditReasonName { get; set; }
     }
+
+    public class EmailConfigurationEditCheckMailHistoryGridDto : BaseAuditDto
+    {
+        public int EmailConfigurationEditCheckId { get; set; }
+        public string RoleName { get; set; }
+        public string Email { get; set; }
+        
+    }
 }

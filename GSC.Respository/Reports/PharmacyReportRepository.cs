@@ -271,6 +271,7 @@ namespace GSC.Respository.Reports
 
         public FileStreamResult GetProductAccountabilityCentralReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport)
         {
+            List<int?> productreciptIds = new List<int?>();
             List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
@@ -295,6 +296,7 @@ namespace GSC.Respository.Reports
                     productAccountabilityCentralReport.ActionDate = x.CreatedDate;
                     productAccountabilityCentralReport.ProductTypeCode = x.PharmacyStudyProductType.ProductType.ProductTypeCode;
                     productAccountabilityCentralReport.ReceiptStatus = x.Status.ToString();
+                    productAccountabilityCentralReport.KitStatus = x.Status.ToString();
                     productAccountabilityCentralReport.StudyProductTypeId = x.PharmacyStudyProductTypeId;
                     var verification = _context.ProductVerification.Where(s => s.ProductReceiptId == x.Id && s.DeletedDate == null).FirstOrDefault();
                     if (verification != null)
@@ -347,7 +349,7 @@ namespace GSC.Respository.Reports
                     productAccountabilityCentralReport.ProductTypeCode = x.PharmacyStudyProductType.ProductType.ProductTypeCode;
                     productAccountabilityCentralReport.StudyProductTypeId = x.PharmacyStudyProductTypeId;
                     productAccountabilityCentralReport.ReceiptStatus = x.Status.ToString();
-
+                    productAccountabilityCentralReport.KitStatus = x.Status.ToString();
                     var verification = _context.ProductVerification.Where(s => s.ProductReceiptId == x.Id && s.DeletedDate == null).FirstOrDefault();
 
                     var verificationdetail = _context.ProductVerificationDetail.Where(s => s.ProductReceiptId == x.Id && s.DeletedDate == null).FirstOrDefault();
@@ -383,15 +385,35 @@ namespace GSC.Respository.Reports
             if (!string.IsNullOrEmpty(randomizationIWRSReport.LotNo))
             {
                 list = list.Where(x => x.LotBatchNo == randomizationIWRSReport.LotNo).ToList();
+
+                productreciptIds = _context.ProductVerification.Include(s => s.ProductReceipt)
+                      .Where(s => s.DeletedDate == null && s.ProductReceipt.ProjectId == randomizationIWRSReport.ProjectId && s.ProductReceipt.DeletedDate == null
+                        && s.BatchLotNumber == randomizationIWRSReport.LotNo).Select(s => s.ProductReceiptId).ToList();
             }
+
 
             if (setting.KitCreationType == KitCreationType.SequenceWise)
             {
-                var kitpack = _context.SupplyManagementKITSeries.
-                    Include(x => x.SupplyManagementShipment).
-                    ThenInclude(s => s.SupplyManagementRequest)
-                    .ThenInclude(x => x.FromProject)
-                    .Include(x => x.Project).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).ToList();
+                List<SupplyManagementKITSeries> kitpack = new List<SupplyManagementKITSeries>();
+                var detailkit = _context.SupplyManagementKITSeriesDetail.Where(s => s.DeletedDate == null && productreciptIds.Contains(s.ProductReceiptId)).Select(s => s.SupplyManagementKITSeriesId).ToList();
+                if (productreciptIds.Count > 0)
+                {
+                    kitpack = _context.SupplyManagementKITSeries.
+                        Include(x => x.SupplyManagementShipment).
+                        ThenInclude(s => s.SupplyManagementRequest)
+                        .ThenInclude(x => x.FromProject)
+                        .Include(x => x.Project).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId
+                         && detailkit.Contains(x.Id)).ToList();
+                }
+                else
+                {
+                    kitpack = _context.SupplyManagementKITSeries.
+                       Include(x => x.SupplyManagementShipment).
+                       ThenInclude(s => s.SupplyManagementRequest)
+                       .ThenInclude(x => x.FromProject)
+                       .Include(x => x.Project).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).ToList();
+                }
+
                 if (randomizationIWRSReport.SiteId > 0)
                 {
                     kitpack = kitpack.Where(x => x.ToSiteId > 0 ? x.ToSiteId == randomizationIWRSReport.SiteId : x.SiteId == randomizationIWRSReport.SiteId).ToList();
@@ -490,15 +512,30 @@ namespace GSC.Respository.Reports
                             productAccountabilityCentralReport.NoofBoxorBottle = 1;
                             list.Add(productAccountabilityCentralReport);
                         }
-
-
-
                     });
                 }
             }
             if (setting.KitCreationType == KitCreationType.KitWise)
             {
-                var kitpack = _context.SupplyManagementKITDetail.
+                List<SupplyManagementKITDetail> detail = new List<SupplyManagementKITDetail>();
+                if (productreciptIds.Count > 0)
+                {
+                    detail = _context.SupplyManagementKITDetail.
+                    Include(x => x.SupplyManagementShipment).
+                    ThenInclude(s => s.SupplyManagementRequest)
+                    .ThenInclude(x => x.FromProject)
+                    .Include(x => x.SupplyManagementKIT).
+                    ThenInclude(x => x.ProjectDesignVisit).
+                    Include(x => x.SupplyManagementKIT).
+                    ThenInclude(x => x.Project).
+                    Include(x => x.SupplyManagementKIT).
+                    ThenInclude(x => x.PharmacyStudyProductType).
+                    ThenInclude(x => x.ProductType).Where(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId
+                    && productreciptIds.Contains(x.SupplyManagementKIT.ProductReceiptId)).ToList();
+                }
+                else
+                {
+                    detail = _context.SupplyManagementKITDetail.
                     Include(x => x.SupplyManagementShipment).
                     ThenInclude(s => s.SupplyManagementRequest)
                     .ThenInclude(x => x.FromProject)
@@ -509,17 +546,19 @@ namespace GSC.Respository.Reports
                     Include(x => x.SupplyManagementKIT).
                     ThenInclude(x => x.PharmacyStudyProductType).
                     ThenInclude(x => x.ProductType).Where(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).ToList();
+
+                }
                 if (randomizationIWRSReport.productTypeId > 0)
                 {
-                    kitpack = kitpack.Where(x => x.SupplyManagementKIT.PharmacyStudyProductTypeId == randomizationIWRSReport.productTypeId).ToList();
+                    detail = detail.Where(x => x.SupplyManagementKIT.PharmacyStudyProductTypeId == randomizationIWRSReport.productTypeId).ToList();
                 }
                 if (randomizationIWRSReport.SiteId > 0)
                 {
-                    kitpack = kitpack.Where(x => x.SupplyManagementKIT.ToSiteId > 0 ? x.SupplyManagementKIT.ToSiteId == randomizationIWRSReport.SiteId : x.SupplyManagementKIT.SiteId == randomizationIWRSReport.SiteId).ToList();
+                    detail = detail.Where(x => x.SupplyManagementKIT.ToSiteId > 0 ? x.SupplyManagementKIT.ToSiteId == randomizationIWRSReport.SiteId : x.SupplyManagementKIT.SiteId == randomizationIWRSReport.SiteId).ToList();
                 }
-                if (kitpack.Count > 0)
+                if (detail.Count > 0)
                 {
-                    kitpack.ForEach(x =>
+                    detail.ForEach(x =>
                     {
                         ProductAccountabilityCentralReport productAccountabilityCentralReport = new ProductAccountabilityCentralReport();
                         productAccountabilityCentralReport.ProjectCode = x.SupplyManagementKIT.Project.ProjectCode;
@@ -898,7 +937,7 @@ namespace GSC.Respository.Reports
 
                 var noofkis = list.Sum(x => x.NoofBoxorBottle);
                 var noofimp = list.Sum(x => x.Noofimp);
-               
+
                 var withwithoutissue = list.Count(x => x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
                 var invalid = list.Count(x => x.Status == KitStatus.ReturnReceive || x.Status == KitStatus.ReturnReceiveMissing);
                 var damaged = list.Count(x => x.Status == KitStatus.Damaged || x.Status == KitStatus.ReturnReceiveDamaged);
@@ -908,7 +947,7 @@ namespace GSC.Respository.Reports
                 var allocated = list.Count(x => x.Status == KitStatus.Allocated);
                 var returns = list.Count(x => x.Status == KitStatus.Returned);
                 var shipped = list.Count(x => x.Status == KitStatus.Shipped);
-                
+
                 var totalkit = withwithoutissue;
                 var totalimp = list.Where(x => x.Status == KitStatus.AllocationPending || x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue).Sum(x => x.TotalIMP);
                 worksheet.Row(list.Count + 3).Cell(8).SetValue(noofkis);
@@ -1198,7 +1237,7 @@ namespace GSC.Respository.Reports
                                         recieptobj.KitNo = s.KitNo;
                                         if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
                                         {
-                                            recieptobj.KitStatus = "Returned"; 
+                                            recieptobj.KitStatus = "Returned";
                                         }
                                         else
                                         {
@@ -1219,7 +1258,7 @@ namespace GSC.Respository.Reports
                                             var expiry = _context.ProductVerification.Where(a => a.ProductReceiptId == s.SupplyManagementKIT.ProductReceiptId).ToList();
                                             if (expiry.Count > 0)
                                             {
-                                                recieptobj.RetestExpiryDatestr = string.Join(",", expiry.Select(s=> Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
+                                                recieptobj.RetestExpiryDatestr = string.Join(",", expiry.Select(s => Convert.ToDateTime(s.RetestExpiryDate.Value.Date).ToString("dddd, dd MMMM yyyy")));
 
                                             }
                                         }
@@ -1460,7 +1499,7 @@ namespace GSC.Respository.Reports
                                         recieptobj.KitNo = s.KitNo;
                                         if (s.Status == KitStatus.ReturnReceive || s.Status == KitStatus.ReturnReceiveDamaged || s.Status == KitStatus.ReturnReceiveMissing || s.Status == KitStatus.ReturnReceiveWithIssue || s.Status == KitStatus.ReturnReceiveWithoutIssue)
                                         {
-                                            recieptobj.KitStatus = "Returned"; 
+                                            recieptobj.KitStatus = "Returned";
                                         }
                                         else
                                         {

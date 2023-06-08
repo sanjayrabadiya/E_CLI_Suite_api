@@ -31,6 +31,12 @@ namespace GSC.Respository.Project.GeneralConfig
 
         public void AddChileRecord(EmailConfigurationEditCheckRoleDto emailConfigurationEditCheckRoleDto)
         {
+            var roles = All.Where(x => x.EmailConfigurationEditCheckId == emailConfigurationEditCheckRoleDto.EmailConfigurationEditCheckId).ToList();
+            if (roles.Count > 0)
+            {
+                _context.EmailConfigurationEditCheckRole.RemoveRange(roles);
+                _context.Save();
+            }
             var obj = _emailConfigurationEditCheckRepository.Find(emailConfigurationEditCheckRoleDto.EmailConfigurationEditCheckId);
             if (emailConfigurationEditCheckRoleDto.RoleId.Count > 0)
             {

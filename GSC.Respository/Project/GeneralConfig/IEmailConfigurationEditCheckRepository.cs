@@ -17,5 +17,7 @@ namespace GSC.Respository.Project.GeneralConfig
         EmailConfigurationEditCheckResult ValidatWithScreeningTemplate(ScreeningTemplate screeningTemplate);
 
         void SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate);
+
+        List<EmailConfigurationEditCheckMailHistoryGridDto> GetEmailConfigurationEditCheckSendMailHistory(int Id);
     }
 }
