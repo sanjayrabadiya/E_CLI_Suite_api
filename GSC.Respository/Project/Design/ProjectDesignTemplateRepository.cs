@@ -317,7 +317,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)
         {
             var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.DesignOrder).Select(
+                                           && x.ProjectDesignVisitId == projectDesignVisitId && x.InActiveVersion ==null).OrderBy(t => t.DesignOrder).Select(
                 t => new DropDownDto
                 {
                     Id = t.Id,
