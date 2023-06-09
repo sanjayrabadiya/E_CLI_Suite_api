@@ -162,11 +162,12 @@ namespace GSC.Api.Controllers.Etmf
         [Route("DeleteDocumentApprover")]
         public IActionResult DeleteDocumentApprover([FromBody] List<int> Data)
         {
+            List<int> documentList = new List<int>();
             foreach (var item in Data)
             {
                 var record = _projectArtificateDocumentApproverRepository.Find(item);
 
-                var allRecords = _projectArtificateDocumentApproverRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && q.IsApproved != true && q.DeletedDate==null);
+                var allRecords = _projectArtificateDocumentApproverRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && q.IsApproved != true && q.DeletedDate == null).ToList();
 
                 if (allRecords == null)
                     return NotFound();
@@ -175,8 +176,25 @@ namespace GSC.Api.Controllers.Etmf
                 {
                     _projectArtificateDocumentApproverRepository.Delete(resultRecord);
                 }
+
+                documentList.Add(record.ProjectWorkplaceArtificatedDocumentId);
             }
 
+            _uow.Save();
+
+            //Logic add by Tinku Mahato (09/06/2023)
+
+            foreach (var item in documentList.Distinct())
+            {
+                var document = _projectWorkplaceArtificatedocumentRepository.Find(item);
+                var allRecords = _projectArtificateDocumentApproverRepository.All.Where(q => q.ProjectWorkplaceArtificatedDocumentId == item && q.DeletedDate == null).ToList();
+                if (allRecords.All(x => x.IsApproved == true) && allRecords.Count > 0)
+                {
+                    document.IsAccepted = true;
+                }
+
+                _projectWorkplaceArtificatedocumentRepository.Update(document);
+            }
             _uow.Save();
             return Ok();
         }

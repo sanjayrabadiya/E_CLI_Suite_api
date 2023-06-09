@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
@@ -151,6 +152,7 @@ namespace GSC.Api.Controllers.Etmf
         [Route("DeleteDocumentApprover")]
         public IActionResult DeleteDocumentApprover([FromBody] List<int> Data)
         {
+            List<int> documentList = new List<int>();
             foreach (var item in Data)
             {
                 var record = _projectSubSecArtificateDocumentApproverRepository.Find(item);
@@ -164,8 +166,23 @@ namespace GSC.Api.Controllers.Etmf
                 {
                     _projectSubSecArtificateDocumentApproverRepository.Delete(resultRecord);
                 }
+                documentList.Add(record.ProjectWorkplaceSubSecArtificateDocumentId);
             }
+            _uow.Save();
 
+            //Logic add by Tinku Mahato (09/06/2023)
+
+            foreach (var item in documentList.Distinct())
+            {
+                var document = _projectWorkplaceSubSecArtificatedocumentRepository.Find(item);
+                var allRecords = _projectSubSecArtificateDocumentApproverRepository.All.Where(q => q.ProjectWorkplaceSubSecArtificateDocumentId == item && q.DeletedDate == null).ToList();
+                if (allRecords.All(x => x.IsApproved == true) && allRecords.Count > 0)
+                {
+                    document.IsAccepted = true;
+                }
+
+                _projectWorkplaceSubSecArtificatedocumentRepository.Update(document);
+            }
             _uow.Save();
             return Ok();
         }
