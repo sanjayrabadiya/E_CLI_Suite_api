@@ -878,7 +878,7 @@ namespace GSC.Respository.Master
             .ThenInclude(i => i.ManageSite)
             .Where(z => projectIds.Contains(z.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.StudyLevelFormId)
             && (siteId == 0 ? (!z.Project.IsTestSite) : true)
-            && z.DeletedDate == null)
+            && z.DeletedDate == null && z.ScheduleStartDate != null && z.ScheduleEndDate != null)
             .Select
             (b => new CtmsMonitoringPlanDashoardDto
             {
