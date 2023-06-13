@@ -146,5 +146,52 @@ namespace GSC.Api.Controllers.CTMS
             var result = _ctmsMonitoringRepository.GetMonitoringFormforDashboard(ctmsMonitoringId, activityId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("AddMissed/{id}")]
+        public ActionResult AddMissed(int id)
+        {
+            var record = _ctmsMonitoringRepository.Find(id);
+            if (record == null)
+                return NotFound();
+
+            var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(record);
+            ctmsMonitoring.If_Missed = true;
+            _ctmsMonitoringRepository.Update(ctmsMonitoring);
+            if (_uow.Save() <= 0) throw new Exception("Updating Missed Monitoring failed on save.");
+
+            return Ok();
+        }
+        [HttpGet]
+        [Route("AddReSchedule/{id}")]
+        public ActionResult AddReSchedule(int id)
+        {
+            var record = _ctmsMonitoringRepository.Find(id);
+            if (record == null)
+                return NotFound();
+
+            var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(record);
+            ctmsMonitoring.If_ReSchedule = true;
+            _ctmsMonitoringRepository.Update(ctmsMonitoring);
+            if (_uow.Save() <= 0) throw new Exception("Updating Missed Monitoring failed on save.");
+
+            record.Id = 0;
+            var addCtmsMonitoring = _mapper.Map<CtmsMonitoring>(record);
+            addCtmsMonitoring.ScheduleStartDate = null;
+            addCtmsMonitoring.ScheduleEndDate = null;
+            addCtmsMonitoring.ActualStartDate = null;
+            addCtmsMonitoring.ActualEndDate = null;
+            addCtmsMonitoring.ModifiedByUser = null;
+            addCtmsMonitoring.ModifiedDate = null;
+            addCtmsMonitoring.DeletedBy = null;
+            addCtmsMonitoring.DeletedDate = null;
+            addCtmsMonitoring.If_Missed = false;
+            addCtmsMonitoring.If_ReSchedule = false;
+
+            _ctmsMonitoringRepository.Add(addCtmsMonitoring);
+            if (_uow.Save() <= 0) throw new Exception("Creating Monitoring failed on save.");
+
+            return Ok();
+        }
     }
 }
