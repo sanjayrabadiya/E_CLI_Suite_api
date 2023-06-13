@@ -383,6 +383,7 @@ namespace GSC.Helper
         [Description("*")] Multiplication = 27,
         [Description("^")] Power = 28,
         [Description("√")] SquareRoot = 29,
+        [Description("Default")] Default = 30
     }
 
     public enum ProjectScheduleOperator : short
