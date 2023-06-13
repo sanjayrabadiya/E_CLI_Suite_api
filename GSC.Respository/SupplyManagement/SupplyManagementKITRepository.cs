@@ -142,7 +142,7 @@ namespace GSC.Respository.SupplyManagement
                                         .Cast<KitStatus>().Select(e => new DropDownStudyDto
                                         {
                                             Id = Convert.ToInt16(e),
-                                            Value = Convert.ToInt16(e) == 6 ? e.GetDescription() + " (With issue)":
+                                            Value = Convert.ToInt16(e) == 6 ? e.GetDescription() + " (With issue)" :
                                             Convert.ToInt16(e) == 7 ? e.GetDescription() + " (Without issue) " : e.GetDescription()
                                         }).Where(x => x.Id == 4 || x.Id == 5 || x.Id == 6 || x.Id == 7).ToList();
                     item.StatusList = refrencetype;
@@ -210,7 +210,8 @@ namespace GSC.Respository.SupplyManagement
             if (productreciept == null)
                 return 0;
             var verification = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.BatchLotNumber == productreciept.BatchLotNumber
-            && x.ProductReceipt.ProjectId == ProjectId && x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved).Select(x => x.ProductReceiptId).ToList();
+            && x.ProductReceipt.ProjectId == ProjectId && x.DeletedDate == null
+            && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId && x.ProductReceipt.Status == ProductVerificationStatus.Approved).Select(x => x.ProductReceiptId).ToList();
             if (verification.Count == 0)
                 return 0;
             var RemainingQuantity = _context.ProductVerificationDetail.Where(x => x.ProductReceipt.ProjectId == ProjectId
@@ -517,7 +518,7 @@ namespace GSC.Respository.SupplyManagement
 
                 if (kitSequencedata == null)
                     return obj;
-               
+
                 var currentdate = DateTime.Now.Date;
                 var kitExpiryDate = kitSequencedata.SupplyManagementKITSeries.KitExpiryDate;
                 if (currentdate < kitExpiryDate.Value.Date)
@@ -1641,6 +1642,23 @@ namespace GSC.Respository.SupplyManagement
             }
 
             return "";
+        }
+
+        public List<DropDownDto> GetDoseListByProductRecieptId(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId)
+        {
+            var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == productReceiptId).FirstOrDefault();
+            if (productreciept == null)
+                return new List<DropDownDto>();
+            var verification = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.BatchLotNumber == productreciept.BatchLotNumber
+                                 && x.ProductReceipt.ProjectId == ProjectId && x.ProductReceipt.PharmacyStudyProductTypeId == PharmacyStudyProductTypeId && x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved)
+                                .Select(x => new DropDownDto
+                                {
+                                    Code = x.Dose.ToString(),
+                                    Value = x.Dose.ToString()
+                                }).Distinct().ToList();
+
+
+            return verification;
         }
 
     }

@@ -976,7 +976,9 @@ namespace GSC.Helper
         [Description("BMI")] BMI = 3,
         [Description("Age")] Age = 4,
         [Description("Joint")] Joint = 5,
-        [Description("Eligibility")] Eligibility = 6
+        [Description("Eligibility")] Eligibility = 6,
+        [Description("Weight")] Weight = 7,
+        [Description("Dose")] Dose = 8
     }
     public enum FectorOperator : short
     {
@@ -1115,5 +1117,13 @@ namespace GSC.Helper
         [Description("Week")] Week = 2,
         [Description("Month")] Month = 3,
         [Description("Year")] Year = 4
+    }
+
+    public enum PacketType : short
+    {
+        [Description("Bottle")] Bottle = 1,
+        [Description("HDPE")] HDPE = 2,
+        [Description("Strip")] Strip = 3,
+        [Description("Patch")] Patch = 4
     }
 }

@@ -629,6 +629,8 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
                 randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
                 randomizationDto.IsEligibilityFactor = factorData.Any(x => x.Fector == Fector.Eligibility);
+                randomizationDto.isWeightFactor = factorData.Any(x => x.Fector == Fector.Weight);
+                randomizationDto.isDoseFactor = factorData.Any(x => x.Fector == Fector.Dose);
                 randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
                 randomizationDto.IsDisable = _context.SupplyManagementFactorMapping.Any(x => x.DeletedDate == null && x.ProjectId == id) ? true : false;
             }

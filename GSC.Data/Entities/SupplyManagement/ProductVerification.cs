@@ -26,5 +26,10 @@ namespace GSC.Data.Entities.SupplyManagement
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public ProductReceipt ProductReceipt { get; set; }
+
+        public PacketType? PacketTypeId { get; set; }
+        public decimal? Dose { get; set; }
+
+        public int? UnitId { get; set; }
     }
 }

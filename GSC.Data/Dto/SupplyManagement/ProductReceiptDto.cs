@@ -50,5 +50,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ProductVerificationDetaild { get; set; }
 
         public string CountryName { get; set; }
+
+        public string PacketTypeName { get; set; }
+
+        public string UnitName { get; set; }
+
+        public decimal? Dose { get; set; }
     }
 }

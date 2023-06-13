@@ -28,6 +28,15 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime? RetestExpiryDate { get; set; }
         public int? CompanyId { get; set; }
         public bool? IsSendForApprove { get; set; }
+
+        public PacketType PacketTypeId { get; set; }
+        public decimal? Dose { get; set; }
+
+        public int? UnitId { get; set; }
+
+        public string PacketTypeName { get; set; }
+
+        public string UnitName { get; set; }
     }
 
     public class ProductVerificationGridDto : BaseAuditDto
@@ -78,5 +87,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public string VerificationPath { get; set; }
 
         public string VerificationMimeType { get; set; }
+
+        public string PacketTypeName { get; set; }
+
+        public string UnitName { get; set; }
+
+        public decimal? Dose { get; set; }
     }
 }

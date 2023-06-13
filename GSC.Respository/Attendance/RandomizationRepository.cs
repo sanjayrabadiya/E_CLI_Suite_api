@@ -372,8 +372,7 @@ namespace GSC.Respository.Attendance
                                             && productarray.Contains(x.PharmacyStudyProductType.ProductType.ProductTypeCode)
                                             && x.SupplyManagementKITSeries.SupplyManagementShipmentId != null
                                             && x.SupplyManagementKITSeries.DeletedDate == null
-                                            && ((x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId)
-                                            || (x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementKITSeries.ToSiteId == siteId))
+                                            && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
@@ -456,8 +455,7 @@ namespace GSC.Respository.Attendance
                                             && x.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && x.SupplyManagementKITSeries.DeletedDate == null
-                                            && ((x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId)
-                                            || (x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementKITSeries.ToSiteId == siteId))
+                                            && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
@@ -545,10 +543,8 @@ namespace GSC.Respository.Attendance
                                                 && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                                 && x.SupplyManagementKIT.ProjectId == projectid
                                                 && productarray.Contains(x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode)
-                                                && x.SupplyManagementShipmentId != null
                                                 && x.SupplyManagementKIT.DeletedDate == null
-                                                && ((x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId)
-                                                || (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementKIT.ToSiteId == siteId))
+                                                && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                                 && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
@@ -574,8 +570,7 @@ namespace GSC.Respository.Attendance
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && productarray.Contains(x.PharmacyStudyProductType.ProductType.ProductTypeCode)
                                             && x.SupplyManagementKITSeries.DeletedDate == null
-                                            && ((x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId)
-                                            || (x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementKITSeries.ToSiteId == siteId))
+                                            && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
@@ -710,8 +705,7 @@ namespace GSC.Respository.Attendance
                                           && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                           && x.SupplyManagementShipmentId != null
                                           && x.SupplyManagementKIT.DeletedDate == null
-                                          && ((x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId)
-                                          || (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementKIT.ToSiteId == siteId))
+                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                           && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                           && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
                         randomizationNumberDto.KitCount = kitdata.Count;
@@ -735,8 +729,7 @@ namespace GSC.Respository.Attendance
                                             && x.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && x.SupplyManagementKITSeries.DeletedDate == null
-                                            && ((x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId)
-                                            || (x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementKITSeries.ToSiteId == siteId))
+                                            && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
 
@@ -2233,6 +2226,16 @@ namespace GSC.Respository.Attendance
                                         if (item.Factor == Fector.Age)
                                         {
                                             randomizationDto.Agefactor = screeningtemplateValue.Value;
+                                            Isexist = true;
+                                        }
+                                        if (item.Factor == Fector.Weight)
+                                        {
+                                            randomizationDto.Weightfactor = screeningtemplateValue.Value;
+                                            Isexist = true;
+                                        }
+                                        if (item.Factor == Fector.Dose)
+                                        {
+                                            randomizationDto.Dosefactor = screeningtemplateValue.Value;
                                             Isexist = true;
                                         }
                                         if (item.Factor == Fector.BMI)

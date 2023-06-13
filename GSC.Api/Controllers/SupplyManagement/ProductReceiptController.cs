@@ -8,6 +8,7 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -64,6 +65,14 @@ namespace GSC.Api.Controllers.SupplyManagement
                 t.PathName = t.PathName == null ? "" : documentUrl + t.PathName;
                 t.ProductVerificationDetaild = _context.ProductVerificationDetail.Where(x => x.ProductReceiptId == t.Id).FirstOrDefault() != null ?
                 _context.ProductVerificationDetail.Where(x => x.ProductReceiptId == t.Id).Select(x => x.Id).FirstOrDefault() : 0;
+                var verification = _context.ProductVerification.Where(x => x.ProductReceiptId == t.Id && x.DeletedDate == null).FirstOrDefault();
+                if (verification != null)
+                {
+                    t.PacketTypeName = verification.PacketTypeId.GetDescription();
+                    t.Dose = verification.Dose;
+                    t.UnitName = verification.UnitId > 0 ? _context.Unit.Where(s => s.Id == verification.UnitId).FirstOrDefault().UnitName : "";
+                }
+
             });
             return Ok(productReciept);
         }
@@ -83,7 +92,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
             productReceipt.Status = ProductVerificationStatus.Quarantine;
-           
+
             _productReceiptRepository.Add(productReceipt);
             if (_uow.Save() <= 0) throw new Exception("Creating product receipt failed on save.");
             return Ok(productReceipt.Id);
@@ -157,7 +166,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
-           
+
             _productReceiptRepository.Active(record);
             var verification = _productVerificationRepository.All.Where(x => x.ProductReceiptId == id).FirstOrDefault();
             if (verification != null)

@@ -202,7 +202,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
-            if (fector == Fector.BMI || fector == Fector.Age)
+            if (fector == Fector.BMI || fector == Fector.Age || fector == Fector.Dose || fector == Fector.Weight)
             {
                 return Collectionavalue;
             }
@@ -392,7 +392,16 @@ namespace GSC.Respository.SupplyManagement
                     x.InputValue = randomization.Agefactor;
                     x.dataType = DataType.Numeric;
                 }
-
+                else if (x.Fector == Fector.Dose && !string.IsNullOrEmpty(randomization.Dosefactor))
+                {
+                    x.InputValue = randomization.Dosefactor;
+                    x.dataType = DataType.Numeric;
+                }
+                else if (x.Fector == Fector.Weight && !string.IsNullOrEmpty(randomization.Weightfactor))
+                {
+                    x.InputValue = randomization.Weightfactor;
+                    x.dataType = DataType.Numeric;
+                }
 
             });
 
@@ -464,6 +473,11 @@ namespace GSC.Respository.SupplyManagement
                     colrandomizationName = "Jointfactor";
                 if (r.Fector == Fector.Eligibility)
                     colrandomizationName = "Eligibilityfactor";
+                if (r.Fector == Fector.Weight)
+                    colrandomizationName = "Weightfactor";
+                if (r.Fector == Fector.Dose)
+                    colrandomizationName = "Dosefactor";
+
                 ruleStrRatio = ruleStrRatio + $"{r.StartParens}{colrandomizationName} {r.Operator.GetDescription()} {singleQuote}{r.CollectionValue}{singleQuote}";
                 ruleStrRatio = ruleStrRatio + $"{r.EndParens} {r.LogicalOperator} ";
 
@@ -946,7 +960,7 @@ namespace GSC.Respository.SupplyManagement
         bool IsNumeric(Fector? collection1, DataType? dataType)
         {
             var collection = new CollectionSources();
-            if (collection1 == Fector.Gender || collection1 == Fector.Diatory || collection1 == Fector.Joint)
+            if (collection1 == Fector.Gender || collection1 == Fector.Diatory || collection1 == Fector.Joint || collection1 == Fector.Eligibility)
             {
                 collection = CollectionSources.ComboBox;
             }

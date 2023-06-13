@@ -247,6 +247,10 @@ namespace GSC.Respository.SupplyManagement
                         {
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
+                            if (request.IsSiteRequest)
+                            {
+                                kit.ToSiteId = request.FromProjectId;
+                            }
                             _context.SupplyManagementKITDetail.Update(kit);
 
                             SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -256,28 +260,8 @@ namespace GSC.Respository.SupplyManagement
                             history.RoleId = _jwtTokenAccesser.RoleId;
                             _context.SupplyManagementKITDetailHistory.Add(history);
                             _uow.Save();
-
-
-
                         }
                     }
-
-                    foreach (var item in supplyManagementshipmentDto.Kits)
-                    {
-                        var kit1 = _context.SupplyManagementKITDetail.Where(x => x.Id == item.Id).FirstOrDefault();
-                        if (kit1 != null && supplyManagementshipmentDto.Id > 0)
-                        {
-                            var kitdata = _context.SupplyManagementKIT.Where(x => x.Id == kit1.SupplyManagementKITId).FirstOrDefault();
-                            if (request.IsSiteRequest && kitdata != null)
-                            {
-                                kitdata.ToSiteId = request.FromProjectId;
-                                _context.SupplyManagementKIT.Update(kitdata);
-                                _context.Entry(kit1).State = EntityState.Detached;
-                                _uow.Save();
-                            }
-                        }
-                    }
-
                 }
                 if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {

@@ -554,7 +554,7 @@ namespace GSC.Respository.Reports
                 }
                 if (randomizationIWRSReport.SiteId > 0)
                 {
-                    detail = detail.Where(x => x.SupplyManagementKIT.ToSiteId > 0 ? x.SupplyManagementKIT.ToSiteId == randomizationIWRSReport.SiteId : x.SupplyManagementKIT.SiteId == randomizationIWRSReport.SiteId).ToList();
+                    detail = detail.Where(x => x.ToSiteId > 0 ? x.ToSiteId == randomizationIWRSReport.SiteId : x.SupplyManagementKIT.SiteId == randomizationIWRSReport.SiteId).ToList();
                 }
                 if (detail.Count > 0)
                 {

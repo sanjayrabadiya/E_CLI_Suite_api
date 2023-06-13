@@ -57,6 +57,7 @@ namespace GSC.Data.Dto.Attendance
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
 
+
         public string KitNo { get; set; }
 
         public string ProductCode { get; set; }
@@ -68,6 +69,10 @@ namespace GSC.Data.Dto.Attendance
         public int KitDetailId { get; set; }
 
         public string ErrorMessage { get; set; }
+
+        public string Weightfactor { get; set; }
+
+        public string Dosefactor { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto
@@ -152,6 +157,10 @@ namespace GSC.Data.Dto.Attendance
         public string Agefactor { get; set; }
         public string BMIfactor { get; set; }
 
+        public string Weightfactor { get; set; }
+
+        public string Dosefactor { get; set; }
+
     }
 
     public class RandomizationNumberDto
@@ -189,6 +198,8 @@ namespace GSC.Data.Dto.Attendance
         public int KitCount { get; set; }
 
 
+
+
     }
     public class RandomizationFactor
     {
@@ -198,6 +209,8 @@ namespace GSC.Data.Dto.Attendance
         public bool IsBMIFactor { get; set; }
         public bool IsJointFactor { get; set; }
         public bool IsEligibilityFactor { get; set; }
+        public bool isWeightFactor { get; set; }
+        public bool isDoseFactor { get; set; }
         public bool IsIWRS { get; set; }
 
         public bool IsDisable { get; set; }

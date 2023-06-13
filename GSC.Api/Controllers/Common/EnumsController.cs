@@ -1106,5 +1106,18 @@ namespace GSC.Api.Controllers.Common
             return Ok(audit);
         }
 
+        [HttpGet]
+        [Route("GetPacketTypes")]
+        public IActionResult GetPacketTypes()
+        {
+            var audit = Enum.GetValues(typeof(PacketType))
+                .Cast<PacketType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+
+            return Ok(audit);
+        }
     }
 }
