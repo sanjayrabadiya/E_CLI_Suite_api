@@ -31,6 +31,7 @@ using GSC.Shared.Extension;
 using GSC.Data.Dto.Configuration;
 using Syncfusion.Pdf.Parsing;
 using Microsoft.AspNetCore.Mvc;
+using Syncfusion.DocIO.DLS;
 
 namespace GSC.Respository.InformConcent
 {
@@ -201,6 +202,31 @@ namespace GSC.Respository.InformConcent
             }
             return sectionsHeaders;
         }
+
+
+        public string ImportSectionDataHtml(int id, int sectionno)
+        {
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
+            var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
+            string path = FullPath;
+            if (!System.IO.File.Exists(path))
+                return null;
+            Stream stream = System.IO.File.OpenRead(path);
+            WordDocument document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+            document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
+            MemoryStream ms = new MemoryStream();
+            document.Save(ms, Syncfusion.DocIO.FormatType.Html);
+            document.Close();
+            ms.Position = 0;
+            StreamReader reader = new StreamReader(ms);
+            var htmlStringText = reader.ReadToEnd();
+            ms.Dispose();
+            reader.Dispose();
+
+            return htmlStringText;
+        }
+
         public string ImportSectionData(int id, int sectionno)
         {
             // this method is called when clicking particular sections from the left side grid in Inform consent page (patient portal)
