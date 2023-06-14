@@ -508,6 +508,7 @@ namespace GSC.Api.Helpers
             CreateMap<OverTimeMetrics, OverTimeMetricsDto>().ReverseMap();
             CreateMap<EmailConfigurationEditCheck, EmailConfigurationEditCheckDto>().ReverseMap();
             CreateMap<EmailConfigurationEditCheckDetail, EmailConfigurationEditCheckDetailDto>().ReverseMap();
+            CreateMap<VariableLabelLanguage, VariableLabelLanguageDto>().ReverseMap();
         }
     }
 }

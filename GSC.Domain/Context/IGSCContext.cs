@@ -436,5 +436,6 @@ namespace GSC.Domain.Context
         DbSet<EmailConfigurationEditCheckRole> EmailConfigurationEditCheckRole { get; set; }
 
         DbSet<EmailConfigurationEditCheckSendMailHistory> EmailConfigurationEditCheckSendMailHistory { get; set; }
+        DbSet<VariableLabelLanguage> VariableLabelLanguage { get; set; }
     }
 }
