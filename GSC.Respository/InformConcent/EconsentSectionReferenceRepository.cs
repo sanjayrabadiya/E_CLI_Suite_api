@@ -11,6 +11,7 @@ using GSC.Respository.Configuration;
 using GSC.Shared.JWTAuth;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Syncfusion.DocIO.DLS;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -28,7 +29,7 @@ namespace GSC.Respository.InformConcent
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
-        public EconsentSectionReferenceRepository(IGSCContext context, 
+        public EconsentSectionReferenceRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IEconsentSetupRepository econsentSetupRepository,
             IUploadSettingRepository uploadSettingRepository,
@@ -44,8 +45,8 @@ namespace GSC.Respository.InformConcent
 
         public IList<EconsentSectionReferenceDto> GetSectionReferenceList(bool isDeleted, int documentId)
         {
-           var sectionrefrence=  All.Where(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
-                ProjectTo<EconsentSectionReferenceDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();                
+            var sectionrefrence = All.Where(x => x.EconsentSetupId == documentId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                 ProjectTo<EconsentSectionReferenceDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return sectionrefrence;
         }
         public List<DropDownDto> GetEconsentDocumentSectionDropDown(int documentId)
@@ -73,7 +74,7 @@ namespace GSC.Respository.InformConcent
                         {
                             DropDownDto sectionsHeader = new DropDownDto();
                             sectionsHeader.Id = sectioncount;
-                            
+
                             string headerstring = "";
                             foreach (var e3 in e2.inlines)
                             {
@@ -92,6 +93,73 @@ namespace GSC.Respository.InformConcent
             return sectionsHeaders;
         }
 
+        public EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocumentNew(int id)
+        {
+            var upload = _uploadSettingRepository.GetDocumentPath();
+            var Econsentsectiondocument = Find(id);
+            var FullPath = System.IO.Path.Combine(upload, Econsentsectiondocument.FilePath);
+            string path = FullPath;
+            if (!System.IO.File.Exists(path))
+                return null;
+            string extension = System.IO.Path.GetExtension(path);
+            string type = "";
+
+            EconsentSectionReferenceDocumentType econsentSectionReferenceDocument = new EconsentSectionReferenceDocumentType();
+
+            if (extension == ".docx" || extension == ".doc")
+            {
+                Stream stream = System.IO.File.OpenRead(path);
+                WordDocument document = null;
+                if (extension == ".docx")
+                    document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                if (extension == ".doc")
+                    document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Doc);
+                document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
+                MemoryStream ms = new MemoryStream();
+                document.Save(ms, Syncfusion.DocIO.FormatType.Html);
+                document.Close();
+                ms.Position = 0;
+                StreamReader reader = new StreamReader(ms);
+                var htmlStringText = reader.ReadToEnd();
+                ms.Dispose();
+                reader.Dispose();
+                stream.Close();
+                stream.Dispose();
+                type = "doc";
+                econsentSectionReferenceDocument.type = type;
+                econsentSectionReferenceDocument.data = htmlStringText;
+                return econsentSectionReferenceDocument;
+            }
+            else if (extension == ".pdf")
+            {
+                var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
+                var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
+                type = "pdf";
+                econsentSectionReferenceDocument.type = type;
+                econsentSectionReferenceDocument.data = pdfFullPath;
+                return econsentSectionReferenceDocument;
+            }
+            else
+            {
+                var fileupload = _uploadSettingRepository.GetWebImageUrl();
+                var fileFullPath = System.IO.Path.Combine(fileupload, Econsentsectiondocument.FilePath);
+                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".bmp" || extension == ".gif")
+                {
+                    type = "img";
+                    econsentSectionReferenceDocument.type = type;
+                    econsentSectionReferenceDocument.data = fileFullPath;
+                    return econsentSectionReferenceDocument;
+                }
+                else
+                {
+                    type = "vid";
+                    econsentSectionReferenceDocument.type = type;
+                    econsentSectionReferenceDocument.data = fileFullPath;
+                    return econsentSectionReferenceDocument;
+                }
+            }
+
+        }
         public EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocument(int id)
         {
             var upload = _uploadSettingRepository.GetDocumentPath();
@@ -119,7 +187,7 @@ namespace GSC.Respository.InformConcent
             }
             else if (extension == ".pdf")
             {
-                var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();              
+                var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
                 var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
                 type = "pdf";
                 econsentSectionReferenceDocument.type = type;
@@ -152,7 +220,7 @@ namespace GSC.Respository.InformConcent
 
         public IList<EconcentSectionRefrenceDetailListDto> GetSetionRefefrenceDetailList(int documentId, int sectionNo)
         {
-            var sectionRefrence = All.Where(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo && x.DeletedDate==null).
+            var sectionRefrence = All.Where(x => x.EconsentSetupId == documentId && x.SectionNo == sectionNo && x.DeletedDate == null).
                ProjectTo<EconcentSectionRefrenceDetailListDto>(_mapper.ConfigurationProvider).ToList();
             return sectionRefrence;
         }
