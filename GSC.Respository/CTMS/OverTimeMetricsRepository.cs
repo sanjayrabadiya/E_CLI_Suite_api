@@ -37,6 +37,8 @@ namespace GSC.Respository.CTMS
             _projectRightRepository = projectRightRepository;
             _metricsRepository = MetricsRepository;
         }
+       
+        //Update All Actual Number as par 
         public List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
@@ -109,12 +111,15 @@ namespace GSC.Respository.CTMS
             }
             return projectIds;
         }
+
         //public string Duplicate(OverTimeMetrics objSave)
         //{
         //    if (All.Any(x => x.Id != objSave.Id && x.PlanMetricsId == objSave.PlanMetricsId && x.TaskName == objSave.TaskName && x.DeletedDate == null))
         //        return "Duplicate Task";
         //    return "";
         //}
+        
+        // validation : not add morthen planned value as study lavel planned
         public string PlannedCheck(OverTimeMetrics objSave)
         {
             var planMetrics = _metricsRepository.Find(objSave.PlanMetricsId).Forecast;
@@ -132,6 +137,8 @@ namespace GSC.Respository.CTMS
 
             return "";
         }
+
+        //Update planning as par PlanningType (day,week,month and Year)
         public string UpdatePlanning(OverTimeMetrics overTimeMetricsDto)
         {
             if (overTimeMetricsDto.PlanningType != null && overTimeMetricsDto.Planned != null && overTimeMetricsDto.Planned != 0)
@@ -166,21 +173,7 @@ namespace GSC.Respository.CTMS
             return "";
         }
 
-        public string UpdateActualNo(OverTimeMetrics overTimeMetricsDto)
-        {
-            if (overTimeMetricsDto.ProjectId != null)
-            {
-                var metricsType = _metricsRepository.Find(overTimeMetricsDto.PlanMetricsId).MetricsType;
-               
-               var ProjectSettings = _context.Randomization.Where(x => x.ProjectId== overTimeMetricsDto.ProjectId && x.DeletedDate == null &&
-               metricsType == MetricsType.Enrolled ? x.CreatedDate>= overTimeMetricsDto.StartDate && x.CreatedDate <= overTimeMetricsDto.EndDate :
-               metricsType == MetricsType.Screened ? x.DateOfScreening >= overTimeMetricsDto.StartDate && x.DateOfScreening <= overTimeMetricsDto.EndDate :
-               x.DateOfRandomization >= overTimeMetricsDto.StartDate && x.DateOfRandomization <= overTimeMetricsDto.EndDate).ToList();
-
-                overTimeMetricsDto.Actual = ProjectSettings.Count();
-            }
-            return "";
-        }
+        //select site only select Approved in CTMS Monitoring
         public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();

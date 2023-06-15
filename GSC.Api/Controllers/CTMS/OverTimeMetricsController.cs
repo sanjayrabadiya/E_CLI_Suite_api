@@ -60,6 +60,7 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", PlanCheck);
                 return BadRequest(ModelState);
             }
+
             taskMaster.Id = 0;
             taskMaster.If_Active = true;
             var updatePlanning = _overTimeMetricsRepository.UpdatePlanning(taskMaster);
@@ -68,9 +69,9 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", updatePlanning);
                 return BadRequest(ModelState);
             }
-            _overTimeMetricsRepository.UpdateActualNo(taskMaster);
             _overTimeMetricsRepository.Add(taskMaster);
             if (_uow.Save() <= 0) throw new Exception("Over Time failed on save.");
+
             return Ok(taskMaster.Id);
         }
 
