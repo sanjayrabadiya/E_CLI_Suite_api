@@ -65,7 +65,7 @@ namespace GSC.Respository.Screening
             IAppSettingRepository appSettingRepository,
              ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IEmailSenderRespository emailSenderRespository,
-            IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository) 
+            IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository)
             : base(context)
         {
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
@@ -507,14 +507,15 @@ namespace GSC.Respository.Screening
         {
             var variable = editCheckValidateDtos.
               Where(x => editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
-              (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+              (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch || x.Operator == Operator.Default)).
              Select(t => t.ProjectDesignVariableId).Distinct().ToList();
 
             foreach (var item in variable)
             {
                 var subEditCheckIds = editCheckValidateDtos.Where(x =>
                 (x.ProjectDesignVariableId == item || (x.FetchingProjectDesignVariableId == item) && !editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
-                (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch))).GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
+                (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch || x.Operator == Operator.Default))).
+                GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
                 result.AddRange(subEditCheckIds);
             }
         }
@@ -523,7 +524,7 @@ namespace GSC.Respository.Screening
         {
             return editCheckValidateDtos.
                Where(x => editCheckIds.Contains(x.EditCheckId) && !alreadyUsed.Contains(x.EditCheckId) &&
-               (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+               (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch || x.Operator == Operator.Default)).
               Select(t => t.ProjectDesignVariableId).Distinct().ToList();
         }
 
@@ -532,7 +533,7 @@ namespace GSC.Respository.Screening
         {
             return editCheckValidateDtos.
              Where(x => (x.ProjectDesignVariableId == projectDesignVariableId || (x.FetchingProjectDesignVariableId == projectDesignVariableId && x.FetchingProjectDesignTemplateId == projectDesignTemplateId)) && !alreadyUsed.Contains(x.EditCheckId) && x.IsTarget &&
-             (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch)).
+             (x.IsFormula || x.Operator == Operator.Enable || x.Operator == Operator.HardFetch || x.Operator == Operator.SoftFetch || x.Operator == Operator.Default)).
              GroupBy(t => t.EditCheckId).Select(r => r.Key).ToList();
         }
 

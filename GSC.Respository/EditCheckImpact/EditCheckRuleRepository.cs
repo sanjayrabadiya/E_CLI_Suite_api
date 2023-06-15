@@ -148,6 +148,11 @@ namespace GSC.Respository.EditCheckImpact
                         targetResult.IsValid = true;
                         targetResult.Result = editCheck.Where(x => !x.IsTarget).FirstOrDefault()?.InputValue;
                     }
+                    if (c.Operator == Operator.Default)
+                    {
+                        targetResult.IsValid = true;
+                        targetResult.Result = c.CollectionValue;
+                    }
                     else if (IsSkipOperator(c.Operator))
                         targetResult.IsValid = true;
                     else
@@ -239,6 +244,14 @@ namespace GSC.Respository.EditCheckImpact
                     editCheckResult.Id = r.Id;
                     editCheckResult.IsValid = true;
                     editCheckResult.Result = editCheck.Where(x => !x.IsTarget).FirstOrDefault()?.InputValue;
+                    result.Target.Add(editCheckResult);
+                }
+                else if (r.Operator == Operator.Default)
+                {
+                    var editCheckResult = new EditCheckResult();
+                    editCheckResult.Id = r.Id;
+                    editCheckResult.IsValid = true;
+                    editCheckResult.Result = r.CollectionValue;
                     result.Target.Add(editCheckResult);
                 }
                 else
