@@ -22,8 +22,6 @@ namespace GSC.Data.Dto.CTMS
         public DateTime PlnStartDate { get; set; }
         [Required(ErrorMessage = "Plan End Date is required.")]
         public DateTime PlnEndDate { get; set; }
-        public DateTime? PlnActualStartDate { get; set; }
-        public DateTime? PlnActualEndDate { get; set; }
     }
 
     public class PlanMetricsGridDto : BaseAuditDto
@@ -37,10 +35,6 @@ namespace GSC.Data.Dto.CTMS
         public int Actual { get; set; }
         public DateTime PlnStartDate { get; set; }
         public DateTime PlnEndDate { get; set; }
-        public DateTime? PlnActualStartDate { get; set; }
-        public DateTime? PlnActualEndDate { get; set; }
-        public string PlnMetricsName { get; set; }
-        public string PlnMetricsCode { get; set; }
 
     }
 }

@@ -7,6 +7,7 @@ using GSC.Helper;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace GSC.Respository.InformConcent
@@ -24,6 +25,7 @@ namespace GSC.Respository.InformConcent
         List<EconsentDocumentDetailsDto> GetEconsentReviewDetailsForPatientDashboard();
         int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
         int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
-        int ApproveWithDrawPatient(EconsentDocumetViwerDto econsentReviewDetailsDto, bool isWithdraw);        
+        int ApproveWithDrawPatient(EconsentDocumetViwerDto econsentReviewDetailsDto, bool isWithdraw);
+        string ImportSectionDataHtml(int id, int sectionno);
     }
 }

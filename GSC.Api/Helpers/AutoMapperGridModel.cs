@@ -754,6 +754,11 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.Email, x => x.MapFrom(a => a.User.Email))
            .ForMember(x => x.RoleName, x => x.MapFrom(a => a.Role.RoleName))
            .ReverseMap();
+
+            CreateMap<VariableLabelLanguage, VariableLabelLanguageGridDto>()
+           .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignVariable.Note))
+           .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+           .ReverseMap();
         }
     }
 }

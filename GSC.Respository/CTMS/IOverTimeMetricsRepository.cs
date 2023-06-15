@@ -11,8 +11,7 @@ namespace GSC.Respository.CTMS
         //string Duplicate(OverTimeMetrics objSave);
         string PlannedCheck (OverTimeMetrics objSave);
         string UpdatePlanning(OverTimeMetrics objSave);
-
-        string UpdateActualNo(OverTimeMetrics objSave);
+        List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int templateId, int projectId, int countryId, int siteId);
         List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId);
     }
 }
