@@ -40,7 +40,7 @@ namespace GSC.Respository.SupplyManagement
         {
             if (obj.Id > 0)
             {
-                if (All.Any(x => x.Id != obj.Id && x.ProjectId == obj.ProjectId && x.Factor == obj.Factor))
+                if (All.Any(x => x.Id != obj.Id && x.ProjectId == obj.ProjectId && x.Factor == obj.Factor && x.DeletedDate == null))
                 {
                     return "This variable has been already added with same factor ";
                 }
@@ -78,11 +78,11 @@ namespace GSC.Respository.SupplyManagement
             }
             else
             {
-                if (All.Any(x => x.ProjectId == obj.ProjectId && x.Factor == obj.Factor))
+                if (All.Any(x => x.ProjectId == obj.ProjectId && x.Factor == obj.Factor && x.DeletedDate == null))
                 {
                     return "This variable has been already added with same factor ";
                 }
-                var variable = _context.ProjectDesignVariable.Where(x => x.Id == obj.ProjectDesignVariableId).FirstOrDefault();
+                var variable = _context.ProjectDesignVariable.Where(x => x.Id == obj.ProjectDesignVariableId && x.StudyVersion == null).FirstOrDefault();
                 if (variable != null)
                 {
                     if (obj.Factor == Fector.Age && variable.CollectionSource != CollectionSources.TextBox)

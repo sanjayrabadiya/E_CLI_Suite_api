@@ -73,6 +73,12 @@ namespace GSC.Data.Dto.Attendance
         public string Weightfactor { get; set; }
 
         public string Dosefactor { get; set; }
+
+        public bool IsDoseWiseKit { get; set; }
+
+        public decimal? Dose { get; set; }
+
+        public List<KitDoseList> KitDoseList { get; set; }
     }
 
     public class RandomizationGridDto : BaseAuditDto
@@ -197,9 +203,11 @@ namespace GSC.Data.Dto.Attendance
 
         public int KitCount { get; set; }
 
+        public bool IsDoseWiseKit { get; set; }
 
+        public decimal? Dose { get; set; }
 
-
+        public List<KitDoseList> KitDoseList { get; set; }
     }
     public class RandomizationFactor
     {
@@ -214,5 +222,14 @@ namespace GSC.Data.Dto.Attendance
         public bool IsIWRS { get; set; }
 
         public bool IsDisable { get; set; }
+    }
+
+    public class KitDoseList
+    {
+        public string kitNo { get; set; }
+        public decimal? Dose { get; set; }
+        public string ProductCode { get; set; }
+        public int VisitId { get; set; }
+        public int KitDetailId { get; set; }
     }
 }

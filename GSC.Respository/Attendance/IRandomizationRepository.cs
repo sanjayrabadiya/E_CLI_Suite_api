@@ -76,6 +76,6 @@ namespace GSC.Respository.Attendance
 
         void RevertKitData(RandomizationDto obj);
 
-        string CheckDuplicateRandomizationNumberIWRS(RandomizationDto obj, RandomizationNumberSettings numerformate);
+        RandomizationDto CheckDuplicateRandomizationNumberIWRS(RandomizationDto obj, RandomizationNumberSettings numerformate);
     }
 }

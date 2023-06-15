@@ -489,6 +489,8 @@ namespace GSC.Domain.Context
         public DbSet<EmailConfigurationEditCheckRole> EmailConfigurationEditCheckRole { get; set; }
 
         public DbSet<EmailConfigurationEditCheckSendMailHistory> EmailConfigurationEditCheckSendMailHistory { get; set; }
+
+        public DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
     }
 
 

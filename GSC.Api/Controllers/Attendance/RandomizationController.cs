@@ -439,10 +439,10 @@ namespace GSC.Api.Controllers.Attendance
             {
                 if (numerformate.IsIWRS || numerformate.IsIGT)
                 {
-                    var message = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
-                    if (!string.IsNullOrEmpty(message))
+                    randomizationDto = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
+                    if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
                     {
-                        ModelState.AddModelError("Message", message);
+                        ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
                         return BadRequest(ModelState);
                     }
                     _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
@@ -535,7 +535,12 @@ namespace GSC.Api.Controllers.Attendance
                     ModelState.AddModelError("Message", data.ErrorMessage);
                     return BadRequest(ModelState);
                 }
-                if (data.IsIWRS && string.IsNullOrEmpty(data.KitNo))
+                if (data.IsIWRS && !data.IsDoseWiseKit && string.IsNullOrEmpty(data.KitNo))
+                {
+                    ModelState.AddModelError("Message", "kit is not available");
+                    return BadRequest(ModelState);
+                }
+                if (data.IsIWRS && data.IsDoseWiseKit && data.KitDoseList.Count == 0)
                 {
                     ModelState.AddModelError("Message", "kit is not available");
                     return BadRequest(ModelState);

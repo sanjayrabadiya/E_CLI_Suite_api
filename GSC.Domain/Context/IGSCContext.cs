@@ -436,5 +436,7 @@ namespace GSC.Domain.Context
         DbSet<EmailConfigurationEditCheckRole> EmailConfigurationEditCheckRole { get; set; }
 
         DbSet<EmailConfigurationEditCheckSendMailHistory> EmailConfigurationEditCheckSendMailHistory { get; set; }
+
+        DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
     }
 }

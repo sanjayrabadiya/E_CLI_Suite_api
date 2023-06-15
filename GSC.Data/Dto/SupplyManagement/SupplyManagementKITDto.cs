@@ -100,6 +100,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string RetestExpirystr { get; set; }
 
         public DateTime? KitValidity { get; set; }
+
+        public decimal? Dose { get; set; }
     }
 
     public class KitListApproved
@@ -120,5 +122,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime? KitValidity { get; set; }
 
         public List<DropDownStudyDto> StatusList { get; set; }
+
+        public decimal? Dose { get; set; }
     }
 }

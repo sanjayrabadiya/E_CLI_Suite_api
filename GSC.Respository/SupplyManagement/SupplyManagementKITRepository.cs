@@ -133,7 +133,7 @@ namespace GSC.Respository.SupplyManagement
                             SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
                             RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                             LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-
+                            Dose = x.SupplyManagementKIT.Dose
                         }).OrderByDescending(x => x.KitNo).ToList();
                 foreach (var item in data)
                 {
@@ -161,6 +161,8 @@ namespace GSC.Respository.SupplyManagement
                             SiteCode = x.SiteId > 0 ? _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
                             KitValidity = x.KitExpiryDate
                         }).OrderByDescending(x => x.KitNo).ToList();
+
+
                 foreach (var item in data)
                 {
 

@@ -1127,4 +1127,12 @@ namespace GSC.Helper
         [Description("Strip")] Strip = 3,
         [Description("Patch")] Patch = 4
     }
+
+    public enum DosePriority : short
+    {
+        [Description("Priority 1")] Priority1 = 1,
+        [Description("Priority 2")] Priority2 = 2,
+        [Description("Priority 3")] Priority3 = 3
+        
+    }
 }
