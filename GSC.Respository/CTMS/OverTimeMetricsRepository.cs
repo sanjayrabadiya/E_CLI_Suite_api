@@ -37,12 +37,28 @@ namespace GSC.Respository.CTMS
             _projectRightRepository = projectRightRepository;
             _metricsRepository = MetricsRepository;
         }
+        public List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var overTimeMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId == metricsId).ToList();
+            foreach (var task in overTimeMetrics)
+            {
+                var metricsType = _metricsRepository.Find(task.PlanMetricsId).MetricsType;
+                var ProjectSettings = _context.Randomization.Where(x => x.ProjectId == task.ProjectId && x.DeletedDate == null &&
+                metricsType == MetricsType.Enrolled ? x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate :
+                metricsType == MetricsType.Screened ? x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate :
+                x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate).ToList();
+                task.Actual = ProjectSettings.Count();
+                Update(task);
+            }
+            return overTimeMetrics;
+        }
 
         public List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId== metricsId).OrderBy(x => x.Id).
-                   ProjectTo<OverTimeMetricsGridDto>(_mapper.ConfigurationProvider).ToList();
+                 ProjectTo<OverTimeMetricsGridDto>(_mapper.ConfigurationProvider).ToList();
         }
         private List<Data.Entities.Master.Project> GetProjectIds(int projectId, int countryId, int siteId)
         {
@@ -102,7 +118,7 @@ namespace GSC.Respository.CTMS
         public string PlannedCheck(OverTimeMetrics objSave)
         {
             var planMetrics = _metricsRepository.Find(objSave.PlanMetricsId).Forecast;
-            var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null).ToList();
+            var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null && x.If_Active==true).ToList();
             int total = (int)project.Sum(item => item.Planned);
             if (objSave.Id == 0) { 
                 total += objSave.Planned;

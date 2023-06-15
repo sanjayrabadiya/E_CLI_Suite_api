@@ -32,7 +32,9 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("{isDeleted:bool?}/{metricsId}/{projectId}/{countryId}/{siteId}")]
         public IActionResult Get(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
-            var tasklist = _overTimeMetricsRepository.GetTasklist(isDeleted, metricsId, projectId, countryId, siteId);
+           _overTimeMetricsRepository.UpdateAllActualNo(isDeleted, metricsId, projectId, countryId, siteId);
+            if (_uow.Save() <= 0);
+            var tasklist = _overTimeMetricsRepository.GetTasklist(isDeleted, metricsId, projectId, countryId, siteId);    
             return Ok(tasklist);
         }
 
@@ -49,9 +51,7 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Post([FromBody] OverTimeMetricsDto overTimeMetricsDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            overTimeMetricsDto.Id = 0;
-            overTimeMetricsDto.If_Active = true;
-
+            overTimeMetricsDto.Id = overTimeMetricsDto.Id != 0 ? overTimeMetricsDto.Id : 0;
             var taskMaster = _mapper.Map<OverTimeMetrics>(overTimeMetricsDto);
 
             var PlanCheck = _overTimeMetricsRepository.PlannedCheck(taskMaster);
@@ -60,6 +60,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", PlanCheck);
                 return BadRequest(ModelState);
             }
+            taskMaster.Id = 0;
+            taskMaster.If_Active = true;
             var updatePlanning = _overTimeMetricsRepository.UpdatePlanning(taskMaster);
             if (!string.IsNullOrEmpty(updatePlanning))
             {
