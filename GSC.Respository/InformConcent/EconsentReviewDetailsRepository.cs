@@ -32,6 +32,7 @@ using GSC.Data.Dto.Configuration;
 using Syncfusion.Pdf.Parsing;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.DocIO.DLS;
+using Syncfusion.DocIO;
 
 namespace GSC.Respository.InformConcent
 {
@@ -213,10 +214,13 @@ namespace GSC.Respository.InformConcent
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
-            WordDocument document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+            WordDocument document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Automatic);
+            var orgSection = document.Sections[sectionno];
+            document.Sections.Clear();
+            document.Sections.Add(orgSection);
             document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
             MemoryStream ms = new MemoryStream();
-            document.Save(ms, Syncfusion.DocIO.FormatType.Html);
+            document.Save(ms, FormatType.Html);
             document.Close();
             ms.Position = 0;
             StreamReader reader = new StreamReader(ms);
