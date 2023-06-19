@@ -1090,7 +1090,8 @@ namespace GSC.Helper
 
     public enum SupplyManagementApprovalType : short
     {
-        [Description("Shipment Approval")] ShipmentApproval = 1
+        [Description("Shipment Request Approval Email")] ShipmentApproval = 1,
+        [Description("Workflow Approval")] WorkflowApproval = 2
     }
 
     public enum SupplyManagementApprovalStatus : short

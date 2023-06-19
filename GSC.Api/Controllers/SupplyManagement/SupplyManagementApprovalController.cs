@@ -172,6 +172,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementShipmentApproval.RoleId = _jwtTokenAccesser.RoleId;
             _context.SupplyManagementShipmentApproval.Add(supplyManagementShipmentApproval);
             _context.Save();
+            if (supplyManagementShipmentApprovalDto.Status == Helper.SupplyManagementApprovalStatus.Approved)
+                _supplyManagementApprovalRepository.SendShipmentWorkflowApprovalEmail(supplyManagementShipmentApproval);
             return Ok(supplyManagementShipmentApproval.Id);
 
         }

@@ -887,6 +887,14 @@ namespace GSC.Respository.EmailSender
             {
                 str = Regex.Replace(str, "##NoOfKitReturn##", email.NoOfKitReturn.ToString(), RegexOptions.IgnoreCase);
             }
+            if (!string.IsNullOrEmpty(email.ApprovedBy))
+            {
+                str = Regex.Replace(str, "##ApprovedBy##", email.ApprovedBy.ToString(), RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ApprovedOn))
+            {
+                str = Regex.Replace(str, "##ApprovedOn##", email.ApprovedOn.ToString(), RegexOptions.IgnoreCase);
+            }
             return str;
         }
 
