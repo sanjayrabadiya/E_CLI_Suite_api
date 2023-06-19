@@ -985,7 +985,15 @@ namespace GSC.Respository.EmailSender
             {
                 str = Regex.Replace(str, "##RandomizationNo##", email.RandomizationNo, RegexOptions.IgnoreCase);
             }
-
+            if (!string.IsNullOrEmpty(email.CompanyName))
+            {
+                str = Regex.Replace(str, "##CompanyName##", email.CompanyName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.CurrentDate))
+            {
+                str = Regex.Replace(str, "##CurrentDate##", email.CurrentDate, RegexOptions.IgnoreCase);
+            }
+            
             return str;
         }
     }

@@ -99,6 +99,10 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public string EmailBody { get; set; }
 
         public int EmailConfigurationEditCheckId { get; set; }
+
+        public string CurrentDate { get; set; }
+
+        public string CompanyName { get; set; }
     }
     public class EmailList
     {

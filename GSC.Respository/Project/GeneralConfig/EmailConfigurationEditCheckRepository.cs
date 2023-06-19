@@ -440,6 +440,9 @@ namespace GSC.Respository.Project.GeneralConfig
                         }
                         emaildata.VisitName = data.FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.DisplayName;
                         emaildata.TemplateName = data.FirstOrDefault().ProjectDesignTemplate.TemplateName;
+                        emaildata.CurrentDate = DateTime.Now.Date.ToString("dddd, dd MMMM yyyy");
+                        if (_jwtTokenAccesser.CompanyId > 0)
+                            emaildata.CompanyName = _context.Company.Where(s => s.Id == _jwtTokenAccesser.CompanyId).FirstOrDefault().CompanyName;
                         if (data.Count == 1)
                         {
                             emaildata.VariableName = data.FirstOrDefault().ProjectDesignVariable.VariableName;
