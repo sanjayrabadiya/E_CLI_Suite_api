@@ -530,7 +530,7 @@ namespace GSC.Respository.Attendance
                     }
                     else
                     {
-                        kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                        kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
                                           x.DeletedDate == null
                                           && x.SupplyManagementKIT.ProjectDesignVisitId == visitlist.FirstOrDefault().ProjectDesignVisitId
                                           && x.SupplyManagementKIT.DeletedDate == null
