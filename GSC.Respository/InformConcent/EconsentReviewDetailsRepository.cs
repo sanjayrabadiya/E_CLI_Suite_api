@@ -31,8 +31,6 @@ using GSC.Shared.Extension;
 using GSC.Data.Dto.Configuration;
 using Syncfusion.Pdf.Parsing;
 using Microsoft.AspNetCore.Mvc;
-using Syncfusion.DocIO.DLS;
-using Syncfusion.DocIO;
 
 namespace GSC.Respository.InformConcent
 {
@@ -207,6 +205,7 @@ namespace GSC.Respository.InformConcent
 
         public string ImportSectionDataHtml(int id, int sectionno)
         {
+            // this method is called when clicking particular sections from the left side grid in Inform consent page(patient portal)
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
@@ -214,20 +213,60 @@ namespace GSC.Respository.InformConcent
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
-            WordDocument document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Automatic);
-            var orgSection = document.Sections[sectionno];
-            document.Sections.Clear();
-            document.Sections.Add(orgSection);
-            document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
-            MemoryStream ms = new MemoryStream();
-            document.Save(ms, FormatType.Html);
-            document.Close();
-            ms.Position = 0;
-            StreamReader reader = new StreamReader(ms);
-            var htmlStringText = reader.ReadToEnd();
-            ms.Dispose();
-            reader.Dispose();
+            string sfdtText = "";
+            EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+            wdocument.Dispose();
+            string json = sfdtText;
+            stream.Position = 0;
+            stream.Close();
+            GSC.Helper.DocumentReader.Root jsonobj = JsonConvert.DeserializeObject<GSC.Helper.DocumentReader.Root>(json);
+            List<GSC.Helper.DocumentReader.Block> blocks = new List<GSC.Helper.DocumentReader.Block>();
+            int headercount = 0;
+            foreach (var e1 in jsonobj.sections)
+            {
+                foreach (var e2 in e1.blocks)
+                {
+                    if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
+                    {
+                        headercount++;
+                    }
+                    if (sectionno == headercount)
+                    {
+                        blocks.Add(e2);
+                    }
+                }
+            }
 
+            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
+            {
+                jsonobj.sections[i].blocks = new List<GSC.Helper.DocumentReader.Block>();
+                if (i == 0)
+                {
+                    jsonobj.sections[0].blocks = blocks;
+                }
+            }
+            List<GSC.Helper.DocumentReader.Section> newsections = new List<GSC.Helper.DocumentReader.Section>();
+            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
+            {
+                if (jsonobj.sections[i].blocks.Count > 0)
+                {
+                    newsections.Add(jsonobj.sections[i]);
+                }
+            }
+            jsonobj.sections = newsections;
+            string jsonnew = JsonConvert.SerializeObject(jsonobj, Formatting.None, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+            Stream document = EJ2WordDocument.Save(jsonnew, Syncfusion.EJ2.DocumentEditor.FormatType.Html);
+            StreamReader reader = new StreamReader(document);
+            var htmlStringText = reader.ReadToEnd();
+            document.Close();
+            document.Dispose();
+            reader.Close();
+            reader.Dispose();
             return htmlStringText;
         }
 
