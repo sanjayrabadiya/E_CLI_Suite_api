@@ -51,4 +51,12 @@ namespace GSC.Data.Dto.Project.Design
         public int noOfVisits { get; set; }
         public int[] noOfTemplate { get; set; }
     }
+
+    public class BasicProjectDesignVisit
+    {
+        public int ProjectDesignId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
+        public bool IsNonCRF { get; set; }
+
+    }
 }

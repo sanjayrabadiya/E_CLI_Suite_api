@@ -553,9 +553,14 @@ namespace GSC.Respository.Screening
 
         }
 
-        public int GetProjectDesignId(int screeningTemplateId)
+        public BasicProjectDesignVisit GetProjectDesignId(int screeningTemplateId)
         {
-            return All.Where(x => x.Id == screeningTemplateId).Select(r => r.ScreeningVisit.ScreeningEntry.ProjectDesignId).FirstOrDefault();
+            return All.Where(x => x.Id == screeningTemplateId).Select(r => new BasicProjectDesignVisit
+            {
+                ProjectDesignId = r.ScreeningVisit.ScreeningEntry.ProjectDesignId,
+                ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
+                IsNonCRF = r.ScreeningVisit.ProjectDesignVisit.IsNonCRF
+            }).FirstOrDefault();
         }
 
         public int GeScreeningEntryId(int screeningTemplateId)

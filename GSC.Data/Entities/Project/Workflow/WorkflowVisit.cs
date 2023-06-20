@@ -9,5 +9,7 @@ namespace GSC.Data.Entities.Project.Workflow
         public int? ProjectWorkflowIndependentId { get; set; }
         public int? ProjectWorkflowLevelId { get; set; }
         public int ProjectDesignVisitId { get; set; }
+
+        public ProjectWorkflowLevel ProjectWorkflowLevel { get; set; }
     }
 }

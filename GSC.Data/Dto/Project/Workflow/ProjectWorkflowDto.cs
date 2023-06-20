@@ -25,6 +25,7 @@ namespace GSC.Data.Dto.Project.Workflow
         public bool IsStartTemplate { get; set; }
         public bool IsWorkFlowBreak { get; set; }
         public bool IsGenerateQuery { get; set; }
+        public bool IsVisitBase { get; set; }
         public bool IsLock { get; set; }
         public short LevelNo { get; set; }
         public bool IsNoCRF { get; set; }
@@ -32,6 +33,7 @@ namespace GSC.Data.Dto.Project.Workflow
         public int ProjectDesignId { get; set; }
         public short StartLevel { get; set; }
         public bool IsElectricSignature { get; set; }
+        public int ProjectDesignVisitId { get; set; }
         public List<WorkFlowText> WorkFlowText { get; set; }
     }
 
