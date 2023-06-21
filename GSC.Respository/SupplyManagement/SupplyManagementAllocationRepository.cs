@@ -107,7 +107,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var templates = _context.ProjectDesignVariable.Where(x =>
             x.ProjectDesignTemplateId == templateId
-            && x.CollectionSource == CollectionSources.TextBox
+            && (x.CollectionSource == CollectionSources.TextBox || x.CollectionSource == CollectionSources.DateTime)
             && x.DeletedDate == null)
                 .Select(x => new DropDownDto
                 {
@@ -140,11 +140,19 @@ namespace GSC.Respository.SupplyManagement
 
         public string CheckDuplicate(SupplyManagementAllocation obj)
         {
+            var variable = _context.ProjectDesignVariable.Where(s => s.Id == obj.ProjectDesignVariableId && s.StudyVersion == null).FirstOrDefault();
+            if (variable == null)
+                return "variable not found";
+            if (obj.Type == SupplyManagementAllocationType.RandomizationDate && variable.CollectionSource != CollectionSources.DateTime)
+                return "Please select variable for datetime collection source";
+
+            if (obj.Type != SupplyManagementAllocationType.RandomizationDate && variable.CollectionSource != CollectionSources.TextBox)
+                return "Please select variable for textbox collection source";
 
             if (obj.Id > 0)
             {
                 var data = All.Where(x => x.Id != obj.Id && x.DeletedDate == null
-                && x.PharmacyStudyProductTypeId == obj.PharmacyStudyProductTypeId && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
+                && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
                 if (data != null)
                 {
                     return "Record already exist!";
@@ -152,7 +160,7 @@ namespace GSC.Respository.SupplyManagement
             }
             else
             {
-                var data = All.Where(x => x.DeletedDate == null && x.PharmacyStudyProductTypeId == obj.PharmacyStudyProductTypeId && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
+                var data = All.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == obj.ProjectDesignVariableId).FirstOrDefault();
                 if (data != null)
                 {
                     return "Record already exist!";

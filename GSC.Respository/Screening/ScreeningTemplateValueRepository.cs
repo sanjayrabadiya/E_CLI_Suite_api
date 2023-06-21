@@ -161,7 +161,8 @@ namespace GSC.Respository.Screening
                                           {
                                               ProjectId = x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId,
                                               RandomizationId = x.ScreeningVisit.ScreeningEntry.RandomizationId,
-                                              RandomizationNo = x.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber
+                                              RandomizationNo = x.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                                              RandomizationDate = x.ScreeningVisit.ScreeningEntry.Randomization.DateOfRandomization
                                           }).FirstOrDefault();
 
             if (projectdata == null)
@@ -193,6 +194,10 @@ namespace GSC.Respository.Screening
                         {
                             value = projectdata.RandomizationNo;
                         }
+                        if (allocationsetting.Type == SupplyManagementAllocationType.RandomizationDate)
+                        {
+                            value = projectdata.RandomizationDate.ToString();
+                        }
                         if (allocationsetting.Type == SupplyManagementAllocationType.ProductCode)
                         {
                             var uploadvisits = _context.SupplyManagementUploadFileVisit
@@ -211,9 +216,19 @@ namespace GSC.Respository.Screening
                         {
                             if (numbersetting.KitCreationType == KitCreationType.KitWise)
                             {
-                                var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
-                                  && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
-                                value = producttype != null ? producttype.KitNo : "";
+                                if (numbersetting.IsUploadWithKit)
+                                {
+                                    var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                 && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).Select(s => s.KitNo).ToList();
+                                    value = producttype != null && producttype.Count > 0 ? String.Join(",", producttype.Distinct()) : "";
+                                }
+                                else
+                                {
+                                    var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                 && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+                                    value = producttype != null ? producttype.KitNo : "";
+                                }
+
                             }
                             if (numbersetting.KitCreationType == KitCreationType.SequenceWise)
                             {
@@ -254,7 +269,7 @@ namespace GSC.Respository.Screening
                             Update(data);
                         }
 
-                        
+
 
                     }
 
