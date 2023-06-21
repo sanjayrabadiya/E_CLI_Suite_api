@@ -10,6 +10,7 @@ namespace GSC.Data.Dto.Project.Workflow
         [Required(ErrorMessage = "Project Name is required.")]
         public int ProjectDesignId { get; set; }
         public bool IsIndependent { get; set; }
+        public bool? IsVisitBase { get; set; }
         public string ProjectName { get; set; }
         public bool IsLock { get; set; }
         public IList<ProjectWorkflowLevelDto> Levels { get; set; }
