@@ -1433,51 +1433,51 @@ namespace GSC.Respository.Master
             if (countryId != 0 && siteId != 0)
             {
                 var EnStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var ensgraph = new List<DashboardEnrolledGraph>();
                 var endata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Enrolled) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
-                var ensresults = _context.OverTimeMetrics.Where(x => EnStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == endata.Id && x.DeletedDate == null).ToList();
+                if (endata != null)
+                {
+                    var ensresults = _context.OverTimeMetrics.Where(x => EnStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == endata.Id && x.DeletedDate == null).ToList();
 
-                entotals = (int)ensresults.Sum(c => c.Planned);
+                    entotals = (int)ensresults.Sum(c => c.Planned);
 
-                var ensgraph = new List<DashboardEnrolledGraph>();
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = entotals * 100 / endata.Forecast;
+                    ensgraph.Add(r);
 
-                var r = new DashboardEnrolledGraph();
-                r.DisplayName = "Planned";
-                r.Total = entotals * 100 / endata.Forecast;
-                ensgraph.Add(r);
-
-                var s = new DashboardEnrolledGraph();
-                s.DisplayName = "Forecast";
-                s.Total = 100 - r.Total;
-                ensgraph.Add(s);
-
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    ensgraph.Add(s);
+                }
                 return ensgraph;
             }
             else
             {
                 int EnSiteproject = projectId;
-
+                var engraph = new List<DashboardEnrolledGraph>();
                 var enresult = _context.PlanMetrics.Where(x => x.ProjectId == EnSiteproject
                      && (x.MetricsType == MetricsType.Enrolled) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
+                if (enresult != null)
+                {
+                    var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id
+                        && x.DeletedDate == null).ToList();
 
-                var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id
-                    && x.DeletedDate == null).ToList();
+                    entotals = (int)enresults.Sum(c => c.Planned);
 
-                entotals = (int)enresults.Sum(c => c.Planned);
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = entotals * 100 / enresult.Forecast;
+                    engraph.Add(r);
 
-                var engraph = new List<DashboardEnrolledGraph>();
-
-                var r = new DashboardEnrolledGraph();
-                r.DisplayName = "Planned";
-                r.Total = entotals * 100 / enresult.Forecast;
-                engraph.Add(r);
-
-                var s = new DashboardEnrolledGraph();
-                s.DisplayName = "Forecast";
-                s.Total = 100 - r.Total;
-                engraph.Add(s);
-                                
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    engraph.Add(s);
+                }
                 return engraph;
             }
         }
@@ -1487,50 +1487,52 @@ namespace GSC.Respository.Master
             if (countryId != 0 && siteId != 0)
             {
                 var ScStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var scsgraph = new List<DashboardEnrolledGraph>();
                 var scdata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Screened) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
-                var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.DeletedDate == null).ToList();
+                if (scdata != null)
+                {
+                    var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.DeletedDate == null).ToList();
 
-                sctotals = (int)scsresults.Sum(c => c.Planned);
+                    sctotals = (int)scsresults.Sum(c => c.Planned);
 
-                var scsgraph = new List<DashboardEnrolledGraph>();
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = sctotals * 100 / scdata.Forecast;
+                    scsgraph.Add(r);
 
-                var r = new DashboardEnrolledGraph();
-                r.DisplayName = "Planned";
-                r.Total = sctotals * 100 / scdata.Forecast;
-                scsgraph.Add(r);
-
-                var s = new DashboardEnrolledGraph();
-                s.DisplayName = "Forecast";
-                s.Total = 100 - r.Total;
-                scsgraph.Add(s);
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    scsgraph.Add(s);
+                }
 
                 return scsgraph;
             }
             else
             {
                 int ScSiteproject = projectId;
-
+                var scgraph = new List<DashboardScreenedGraph>();
                 var scresult = _context.PlanMetrics.Where(x => x.ProjectId == ScSiteproject
                      && (x.MetricsType == MetricsType.Screened) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
+                if (scresult != null)
+                {
+                    var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id
+                        && x.DeletedDate == null).ToList();
 
-                var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id
-                    && x.DeletedDate == null).ToList();
+                    sctotals = (int)scresults.Sum(c => c.Planned);
 
-                sctotals = (int)scresults.Sum(c => c.Planned);
+                    var r = new DashboardScreenedGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = sctotals * 100 / scresult.Forecast;
+                    scgraph.Add(r);
 
-                var scgraph = new List<DashboardScreenedGraph>();
-
-                var r = new DashboardScreenedGraph();
-                r.DisplayName = "Planned";
-                r.Total = sctotals * 100 / scresult.Forecast;
-                scgraph.Add(r);
-
-                var s = new DashboardScreenedGraph();
-                s.DisplayName = "Forecast";
-                s.Total = 100 - r.Total;
-                scgraph.Add(s);
+                    var s = new DashboardScreenedGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    scgraph.Add(s);
+                }
 
                 return scgraph;
             }
@@ -1541,50 +1543,52 @@ namespace GSC.Respository.Master
             if (countryId != 0 && siteId != 0)
             {
                 var RaStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var rasgraph = new List<DashboardEnrolledGraph>();
                 var radata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Randomized) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
-                var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.DeletedDate == null).ToList();
+                if (radata != null)
+                {
+                    var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.DeletedDate == null).ToList();
 
-                ratotals = (int)rasresults.Sum(c => c.Planned);
+                    ratotals = (int)rasresults.Sum(c => c.Planned);
 
-                var rasgraph = new List<DashboardEnrolledGraph>();
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = ratotals * 100 / radata.Forecast;
+                    rasgraph.Add(r);
 
-                var r = new DashboardEnrolledGraph();
-                r.DisplayName = "Planned";
-                r.Total = ratotals * 100 / radata.Forecast;
-                rasgraph.Add(r);
-
-                var s = new DashboardEnrolledGraph();
-                s.DisplayName = "Forecast";
-                s.Total = 100 - r.Total;
-                rasgraph.Add(s);
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    rasgraph.Add(s);
+                }
 
                 return rasgraph;
             }
             else
             {
                 int RaSiteproject = projectId;
-
+                var ragraph = new List<DashboardRandomizedGraph>();
                 var raresult = _context.PlanMetrics.Where(x => x.ProjectId == RaSiteproject
                      && (x.MetricsType == MetricsType.Randomized) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
+                if (raresult != null)
+                {
+                    var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id
+                        && x.DeletedDate == null).ToList();
 
-                var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id
-                    && x.DeletedDate == null).ToList();
+                    ratotals = (int)raresults.Sum(c => c.Planned);
 
-                ratotals = (int)raresults.Sum(c => c.Planned);
+                    var r = new DashboardRandomizedGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = ratotals * 100 / raresult.Forecast;
+                    ragraph.Add(r);
 
-                var ragraph = new List<DashboardRandomizedGraph>();
-
-                var r = new DashboardRandomizedGraph();
-                r.DisplayName = "Planned";
-                r.Total = ratotals * 100 / raresult.Forecast;
-                ragraph.Add(r);
-
-                var s = new DashboardRandomizedGraph();
-                s.DisplayName = "Forecast";
-                s.Total = 100 - r.Total;
-                ragraph.Add(s);
+                    var s = new DashboardRandomizedGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    ragraph.Add(s);
+                }
 
                 return ragraph;
             }
