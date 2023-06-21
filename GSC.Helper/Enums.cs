@@ -950,7 +950,9 @@ namespace GSC.Helper
         [Description("Randomization No")] RandomizationNo = 1,
         [Description("Kit No")] KitNo = 2,
         [Description("Product Code")] ProductCode = 3,
-        [Description("Product Name")] ProductName = 4
+        [Description("Product Name")] ProductName = 4,
+        [Description("Randomization Date")] RandomizationDate = 5
+
     }
 
     public enum InformConsentChart : short
