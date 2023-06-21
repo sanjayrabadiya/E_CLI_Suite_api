@@ -69,6 +69,9 @@ namespace GSC.Respository.SupplyManagement
         int GetAvailableRemainingkitSequenceCount(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId);
 
         string CheckExpiryDate(SupplyManagementKITDto supplyManagementUploadFileDto);
-        
+
+        List<DropDownDto> GetDoseListByProductRecieptId(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId);
+
+
     }
 }

@@ -938,7 +938,8 @@ namespace GSC.Api.Controllers.Common
                     .Cast<KitStatus>().Select(e => new DropDownEnum
                     {
                         Id = Convert.ToInt16(e),
-                        Value = e.GetDescription()
+                        Value = Convert.ToInt16(e) == 12 ? e.GetDescription() + " (Return Receive With issue)" :
+                                            Convert.ToInt16(e) == 13 ? e.GetDescription() + " (Return Receive Without issue) " : e.GetDescription()
                     }).Where(x => x.Id == 12 || x.Id == 13).OrderBy(o => o.Id).ToList();
 
                 return Ok(status);
@@ -960,7 +961,8 @@ namespace GSC.Api.Controllers.Common
                     .Cast<KitStatus>().Select(e => new DropDownEnum
                     {
                         Id = Convert.ToInt16(e),
-                        Value = e.GetDescription()
+                        Value = Convert.ToInt16(e) == 12 ? e.GetDescription() + " (Return Receive With issue)" :
+                                            Convert.ToInt16(e) == 13 ? e.GetDescription() + " (Return Receive Without issue) " : e.GetDescription()
                     }).Where(x => x.Id == 12 || x.Id == 13 || x.Id == 14 || x.Id == 15).OrderBy(o => o.Id).ToList();
 
                 return Ok(status);
@@ -1104,5 +1106,18 @@ namespace GSC.Api.Controllers.Common
             return Ok(audit);
         }
 
+        [HttpGet]
+        [Route("GetPacketTypes")]
+        public IActionResult GetPacketTypes()
+        {
+            var audit = Enum.GetValues(typeof(PacketType))
+                .Cast<PacketType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+
+            return Ok(audit);
+        }
     }
 }

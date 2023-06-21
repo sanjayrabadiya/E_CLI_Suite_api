@@ -57,6 +57,7 @@ namespace GSC.Data.Entities.Project.Design
         public string Label { get; set; }
         public List<VariableLanguage> VariableLanguage { get; set; }
         public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
+        public List<VariableLabelLanguage> VariableLabelLanguage { get; set; }
         public Alignment? Alignment { get; set; }
 
         public IList<ProjectDesignVariableEncryptRole> Roles { get; set; } = null;

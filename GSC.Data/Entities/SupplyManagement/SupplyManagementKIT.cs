@@ -26,6 +26,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? Days { get; set; }
         public int? ProductReceiptId { get; set; }
 
+        public decimal? Dose { get; set; }
+
         [ForeignKey("SiteId")]
         public Entities.Master.Project Site { get; set; }
         public int? AuditReasonId { get; set; }

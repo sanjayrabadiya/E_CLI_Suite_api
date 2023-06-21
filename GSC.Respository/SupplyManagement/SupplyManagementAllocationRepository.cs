@@ -121,7 +121,7 @@ namespace GSC.Respository.SupplyManagement
             var templates = _context.ProjectDesignVariable.Where(x =>
             x.ProjectDesignTemplateId == templateId
             && (x.CollectionSource == CollectionSources.TextBox || x.CollectionSource == CollectionSources.RadioButton || x.CollectionSource == CollectionSources.ComboBox)
-            && x.DeletedDate == null)
+            && x.DeletedDate == null && x.StudyVersion == null)
                 .Select(x => new DropDownDto
                 {
                     Id = x.Id,

@@ -1,5 +1,6 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using System.Collections.Generic;
 namespace GSC.Respository.CTMS
@@ -10,7 +11,7 @@ namespace GSC.Respository.CTMS
         //string Duplicate(OverTimeMetrics objSave);
         string PlannedCheck (OverTimeMetrics objSave);
         string UpdatePlanning(OverTimeMetrics objSave);
-
-        string UpdateActualNo(OverTimeMetrics objSave);
+        List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int templateId, int projectId, int countryId, int siteId);
+        List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId);
     }
 }

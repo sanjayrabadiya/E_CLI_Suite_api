@@ -18,5 +18,7 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetProjectRightsRoleShipmentApproval(int projectId);
 
         List<DropDownDto> GetRoleUserShipmentApproval(int roleId,int projectId);
+
+        void SendShipmentWorkflowApprovalEmail(SupplyManagementShipmentApproval supplyManagementShipmentApproval);
     }
 }

@@ -313,13 +313,6 @@ namespace GSC.Respository.Master
             var projectList = _projectRightRepository.GetParentProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            //var project = new List<int>();
-            //projectList.ForEach(x =>
-            //{
-            //    x = (int)All.Where(y => y.Id == x).Select(z => z.ParentProjectId == null ? z.Id : z.ParentProjectId).FirstOrDefault();
-            //    project.Add(x);
-            //});
-
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.ParentProjectId == null && x.IsStatic == true
@@ -335,7 +328,8 @@ namespace GSC.Respository.Master
                     IsSendSMS = c.IsSendSMS,
                     ParentProjectId = c.ParentProjectId ?? c.Id,
                     IsDeleted = c.DeletedDate != null
-                }).Distinct().OrderBy(o => o.Value).ToList();
+                    // add where condition for bypass delete study on 07/06/2023 by vipul
+                }).Where(q => q.IsDeleted == false).Distinct().OrderBy(o => o.Value).ToList();
         }
 
         public List<LockUnlockProject> GetParentStaticProject()

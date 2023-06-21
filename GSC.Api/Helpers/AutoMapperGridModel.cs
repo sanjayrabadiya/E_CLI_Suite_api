@@ -554,6 +554,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.NoOfImp, x => x.MapFrom(a => a.SupplyManagementKIT.NoOfImp))
                .ForMember(x => x.NoofPatient, x => x.MapFrom(a => a.SupplyManagementKIT.NoofPatient))
                .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectId))
+               .ForMember(x => x.Dose, x => x.MapFrom(a => a.SupplyManagementKIT.Dose))
                .ForMember(x => x.Reason, x => x.MapFrom(a => a.SupplyManagementKIT.AuditReason.ReasonName)).ReverseMap();
 
             CreateMap<SupplyManagementUploadFileDetail, SupplyManagementUploadFileDetailDto>()
@@ -737,6 +738,27 @@ namespace GSC.Api.Helpers
             CreateMap<OverTimeMetrics, OverTimeMetricsGridDto>()
                     .ForMember(x => x.SiteName, x => x.MapFrom(a => a.Project.ProjectCode))
                     .ForMember(x => x.PlanningType, x => x.MapFrom(a => a.PlanningType.GetDescription())).ReverseMap();
+
+            CreateMap<EmailConfigurationEditCheck, EmailConfigurationEditCheckGridDto>()
+             .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+             .ReverseMap();
+
+            CreateMap<EmailConfigurationEditCheckDetail, EmailConfigurationEditCheckDetailGridDto>()
+            .ForMember(x => x.TemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName))
+            .ForMember(x => x.VariableName, x => x.MapFrom(a => a.ProjectDesignVariable.VariableName))
+            .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
+            .ForMember(x => x.OperatorName, x => x.MapFrom(a => a.Operator.GetDescription()))
+            .ReverseMap();
+
+            CreateMap<EmailConfigurationEditCheckSendMailHistory, EmailConfigurationEditCheckMailHistoryGridDto>()
+           .ForMember(x => x.Email, x => x.MapFrom(a => a.User.Email))
+           .ForMember(x => x.RoleName, x => x.MapFrom(a => a.Role.RoleName))
+           .ReverseMap();
+
+            CreateMap<VariableLabelLanguage, VariableLabelLanguageGridDto>()
+           .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignVariable.Note))
+           .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
+           .ReverseMap();
         }
     }
 }

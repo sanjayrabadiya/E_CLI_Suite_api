@@ -303,7 +303,7 @@ namespace GSC.Respository.SupplyManagement
                                 ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                 RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                 LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-
+                                Dose = x.SupplyManagementKIT.Dose
                             }).OrderBy(x => x.KitNo).ToList();
 
 
@@ -322,6 +322,7 @@ namespace GSC.Respository.SupplyManagement
                                       ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                       RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                       LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                      Dose = x.SupplyManagementKIT.Dose
                                   }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
@@ -343,6 +344,7 @@ namespace GSC.Respository.SupplyManagement
                                      ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                      RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                      LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                     Dose = x.SupplyManagementKIT.Dose
                                  }).OrderBy(x => x.KitNo).ToList();
                 }
             }
@@ -361,7 +363,8 @@ namespace GSC.Respository.SupplyManagement
                                 KitNo = x.KitNo,
                                 ProjectCode = x.Project.ProjectCode,
                                 TreatmentType = x.TreatmentType,
-                                SiteCode = x.SiteId > 0 ? _context.Project.Where(s => s.Id == x.SiteId).FirstOrDefault().ProjectCode : ""
+                                SiteCode = x.SiteId > 0 ? _context.Project.Where(s => s.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
+                                KitValidity = x.KitExpiryDate
                             }).OrderBy(x => x.KitNo).ToList();
 
                     var data1 = _context.SupplyManagementKITSeries.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
@@ -374,8 +377,7 @@ namespace GSC.Respository.SupplyManagement
                                        ProjectCode = x.Project.ProjectCode,
                                        TreatmentType = x.TreatmentType,
                                        SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode,
-                                       //RetestExpiry = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
-                                       //LotBatchNo = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                       KitValidity = x.KitExpiryDate
                                    }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
@@ -395,8 +397,7 @@ namespace GSC.Respository.SupplyManagement
                                 KitNo = x.KitNo,
                                 ProjectCode = x.Project.ProjectCode,
                                 TreatmentType = x.TreatmentType,
-                                //RetestExpiry = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
-                                //LotBatchNo = x.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                KitValidity = x.KitExpiryDate
                             }).OrderBy(x => x.KitNo).ToList();
 
 
@@ -411,7 +412,8 @@ namespace GSC.Respository.SupplyManagement
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == id).FirstOrDefault();
             if (request != null)
             {
-                var emailconfiglist = _context.SupplyManagementApprovalDetails.Include(s => s.Users).Include(s => s.SupplyManagementApproval).ThenInclude(s => s.Project).Where(x => x.DeletedDate == null && x.SupplyManagementApproval.ProjectId == request.FromProject.ParentProjectId).ToList();
+                var emailconfiglist = _context.SupplyManagementApprovalDetails.Include(s => s.Users).Include(s => s.SupplyManagementApproval).ThenInclude(s => s.Project).Where(x => x.DeletedDate == null && x.SupplyManagementApproval.ProjectId == request.FromProject.ParentProjectId
+                && x.SupplyManagementApproval.ApprovalType == Helper.SupplyManagementApprovalType.ShipmentApproval).ToList();
                 if (emailconfiglist != null && emailconfiglist.Count > 0)
                 {
                     var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();

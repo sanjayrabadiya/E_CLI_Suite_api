@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
@@ -36,12 +37,30 @@ namespace GSC.Respository.CTMS
             _projectRightRepository = projectRightRepository;
             _metricsRepository = MetricsRepository;
         }
+       
+        //Update All Actual Number as par 
+        public List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var overTimeMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId == metricsId).ToList();
+            foreach (var task in overTimeMetrics)
+            {
+                var metricsType = _metricsRepository.Find(task.PlanMetricsId).MetricsType;
+                var ProjectSettings = _context.Randomization.Where(x => x.ProjectId == task.ProjectId && x.DeletedDate == null &&
+                metricsType == MetricsType.Enrolled ? x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate :
+                metricsType == MetricsType.Screened ? x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate :
+                x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate).ToList();
+                task.Actual = ProjectSettings.Count();
+                Update(task);
+            }
+            return overTimeMetrics;
+        }
 
         public List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId== metricsId).OrderBy(x => x.Id).
-                   ProjectTo<OverTimeMetricsGridDto>(_mapper.ConfigurationProvider).ToList();
+                 ProjectTo<OverTimeMetricsGridDto>(_mapper.ConfigurationProvider).ToList();
         }
         private List<Data.Entities.Master.Project> GetProjectIds(int projectId, int countryId, int siteId)
         {
@@ -92,16 +111,19 @@ namespace GSC.Respository.CTMS
             }
             return projectIds;
         }
+
         //public string Duplicate(OverTimeMetrics objSave)
         //{
         //    if (All.Any(x => x.Id != objSave.Id && x.PlanMetricsId == objSave.PlanMetricsId && x.TaskName == objSave.TaskName && x.DeletedDate == null))
         //        return "Duplicate Task";
         //    return "";
         //}
+        
+        // validation : not add morthen planned value as study lavel planned
         public string PlannedCheck(OverTimeMetrics objSave)
         {
             var planMetrics = _metricsRepository.Find(objSave.PlanMetricsId).Forecast;
-            var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null).ToList();
+            var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null && x.If_Active==true).ToList();
             int total = (int)project.Sum(item => item.Planned);
             if (objSave.Id == 0) { 
                 total += objSave.Planned;
@@ -115,6 +137,8 @@ namespace GSC.Respository.CTMS
 
             return "";
         }
+
+        //Update planning as par PlanningType (day,week,month and Year)
         public string UpdatePlanning(OverTimeMetrics overTimeMetricsDto)
         {
             if (overTimeMetricsDto.PlanningType != null && overTimeMetricsDto.Planned != null && overTimeMetricsDto.Planned != 0)
@@ -149,20 +173,40 @@ namespace GSC.Respository.CTMS
             return "";
         }
 
-        public string UpdateActualNo(OverTimeMetrics overTimeMetricsDto)
+        //select site only select Approved in CTMS Monitoring
+        public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId)
         {
-            if (overTimeMetricsDto.ProjectId != null)
-            {
-                var metricsType = _metricsRepository.Find(overTimeMetricsDto.PlanMetricsId).MetricsType;
-               
-               var ProjectSettings = _context.Randomization.Where(x => x.ProjectId== overTimeMetricsDto.ProjectId && x.DeletedDate == null &&
-               metricsType == MetricsType.Enrolled ? x.CreatedDate>= overTimeMetricsDto.StartDate && x.CreatedDate <= overTimeMetricsDto.EndDate :
-               metricsType == MetricsType.Screened ? x.DateOfScreening >= overTimeMetricsDto.StartDate && x.DateOfScreening <= overTimeMetricsDto.EndDate :
-               x.DateOfRandomization >= overTimeMetricsDto.StartDate && x.DateOfRandomization <= overTimeMetricsDto.EndDate).ToList();
+            var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
 
-                overTimeMetricsDto.Actual = ProjectSettings.Count();
-            }
-            return "";
+            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
+
+            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == "act_002" && x.DeletedDate == null).ToList();
+
+            var Activity = _context.Activity.Where(x => CtmsActivity.Select(v => v.Id).Contains(x.CtmsActivityId) && x.DeletedDate == null).ToList();
+
+            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
+                               .Where(x => Activity.Select(f => f.Id).Contains(x.ActivityId) && x.ProjectId == parentProjectId
+                               && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
+
+            var CtmsMonitoring = _context.CtmsMonitoringReport
+               .Include(i => i.CtmsMonitoring).Where(x => StudyLevelForm.Select(v => v.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null && x.ReportStatus == MonitoringReportStatus.Approved).ToList();
+
+            return _context.Project.Where(x => CtmsMonitoring.Select(v => v.CtmsMonitoring.ProjectId).Contains(x.Id) &&
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                    CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsTestSite = c.IsTestSite,
+                    ParentProjectId = c.ParentProjectId ?? 0,
+                    AttendanceLimit = c.AttendanceLimit ?? 0, 
+                }).OrderBy(o => o.Value).ToList();
         }
     }
 }

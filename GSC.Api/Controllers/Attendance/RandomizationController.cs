@@ -439,10 +439,10 @@ namespace GSC.Api.Controllers.Attendance
             {
                 if (numerformate.IsIWRS || numerformate.IsIGT)
                 {
-                    var message = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
-                    if (!string.IsNullOrEmpty(message))
+                    randomizationDto = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
+                    if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
                     {
-                        ModelState.AddModelError("Message", message);
+                        ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
                         return BadRequest(ModelState);
                     }
                     _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
@@ -535,7 +535,12 @@ namespace GSC.Api.Controllers.Attendance
                     ModelState.AddModelError("Message", data.ErrorMessage);
                     return BadRequest(ModelState);
                 }
-                if (data.IsIWRS && string.IsNullOrEmpty(data.KitNo))
+                if (data.IsIWRS && !data.IsDoseWiseKit && string.IsNullOrEmpty(data.KitNo))
+                {
+                    ModelState.AddModelError("Message", "kit is not available");
+                    return BadRequest(ModelState);
+                }
+                if (data.IsIWRS && data.IsDoseWiseKit && data.KitDoseList.Count == 0)
                 {
                     ModelState.AddModelError("Message", "kit is not available");
                     return BadRequest(ModelState);
@@ -629,6 +634,8 @@ namespace GSC.Api.Controllers.Attendance
                 randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
                 randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
                 randomizationDto.IsEligibilityFactor = factorData.Any(x => x.Fector == Fector.Eligibility);
+                randomizationDto.isWeightFactor = factorData.Any(x => x.Fector == Fector.Weight);
+                randomizationDto.isDoseFactor = factorData.Any(x => x.Fector == Fector.Dose);
                 randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
                 randomizationDto.IsDisable = _context.SupplyManagementFactorMapping.Any(x => x.DeletedDate == null && x.ProjectId == id) ? true : false;
             }

@@ -378,6 +378,17 @@ namespace GSC.Respository.EditCheckImpact
                             _editCheckTargetEnableViewModels.Add(new EditCheckTargetEnableViewModel { ProjectDesignVariableId = t, Value = r.ScreeningTemplateValue });
 
                     }
+                    else if (r.Operator == Operator.Default)
+                    {
+                        if (r.ValidateType == EditCheckValidateType.Passed)
+                            editCheckTarget.Value = r.CollectionValue;
+
+                        editCheckTarget.IsValueSet = true;
+                        editCheckTarget.Note = note;
+                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
+                        editCheckTarget.OriginalValidationType = ValidationType.None;
+                        editCheckTarget.EditCheckDisable = true;
+                    }
                     else if (r.IsFormula || r.Operator == Operator.HardFetch)
                     {
                         editCheckTarget.Value = r.ScreeningTemplateValue;

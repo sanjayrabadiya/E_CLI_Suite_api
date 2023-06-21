@@ -26,6 +26,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public bool IsUploadWithKit { get; set; }
 
+        public bool IsDoseWiseKit { get; set; }
+
     }
 
     public class SupplyManagementKitNumberSettingsGridDto : BaseAuditDto
@@ -43,6 +45,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string  KitCreationTypeName { get; set; }
 
         public bool IsUploadWithKit { get; set; }
+
+        public bool IsDoseWiseKit { get; set; }
     }
 
 }

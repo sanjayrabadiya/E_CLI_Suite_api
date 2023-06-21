@@ -142,7 +142,8 @@ namespace GSC.Respository.Project.Design
                         x.VariableNoteLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Note),
                         ValidationMessage = x.ValidationType == ValidationType.Required ? "This field is required" : "",
                         DisplayStepValue = x.DisplayStepValue,
-                        Label = x.Label,
+                        Label = (_jwtTokenAccesser.Language != 1 ?
+                        x.VariableLabelLanguage.Where(c => c.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null && c.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : x.Label),
                         IsHide = x.IsHide,
                         IsLevelNo = x.IsLevelNo,
                         PreLabel = x.PreLabel == null ? "" : x.PreLabel,
@@ -226,6 +227,7 @@ namespace GSC.Respository.Project.Design
             {
 
                 var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null
+                && t.InActiveVersion == null 
                  && (t.CollectionSource == CollectionSources.Date || t.CollectionSource == CollectionSources.DateTime
                  || t.CollectionSource == CollectionSources.MultilineTextBox || t.CollectionSource == CollectionSources.RadioButton))
                     .Select(x => new DesignScreeningVariableDto
@@ -271,7 +273,7 @@ namespace GSC.Respository.Project.Design
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
-                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null).Select(c => new ScreeningVariableValueDto
+                     Where(x => x.ProjectDesignVariable.ProjectDesignTemplateId == id && x.DeletedDate == null && x.InActiveVersion == null).Select(c => new ScreeningVariableValueDto
                      {
                          Id = c.Id,
                          ProjectDesignVariableId = c.ProjectDesignVariableId,
@@ -316,7 +318,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)
         {
             var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ProjectDesignVisitId == projectDesignVisitId).OrderBy(t => t.DesignOrder).Select(
+                                           && x.ProjectDesignVisitId == projectDesignVisitId && x.InActiveVersion ==null).OrderBy(t => t.DesignOrder).Select(
                 t => new DropDownDto
                 {
                     Id = t.Id,

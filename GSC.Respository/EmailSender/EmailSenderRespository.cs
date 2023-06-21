@@ -12,6 +12,7 @@ using GSC.Data.Dto.LabManagement;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
@@ -886,6 +887,14 @@ namespace GSC.Respository.EmailSender
             {
                 str = Regex.Replace(str, "##NoOfKitReturn##", email.NoOfKitReturn.ToString(), RegexOptions.IgnoreCase);
             }
+            if (!string.IsNullOrEmpty(email.ApprovedBy))
+            {
+                str = Regex.Replace(str, "##ApprovedBy##", email.ApprovedBy.ToString(), RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ApprovedOn))
+            {
+                str = Regex.Replace(str, "##ApprovedOn##", email.ApprovedOn.ToString(), RegexOptions.IgnoreCase);
+            }
             return str;
         }
 
@@ -929,6 +938,70 @@ namespace GSC.Respository.EmailSender
                 str = "Unblind : " + iWRSEmailModel.StudyCode;
             }
 
+            return str;
+        }
+
+        public void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.Subject = email.Subject;
+            emailMessage.SendTo = toMails;
+            emailMessage.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, userId);
+            _emailService.SendMail(emailMessage);
+
+        }
+
+        private string ReplaceBodyForEmailvariableConfiguration(string body, EmailConfigurationEditCheckSendEmail email, int? userId)
+        {
+
+            var str = body;
+            if (userId > 0)
+            {
+                var user = _context.Users.Where(s => s.Id == userId).FirstOrDefault();
+                if (user != null)
+                    str = Regex.Replace(str, "##UserName##", user.UserName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.StudyCode))
+            {
+                str = Regex.Replace(str, "##StudyCode##", email.StudyCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteCode))
+            {
+                str = Regex.Replace(str, "##SiteCode##", email.SiteCode, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.SiteName))
+            {
+                str = Regex.Replace(str, "##SiteName##", email.SiteName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.VisitName))
+            {
+                str = Regex.Replace(str, "##VisitName##", email.VisitName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.TemplateName))
+            {
+                str = Regex.Replace(str, "##TemplateName##", email.TemplateName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.VariableName))
+            {
+                str = Regex.Replace(str, "##VariableName##", email.VariableName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.ScreeningNo))
+            {
+                str = Regex.Replace(str, "##ScreeningNo##", email.ScreeningNo, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.RandomizationNo))
+            {
+                str = Regex.Replace(str, "##RandomizationNo##", email.RandomizationNo, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.CompanyName))
+            {
+                str = Regex.Replace(str, "##CompanyName##", email.CompanyName, RegexOptions.IgnoreCase);
+            }
+            if (!string.IsNullOrEmpty(email.CurrentDate))
+            {
+                str = Regex.Replace(str, "##CurrentDate##", email.CurrentDate, RegexOptions.IgnoreCase);
+            }
+            
             return str;
         }
     }

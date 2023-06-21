@@ -145,7 +145,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
-            if (fector == Fector.BMI || fector == Fector.Age)
+            if (fector == Fector.BMI || fector == Fector.Age || fector == Fector.Weight || fector == Fector.Dose)
             {
                 return Collectionavalue;
             }

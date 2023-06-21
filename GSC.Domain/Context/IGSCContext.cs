@@ -430,5 +430,15 @@ namespace GSC.Domain.Context
         DbSet<VendorManagement> VendorManagement { get; set; }
         DbSet<PlanMetrics> PlanMetrics { get; set; }
         DbSet<OverTimeMetrics> OverTimeMetrics { get; set; }
+
+        DbSet<EmailConfigurationEditCheck> EmailConfigurationEditCheck { get; set; }
+        DbSet<EmailConfigurationEditCheckDetail> EmailConfigurationEditCheckDetail { get; set; }
+        DbSet<EmailConfigurationEditCheckRole> EmailConfigurationEditCheckRole { get; set; }
+
+        DbSet<EmailConfigurationEditCheckSendMailHistory> EmailConfigurationEditCheckSendMailHistory { get; set; }
+        DbSet<VariableLabelLanguage> VariableLabelLanguage { get; set; }
+
+        DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
+        DbSet<WorkflowVisit> WorkflowVisit { get; set; }
     }
 }

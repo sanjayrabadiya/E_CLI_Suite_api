@@ -383,6 +383,7 @@ namespace GSC.Helper
         [Description("*")] Multiplication = 27,
         [Description("^")] Power = 28,
         [Description("√")] SquareRoot = 29,
+        [Description("Default")] Default = 30
     }
 
     public enum ProjectScheduleOperator : short
@@ -976,7 +977,9 @@ namespace GSC.Helper
         [Description("BMI")] BMI = 3,
         [Description("Age")] Age = 4,
         [Description("Joint")] Joint = 5,
-        [Description("Eligibility")] Eligibility = 6
+        [Description("Eligibility")] Eligibility = 6,
+        [Description("Weight")] Weight = 7,
+        [Description("Dose")] Dose = 8
     }
     public enum FectorOperator : short
     {
@@ -1087,7 +1090,8 @@ namespace GSC.Helper
 
     public enum SupplyManagementApprovalType : short
     {
-        [Description("Shipment Approval")] ShipmentApproval = 1
+        [Description("Shipment Request Approval Email")] ShipmentApproval = 1,
+        [Description("Workflow Approval")] WorkflowApproval = 2
     }
 
     public enum SupplyManagementApprovalStatus : short
@@ -1115,5 +1119,21 @@ namespace GSC.Helper
         [Description("Week")] Week = 2,
         [Description("Month")] Month = 3,
         [Description("Year")] Year = 4
+    }
+
+    public enum PacketType : short
+    {
+        [Description("Bottle")] Bottle = 1,
+        [Description("HDPE")] HDPE = 2,
+        [Description("Strip")] Strip = 3,
+        [Description("Patch")] Patch = 4
+    }
+
+    public enum DosePriority : short
+    {
+        [Description("Priority 1")] Priority1 = 1,
+        [Description("Priority 2")] Priority2 = 2,
+        [Description("Priority 3")] Priority3 = 3
+        
     }
 }

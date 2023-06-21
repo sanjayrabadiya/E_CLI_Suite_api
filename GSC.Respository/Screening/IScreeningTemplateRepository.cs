@@ -32,7 +32,7 @@ namespace GSC.Respository.Screening
 
         void SubmitReviewTemplate(int screeningTemplateId, bool isFromLockUnLock);
         bool IsRepated(int screeningTemplateId);
-        int GetProjectDesignId(int screeningTemplateId);
+        BasicProjectDesignVisit GetProjectDesignId(int screeningTemplateId);
         int GeScreeningEntryId(int screeningTemplateId);
         string GetStatusName(ScreeningTemplateBasic basicDetail, bool myReview, WorkFlowLevelDto workFlowLevel);
         IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto);
@@ -50,5 +50,8 @@ namespace GSC.Respository.Screening
         void DeleteRepeatVisitTemplate(int Id);
         IList<ReviewDto> GetScreeningReviewReportList(ScreeningQuerySearchDto filters);
         DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing, bool firstTime);
+
+        void SendEmailOnVaribleConfiguration(int id);
+        
     }
 }

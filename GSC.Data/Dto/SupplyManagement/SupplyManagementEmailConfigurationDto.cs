@@ -109,6 +109,11 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string RequestFromSiteName { get; set; }
 
+        public string ApprovedBy { get; set; }
+        public string ApprovedOn { get; set; }
+
+
+
 
     }
     public class SupplyManagementEmailConfigurationDetailHistoryGridDto : BaseAuditDto

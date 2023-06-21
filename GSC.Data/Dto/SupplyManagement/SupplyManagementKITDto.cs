@@ -27,7 +27,7 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int Days { get; set; }
 
-
+        public decimal? Dose { get; set; }
     }
 
     public class SupplyManagementKITGridDto : BaseAuditDto
@@ -70,6 +70,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime? ExpiryDate { get; set; }
         public string LotBatchNo { get; set; }
 
+        public decimal? Dose { get; set; }
         public SupplyManagementShipment? SupplyManagementShipment { get; set; }
 
 
@@ -97,6 +98,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime? RetestExpiry { get; set; }
 
         public string RetestExpirystr { get; set; }
+
+        public DateTime? KitValidity { get; set; }
+
+        public decimal? Dose { get; set; }
     }
 
     public class KitListApproved
@@ -114,6 +119,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public DateTime? RetestExpiry { get; set; }
 
+        public DateTime? KitValidity { get; set; }
+
         public List<DropDownStudyDto> StatusList { get; set; }
+
+        public decimal? Dose { get; set; }
     }
 }

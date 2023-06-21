@@ -366,5 +366,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             return Ok(_supplyManagementKITRepository.GetAvailableRemainingkitSequenceCount(projectId, pharmacyStudyProductTypeId, productReceiptId));
         }
+
+        [HttpGet]
+        [Route("GetDoseListByProductRecieptId/{projectId}/{projecttypeId}/{productReceiptId}")]
+        public IActionResult GetDoseListByProductRecieptId(int projectId, int projecttypeId, int productReceiptId)
+        {
+            return Ok(_supplyManagementKITRepository.GetDoseListByProductRecieptId(projectId, projecttypeId, productReceiptId));
+        }
     }
 }

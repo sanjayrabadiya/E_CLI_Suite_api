@@ -71,10 +71,5 @@ namespace GSC.Data.Dto.Screening
     }
 
 
-    public class ScreeningTemplateRequest
-    {
-        public int Id { get; set; }
-        public int ProjectDesignTemplateId { get; set; }
-
-    }
+   
 }

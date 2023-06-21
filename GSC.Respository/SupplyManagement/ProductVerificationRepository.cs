@@ -112,7 +112,10 @@ namespace GSC.Respository.SupplyManagement
                                RecieptPath = productReceipt.PathName == null ? "" : documentUrl + productReceipt.PathName,
                                RecieptMimeType = productReceipt.MimeType,
                                VerificationPath = productverification.PathName == null ? "" : documentUrl + productverification.PathName,
-                               VerificationMimeType = productverification.MimeType
+                               VerificationMimeType = productverification.MimeType,
+                               PacketTypeName = productverification.PacketTypeId > 0 ? productverification.PacketTypeId.GetDescription() : "",
+                               Dose = productverification.Dose > 0 ? productverification.Dose : 0,
+                               UnitName = productverification.UnitId > 0 ? _context.Unit.Where(s => s.Id == productverification.UnitId).FirstOrDefault().UnitName : ""
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;
@@ -164,8 +167,10 @@ namespace GSC.Respository.SupplyManagement
                                ReceivedQty = productverificationDetail.ReceivedQty,
                                IsConditionProduct = productverificationDetail.IsConditionProduct,
                                RetentionSampleQty = productverificationDetail.RetentionSampleQty,
-                               RemainingQuantity = productverificationDetail.RemainingQuantity
-
+                               RemainingQuantity = productverificationDetail.RemainingQuantity,
+                               PacketTypeName = productverification.PacketTypeId > 0 ? productverification.PacketTypeId.GetDescription() : "",
+                               Dose = productverification.Dose > 0 ? productverification.Dose : 0,
+                               UnitName = productverification.UnitId > 0 ? _context.Unit.Where(s => s.Id == productverification.UnitId).FirstOrDefault().UnitName : ""
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;
@@ -183,6 +188,10 @@ namespace GSC.Respository.SupplyManagement
                 return "you can not change expiry/re-test date for same lot number";
             }
 
+            if (verification != null && verification.Dose != obj.Dose)
+            {
+                return "you can not change dose for same lot number";
+            }
             return "";
         }
 

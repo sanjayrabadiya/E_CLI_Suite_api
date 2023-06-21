@@ -97,6 +97,14 @@ namespace GSC.Api.Controllers.InformConcent
             return jsonnew;
         }
 
+        [HttpPost]
+        [Route("ImportSectionDataHtml/{id}/{sectionno}")]
+        public IActionResult ImportSectionDataHtml(int id, int sectionno)
+        {
+            var htmlFile = _econsentReviewDetailsRepository.ImportSectionDataHtml(id, sectionno);
+            return Ok(htmlFile);
+        }
+
         [HttpPut]
         public IActionResult Put([FromBody] EconsentReviewDetailsDto econsentReviewDetailsDto)
         {
