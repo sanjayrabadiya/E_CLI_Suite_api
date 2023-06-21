@@ -21,6 +21,7 @@ namespace GSC.Data.Entities.CTMS
         public string PlnMetricsCode { get; set; }
         public Master.Project Project { get; set; }
         public MetricsType MetricsType { get; set; }
+        public OverTimeMetrics OverTimeMetrics { get; set; }
 
     }
 }

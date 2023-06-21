@@ -42,6 +42,7 @@ namespace GSC.Respository.Master
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IMetricsRepository _metricsRepository;
 
 
         public DashboardRepository(IJwtTokenAccesser jwtTokenAccesser, IScreeningVisitRepository screeningVisitRepository,
@@ -57,7 +58,8 @@ namespace GSC.Respository.Master
             IProjectRepository projectRepository,
             IProjectRightRepository projectRightRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
-            IGSCContext context)
+            IGSCContext context,
+            IMetricsRepository metricsRepository)
         {
             _screeningVisitRepository = screeningVisitRepository;
             _randomizationRepository = randomizationRepository;
@@ -73,6 +75,7 @@ namespace GSC.Respository.Master
             _projectRightRepository = projectRightRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
+            _metricsRepository = metricsRepository;
         }
 
 
@@ -1423,6 +1426,170 @@ namespace GSC.Respository.Master
             }
             return r;
         }
+        #region //Added Graphs Of Subject Recruitment in Site Monitoring By Sachin On 19/06/2023
+        public dynamic GetEnrolledGraph(int projectId, int countryId, int siteId)
+        {
+            int entotals = 0;
+            if (countryId != 0 && siteId != 0)
+            {
+                var EnStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var endata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Enrolled) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                var ensresults = _context.OverTimeMetrics.Where(x => EnStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == endata.Id && x.DeletedDate == null).ToList();
+
+                entotals = (int)ensresults.Sum(c => c.Planned);
+
+                var ensgraph = new List<DashboardEnrolledGraph>();
+
+                var r = new DashboardEnrolledGraph();
+                r.DisplayName = "Planned";
+                r.Total = entotals * 100 / endata.Forecast;
+                ensgraph.Add(r);
+
+                var s = new DashboardEnrolledGraph();
+                s.DisplayName = "Forecast";
+                s.Total = 100 - r.Total;
+                ensgraph.Add(s);
+
+                return ensgraph;
+            }
+            else
+            {
+                int EnSiteproject = projectId;
+
+                var enresult = _context.PlanMetrics.Where(x => x.ProjectId == EnSiteproject
+                     && (x.MetricsType == MetricsType.Enrolled) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+
+                var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id
+                    && x.DeletedDate == null).ToList();
+
+                entotals = (int)enresults.Sum(c => c.Planned);
+
+                var engraph = new List<DashboardEnrolledGraph>();
+
+                var r = new DashboardEnrolledGraph();
+                r.DisplayName = "Planned";
+                r.Total = entotals * 100 / enresult.Forecast;
+                engraph.Add(r);
+
+                var s = new DashboardEnrolledGraph();
+                s.DisplayName = "Forecast";
+                s.Total = 100 - r.Total;
+                engraph.Add(s);
+                                
+                return engraph;
+            }
+        }
+        public dynamic GetScreenedGraph(int projectId, int countryId, int siteId)
+        {
+            int sctotals = 0;
+            if (countryId != 0 && siteId != 0)
+            {
+                var ScStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var scdata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Screened) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.DeletedDate == null).ToList();
+
+                sctotals = (int)scsresults.Sum(c => c.Planned);
+
+                var scsgraph = new List<DashboardEnrolledGraph>();
+
+                var r = new DashboardEnrolledGraph();
+                r.DisplayName = "Planned";
+                r.Total = sctotals * 100 / scdata.Forecast;
+                scsgraph.Add(r);
+
+                var s = new DashboardEnrolledGraph();
+                s.DisplayName = "Forecast";
+                s.Total = 100 - r.Total;
+                scsgraph.Add(s);
+
+                return scsgraph;
+            }
+            else
+            {
+                int ScSiteproject = projectId;
+
+                var scresult = _context.PlanMetrics.Where(x => x.ProjectId == ScSiteproject
+                     && (x.MetricsType == MetricsType.Screened) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+
+                var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id
+                    && x.DeletedDate == null).ToList();
+
+                sctotals = (int)scresults.Sum(c => c.Planned);
+
+                var scgraph = new List<DashboardScreenedGraph>();
+
+                var r = new DashboardScreenedGraph();
+                r.DisplayName = "Planned";
+                r.Total = sctotals * 100 / scresult.Forecast;
+                scgraph.Add(r);
+
+                var s = new DashboardScreenedGraph();
+                s.DisplayName = "Forecast";
+                s.Total = 100 - r.Total;
+                scgraph.Add(s);
+
+                return scgraph;
+            }
+        }
+        public dynamic GetRandomizedGraph(int projectId, int countryId, int siteId)
+        {
+            int ratotals = 0;
+            if (countryId != 0 && siteId != 0)
+            {
+                var RaStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var radata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Randomized) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.DeletedDate == null).ToList();
+
+                ratotals = (int)rasresults.Sum(c => c.Planned);
+
+                var rasgraph = new List<DashboardEnrolledGraph>();
+
+                var r = new DashboardEnrolledGraph();
+                r.DisplayName = "Planned";
+                r.Total = ratotals * 100 / radata.Forecast;
+                rasgraph.Add(r);
+
+                var s = new DashboardEnrolledGraph();
+                s.DisplayName = "Forecast";
+                s.Total = 100 - r.Total;
+                rasgraph.Add(s);
+
+                return rasgraph;
+            }
+            else
+            {
+                int RaSiteproject = projectId;
+
+                var raresult = _context.PlanMetrics.Where(x => x.ProjectId == RaSiteproject
+                     && (x.MetricsType == MetricsType.Randomized) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+
+                var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id
+                    && x.DeletedDate == null).ToList();
+
+                ratotals = (int)raresults.Sum(c => c.Planned);
+
+                var ragraph = new List<DashboardRandomizedGraph>();
+
+                var r = new DashboardRandomizedGraph();
+                r.DisplayName = "Planned";
+                r.Total = ratotals * 100 / raresult.Forecast;
+                ragraph.Add(r);
+
+                var s = new DashboardRandomizedGraph();
+                s.DisplayName = "Forecast";
+                s.Total = 100 - r.Total;
+                ragraph.Add(s);
+
+                return ragraph;
+            }
+        }
+        #endregion
 
     }
 }

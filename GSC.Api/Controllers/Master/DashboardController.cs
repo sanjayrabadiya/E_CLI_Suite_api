@@ -358,5 +358,29 @@ namespace GSC.Api.Controllers.Master
             return Ok(queries);
         }
 
+        [HttpGet]
+        [Route("GetEnrolledGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetEnrolledGraph(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.GetEnrolledGraph(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetScreenedGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetScreenedGraph(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.GetScreenedGraph(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetRandomizedGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetRandomizedGraph(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.GetRandomizedGraph(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
     }
 }

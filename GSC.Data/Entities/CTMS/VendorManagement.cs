@@ -1,6 +1,7 @@
 using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Helper;
+using System;
 
 namespace GSC.Data.Entities.Master
 {
@@ -12,5 +13,6 @@ namespace GSC.Data.Entities.Master
         public string RegOfficeAddress { get; set; }
         public string BranchOfficeDetails { get; set; }
         public VendorManagementAudit? VendorManagementAuditId { get; set; }
+        public DateTime? VendorManagementAuditDate { get; set; }
     }
 }
