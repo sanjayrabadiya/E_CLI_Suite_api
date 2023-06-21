@@ -45,5 +45,8 @@ namespace GSC.Respository.Master
         dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag);
         dynamic GetDashboardByCriticalGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardByDiscontinuationGraph(int projectId, int countryId, int siteId);
+        dynamic GetEnrolledGraph(int projectId, int countryId, int siteId);
+        dynamic GetScreenedGraph(int projectId, int countryId, int siteId);
+        dynamic GetRandomizedGraph(int projectId, int countryId, int siteId);
     }
 }

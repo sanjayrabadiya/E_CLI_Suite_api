@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Data.Entities.UserMgt;
+using System.Collections.Generic;
 
 namespace GSC.Data.Entities.Project.Workflow
 {
@@ -17,5 +18,6 @@ namespace GSC.Data.Entities.Project.Workflow
         public bool IsNoCRF { get; set; }
         public SecurityRole SecurityRole { get; set; }
         public ProjectWorkflow ProjectWorkflow { get; set; }
+        
     }
 }

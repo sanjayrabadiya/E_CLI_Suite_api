@@ -115,6 +115,25 @@ namespace GSC.Data.Dto.ProjectRight
         public double? Avg { get; set; }
     }
 
+    #region //Added Graphs Of Subject Recruitment in Site Monitoring By Sachin On 19/06/2023
+    public class DashboardEnrolledGraph
+    {
+        public string DisplayName { get; set; }
+        public int Total { get; set; }
+    }
+
+    public class DashboardScreenedGraph
+    {
+        public string DisplayName { get; set; }
+        public int Total { get; set; }
+    }
+
+    public class DashboardRandomizedGraph
+    {
+        public string DisplayName { get; set; }
+        public int Total { get; set; }
+    }
+    #endregion
     public class DashboardStudyStatusDto
     {
         public string DisplayName { get; set; }

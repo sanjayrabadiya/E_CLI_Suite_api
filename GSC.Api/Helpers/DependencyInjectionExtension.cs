@@ -416,6 +416,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEmailConfigurationEditCheckDetailRepository, EmailConfigurationEditCheckDetailRepository>();
             services.AddScoped<IEmailConfigurationEditCheckRoleRepository, EmailConfigurationEditCheckRoleRepository>();
             services.AddScoped<IVariabeLabelLanguageRepository, VariabeLabelLanguageRepository>();
+            services.AddScoped<IWorkflowVisitRepository, WorkflowVisitRepository>();
         }
     }
 }

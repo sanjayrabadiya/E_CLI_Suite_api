@@ -492,6 +492,7 @@ namespace GSC.Domain.Context
         public DbSet<VariableLabelLanguage> VariableLabelLanguage { get; set; }
 
         public DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
+        public DbSet<WorkflowVisit> WorkflowVisit { get; set; }
     }
 
 

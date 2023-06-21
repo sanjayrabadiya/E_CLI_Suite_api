@@ -17,6 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? PlnEndDate { get; set; }
         public Master.Project Project { get; set; }
         public MetricsType MetricsType { get; set; }
+        public OverTimeMetrics OverTimeMetrics { get; set; }
 
     }
 }

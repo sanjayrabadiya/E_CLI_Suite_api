@@ -9,6 +9,7 @@ namespace GSC.Data.Entities.Project.Workflow
     {
         public int ProjectDesignId { get; set; }
         public bool IsIndependent { get; set; }
+        public bool? IsVisitBase { get; set; }
         public int? CompanyId { get; set; }
         public ProjectDesign ProjectDesign { get; set; }
         public IList<ProjectWorkflowLevel> Levels { get; set; }
