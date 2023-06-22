@@ -155,7 +155,8 @@ namespace GSC.Respository.Project.Workflow
                     LevelNo = level.LevelNo,
                     SelfCorrection = level.IsDataEntryUser,
                     IsGenerateQuery = level.IsGenerateQuery,
-                    IsElectricSignature = level.IsElectricSignature
+                    IsElectricSignature = level.IsElectricSignature,
+                    IsVisitBase = projectWork.IsVisitBase ?? false
                 };
 
 
