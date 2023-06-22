@@ -80,9 +80,10 @@ namespace GSC.Respository.Screening
                 VisitSeqNo = s.RepeatedVisitNumber,
                 DesignOrder = s.ProjectDesignVisit.DesignOrder,
                 ProjectDesignVisitId = s.ProjectDesignVisitId,
-                ProjectDesignVisitName = (_jwtTokenAccesser.Language != 1 ?
+                ScreeningVisitName = (_jwtTokenAccesser.Language != 1 ?
                 s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
-                : s.ProjectDesignVisit.DisplayName) +
+                : s.ScreeningVisitName) +
+                //: s.ProjectDesignVisit.DisplayName) +
                                          Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),
                 VisitStatus = s.Status,
                 VisitStatusName = s.Status.GetDescription(),
@@ -109,6 +110,7 @@ namespace GSC.Respository.Screening
                     ProjectDesignVisitId = r.Id,
                     Status = projectDesignVisitId == r.Id ? ScreeningVisitStatus.Open : ScreeningVisitStatus.NotStarted,
                     IsSchedule = r.IsSchedule ?? false,
+                    ScreeningVisitName=r.DisplayName,
                     ScreeningTemplates = new List<ScreeningTemplate>()
                 };
 
@@ -124,7 +126,8 @@ namespace GSC.Respository.Screening
                     var screeningTemplate = new ScreeningTemplate
                     {
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                        Status = ScreeningTemplateStatus.Pending
+                        Status = ScreeningTemplateStatus.Pending,
+                        ScreeningTemplateName=t.ScreeningTemplateName
                     };
                     _screeningTemplateRepository.Add(screeningTemplate);
                     screeningVisit.ScreeningTemplates.Add(screeningTemplate);
@@ -440,9 +443,12 @@ namespace GSC.Respository.Screening
             if (cloneVisit != null)
                 repeatedCount = All.Where(x => x.ScreeningEntryId == cloneVisit.ScreeningEntryId && x.ProjectDesignVisitId == cloneVisit.ProjectDesignVisitId).Max(t => t.RepeatedVisitNumber) ?? 0;
 
-            var templates = _screeningTemplateRepository.All.Where(r => r.DeletedDate == null && r.ScreeningVisitId == screeningVisitDto.ScreeningVisitId).Select(t => new
+            var templates = _screeningTemplateRepository.All.Where(r => r.DeletedDate == null 
+            && r.ScreeningVisitId == screeningVisitDto.ScreeningVisitId
+            && r.ParentId ==null).Select(t => new
             {
                 t.ProjectDesignTemplateId,
+                t.ScreeningTemplateName
             }).ToList();
 
             var screeningVisit = new ScreeningVisit
@@ -454,7 +460,8 @@ namespace GSC.Respository.Screening
                 RepeatedVisitNumber = repeatedCount + 1,
                 ParentId = cloneVisit.Id,
                 VisitStartDate = screeningVisitDto.VisitOpenDate,
-                ScreeningTemplates = new List<ScreeningTemplate>()
+                ScreeningTemplates = new List<ScreeningTemplate>(),
+                ScreeningVisitName= screeningVisitDto.ScreeningVisitName
             };
 
             templates.ForEach(t =>
@@ -462,7 +469,8 @@ namespace GSC.Respository.Screening
                 var template = new ScreeningTemplate
                 {
                     ProjectDesignTemplateId = t.ProjectDesignTemplateId,
-                    Status = ScreeningTemplateStatus.Pending
+                    Status = ScreeningTemplateStatus.Pending,
+                    ScreeningTemplateName=t.ScreeningTemplateName
                 };
                 _screeningTemplateRepository.Add(template);
                 screeningVisit.ScreeningTemplates.Add(template);
@@ -501,7 +509,8 @@ namespace GSC.Respository.Screening
             return Visit.GroupBy(x => x.ProjectDesignVisitId).Select(x => new DropDownDto
             {
                 Id = x.Key,
-                Value = x.FirstOrDefault().ProjectDesignVisit.DisplayName
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                Value = x.FirstOrDefault().ScreeningVisitName
             }).Distinct().ToList();
         }
 

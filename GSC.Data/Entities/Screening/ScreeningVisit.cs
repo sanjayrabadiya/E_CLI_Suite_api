@@ -38,5 +38,7 @@ namespace GSC.Data.Entities.Screening
       
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public List<ScreeningTemplate> ScreeningTemplates { get; set; }
+
+        public string ScreeningVisitName { get; set; }
     }
 }

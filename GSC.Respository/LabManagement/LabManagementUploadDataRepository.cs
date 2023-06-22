@@ -4,6 +4,7 @@ using ExcelDataReader;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -208,7 +209,12 @@ namespace GSC.Respository.LabManagement
                         {
                             if (screeningTemplate.ProjectDesignTemplate.IsRepeated)
                             {
-                                screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate.Id);
+                                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                                ScreeningTemplateRepeat screeningTemplatedetails = new ScreeningTemplateRepeat();
+                                screeningTemplatedetails.ScreeningTemplateId = screeningTemplate.Id;
+                                screeningTemplatedetails.ScreeningTemplateName = screeningTemplate.ScreeningTemplateName;
+
+                                screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplatedetails);
                                 screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
                             }
                             else screeningTemplate = null;

@@ -15,5 +15,7 @@ namespace GSC.Data.Dto.Screening
             get => _visitOpenDate.UtcDate();
             set => _visitOpenDate = value == DateTime.MinValue ? value : value.UtcDate();
         }
+
+        public string ScreeningVisitName { get; set; }
     }
 }

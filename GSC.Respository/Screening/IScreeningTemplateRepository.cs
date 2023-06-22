@@ -17,7 +17,7 @@ namespace GSC.Respository.Screening
     public interface IScreeningTemplateRepository : IGenericRepository<ScreeningTemplate>
     {
         List<MyReviewDto> GetScreeningTemplateReview();
-        ScreeningTemplate TemplateRepeat(int id);
+        ScreeningTemplate TemplateRepeat(ScreeningTemplateRepeat screeningTemplateRepeat);
         List<ScreeningTemplateTree> GetTemplateTree(int screeningEntryId, WorkFlowLevelDto workFlowLevel);
         List<TemplateText> GetTemplateData(int ProjectId, int VisitId);
 
@@ -27,7 +27,7 @@ namespace GSC.Respository.Screening
         // changes for dynamic column 04/06/2023
         List<ReviewDto> GetReviewReportList(ReviewSearchDto filters);
         List<LockUnlockListDto> GetLockUnlockList(LockUnlockSearchDto lockUnlockParams);
-        
+
         ScreeningTemplateValueSaveBasics ValidateVariableValue(ScreeningTemplateValue screeningTemplateValue, List<EditCheckIds> EditCheckIds, CollectionSources? collectionSource);
 
         void SubmitReviewTemplate(int screeningTemplateId, bool isFromLockUnLock);
@@ -52,6 +52,6 @@ namespace GSC.Respository.Screening
         DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing, bool firstTime);
 
         void SendEmailOnVaribleConfiguration(int id);
-        
+
     }
 }

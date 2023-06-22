@@ -91,11 +91,13 @@ namespace GSC.Respository.Screening
                                      : r.OldValue,
                 Reason = r.AuditReason.ReasonName,
                 Role = r.UserRole,
-                Template = r.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                Template = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName,
                 TimeZone = r.TimeZone,
                 User = r.UserName,
                 Variable = r.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
-                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                 Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber)
             }).OrderByDescending(t => t.CreatedDate).ToList();
         }
@@ -148,11 +150,13 @@ namespace GSC.Respository.Screening
                 Reason = r.AuditReason.ReasonName,
                 ReasonOth = r.ReasonOth,
                 Role = r.UserRole,
-                Template = r.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                Template = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName,
                 TimeZone = r.TimeZone,
                 User = r.UserName,
                 Variable = r.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
-                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                 Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                 SiteCode = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
                 PatientInitial = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial,

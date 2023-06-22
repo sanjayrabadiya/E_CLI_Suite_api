@@ -590,6 +590,11 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "Recruitment", DisplayName = "Recruitment Rate" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "ScreeningTemplateName", DisplayName = "Screening Template Name" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "ScreeningVisitName", DisplayName = "Screening Visit Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "IsVisitBase", DisplayName = "Visit Base Workflow" });
+
         }
 
 

@@ -470,7 +470,7 @@ namespace GSC.Respository.Attendance
                 if (supplyManagementKitNumberSettings.IsDoseWiseKit)
                 {
                     randomizationNumberDto.IsDoseWiseKit = supplyManagementKitNumberSettings.IsDoseWiseKit;
-                    if(string.IsNullOrEmpty(randomization.Dosefactor))
+                    if (string.IsNullOrEmpty(randomization.Dosefactor))
                     {
                         randomizationNumberDto.ErrorMessage = "Dose not found for this patient";
                         return randomizationNumberDto;
@@ -554,7 +554,7 @@ namespace GSC.Respository.Attendance
                         return randomizationNumberDto;
                     }
 
-                    
+
                     foreach (var visititem in visitlist)
                     {
                         randomizationNumberDto.Dose = 0;
@@ -594,7 +594,7 @@ namespace GSC.Respository.Attendance
                                                 randomizationNumberDto.KitDoseList.Add(obj);
                                                 randomizationNumberDto.Dose += kitdose.SupplyManagementKIT.Dose;
                                                 totaldose = Convert.ToDecimal(randomization.Dosefactor) - (decimal)kitdose.SupplyManagementKIT.Dose;
-                                                if(totaldose < firstpriority)
+                                                if (totaldose < firstpriority)
                                                 {
                                                     break;
                                                 }
@@ -1568,8 +1568,10 @@ namespace GSC.Respository.Attendance
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
-                            DisplayName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
-                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName), //r.ProjectDesignVisit.DisplayName,
+                            DisplayName = (_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
+                                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault()
+                                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                                : r.ScreeningVisitName, //r.ProjectDesignVisit.DisplayName,
                             ScreeningEntryId = r.ScreeningEntryId
                         }).ToList();
 
@@ -1584,8 +1586,10 @@ namespace GSC.Respository.Attendance
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
                             ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
+                            // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                             TemplateName = ((_jwtTokenAccesser.Language != 1) ?
-                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
+                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language
+                && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ScreeningTemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
                             ScheduleDate = r.ScheduleDate,

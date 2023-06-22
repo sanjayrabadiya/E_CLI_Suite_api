@@ -11,6 +11,8 @@ namespace GSC.Data.Entities.Screening
     public class ScreeningTemplate : BaseEntity
     {
         public int ProjectDesignTemplateId { get; set; }
+
+        public string ScreeningTemplateName { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public int? ParentId { get; set; }
         public int? Progress { get; set; }

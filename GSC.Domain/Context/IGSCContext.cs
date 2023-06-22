@@ -440,5 +440,6 @@ namespace GSC.Domain.Context
 
         DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
         DbSet<WorkflowVisit> WorkflowVisit { get; set; }
+        DbSet<ProjectDesignVisitRestriction> ProjectDesignVisitRestriction { get; set; }
     }
 }
