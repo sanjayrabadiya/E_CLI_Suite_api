@@ -180,9 +180,6 @@ namespace GSC.Respository.Screening
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
             screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
-            if (workFlowLevel.IsVisitBase)
-                screeningTemplateValue.ReviewLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
-
             screeningTemplateValue.QueryStatus = QueryStatus.Open;
 
             screeningTemplateValueQuery.Value = value;
