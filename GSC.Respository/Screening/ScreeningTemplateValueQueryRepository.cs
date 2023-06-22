@@ -320,7 +320,7 @@ namespace GSC.Respository.Screening
                         screeningTemplateValue.AcknowledgeLevel += 1;
                 }
                 else if (workFlowLevel.IsVisitBase)
-                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, 1);
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                 else if (workFlowLevel.IsWorkFlowBreak)
                 {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);
