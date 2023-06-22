@@ -57,12 +57,12 @@ namespace GSC.Api.Controllers.Screening
             _scheduleTerminate = scheduleTerminate;
         }
 
-        [HttpPost("Repeat/{screeningTemplateId}")]
-        public IActionResult Repeat(int screeningTemplateId)
+        [HttpPost("Repeat")]
+        public IActionResult Repeat([FromBody] ScreeningTemplateRepeat screeningTemplateRepeat)
         {
-            if (screeningTemplateId <= 0) return BadRequest();
+            if (screeningTemplateRepeat.ScreeningTemplateId <= 0) return BadRequest();
 
-            var screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplateId);
+            var screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplateRepeat);
             _uow.Save();
             return Ok(screeningTemplate.Id);
         }

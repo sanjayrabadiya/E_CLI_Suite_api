@@ -7,7 +7,8 @@ namespace GSC.Data.Dto.Screening
     public class ScreeningVisitTree
     {
         public int ScreeningVisitId { get; set; }
-        public string ProjectDesignVisitName { get; set; }
+        //public string ProjectDesignVisitName { get; set; }
+        public string ScreeningVisitName { get; set; }
         public int? VisitSeqNo { get; set; }
         public int ProjectDesignVisitId { get; set; }
         public string VisitStatusName { get; set; }
@@ -27,6 +28,7 @@ namespace GSC.Data.Dto.Screening
         public int? ParentId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
         public string ProjectDesignTemplateName { get; set; }
+        public string ScreeningTemplateName { get; set; }
         public string DesignOrder { get; set; }
         public string DesignOrderForOrderBy { get; set; }
         public int Progress { get; set; }
@@ -70,6 +72,9 @@ namespace GSC.Data.Dto.Screening
 
     }
 
-
-   
+    public class ScreeningTemplateRepeat
+    {
+        public int ScreeningTemplateId { get; set; }
+        public string ScreeningTemplateName { get; set; }
+    }
 }

@@ -143,11 +143,13 @@ namespace GSC.Respository.Project.Design
                     IsSchedule = t.IsSchedule,
                     StudyVersion = t.StudyVersion,
                     InActiveVersion = t.InActiveVersion,
+                    DisplayName=t.DisplayName,
                     Templates = t.Templates.Where(a => a.DeletedDate == null).Select(b => new InsertScreeningTemplate
                     {
                         ProjectDesignTemplateId = b.Id,
                         StudyVersion = b.StudyVersion,
-                        InActiveVersion = b.InActiveVersion
+                        InActiveVersion = b.InActiveVersion,
+                        ScreeningTemplateName=b.TemplateName
                     }).ToList()
                 }).ToList();
 
