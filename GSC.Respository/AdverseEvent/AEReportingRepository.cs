@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.AdverseEvent;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -209,8 +211,12 @@ namespace GSC.Respository.AdverseEvent
                 }
                 else
                 {
-                    var parentscreeningTemplateId = _screeningTemplateRepository.FindBy(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.ParentId == null).ToList().FirstOrDefault().Id;
-                    var repeatScreeningTemplate = _screeningTemplateRepository.TemplateRepeat(parentscreeningTemplateId);
+                    var parentscreeningTemplate = _screeningTemplateRepository.FindBy(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.ParentId == null).ToList().FirstOrDefault();
+                    // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                    ScreeningTemplateRepeat screeningTemplate = new ScreeningTemplateRepeat();
+                    screeningTemplate.ScreeningTemplateId = parentscreeningTemplate.Id;
+                    screeningTemplate.ScreeningTemplateName = parentscreeningTemplate.ScreeningTemplateName;
+                    var repeatScreeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate);
                     _uow.Save();
                     data.ScreeningTemplateId = repeatScreeningTemplate.Id;
                     data.Status = repeatScreeningTemplate.Status;

@@ -34,6 +34,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
         public bool IsNonCRF { get; set; }
+        public string DisplayName { get; set; }
         public List<InsertScreeningTemplate> Templates { get; set; }
     }
 
@@ -42,6 +43,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
+        public string ScreeningTemplateName { get; set; }
     }
 
     public class ProjectDesignVisitClone

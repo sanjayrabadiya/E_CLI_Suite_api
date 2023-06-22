@@ -198,7 +198,9 @@ namespace GSC.Respository.Screening
                {
                    ScreeningVisitId = a.Id,
                    ProjectDesignVisitId = a.ProjectDesignVisitId,
-                   VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                   VisitName = //a.ProjectDesignVisit.DisplayName 
+                   a.ScreeningVisitName
+                   + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
                    VisitStatus = a.Status.GetDescription(),
                    VisitStatusId = (int)a.Status,
                    ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
@@ -218,30 +220,30 @@ namespace GSC.Respository.Screening
                  (!a.IsSchedule || a.IsScheduleTerminate == true || a.VisitStatusId > (int)ScreeningVisitStatus.NotStarted)).ToList();
 
                 r.Visit.Where(x => x.VisitStatusId > 3).ToList().ForEach(v =>
-                 {
-                     v.IsLocked = tempTemplates.Any(x => x.IsLocked == false && x.ScreeningVisitId == v.ScreeningVisitId) ? false : true;
-                     v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
-                     v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
+                {
+                    v.IsLocked = tempTemplates.Any(x => x.IsLocked == false && x.ScreeningVisitId == v.ScreeningVisitId) ? false : true;
+                    v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
+                    v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
 
-                     v.MyQuery = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && (
-                     x.AcknowledgeLevel == workflowlevel.LevelNo ||
-                     ((x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.Reopened) && workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate) ||
-                     ((x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.Answered) && workflowlevel.LevelNo == 0 && x.UserRoleId == _jwtTokenAccesser.RoleId)
-                     )).Sum(t => t.TotalQuery);
+                    v.MyQuery = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && (
+                    x.AcknowledgeLevel == workflowlevel.LevelNo ||
+                    ((x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.Reopened) && workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate) ||
+                    ((x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.Answered) && workflowlevel.LevelNo == 0 && x.UserRoleId == _jwtTokenAccesser.RoleId)
+                    )).Sum(t => t.TotalQuery);
 
-                     v.ReOpen = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Reopened).Sum(t => t.TotalQuery);
-                     v.Open = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Open).Sum(t => t.TotalQuery);
-                     v.Answered = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Answered).Sum(t => t.TotalQuery);
-                     v.Resolved = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Resolved).Sum(t => t.TotalQuery);
-                     v.Closed = closeQueries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId).Sum(t => t.TotalQuery);
-                     v.SelfCorrection = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.SelfCorrection).Sum(t => t.TotalQuery);
-                     v.Acknowledge = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel != x.ReviewLevel && (x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.SelfCorrection)).Sum(t => t.TotalQuery);
-                     v.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
-                     {
-                         LevelNo = x.LevelNo,
-                         Count = templates.Where(a => a.ScreeningEntryId == r.ScreeningEntryId && a.ScreeningVisitId == v.ScreeningVisitId && a.ReviewLevel == x.LevelNo).Sum(t => t.TotalTemplate)
-                     }).ToList();
-                 });
+                    v.ReOpen = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Reopened).Sum(t => t.TotalQuery);
+                    v.Open = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Open).Sum(t => t.TotalQuery);
+                    v.Answered = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Answered).Sum(t => t.TotalQuery);
+                    v.Resolved = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Resolved).Sum(t => t.TotalQuery);
+                    v.Closed = closeQueries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId).Sum(t => t.TotalQuery);
+                    v.SelfCorrection = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.SelfCorrection).Sum(t => t.TotalQuery);
+                    v.Acknowledge = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel != x.ReviewLevel && (x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.SelfCorrection)).Sum(t => t.TotalQuery);
+                    v.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
+                    {
+                        LevelNo = x.LevelNo,
+                        Count = templates.Where(a => a.ScreeningEntryId == r.ScreeningEntryId && a.ScreeningVisitId == v.ScreeningVisitId && a.ReviewLevel == x.LevelNo).Sum(t => t.TotalTemplate)
+                    }).ToList();
+                });
 
                 r.NotStarted = r.Visit.Sum(x => x.NotStarted);
                 r.InProgress = r.Visit.Sum(x => x.InProgress);
@@ -284,7 +286,10 @@ namespace GSC.Respository.Screening
                      ScreeningVisitId = t.ScreeningVisitId,
                      ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                      Status = t.Status,
-                     ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                     ScreeningTemplateName = t.ScreeningTemplateName,
+
+                     //ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
                      DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                      DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                      Progress = t.Progress ?? 0,
@@ -293,8 +298,10 @@ namespace GSC.Respository.Screening
                      MyReview = false,
                      ParentId = t.ParentId,
                      ScheduleDate = t.ScheduleDate,
-                     TemplateName = t.ProjectDesignTemplate.TemplateName,
-                     VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                     TemplateName = t.ScreeningTemplateName,
+                     // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                     VisitName = t.ScreeningVisit.ScreeningVisitName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
@@ -332,7 +339,8 @@ namespace GSC.Respository.Screening
                 ScreeningVisitId = t.ScreeningVisitId,
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
-                ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                ScreeningTemplateName = t.ScreeningTemplateName,
                 DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                 DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                 Progress = t.Progress ?? 0,
@@ -341,8 +349,10 @@ namespace GSC.Respository.Screening
                 MyReview = false,
                 ParentId = t.ParentId,
                 ScheduleDate = t.ScheduleDate,
-                TemplateName = t.ProjectDesignTemplate.TemplateName,
-                VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                TemplateName = t.ScreeningTemplateName,
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                VisitName = t.ScreeningVisit.ScreeningVisitName,
                 SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
@@ -373,7 +383,8 @@ namespace GSC.Respository.Screening
                      ScreeningVisitId = t.ScreeningVisitId,
                      ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                      Status = t.Status,
-                     ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                     ScreeningTemplateName = t.ScreeningTemplateName,
                      DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                      DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                      Progress = t.Progress ?? 0,
@@ -382,8 +393,10 @@ namespace GSC.Respository.Screening
                      MyReview = false,
                      ParentId = t.ParentId,
                      ScheduleDate = t.ScheduleDate,
-                     TemplateName = t.ProjectDesignTemplate.TemplateName,
-                     VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                     TemplateName = t.ScreeningTemplateName,
+                     // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                     VisitName = t.ScreeningVisit.ScreeningVisitName,
                      SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
@@ -411,7 +424,8 @@ namespace GSC.Respository.Screening
                         ScreeningVisitId = t.ScreeningVisitId,
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                         Status = t.Status,
-                        ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                        // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                        ScreeningTemplateName = t.ScreeningTemplateName,
                         DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                         DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                         Progress = t.Progress ?? 0,
@@ -420,8 +434,10 @@ namespace GSC.Respository.Screening
                         MyReview = false,
                         ParentId = t.ParentId,
                         ScheduleDate = t.ScheduleDate,
-                        TemplateName = t.ProjectDesignTemplate.TemplateName,
-                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                        // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                        TemplateName = t.ScreeningTemplateName,
+                        // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                        VisitName = t.ScreeningVisit.ScreeningVisitName,
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
@@ -453,7 +469,8 @@ namespace GSC.Respository.Screening
                         ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                         ProjectDesignPeriodId = t.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId,
                         Status = t.Status,
-                        ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                        // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                        ScreeningTemplateName = t.ScreeningTemplateName,
                         DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder.ToString() : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                         DesignOrderForOrderBy = t.RepeatSeqNo == null ? t.ProjectDesignTemplate.DesignOrder : Convert.ToDecimal(t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString()),
                         Progress = t.Progress ?? 0,
@@ -462,8 +479,10 @@ namespace GSC.Respository.Screening
                         MyReview = false,
                         ParentId = t.ParentId,
                         ScheduleDate = t.ScheduleDate,
-                        TemplateName = t.ProjectDesignTemplate.TemplateName,
-                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ? "" : "-" + t.ScreeningVisit.RepeatedVisitNumber),
+                        // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                        TemplateName = t.ScreeningTemplateName,
+                        // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                        VisitName = t.ScreeningVisit.ScreeningVisitName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ? "" : "-" + t.ScreeningVisit.RepeatedVisitNumber),
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
@@ -523,7 +542,8 @@ namespace GSC.Respository.Screening
               {
                   ScreeningVisitId = a.Id,
                   ProjectDesignVisitId = a.ProjectDesignVisitId,
-                  VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                  VisitName = a.ScreeningVisitName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                  //a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
                   VisitStatus = a.Status.GetDescription(),
                   VisitStatusId = (int)a.Status,
                   ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,

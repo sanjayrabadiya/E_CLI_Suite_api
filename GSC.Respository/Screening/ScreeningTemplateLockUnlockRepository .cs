@@ -59,9 +59,11 @@ namespace GSC.Respository.Screening
                 //AttendanceId = x.ScreeningEntry.Attendance.Id,
                 ProjectDesignTemplateId = x.ScreeningTemplate.ScreeningVisit.Id,
                 VisitId = x.ScreeningTemplate.ScreeningVisitId,
-                VisitName = x.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
-                ProjectDesignTemplateName = x.ScreeningTemplate.RepeatSeqNo == null && x.ScreeningTemplate.ParentId == null ? x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + x.ScreeningTemplate.ProjectDesignTemplate.TemplateName
-                                            : x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder+ "." + x.ScreeningTemplate.RepeatSeqNo + " " + x.ScreeningTemplate.ProjectDesignTemplate.TemplateName,                
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                VisitName = x.ScreeningTemplate.ScreeningVisit.ScreeningVisitName + Convert.ToString(x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                ProjectDesignTemplateName = x.ScreeningTemplate.RepeatSeqNo == null && x.ScreeningTemplate.ParentId == null ? x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + x.ScreeningTemplate.ScreeningTemplateName
+                                            : x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder+ "." + x.ScreeningTemplate.RepeatSeqNo + " " + x.ScreeningTemplate.ScreeningTemplateName,                
                 DesignOrder = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder.ToString(),
                 ScreeningTemplateParentId = x.ScreeningTemplate.ParentId,
                 ScreeningTemplateId = x.ScreeningTemplateId,

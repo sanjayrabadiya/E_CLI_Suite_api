@@ -392,9 +392,11 @@ namespace GSC.Respository.Screening
                  QueryStatus = t.QueryStatus,
                  OldValue = t.OldValue,
                  QueryDescription = t.Note,
-                 ScreeningTemplateValue = t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null && t.ScreeningTemplateValue.ScreeningTemplate.ParentId == null ? t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
-                                            : t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo + " " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
-                 Visit = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                 // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                 ScreeningTemplateValue = t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null && t.ScreeningTemplateValue.ScreeningTemplate.ParentId == null ? t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName
+                                            : t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo + " " + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName,
+                 // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                 Visit = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                                          Convert.ToString(t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                  FieldName = t.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
                  CollectionSource = t.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
@@ -472,9 +474,11 @@ namespace GSC.Respository.Screening
                     QueryStatus = t.QueryStatus,
                     OldValue = t.OldValue,
                     QueryDescription = t.Note,
-                    ScreeningTemplateValue = t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null && t.ScreeningTemplateValue.ScreeningTemplate.ParentId == null ? t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
-                                              : t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo + " " + t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
-                    Visit = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                    // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                    ScreeningTemplateValue = t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null && t.ScreeningTemplateValue.ScreeningTemplate.ParentId == null ? t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName
+                                              : t.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + t.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo + " " + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName,
+                    // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                    Visit = t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                                            Convert.ToString(t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + t.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                     FieldName = t.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
                     CollectionSource = t.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
@@ -813,7 +817,8 @@ namespace GSC.Respository.Screening
             && r.DeletedDate == null && r.Status > ScreeningVisitStatus.ReSchedule).Select(t => new
             {
                 ProjectDesignVisitId = t.ProjectDesignVisitId,
-                VisitName = t.ProjectDesignVisit.DisplayName
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                VisitName = t.ScreeningVisitName
             }).Distinct().ToList();
 
             var result = visitData.Select(r => new DashboardQueryStatusDto
@@ -899,10 +904,12 @@ namespace GSC.Respository.Screening
                               ScreeningEntryId = screeningValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
                               IsSystem = screeningValue.IsSystem,
                               DesignOrder = screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
+                              // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                               ProjectDesignTemplateName = screeningValue.ScreeningTemplate.RepeatSeqNo == null && screeningValue.ScreeningTemplate.ParentId == null ?
-                                 screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName
-                                            : screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + screeningValue.ScreeningTemplate.RepeatSeqNo + " " + screeningValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
-                              Visit = screeningValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                                 screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + ". " + screeningValue.ScreeningTemplate.ScreeningTemplateName
+                                            : screeningValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder + "." + screeningValue.ScreeningTemplate.RepeatSeqNo + " " + screeningValue.ScreeningTemplate.ScreeningTemplateName,
+                              // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                              Visit = screeningValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                                          Convert.ToString(screeningValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "-" + screeningValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                               FieldName = screeningValue.ProjectDesignVariable.VariableName,
                               ProjectDesignVariableId = screeningValue.ProjectDesignVariableId,
