@@ -216,7 +216,7 @@ namespace GSC.Respository.Screening
                         {
                             if (numbersetting.KitCreationType == KitCreationType.KitWise)
                             {
-                                if (numbersetting.IsUploadWithKit)
+                                if (numbersetting.IsDoseWiseKit)
                                 {
                                     var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
                                  && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).Select(s => s.KitNo).ToList();
