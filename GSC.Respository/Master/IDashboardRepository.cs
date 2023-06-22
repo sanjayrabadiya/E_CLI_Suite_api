@@ -48,5 +48,6 @@ namespace GSC.Respository.Master
         dynamic GetEnrolledGraph(int projectId, int countryId, int siteId);
         dynamic GetScreenedGraph(int projectId, int countryId, int siteId);
         dynamic GetRandomizedGraph(int projectId, int countryId, int siteId);
+        dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId);
     }
 }

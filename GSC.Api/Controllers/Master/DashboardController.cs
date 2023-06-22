@@ -381,6 +381,12 @@ namespace GSC.Api.Controllers.Master
             var result = _dashboardRepository.GetRandomizedGraph(projectId, countryId, siteId);
             return Ok(result);
         }
+        [HttpGet]
+        [Route("GetIMPShipmentDetailsCount/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetIMPShipmentDetailsCount(projectId, countryId, siteId));
+        }
 
     }
 }

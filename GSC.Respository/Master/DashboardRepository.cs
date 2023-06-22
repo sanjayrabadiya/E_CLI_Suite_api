@@ -1477,7 +1477,7 @@ namespace GSC.Respository.Master
                 s.DisplayName = "Forecast";
                 s.Total = 100 - r.Total;
                 engraph.Add(s);
-                                
+
                 return engraph;
             }
         }
@@ -1590,6 +1590,28 @@ namespace GSC.Respository.Master
             }
         }
         #endregion
+
+        public dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                .Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+
+            var ImpReceiptCount = ImpReceipt.Count();
+
+            var shipmentdata = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
+                .Where(s => projectIds.Contains((int)s.SupplyManagementRequest.FromProjectId)
+                && !ImpReceipt.Select(a => a.SupplyManagementShipmentId).Contains(s.Id) && s.Status == SupplyMangementShipmentStatus.Approved).ToList();
+
+            var ImpShipmentCount = shipmentdata.Count();
+
+            var ImpRequestedCount = _context.SupplyManagementRequest.Where(s => projectIds.Contains((int)s.FromProjectId) && s.DeletedDate == null
+                                   && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
+
+
+            return new { ImpRequestedCount, ImpShipmentCount, ImpReceiptCount };
+        }
 
     }
 }
