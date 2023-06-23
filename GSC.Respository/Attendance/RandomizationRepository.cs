@@ -2604,5 +2604,25 @@ namespace GSC.Respository.Attendance
 
             return obj;
         }
+
+        public List<ScreeningVisitForSubject> GetPatientVisitsForMobile()
+        {
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            if (randomization != null)
+            {
+                var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
+                            Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && (!x.IsSchedule || x.IsScheduleTerminate == true || x.Status > ScreeningVisitStatus.NotStarted) && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null).
+                            Select(a => new ScreeningVisitForSubject
+                            {
+                                VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                                VisitStatus = a.Status.GetDescription(),
+                                ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
+                                OffOnSite = a.ProjectDesignVisit.OffSite
+                            }).ToList();
+
+                return data;
+            }
+            return null;
+        }
     }
 }
