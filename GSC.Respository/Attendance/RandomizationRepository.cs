@@ -2611,7 +2611,7 @@ namespace GSC.Respository.Attendance
             if (randomization != null)
             {
                 var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
-                            Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && (!x.IsSchedule || x.IsScheduleTerminate == true || x.Status > ScreeningVisitStatus.NotStarted) && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null).
+                            Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && (!x.IsSchedule || x.IsScheduleTerminate == true) && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null && (int)x.Status > 1).
                             Select(a => new ScreeningVisitForSubject
                             {
                                 VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
