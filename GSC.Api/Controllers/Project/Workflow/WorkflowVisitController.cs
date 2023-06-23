@@ -4,6 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.Workflow;
+using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.Workflow;
 using GSC.Domain.Context;
 using GSC.Respository.Project.Design;
@@ -12,6 +13,7 @@ using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GSC.Api.Controllers.Project.Workflow
@@ -74,48 +76,14 @@ namespace GSC.Api.Controllers.Project.Workflow
             return Ok();
         }
 
+        [TransactionRequired]
         [HttpPut]
         public IActionResult Put([FromBody] WorkflowVisitDto workflowVisitDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var workflowVisit = _mapper.Map<WorkflowVisit>(workflowVisitDto);
+            _workflowVisitRepository.updatePermission(workflowVisitDto);
 
-            var workFlowVis = _context.WorkflowVisit.Where(x => x.IsIndependent == workflowVisitDto.IsIndependent && x.ProjectWorkflowIndependentId
-               == workflowVisitDto.ProjectWorkflowIndependentId && x.ProjectWorkflowLevelId == workflowVisitDto.ProjectWorkflowLevelId).ToList();
-
-            workFlowVis.ForEach(z => {
-                z.DeletedDate=_jwtTokenAccesser.GetClientDate();
-                z.DeletedBy = _jwtTokenAccesser.UserId;
-                _workflowVisitRepository.Update(z);
-            });
-
-            foreach (var item in workflowVisitDto.ProjectDesignVisitIds)
-            {
-                var result = workflowVisit.DeepCopy();
-                result.ProjectDesignVisitId = item;
-                _workflowVisitRepository.Add(result);
-            }
-
-
-            //foreach (var item in workflowVisitDto.ProjectDesignVisitIds)
-            //{
-
-
-            //    if(workFlowVis==null)
-            //    {
-            //        workflowVisit.ProjectDesignVisitId = item;
-            //        _workflowVisitRepository.Add(workflowVisit);
-            //    }
-
-            //    workflowVisit.ProjectDesignVisitId = item;
-
-
-
-            //    _workflowVisitRepository.Add(workflowVisit);
-            //}
-
-            _uow.Save();
             return Ok();
         }
     }
