@@ -36,7 +36,7 @@ namespace GSC.Respository.Project.EditCheck
                 ByAnnotation = c.ByAnnotation,
                 ProjectDesignId = c.EditCheck.ProjectDesignId,
                 ProjectDesignTemplateId = c.ProjectDesignTemplateId,
-                ProjectDesignVisitId = c.ProjectDesignVariable != null
+                ProjectDesignVisitId = c.ProjectDesignVariableId == null ? c.ProjectDesignVisitId : c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.Id
                      : c.ProjectDesignTemplate.ProjectDesignVisit.Id,
                 ProjectDesignPeriodId = c.ProjectDesignVariable != null
@@ -57,12 +57,12 @@ namespace GSC.Respository.Project.EditCheck
                 Message = c.Message,
                 ExtraData = c.EditCheck.IsFormula ? null : _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
                 QueryFormula = c.QueryFormula,
-                PeriodName = c.ProjectDesignVariable != null
+                PeriodName = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.ProjectDesignPeriod.DisplayName : c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
                      : "",
                 TemplateName = c.ProjectDesignTemplate.TemplateName,
                 VariableName = c.ProjectDesignVariable.VariableName,
-                VisitName = c.ProjectDesignVariable != null
+                VisitName = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.DisplayName : c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                      : "",
                 FetchingProjectDesignTemplateId = c.FetchingProjectDesignTemplateId,

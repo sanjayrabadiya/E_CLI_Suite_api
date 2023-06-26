@@ -133,10 +133,10 @@ namespace GSC.Respository.Project.EditCheck
                      CheckByName = c.CheckBy.GetDescription(),
                      ByAnnotation = c.ByAnnotation,
                      ProjectDesignTemplateId = c.ProjectDesignTemplateId,
-                     ProjectDesignVisitId = c.ProjectDesignVariable != null
+                     ProjectDesignVisitId = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisitId : c.ProjectDesignVariable != null
                          ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.Id
                          : c.ProjectDesignTemplate.ProjectDesignVisit.Id,
-                     ProjectDesignPeriodId = c.ProjectDesignVariable != null
+                     ProjectDesignPeriodId = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.ProjectDesignPeriodId : c.ProjectDesignVariable != null
                          ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId
                          : c.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
                      ProjectDesignVariableId = c.ProjectDesignVariableId,
@@ -159,16 +159,16 @@ namespace GSC.Respository.Project.EditCheck
                      ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
                      Message = c.Message,
                      QueryFormula = c.QueryFormula,
-                     PeriodName = c.ProjectDesignVariable != null
+                     PeriodName = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.ProjectDesignPeriod.DisplayName : c.ProjectDesignVariable != null
                          ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
                              .DisplayName
                          : "",
                      TemplateName = c.ProjectDesignTemplate.TemplateName,
                      VariableName = c.ProjectDesignVariable.VariableName,
-                     VisitName = c.ProjectDesignVariable != null
+                     VisitName = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.DisplayName : c.ProjectDesignVariable != null
                          ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                          : "",
-                     FieldName = c.CheckBy == EditCheckRuleBy.ByTemplate
+                     FieldName = c.CheckBy == EditCheckRuleBy.ByVisit ? c.ProjectDesignVisit.DisplayName : c.CheckBy == EditCheckRuleBy.ByTemplate
                          ?
                          c.ProjectDesignTemplate.ProjectDesignVisit.DisplayName + "." +
                          c.ProjectDesignTemplate.TemplateName
@@ -336,7 +336,7 @@ namespace GSC.Respository.Project.EditCheck
                              .DisplayName : "",
                     TemplateName = r.ProjectDesignTemplate.TemplateName,
                     VariableName = string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation,
-                    VisitName = r.ProjectDesignVariable != null
+                    VisitName = r.ProjectDesignVisitId > 0 ? r.ProjectDesignVisit.DisplayName : r.ProjectDesignVariable != null
                          ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                          : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
                     Operator = r.Operator,
@@ -364,14 +364,14 @@ namespace GSC.Respository.Project.EditCheck
 
 
 
-                var name = (x.CheckBy == EditCheckRuleBy.ByTemplate ?
+                var name = (x.CheckBy == EditCheckRuleBy.ByVisit ? x.VisitName : (x.CheckBy == EditCheckRuleBy.ByTemplate ?
                      x.PeriodName + "." + x.VisitName + "." + x.TemplateName :
                      x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation ?
                          x.DomainName :
                       x.CheckBy == EditCheckRuleBy.ByVariableAnnotation
                             ? x.VariableAnnotation :
                              x.PeriodName + "." + x.VisitName + "." +
-                             x.TemplateName + "." + x.VariableName);
+                             x.TemplateName + "." + x.VariableName));
 
                 var operatorName = x.Operator.GetDescription();
 

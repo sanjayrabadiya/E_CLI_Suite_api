@@ -350,6 +350,9 @@ namespace GSC.Helper
 
         [Description("By Variable Rule")]
         ByVariableRule = 5,
+
+        [Description("By Visit")]
+        ByVisit = 6
     }
 
     public enum Operator : short
