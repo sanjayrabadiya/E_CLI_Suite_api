@@ -160,5 +160,6 @@ namespace GSC.Data.Dto.Attendance
         public string VisitStatus { get; set; }
         public DateTime? ActualDate { get; set; }
         public bool OffOnSite { get; set; }
+        public DateTime? ScheduleDate { get; set; }
     }
 }
