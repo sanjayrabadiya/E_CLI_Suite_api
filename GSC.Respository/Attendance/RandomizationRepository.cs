@@ -2617,7 +2617,8 @@ namespace GSC.Respository.Attendance
                                 VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
                                 VisitStatus = a.Status.GetDescription(),
                                 ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
-                                OffOnSite = a.ProjectDesignVisit.OffSite
+                                OffOnSite = a.ProjectDesignVisit.OffSite,
+                                ScheduleDate = a.ScheduleDate
                             }).ToList();
 
                 return data;
