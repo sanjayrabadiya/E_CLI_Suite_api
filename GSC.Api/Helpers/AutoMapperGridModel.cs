@@ -759,6 +759,12 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignVariable.Note))
            .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
            .ReverseMap();
+
+            CreateMap<VisitEmailConfiguration, VisitEmailConfigurationGridDto>()
+              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+              .ForMember(x => x.UserRoles, x => x.MapFrom(a => string.Join(",", a.VisitEmailConfigurationRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList())))
+              .ForMember(x => x.VisitStatus, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
+              .ReverseMap();
         }
     }
 }

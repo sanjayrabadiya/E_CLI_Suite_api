@@ -594,6 +594,7 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "ScreeningVisitName", DisplayName = "Screening Visit Name" });
             _dictionaries.Add(new Dictionary { FieldName = "IsVisitBase", DisplayName = "Visit Base Workflow" });
+            _dictionaries.Add(new Dictionary { FieldName = "LevelNo", DisplayName = "Level No" });
 
         }
 
