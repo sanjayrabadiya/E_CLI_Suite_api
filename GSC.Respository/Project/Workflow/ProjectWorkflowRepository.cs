@@ -70,6 +70,23 @@ namespace GSC.Respository.Project.Workflow
 
         }
 
+        public short GetTemplateWorkFlow(int projectDesignTemplateId, int projectDesignId, short levelNo)
+        {
+            var result = _context.WorkflowTemplate.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId
+           && x.DeletedDate == null).Select(r => r.LevelNo).ToList();
+
+            if (result.Count() == 0)
+                return 0;
+
+            var level = result.Where(x => x > (int)levelNo).Min(a => a);
+
+            if (level == 0)
+                return (short)(GetMaxWorkFlowLevel(projectDesignId) + 1);
+
+            return (short)level;
+
+        }
+
 
         public short GetMaxLevelWorkBreak(int projectDesignId)
         {

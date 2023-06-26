@@ -146,8 +146,10 @@ namespace GSC.Respository.Screening
             else if (updateQueryStatus == QueryStatus.Resolved)
             {
                 var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
-
-                if (workFlowLevel.IsNoCRF)
+                var templateLevel = _projectWorkflowRepository.GetTemplateWorkFlow(screeningTemplate.ProjectDesignTemplateId, workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+                if (templateLevel > 0)
+                    screeningTemplateValue.AcknowledgeLevel = templateLevel;
+                else if (workFlowLevel.IsNoCRF)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
                 else if (workFlowLevel.IsVisitBase)
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
@@ -260,9 +262,10 @@ namespace GSC.Respository.Screening
             var screeningTemplate = _context.ScreeningTemplate.Find(screeningTemplateValue.ScreeningTemplateId);
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
-
-
-            if (workFlowLevel.IsNoCRF)
+            var templateLevel = _projectWorkflowRepository.GetTemplateWorkFlow(screeningTemplate.ProjectDesignTemplateId, workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
+            if (templateLevel > 0)
+                screeningTemplateValue.AcknowledgeLevel = templateLevel;
+            else if (workFlowLevel.IsNoCRF)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
             else if (workFlowLevel.IsVisitBase)
                 screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
@@ -312,8 +315,10 @@ namespace GSC.Respository.Screening
                 screeningTemplateValue.QueryStatus = QueryStatus.SelfCorrection;
                 screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
 
-
-                if (workFlowLevel.IsNoCRF)
+                var templateLevel = _projectWorkflowRepository.GetTemplateWorkFlow(screeningTemplate.ProjectDesignTemplateId, workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
+                if (templateLevel > 0)
+                    screeningTemplateValue.AcknowledgeLevel = templateLevel;
+                else if (workFlowLevel.IsNoCRF)
                 {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetNoCRFLevel(workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                     if (workFlowLevel.LevelNo > 0 && screeningTemplateValue.AcknowledgeLevel < screeningTemplate.ReviewLevel)

@@ -213,11 +213,13 @@ namespace GSC.Api.Controllers.Screening
 
             var basicProjectDesignVisit = _screeningTemplateRepository.GetProjectDesignId(id);
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(basicProjectDesignVisit.ProjectDesignId);
+            var templateLevel = _projectWorkflowRepository.GetTemplateWorkFlow(screeningTemplate.ProjectDesignTemplateId, basicProjectDesignVisit.ProjectDesignId, 0);
 
             screeningTemplate.ReviewLevel = 1;
             screeningTemplate.StartLevel = -1;
-
-            if (basicProjectDesignVisit.IsNonCRF)
+            if (templateLevel > 0)
+                screeningTemplate.ReviewLevel = templateLevel;
+            else if (basicProjectDesignVisit.IsNonCRF)
                 screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(basicProjectDesignVisit.ProjectDesignId, (short)screeningTemplate.StartLevel);
             else if (workflowlevel.IsVisitBase)
                 screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetVisitLevel(basicProjectDesignVisit.ProjectDesignVisitId, basicProjectDesignVisit.ProjectDesignId, 0);
