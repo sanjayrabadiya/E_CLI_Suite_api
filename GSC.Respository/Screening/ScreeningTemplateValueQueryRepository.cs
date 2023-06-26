@@ -180,9 +180,6 @@ namespace GSC.Respository.Screening
 
             var workFlowLevel = GetReviewLevel(screeningTemplateValue.ScreeningTemplateId);
             screeningTemplateValue.ReviewLevel = workFlowLevel.LevelNo;
-            if (workFlowLevel.IsVisitBase)
-                screeningTemplateValue.ReviewLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, workFlowLevel.LevelNo);
-
             screeningTemplateValue.QueryStatus = QueryStatus.Open;
 
             screeningTemplateValueQuery.Value = value;
@@ -323,7 +320,7 @@ namespace GSC.Respository.Screening
                         screeningTemplateValue.AcknowledgeLevel += 1;
                 }
                 else if (workFlowLevel.IsVisitBase)
-                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, 1);
+                    screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetVisitLevel(workFlowLevel.ProjectDesignVisitId, workFlowLevel.ProjectDesignId, Convert.ToInt16(workFlowLevel.LevelNo == 1 ? 1 : 0));
                 else if (workFlowLevel.IsWorkFlowBreak)
                 {
                     screeningTemplateValue.AcknowledgeLevel = _projectWorkflowRepository.GetMaxLevelWorkBreak(workFlowLevel.ProjectDesignId);

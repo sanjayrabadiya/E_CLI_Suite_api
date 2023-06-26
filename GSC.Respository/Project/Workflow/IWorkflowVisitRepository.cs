@@ -9,5 +9,6 @@ namespace GSC.Respository.Project.Workflow
     public interface IWorkflowVisitRepository : IGenericRepository<WorkflowVisit>
     {
         List<int> GetDetailById(WorkflowVisitDto workflowVisitDto);
+        void updatePermission(WorkflowVisitDto workflowVisitDto);
     }
 }

@@ -77,5 +77,7 @@ namespace GSC.Respository.Attendance
         void RevertKitData(RandomizationDto obj);
 
         RandomizationDto CheckDuplicateRandomizationNumberIWRS(RandomizationDto obj, RandomizationNumberSettings numerformate);
+
+        List<ScreeningVisitForSubject> GetPatientVisitsForMobile();
     }
 }

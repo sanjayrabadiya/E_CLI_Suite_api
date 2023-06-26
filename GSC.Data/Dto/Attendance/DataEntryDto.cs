@@ -154,4 +154,11 @@ namespace GSC.Data.Dto.Attendance
         public int ScreeningEntryId { get; set; }
     }
 
+    public class ScreeningVisitForSubject
+    {
+        public string VisitName { get; set; }
+        public string VisitStatus { get; set; }
+        public DateTime? ActualDate { get; set; }
+        public bool OffOnSite { get; set; }
+    }
 }

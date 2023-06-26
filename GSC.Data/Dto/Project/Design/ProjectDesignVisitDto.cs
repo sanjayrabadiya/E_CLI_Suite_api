@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? StudyVersion { get; set; }
         public string PreLabel { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
+        public bool OffSite { get; set; }
     }
 
 
