@@ -292,7 +292,11 @@ namespace GSC.Data.Dto.ProjectRight
         public string X { get; set; }
         public int Y { get; set; }
     }
-
+    public class TreatmentvsArms
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
+    }
     public class DynamicAeChartData
     {
         public string VariableName { get; set; }
@@ -301,6 +305,26 @@ namespace GSC.Data.Dto.ProjectRight
         public int ScreeningTemplateId { get; set; }
         public string Value { get; set; }
         public int ProjectDesignVariableId { get; set; }
+    }
+
+    public class FactoreDashboardModel
+    {
+        public string ScreeningNo { get; set; }
+        public string RandomizationNo { get; set; }
+        public string Genderfactor { get; set; }
+        public string Diatoryfactor { get; set; }
+
+        public string Jointfactor { get; set; }
+
+        public string Eligibilityfactor { get; set; }
+
+        public string Agefactor { get; set; }
+        public string BMIfactor { get; set; }
+        public string ProductCode { get; set; }
+
+        public string Weightfactor { get; set; }
+
+        public string Dosefactor { get; set; }
     }
 
 }

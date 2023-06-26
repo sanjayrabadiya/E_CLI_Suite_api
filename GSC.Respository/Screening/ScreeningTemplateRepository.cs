@@ -1689,7 +1689,7 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
                 _screeningTemplateValueRepository.UpdateDefaultValue(designTemplateDto.Variables, screeningTemplateId);
 
-            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending || screeningTemplateBasic.Status == ScreeningTemplateStatus.InProcess)
                 _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
 
             if (!firstTime)

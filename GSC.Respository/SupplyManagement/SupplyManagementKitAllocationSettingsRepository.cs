@@ -56,7 +56,7 @@ namespace GSC.Respository.SupplyManagement
         public IList<DropDownDto> GetVisitDropDownByProjectId(int projectId)
         {
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
-                         && x.IsNonCRF == false
+                        
                          && x.DeletedDate == null && x.InActiveVersion == null)
                     .Select(x => new DropDownDto
                     {

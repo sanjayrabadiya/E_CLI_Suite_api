@@ -1615,5 +1615,51 @@ namespace GSC.Respository.Master
 
             return new { ImpRequestedCount, ImpShipmentCount, ImpReceiptCount };
         }
+
+        public List<TreatmentvsArms> GetTreatmentvsArmData(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var data = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Include(s => s.Randomization)
+                .Where(x => x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                 && x.Randomization != null && x.SupplyManagementUploadFile.ProjectId == projectId).ToList();
+            var r = new List<TreatmentvsArms>();
+            if (countryId > 0 || siteId > 0)
+            {
+                data = data.Where(s => projectIds.Contains(s.Randomization.ProjectId)).ToList();
+            }
+            var treatment = data.Select(s => s.TreatmentType).Distinct().ToList();
+            foreach (var item in treatment)
+            {
+                var result = new TreatmentvsArms();
+                result.Name = item;
+                result.Count = data.Where(e => e.TreatmentType == item).ToList().Count();
+                r.Add(result);
+            }
+            return r;
+        }
+
+        public List<FactoreDashboardModel> GetFactorDataReportDashbaord(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var data = _context.Randomization.Where(s => s.RandomizationNumber != null && projectIds.Contains(s.ProjectId)).Select(s => new FactoreDashboardModel
+            {
+                RandomizationNo = s.RandomizationNumber,
+                ScreeningNo = s.ScreeningNumber,
+                Genderfactor = s.Genderfactor.GetDescription(),
+                Diatoryfactor = s.Diatoryfactor.GetDescription(),
+                Eligibilityfactor = s.Eligibilityfactor.GetDescription(),
+                Jointfactor = s.Jointfactor.GetDescription(),
+                Agefactor = s.Agefactor,
+                BMIfactor = s.BMIfactor,
+                ProductCode = s.ProductCode,
+                Dosefactor = s.Dosefactor,
+                Weightfactor = s.Weightfactor
+            }).ToList();
+
+
+
+            return data;
+        }
     }
 }

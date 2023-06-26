@@ -387,6 +387,18 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetIMPShipmentDetailsCount(projectId, countryId, siteId));
         }
+        [HttpGet]
+        [Route("GetTreatmentvsArmData/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetTreatmentvsArmData(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetTreatmentvsArmData(projectId, countryId, siteId));
+        }
 
+        [HttpGet]
+        [Route("GetFactorDataReportDashbaord/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetFactorDataReportDashbaord(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetFactorDataReportDashbaord(projectId, countryId, siteId));
+        }
     }
 }

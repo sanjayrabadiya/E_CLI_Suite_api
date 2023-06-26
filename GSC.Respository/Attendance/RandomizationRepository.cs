@@ -830,13 +830,13 @@ namespace GSC.Respository.Attendance
 
                     if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                     {
-                        kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
-                                          x.DeletedDate == null
-                                          && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
-                                          && x.SupplyManagementKIT.DeletedDate == null
-                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
-                                          && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
-                                          && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
+                        kitdata = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                                           x.DeletedDate == null
+                                           && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
+                                           && x.SupplyManagementKIT.DeletedDate == null
+                                           && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
+                                           && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                                           && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
                         randomizationNumberDto.KitCount = kitdata.Count;
 
                         if (kitdata == null || kitdata.Count == 0)
