@@ -67,7 +67,7 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementFectorGridDto> GetListByProjectId(int projectId, bool isDeleted)
         {
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectId == projectId).
+            var data = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId).
                     ProjectTo<SupplyManagementFectorGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
 
