@@ -11,15 +11,16 @@ namespace GSC.Data.Dto.Project.Design
     {
         public int ProjectDesignVisitId { get; set; }
         public string EmailBody { get; set; }
-        public string SubjectName { get; set; }
+        public string Subject { get; set; }
+        public int[] RoleId { get; set; }
         public ScreeningVisitStatus VisitStatusId { get; set; }
-        public List<VisitEmailConfigurationRoles> VisitEmailConfigurationRoles { get; set; }
+        public List<VisitEmailConfigurationRolesDto> VisitEmailConfigurationRoles { get; set; }
     }
 
     public class VisitEmailConfigurationGridDto : BaseAuditDto
     {
         public string VisitName { get; set; }
-        public string SubjectName { get; set; }
+        public string Subject { get; set; }
         public string VisitStatus { get; set; }
         public string UserRoles { get; set; }
     }

@@ -8,5 +8,6 @@ namespace GSC.Respository.Project.Design
     public interface IVisitEmailConfigurationRepository : IGenericRepository<VisitEmailConfiguration>
     {
         List<VisitEmailConfigurationGridDto> GetVisitEmailConfigurationList(bool isDeleted, int projectDesignVisitId);
+        string Duplicate(VisitEmailConfiguration objSave);
     }
 }

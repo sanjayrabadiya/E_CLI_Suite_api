@@ -10,9 +10,8 @@ namespace GSC.Data.Entities.Project.Design
     public class VisitEmailConfigurationRoles : BaseEntity, ICommonAduit
     {
         public int VisitEmailConfigurationId { get; set; }
-        public int SecurityRoleId { get;}
-
-        public SecurityRole SecurityRole { get;}
+        public int SecurityRoleId { get; set; }
+        public SecurityRole SecurityRole { get; set; }
         public VisitEmailConfiguration VisitEmailConfiguration { get; set; }
     }
 }
