@@ -510,7 +510,10 @@ namespace GSC.Api.Helpers
             CreateMap<EmailConfigurationEditCheckDetail, EmailConfigurationEditCheckDetailDto>().ReverseMap();
             CreateMap<VariableLabelLanguage, VariableLabelLanguageDto>().ReverseMap();
             CreateMap<WorkflowVisit, WorkflowVisitDto>().ReverseMap();
+            CreateMap<WorkflowTemplate, WorkflowTemplateDto>().ReverseMap();
             CreateMap<ProjectDesignVisitRestriction, ProjectDesignVisitRestrictionDto>().ReverseMap();
+            CreateMap<VisitEmailConfiguration, VisitEmailConfigurationDto>().ReverseMap();
+            CreateMap<VisitEmailConfigurationRoles, VisitEmailConfigurationRolesDto>().ReverseMap();
 
         }
     }
