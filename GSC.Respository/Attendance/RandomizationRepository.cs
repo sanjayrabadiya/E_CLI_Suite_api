@@ -282,10 +282,12 @@ namespace GSC.Respository.Attendance
                         if (!string.IsNullOrEmpty(result.ErrorMessage))
                         {
                             randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                            return randomizationNumberDto;
                         }
                         if (!string.IsNullOrEmpty(result.Result))
                         {
                             randomizationNumberDto.ErrorMessage = result.Result;
+                            return randomizationNumberDto;
                         }
                         if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
                         {
@@ -830,7 +832,7 @@ namespace GSC.Respository.Attendance
 
                     if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                     {
-                        kitdata = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                        kitdata = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
                                            x.DeletedDate == null
                                            && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                            && x.SupplyManagementKIT.DeletedDate == null
@@ -2262,7 +2264,7 @@ namespace GSC.Respository.Attendance
                     {
                         emailconfig = emailconfiglist.FirstOrDefault();
                     }
-                    var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                    var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                     if (details.Count() > 0)
                     {
                         iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault().ProjectCode;
@@ -2315,7 +2317,7 @@ namespace GSC.Respository.Attendance
                         {
                             emailconfig = emailconfiglist.FirstOrDefault();
                         }
-                        var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                        var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                         if (details.Count() > 0)
                         {
                             iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault().ProjectCode;
@@ -2576,7 +2578,7 @@ namespace GSC.Respository.Attendance
                 obj.ErrorMessage = "Kit is not available";
                 return obj;
             }
-            if (numerformate.IsIWRS == true && obj.KitDoseList.Count == 0 && obj.IsDoseWiseKit)
+            if (numerformate.IsIWRS == true && obj.KitDoseList != null && obj.KitDoseList.Count == 0 && obj.IsDoseWiseKit)
             {
                 UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = "Kit is not available";

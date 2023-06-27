@@ -1597,7 +1597,7 @@ namespace GSC.Respository.Master
         public dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-
+            int UnblindPatientCount = 0;
             var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
                 .Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
 
@@ -1612,8 +1612,42 @@ namespace GSC.Respository.Master
             var ImpRequestedCount = _context.SupplyManagementRequest.Where(s => projectIds.Contains((int)s.FromProjectId) && s.DeletedDate == null
                                    && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
 
+            var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
 
-            return new { ImpRequestedCount, ImpShipmentCount, ImpReceiptCount };
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var data = _context.SupplyManagementKITDetail
+                    .Include(x => x.SupplyManagementKIT)
+                    .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                    .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                    if (data.Count > 0)
+                    {
+
+                        data = data.Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                        if (data.Count > 0)
+                            UnblindPatientCount = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && data.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+
+                    }
+                }
+                else
+                {
+                    var kitpack = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).ThenInclude(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                             .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                    if (kitpack.Count > 0)
+                    {
+                        kitpack = kitpack.Where(s => projectIds.Contains((int)s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                        if (kitpack.Count > 0)
+                            UnblindPatientCount = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && kitpack.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+                    }
+                }
+
+            }
+
+
+
+            return new { ImpRequestedCount, ImpShipmentCount, ImpReceiptCount, UnblindPatientCount };
         }
 
         public List<TreatmentvsArms> GetTreatmentvsArmData(int projectId, int countryId, int siteId)

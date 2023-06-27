@@ -856,7 +856,7 @@ namespace GSC.Respository.EmailSender
                 str = Regex.Replace(str, "##ThresholdValue##", email.ThresholdValue.ToString(), RegexOptions.IgnoreCase);
 
             }
-            if (email.RemainingKit > 0)
+            if (email.RemainingKit > 0 || email.RemainingKit == 0)
             {
                 str = Regex.Replace(str, "##RemainingKit##", email.RemainingKit.ToString(), RegexOptions.IgnoreCase);
 
@@ -1001,7 +1001,7 @@ namespace GSC.Respository.EmailSender
             {
                 str = Regex.Replace(str, "##CurrentDate##", email.CurrentDate, RegexOptions.IgnoreCase);
             }
-            
+
             return str;
         }
     }
