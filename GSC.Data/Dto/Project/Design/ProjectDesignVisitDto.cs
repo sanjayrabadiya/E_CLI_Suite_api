@@ -53,6 +53,7 @@ namespace GSC.Data.Dto.Project.Design
         public int projectDesignPeriodId { get; set; }
         public int noOfVisits { get; set; }
         public int[] noOfTemplate { get; set; }
+        public int[] visitIds { get; set; }
     }
 
     public class BasicProjectDesignVisit
