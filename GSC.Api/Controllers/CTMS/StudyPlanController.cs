@@ -10,6 +10,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -55,7 +56,7 @@ namespace GSC.Api.Controllers.CTMS
             var lstStudyPlan = new List<StudyPlanDto>();
             lstStudyPlan.Add(studyplanDto);
 
-            var TaskMaster = _context.TaskMaster.Where(x => x.TaskTemplateId == studyplanDto.TaskTemplateId).Any(x => x.RefrenceType == Helper.RefrenceType.Sites || x.RefrenceType == Helper.RefrenceType.Sites);
+            var TaskMaster = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.TaskMaster.TaskTemplateId == studyplanDto.TaskTemplateId).Any(x => x.RefrenceType == Helper.RefrenceType.Sites || x.RefrenceType == Helper.RefrenceType.Sites);
             if (TaskMaster)
             {
                 var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == studyplanDto.ProjectId).ToList();

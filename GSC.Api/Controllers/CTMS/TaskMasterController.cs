@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -43,8 +44,12 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var task = _taskMasterRepository.Find(id);
-            var taskDto = _mapper.Map<TaskmasterDto>(task);
+            var taskmaster = _taskMasterRepository.FindByInclude(x => x.Id == id, x => x.RefrenceTypes).FirstOrDefault();
+
+            if (taskmaster != null && taskmaster.RefrenceTypes != null)
+                taskmaster.RefrenceTypes = taskmaster.RefrenceTypes.Where(x => x.DeletedDate == null).ToList();
+            //var task = _taskMasterRepository.Find(id);
+            var taskDto = _mapper.Map<TaskmasterDto>(taskmaster);
             return Ok(taskDto);
         }
 
@@ -65,8 +70,8 @@ namespace GSC.Api.Controllers.CTMS
 
             if (_uow.Save() <= 0) throw new Exception("Creating Task failed on save.");
             taskmasterDto.Id = tastMaster.Id;
+            _taskMasterRepository.AddRefrenceTypes(taskmasterDto);
             _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
-
             return Ok(tastMaster.Id);
         }
 
@@ -82,12 +87,42 @@ namespace GSC.Api.Controllers.CTMS
                 taskmaster.Duration = 0;
                 taskmaster.IsMileStone = true;
             }
+            UpdateRefrenceTypes(taskmaster);
             _taskMasterRepository.Update(taskmaster);
             if (_uow.Save() <= 0) throw new Exception("Updating Task Master failed on save.");
             _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(taskmaster.Id);
         }
 
+        private void UpdateRefrenceTypes(TaskMaster taskmaster)
+        {
+            var refrenceTypes = _context.RefrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id
+                                                               && taskmaster.RefrenceTypes.Select(x => x.Id).Contains(x.Id)
+                                                               && x.DeletedDate == null).ToList();
+            taskmaster.RefrenceTypes.ForEach(z =>
+            {
+                var role = refrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id && x.Id == z.Id).FirstOrDefault();
+                if (role == null)
+                {
+                    _context.RefrenceTypes.Add(z);
+                }
+            });
+
+            var refrenceType = _context.RefrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id && x.DeletedDate == null)
+                .ToList();
+
+            refrenceType.ForEach(t =>
+            {
+                var type = refrenceType.Where(x => x.TaskMasterId == t.TaskMasterId && x.Id == t.Id).FirstOrDefault();
+                if (refrenceType == null)
+                {
+                    //delete
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _context.RefrenceTypes.Update(t);
+                }
+            });
+        }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
@@ -102,6 +137,16 @@ namespace GSC.Api.Controllers.CTMS
 
                 _taskMasterRepository.Delete(task);
             }
+            var refrenceType = _context.RefrenceTypes.Where(x => x.TaskMasterId == id && x.DeletedDate == null).ToList();
+            refrenceType.ForEach(t =>
+            {
+                if (refrenceType != null)
+                {
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _context.RefrenceTypes.Update(t);
+                }
+            });
             _taskMasterRepository.Delete(record);
             _uow.Save();
 

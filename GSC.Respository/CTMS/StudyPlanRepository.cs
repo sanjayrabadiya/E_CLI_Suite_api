@@ -7,6 +7,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -51,23 +52,23 @@ namespace GSC.Respository.CTMS
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
 
-            var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.TaskTemplateId == studyplan.TaskTemplateId
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+            var tasklist = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.DeletedDate == null && x.TaskMaster.TaskTemplateId == studyplan.TaskTemplateId
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
-                    TaskId = t.Id,
-                    TaskName = t.TaskName,
-                    ParentId = t.ParentId,
-                    isMileStone = t.IsMileStone,
-                    TaskOrder = t.TaskOrder,
-                    Duration = t.Duration,
+                    TaskId = t.TaskMaster.Id,
+                    TaskName = t.TaskMaster.TaskName,
+                    ParentId = t.TaskMaster.ParentId,
+                    isMileStone = t.TaskMaster.IsMileStone,
+                    TaskOrder = t.TaskMaster.TaskOrder,
+                    Duration = t.TaskMaster.Duration,
                     StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
-                    DependentTaskId = t.DependentTaskId,
-                    ActivityType = t.ActivityType,
-                    OffSet = t.OffSet,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                    DependentTaskId = t.TaskMaster.DependentTaskId,
+                    ActivityType = t.TaskMaster.ActivityType,
+                    OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType
                 }).ToList();
 
@@ -198,45 +199,66 @@ namespace GSC.Respository.CTMS
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
 
-            var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == id
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+            var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
-                    TaskId = t.Id,
-                    TaskName = t.TaskName,
-                    ParentId = t.ParentId,
-                    isMileStone = t.IsMileStone,
-                    TaskOrder = t.TaskOrder,
-                    Duration = t.Duration,
+                    TaskId = t.TaskMaster.Id,
+                    TaskName = t.TaskMaster.TaskName,
+                    ParentId = t.TaskMaster.ParentId,
+                    isMileStone = t.TaskMaster.IsMileStone,
+                    TaskOrder = t.TaskMaster.TaskOrder,
+                    Duration = t.TaskMaster.Duration,
                     StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
-                    DependentTaskId = t.DependentTaskId,
-                    ActivityType = t.ActivityType,
-                    OffSet = t.OffSet,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                    DependentTaskId = t.TaskMaster.DependentTaskId,
+                    ActivityType = t.TaskMaster.ActivityType,
+                    OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType
                 }).ToList();
 
+
+            //var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == id
+            //&& (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+            //: x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
+            //    .Select(t => new StudyPlanTask
+            //    {
+            //        StudyPlanId = studyplan.Id,
+            //        TaskId = t.Id,
+            //        TaskName = t.TaskName,
+            //        ParentId = t.ParentId,
+            //        isMileStone = t.IsMileStone,
+            //        TaskOrder = t.TaskOrder,
+            //        Duration = t.Duration,
+            //        StartDate = studyplan.StartDate,
+            //        EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
+            //        DependentTaskId = t.DependentTaskId,
+            //        ActivityType = t.ActivityType,
+            //        OffSet = t.OffSet,
+            //        RefrenceType = t.RefrenceType
+            //    }).ToList();
+
             tasklist.ForEach(t =>
             {
-                var tasklist1 = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == t.DependentTaskId
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+                var tasklist1 = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == t.DependentTaskId
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
-                    TaskId = t.Id,
-                    TaskName = t.TaskName,
-                    ParentId = t.ParentId,
-                    isMileStone = t.IsMileStone,
-                    TaskOrder = t.TaskOrder,
-                    Duration = t.Duration,
+                    TaskId = t.TaskMaster.Id,
+                    TaskName = t.TaskMaster.TaskName,
+                    ParentId = t.TaskMaster.ParentId,
+                    isMileStone = t.TaskMaster.IsMileStone,
+                    TaskOrder = t.TaskMaster.TaskOrder,
+                    Duration = t.TaskMaster.Duration,
                     StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
-                    DependentTaskId = t.DependentTaskId,
-                    ActivityType = t.ActivityType,
-                    OffSet = t.OffSet,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                    DependentTaskId = t.TaskMaster.DependentTaskId,
+                    ActivityType = t.TaskMaster.ActivityType,
+                    OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType
                 }).ToList();
 

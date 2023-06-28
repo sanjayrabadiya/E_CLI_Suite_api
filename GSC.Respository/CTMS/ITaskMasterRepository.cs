@@ -15,5 +15,6 @@ namespace GSC.Respository.CTMS
         List<AuditTrailDto> GetTaskHistory(int id);
 
         string AddTaskToSTudyPlan(TaskmasterDto taskmasterDto);
+        void AddRefrenceTypes(TaskmasterDto taskmasterDto);
     }
 }
