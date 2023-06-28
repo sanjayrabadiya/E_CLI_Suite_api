@@ -50,8 +50,10 @@ namespace GSC.Respository.Master
         dynamic GetRandomizedGraph(int projectId, int countryId, int siteId);
         dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId);
         List<TreatmentvsArms> GetTreatmentvsArmData(int projectId, int countryId, int siteId);
-
         List<FactoreDashboardModel> GetFactorDataReportDashbaord(int projectId, int countryId, int siteId);
+        List<ImpShipmentGridDashboard> GetIMPShipmentDetailsData(int projectId, int countryId, int siteId);
+
+        List<TreatmentvsArms> GetVisitWiseAllocationData(int projectId, int countryId, int siteId);
 
     }
 }

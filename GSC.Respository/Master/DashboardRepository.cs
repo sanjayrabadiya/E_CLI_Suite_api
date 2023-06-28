@@ -1695,5 +1695,130 @@ namespace GSC.Respository.Master
 
             return data;
         }
+
+        public List<ImpShipmentGridDashboard> GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
+        {
+            List<ImpShipmentGridDashboard> Data = new List<ImpShipmentGridDashboard>();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            foreach (var item in projectIds)
+            {
+                ImpShipmentGridDashboard obj = new ImpShipmentGridDashboard();
+
+                var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+
+                obj.ReceiptNo = ImpReceipt.Count();
+
+                var shipmentdata = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementRequest.FromProjectId == item
+                    && !ImpReceipt.Select(a => a.SupplyManagementShipmentId).Contains(s.Id) && s.Status == SupplyMangementShipmentStatus.Approved).ToList();
+
+                obj.ShipmentNo = shipmentdata.Count();
+
+                obj.RequestNo = _context.SupplyManagementRequest.Where(s => s.FromProjectId == item && s.DeletedDate == null
+                                       && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
+
+                var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+
+                if (setting != null)
+                {
+                    if (setting.KitCreationType == KitCreationType.KitWise)
+                    {
+                        var data = _context.SupplyManagementKITDetail
+                        .Include(x => x.SupplyManagementKIT)
+                        .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                        .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                        if (data.Count > 0)
+                        {
+
+                            data = data.Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+                            if (data.Count > 0)
+                                obj.UnblindNo = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && data.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+
+                        }
+                    }
+                    else
+                    {
+                        var kitpack = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).ThenInclude(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                                 .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                        if (kitpack.Count > 0)
+                        {
+                            kitpack = kitpack.Where(s => s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+                            if (kitpack.Count > 0)
+                                obj.UnblindNo = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && kitpack.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+                        }
+                    }
+
+                }
+                var project = _context.Project.Where(s => s.Id == item).FirstOrDefault();
+                if (project != null)
+                {
+
+                    var managesite = _context.ManageSite.Include(s => s.City).ThenInclude(s => s.State).ThenInclude(s => s.Country).Where(x => x.Id == project.ManageSiteId).FirstOrDefault();
+                    if (managesite != null)
+                    {
+                        obj.CountryName = managesite.City.State.Country.CountryName;
+                        obj.SiteName = project.ProjectCode + " - " + managesite.SiteName;
+                    }
+                }
+
+
+                Data.Add(obj);
+            }
+            return Data;
+        }
+
+        public List<TreatmentvsArms> GetVisitWiseAllocationData(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var r = new List<TreatmentvsArms>();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var data = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).
+                           Where(s => s.DeletedDate == null && s.RandomizationId != null && s.RandomizationId > 0 && s.SupplyManagementKIT.ProjectId == projectId).ToList();
+
+                    if (countryId > 0 || siteId > 0)
+                    {
+                        data = data.Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                    }
+                    var visitids = data.OrderBy(s => s.SupplyManagementKIT.ProjectDesignVisitId).Select(s => s.SupplyManagementKIT.ProjectDesignVisitId).Distinct().ToList();
+                    if (visitids.Count > 0)
+                    {
+                        foreach (var item in visitids)
+                        {
+                            var result = new TreatmentvsArms();
+                            result.Name = _context.ProjectDesignVisit.Where(s => s.Id == item).FirstOrDefault().DisplayName;
+                            result.Count = data.Where(e => e.SupplyManagementKIT.ProjectDesignVisitId == item).ToList().Count();
+                            r.Add(result);
+                        }
+                    }
+                }
+                else
+                {
+                    var data = _context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).ThenInclude(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).
+                           Where(s => s.DeletedDate == null && s.RandomizationId != null && s.RandomizationId > 0 && s.SupplyManagementKITSeries.ProjectId == projectId).ToList();
+
+                    if (countryId > 0 || siteId > 0)
+                    {
+                        data = data.Where(s => projectIds.Contains((int)s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                    }
+                    var visitids = data.OrderBy(s => s.ProjectDesignVisitId).Select(s => s.ProjectDesignVisitId).Distinct().ToList();
+                    if (visitids.Count > 0)
+                    {
+                        foreach (var item in visitids)
+                        {
+                            var result = new TreatmentvsArms();
+                            result.Name = _context.ProjectDesignVisit.Where(s => s.Id == item).FirstOrDefault().DisplayName;
+                            result.Count = data.Where(e => e.ProjectDesignVisitId == item).ToList().Count();
+                            r.Add(result);
+                        }
+                    }
+                }
+            }
+            return r;
+        }
     }
 }

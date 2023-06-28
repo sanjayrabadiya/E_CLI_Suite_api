@@ -400,5 +400,18 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetFactorDataReportDashbaord(projectId, countryId, siteId));
         }
+
+        [HttpGet]
+        [Route("GetIMPShipmentDetailsData/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetIMPShipmentDetailsData(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetVisitWiseAllocationData/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetVisitWiseAllocationData(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetVisitWiseAllocationData(projectId, countryId, siteId));
+        }
     }
 }

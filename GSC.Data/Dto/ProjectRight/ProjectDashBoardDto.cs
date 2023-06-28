@@ -326,5 +326,14 @@ namespace GSC.Data.Dto.ProjectRight
 
         public string Dosefactor { get; set; }
     }
+    public class ImpShipmentGridDashboard
+    {
+        public string CountryName { get; set; }
+        public string SiteName { get; set; }
+        public int ShipmentNo { get; set; }
+        public int RequestNo { get; set; }
+        public int ReceiptNo { get; set; }
+        public int UnblindNo { get; set; }
 
+    }
 }
