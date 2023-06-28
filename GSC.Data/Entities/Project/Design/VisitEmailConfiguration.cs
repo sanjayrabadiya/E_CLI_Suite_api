@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.Project.Design
     {
         public int ProjectDesignVisitId { get; set; }
         public string EmailBody { get; set;}
-        public string SubjectName { get; set; }
+        public string Subject { get; set; }
         public ScreeningVisitStatus VisitStatusId { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public List<VisitEmailConfigurationRoles> VisitEmailConfigurationRoles { get; set; }

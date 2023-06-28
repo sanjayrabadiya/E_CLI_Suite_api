@@ -3,7 +3,9 @@ using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
+using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Project.Design;
+using GSC.Data.Entities.Project.Workflow;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using System.Collections.Generic;
@@ -28,5 +30,15 @@ namespace GSC.Respository.Project.Design
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectDesignVisitId== projectDesignVisitId).
                    ProjectTo<VisitEmailConfigurationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+
+        public string Duplicate(VisitEmailConfiguration objSave)
+        {
+            if (All.Any(x =>
+                x.Id != objSave.Id && x.VisitStatusId == objSave.VisitStatusId && x.ProjectDesignVisitId==objSave.ProjectDesignVisitId && x.DeletedDate == null))
+                return "Duplicate visit status.";
+
+            return "";
+        }
+
     }
 }
