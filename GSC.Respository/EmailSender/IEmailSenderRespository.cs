@@ -1,7 +1,9 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
@@ -52,6 +54,8 @@ namespace GSC.Respository.EmailSender
         void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration);
 
         void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone);
+
+        void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight item,Randomization randomization);
 
     }
 }

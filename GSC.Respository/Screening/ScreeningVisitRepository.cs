@@ -35,6 +35,7 @@ namespace GSC.Respository.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
         private readonly IProjectScheduleRepository _projectScheduleRepository;
+        private readonly IVisitEmailConfigurationRepository _visitEmailConfigurationRepository;
         public ScreeningVisitRepository(IGSCContext context,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IScreeningVisitHistoryRepository screeningVisitHistoryRepository,
@@ -49,7 +50,8 @@ namespace GSC.Respository.Screening
             IScheduleRuleRespository scheduleRuleRespository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
             IImpactService impactService,
-            IProjectScheduleRepository projectScheduleRepository)
+            IProjectScheduleRepository projectScheduleRepository,
+            IVisitEmailConfigurationRepository visitEmailConfigurationRepository)
             : base(context)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -67,6 +69,7 @@ namespace GSC.Respository.Screening
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
             _projectScheduleRepository = projectScheduleRepository;
+            _visitEmailConfigurationRepository= visitEmailConfigurationRepository;
         }
 
 
@@ -231,6 +234,10 @@ namespace GSC.Respository.Screening
             _context.Save();
 
             PatientStatus(visit.ScreeningEntryId);
+
+            // send email
+            _visitEmailConfigurationRepository.SendEmailForVisitStatus(visit);
+
         }
 
         public bool IsPatientScreeningFailure(int screeningVisitId)

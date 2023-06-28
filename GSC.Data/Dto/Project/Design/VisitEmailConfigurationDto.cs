@@ -23,5 +23,6 @@ namespace GSC.Data.Dto.Project.Design
         public string Subject { get; set; }
         public string VisitStatus { get; set; }
         public string UserRoles { get; set; }
+        public string EmailBody { get; set; }
     }
 }
