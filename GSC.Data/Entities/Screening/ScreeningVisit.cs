@@ -5,7 +5,6 @@ using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace GSC.Data.Entities.Screening
 {
@@ -40,5 +39,6 @@ namespace GSC.Data.Entities.Screening
         public List<ScreeningTemplate> ScreeningTemplates { get; set; }
 
         public string ScreeningVisitName { get; set; }
+        public HideDisableType HideDisableType { get; set; }
     }
 }

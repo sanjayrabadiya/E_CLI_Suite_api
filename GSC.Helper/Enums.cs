@@ -1141,4 +1141,12 @@ namespace GSC.Helper
         [Description("Priority 3")] Priority3 = 3
 
     }
+
+    public enum HideDisableType : short
+    {
+        [Description("None")] None = 0,
+        [Description("Hide")] Hide = 1,
+        [Description("Disable")] Disable = 2
+
+    }
 }

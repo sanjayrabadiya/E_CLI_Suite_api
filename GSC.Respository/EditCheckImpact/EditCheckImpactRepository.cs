@@ -166,7 +166,9 @@ namespace GSC.Respository.EditCheckImpact
 
             if (!isQueryRaise)
             {
-                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.IsOnlyTarget || x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
+                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.IsOnlyTarget || 
+                x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || 
+                x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
                 editCheckResult = editCheckResult.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
 
@@ -318,6 +320,10 @@ namespace GSC.Respository.EditCheckImpact
             targetResult.Where(r => r.Operator == Operator.Hide && (r.CheckBy == EditCheckRuleBy.ByTemplate || r.CheckBy == EditCheckRuleBy.ByTemplateAnnotation)).ToList().ForEach(r =>
             {
                 UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningEntryId, r.ValidateType, editTargetValidation);
+            });
+
+            targetResult.Where(r => r.CheckBy == EditCheckRuleBy.ByVisit && (r.Operator == Operator.Hide || r.Operator == Operator.Enable)).ToList().ForEach(r =>
+            {
             });
 
         }
