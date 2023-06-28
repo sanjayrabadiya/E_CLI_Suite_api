@@ -437,7 +437,7 @@ namespace GSC.Domain.Context
 
         DbSet<EmailConfigurationEditCheckSendMailHistory> EmailConfigurationEditCheckSendMailHistory { get; set; }
         DbSet<VariableLabelLanguage> VariableLabelLanguage { get; set; }
-
+        DbSet<RefrenceTypes> RefrenceTypes { get; set; }
         DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
         DbSet<WorkflowVisit> WorkflowVisit { get; set; }
         DbSet<WorkflowTemplate> WorkflowTemplate { get; set; }

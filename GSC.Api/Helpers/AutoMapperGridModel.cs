@@ -293,8 +293,9 @@ namespace GSC.Api.Helpers
 
             CreateMap<TaskMaster, TaskMasterGridDto>()
                 .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
-                .ForMember(x => x.RefrenceType, x => x.MapFrom(a => a.RefrenceType.GetDescription()))
+                .ForMember(x => x.RefrenceTypes, x => x.MapFrom(a => string.Join(", ", a.RefrenceTypes.Where(x => x.DeletedDate == null).Select(s => s.RefrenceType.GetDescription()).ToList())))
                 .ReverseMap();
+            CreateMap<RefrenceTypes, TaskMasterGridDto>().ReverseMap();
 
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
                            .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))

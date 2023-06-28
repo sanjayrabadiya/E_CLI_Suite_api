@@ -44,6 +44,10 @@ namespace GSC.Data.Dto.CTMS
         public RefrenceType RefrenceType { get; set; }
         public int CreatedBy { get; set; }
         public string Status { get; set; }
+        public bool? PreApprovalStatus { get; set; }
+        public bool? ApprovalStatus { get; set; }
+        public string FileName { get; set; }
+        public string DocumentPath { get; set; }
     }
 
     public class StudyPlanTaskChartDto
@@ -54,7 +58,7 @@ namespace GSC.Data.Dto.CTMS
         public int DeviatedDate { get; set; }
         public int NotStartedDate { get; set; }
         public int OnGoingDate { get; set; }
-       
+
     }
 
     public class StudyPlanTaskChartReportDto
