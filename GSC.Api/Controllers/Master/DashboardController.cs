@@ -381,6 +381,15 @@ namespace GSC.Api.Controllers.Master
             var result = _dashboardRepository.GetRandomizedGraph(projectId, countryId, siteId);
             return Ok(result);
         }
+
+        [HttpGet]
+        [Route("GetDashboardNumberOfSubjectsGrid/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardNumberOfSubjectsGrid(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
+        {
+            var subjectsGrid = _dashboardRepository.GetDashboardNumberOfSubjectsGrid(isDeleted, metricsId, projectId, countryId, siteId);
+            return Ok(subjectsGrid);
+        }
+
         [HttpGet]
         [Route("GetIMPShipmentDetailsCount/{projectId}/{countryId}/{siteId}")]
         public IActionResult GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
