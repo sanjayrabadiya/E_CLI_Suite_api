@@ -40,6 +40,7 @@ namespace GSC.Respository.Project.Design
                 if (p == null) return;
                 t.ProjectDesignTemplateId = p.ProjectDesignTemplateId;
                 t.IsAdd = p.IsAdd;
+                t.IsHide = p.IsHide;
                // t.IsEdit = p.IsEdit;
             });
 
@@ -49,7 +50,7 @@ namespace GSC.Respository.Project.Design
         public void Save(List<Data.Entities.Project.Design.ProjectDesingTemplateRestriction> projectDesingTemplateRestriction)
         {
             // Get only that data which is has add or edit permission
-            projectDesingTemplateRestriction = projectDesingTemplateRestriction.Where(t => t.IsAdd).ToList();
+            projectDesingTemplateRestriction = projectDesingTemplateRestriction.Where(t => t.IsAdd || t.IsHide).ToList();
             _context.ProjectDesingTemplateRestriction.AddRange(projectDesingTemplateRestriction);
             _context.Save();
         }
@@ -63,18 +64,18 @@ namespace GSC.Respository.Project.Design
                 if (permission == null)
                 {
                     // if not exists in table than add data
-                    if (item.IsAdd || item.IsAdd)
+                    if (item.IsAdd || item.IsHide)
                         Add(item);
                 }
                 else
                 {
                     // if exists in table and not any changes than not perform any action on that row
-                    if (permission.IsAdd == item.IsAdd) { }
+                    if (permission.IsAdd == item.IsAdd && permission.IsHide == item.IsHide) { }
                     else
                     {
                         // if exists in table and than delete first and if any changes than add new row for that record.
                         Delete(permission);
-                        if (item.IsAdd || item.IsAdd)
+                        if (item.IsAdd || item.IsHide)
                             Add(item);
                     }
                 }
