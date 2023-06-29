@@ -1095,8 +1095,8 @@ namespace GSC.Helper
 
     public enum SupplyManagementApprovalType : short
     {
-        [Description("Shipment Request Approval Email")] ShipmentApproval = 1,
-        [Description("Workflow Approval")] WorkflowApproval = 2
+        [Description("Shipment Request Approval")] ShipmentApproval = 1,
+        [Description("Workflow Approved")] WorkflowApproval = 2
     }
 
     public enum SupplyManagementApprovalStatus : short
@@ -1140,5 +1140,11 @@ namespace GSC.Helper
         [Description("Priority 2")] Priority2 = 2,
         [Description("Priority 3")] Priority3 = 3
         
+    }
+
+    public enum KitHistoryReportType : int
+    {
+        [Description("Kit Wise")] KitWise = 1,
+        [Description("Randomization Wise")] RandomizationWise = 2
     }
 }

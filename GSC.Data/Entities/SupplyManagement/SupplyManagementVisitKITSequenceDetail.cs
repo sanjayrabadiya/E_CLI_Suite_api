@@ -15,6 +15,7 @@ namespace GSC.Data.Entities.SupplyManagement
     {
         public string KitNo { get; set; }
         public int ProjectDesignVisitId { get; set; }
+        public int? SupplyManagementShipmentId { get; set; }
         public int RandomizationId { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }

@@ -585,6 +585,7 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
               .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
               .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+              .ForMember(x => x.SupplyManagementKITDetailId, x => x.MapFrom(a => a.SupplyManagementKITDetailId))
               .ReverseMap();
 
             CreateMap<SupplyManagementKITDetailHistory, SupplyManagementKITDetailHistoryDto>()
@@ -638,6 +639,7 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
              .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
              .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+             .ForMember(x => x.SupplyManagementKITDetailId, x => x.MapFrom(a => a.SupplyManagementKITSeriesdetailId))
              .ReverseMap();
 
             CreateMap<Randomization, SupplyManagementUnblindTreatmentGridDto>()

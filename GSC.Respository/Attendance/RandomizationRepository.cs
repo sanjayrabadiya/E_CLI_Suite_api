@@ -2044,7 +2044,8 @@ namespace GSC.Respository.Attendance
                             ProjectDesignVisitId = item.VisitId,
                             KitNo = item.kitNo,
                             ProductCode = item.ProductCode,
-                            SupplyManagementKITDetailId = kitdata.Id
+                            SupplyManagementKITDetailId = kitdata.Id,
+                            SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId
                         };
                         _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
 
@@ -2053,6 +2054,7 @@ namespace GSC.Respository.Attendance
                         history.SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId;
                         history.Status = KitStatus.Allocated;
                         history.RoleId = _jwtTokenAccesser.RoleId;
+                        history.RandomizationId = obj.Id;
                         _supplyManagementKITRepository.InsertKitHistory(history);
                         _context.Save();
                     }
@@ -2081,7 +2083,8 @@ namespace GSC.Respository.Attendance
                                 ProjectDesignVisitId = randomizationNumberDto.VisitId,
                                 KitNo = randomizationNumberDto.KitNo,
                                 ProductCode = randomizationNumberDto.ProductCode,
-                                SupplyManagementKITDetailId = kitdata.Id
+                                SupplyManagementKITDetailId = kitdata.Id,
+                                SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId
                             };
                             _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
 
@@ -2090,6 +2093,7 @@ namespace GSC.Respository.Attendance
                             history.SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId;
                             history.Status = KitStatus.Allocated;
                             history.RoleId = _jwtTokenAccesser.RoleId;
+                            history.RandomizationId = obj.Id;
                             _supplyManagementKITRepository.InsertKitHistory(history);
                             _context.Save();
                             obj.KitNo = randomizationNumberDto.KitNo;
@@ -2109,24 +2113,27 @@ namespace GSC.Respository.Attendance
                                 kit.RandomizationId = obj.Id;
                                 kit.Status = KitStatus.Allocated;
                                 _context.SupplyManagementKITSeries.Update(kit);
-                            }
-                            var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITSequenceDetailDto
-                            {
-                                RandomizationId = obj.Id,
-                                ProjectDesignVisitId = randomizationNumberDto.VisitId,
-                                KitNo = randomizationNumberDto.KitNo,
-                                ProductCode = randomizationNumberDto.ProductCode,
-                                SupplyManagementKITSeriesdetailId = kitdata.Id
-                            };
-                            _supplyManagementKITRepository.InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
 
-                            SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
-                            history.SupplyManagementKITSeriesId = kitdata.SupplyManagementKITSeriesId;
-                            history.Status = KitStatus.Allocated;
-                            history.RoleId = _jwtTokenAccesser.RoleId;
-                            _supplyManagementKITRepository.InsertKitSequenceHistory(history);
-                            _context.Save();
-                            obj.KitNo = randomizationNumberDto.KitNo;
+                                var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITSequenceDetailDto
+                                {
+                                    RandomizationId = obj.Id,
+                                    ProjectDesignVisitId = randomizationNumberDto.VisitId,
+                                    KitNo = randomizationNumberDto.KitNo,
+                                    ProductCode = randomizationNumberDto.ProductCode,
+                                    SupplyManagementKITSeriesdetailId = kitdata.Id,
+                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId
+                                };
+                                _supplyManagementKITRepository.InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
+
+                                SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
+                                history.SupplyManagementKITSeriesId = kitdata.SupplyManagementKITSeriesId;
+                                history.Status = KitStatus.Allocated;
+                                history.RoleId = _jwtTokenAccesser.RoleId;
+                                history.RandomizationId = obj.Id;
+                                _supplyManagementKITRepository.InsertKitSequenceHistory(history);
+                                _context.Save();
+                                obj.KitNo = randomizationNumberDto.KitNo;
+                            }
                         }
                     }
                 }

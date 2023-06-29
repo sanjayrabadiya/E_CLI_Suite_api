@@ -92,6 +92,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementApprovalRepository.Update(supplyManagementEmailConfiguration);
 
             if (_uow.Save() <= 0) throw new Exception("Updating shipment apporval study product type failed on save.");
+            _supplyManagementApprovalRepository.DelectChildWorkflowEmailUser(supplyManagementEmailConfigurationDto, supplyManagementEmailConfiguration.Id);
             _supplyManagementApprovalRepository.ChildUserApprovalAdd(supplyManagementEmailConfigurationDto, supplyManagementEmailConfiguration.Id);
             return Ok(supplyManagementEmailConfiguration.Id);
         }

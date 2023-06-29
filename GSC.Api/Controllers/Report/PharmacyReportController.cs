@@ -122,5 +122,45 @@ namespace GSC.Api.Controllers.Report
         {
             return Ok(_pharmacyReportRepository.GetPharmacyStudyProductTypeDropDownPharmacyReport(projectId));
         }
+
+        [HttpGet]
+        [Route("GetPatientforKitHistoryReport/{projectId}")]
+        public IActionResult GetPatientforKitHistoryReport(int projectId)
+        {
+            return Ok(_pharmacyReportRepository.GetPatientforKitHistoryReport(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetKitlistforReport/{projectId}")]
+        public IActionResult GetKitlistforReport(int projectId)
+        {
+            return Ok(_pharmacyReportRepository.GetKitlistforReport(projectId));
+        }
+
+        [HttpPost]
+        [Route("GetKitHistoryReport")]
+        public IActionResult GetKitHistoryReport([FromBody] KitHistoryReportSearchModel search)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                ModelState.AddModelError("Message", "Please set kit number setting");
+                return BadRequest(ModelState);
+            }
+            return Ok(_pharmacyReportRepository.GetKitHistoryReport(search));
+        }
+        [HttpPost]
+        [Route("GetKitHistoryReportExcelToExcel")]
+        public IActionResult GetKitHistoryReportExcelToExcel([FromBody] KitHistoryReportSearchModel search)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                ModelState.AddModelError("Message", "Please set kit number setting");
+                return BadRequest(ModelState);
+            }
+            return _pharmacyReportRepository.GetKitHistoryReportExcelToExcel(search);
+        }
+        
     }
 }

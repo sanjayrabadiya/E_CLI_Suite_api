@@ -1119,5 +1119,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(audit);
         }
+
+        [HttpGet]
+        [Route("GetKitHistoryReportType")]
+        public IActionResult GetKitHistoryReportType()
+        {
+            var pkenum = Enum.GetValues(typeof(KitHistoryReportType))
+                .Cast<KitHistoryReportType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(pkenum);
+        }
     }
 }

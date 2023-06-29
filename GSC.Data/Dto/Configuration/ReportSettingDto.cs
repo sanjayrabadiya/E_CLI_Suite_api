@@ -189,6 +189,16 @@ namespace GSC.Data.Dto.Configuration
         public string CourierName { get; set; }
 
         public string TrackingNumber { get; set; }
+
+        public int ImpPerKit { get; set; }
+
+        public string RoleName { get; set; }
+
+        public string ActionDatestr { get; set; }
+
+        public string RandomizationNo { get; set; }
+
+        public string ScreeningNo { get; set; }
     }
 
     public class ProductAccountabilityCentralReportSearch
@@ -200,5 +210,16 @@ namespace GSC.Data.Dto.Configuration
         public string LotNo { get; set; }
 
         public int VisitId { get; set; }
+
+
+    }
+
+    public class KitHistoryReportSearchModel
+    {
+        public int ProjectId { get; set; }
+        public int KitId { get; set; }
+        public int RandomizationId { get; set; }
+        public KitHistoryReportType Type { get; set; }
+
     }
 }
