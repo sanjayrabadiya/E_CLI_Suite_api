@@ -1621,7 +1621,6 @@ namespace GSC.Respository.Master
                     .Select(b => new PlanMetricsGridDto
                     {
                         ProjectId = b.ProjectId,
-                        Study = b.Project.ProjectCode,
                         MetricsType = b.MetricsType.GetDescription(),
                         Planned = b.OverTimeMetrics.Planned,
                         Forecast = b.Forecast,
