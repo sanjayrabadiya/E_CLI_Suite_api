@@ -1593,6 +1593,43 @@ namespace GSC.Respository.Master
                 return ragraph;
             }
         }
+
+        public List<PlanMetricsGridDto> GetDashboardNumberOfSubjectsGrid(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
+        {
+            var list = new List<PlanMetricsGridDto>();
+
+            if (countryId != 0 || siteId != 0)
+            {
+                var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+                var data = _context.PlanMetrics.Include(j => j.OverTimeMetrics).ThenInclude(i => i.Project).Where(x => projectIds.Contains(x.OverTimeMetrics.ProjectId) && x.DeletedDate == null)
+                    .Select(b => new PlanMetricsGridDto
+                    {
+                        SiteName = b.OverTimeMetrics.Project.ProjectCode,
+                        MetricsType = b.MetricsType.GetDescription(),
+                        Planned = b.OverTimeMetrics.Planned,
+                        Forecast = b.Forecast,
+                        Actual = b.OverTimeMetrics.Actual
+                    }).ToList();
+
+                return data;
+            }
+
+            else
+            {
+                var planMetrics = _context.PlanMetrics.Include(j => j.OverTimeMetrics).ThenInclude(i => i.Project).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
+                    .Select(b => new PlanMetricsGridDto
+                    {
+                        ProjectId = b.ProjectId,
+                        MetricsType = b.MetricsType.GetDescription(),
+                        Planned = b.OverTimeMetrics.Planned,
+                        Forecast = b.Forecast,
+                        Actual = b.OverTimeMetrics.Actual,
+                    }).ToList();
+
+                return planMetrics;
+            }
+        }
         #endregion
         public dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
         {

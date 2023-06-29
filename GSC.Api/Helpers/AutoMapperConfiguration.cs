@@ -354,6 +354,9 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanTask, TaskMaster>()
                 .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskId))
                .ReverseMap();
+            CreateMap<RefrenceTypes, TaskMaster>()
+              .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskMasterId))
+             .ReverseMap();
             CreateMap<ScreeningNumberSettings, ScreeningNumberSettingsDto>()
                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
               .ReverseMap();

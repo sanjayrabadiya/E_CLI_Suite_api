@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
@@ -30,14 +32,16 @@ namespace GSC.Respository.EmailSender
         private readonly IEmailService _emailService;
         private readonly ISMSSettingRepository _iSMSSettingRepository;
         private readonly HttpClient _httpClient;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public EmailSenderRespository(IGSCContext context,
-            HttpClient httpClient,
-            IJwtTokenAccesser jwtTokenAccesser,
+             IJwtTokenAccesser jwtTokenAccesser,
+        HttpClient httpClient,
             IEmailService emailService,
             ISMSSettingRepository iSMSSettingRepository)
             : base(context)
         {
+            _jwtTokenAccesser = jwtTokenAccesser;
             _emailService = emailService;
             _context = context;
             _httpClient = httpClient;
@@ -1002,6 +1006,37 @@ namespace GSC.Respository.EmailSender
                 str = Regex.Replace(str, "##CurrentDate##", email.CurrentDate, RegexOptions.IgnoreCase);
             }
 
+            return str;
+        }
+
+        // for visit email
+        public void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight data, Randomization randomization)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.Subject = email.Subject;
+            emailMessage.SendTo = data.User.Email;
+            emailMessage.MessageBody = ReplaceBodyForVisitStatusEmail(email.EmailBody, email, data, randomization);
+            _emailService.SendMail(emailMessage);
+        }
+
+        private string ReplaceBodyForVisitStatusEmail(string body, VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight data, Randomization randomization)
+        {
+            var str = body;
+
+            if (data.User != null)
+                str = Regex.Replace(str, "##UserName##", data.User.UserName, RegexOptions.IgnoreCase);
+
+            str = Regex.Replace(str, "##StudyCode##", _context.Project.Find(_context.Project.Find(randomization.ProjectId).ParentProjectId).ProjectCode, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##SiteCode##", _context.Project.Find(randomization.ProjectId).ProjectCode, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##VisitName##", email.VisitName, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##VisitStatus##", email.VisitStatus, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##ScreeningNo##", randomization.ScreeningNumber, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##CompanyName##", _context.Company.Find(_jwtTokenAccesser.CompanyId).CompanyName, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##CurrentDate##", DateTime.Now.Date.ToString("dddd, dd MMMM yyyy"), RegexOptions.IgnoreCase);
+
+            if (!string.IsNullOrEmpty(randomization.RandomizationNumber))
+                str = Regex.Replace(str, "##RandomizationNo##", randomization.RandomizationNumber, RegexOptions.IgnoreCase);
+            
             return str;
         }
     }

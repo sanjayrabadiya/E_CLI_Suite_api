@@ -433,7 +433,7 @@ namespace GSC.Respository.Project.Design
         {
             var checkVersion = CheckStudyVersion(projectDesignVisitId);
             var vistInActiveVersion = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.InActiveVersion).FirstOrDefault();
-            var list = All.Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ToList();
+            var list = All.Include(x=>x.ProjectDesignVisit).Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ToList();
             var result = _mapper.Map<List<ProjectDesignTemplateDto>>(list).OrderBy(t => t.DesignOrder).ToList();
             result.ForEach(x =>
             {

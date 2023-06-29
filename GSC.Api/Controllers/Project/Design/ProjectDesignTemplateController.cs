@@ -103,6 +103,26 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok(templates);
         }
 
+        [HttpPost("GetByVisitIds")]
+        public IActionResult GetByVisitIds([FromBody]List<int> visitIds)
+        {
+            if (visitIds.Count <= 0) return BadRequest();
+            var projectDesignVisitList = new List<ProjectDesignTemplateDto>();
+            foreach(var id in visitIds)
+            {
+                var templates = _projectDesignTemplateRepository.GetTemplateByVisitId(id);
+                templates.ForEach(t =>
+                {
+                    t.DomainName = _domainRepository.Find(t.DomainId)?.DomainName;
+                });
+
+                projectDesignVisitList.AddRange(templates);
+            }
+
+
+            return Ok(projectDesignVisitList);
+        }
+
         [HttpPut]
         public IActionResult Put([FromBody] ProjectDesignTemplateDto projectDesignTemplateDto)
         {

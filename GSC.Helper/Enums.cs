@@ -674,7 +674,7 @@ namespace GSC.Helper
     {
         [Description("Study")] Study = 1,
         [Description("Sites")] Sites = 2,
-        [Description("Both")] Both = 3,
+        [Description("Country")] Country = 3,
 
     }
 
@@ -1139,7 +1139,15 @@ namespace GSC.Helper
         [Description("Priority 1")] Priority1 = 1,
         [Description("Priority 2")] Priority2 = 2,
         [Description("Priority 3")] Priority3 = 3
-        
+
+    }
+
+    public enum HideDisableType : short
+    {
+        [Description("None")] None = 0,
+        [Description("Hide")] Hide = 1,
+        [Description("Disable")] Disable = 2
+
     }
 
     public enum KitHistoryReportType : int

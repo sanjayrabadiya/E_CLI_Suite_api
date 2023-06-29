@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
+using GSC.Data.Entities.Screening;
 using System.Collections.Generic;
 
 namespace GSC.Respository.Project.Design
@@ -9,5 +10,6 @@ namespace GSC.Respository.Project.Design
     {
         List<VisitEmailConfigurationGridDto> GetVisitEmailConfigurationList(bool isDeleted, int projectDesignVisitId);
         string Duplicate(VisitEmailConfiguration objSave);
+        void SendEmailForVisitStatus(ScreeningVisit screeningVisit);
     }
 }
