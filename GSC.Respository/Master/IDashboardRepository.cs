@@ -31,6 +31,8 @@ namespace GSC.Respository.Master
         dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId);
 
         List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId);
+        List<StudyPlanTaskDto> GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId);
+
         List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId);
         List<CtmsMonitoringReportVariableValueQueryDto> getCTMSQueriesDashboard(int projectId, int countryId, int siteId);
 

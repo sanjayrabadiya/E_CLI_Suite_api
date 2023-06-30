@@ -48,6 +48,7 @@ namespace GSC.Data.Dto.CTMS
         public bool? ApprovalStatus { get; set; }
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
+        public string Site { get; set; }
     }
 
     public class StudyPlanTaskChartDto
