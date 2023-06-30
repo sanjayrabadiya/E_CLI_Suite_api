@@ -755,7 +755,10 @@ namespace GSC.Respository.EmailSender
         public void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration)
         {
             var emailMessage = ConfigureEmailForVariable();
-            emailMessage.Subject = "Shipment Request Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
+            if (supplyManagementEmailConfiguration.ApprovalType == Helper.SupplyManagementApprovalType.ShipmentApproval)
+                emailMessage.Subject = "Shipment Request Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
+            if (supplyManagementEmailConfiguration.ApprovalType == Helper.SupplyManagementApprovalType.WorkflowApproval)
+                emailMessage.Subject = "Shipment Workflow Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
             emailMessage.MessageBody = ReplaceBodyForIWRSEmail(supplyManagementEmailConfiguration.EmailTemplate, iWRSEmailModel);
 
             if (toMails != null && toMails.Count > 0)
@@ -1036,7 +1039,7 @@ namespace GSC.Respository.EmailSender
 
             if (!string.IsNullOrEmpty(randomization.RandomizationNumber))
                 str = Regex.Replace(str, "##RandomizationNo##", randomization.RandomizationNumber, RegexOptions.IgnoreCase);
-            
+
             return str;
         }
     }
