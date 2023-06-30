@@ -28,6 +28,7 @@ namespace GSC.Respository.InformConcent
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
+        private readonly IGSCContext _context;
 
         public EconsentSectionReferenceRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -36,6 +37,7 @@ namespace GSC.Respository.InformConcent
             IUnitOfWork uow,
             IMapper mapper) : base(context)
         {
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _econsentSetupRepository = econsentSetupRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -160,6 +162,100 @@ namespace GSC.Respository.InformConcent
             }
 
         }
+
+        public List<EconsentSectionReferenceDocumentType> GetEconsentSectionReferenceDocumentByUser()
+        {
+            var roleName = _jwtTokenAccesser.RoleName;
+
+            var noneregister = _context.Randomization.Where(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+
+            if (roleName == "LAR")
+            {
+                noneregister = _context.Randomization.Where(x => x.LARUserId == _jwtTokenAccesser.UserId).FirstOrDefault();
+            }
+            if (noneregister == null) return null;
+            var result = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
+               && x.EconsentSetup.LanguageId == noneregister.LanguageId
+               && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Select(s => s.EconsentSetupId).ToList();
+
+            var econsentSectionReferenceDocuments = new List<EconsentSectionReferenceDocumentType>();
+            var Econsentsectiondocuments = All.Where(q => result.Contains(q.EconsentSetupId) && q.DeletedDate == null).ToList();
+
+            foreach (var Econsentsectiondocument in Econsentsectiondocuments)
+            {
+                var econsentSectionReferenceDocument = new EconsentSectionReferenceDocumentType();
+                var upload = _uploadSettingRepository.GetDocumentPath();
+                //var Econsentsectiondocument = Find(id);
+                var FullPath = System.IO.Path.Combine(upload, Econsentsectiondocument.FilePath);
+                string path = FullPath;
+                if (!System.IO.File.Exists(path))
+                    return null;
+                string extension = System.IO.Path.GetExtension(path);
+                string type = "";
+
+                if (extension == ".docx" || extension == ".doc")
+                {
+                    Stream stream = System.IO.File.OpenRead(path);
+                    WordDocument document = null;
+                    if (extension == ".docx")
+                        document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                    if (extension == ".doc")
+                        document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Doc);
+                    document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
+                    MemoryStream ms = new MemoryStream();
+                    document.Save(ms, Syncfusion.DocIO.FormatType.Html);
+                    document.Close();
+                    ms.Position = 0;
+                    StreamReader reader = new StreamReader(ms);
+                    var htmlStringText = reader.ReadToEnd();
+                    ms.Dispose();
+                    reader.Dispose();
+                    stream.Close();
+                    stream.Dispose();
+                    type = "doc";
+                    econsentSectionReferenceDocument.type = type;
+                    econsentSectionReferenceDocument.data = htmlStringText;
+                    //return econsentSectionReferenceDocument;
+                    econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
+                }
+                else if (extension == ".pdf")
+                {
+                    var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
+                    var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
+                    type = "pdf";
+                    econsentSectionReferenceDocument.type = type;
+                    econsentSectionReferenceDocument.data = pdfFullPath;
+                    //return econsentSectionReferenceDocument;
+                    econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
+                }
+                else
+                {
+                    var fileupload = _uploadSettingRepository.GetWebImageUrl();
+                    var fileFullPath = System.IO.Path.Combine(fileupload, Econsentsectiondocument.FilePath);
+                    if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".bmp" || extension == ".gif")
+                    {
+                        type = "img";
+                        econsentSectionReferenceDocument.type = type;
+                        econsentSectionReferenceDocument.data = fileFullPath;
+                        //return econsentSectionReferenceDocument;
+                        econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
+                    }
+                    else
+                    {
+                        type = "vid";
+                        econsentSectionReferenceDocument.type = type;
+                        econsentSectionReferenceDocument.data = fileFullPath;
+                        //return econsentSectionReferenceDocument;
+                        econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
+                    }
+                }
+            }
+
+            return econsentSectionReferenceDocuments;
+
+        }
+
+
         public EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocument(int id)
         {
             var upload = _uploadSettingRepository.GetDocumentPath();
