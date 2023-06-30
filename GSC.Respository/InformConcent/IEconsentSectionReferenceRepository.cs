@@ -15,5 +15,6 @@ namespace GSC.Respository.InformConcent
         EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocument(int id);    
         IList<EconcentSectionRefrenceDetailListDto> GetSetionRefefrenceDetailList(int documentId, int sectionNo);
         EconsentSectionReferenceDocumentType GetEconsentSectionReferenceDocumentNew(int id);
+        List<EconsentSectionReferenceDocumentType> GetEconsentSectionReferenceDocumentByUser();
     }
 }
