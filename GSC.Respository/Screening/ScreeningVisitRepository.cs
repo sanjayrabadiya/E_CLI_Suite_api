@@ -121,6 +121,8 @@ namespace GSC.Respository.Screening
                 {
                     screeningVisit.VisitStartDate = visitDate;
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open, visitDate);
+                    //// send email
+                    //_visitEmailConfigurationRepository.SendEmailForVisitStatus(screeningVisit);
                 }
 
                 r.Templates.Where(b => (b.StudyVersion == null || b.StudyVersion <= studyVersion)
@@ -322,6 +324,9 @@ namespace GSC.Respository.Screening
             var isScheduleReference = _projectScheduleRepository.All.Any(x => x.ProjectDesignVisitId == visit.ProjectDesignVisitId && x.DeletedDate == null);
             if (visit.IsSchedule || isScheduleReference)
                 ScheduleVisitUpdate(visit.ScreeningEntryId);
+
+            // send email
+            _visitEmailConfigurationRepository.SendEmailForVisitStatus(visit);
         }
 
         public void ScheduleVisitUpdate(int screeningEntryId)
