@@ -93,6 +93,8 @@ namespace GSC.Data.Dto.Attendance
 
         // changes for visit order in data capture and review column 04/06/2023
         public int? VisitSeqNo { get; set; }
+        public HideDisableType? HideDisableType { get; set; }
+        public string EditCheckMsg { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto
@@ -138,7 +140,7 @@ namespace GSC.Data.Dto.Attendance
         public string PreLabel { get; set; }
     }
 
-    public class BarcodeDataEntrySubject 
+    public class BarcodeDataEntrySubject
     {
         public int AttendanceId { get; set; }
         public int VolunteerId { get; set; }

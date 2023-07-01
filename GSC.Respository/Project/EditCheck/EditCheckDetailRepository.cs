@@ -8,20 +8,16 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.EditCheck
 {
     public class EditCheckDetailRepository : GenericRespository<EditCheckDetail>, IEditCheckDetailRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public EditCheckDetailRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public EditCheckDetailRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }
@@ -91,6 +87,22 @@ namespace GSC.Respository.Project.EditCheck
                        && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault();
 
             return annotationVariable;
+
+        }
+
+        public List<EditCheckVisit> GetProjectDesignVisitIds(int projectDesignId)
+        {
+            var result = All.Where(x => x.EditCheck.ProjectDesignId == projectDesignId
+              && x.CheckBy == EditCheckRuleBy.ByVisit && x.IsTarget).
+                 Select(r => new EditCheckVisit
+                 {
+                     ProjectDesignVisitId = r.ProjectDesignVisitId,
+                     HideDisableType = r.Operator == Operator.Hide ? HideDisableType.Hide :
+                     (r.Operator == Operator.Enable ? HideDisableType.Disable : HideDisableType.None),
+                     EditCheckMsg = r.Message
+                 }).ToList();
+
+            return result;
 
         }
 

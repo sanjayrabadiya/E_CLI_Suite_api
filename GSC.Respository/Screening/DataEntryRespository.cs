@@ -12,6 +12,7 @@ using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
+using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
@@ -34,6 +35,7 @@ namespace GSC.Respository.Screening
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IScreeningVisitRepository _screeningVisitRepository;
+        private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         public DataEntryRespository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectRightRepository projectRightRepository,
@@ -45,7 +47,8 @@ namespace GSC.Respository.Screening
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignRepository projectDesignRepository,
             IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IScreeningVisitRepository screeningVisitRepository
+            IScreeningVisitRepository screeningVisitRepository,
+            IEditCheckDetailRepository editCheckDetailRepository
         )
             : base(context)
         {
@@ -61,6 +64,7 @@ namespace GSC.Respository.Screening
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _screeningVisitRepository = screeningVisitRepository;
+            _editCheckDetailRepository = editCheckDetailRepository;
         }
 
         public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
@@ -68,6 +72,8 @@ namespace GSC.Respository.Screening
             var result = new DataCaptureGridDto();
 
             var projectDesignId = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId).Select(t => t.Id).FirstOrDefault();
+
+            var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(projectDesignPeriodId);
 
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
             result.WorkFlowText = workflowlevel.WorkFlowText;
@@ -86,6 +92,8 @@ namespace GSC.Respository.Screening
                 StudyVersion = t.StudyVersion,
                 InActiveVersion = t.InActiveVersion
             }).ToListAsync();
+
+
 
 
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
@@ -210,7 +218,7 @@ namespace GSC.Respository.Screening
                    StudyVersion = a.ProjectDesignVisit.StudyVersion,
                    IsScheduleTerminate = a.IsScheduleTerminate,
                    ScreeningEntryId = a.ScreeningEntryId
-               }).OrderBy(b => b.DesignOrder).ThenBy(d=>d.ScreeningEntryId).ToListAsync();
+               }).OrderBy(b => b.DesignOrder).ThenBy(d => d.ScreeningEntryId).ToListAsync();
 
             randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
 
@@ -266,6 +274,18 @@ namespace GSC.Respository.Screening
             result.Data.AddRange(screeningData);
 
             result.Data = result.Data.OrderByDescending(t => t.SubjectNo).ToList();
+
+            result.Data.ForEach(x =>
+            {
+                x.Visit.ForEach(a =>
+                {
+                    var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId);
+                    a.HideDisableType = editCheck.HideDisableType;
+                    a.EditCheckMsg = editCheck.EditCheckMsg;
+                });
+
+                x.Visit = x.Visit.Where(a => a.HideDisableType != HideDisableType.Hide).ToList();
+            });
 
             return result;
 
