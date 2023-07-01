@@ -93,6 +93,17 @@ namespace GSC.Respository.Screening
                 InActiveVersion = t.InActiveVersion
             }).ToListAsync();
 
+            projectDesignVisit.ForEach(a =>
+            {
+                var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
+                if (editCheck != null)
+                    a.HideDisableType = editCheck.HideDisableType;
+
+                editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Hide);
+                if (editCheck != null)
+                    a.HideDisableType = editCheck.HideDisableType;
+            });
+
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
              && x.PatientStatusId == ScreeningPatientStatus.Screening && x.ScreeningEntry == null).Select(t => new DataCaptureGridData
              {
@@ -214,7 +225,8 @@ namespace GSC.Respository.Screening
                    DesignOrder = a.ProjectDesignVisit.DesignOrder,
                    StudyVersion = a.ProjectDesignVisit.StudyVersion,
                    IsScheduleTerminate = a.IsScheduleTerminate,
-                   ScreeningEntryId = a.ScreeningEntryId
+                   ScreeningEntryId = a.ScreeningEntryId,
+                   HideDisableType = a.HideDisableType
                }).OrderBy(b => b.DesignOrder).ThenBy(d => d.ScreeningEntryId).ToListAsync();
 
             randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
@@ -280,17 +292,7 @@ namespace GSC.Respository.Screening
                     {
                         var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
                         if (editCheck != null)
-                        {
-                            a.HideDisableType = editCheck.HideDisableType;
                             a.EditCheckMsg = editCheck.EditCheckMsg;
-                        }
-
-                        editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Hide);
-                        if (editCheck != null)
-                        {
-                            a.HideDisableType = editCheck.HideDisableType;
-                            a.EditCheckMsg = editCheck.EditCheckMsg;
-                        }
 
                     });
 
@@ -594,12 +596,14 @@ namespace GSC.Respository.Screening
             visits = visits.Where(a => a.ScreeningEntryId == ScreeningEntryId && a.HideDisableType != HideDisableType.Hide &&
                  (!a.IsSchedule || a.IsScheduleTerminate == true || a.VisitStatusId > (int)ScreeningVisitStatus.NotStarted)).ToList();
 
+            visits = visits.Where(x => x.HideDisableType != HideDisableType.Hide).ToList();
+
             if (visits.Any(x => x.HideDisableType == HideDisableType.Disable))
             {
                 var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(visits.FirstOrDefault().ProjectDesignId);
                 visits.ForEach(x =>
                 {
-                    x.EditCheckMsg = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable).EditCheckMsg;
+                    x.EditCheckMsg = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable)?.EditCheckMsg;
                 });
             }
 

@@ -135,7 +135,7 @@ namespace GSC.Respository.Screening
                 if (editCheck != null)
                     screeningVisit.HideDisableType = editCheck.HideDisableType;
 
-                editCheck = editCheckVisit.FirstOrDefault(c => c.ProjectDesignVisitId == r.Id && c.HideDisableType == HideDisableType.Disable);
+                editCheck = editCheckVisit.FirstOrDefault(c => c.ProjectDesignVisitId == r.Id && c.HideDisableType == HideDisableType.Hide);
                 if (editCheck != null)
                     screeningVisit.HideDisableType = editCheck.HideDisableType;
 
