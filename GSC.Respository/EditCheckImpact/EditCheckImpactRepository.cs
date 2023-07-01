@@ -322,13 +322,13 @@ namespace GSC.Respository.EditCheckImpact
                 UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningEntryId, r.ValidateType, editTargetValidation);
             });
 
-            HideDisableVisit(targetResult);
+            HideDisableVisit(targetResult, screeningEntryId);
 
 
 
         }
 
-        void HideDisableVisit(List<EditCheckValidateDto> editCheckValidateDtos)
+        void HideDisableVisit(List<EditCheckValidateDto> editCheckValidateDtos, int screeningEntryId)
         {
             var visits = editCheckValidateDtos.Where(x => x.CheckBy == EditCheckRuleBy.ByVisit).ToList();
             var projectDesignVisitIds = visits.GroupBy(x => x.ProjectDesignVisitId).Select(r => r.Key).ToList();
@@ -340,9 +340,16 @@ namespace GSC.Respository.EditCheckImpact
                     hideDisableType = HideDisableType.Hide;
                 if (visits.Any(r => r.Operator == Operator.Enable && r.ProjectDesignVisitId == x && r.ValidateType == EditCheckValidateType.Passed))
                     hideDisableType = HideDisableType.Disable;
+
+                var ScreeningVisits = _context.ScreeningVisit.Where(a => a.ScreeningEntryId == screeningEntryId && a.ProjectDesignVisitId == x).ToList();
+                ScreeningVisits.ForEach(a =>
+                {
+                    a.HideDisableType = hideDisableType;
+                    _context.ScreeningVisit.Update(a);
+                });
             });
 
-           
+            _context.Save();
         }
 
         public List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, int screeningEntryId, int screeningVisitId, bool isVariable, bool isQueryRaise)

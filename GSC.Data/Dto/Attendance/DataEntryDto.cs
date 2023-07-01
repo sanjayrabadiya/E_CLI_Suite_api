@@ -95,6 +95,7 @@ namespace GSC.Data.Dto.Attendance
         public int? VisitSeqNo { get; set; }
         public HideDisableType? HideDisableType { get; set; }
         public string EditCheckMsg { get; set; }
+        public int ProjectDesignId { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto
