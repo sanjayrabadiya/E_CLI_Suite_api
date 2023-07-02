@@ -551,6 +551,7 @@ namespace GSC.Respository.Screening
             var values = GetScreeningValues(screeningTemplateBasic.Id);
             var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, !isFromLockUnLock);
             _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, true, true);
+            _editCheckImpactRepository.HideDisableVisit(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId);
             _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
 
         }

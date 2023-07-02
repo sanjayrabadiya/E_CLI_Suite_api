@@ -15,5 +15,6 @@ namespace GSC.Respository.EditCheckImpact
         List<EditCheckTargetValidationList> VariableValidateProcess(int screeningEntryId, int screeningTemplateId, string value, int projectDesignTemplateId, int projectDesignVariableId, List<EditCheckIds> editCheckIds, bool isQueryRaise, int screeningVisitId, int? projectDesignVisitId, bool isNa, ScreeningTemplateStatus status);
         List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, int screeningEntryId, int screeningVisitId, bool isVariable, bool isQueryRaise);
         int InsertScreeningValue(int screeningTemplateId, int projectDesignVariableId, string value, string note, bool isSoftFetch, CollectionSources? collectionSource, bool isDisable);
+        void HideDisableVisit(List<EditCheckValidateDto> editCheckValidateDtos, int screeningEntryId);
     }
 }

@@ -144,7 +144,7 @@ namespace GSC.Respository.EditCheckImpact
 
             });
 
-            result = result.Where(x => (x.Status > ScreeningTemplateStatus.Pending && x.IsTarget) || x.ScreeningTemplateId == screeningTemplateBasic.Id || !x.IsTarget).ToList();
+            result = result.Where(x => (x.Status > ScreeningTemplateStatus.Pending && x.IsTarget) || x.CheckBy == EditCheckRuleBy.ByVisit || x.ScreeningTemplateId == screeningTemplateBasic.Id || !x.IsTarget).ToList();
 
             return TargetValidateProcess(result);
         }
@@ -168,6 +168,7 @@ namespace GSC.Respository.EditCheckImpact
             {
                 var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.IsOnlyTarget ||
                 x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation ||
+                 x.CheckBy == EditCheckRuleBy.ByVisit ||
                 x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
                 editCheckResult = editCheckResult.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
@@ -328,7 +329,7 @@ namespace GSC.Respository.EditCheckImpact
 
         }
 
-        void HideDisableVisit(List<EditCheckValidateDto> editCheckValidateDtos, int screeningEntryId)
+        public void HideDisableVisit(List<EditCheckValidateDto> editCheckValidateDtos, int screeningEntryId)
         {
             var visits = editCheckValidateDtos.Where(x => x.CheckBy == EditCheckRuleBy.ByVisit).ToList();
             var projectDesignVisitIds = visits.GroupBy(x => x.ProjectDesignVisitId).Select(r => r.Key).ToList();
@@ -336,9 +337,9 @@ namespace GSC.Respository.EditCheckImpact
             projectDesignVisitIds.ForEach(x =>
             {
                 var hideDisableType = HideDisableType.None;
-                if (visits.Any(r => r.Operator == Operator.Hide && r.ProjectDesignVisitId == x && r.ValidateType == EditCheckValidateType.Passed))
+                if (visits.Any(r => r.Operator == Operator.Hide && r.ProjectDesignVisitId == x && r.ValidateType != EditCheckValidateType.Passed))
                     hideDisableType = HideDisableType.Hide;
-                else if (visits.Any(r => r.Operator == Operator.Enable && r.ProjectDesignVisitId == x && r.ValidateType == EditCheckValidateType.Passed))
+                else if (visits.Any(r => r.Operator == Operator.Enable && r.ProjectDesignVisitId == x && r.ValidateType != EditCheckValidateType.Passed))
                     hideDisableType = HideDisableType.Disable;
 
                 var ScreeningVisits = _context.ScreeningVisit.Where(a => a.ScreeningEntryId == screeningEntryId && a.ProjectDesignVisitId == x).ToList();
