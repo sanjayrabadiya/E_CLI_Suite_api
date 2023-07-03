@@ -75,6 +75,7 @@ namespace GSC.Api.Controllers.CTMS
             {
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
+                tastMaster.Percentage = data.Percentage;
             }
 
             _studyPlanTaskRepository.Add(tastMaster);

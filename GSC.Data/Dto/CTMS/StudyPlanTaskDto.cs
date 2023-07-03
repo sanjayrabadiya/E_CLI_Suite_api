@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? EndDate { get; set; }
         public DateTime? EndDateDay { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
+        public decimal? Percentage { get; set; }
 
     }
 
@@ -49,6 +50,7 @@ namespace GSC.Data.Dto.CTMS
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
         public string Site { get; set; }
+        public decimal? Percentage { get; set; }
     }
 
     public class StudyPlanTaskChartDto
@@ -70,6 +72,7 @@ namespace GSC.Data.Dto.CTMS
         public string TaskName { get; set; }
         public int Duration { get; set; }
         public int NoOfDeviatedDay { get; set; }
+        public decimal? Percentage { get; set; }
 
     }
 }
