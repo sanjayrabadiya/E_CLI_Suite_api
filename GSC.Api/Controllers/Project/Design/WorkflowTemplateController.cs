@@ -82,5 +82,14 @@ namespace GSC.Api.Controllers.Project.Design
             _workflowTemplateRepository.updatePermission(workflowTemplateDto);
             return Ok();
         }
+
+
+        [HttpGet]
+        [Route("CheckForVisitWorkflow/{projectDesignVisitId}")]
+        public IActionResult CheckForVisitWorkflow(int projectDesignVisitId)
+        {
+            var result = _context.WorkflowVisit.Any(x => x.DeletedDate ==null && x.ProjectDesignVisitId == projectDesignVisitId);
+            return Ok(result);
+        }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Entities.Project.Design;
@@ -61,6 +62,12 @@ namespace GSC.Respository.Project.Design
                 Delete(d);
             }
             _context.Save();
+        }
+
+        public bool CheckforTemplateisExists(int projectDesignVisitId)
+        {
+            var result = All.Any(x => x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisitId == projectDesignVisitId);
+            return result;
         }
     }
 }

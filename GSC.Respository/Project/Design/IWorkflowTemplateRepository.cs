@@ -9,5 +9,6 @@ namespace GSC.Respository.Project.Design
     {
         List<int> GetDetailById(WorkflowTemplateDto workflowTemplateDto);
         void updatePermission(WorkflowTemplateDto workflowTemplateDto);
+        bool CheckforTemplateisExists(int projectDesignVisitId);
     }
 }

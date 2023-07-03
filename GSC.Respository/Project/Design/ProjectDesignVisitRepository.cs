@@ -16,10 +16,12 @@ namespace GSC.Respository.Project.Design
 
         private readonly IGSCContext _context;
         private readonly IStudyVersionRepository _studyVersionRepository;
-        public ProjectDesignVisitRepository(IGSCContext context, IStudyVersionRepository studyVersionRepository) : base(context)
+        private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
+        public ProjectDesignVisitRepository(IGSCContext context, IStudyVersionRepository studyVersionRepository, IWorkflowTemplateRepository workflowTemplateRepository) : base(context)
         {
             _context = context;
             _studyVersionRepository = studyVersionRepository;
+            _workflowTemplateRepository = workflowTemplateRepository;
         }
 
         public ProjectDesignVisit GetVisit(int id)
@@ -143,13 +145,13 @@ namespace GSC.Respository.Project.Design
                     IsSchedule = t.IsSchedule,
                     StudyVersion = t.StudyVersion,
                     InActiveVersion = t.InActiveVersion,
-                    DisplayName=t.DisplayName,
+                    DisplayName = t.DisplayName,
                     Templates = t.Templates.Where(a => a.DeletedDate == null).Select(b => new InsertScreeningTemplate
                     {
                         ProjectDesignTemplateId = b.Id,
                         StudyVersion = b.StudyVersion,
                         InActiveVersion = b.InActiveVersion,
-                        ScreeningTemplateName=b.TemplateName
+                        ScreeningTemplateName = b.TemplateName
                     }).ToList()
                 }).ToList();
 
@@ -159,7 +161,7 @@ namespace GSC.Respository.Project.Design
         {
             if (All.Any(x =>
                 x.Id != objSave.Id && x.DisplayName == objSave.DisplayName &&
-                x.ProjectDesignPeriodId == objSave.ProjectDesignPeriodId && x.DeletedDate == null && x.InActiveVersion==null))
+                x.ProjectDesignPeriodId == objSave.ProjectDesignPeriodId && x.DeletedDate == null && x.InActiveVersion == null))
                 return "Duplicate Visit Name : " + objSave.DisplayName;
             return "";
         }
@@ -171,6 +173,25 @@ namespace GSC.Respository.Project.Design
             result.AnyLive = _studyVersionRepository.AnyLive(projectDesignId);
             if (result.AnyLive)
                 result.VersionNumber = _studyVersionRepository.GetOnTrialVersionByProjectDesign(projectDesignId);
+            return result;
+        }
+
+
+        public IList<DropDownDto> GetVisitsforWorkflowVisit(int projectDesignId)
+        {
+            var result = All.Where(x => x.ProjectDesignPeriod.ProjectDesignId == projectDesignId && x.DeletedDate == null && x.InActiveVersion == null).Select(x => new DropDownDto
+            {
+                Id = x.Id,
+                Value = x.DisplayName
+            }).ToList();
+
+            List<DropDownDto> removeItem = new List<DropDownDto>();
+
+            foreach (DropDownDto item in result)
+                if (_workflowTemplateRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisitId == item.Id))
+                    removeItem.Add(item);
+
+            result.RemoveAll(item => removeItem.Contains(item));
             return result;
         }
     }
