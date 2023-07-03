@@ -1670,16 +1670,21 @@ namespace GSC.Respository.Master
 
             else
             {
-                var planMetrics = _context.PlanMetrics.Include(j => j.OverTimeMetrics).ThenInclude(i => i.Project).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
+                var planMetrics = _context.PlanMetrics.Include(x => x.OverTimeMetrics).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                     .Select(b => new PlanMetricsGridDto
                     {
+                        Id = b.Id,
                         ProjectId = b.ProjectId,
                         MetricsType = b.MetricsType.GetDescription(),
-                        Planned = b.OverTimeMetrics.Planned,
                         Forecast = b.Forecast,
-                        Actual = b.OverTimeMetrics.Actual,
                     }).ToList();
 
+                foreach (var item in planMetrics)
+                {
+                    var planMetricsr = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == item.Id && x.DeletedDate == null).ToList();
+                    item.Planned = planMetricsr.Sum(c => c.Planned);
+                    item.Actual = planMetricsr.Sum(c => c.Actual);
+                }
                 return planMetrics;
             }
         }
