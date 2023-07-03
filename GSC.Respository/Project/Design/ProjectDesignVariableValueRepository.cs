@@ -45,7 +45,7 @@ namespace GSC.Respository.Project.Design
             var query = _context.ProjectDesignVariable.AsQueryable();
             query = query.Where(x => x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == search.ParentProjectId
             && x.ProjectDesignTemplate.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.DeletedDate == null
-            && x.DeletedDate == null);
+            && x.DeletedDate == null).OrderBy(x=>x.ProjectDesignTemplate.ProjectDesignVisit.DesignOrder).ThenBy(x => x.ProjectDesignTemplate.DesignOrder).ThenBy(x=>x.DesignOrder);
 
             if (search.VisitIds != null && search.VisitIds.Length > 0)
                 query = query.Where(x => search.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisit.Id));
