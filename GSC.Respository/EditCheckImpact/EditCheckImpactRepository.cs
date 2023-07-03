@@ -337,11 +337,11 @@ namespace GSC.Respository.EditCheckImpact
             projectDesignVisitIds.ForEach(x =>
             {
                 var hideDisableType = HideDisableType.None;
-                if (visits.Any(r => r.Operator == Operator.Hide && r.ProjectDesignVisitId == x && r.ValidateType != EditCheckValidateType.Passed))
+                if (visits.Any(r => r.Operator == Operator.Hide && r.ProjectDesignVisitId == x && r.ValidateType == EditCheckValidateType.Passed))
                     hideDisableType = HideDisableType.Hide;
                 else if (visits.Any(r => r.Operator == Operator.Enable && r.ProjectDesignVisitId == x && r.ValidateType != EditCheckValidateType.Passed))
                     hideDisableType = HideDisableType.Disable;
-
+                
                 var ScreeningVisits = _context.ScreeningVisit.Where(a => a.ScreeningEntryId == screeningEntryId && a.ProjectDesignVisitId == x).ToList();
                 ScreeningVisits.ForEach(a =>
                 {
