@@ -201,7 +201,7 @@ namespace GSC.Respository.CTMS
 
             var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
@@ -244,7 +244,7 @@ namespace GSC.Respository.CTMS
             {
                 var tasklist1 = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == t.DependentTaskId
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
