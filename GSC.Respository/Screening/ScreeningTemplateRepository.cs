@@ -231,13 +231,21 @@ namespace GSC.Respository.Screening
 
             var isRestriction = false;
 
-            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null))
+            var templateRestriction = _projectDesingTemplateRestrictionRepository.All.Where(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId
+            && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).Select(r => new { r.ProjectDesignTemplateId, r.IsHide }).FirstOrDefault();
+
+            if (templateRestriction != null)
             {
                 designTemplateDto.IsSubmittedButton = false;
                 designTemplateDto.IsRepeated = false;
                 isRestriction = true;
                 designTemplateDto.IsUnSubmittedButton = false;
+
+                if (templateRestriction.IsHide)
+                    throw new Exception("You can't view the template!");
             }
+
+
 
             designTemplateDto.Variables = designTemplateDto.Variables.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
             && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
