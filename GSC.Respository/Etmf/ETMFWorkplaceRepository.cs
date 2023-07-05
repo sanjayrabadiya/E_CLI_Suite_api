@@ -1271,6 +1271,287 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
+
+        public List<ChartReport> GetChartDocumentReport(int id, EtmfChartType? chartType)
+        {
+            var result = new List<ChartReport>();
+            var projectWorkplaces = _context.EtmfProjectWorkPlace.Where(t => t.DeletedBy == null && t.ProjectId == id && t.TableTag == (int)EtmfTableNameTag.ProjectWorkPlace)
+                            .Include(x => x.ProjectWorkplaceDetails)
+                            .ThenInclude(x => x.ProjectWorkplaceDetails)
+                            .ThenInclude(x => x.ProjectWorkplaceDetails)
+                            .ThenInclude(x => x.ProjectWorkplaceDetails)
+                            .AsNoTracking().ToList();
+            var Project = _context.Project.Where(x => x.Id == id).FirstOrDefault();
+            foreach (var b in projectWorkplaces)
+            {
+                #region Details
+                foreach (var c in b.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceDetail))
+                {
+                    var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == c.Id && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+
+                    if (rights != null && rights.IsView)
+                    {
+                        TreeValue pvListdetaiObj = GetWorksplaceDetails(rights, c, null);
+
+                        foreach (var d in c.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone))
+                        {
+                            d.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(d.EtmfMasterLibraryId);
+                            // Get zone
+                            TreeValue pvListZoneObj = GetZone(rights, c, d, b, pvListdetaiObj.ExpandData);
+
+                            foreach (var e in d.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceSection))
+                            {
+                                e.EtmfMasterLibrary = _context.EtmfMasterLibrary.Find(e.EtmfMasterLibraryId);
+                                // Get section
+                                TreeValue pvListSectionObj = GetSection(e, (WorkPlaceFolder)c.WorkPlaceFolderId, rights, c, d, b, pvListZoneObj.ExpandData);
+                                // Get artificate
+                                List<TreeValue> pvListArtificateList = GetArtificate(e.ProjectWorkplaceDetails.Where(x => x.DeletedBy == null && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceArtificate).ToList(), (WorkPlaceFolder)c.WorkPlaceFolderId, chartType, rights, c, d, e, b, pvListSectionObj.ExpandData);
+
+                                foreach (var artificate in pvListArtificateList.Where(x => x.Level == 6).ToList())
+                                {
+                                    if (chartType.Value == EtmfChartType.Incomplete)
+                                    {
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(z => z.DeletedDate == null && z.ProjectWorkplaceArtificateId == artificate.ArtificateId && z.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0);
+
+                                        foreach (var item in documents)
+                                        {
+                                            ChartReport obj = new ChartReport();
+                                            obj.ProjectCode = Project.ProjectCode;
+                                            obj.WorkPlaceFolderName = c.ItemName;
+                                            obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                            obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                            obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                            obj.ArtificateName = artificate.Text;
+                                            obj.DocumentName = item.DocumentName;
+                                            result.Add(obj);
+                                        }
+                                    }
+
+                                    if (chartType.Value == EtmfChartType.PendingReview)
+                                    {
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.ProjectArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).Any(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy));
+
+                                        foreach (var item in documents)
+                                        {
+                                            ChartReport obj = new ChartReport();
+                                            obj.ProjectCode = Project.ProjectCode;
+                                            obj.WorkPlaceFolderName = c.ItemName;
+                                            obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                            obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                            obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                            obj.ArtificateName = artificate.Text;
+                                            obj.DocumentName = item.DocumentName;
+                                            result.Add(obj);
+                                        }
+                                    }
+
+                                    if (chartType.Value == EtmfChartType.PendingApprove)
+                                    {
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null));
+
+                                        foreach (var item in documents)
+                                        {
+                                            ChartReport obj = new ChartReport();
+                                            obj.ProjectCode = Project.ProjectCode;
+                                            obj.WorkPlaceFolderName = c.ItemName;
+                                            obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                            obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                            obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                            obj.ArtificateName = artificate.Text;
+                                            obj.DocumentName = item.DocumentName;
+                                            result.Add(obj);
+                                        }
+                                    }
+
+                                    if (chartType.Value == EtmfChartType.PendingFinal)
+                                    {
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.Status != ArtifactDocStatusType.Final && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).All(l => l.IsApproved == true && l.DeletedDate==null));
+
+                                        foreach (var item in documents)
+                                        {
+                                            ChartReport obj = new ChartReport();
+                                            obj.ProjectCode = Project.ProjectCode;
+                                            obj.WorkPlaceFolderName = c.ItemName;
+                                            obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                            obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                            obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                            obj.ArtificateName = artificate.Text;
+                                            obj.DocumentName = item.DocumentName;
+                                            result.Add(obj);
+                                        }
+                                    }
+
+                                    if (chartType.Value == EtmfChartType.Final)
+                                    {
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.Status == ArtifactDocStatusType.Final && y.DeletedDate == null);
+
+                                        foreach (var item in documents)
+                                        {
+                                            ChartReport obj = new ChartReport();
+                                            obj.ProjectCode = Project.ProjectCode;
+                                            obj.WorkPlaceFolderName = c.ItemName;
+                                            obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                            obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                            obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                            obj.ArtificateName = artificate.Text;
+                                            obj.DocumentName = item.DocumentName;
+                                            result.Add(obj);
+                                        }
+                                    }
+
+                                    if (chartType.Value == EtmfChartType.Expired)
+                                    {
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.Status == ArtifactDocStatusType.Expired && y.DeletedDate == null);
+
+                                        foreach (var item in documents)
+                                        {
+                                            ChartReport obj = new ChartReport();
+                                            obj.ProjectCode = Project.ProjectCode;
+                                            obj.WorkPlaceFolderName = c.ItemName;
+                                            obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                            obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                            obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                            obj.ArtificateName = artificate.Text;
+                                            obj.DocumentName = item.DocumentName;
+                                            obj.ExpiryDate = item.ExpiryDate;
+                                            result.Add(obj);
+                                        }
+                                    }
+                                }
+
+                                foreach (var artificate in pvListArtificateList.Where(x => x.Level == 5.1).ToList())
+                                {
+                                    foreach (var subData in artificate?.Item)
+                                    {
+                                        //ChartReport obj = new ChartReport();
+                                        //obj.ProjectCode = Project.ProjectCode;
+                                        //obj.WorkPlaceFolderName = c.ItemName;
+                                        //obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                        //obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                        //obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                        //obj.SubSectionName = artificate.Text;
+                                        //obj.ArtificateName = subData.Text;
+                                        //result.Add(obj);
+
+
+                                        if (chartType.Value == EtmfChartType.Incomplete)
+                                        {
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(z => z.DeletedDate == null && z.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && z.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0);
+
+                                            foreach (var item in documents)
+                                            {
+                                                ChartReport obj = new ChartReport();
+                                                obj.ProjectCode = Project.ProjectCode;
+                                                obj.WorkPlaceFolderName = c.ItemName;
+                                                obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                                obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                                obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                                obj.ArtificateName = artificate.Text;
+                                                obj.DocumentName = item.DocumentName;
+                                                result.Add(obj);
+                                            }
+                                        }
+
+                                        if (chartType.Value == EtmfChartType.PendingReview)
+                                        {
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.ProjectSubSecArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).Any(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy));
+
+                                            foreach (var item in documents)
+                                            {
+                                                ChartReport obj = new ChartReport();
+                                                obj.ProjectCode = Project.ProjectCode;
+                                                obj.WorkPlaceFolderName = c.ItemName;
+                                                obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                                obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                                obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                                obj.ArtificateName = artificate.Text;
+                                                obj.DocumentName = item.DocumentName;
+                                                result.Add(obj);
+                                            }
+                                        }
+
+                                        if (chartType.Value == EtmfChartType.PendingApprove)
+                                        {
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.ProjectSubSecArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null));
+
+                                            foreach (var item in documents)
+                                            {
+                                                ChartReport obj = new ChartReport();
+                                                obj.ProjectCode = Project.ProjectCode;
+                                                obj.WorkPlaceFolderName = c.ItemName;
+                                                obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                                obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                                obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                                obj.ArtificateName = artificate.Text;
+                                                obj.DocumentName = item.DocumentName;
+                                                result.Add(obj);
+                                            }
+                                        }
+
+                                        if (chartType.Value == EtmfChartType.PendingFinal)
+                                        {
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.Status != ArtifactDocStatusType.Final && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.ProjectSubSecArtificateDocumentApprover.Where(c => c.DeletedDate == null).All(l => l.IsApproved == true && l.DeletedDate == null));
+
+                                            foreach (var item in documents)
+                                            {
+                                                ChartReport obj = new ChartReport();
+                                                obj.ProjectCode = Project.ProjectCode;
+                                                obj.WorkPlaceFolderName = c.ItemName;
+                                                obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                                obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                                obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                                obj.ArtificateName = artificate.Text;
+                                                obj.DocumentName = item.DocumentName;
+                                                result.Add(obj);
+                                            }
+                                        }
+
+                                        if (chartType.Value == EtmfChartType.Final)
+                                        {
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.Status == ArtifactDocStatusType.Final && y.DeletedDate == null);
+
+                                            foreach (var item in documents)
+                                            {
+                                                ChartReport obj = new ChartReport();
+                                                obj.ProjectCode = Project.ProjectCode;
+                                                obj.WorkPlaceFolderName = c.ItemName;
+                                                obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                                obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                                obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                                obj.ArtificateName = artificate.Text;
+                                                obj.DocumentName = item.DocumentName;
+                                                result.Add(obj);
+                                            }
+                                        }
+
+                                        if (chartType.Value == EtmfChartType.Expired)
+                                        {
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.Status == ArtifactDocStatusType.Expired && y.DeletedDate == null);
+
+                                            foreach (var item in documents)
+                                            {
+                                                ChartReport obj = new ChartReport();
+                                                obj.ProjectCode = Project.ProjectCode;
+                                                obj.WorkPlaceFolderName = c.ItemName;
+                                                obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
+                                                obj.ZoneName = d.EtmfMasterLibrary.ZonName;
+                                                obj.SectionName = e.EtmfMasterLibrary.SectionName;
+                                                obj.ArtificateName = artificate.Text;
+                                                obj.DocumentName = item.DocumentName;
+                                                result.Add(obj);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                #endregion
+            }
+            return result;
+        }
+
         public EtmfProjectWorkPlace GetWorkplaceDetails(int id)
         {
             var result = All.Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkplaceArtificatedocument)
