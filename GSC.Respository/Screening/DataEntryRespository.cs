@@ -124,6 +124,8 @@ namespace GSC.Respository.Screening
                  }).ToList()
              }).ToListAsync();
 
+            var hideTemplateIds = _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToList();
+
             var tempTemplates = await _screeningTemplateRepository.All.
                Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).Select(c => new
                {
@@ -136,6 +138,8 @@ namespace GSC.Respository.Screening
                    c.IsLocked,
                    c.ProjectDesignTemplateId
                }).ToListAsync();
+
+            tempTemplates = tempTemplates.Where(r => !hideTemplateIds.Contains(r.ProjectDesignTemplateId)).ToList();
 
             var templates = tempTemplates.
                 Where(r => !r.IsDisable && (r.IsHide == null || r.IsHide == false)).
@@ -303,7 +307,7 @@ namespace GSC.Respository.Screening
                 });
             }
 
-            var hideTemplateIds = _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToList();
+
             if (hideTemplateIds.Count() > 0)
             {
                 var visitTemplates = await _projectDesignVisitRepository.All.
