@@ -6,6 +6,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -23,10 +24,11 @@ namespace GSC.Respository.CTMS
         private readonly IHolidayMasterRepository _holidayMasterRepository;
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
+        private readonly IProjectRightRepository _projectRightRepository;
 
         public StudyPlanRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IStudyPlanTaskRepository studyPlanTaskRepository) : base(context)
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IStudyPlanTaskRepository studyPlanTaskRepository, IProjectRightRepository projectRightRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -34,13 +36,16 @@ namespace GSC.Respository.CTMS
             _holidayMasterRepository = holidayMasterRepository;
             _weekEndMasterRepository = weekEndMasterRepository;
             _studyPlanTaskRepository = studyPlanTaskRepository;
+            _projectRightRepository = projectRightRepository;
         }
 
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
         {
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null).OrderByDescending(x => x.Id).
-                   ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
 
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && projectList.Any(c => c == x.ProjectId)).OrderByDescending(x => x.Id).
+                   ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
         }
 
         public string ImportTaskMasterData(StudyPlan studyplan)
