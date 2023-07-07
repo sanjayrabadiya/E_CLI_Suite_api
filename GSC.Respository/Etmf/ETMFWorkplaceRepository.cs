@@ -1322,14 +1322,14 @@ namespace GSC.Respository.Etmf
                                             obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
-                                            obj.DocumentName = item.DocumentName;
+                                            obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                             result.Add(obj);
                                         }
                                     }
 
                                     if (chartType.Value == EtmfChartType.PendingReview)
                                     {
-                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.ProjectArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).Any(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy));
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.ProjectArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentReview.Where(x => x.DeletedDate == null).Any(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy)).ToList();
 
                                         foreach (var item in documents)
                                         {
@@ -1340,14 +1340,15 @@ namespace GSC.Respository.Etmf
                                             obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
-                                            obj.DocumentName = item.DocumentName;
+                                            obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                                            obj.ReviewerApproverName = _context.ProjectArtificateDocumentReview.Where(v => v.ProjectWorkplaceArtificatedDocumentId == item.Id && v.IsReviewed == false && v.UserId != item.CreatedBy && v.DeletedDate == null).Join(_context.Users, x => x.UserId, y => y.Id, (x, y) => new { y.FirstName, y.LastName }).ToList().Select(s => s.FirstName + " " + s.LastName).Aggregate((a, b) => a + ", " + b);
                                             result.Add(obj);
                                         }
                                     }
 
                                     if (chartType.Value == EtmfChartType.PendingApprove)
                                     {
-                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null));
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Any(c => c.IsApproved == null && c.DeletedDate == null)).ToList();
 
                                         foreach (var item in documents)
                                         {
@@ -1358,14 +1359,15 @@ namespace GSC.Respository.Etmf
                                             obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
-                                            obj.DocumentName = item.DocumentName;
+                                            obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                                            obj.ReviewerApproverName = _context.ProjectArtificateDocumentApprover.Where(v => v.ProjectWorkplaceArtificatedDocumentId == item.Id && (v.IsApproved==null || v.IsApproved==false) && v.UserId != item.CreatedBy && v.DeletedDate == null).Join(_context.Users, x => x.UserId, y => y.Id, (x, y) => new { y.FirstName, y.LastName }).ToList().Select(s => s.FirstName + " " + s.LastName).Aggregate((a, b) => a + ", " + b);
                                             result.Add(obj);
                                         }
                                     }
 
                                     if (chartType.Value == EtmfChartType.PendingFinal)
                                     {
-                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.Status != ArtifactDocStatusType.Final && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).All(l => l.IsApproved == true && l.DeletedDate==null));
+                                        var documents = _context.ProjectWorkplaceArtificatedocument.Where(y => y.ProjectWorkplaceArtificateId == artificate.ArtificateId && y.Status != ArtifactDocStatusType.Final && y.DeletedDate == null && y.ProjectArtificateDocumentApprover.Count(q => q.DeletedDate == null) != 0 && y.ProjectArtificateDocumentApprover.Where(c => c.DeletedDate == null).All(l => l.IsApproved == true && l.DeletedDate == null));
 
                                         foreach (var item in documents)
                                         {
@@ -1376,7 +1378,7 @@ namespace GSC.Respository.Etmf
                                             obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
-                                            obj.DocumentName = item.DocumentName;
+                                            obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                             result.Add(obj);
                                         }
                                     }
@@ -1394,7 +1396,7 @@ namespace GSC.Respository.Etmf
                                             obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
-                                            obj.DocumentName = item.DocumentName;
+                                            obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                             result.Add(obj);
                                         }
                                     }
@@ -1412,7 +1414,7 @@ namespace GSC.Respository.Etmf
                                             obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
-                                            obj.DocumentName = item.DocumentName;
+                                            obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                             obj.ExpiryDate = item.ExpiryDate;
                                             result.Add(obj);
                                         }
@@ -1422,18 +1424,7 @@ namespace GSC.Respository.Etmf
                                 foreach (var artificate in pvListArtificateList.Where(x => x.Level == 5.1).ToList())
                                 {
                                     foreach (var subData in artificate?.Item)
-                                    {
-                                        //ChartReport obj = new ChartReport();
-                                        //obj.ProjectCode = Project.ProjectCode;
-                                        //obj.WorkPlaceFolderName = c.ItemName;
-                                        //obj.WorkPlaceFolderType = ((WorkPlaceFolder)c.WorkPlaceFolderId).GetDescription();
-                                        //obj.ZoneName = d.EtmfMasterLibrary.ZonName;
-                                        //obj.SectionName = e.EtmfMasterLibrary.SectionName;
-                                        //obj.SubSectionName = artificate.Text;
-                                        //obj.ArtificateName = subData.Text;
-                                        //result.Add(obj);
-
-
+                                    {                                        
                                         if (chartType.Value == EtmfChartType.Incomplete)
                                         {
                                             var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(z => z.DeletedDate == null && z.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && z.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0);
@@ -1447,14 +1438,14 @@ namespace GSC.Respository.Etmf
                                                 obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                                 obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                                 obj.ArtificateName = artificate.Text;
-                                                obj.DocumentName = item.DocumentName;
+                                                obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                                 result.Add(obj);
                                             }
                                         }
 
                                         if (chartType.Value == EtmfChartType.PendingReview)
                                         {
-                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.ProjectSubSecArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).Any(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy));
+                                            var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(y => y.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && y.ProjectSubSecArtificateDocumentReview.Count(q => q.DeletedDate == null) != 0 && y.DeletedDate == null && y.ProjectSubSecArtificateDocumentReview.Where(x => x.DeletedDate == null).Any(v => v.IsReviewed == false && v.ModifiedDate == null && v.UserId != y.CreatedBy)).ToList();
 
                                             foreach (var item in documents)
                                             {
@@ -1465,7 +1456,8 @@ namespace GSC.Respository.Etmf
                                                 obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                                 obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                                 obj.ArtificateName = artificate.Text;
-                                                obj.DocumentName = item.DocumentName;
+                                                obj.ReviewerApproverName = obj.ReviewerApproverName = _context.ProjectSubSecArtificateDocumentReview.Where(v => v.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && v.IsReviewed == false && v.UserId != item.CreatedBy && v.DeletedDate == null).Join(_context.Users, x => x.UserId, y => y.Id, (x, y) => new { y.FirstName, y.LastName }).ToList().Select(s => s.FirstName + " " + s.LastName).Aggregate((a, b) => a + ", " + b);
+                                                obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                                 result.Add(obj);
                                             }
                                         }
@@ -1483,7 +1475,8 @@ namespace GSC.Respository.Etmf
                                                 obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                                 obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                                 obj.ArtificateName = artificate.Text;
-                                                obj.DocumentName = item.DocumentName;
+                                                obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                                                obj.ReviewerApproverName = _context.ProjectSubSecArtificateDocumentApprover.Where(v => v.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && (v.IsApproved == null || v.IsApproved == false) && v.UserId != item.CreatedBy && v.DeletedDate == null).Join(_context.Users, x => x.UserId, y => y.Id, (x, y) => new { y.FirstName, y.LastName }).ToList().Select(s => s.FirstName + " " + s.LastName).Aggregate((a, b) => a + ", " + b);
                                                 result.Add(obj);
                                             }
                                         }
@@ -1501,7 +1494,7 @@ namespace GSC.Respository.Etmf
                                                 obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                                 obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                                 obj.ArtificateName = artificate.Text;
-                                                obj.DocumentName = item.DocumentName;
+                                                obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                                 result.Add(obj);
                                             }
                                         }
@@ -1519,7 +1512,7 @@ namespace GSC.Respository.Etmf
                                                 obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                                 obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                                 obj.ArtificateName = artificate.Text;
-                                                obj.DocumentName = item.DocumentName;
+                                                obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                                                 result.Add(obj);
                                             }
                                         }
@@ -1537,7 +1530,8 @@ namespace GSC.Respository.Etmf
                                                 obj.ZoneName = d.EtmfMasterLibrary.ZonName;
                                                 obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                                 obj.ArtificateName = artificate.Text;
-                                                obj.DocumentName = item.DocumentName;
+                                                obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
+                                                obj.ExpiryDate = item.ExpiryDate;
                                                 result.Add(obj);
                                             }
                                         }
