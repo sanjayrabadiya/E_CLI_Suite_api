@@ -59,6 +59,7 @@ namespace GSC.Api.Controllers.Screening
             else
             {
                 exists.ProjectId = screeningSettingDto.ProjectId;
+                exists.VisitId= screeningSettingDto.VisitId;
                 _screeningSettingRepository.Update(exists);
             }
             if (_uow.Save() <= 0) throw new Exception("Set default project failed.");
