@@ -1218,6 +1218,19 @@ namespace GSC.Respository.Master
                 _context.Save();
             });
 
+            //var templateWorkflow = _context.WorkflowTemplate.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
+            //templateWorkflow.ForEach(x =>
+            //{
+            //    x.Id = 0;
+            //    x.ProjectDesignTemplateId = template.Id;
+            //    x.ModifiedBy = null;
+            //    x.ModifiedDate = null;
+            //    x.DeletedBy = null;
+            //    x.DeletedDate = null;
+            //    _context.WorkflowTemplate.Add(x);
+            //    _context.Save();
+            //});
+
             var projectDesignNotes = _context.ProjectDesignTemplateNote.Where(q => q.ProjectDesignTemplateId == templateId && q.DeletedDate == null).ToList();
             projectDesignNotes.ForEach(x =>
             {

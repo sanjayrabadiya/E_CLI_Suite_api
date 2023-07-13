@@ -7,5 +7,6 @@ namespace GSC.Data.Entities.Project.Design
     {
         public int LevelNo { get; set; }
         public int ProjectDesignTemplateId { get; set; }
+        public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
     }
 }

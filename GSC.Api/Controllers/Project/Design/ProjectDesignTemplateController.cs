@@ -42,6 +42,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly IProjectDesingTemplateRestrictionRepository _templatePermissioRepository;
+        private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -61,6 +62,7 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeValueLanguageRepository variableValueLanguageRepository,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             IProjectDesingTemplateRestrictionRepository templatePermissioRepository,
+            IWorkflowTemplateRepository workflowTemplateRepository,
         IUnitOfWork uow, IMapper mapper,
          IJwtTokenAccesser jwtTokenAccesser,
          ISupplyManagementAllocationRepository supplyManagementAllocationRepository)
@@ -86,6 +88,7 @@ namespace GSC.Api.Controllers.Project.Design
             _templatePermissioRepository = templatePermissioRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
+            _workflowTemplateRepository = workflowTemplateRepository;
         }
 
         [HttpGet("{projectDesignVisitId}")]
@@ -323,6 +326,12 @@ namespace GSC.Api.Controllers.Project.Design
                 {
                     permission.Id = 0;
                     _templatePermissioRepository.Add(permission);
+                }
+
+                foreach (var workflow in projectDesignTemplate.WorkflowTemplate)
+                {
+                    workflow.Id = 0;
+                    _workflowTemplateRepository.Add(workflow);
                 }
 
                 projectDesignTemplate.ProjectDesignVisit = null;

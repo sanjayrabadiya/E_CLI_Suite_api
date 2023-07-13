@@ -75,6 +75,7 @@ namespace GSC.Api.Controllers.CTMS
             {
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
+                tastMaster.Percentage = data.Percentage;
             }
 
             _studyPlanTaskRepository.Add(tastMaster);
@@ -274,7 +275,7 @@ namespace GSC.Api.Controllers.CTMS
             DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), record.DocumentPath);
             if (data.FileModel?.Base64?.Length > 0)
             {
-                tastMaster.DocumentPath = DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+                tastMaster.DocumentPath = _uploadSettingRepository.GetWebDocumentUrl()+DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
             }
             tastMaster.ApprovalStatus = data.ApprovalStatus;
             tastMaster.FileName = data.FileName;

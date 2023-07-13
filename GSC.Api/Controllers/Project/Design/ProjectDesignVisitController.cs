@@ -530,5 +530,12 @@ namespace GSC.Api.Controllers.Project.Design
             return Ok();
         }
 
+        [HttpGet]
+        [Route("GetVisitsforWorkflowVisit/{projectDesignId}")]
+        public IActionResult GetVisitsforWorkflowVisit(int projectDesignId)
+        {
+            return Ok(_projectDesignVisitRepository.GetVisitsforWorkflowVisit(projectDesignId));
+        }
+
     }
 }

@@ -163,7 +163,7 @@ namespace GSC.Respository.InformConcent
 
         }
 
-        public List<EconsentSectionReferenceDocumentType> GetEconsentSectionReferenceDocumentByUser()
+        public List<EconsentSectionReferenceDocument> GetEconsentSectionReferenceDocumentByUser()
         {
             var roleName = _jwtTokenAccesser.RoleName;
 
@@ -178,12 +178,12 @@ namespace GSC.Respository.InformConcent
                && x.EconsentSetup.LanguageId == noneregister.LanguageId
                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Select(s => s.EconsentSetupId).ToList();
 
-            var econsentSectionReferenceDocuments = new List<EconsentSectionReferenceDocumentType>();
+            var econsentSectionReferenceDocuments = new List<EconsentSectionReferenceDocument>();
             var Econsentsectiondocuments = All.Where(q => result.Contains(q.EconsentSetupId) && q.DeletedDate == null).ToList();
 
             foreach (var Econsentsectiondocument in Econsentsectiondocuments)
             {
-                var econsentSectionReferenceDocument = new EconsentSectionReferenceDocumentType();
+                var econsentSectionReferenceDocument = new EconsentSectionReferenceDocument();
                 var upload = _uploadSettingRepository.GetDocumentPath();
                 //var Econsentsectiondocument = Find(id);
                 var FullPath = System.IO.Path.Combine(upload, Econsentsectiondocument.FilePath);
@@ -215,7 +215,7 @@ namespace GSC.Respository.InformConcent
                     type = "doc";
                     econsentSectionReferenceDocument.type = type;
                     econsentSectionReferenceDocument.data = htmlStringText;
-                    //return econsentSectionReferenceDocument;
+                    econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
                     econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                 }
                 else if (extension == ".pdf")
@@ -224,8 +224,8 @@ namespace GSC.Respository.InformConcent
                     var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
                     type = "pdf";
                     econsentSectionReferenceDocument.type = type;
-                    econsentSectionReferenceDocument.data = pdfFullPath;
-                    //return econsentSectionReferenceDocument;
+                    econsentSectionReferenceDocument.data = pdfFullPath.Replace('\\', '/');
+                    econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
                     econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                 }
                 else
@@ -236,15 +236,16 @@ namespace GSC.Respository.InformConcent
                     {
                         type = "img";
                         econsentSectionReferenceDocument.type = type;
-                        econsentSectionReferenceDocument.data = fileFullPath;
-                        //return econsentSectionReferenceDocument;
+                        econsentSectionReferenceDocument.data = fileFullPath.Replace('\\', '/');
+                        econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
                         econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                     }
                     else
                     {
                         type = "vid";
                         econsentSectionReferenceDocument.type = type;
-                        econsentSectionReferenceDocument.data = fileFullPath;
+                        econsentSectionReferenceDocument.data = fileFullPath.Replace('\\', '/');
+                        econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
                         //return econsentSectionReferenceDocument;
                         econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                     }

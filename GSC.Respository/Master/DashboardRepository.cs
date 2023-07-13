@@ -6,6 +6,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -917,6 +918,58 @@ namespace GSC.Respository.Master
 
             return list;
         }
+        //Add made by Mitul Pre Requisite
+        public List<StudyPlanTaskDto> GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            if (countryId > 0)
+            {
+            var list = _context.StudyPlanTask
+           .Include(i => i.StudyPlan)
+           .ThenInclude(i => i.Project)
+           .Where(z => z.DeletedDate == null && projectIds.Contains(z.StudyPlan.ProjectId) && z.PreApprovalStatus == true)
+           .Select
+           (b => new StudyPlanTaskDto
+           {
+               Id = b.Id,
+               Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
+               TaskName = b.TaskName,
+               StartDate = b.StartDate,
+               EndDate = b.EndDate,
+               Duration = b.Duration,
+               ActualStartDate = b.ActualStartDate,
+               ActualEndDate = b.ActualEndDate,
+               ApprovalStatus = b.ApprovalStatus,
+               CreatedDate = b.CreatedDate
+           }).ToList();
+
+                return list;
+            }
+            else
+            {
+             var list = _context.StudyPlanTask
+            .Include(i => i.StudyPlan)
+            .ThenInclude(i => i.Project)
+            .Where(z => z.DeletedDate == null && z.StudyPlan.ProjectId == projectId &&  z.PreApprovalStatus == true)
+            .Select
+            (b => new StudyPlanTaskDto
+            {
+                Id = b.Id,
+                Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
+                TaskName = b.TaskName,
+                StartDate = b.StartDate,
+                EndDate = b.EndDate,
+                Duration = b.Duration,
+                ActualStartDate = b.ActualStartDate,
+                ActualEndDate = b.ActualEndDate,
+                ApprovalStatus = b.ApprovalStatus,
+                CreatedDate = b.CreatedDate
+            }).ToList();
+
+                return list;
+            }
+        }
 
         //Add by mitul on 24-04-2024
         public List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId)
@@ -1617,16 +1670,21 @@ namespace GSC.Respository.Master
 
             else
             {
-                var planMetrics = _context.PlanMetrics.Include(j => j.OverTimeMetrics).ThenInclude(i => i.Project).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
+                var planMetrics = _context.PlanMetrics.Include(x => x.OverTimeMetrics).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                     .Select(b => new PlanMetricsGridDto
                     {
+                        Id = b.Id,
                         ProjectId = b.ProjectId,
                         MetricsType = b.MetricsType.GetDescription(),
-                        Planned = b.OverTimeMetrics.Planned,
                         Forecast = b.Forecast,
-                        Actual = b.OverTimeMetrics.Actual,
                     }).ToList();
 
+                foreach (var item in planMetrics)
+                {
+                    var planMetricsr = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == item.Id && x.DeletedDate == null).ToList();
+                    item.Planned = planMetricsr.Sum(c => c.Planned);
+                    item.Actual = planMetricsr.Sum(c => c.Actual);
+                }
                 return planMetrics;
             }
         }

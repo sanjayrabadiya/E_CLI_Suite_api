@@ -52,7 +52,7 @@ namespace GSC.Data.Dto.Project.EditCheck
 
         public int? FetchingProjectDesignVisitId { get; set; }
 
-        
+
     }
 
     public class EditCheckValidate
@@ -88,6 +88,13 @@ namespace GSC.Data.Dto.Project.EditCheck
         public bool ResultSkip { get; set; }
         public List<EditCheckResult> Target { get; set; }
 
+    }
+
+    public class EditCheckVisit
+    {
+        public int? ProjectDesignVisitId { get; set; }
+        public HideDisableType HideDisableType { get; set; }
+        public string EditCheckMsg { get; set; }
     }
 
 }

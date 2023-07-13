@@ -46,6 +46,7 @@ namespace GSC.Respository.Screening
         private readonly IProjectScheduleRepository _projectScheduleRepository;
         private readonly IAttendanceBarcodeGenerateRepository _attendanceBarcodeGenerateRepository;
         private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         public ScreeningEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IProjectRightRepository projectRightRepository,
@@ -60,7 +61,7 @@ namespace GSC.Respository.Screening
             IRolePermissionRepository rolePermissionRepository,
              IProjectScheduleRepository projectScheduleRepository,
              IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository,
-             IAppSettingRepository appSettingRepository)
+             IAppSettingRepository appSettingRepository, IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository)
             : base(context)
         {
             _volunteerRepository = volunteerRepository;
@@ -79,6 +80,7 @@ namespace GSC.Respository.Screening
             _projectScheduleRepository = projectScheduleRepository;
             _attendanceBarcodeGenerateRepository = attendanceBarcodeGenerateRepository;
             _appSettingRepository = appSettingRepository;
+            _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
         }
 
         public ScreeningEntryDto GetDetails(int id)
@@ -158,6 +160,11 @@ namespace GSC.Respository.Screening
             var visits = _screeningVisitRepository.GetVisitTree(screeningEntryId);
             var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryId, workflowlevel);
 
+            var hideTemplateIds = _projectDesingTemplateRestrictionRepository.All.Where(x =>
+            x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToList();
+
+            templates = templates.Where(r => !hideTemplateIds.Contains(r.ProjectDesignTemplateId)).ToList();
+
             visits.ForEach(x =>
             {
                 x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => Convert.ToDecimal(c.DesignOrderForOrderBy)).ToList();
@@ -170,6 +177,8 @@ namespace GSC.Respository.Screening
                     x.IsVisitRepeated = false;
                 x.IsLocked = x.ScreeningTemplates.All(x => x.IsLocked);
             });
+
+            visits = visits.Where(r => r.ScreeningTemplates.Count() > 0).ToList();
 
             myReview = templates.Any(x => x.MyReview);
 

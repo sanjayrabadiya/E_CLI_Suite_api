@@ -106,7 +106,9 @@ namespace GSC.Data.Dto.Etmf
         public string ArtificateName { get; set; }
         public string SubSectionName { get; set; }
         public string SubSectionArtificateName { get; set; }
-
+        public string DocumentName { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public string ReviewerApproverName { get; set; }
     }
 
     public class EtmfGroupSearchModel

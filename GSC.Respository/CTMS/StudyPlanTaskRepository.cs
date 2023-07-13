@@ -189,6 +189,7 @@ namespace GSC.Respository.CTMS
                     t.DependentTaskId = taskData.DependentTaskId;
                     t.ActivityType = taskData.ActivityType;
                     t.OffSet = taskData.OffSet;
+                    t.Percentage = taskData.Percentage;
                 });
             }
             _context.StudyPlanTask.AddRange(tasklist);

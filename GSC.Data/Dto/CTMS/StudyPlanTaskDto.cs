@@ -48,6 +48,8 @@ namespace GSC.Data.Dto.CTMS
         public bool? ApprovalStatus { get; set; }
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
+        public string Site { get; set; }
+        public decimal? Percentage { get; set; }
     }
 
     public class StudyPlanTaskChartDto
@@ -69,6 +71,7 @@ namespace GSC.Data.Dto.CTMS
         public string TaskName { get; set; }
         public int Duration { get; set; }
         public int NoOfDeviatedDay { get; set; }
+        public decimal? Percentage { get; set; }
 
     }
 }

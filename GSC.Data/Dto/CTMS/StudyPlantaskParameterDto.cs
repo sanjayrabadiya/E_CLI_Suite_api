@@ -37,6 +37,7 @@ namespace GSC.Data.Dto.CTMS
         public FileModel FileModel { get; set; }
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
+        public decimal? Percentage { get; set; }
 
     }
 

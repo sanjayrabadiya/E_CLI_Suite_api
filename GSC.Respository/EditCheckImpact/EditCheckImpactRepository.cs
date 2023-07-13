@@ -144,7 +144,7 @@ namespace GSC.Respository.EditCheckImpact
 
             });
 
-            result = result.Where(x => (x.Status > ScreeningTemplateStatus.Pending && x.IsTarget) || x.ScreeningTemplateId == screeningTemplateBasic.Id || !x.IsTarget).ToList();
+            result = result.Where(x => (x.Status > ScreeningTemplateStatus.Pending && x.IsTarget) || x.CheckBy == EditCheckRuleBy.ByVisit || x.ScreeningTemplateId == screeningTemplateBasic.Id || !x.IsTarget).ToList();
 
             return TargetValidateProcess(result);
         }
@@ -166,8 +166,9 @@ namespace GSC.Respository.EditCheckImpact
 
             if (!isQueryRaise)
             {
-                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.IsOnlyTarget || 
-                x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation || 
+                var Ids = editCheckResult.Where(x => (x.CheckBy == EditCheckRuleBy.ByTemplate || x.IsOnlyTarget ||
+                x.CheckBy == EditCheckRuleBy.ByTemplateAnnotation ||
+                 x.CheckBy == EditCheckRuleBy.ByVisit ||
                 x.ProjectDesignTemplateId == projectDesignTemplateId) && x.IsTarget).Select(t => t.EditCheckId).Distinct().ToList();
                 editCheckResult = editCheckResult.Where(t => Ids.Contains(t.EditCheckId)).ToList();
             }
@@ -322,10 +323,34 @@ namespace GSC.Respository.EditCheckImpact
                 UpdateTemplateHide(r.CheckBy == EditCheckRuleBy.ByTemplate ? (int)r.ProjectDesignTemplateId : 0, r.CheckBy == EditCheckRuleBy.ByTemplate ? 0 : (int)r.DomainId, screeningEntryId, r.ValidateType, editTargetValidation);
             });
 
-            targetResult.Where(r => r.CheckBy == EditCheckRuleBy.ByVisit && (r.Operator == Operator.Hide || r.Operator == Operator.Enable)).ToList().ForEach(r =>
+            HideDisableVisit(targetResult, screeningEntryId);
+
+
+
+        }
+
+        public void HideDisableVisit(List<EditCheckValidateDto> editCheckValidateDtos, int screeningEntryId)
+        {
+            var visits = editCheckValidateDtos.Where(x => x.CheckBy == EditCheckRuleBy.ByVisit).ToList();
+            var projectDesignVisitIds = visits.GroupBy(x => x.ProjectDesignVisitId).Select(r => r.Key).ToList();
+
+            projectDesignVisitIds.ForEach(x =>
             {
+                var hideDisableType = HideDisableType.None;
+                if (visits.Any(r => r.Operator == Operator.Hide && r.ProjectDesignVisitId == x && r.ValidateType == EditCheckValidateType.Passed))
+                    hideDisableType = HideDisableType.Hide;
+                else if (visits.Any(r => r.Operator == Operator.Enable && r.ProjectDesignVisitId == x && r.ValidateType != EditCheckValidateType.Passed))
+                    hideDisableType = HideDisableType.Disable;
+                
+                var ScreeningVisits = _context.ScreeningVisit.Where(a => a.ScreeningEntryId == screeningEntryId && a.ProjectDesignVisitId == x).ToList();
+                ScreeningVisits.ForEach(a =>
+                {
+                    a.HideDisableType = hideDisableType;
+                    _context.ScreeningVisit.Update(a);
+                });
             });
 
+            _context.Save();
         }
 
         public List<EditCheckTargetValidationList> UpdateVariale(List<EditCheckValidateDto> editCheckValidateDto, int screeningEntryId, int screeningVisitId, bool isVariable, bool isQueryRaise)

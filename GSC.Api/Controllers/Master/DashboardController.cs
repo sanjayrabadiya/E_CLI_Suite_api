@@ -275,6 +275,13 @@ namespace GSC.Api.Controllers.Master
             return Ok(queries);
         }
         [HttpGet]
+        [Route("GetCTMSPreRequisiteDashboard/{ProjectId}/{countryId}/{SiteId}")]
+        public IActionResult GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetCTMSPreRequisiteDashboard(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
         [Route("GetCTMSMonitoringActionPointChartDashboard/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
         {

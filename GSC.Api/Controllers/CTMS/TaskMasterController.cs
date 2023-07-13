@@ -96,31 +96,24 @@ namespace GSC.Api.Controllers.CTMS
 
         private void UpdateRefrenceTypes(TaskMaster taskmaster)
         {
-            var refrenceTypes = _context.RefrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id
-                                                               && taskmaster.RefrenceTypes.Select(x => x.Id).Contains(x.Id)
-                                                               && x.DeletedDate == null).ToList();
-            taskmaster.RefrenceTypes.ForEach(z =>
-            {
-                var role = refrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id && x.Id == z.Id).FirstOrDefault();
-                if (role == null)
-                {
-                    _context.RefrenceTypes.Add(z);
-                }
-            });
-
             var refrenceType = _context.RefrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id && x.DeletedDate == null)
-                .ToList();
+               .ToList();
 
             refrenceType.ForEach(t =>
             {
-                var type = refrenceType.Where(x => x.TaskMasterId == t.TaskMasterId && x.Id == t.Id).FirstOrDefault();
-                if (refrenceType == null)
+                if (refrenceType != null)
                 {
-                    //delete
                     t.DeletedBy = _jwtTokenAccesser.UserId;
                     t.DeletedDate = DateTime.UtcNow;
                     _context.RefrenceTypes.Update(t);
                 }
+            });
+            //var refrenceTypes = _context.RefrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id
+            //                                                   && taskmaster.RefrenceTypes.Select(x => x.Id).Contains(x.Id)
+            //                                                   && x.DeletedDate == null).ToList();
+            taskmaster.RefrenceTypes.ForEach(z =>
+            {
+                _context.RefrenceTypes.Add(z);
             });
         }
 

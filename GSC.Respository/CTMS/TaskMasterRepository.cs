@@ -108,7 +108,7 @@ namespace GSC.Respository.CTMS
                 var sitedata = TaskMaster.Where(x => x.Project.ParentProjectId != null).FirstOrDefault();
                 foreach (var item in taskmasterDto.RefrenceTypes)
                 {
-                    if (sitedata == null && item.RefrenceType == Helper.RefrenceType.Sites)
+                    if (sitedata == null && (item.RefrenceType == Helper.RefrenceType.Sites || item.RefrenceType == Helper.RefrenceType.Country))
                     {
                         var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == projectid).ToList();
                         sites.ForEach(s =>
@@ -121,7 +121,7 @@ namespace GSC.Respository.CTMS
                             lstStudyPlan.Add(data);
                         });
                     }
-                    else if (sitedata != null && item.RefrenceType == Helper.RefrenceType.Sites)
+                    else if (sitedata != null && (item.RefrenceType == Helper.RefrenceType.Sites || item.RefrenceType == Helper.RefrenceType.Country))
                     {
                         var sites = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId != null).ToList();
                         sites.ForEach(s =>
@@ -149,31 +149,31 @@ namespace GSC.Respository.CTMS
                             lstStudyPlan.Add(data);
                         });
                     }
-                    else if (item.RefrenceType == Helper.RefrenceType.Country)
-                    {
-                        var study = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId == null && x.Project.CountryId != null).ToList();
-                        study.ForEach(s =>
-                        {
-                            var data = new StudyPlanDto();
-                            data.Id = s.Id;
-                            data.StartDate = s.StartDate;
-                            data.EndDate = s.EndDate;
-                            data.ProjectId = s.ProjectId;
-                            data.TaskTemplateId = taskmasterDto.TaskTemplateId;
-                            lstStudyPlan.Add(data);
-                        });
+                    //else if (item.RefrenceType == Helper.RefrenceType.Country)
+                    //{
+                    //    var study = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId == null && x.Project.CountryId != null).ToList();
+                    //    study.ForEach(s =>
+                    //    {
+                    //        var data = new StudyPlanDto();
+                    //        data.Id = s.Id;
+                    //        data.StartDate = s.StartDate;
+                    //        data.EndDate = s.EndDate;
+                    //        data.ProjectId = s.ProjectId;
+                    //        data.TaskTemplateId = taskmasterDto.TaskTemplateId;
+                    //        lstStudyPlan.Add(data);
+                    //    });
 
-                        var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == projectid && x.CountryId != null).ToList();
-                        sites.ForEach(s =>
-                        {
-                            var data = new StudyPlanDto();
-                            data.StartDate = TaskMaster.FirstOrDefault().StartDate;
-                            data.EndDate = TaskMaster.FirstOrDefault().EndDate;
-                            data.ProjectId = s.Id;
-                            data.TaskTemplateId = taskmasterDto.TaskTemplateId;
-                            lstStudyPlan.Add(data);
-                        });
-                    }
+                    //    var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == projectid && x.CountryId != null).ToList();
+                    //    sites.ForEach(s =>
+                    //    {
+                    //        var data = new StudyPlanDto();
+                    //        data.StartDate = TaskMaster.FirstOrDefault().StartDate;
+                    //        data.EndDate = TaskMaster.FirstOrDefault().EndDate;
+                    //        data.ProjectId = s.Id;
+                    //        data.TaskTemplateId = taskmasterDto.TaskTemplateId;
+                    //        lstStudyPlan.Add(data);
+                    //    });
+                    //}
 
                 }
                 //if (sitedata == null && taskmasterDto.RefrenceType == Helper.RefrenceType.Sites)
