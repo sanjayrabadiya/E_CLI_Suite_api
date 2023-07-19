@@ -444,5 +444,7 @@ namespace GSC.Domain.Context
         DbSet<ProjectDesignVisitRestriction> ProjectDesignVisitRestriction { get; set; }
         DbSet<VisitEmailConfiguration> VisitEmailConfiguration { get; set; }
         DbSet<VisitEmailConfigurationRoles> VisitEmailConfigurationRoles { get; set; }
+        DbSet<LettersFormate> LettersFormate { get; set; }
+        DbSet<LettersActivity> LettersActivity { get; set; }
     }
 }

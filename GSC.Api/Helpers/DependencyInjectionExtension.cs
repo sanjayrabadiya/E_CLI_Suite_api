@@ -421,6 +421,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IProjectDesignVisitRestrictionRepository, ProjectDesignVisitRestrictionRepository>();
             services.AddScoped<IVisitEmailConfigurationRolesRepository, VisitEmailConfigurationRolesRepository>();
             services.AddScoped<IVisitEmailConfigurationRepository, VisitEmailConfigurationRepository>();
+            services.AddScoped<ILettersFormateRepository, LettersFormateRepository>();
+            services.AddScoped<ILettersActivityRepository, LettersActivityRepository>();
         }
     }
 }

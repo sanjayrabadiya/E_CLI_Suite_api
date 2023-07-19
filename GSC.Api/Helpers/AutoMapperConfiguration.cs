@@ -517,7 +517,8 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignVisitRestriction, ProjectDesignVisitRestrictionDto>().ReverseMap();
             CreateMap<VisitEmailConfiguration, VisitEmailConfigurationDto>().ReverseMap();
             CreateMap<VisitEmailConfigurationRoles, VisitEmailConfigurationRolesDto>().ReverseMap();
-
+            CreateMap<LettersFormate, LettersFormateDto>().ReverseMap();
+            CreateMap<LettersActivity, LettersActivityDto>().ReverseMap();
         }
     }
 }
