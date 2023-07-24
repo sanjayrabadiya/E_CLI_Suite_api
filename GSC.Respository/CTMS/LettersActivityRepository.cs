@@ -185,11 +185,18 @@ namespace GSC.Respository.Master
                         }
                     }
             };
+
+            //PDF file save
             var pdf = renderer.RenderHtmlAsPdf(html);
             string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
             var fullPath = Path.Combine(paths);
-            lettersActivityDto.FilePath = fullPath;
             pdf.SaveAs(fullPath);
+
+            //PDF filepath save in table
+            string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
+            var fullPath1 = Path.Combine(paths1);
+            lettersActivityDto.FilePath = fullPath1;
+
             //if(lettersActivityDto.Email != null && lettersActivityDto.Email=="")
             //    _emailSenderRespository.SendALettersMailtoInvestigator(fullPath, lettersActivityDto.Email);
         }
@@ -230,11 +237,16 @@ namespace GSC.Respository.Master
                         }
                     }
             };
+            //PDF file save
             var pdf = renderer.RenderHtmlAsPdf(lettersActivityDto.LetterBody);
             string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
             var fullPath = Path.Combine(paths);
-            lettersActivityDto.FilePath = fullPath;
             pdf.SaveAs(fullPath);
+
+            //PDF filepath save in table
+            string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
+            var fullPath1 = Path.Combine(paths1);
+            lettersActivityDto.FilePath = fullPath1;
         }
         public string Duplicate(LettersActivity objSave)
         {
