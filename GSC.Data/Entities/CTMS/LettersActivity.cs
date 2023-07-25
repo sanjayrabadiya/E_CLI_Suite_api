@@ -13,6 +13,7 @@ namespace GSC.Data.Entities.CTMS
         public string Email { get; set; }
         public int? UserIntigration { get; set; }
         public string FilePath { get; set; }
+        public string AttachmentPath { get; set; }  
         public string LetterBody { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
         public CtmsActivity Activity { get; set; }

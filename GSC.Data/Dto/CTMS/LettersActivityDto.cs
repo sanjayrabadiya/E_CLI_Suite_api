@@ -22,6 +22,7 @@ namespace GSC.Data.Dto.CTMS
         public string Email { get; set; }
         public int? UserIntigration { get; set; }  
         public string FilePath { get; set; }
+        public string AttachmentPath { get; set; }
         public string LetterBody { get; set; }
         public int UserId { get; set; }
         public string Name { get; set; }
@@ -39,7 +40,7 @@ namespace GSC.Data.Dto.CTMS
         public string Email { get; set; }
         public string UserIntigration { get; set; }
         public string FilePath { get; set; }
-
+        
     }
     public class LettersActivityDateDropDown : BaseDto
     {

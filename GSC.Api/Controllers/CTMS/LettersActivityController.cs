@@ -152,12 +152,12 @@ namespace GSC.Api.Controllers.Master
             lettersActivityDto.Email= sendMailModel.Email;
 
             if (sendMailModel.Email != null && sendMailModel.Email != "")
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.FilePath, sendMailModel.Email, data.Activity.ActivityName,data.CtmsMonitoring.ScheduleStartDate.ToString());
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, data.Activity.ActivityName,data.CtmsMonitoring.ScheduleStartDate.ToString());
 
             foreach (var item in sendMailModel.UserModel)
             {
                 var email =_context.Users.Where(x => x.Id == item.userId && x.DeletedBy==null).Select(x => x.Email).FirstOrDefault();
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.FilePath, sendMailModel.Email, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
             }
                 
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);

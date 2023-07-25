@@ -191,6 +191,7 @@ namespace GSC.Respository.Master
             string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
             var fullPath = Path.Combine(paths);
             pdf.SaveAs(fullPath);
+            lettersActivityDto.AttachmentPath = fullPath;
 
             //PDF filepath save in table
             string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
@@ -242,6 +243,7 @@ namespace GSC.Respository.Master
             string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
             var fullPath = Path.Combine(paths);
             pdf.SaveAs(fullPath);
+            lettersActivityDto.AttachmentPath = fullPath;
 
             //PDF filepath save in table
             string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
