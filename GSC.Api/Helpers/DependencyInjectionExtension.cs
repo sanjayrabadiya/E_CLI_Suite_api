@@ -423,6 +423,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IVisitEmailConfigurationRepository, VisitEmailConfigurationRepository>();
             services.AddScoped<ILettersFormateRepository, LettersFormateRepository>();
             services.AddScoped<ILettersActivityRepository, LettersActivityRepository>();
+            services.AddScoped<IDashboardCompanyRepository, DashboardCompanyRepository>();
         }
     }
 }

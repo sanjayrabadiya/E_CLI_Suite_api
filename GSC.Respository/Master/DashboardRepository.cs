@@ -925,47 +925,47 @@ namespace GSC.Respository.Master
 
             if (countryId > 0)
             {
-            var list = _context.StudyPlanTask
-           .Include(i => i.StudyPlan)
-           .ThenInclude(i => i.Project)
-           .Where(z => z.DeletedDate == null && projectIds.Contains(z.StudyPlan.ProjectId) && z.PreApprovalStatus == true)
-           .Select
-           (b => new StudyPlanTaskDto
-           {
-               Id = b.Id,
-               Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
-               TaskName = b.TaskName,
-               StartDate = b.StartDate,
-               EndDate = b.EndDate,
-               Duration = b.Duration,
-               ActualStartDate = b.ActualStartDate,
-               ActualEndDate = b.ActualEndDate,
-               ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
-               CreatedDate = b.CreatedDate
-           }).ToList();
+                var list = _context.StudyPlanTask
+               .Include(i => i.StudyPlan)
+               .ThenInclude(i => i.Project)
+               .Where(z => z.DeletedDate == null && projectIds.Contains(z.StudyPlan.ProjectId) && z.PreApprovalStatus == true)
+               .Select
+               (b => new StudyPlanTaskDto
+               {
+                   Id = b.Id,
+                   Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
+                   TaskName = b.TaskName,
+                   StartDate = b.StartDate,
+                   EndDate = b.EndDate,
+                   Duration = b.Duration,
+                   ActualStartDate = b.ActualStartDate,
+                   ActualEndDate = b.ActualEndDate,
+                   ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
+                   CreatedDate = b.CreatedDate
+               }).ToList();
 
                 return list;
             }
             else
             {
-             var list = _context.StudyPlanTask
-            .Include(i => i.StudyPlan)
-            .ThenInclude(i => i.Project)
-            .Where(z => z.DeletedDate == null && z.StudyPlan.ProjectId == projectId &&  z.PreApprovalStatus == true)
-            .Select
-            (b => new StudyPlanTaskDto
-            {
-                Id = b.Id,
-                Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
-                TaskName = b.TaskName,
-                StartDate = b.StartDate,
-                EndDate = b.EndDate,
-                Duration = b.Duration,
-                ActualStartDate = b.ActualStartDate,
-                ActualEndDate = b.ActualEndDate,
-                ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
-                CreatedDate = b.CreatedDate
-            }).ToList();
+                var list = _context.StudyPlanTask
+               .Include(i => i.StudyPlan)
+               .ThenInclude(i => i.Project)
+               .Where(z => z.DeletedDate == null && z.StudyPlan.ProjectId == projectId && z.PreApprovalStatus == true)
+               .Select
+               (b => new StudyPlanTaskDto
+               {
+                   Id = b.Id,
+                   Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
+                   TaskName = b.TaskName,
+                   StartDate = b.StartDate,
+                   EndDate = b.EndDate,
+                   Duration = b.Duration,
+                   ActualStartDate = b.ActualStartDate,
+                   ActualEndDate = b.ActualEndDate,
+                   ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
+                   CreatedDate = b.CreatedDate
+               }).ToList();
 
                 return list;
             }
@@ -1491,7 +1491,7 @@ namespace GSC.Respository.Master
 
                 if (endata != null)
                 {
-                    var ensresults = _context.OverTimeMetrics.Where(x => EnStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == endata.Id && x.DeletedDate == null).ToList();
+                    var ensresults = _context.OverTimeMetrics.Where(x => EnStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == endata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
 
                     entotals = (int)ensresults.Sum(c => c.Planned);
 
@@ -1516,7 +1516,7 @@ namespace GSC.Respository.Master
 
                 if (enresult != null)
                 {
-                    var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id
+                    var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id && x.If_Active != false
                         && x.DeletedDate == null).ToList();
 
                     entotals = (int)enresults.Sum(c => c.Planned);
@@ -1545,7 +1545,7 @@ namespace GSC.Respository.Master
 
                 if (scdata != null)
                 {
-                    var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.DeletedDate == null).ToList();
+                    var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
 
                     sctotals = (int)scsresults.Sum(c => c.Planned);
 
@@ -1571,7 +1571,7 @@ namespace GSC.Respository.Master
 
                 if (scresult != null)
                 {
-                    var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id
+                    var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id && x.If_Active != false
                         && x.DeletedDate == null).ToList();
 
                     sctotals = (int)scresults.Sum(c => c.Planned);
@@ -1601,7 +1601,7 @@ namespace GSC.Respository.Master
 
                 if (radata != null)
                 {
-                    var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.DeletedDate == null).ToList();
+                    var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
 
                     ratotals = (int)rasresults.Sum(c => c.Planned);
 
@@ -1627,7 +1627,7 @@ namespace GSC.Respository.Master
 
                 if (raresult != null)
                 {
-                    var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id
+                    var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id && x.If_Active != false
                         && x.DeletedDate == null).ToList();
 
                     ratotals = (int)raresults.Sum(c => c.Planned);
@@ -1681,7 +1681,7 @@ namespace GSC.Respository.Master
 
                 foreach (var item in planMetrics)
                 {
-                    var planMetricsr = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == item.Id && x.DeletedDate == null).ToList();
+                    var planMetricsr = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == item.Id && (x.If_Active != false) && x.DeletedDate == null).ToList();
                     item.Planned = planMetricsr.Sum(c => c.Planned);
                     item.Actual = planMetricsr.Sum(c => c.Actual);
                 }

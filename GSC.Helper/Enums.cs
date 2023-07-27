@@ -969,11 +969,12 @@ namespace GSC.Helper
 
     public enum ProjectStatusEnum : short
     {
-        [Description("Ongoing")] Ongoing = 1,
-        [Description("Complete")] Complete = 2,
-        [Description("On Hold")] OnHold = 3,
-        [Description("Discountinue")] Discountinue = 4,
-        [Description("Terminate")] Terminate = 5,
+        [Description("Pre Start-Up")] PreStartUp = 1,
+        [Description("Not Started")] NotStarted = 2,
+        [Description("On Going")] Ongoing = 3,
+        [Description("On Hold")] OnHold = 4,
+        [Description("Completed")] Completed = 5,
+        [Description("Terminated")] Terminated = 6,
     }
     public enum Fector : short
     {
