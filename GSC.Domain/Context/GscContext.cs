@@ -499,5 +499,7 @@ namespace GSC.Domain.Context
     public DbSet<ProjectDesignVisitRestriction> ProjectDesignVisitRestriction { get; set; }
     public DbSet<VisitEmailConfiguration> VisitEmailConfiguration { get; set; }
     public DbSet<VisitEmailConfigurationRoles> VisitEmailConfigurationRoles { get; set; }
-}
+    public DbSet<LettersFormate> LettersFormate { get; set; }
+    public DbSet<LettersActivity> LettersActivity { get; set; }
+    }
 }

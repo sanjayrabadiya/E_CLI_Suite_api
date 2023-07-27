@@ -89,12 +89,12 @@ namespace GSC.Api
             {
                 if (!Directory.Exists(doc))
                     Directory.CreateDirectory(doc);
-                //app.UseStaticFiles(new StaticFileOptions
-                //{
-                //    FileProvider = new PhysicalFileProvider(
-                //        Path.Combine(Directory.GetCurrentDirectory(), "TempDoc")),
-                //    RequestPath = "/static"
-                //});
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(
+                        Path.Combine(Directory.GetCurrentDirectory(), "TempDoc")),
+                    RequestPath = "/static"
+                });
             }
 
             app.UseSwagger();

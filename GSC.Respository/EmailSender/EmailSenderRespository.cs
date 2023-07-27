@@ -373,7 +373,33 @@ namespace GSC.Respository.EmailSender
                 emailMessage.Cc = result.Bcc;
                 emailMessage.Bcc = result.Bcc;
                 emailMessage.IsBodyHtml = true;
-                emailMessage.Attachments = null;
+                emailMessage.Attachments =null;
+                emailMessage.EmailFrom = result.EmailSetting.EmailFrom;
+                emailMessage.PortName = result.EmailSetting.PortName;
+                emailMessage.DomainName = result.EmailSetting.DomainName;
+                emailMessage.EmailPassword = result.EmailSetting.EmailPassword;
+                emailMessage.MailSsl = result.EmailSetting.MailSsl;
+                emailMessage.DLTTemplateId = result.DLTTemplateId;
+            }
+
+            return emailMessage;
+        }
+        private EmailMessage ConfigureEmailLetters(string keyName, string userName,string fullPath)
+        {
+            var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
+               x.DeletedDate == null && x.KeyName == keyName);
+            var emailMessage = new EmailMessage();
+
+            if (result != null)
+            {
+                emailMessage.SendFrom = result.EmailSetting.EmailFrom;
+                emailMessage.Subject = result.SubjectName;
+                emailMessage.MessageBody = result.Body;
+                emailMessage.Cc = result.Bcc;
+                emailMessage.Bcc = result.Bcc;
+                emailMessage.IsBodyHtml = true;
+                Attachment file = new Attachment(fullPath);
+                emailMessage.Attachments.Add(file);
                 emailMessage.EmailFrom = result.EmailSetting.EmailFrom;
                 emailMessage.PortName = result.EmailSetting.PortName;
                 emailMessage.DomainName = result.EmailSetting.DomainName;
@@ -1055,6 +1081,31 @@ namespace GSC.Respository.EmailSender
                 str = Regex.Replace(str, "##RandomizationNo##", randomization.RandomizationNumber, RegexOptions.IgnoreCase);
 
             return str;
+        }
+        public void SendALettersMailtoInvestigator(string fullPath, string email,string CtmsActivity,string ScheduleStartDate)
+        {
+            var userName = _jwtTokenAccesser.UserName;
+            var emailMessage = ConfigureEmailLetters("Letters", userName, fullPath) ;
+            emailMessage.SendTo = email;
+            emailMessage.MessageBody = ReplaceBodyForLetters(emailMessage.MessageBody, userName);
+            emailMessage.Subject = ReplaceSubjectForLetters(emailMessage.Subject, CtmsActivity, ScheduleStartDate);
+            _emailService.SendMail(emailMessage);
+        }
+        private string ReplaceBodyForLetters(string body, string userName)
+        {
+            body = Regex.Replace(body, "##UserName##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>UserName</strong>##", "<strong>" + userName + "</strong>",RegexOptions.IgnoreCase);
+            return body;
+        }
+        private string ReplaceSubjectForLetters(string body, string CtmsActivity, string ScheduleStartDate)
+        {
+            body = Regex.Replace(body, "##CTMSACTVITY##", CtmsActivity, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>CTMSACTVITY</strong>##", "<strong>" + CtmsActivity + "</strong>",RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##DATE##", ScheduleStartDate.ToString(), RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>DATE</strong>##", "<strong>" + ScheduleStartDate + "</strong>", RegexOptions.IgnoreCase);
+
+            return body;
         }
     }
 }

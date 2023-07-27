@@ -940,7 +940,7 @@ namespace GSC.Respository.Master
                Duration = b.Duration,
                ActualStartDate = b.ActualStartDate,
                ActualEndDate = b.ActualEndDate,
-               ApprovalStatus = b.ApprovalStatus,
+               ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
                CreatedDate = b.CreatedDate
            }).ToList();
 
@@ -963,7 +963,7 @@ namespace GSC.Respository.Master
                 Duration = b.Duration,
                 ActualStartDate = b.ActualStartDate,
                 ActualEndDate = b.ActualEndDate,
-                ApprovalStatus = b.ApprovalStatus,
+                ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
                 CreatedDate = b.CreatedDate
             }).ToList();
 

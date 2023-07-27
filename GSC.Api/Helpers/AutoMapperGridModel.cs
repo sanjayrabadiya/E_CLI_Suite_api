@@ -768,6 +768,14 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.UserRoles, x => x.MapFrom(a => string.Join(",", a.VisitEmailConfigurationRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList())))
               .ForMember(x => x.VisitStatus, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
               .ReverseMap();
+            CreateMap<LettersFormate, LettersFormateGridDto>().ReverseMap();
+
+            CreateMap<LettersActivity, LettersActivityGridDto>()
+              .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.ActivityName))
+              .ForMember(x => x.LettersFormate, x => x.MapFrom(a => a.LettersFormate.LetterName))
+              .ForMember(x => x.ScheduleStartDate, x => x.MapFrom(a => a.CtmsMonitoring.ScheduleStartDate))
+              .ReverseMap();
         }
     }
 }
