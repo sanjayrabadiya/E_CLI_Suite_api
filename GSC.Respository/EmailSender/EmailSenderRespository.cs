@@ -956,6 +956,20 @@ namespace GSC.Respository.EmailSender
             emailMessage.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, userId);
             _emailService.SendMail(emailMessage);
 
+
+        }
+
+        public async Task SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone)
+        {
+            if (email.IsSMS)
+            {
+                var emailMessagesms = ConfigureEmail("PROPHASESTUDY", "");
+                if (!string.IsNullOrEmpty(tophone))
+                {
+                    emailMessagesms.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, userId);
+                    await SendSMS(tophone, emailMessagesms.MessageBody, emailMessagesms.DLTTemplateId);
+                }
+            }
         }
 
         private string ReplaceBodyForEmailvariableConfiguration(string body, EmailConfigurationEditCheckSendEmail email, int? userId)

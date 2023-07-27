@@ -353,7 +353,7 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return EmailEditCheckValidateRule(data);
         }
-        public void SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate)
+        public async void SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate)
         {
             List<EmailList> emails = new List<EmailList>();
             List<string> mobile = new List<string>();
@@ -416,6 +416,7 @@ namespace GSC.Respository.Project.GeneralConfig
                     {
                         emaildata.Subject = emailconfig.Subject;
                         emaildata.EmailBody = emailconfig.EmailBody;
+                        emaildata.IsSMS = emailconfig.IsSMS;
                         emaildata.EmailConfigurationEditCheckId = emailconfig.Id;
                         var screeningdata = _context.ScreeningEntry.Include(x => x.Randomization).ThenInclude(x => x.Project).ThenInclude(x => x.ManageSite).Include(x => x.Project).Where(x => x.Id == screeningTemplate.ScreeningVisit.ScreeningEntryId).FirstOrDefault();
                         if (screeningdata != null)
@@ -452,6 +453,7 @@ namespace GSC.Respository.Project.GeneralConfig
                             foreach (var item in emails)
                             {
                                 _emailSenderRespository.SendEmailonEmailvariableConfiguration(emaildata, (int)item.UserId, item.Email, item.Phone);
+                                await _emailSenderRespository.SendEmailonEmailvariableConfigurationSMS(emaildata, (int)item.UserId, item.Email, item.Phone);
                                 EmailConfigurationEditCheckSendMailHistory obj = new EmailConfigurationEditCheckSendMailHistory();
                                 obj.RoleId = item.RoleId;
                                 obj.UserId = (int)item.UserId;

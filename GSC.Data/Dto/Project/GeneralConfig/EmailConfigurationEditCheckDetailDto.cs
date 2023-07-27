@@ -103,6 +103,8 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public string CurrentDate { get; set; }
 
         public string CompanyName { get; set; }
+
+        public bool IsSMS { get; set; }
     }
     public class EmailList
     {

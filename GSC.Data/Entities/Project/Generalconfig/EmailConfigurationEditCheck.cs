@@ -18,6 +18,8 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public string ReasonOth { get; set; }
         public string Subject { get; set; }
         public string EmailBody { get; set; }
+
+        public bool IsSMS { get; set; }
         public int? EditCheckRoleAuditReasonId { get; set; }
         public string EditCheckRoleReasonOth { get; set; }
         public GSC.Data.Entities.Master.Project Project { get; set; }

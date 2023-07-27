@@ -67,6 +67,8 @@ namespace GSC.Respository.Project.GeneralConfig
                 {
                     obj.Subject = emailConfigurationEditCheckRoleDto.Subject;
                     obj.EmailBody = emailConfigurationEditCheckRoleDto.EmailBody;
+                    obj.IsSMS = emailConfigurationEditCheckRoleDto.IsSMS;
+                    
                     if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
                         obj.EditCheckRoleReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
                     if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
