@@ -353,8 +353,9 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return EmailEditCheckValidateRule(data);
         }
-        public async void SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate)
+        public EmailConfigurationEditCheckSendEmailResult SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate)
         {
+            EmailConfigurationEditCheckSendEmailResult finaldata = new EmailConfigurationEditCheckSendEmailResult();
             List<EmailList> emails = new List<EmailList>();
             List<string> mobile = new List<string>();
             EmailConfigurationEditCheckSendEmail emaildata = new EmailConfigurationEditCheckSendEmail();
@@ -453,27 +454,44 @@ namespace GSC.Respository.Project.GeneralConfig
                             foreach (var item in emails)
                             {
                                 _emailSenderRespository.SendEmailonEmailvariableConfiguration(emaildata, (int)item.UserId, item.Email, item.Phone);
-                                await _emailSenderRespository.SendEmailonEmailvariableConfigurationSMS(emaildata, (int)item.UserId, item.Email, item.Phone);
+
                                 EmailConfigurationEditCheckSendMailHistory obj = new EmailConfigurationEditCheckSendMailHistory();
                                 obj.RoleId = item.RoleId;
                                 obj.UserId = (int)item.UserId;
                                 obj.EmailConfigurationEditCheckId = emailconfig.Id;
                                 _context.EmailConfigurationEditCheckSendMailHistory.Add(obj);
-                                _context.Save();
+
                             }
+                            _context.Save();
                         }
 
                     }
                 }
             }
 
+            finaldata.emails = emails;
+            finaldata.emaildata = emaildata;
+            finaldata.EmailMessage = _emailSenderRespository.ConfigureEmail("PROPHASESTUDY", "");
+            return finaldata;
+
+        }
+
+        public async void SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmailResult result)
+        {
+            if (result.emails.Count > 0)
+            {
+                foreach (var item in result.emails)
+                {
+                    await _emailSenderRespository.SendEmailonEmailvariableConfigurationSMS(result.emaildata, result.EmailMessage, (int)item.UserId, item.Email, item.Phone);
+                }
+            }
         }
 
         public List<EmailConfigurationEditCheckMailHistoryGridDto> GetEmailConfigurationEditCheckSendMailHistory(int Id)
         {
             var data = _context.EmailConfigurationEditCheckSendMailHistory.Where(x => x.EmailConfigurationEditCheckId == Id).
                     ProjectTo<EmailConfigurationEditCheckMailHistoryGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-           
+
             return data;
         }
     }

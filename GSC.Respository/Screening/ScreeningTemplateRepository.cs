@@ -1738,7 +1738,9 @@ namespace GSC.Respository.Screening
             var result = _emailConfigurationEditCheckRepository.ValidatWithScreeningTemplate(screeningTemplate);
             if (result != null && result.IsValid)
             {
-                _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfiguration(screeningTemplate);
+                var finaldata = _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfiguration(screeningTemplate);
+                _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfigurationSMS(finaldata);
+
             }
         }
 

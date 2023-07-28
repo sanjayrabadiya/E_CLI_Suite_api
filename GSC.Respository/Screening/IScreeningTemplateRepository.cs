@@ -53,5 +53,7 @@ namespace GSC.Respository.Screening
 
         void SendEmailOnVaribleConfiguration(int id);
 
+       
+
     }
 }
