@@ -3,6 +3,7 @@ using GSC.Common.Common;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Project.Design;
 using GSC.Helper;
+using GSC.Shared.Email;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -116,5 +117,14 @@ namespace GSC.Data.Entities.Project.Generalconfig
 
         public string Phone { get; set; }
 
+    }
+
+    public class EmailConfigurationEditCheckSendEmailResult
+    {
+        public List<EmailList> emails { get; set; }
+
+        public EmailConfigurationEditCheckSendEmail emaildata { get; set; }
+
+        public EmailMessage EmailMessage { get; set; }
     }
 }

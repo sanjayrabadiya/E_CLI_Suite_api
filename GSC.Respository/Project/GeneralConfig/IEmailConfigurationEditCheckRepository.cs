@@ -16,8 +16,12 @@ namespace GSC.Respository.Project.GeneralConfig
 
         EmailConfigurationEditCheckResult ValidatWithScreeningTemplate(ScreeningTemplate screeningTemplate);
 
-        void SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate);
+        EmailConfigurationEditCheckSendEmailResult SendEmailonEmailvariableConfiguration(ScreeningTemplate screeningTemplate);
 
         List<EmailConfigurationEditCheckMailHistoryGridDto> GetEmailConfigurationEditCheckSendMailHistory(int Id);
+
+        void SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmailResult result);
+
+
     }
 }

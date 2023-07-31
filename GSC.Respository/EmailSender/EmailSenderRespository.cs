@@ -319,7 +319,6 @@ namespace GSC.Respository.EmailSender
                 RegexOptions.IgnoreCase);
             return body;
         }
-
         public async Task SendSMS(string mobile, string messagebody, string? DLTTemplateId)
         {
             var smstemplate = messagebody;//emailMessage.MessageBody;
@@ -342,6 +341,28 @@ namespace GSC.Respository.EmailSender
             await HttpService.Get(_httpClient, url, null);
             //var responseresult = _aPICall.Get(url);
         }
+        public async Task SendSMSParticaularStudyWise(string mobile, string messagebody, string? DLTTemplateId)
+        {
+            var smstemplate = messagebody;//emailMessage.MessageBody;
+            smstemplate = smstemplate.Replace("<p>", "");
+            smstemplate = smstemplate.Replace("</p>", "\r\n");
+            smstemplate = smstemplate.Replace("<strong>", "");
+            smstemplate = smstemplate.Replace("</strong>", "");
+            smstemplate = Regex.Replace(smstemplate, "<.*?>", String.Empty);
+            
+            var url = "https://api.msg91.com/api/sendhttp.php?authkey=##AuthKey##&mobiles=##Mobile##&country=91&message=##message##&sender=##senderid##&route=##route##&DLT_TE_ID=##DLTTemplateId##&dev_mode=1";
+            url = url.Replace("##AuthKey##", "349610As7MvryDDp5fdb3d6bP1");
+            url = url.Replace("##Mobile##", "91" + mobile);
+            url = url.Replace("##senderid##", "425096");
+            url = url.Replace("##route##", "1");
+            url = url.Replace("##message##", Uri.EscapeDataString(smstemplate));//emailMessage.MessageBody
+            if (DLTTemplateId != null && DLTTemplateId != "")
+                url = url.Replace("##DLTTemplateId##", DLTTemplateId);
+            else
+                url = url.Replace("&DLT_TE_ID=##DLTTemplateId##", "");
+            await HttpService.Get(_httpClient, url, null);
+            
+        }
 
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
         {
@@ -358,10 +379,10 @@ namespace GSC.Respository.EmailSender
         }
 
 
-        private EmailMessage ConfigureEmail(string keyName, string userName)
+        public EmailMessage ConfigureEmail(string keyName, string userName)
         {
             //        var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
-            var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
+            var result = All.AsNoTracking().Include(x => x.EmailSetting).FirstOrDefault(x =>
                x.DeletedDate == null && x.KeyName == keyName);
             var emailMessage = new EmailMessage();
 
@@ -985,15 +1006,15 @@ namespace GSC.Respository.EmailSender
 
         }
 
-        public async Task SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone)
+        public async Task SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmail email, EmailMessage EmailMessage, int userId, string toMails, string tophone)
         {
             if (email.IsSMS)
             {
-                var emailMessagesms = ConfigureEmail("PROPHASESTUDY", "");
+                var emailMessagesms = EmailMessage;
                 if (!string.IsNullOrEmpty(tophone))
                 {
-                    emailMessagesms.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, userId);
-                    await SendSMS(tophone, emailMessagesms.MessageBody, emailMessagesms.DLTTemplateId);
+                    var body = ReplaceBodyForEmailvariableConfigurationSMS(emailMessagesms.MessageBody, email, userId);
+                    await SendSMSParticaularStudyWise(tophone, body, emailMessagesms.DLTTemplateId);
                 }
             }
         }
@@ -1051,7 +1072,24 @@ namespace GSC.Respository.EmailSender
 
             return str;
         }
+        private string ReplaceBodyForEmailvariableConfigurationSMS(string body, EmailConfigurationEditCheckSendEmail email, int? userId)
+        {
 
+            var str = body;
+           
+            if (!string.IsNullOrEmpty(email.TemplateName))
+            {
+                str = Regex.Replace(str, "#TemplateName#", email.TemplateName, RegexOptions.IgnoreCase);
+            }
+            
+            if (!string.IsNullOrEmpty(email.ScreeningNo))
+            {
+                str = Regex.Replace(str, "#ScreeningNo#", email.ScreeningNo, RegexOptions.IgnoreCase);
+            }
+          
+
+            return str;
+        }
         // for visit email
         public void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight data, Randomization randomization)
         {
