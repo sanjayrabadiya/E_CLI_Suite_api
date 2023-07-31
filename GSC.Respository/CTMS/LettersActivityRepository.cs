@@ -185,7 +185,6 @@ namespace GSC.Respository.Master
                         }
                     }
             };
-
             //PDF file save
             var pdf = renderer.RenderHtmlAsPdf(html);
             string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
@@ -193,20 +192,16 @@ namespace GSC.Respository.Master
             pdf.SaveAs(fullPath);
             lettersActivityDto.AttachmentPath = fullPath;
 
-            //PDF filepath save in table
+            //PDF filepath save in Table
             string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
             var fullPath1 = Path.Combine(paths1);
             lettersActivityDto.FilePath = fullPath1;
-
-            //if(lettersActivityDto.Email != null && lettersActivityDto.Email=="")
-            //    _emailSenderRespository.SendALettersMailtoInvestigator(fullPath, lettersActivityDto.Email);
         }
         public void updateLettersEmail(LettersActivityDto lettersActivityDto)
         {
             Guid obj = Guid.NewGuid();
             var CtmsActivity = _context.CtmsActivity.Where(x => x.Id == lettersActivityDto.ActivityId).FirstOrDefault();
             IronPdf.License.LicenseKey = "IRONSUITE.PROJECT.GSC.TECHNOLOGIES.COM.25591-9E0B467B32-AFJTVDQ-6WN6XNLZEYTP-32BSHFYDEP5E-HQSQGZLSNZXF-7BLGH6WO6OQ3-BRZW46YOOA6C-UFONLE5PVIJ2-WYUK6K-T75DD74MYVWKEA-DEPLOYMENT.TRIAL-66RKX3.TRIAL.EXPIRES.16.AUG.2023";
-
             if (!String.IsNullOrEmpty(lettersActivityDto.FilePath))
             {
                 string[] removePaths = { lettersActivityDto.FilePath };
