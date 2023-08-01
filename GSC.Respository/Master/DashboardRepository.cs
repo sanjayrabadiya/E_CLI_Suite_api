@@ -1369,7 +1369,7 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var details = _screeningTemplateRepository.All.
-                Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId)
+                Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true)
                 && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess)
                 //  && x.ScreeningTemplateReview.OrderBy(r => r.Id).LastOrDefault().Status >= ScreeningTemplateStatus.Submitted
                 && x.ScheduleDate != null &&
