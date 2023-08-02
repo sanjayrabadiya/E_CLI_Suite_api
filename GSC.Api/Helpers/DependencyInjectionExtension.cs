@@ -46,6 +46,7 @@ using GSC.Respository.SupplyManagement;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Project.StudyLevelFormSetup;
+using GSC.Respository.LabReportManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -424,6 +425,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ILettersFormateRepository, LettersFormateRepository>();
             services.AddScoped<ILettersActivityRepository, LettersActivityRepository>();
             services.AddScoped<IDashboardCompanyRepository, DashboardCompanyRepository>();
+            services.AddScoped<ILabReportRepository, LabReportRepository>();
         }
     }
 }
