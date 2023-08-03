@@ -12,6 +12,7 @@ using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.LabReportManagement;
 using GSC.Data.Dto.LanguageSetup;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
@@ -44,6 +45,7 @@ using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
@@ -519,6 +521,7 @@ namespace GSC.Api.Helpers
             CreateMap<VisitEmailConfigurationRoles, VisitEmailConfigurationRolesDto>().ReverseMap();
             CreateMap<LettersFormate, LettersFormateDto>().ReverseMap();
             CreateMap<LettersActivity, LettersActivityDto>().ReverseMap();
+            CreateMap<LabReport, LabReportDto>().ReverseMap();
         }
     }
 }

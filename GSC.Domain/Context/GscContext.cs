@@ -22,6 +22,7 @@ using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
@@ -501,5 +502,6 @@ namespace GSC.Domain.Context
     public DbSet<VisitEmailConfigurationRoles> VisitEmailConfigurationRoles { get; set; }
     public DbSet<LettersFormate> LettersFormate { get; set; }
     public DbSet<LettersActivity> LettersActivity { get; set; }
-    }
+    public  DbSet<LabReport> LabReport { get; set; }
+   }
 }

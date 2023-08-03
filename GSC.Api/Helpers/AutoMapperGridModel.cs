@@ -42,6 +42,8 @@ using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Entities.Project.Generalconfig;
+using GSC.Data.Dto.LabReportManagement;
+using GSC.Data.Entities.LabReportManagement;
 
 namespace GSC.Api.Helpers
 {
@@ -776,6 +778,8 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.LettersFormate, x => x.MapFrom(a => a.LettersFormate.LetterName))
               .ForMember(x => x.ScheduleStartDate, x => x.MapFrom(a => a.CtmsMonitoring.ScheduleStartDate))
               .ReverseMap();
+
+            CreateMap<LabReport, LabReportGridDto>().ReverseMap();
         }
     }
 }
