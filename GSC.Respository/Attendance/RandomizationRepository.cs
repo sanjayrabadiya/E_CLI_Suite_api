@@ -2620,11 +2620,11 @@ namespace GSC.Respository.Attendance
             if (randomization != null)
             {
                 var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
-                            Where(x => x.ScreeningEntry.RandomizationId == randomization.Id  && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null 
-                            && (x.Status== ScreeningVisitStatus.Scheduled || x.Status == ScreeningVisitStatus.ReSchedule ||
+                            Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null
+                            && (x.Status == ScreeningVisitStatus.Scheduled || x.Status == ScreeningVisitStatus.ReSchedule ||
                             x.Status == ScreeningVisitStatus.Open || x.Status == ScreeningVisitStatus.InProgress ||
                             x.Status == ScreeningVisitStatus.Missed || x.Status == ScreeningVisitStatus.Withdrawal ||
-                            x.Status == ScreeningVisitStatus.OnHold || x.Status == ScreeningVisitStatus.ScreeningFailure)).
+                            x.Status == ScreeningVisitStatus.OnHold || x.Status == ScreeningVisitStatus.ScreeningFailure || x.Status == ScreeningVisitStatus.Completed)).
                             Select(a => new ScreeningVisitForSubject
                             {
                                 VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
