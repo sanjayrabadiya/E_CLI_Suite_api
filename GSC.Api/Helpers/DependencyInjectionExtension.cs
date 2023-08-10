@@ -426,6 +426,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ILettersActivityRepository, LettersActivityRepository>();
             services.AddScoped<IDashboardCompanyRepository, DashboardCompanyRepository>();
             services.AddScoped<ILabReportRepository, LabReportRepository>();
+            services.AddScoped<IWorkingDayRepository, WorkingDayRepository>();
         }
     }
 }

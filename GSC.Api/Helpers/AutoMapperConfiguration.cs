@@ -522,6 +522,7 @@ namespace GSC.Api.Helpers
             CreateMap<LettersFormate, LettersFormateDto>().ReverseMap();
             CreateMap<LettersActivity, LettersActivityDto>().ReverseMap();
             CreateMap<LabReport, LabReportDto>().ReverseMap();
+            CreateMap<WorkingDay, WorkingDayDto>().ReverseMap();
         }
     }
 }

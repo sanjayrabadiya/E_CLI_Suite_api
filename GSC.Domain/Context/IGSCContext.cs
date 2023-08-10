@@ -448,5 +448,6 @@ namespace GSC.Domain.Context
         DbSet<LettersFormate> LettersFormate { get; set; }
         DbSet<LettersActivity> LettersActivity { get; set; }
         DbSet<LabReport> LabReport { get; set; }
+        DbSet<WorkingDay> WorkingDay { get; set; }
     }
 }

@@ -780,6 +780,10 @@ namespace GSC.Api.Helpers
               .ReverseMap();
 
             CreateMap<LabReport, LabReportGridDto>().ReverseMap();
+
+            CreateMap<WorkingDay, WorkingDayListDto>()
+           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))   
+           .ReverseMap();
         }
     }
 }
