@@ -47,6 +47,7 @@ using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.LabReportManagement;
+using GSC.Respository.IDVerificationSystem;
 
 namespace GSC.Api.Helpers
 {
@@ -427,6 +428,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IDashboardCompanyRepository, DashboardCompanyRepository>();
             services.AddScoped<ILabReportRepository, LabReportRepository>();
             services.AddScoped<IWorkingDayRepository, WorkingDayRepository>();
+            services.AddScoped<IIDVerificationRepository, IDVerificationRepository>();
         }
     }
 }

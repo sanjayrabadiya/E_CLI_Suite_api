@@ -44,6 +44,8 @@ using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Dto.LabReportManagement;
 using GSC.Data.Entities.LabReportManagement;
+using GSC.Data.Entities.IDVerificationSystem;
+using GSC.Data.Dto.IDVerificationSystem;
 
 namespace GSC.Api.Helpers
 {
@@ -784,6 +786,8 @@ namespace GSC.Api.Helpers
             CreateMap<WorkingDay, WorkingDayListDto>()
            .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))   
            .ReverseMap();
+
+            CreateMap<IDVerification, IDVerificationGridDto>().ReverseMap();
         }
     }
 }

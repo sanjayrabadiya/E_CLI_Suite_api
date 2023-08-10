@@ -20,6 +20,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LabReportManagement;
@@ -504,5 +505,6 @@ namespace GSC.Domain.Context
     public DbSet<LettersActivity> LettersActivity { get; set; }
     public  DbSet<LabReport> LabReport { get; set; }
     public DbSet<WorkingDay> WorkingDay { get; set; }
+    public DbSet<IDVerification> IDVerification { get; set; }
     }
 }

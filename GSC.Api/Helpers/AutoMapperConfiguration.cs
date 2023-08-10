@@ -10,6 +10,7 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.IDVerificationSystem;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Dto.LabReportManagement;
@@ -43,6 +44,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LabReportManagement;
@@ -523,6 +525,7 @@ namespace GSC.Api.Helpers
             CreateMap<LettersActivity, LettersActivityDto>().ReverseMap();
             CreateMap<LabReport, LabReportDto>().ReverseMap();
             CreateMap<WorkingDay, WorkingDayDto>().ReverseMap();
+            CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
         }
     }
 }
