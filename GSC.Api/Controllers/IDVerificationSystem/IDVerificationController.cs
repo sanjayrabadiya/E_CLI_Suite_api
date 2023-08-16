@@ -3,6 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.IDVerificationSystem;
 using GSC.Data.Dto.LabReportManagement;
+using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Respository.Configuration;
 using GSC.Respository.IDVerificationSystem;
 using GSC.Respository.LabReportManagement;
@@ -41,6 +42,32 @@ namespace GSC.Api.Controllers.LabReportManagement
             return Ok(idVerificationDto);
         }
 
+        [HttpGet("GetDocumentByUser/{userId}")]
+        public IActionResult GetDocumentByUser(int userId)
+        {
+            var idVerificationDto = _iIDVerificationRepository.GetIDVerificationByUser(userId);
+            return Ok(idVerificationDto);
+        }
+
+
+        [HttpPost("ChangeDocumentStatus")]
+        public IActionResult ChangeDocumentStatus(IDVerificationUpdateDto iDVerification)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            iDVerification.VerifyOrRejectBy = _jwtTokenAccesser.UserId;
+            var verification = _mapper.Map<IDVerification>(iDVerification);
+            _iIDVerificationRepository.Update(verification);
+            var result = _uow.Save();
+            if (result > 0)
+            {
+                return Ok(result);
+            }
+            else
+            {
+                return Ok("Failed to save change");
+            }
+        }
+
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
@@ -50,8 +77,11 @@ namespace GSC.Api.Controllers.LabReportManagement
             if (idVerification.DeletedDate == null)
             {
                 var idVerificationDto = _mapper.Map<IDVerificationDto>(idVerification);
-                var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), idVerificationDto.DocumentPath).Replace('\\', '/');
-                idVerificationDto.DocumentPath = path;
+                foreach (var document in idVerificationDto.IDVerificationFiles)
+                {
+                    var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), document.DocumentPath).Replace('\\', '/');
+                    document.DocumentPath = path;
+                }
                 return Ok(idVerificationDto);
             }
             else

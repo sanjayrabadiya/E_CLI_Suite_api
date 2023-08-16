@@ -526,6 +526,7 @@ namespace GSC.Api.Helpers
             CreateMap<LabReport, LabReportDto>().ReverseMap();
             CreateMap<WorkingDay, WorkingDayDto>().ReverseMap();
             CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
+            CreateMap<IDVerificationFile, IDVerificationFileDto>().ReverseMap();
         }
     }
 }

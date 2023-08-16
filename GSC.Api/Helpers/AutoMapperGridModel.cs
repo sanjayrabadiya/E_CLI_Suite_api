@@ -83,7 +83,9 @@ namespace GSC.Api.Helpers
             CreateMap<ClientType, ClientTypeGridDto>().ReverseMap();
             CreateMap<Department, DepartmentGridDto>().ReverseMap();
             CreateMap<DocumentType, DocumentTypeGridDto>().ReverseMap();
-            CreateMap<DocumentName, DocumentNameGridDto>().ReverseMap();
+            CreateMap<DocumentName, DocumentNameGridDto>()
+                .ForMember(x => x.PickFromTypeName, a => a.MapFrom(x => x.PickFromType.GetDescription()))
+                .ReverseMap();
             CreateMap<Freezer, FreezerGridDto>().ReverseMap();
             CreateMap<FoodType, FoodTypeGridDto>().ReverseMap();
             CreateMap<Language, LanguageGridDto>().ReverseMap();
@@ -784,10 +786,10 @@ namespace GSC.Api.Helpers
             CreateMap<LabReport, LabReportGridDto>().ReverseMap();
 
             CreateMap<WorkingDay, WorkingDayListDto>()
-           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))   
+           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
            .ReverseMap();
 
-            CreateMap<IDVerification, IDVerificationGridDto>().ReverseMap();
+            CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
         }
     }
 }

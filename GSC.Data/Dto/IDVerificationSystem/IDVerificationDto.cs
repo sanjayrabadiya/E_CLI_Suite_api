@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -6,20 +7,20 @@ using System.Text;
 
 namespace GSC.Data.Dto.IDVerificationSystem
 {
-    public class IDVerificationDto:BaseDto
+    public class IDVerificationDto : BaseDto
     {
         public int UserId { get; set; }
-        [Required]
-        public string DocumentName { get; set; }
-        public string DocumentPath { get; set; }
-        [Required]
-        public string DocumentBase64String { get; set; }
+        public bool IsUpload { get; set; }
+        public int? VerifyOrRejectBy { get; set; }
+        public DocumentVerifyStatus VerifyStatus { get; set; }
+        public List<IDVerificationFileDto> IDVerificationFiles { get; set; }
     }
 
-    public class IDVerificationGridDto : BaseAuditDto
+    public class IDVerificationUpdateDto : BaseDto
     {
         public int UserId { get; set; }
-        public string DocumentName { get; set; }
-        public string DocumentPath { get; set; }
+        public bool IsUpload { get; set; }
+        public int? VerifyOrRejectBy { get; set; }
+        public DocumentVerifyStatus VerifyStatus { get; set; }
     }
 }

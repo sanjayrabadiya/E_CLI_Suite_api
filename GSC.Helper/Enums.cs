@@ -1156,4 +1156,12 @@ namespace GSC.Helper
         [Description("Kit Wise")] KitWise = 1,
         [Description("Randomization Wise")] RandomizationWise = 2
     }
+
+
+    public enum DocumentVerifyStatus : int
+    {
+        [Description("Pending")] Pending = 1,
+        [Description("Approved")] Approved = 2,
+        [Description("Rejected")] Rejected = 3
+    }
 }

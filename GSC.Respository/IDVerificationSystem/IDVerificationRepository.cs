@@ -5,8 +5,10 @@ using GSC.Data.Dto.IDVerificationSystem;
 using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Entities.LabReportManagement;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -32,52 +34,87 @@ namespace GSC.Respository.IDVerificationSystem
 
         public List<IDVerificationDto> GetIDVerificationList(bool isDeleted)
         {
-            var dataList = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId).
+            var dataList = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.UserId == _jwtTokenAccesser.UserId).Include(x => x.IDVerificationFiles).
                   ProjectTo<IDVerificationDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             dataList.ForEach(x =>
             {
-                var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), x.DocumentPath).Replace('\\', '/');
-                x.DocumentPath = path;
+                x.IDVerificationFiles.ForEach(m =>
+                {
+                    var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), m.DocumentPath).Replace('\\', '/');
+                    m.DocumentPath = path;
+                });
             });
 
             return dataList;
         }
 
+        public List<IDVerificationDto> GetIDVerificationByUser(int userId)
+        {
+            var dataList = All.Where(x => x.DeletedDate == null && x.UserId == userId).Include(x => x.IDVerificationFiles).
+                  ProjectTo<IDVerificationDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            dataList.ForEach(x =>
+            {
+                x.IDVerificationFiles.ForEach(m =>
+                {
+                    var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), m.DocumentPath).Replace('\\', '/');
+                    m.DocumentPath = path;
+                });
+            });
+
+            return dataList;
+        }
+
+
         public int SaveIDVerificationDocument(IDVerificationDto reportDto)
         {
             reportDto.UserId = _jwtTokenAccesser.UserId;
-            var documentPath = Path.Combine("IDVerificationDocuments", reportDto.UserId.ToString());
-            var path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), documentPath);
-            if (!Directory.Exists(path))
+            reportDto.IsUpload = true;
+
+            var iDVerification = _mapper.Map<IDVerification>(reportDto);
+            iDVerification.IDVerificationFiles = null;
+            iDVerification.VerifyStatus = DocumentVerifyStatus.Pending;
+            _context.IDVerification.Add(iDVerification);
+            _context.Save();
+
+            foreach (var IdFile in reportDto.IDVerificationFiles)
             {
-                Directory.CreateDirectory(path);
-            }
-            var fileExtension = Path.GetExtension(reportDto.DocumentName);
-            var fileName = Guid.NewGuid().ToString().ToUpper() + fileExtension;
-            var filePath = Path.Combine(path, fileName);
-            if (!File.Exists(filePath))
-            {
-                try
+                var documentPath = Path.Combine("IDVerificationDocuments", reportDto.UserId.ToString());
+                var path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), documentPath);
+                if (!Directory.Exists(path))
                 {
-                    byte[] fileBytes = Convert.FromBase64String(reportDto.DocumentBase64String);
-                    File.WriteAllBytes(filePath, fileBytes);
-                    //reportDto.DocumentName = fileName;
-                    reportDto.DocumentPath = Path.Combine(documentPath, fileName);
-                    var iDVerification = _mapper.Map<IDVerification>(reportDto);
-                    _context.IDVerification.Add(iDVerification);
-                    _context.Save();
-                    return iDVerification.Id;
+                    Directory.CreateDirectory(path);
                 }
-                catch (Exception ex)
+                var fileExtension = Path.GetExtension(IdFile.DocumentName);
+                var fileName = Guid.NewGuid().ToString().ToUpper() + fileExtension;
+                var filePath = Path.Combine(path, fileName);
+                if (!File.Exists(filePath))
+                {
+                    try
+                    {
+                        byte[] fileBytes = Convert.FromBase64String(IdFile.DocumentBase64String);
+                        File.WriteAllBytes(filePath, fileBytes);
+                        //reportDto.DocumentName = fileName;
+                        IdFile.DocumentPath = Path.Combine(documentPath, fileName);
+                        IdFile.IDVerificationId = iDVerification.Id;
+                        var iDVerificationFile = _mapper.Map<IDVerificationFile>(IdFile);
+                        _context.IDVerificationFile.Add(iDVerificationFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        return 0;
+                    }
+                }
+                else
                 {
                     return 0;
                 }
             }
-            else
-            {
-                return 0;
-            }
+
+            var result = _context.Save();
+
+            return result;
         }
     }
 }

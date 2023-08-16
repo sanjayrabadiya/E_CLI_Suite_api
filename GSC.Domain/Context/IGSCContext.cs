@@ -451,5 +451,6 @@ namespace GSC.Domain.Context
         DbSet<LabReport> LabReport { get; set; }
         DbSet<WorkingDay> WorkingDay { get; set; }
         DbSet<IDVerification> IDVerification { get; set; }
+        DbSet<IDVerificationFile> IDVerificationFile { get; set; }
     }
 }

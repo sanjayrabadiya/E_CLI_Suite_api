@@ -13,5 +13,6 @@ namespace GSC.Respository.IDVerificationSystem
     {
         List<IDVerificationDto> GetIDVerificationList(bool isDeleted);
         int SaveIDVerificationDocument(IDVerificationDto reportDto);
+        List<IDVerificationDto> GetIDVerificationByUser(int userId);
     }
 }
