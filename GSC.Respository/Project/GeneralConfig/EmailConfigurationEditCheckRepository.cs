@@ -334,7 +334,7 @@ namespace GSC.Respository.Project.GeneralConfig
                 if (screeningTemplate.ProjectDesignTemplateId == x.ProjectDesignTemplateId)
                 {
                     var data = screeningTemplate.ScreeningTemplateValues.Where(s => s.ProjectDesignVariableId == x.ProjectDesignVariableId && s.DeletedDate == null).FirstOrDefault();
-                    if (data != null)
+                    if (data != null && !string.IsNullOrEmpty(data.Value))
                     {
                         if (data.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || data.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox || data.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
                         {
