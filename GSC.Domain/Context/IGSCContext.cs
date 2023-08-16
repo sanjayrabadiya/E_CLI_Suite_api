@@ -450,6 +450,7 @@ namespace GSC.Domain.Context
         DbSet<LettersActivity> LettersActivity { get; set; }
         DbSet<LabReport> LabReport { get; set; }
         DbSet<WorkingDay> WorkingDay { get; set; }
+        DbSet<SiteTypes> SiteTypes { get; set; }
         DbSet<IDVerification> IDVerification { get; set; }
         DbSet<IDVerificationFile> IDVerificationFile { get; set; }
     }

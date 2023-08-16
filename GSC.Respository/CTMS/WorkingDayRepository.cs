@@ -31,20 +31,23 @@ namespace GSC.Respository.CTMS
             ProjectTo<WorkingDayListDto>(_mapper.ConfigurationProvider).ToList();
             var data = result.Select(r =>
             {
-                var proID = r.IsSite == true ? _context.Project.Where(x=>x.Id == r.ProjectId).Select(s=>s.ParentProjectId).FirstOrDefault() : null;
-                if(proID!=null)
-                { 
-                     r.SiteCode = _context.Project.Where(x => x.Id == proID).Select(s => s.ProjectCode).FirstOrDefault();
-                }
-                else
-                { 
-                    r.SiteCode = r.ProjectCode;
-                    r.ProjectCode = null;
-                }
+                r.ProjectCode =  _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
                 return r;
             }).ToList();
 
-            return data;
+            return result;
+        }
+        public void AddSiteType(WorkingDayDto workingDayListDto)
+        {
+            if (workingDayListDto.siteTypes != null && workingDayListDto.siteTypes[0].ProjectId !=0)
+            {
+                foreach (var item in workingDayListDto.siteTypes)
+                 {
+                     item.WorkingDayId = workingDayListDto.Id;
+                    _context.SiteTypes.Add(item);
+                    _context.Save();
+                  }
+            }
         }
     }
 }

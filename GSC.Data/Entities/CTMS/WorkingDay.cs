@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using System;
+using System.Collections.Generic;
 namespace GSC.Data.Entities.CTMS
 {
     public class WorkingDay : BaseEntity, ICommonAduit
     {
-        public int ProjectId { get; set; }
+        public int? ParentProjectId { get; set; }
         public string Description { get; set; }
         public bool? IsSite { get; set; }
         public bool? Sunday { get; set; }
@@ -37,6 +38,6 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? SatEndTime { get; set; }
         public string SatTotalHour { get; set; }
         public string  TotalHour { get; set; }
-        public Master.Project Project { get; set; }
+        public List<SiteTypes> siteTypes { get; set; } = null;
     }
 }

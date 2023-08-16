@@ -786,8 +786,9 @@ namespace GSC.Api.Helpers
             CreateMap<LabReport, LabReportGridDto>().ReverseMap();
 
             CreateMap<WorkingDay, WorkingDayListDto>()
-           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
-           .ReverseMap();
+            .ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteTypes.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
+            .ReverseMap();
+            CreateMap<SiteTypes, WorkingDayListDto>().ReverseMap();
 
             CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
         }
