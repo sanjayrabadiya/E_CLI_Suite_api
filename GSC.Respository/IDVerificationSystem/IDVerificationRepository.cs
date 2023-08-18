@@ -58,8 +58,16 @@ namespace GSC.Respository.IDVerificationSystem
             {
                 x.IDVerificationFiles.ForEach(m =>
                 {
-                    var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), m.DocumentPath).Replace('\\', '/');
-                    m.DocumentPath = path;
+                    if (Path.GetExtension(m.DocumentPath) == ".pdf")
+                    {
+                        var path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), m.DocumentPath);
+                        m.DocumentPath = path;
+                    }
+                    else
+                    {
+                        var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), m.DocumentPath).Replace('\\', '/');
+                        m.DocumentPath = path;
+                    }
                 });
             });
 
