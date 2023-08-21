@@ -12,6 +12,7 @@ namespace GSC.Data.Dto.InformConcent
         public string DocumentPath { get; set; }
         public Boolean IsReviewed { get; set; }
         public int TotalReviewTime { get; set; }
+        public string IntroVideoPath { get; set; }
 
     }
 }

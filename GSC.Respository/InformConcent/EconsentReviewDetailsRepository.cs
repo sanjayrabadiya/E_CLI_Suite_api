@@ -96,10 +96,15 @@ namespace GSC.Respository.InformConcent
                     DocumentPath = x.EconsentSetup.DocumentPath,
                     ReviewId = x.Id,
                     IsReviewed = x.IsReviewedByPatient,
-                    TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds)
+                    TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds),
+                    IntroVideoPath = x.EconsentSetup.IntroVideoPath
                 }).OrderByDescending(x => x.DocumentId).ToList();
 
-            result.ForEach(t => t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath));
+            result.ForEach(t =>
+            {
+                t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath);
+                t.IntroVideoPath = System.IO.Path.Combine(upload.DocumentPath, t.IntroVideoPath);
+            });
 
             return result;
         }
