@@ -103,7 +103,10 @@ namespace GSC.Respository.InformConcent
             result.ForEach(t =>
             {
                 t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath);
-                t.IntroVideoPath = System.IO.Path.Combine(upload.DocumentPath, t.IntroVideoPath);
+                if (t.IntroVideoPath != null)
+                {
+                    t.IntroVideoPath = System.IO.Path.Combine(upload.DocumentPath, t.IntroVideoPath);
+                }
             });
 
             return result;
