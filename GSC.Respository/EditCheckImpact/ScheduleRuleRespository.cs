@@ -364,6 +364,7 @@ namespace GSC.Respository.EditCheckImpact
                     ScheduleDate = scheduleDate,
                 };
                 _screeningTemplateValueRepository.Add(screeningTemplateValue);
+                _context.Save();
             }
             else
             {
