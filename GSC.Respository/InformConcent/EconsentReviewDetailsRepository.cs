@@ -818,16 +818,15 @@ namespace GSC.Respository.InformConcent
             {
                 FileModel fileModel = new FileModel();
                 fileModel.Base64 = econsentReviewDetailsDto.PatientdigitalSignBase64;
-                fileModel.Extension = "png";
+                if (string.IsNullOrEmpty(econsentReviewDetailsDto.FileExtension))
+                {
+                    fileModel.Extension = "png";
+                }
+                else
+                {
+                    fileModel.Extension = econsentReviewDetailsDto.FileExtension;
+                }
                 reviewdetails.PatientdigitalSignImagepath = new ImageService().ImageSave(fileModel,
-                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "");
-            }
-            if (econsentReviewDetailsDto.PatientSignVideoBase64?.Length > 0)
-            {
-                FileModel fileModel = new FileModel();
-                fileModel.Base64 = econsentReviewDetailsDto.PatientSignVideoBase64;
-                fileModel.Extension = "mp4";
-                reviewdetails.PatientSignVideoPath = new ImageService().ImageSave(fileModel,
                     _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "");
             }
             reviewdetails.EconsentReviewDetailsSections = _mapper.Map<List<EconsentReviewDetailsSections>>(econsentReviewDetailsDto.EconsentReviewDetailsSections);

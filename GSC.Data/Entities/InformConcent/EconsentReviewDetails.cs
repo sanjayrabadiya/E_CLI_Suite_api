@@ -18,7 +18,6 @@ namespace GSC.Data.Entities.InformConcent
         public string? PdfPath { get; set; }
         public bool IsReviewedByPatient { get; set; }
         public string? PatientdigitalSignImagepath { get; set; }
-        public string? PatientSignVideoPath { get; set; }
         public Randomization Randomization { get; set; }
         public EconsentSetup EconsentSetup { get; set; }
         public List<EconsentReviewDetailsSections> EconsentReviewDetailsSections { get; set; }

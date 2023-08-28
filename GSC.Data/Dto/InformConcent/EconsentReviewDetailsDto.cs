@@ -48,7 +48,7 @@ namespace GSC.Data.Dto.InformConcent
         public int EconcentReviewDetailsId { get; set; }
         public string PatientdigitalSignBase64 { get; set; }
         //public bool IsWithdraw { get; set; }
-        public string PatientSignVideoBase64 { get; set; }
+        public string FileExtension { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
     }
 }
