@@ -163,6 +163,7 @@ namespace GSC.Api.Controllers.InformConcent
                 EconsentDocumetViwerDto econcentDetails = new EconsentDocumetViwerDto();
                 econcentDetails.EconcentReviewDetailsId = item.Id;
                 econcentDetails.PatientdigitalSignBase64 = econsentreviewdetails.PatientdigitalSignBase64;
+                econcentDetails.FileExtension = econsentreviewdetails.FileExtension;
                 _econsentReviewDetailsRepository.ApproveWithDrawPatient(econcentDetails, true);
             }
             _randomizationRepository.ChangeStatustoWithdrawal();
