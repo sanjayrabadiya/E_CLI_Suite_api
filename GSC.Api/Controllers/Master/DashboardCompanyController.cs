@@ -41,5 +41,14 @@ namespace GSC.Api.Controllers.Configuration
             var screeningVisits = _dashboardCompanyRepository.GetDashboardProjectsStatus();
             return Ok(screeningVisits);
         }
+        //Add yash
+        [HttpGet]
+        [Route("GetDashboardManageStudy")]
+        public IActionResult GetDashboardManageStudy()
+        {
+            var res = _dashboardCompanyRepository.GetDashboardManageStudy();
+            return Ok(res);
+        }
+
     }
 }
