@@ -124,7 +124,7 @@ namespace GSC.Api.Controllers.InformConcent
             }
             if (econsentSetupDto.IntroVideo?.Base64?.Length > 0)
             {
-                econsent.IntroVideoPath = DocumentService.SaveUploadDocument(econsentSetupDto.IntroVideo, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDto.ProjectId), FolderType.InformConcent, "EconsentSetup");
+                econsent.IntroVideoPath = DocumentService.SaveUploadDocument(econsentSetupDto.IntroVideo, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "EconsentSetup");
             }
             string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
             var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
