@@ -429,6 +429,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<ILabReportRepository, LabReportRepository>();
             services.AddScoped<IWorkingDayRepository, WorkingDayRepository>();
             services.AddScoped<IIDVerificationRepository, IDVerificationRepository>();
+            services.AddScoped<IDesignationRepository, DesignationRepository>();
+            services.AddScoped<ITaskResourceRepository, TaskResourceRepository>();
         }
     }
 }

@@ -330,7 +330,7 @@ namespace GSC.Api.Helpers
             CreateMap<AdverseEventSettings, AdverseEventSettingsDto>().ReverseMap();
             CreateMap<EtmfUserPermission, EtmfUserPermissionDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementDto>().ReverseMap();
-            CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
+            
 
             CreateMap<ProjectDesignVariableEncryptRole, ProjectDesignVariableEncryptRoleDto>().ReverseMap();
             CreateMap<ProjectDesingTemplateRestriction, ProjectDesingTemplateRestrictionDto>().ReverseMap();
@@ -531,6 +531,9 @@ namespace GSC.Api.Helpers
             CreateMap<SiteTypes, WorkingDay>()
               .ForMember(x => x.Id, y => y.MapFrom(a => a.WorkingDayId))
              .ReverseMap();
+            CreateMap<Designation, DesignationDto>().ReverseMap();
+            CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
+            CreateMap<TaskResource, TaskResourceDto>().ReverseMap();
         }
     }
 }

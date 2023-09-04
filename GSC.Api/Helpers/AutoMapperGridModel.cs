@@ -284,7 +284,14 @@ namespace GSC.Api.Helpers
 
             CreateMap<SiteTeam, SiteTeamGridDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementGridDto>().ReverseMap();
-            CreateMap<ResourceType, ResourceTypeGridDto>().ReverseMap();
+            CreateMap<ResourceType, ResourceTypeGridDto>()
+                .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceTypes.GetDescription()))
+                .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceSubType.GetDescription()))
+                .ForMember(x => x.Role, x => x.MapFrom(a => a.Role.RoleName))
+                .ForMember(x => x.User, x => x.MapFrom(a => a.User.UserName))
+                .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
+                .ForMember(x => x.Designation, x => x.MapFrom(a => a.Designation.NameOFDesignation))
+                .ReverseMap();
             CreateMap<TaskTemplate, TaskTemplateGridDto>().ReverseMap();
 
             CreateMap<TaskMaster, TaskMasterGridDto>().ReverseMap();
@@ -791,6 +798,12 @@ namespace GSC.Api.Helpers
             CreateMap<SiteTypes, WorkingDayListDto>().ReverseMap();
 
             CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
+
+           CreateMap<TaskResource, TaskResourceGridDto>().ReverseMap();
+           CreateMap<TaskResource, TaskResourceGridDto>()
+          .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
+          .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceType.ResourceSubType.GetDescription()))
+          .ReverseMap();
         }
     }
 }

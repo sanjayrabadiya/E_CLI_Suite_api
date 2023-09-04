@@ -1162,5 +1162,29 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(pickFromTypes);
         }
+        [HttpGet]
+        [Route("GetResourceType")]
+        public IActionResult GetResourceType()
+        {
+            var ResourceType = Enum.GetValues(typeof(ResourceTypeEnum))
+                .Cast<ResourceTypeEnum>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(ResourceType);
+        }
+        [HttpGet]
+        [Route("GetSubResourceType")]
+        public IActionResult GetSubResourceType()
+        {
+            var SubResourceType = Enum.GetValues(typeof(SubResourceType))
+                .Cast<SubResourceType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(SubResourceType);
+        }
     }
 }

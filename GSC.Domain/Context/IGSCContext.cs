@@ -453,5 +453,7 @@ namespace GSC.Domain.Context
         DbSet<SiteTypes> SiteTypes { get; set; }
         DbSet<IDVerification> IDVerification { get; set; }
         DbSet<IDVerificationFile> IDVerificationFile { get; set; }
+        public DbSet<Designation> Designation { get; set; }
+        public DbSet<TaskResource> TaskResource { get; set; }
     }
 }
