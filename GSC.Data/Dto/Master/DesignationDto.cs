@@ -17,7 +17,6 @@ namespace GSC.Data.Dto.Master
     }
     public class DesignationGridDto : BaseAuditDto
     {
-        public int Id { get; set; }
         public string DesignationCod { get; set; }
         public string NameOFDesignation { get; set; }
         public int YersOfExperience { get; set; }

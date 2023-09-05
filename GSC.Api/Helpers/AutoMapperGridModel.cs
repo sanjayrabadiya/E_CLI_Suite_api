@@ -804,6 +804,7 @@ namespace GSC.Api.Helpers
           .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
           .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceType.ResourceSubType.GetDescription()))
           .ReverseMap();
+            CreateMap<Designation, DesignationGridDto>().ReverseMap();
         }
     }
 }
