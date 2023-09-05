@@ -115,5 +115,11 @@ namespace GSC.Api.Controllers.Master
 
             return Ok();
         }
+        [HttpGet]
+        [Route("GetDepartmenDropDown")]
+        public IActionResult GetDepartmenDropDown()
+        {
+            return Ok(_designationRepository.GetDepartmenDropDown());
+        }
     }
 }

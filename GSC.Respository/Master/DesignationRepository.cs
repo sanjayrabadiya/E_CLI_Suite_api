@@ -35,5 +35,10 @@ namespace GSC.Respository.Master
                 return "Duplicate Letter Name : " + objSave.DesignationCod;
             return "";
         }
+        public List<DropDownDto> GetDepartmenDropDown()
+        {
+            return _context.Department.Where(x => x.DeletedBy == null)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.DepartmentName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

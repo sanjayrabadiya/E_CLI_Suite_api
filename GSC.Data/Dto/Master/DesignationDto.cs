@@ -13,7 +13,7 @@ namespace GSC.Data.Dto.Master
 
         [Required(ErrorMessage = "Yers Of Experience is required.")]
         public int YersOfExperience { get; set; }
-        public string Department { get; set; }
+        public int? DepartmentId { get; set; }
     }
     public class DesignationGridDto : BaseAuditDto
     {
