@@ -105,7 +105,7 @@ namespace GSC.Respository.InformConcent
                 t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath);
                 if (t.IntroVideoPath != null)
                 {
-                    t.IntroVideoPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), t.IntroVideoPath).Replace('\\','/');
+                    t.IntroVideoPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), t.IntroVideoPath).Replace('\\', '/');
                 }
             });
 
@@ -827,9 +827,9 @@ namespace GSC.Respository.InformConcent
                 else
                 {
                     fileModel.Extension = econsentReviewDetailsDto.FileExtension;
-                    reviewdetails.PatientdigitalSignImagepath= DocumentService.SaveUploadDocument(fileModel, 
-                        _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(randomization.ProjectId), FolderType.InformConcent, "EconsentReviewVideo");
-                }              
+                    reviewdetails.PatientdigitalSignImagepath = DocumentService.SaveUploadDocument(fileModel,
+                        _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "EconsentReviewVideo");
+                }
             }
             reviewdetails.EconsentReviewDetailsSections = _mapper.Map<List<EconsentReviewDetailsSections>>(econsentReviewDetailsDto.EconsentReviewDetailsSections);
             string filepath = "";
@@ -872,7 +872,7 @@ namespace GSC.Respository.InformConcent
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
             PdfGraphics graphics = page.Graphics;
             //Load the image from the disk
-            PdfImage image=null;
+            PdfImage image = null;
             if (string.IsNullOrEmpty(econsentReviewDetailsDto.FileExtension))
             {
                 FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
@@ -900,7 +900,7 @@ namespace GSC.Respository.InformConcent
                 //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
                 //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
                 result = AddString(reviewdetails.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-                if (image!=null)
+                if (image != null)
                 {
                     result.Page.Graphics.DrawImage(image, new PointF(70, result.Bounds.Y + 20), new SizeF(400f, 100f));
                 }
