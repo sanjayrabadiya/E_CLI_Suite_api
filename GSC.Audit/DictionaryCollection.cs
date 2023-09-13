@@ -596,6 +596,13 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsVisitBase", DisplayName = "Visit Base Workflow" });
             _dictionaries.Add(new Dictionary { FieldName = "LevelNo", DisplayName = "Level No" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "nameOFDesignation", DisplayName = "Name OF Designation"});
+            _dictionaries.Add(new Dictionary { FieldName = "department", DisplayName = "Department / Division"});
+            _dictionaries.Add(new Dictionary { FieldName = "yersOfExperience", DisplayName = "Yers Of Experience"});
+
+            _dictionaries.Add(new Dictionary { FieldName = "serviceType", DisplayName = "Service Type" });
+            _dictionaries.Add(new Dictionary { FieldName = "regOfficeAddress", DisplayName = "Registered Office Address" });
+            _dictionaries.Add(new Dictionary { FieldName = "branchOfficeDetails", DisplayName = "Branch Office Details" });
         }
 
 
