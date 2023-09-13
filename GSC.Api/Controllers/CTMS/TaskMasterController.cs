@@ -179,5 +179,16 @@ namespace GSC.Api.Controllers.CTMS
             var result = _taskMasterRepository.GetTaskHistory(id);
             return Ok(result);
         }
+        [HttpPatch("{id}")]
+        public ActionResult Active(int id)
+        {
+            var record = _taskMasterRepository.Find(id);
+            if (record == null)
+                return NotFound();
+
+            _taskMasterRepository.Active(record);
+            _uow.Save();
+            return Ok();
+        }
     }
 }
