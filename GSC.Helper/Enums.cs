@@ -1171,7 +1171,7 @@ namespace GSC.Helper
     }
     public enum SubResourceType : short
     {
-        [Description("On a Roll")] OnARoll = 1,
+        [Description("Permanent")] Permanent = 1,
         [Description("Contract")] Contract = 2,
         [Description("Consumable")] Consumable = 3,
         [Description("Non Consumable")] NonConsumable = 4
