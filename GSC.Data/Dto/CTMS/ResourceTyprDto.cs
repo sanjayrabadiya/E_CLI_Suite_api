@@ -26,6 +26,7 @@ namespace GSC.Data.Dto.CTMS
 
     public class ResourceTypeGridDto: BaseAuditDto
     {
+        public int? TaskId { get; set; }
         public string ResourceCode { get; set; }
         public string ResourceType { get; set; }
         public string ResourceSubType { get; set; }

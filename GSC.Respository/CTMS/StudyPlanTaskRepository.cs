@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
 using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
+using GSC.Data.Entities.Master;
 
 namespace GSC.Respository.CTMS
 {
@@ -135,6 +136,23 @@ namespace GSC.Respository.CTMS
                     result.StudyPlanTask = tasklist;
                 }
             }
+
+         //Add by mitul task was Resource Add
+         var resourcelist = _context.TaskResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null)
+        .Select(x => new ResourceTypeGridDto
+        {
+            TaskId = x.TaskMasterId,
+            ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+            ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+            Role = x.ResourceType.Role.RoleName,
+            User = x.ResourceType.User.UserName,
+            Designation=x.ResourceType.Designation.NameOFDesignation,
+            YersOfExperience=x.ResourceType.Designation.YersOfExperience,
+            NameOfMaterial=x.ResourceType.NameOfMaterial,
+            CreatedDate= x.CreatedDate,
+            CreatedByUser=x.CreatedByUser.UserName
+        }).ToList();
+        result.TaskResource = resourcelist;
 
             return result;
         }

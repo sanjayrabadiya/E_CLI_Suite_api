@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? EndDate { get; set; }
         public DateTime? EndDateDay { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
+        public List<ResourceTypeGridDto> TaskResource { get; set; }
 
     }
 

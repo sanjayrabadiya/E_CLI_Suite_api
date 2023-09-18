@@ -32,9 +32,8 @@ namespace GSC.Respository.CTMS
 
         public List<TaskMasterGridDto> GetTasklist(bool isDeleted, int templateId)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.TaskTemplateId == templateId).OrderBy(x => x.TaskOrder).
+            return All.Where(x => (isDeleted ? (x.DeletedDate != null) : (x.DeletedDate == null)) && (x.TaskTemplateId == templateId)).OrderBy(x => x.TaskOrder).
                    ProjectTo<TaskMasterGridDto>(_mapper.ConfigurationProvider).ToList();
-
         }
         public int UpdateTaskOrder(TaskmasterDto taskmasterDto)
         {
