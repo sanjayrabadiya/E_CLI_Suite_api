@@ -169,17 +169,22 @@ namespace GSC.Respository.Configuration
             var result = chartFinal1.ToList();
 
             //Grid disply data
-           /* var gridFinal1 = _context.Project
-                .Select(c => new ProjectGridDto
-                {
-                   ProjectCode = c.ProjectCode,
-                   ProjectName = c.ProjectName,
-                   ProjectNumber = c.ProjectNumber,
-                   SiteName = c.SiteName,  
-                }).ToList();*/
-           var gridFinal1 = from p in _context.Project
-                            where projectIdsList.Contains(p.Id) && p.DeletedDate == null
-                            select p;
+          
+                       var gridFinal1 = from project in _context.Project
+                             where projectIdsList.Contains(project.Id) && project.DeletedDate == null
+                             join designTrial in _context.DesignTrial on project.DesignTrialId equals designTrial.Id
+                             join trialType in _context.TrialType on designTrial.TrialTypeId equals trialType.Id
+                        select new
+                        {
+                            project.ProjectCode,
+                            project.ProjectName,
+                            designTrial.DesignTrialName,
+                            trialType.TrialTypeName
+                        };
+                        
+
+            var result1 = gridFinal1.ToList();
+
 
             dynamic[] data = new dynamic[2];
             data[0] = chartFinal1;
