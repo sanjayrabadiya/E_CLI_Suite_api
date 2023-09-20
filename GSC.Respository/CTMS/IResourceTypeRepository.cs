@@ -14,5 +14,7 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetUnitTypeDropDown();
         List<DropDownDto> GetDesignationDropDown();
         List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID);
+        List<DropDownDto> GetNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID);
+        List<DropDownDto> GetRollUserDropDown(int designationID);
     }
 }

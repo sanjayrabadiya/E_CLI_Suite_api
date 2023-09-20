@@ -153,5 +153,20 @@ namespace GSC.Api.Controllers.CTMS
         {
             return Ok(_resourcetypeRepository.GetDesignationDropDown(resourceTypeID, resourceSubTypeID));
         }
+
+        [HttpGet]
+        [Route("GetNameOfMaterialDropDown/{resourceTypeID}/{resourceSubTypeID}")]
+        public IActionResult getNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID)
+        {
+            return Ok(_resourcetypeRepository.GetNameOfMaterialDropDown(resourceTypeID, resourceSubTypeID));
+
+        }
+
+        [HttpGet]
+        [Route("GetRollUserDropDown/{designationID}")]
+        public IActionResult getSelectDateDrop(int designationID)
+        {
+            return Ok(_resourcetypeRepository.GetRollUserDropDown(designationID));
+        }
     }
 }

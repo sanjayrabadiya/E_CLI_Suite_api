@@ -291,6 +291,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.User, x => x.MapFrom(a => a.User.UserName))
                 .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
                 .ForMember(x => x.Designation, x => x.MapFrom(a => a.Designation.NameOFDesignation))
+                .ForMember(x => x.YersOfExperience, x => x.MapFrom(a => a.Designation.YersOfExperience))
                 .ReverseMap();
             CreateMap<TaskTemplate, TaskTemplateGridDto>().ReverseMap();
 

@@ -31,9 +31,9 @@ namespace GSC.Respository.CTMS
                    Id = c.Id,
                    ResourceType = c.ResourceType.ResourceTypes.GetDescription(),
                    ResourceSubType = c.ResourceType.ResourceSubType.GetDescription(),
-                   Designation = c.ResourceType.Designation.NameOFDesignation,
-                   YersOfExperience = c.ResourceType.Designation.YersOfExperience,
-                   NameOfMaterial = c.ResourceType.NameOfMaterial,
+                   Designation = c.ResourceType.Designation.NameOFDesignation != null ? c.ResourceType.Designation.NameOFDesignation+" - "+ c.ResourceType.Designation.YersOfExperience+ " Years" : " - ",
+                   Role = c.ResourceType.Role.RoleName != null ? c.ResourceType.Role.RoleName+" - " + c.ResourceType.User.UserName : " - ",
+                   NameOfMaterial = c.ResourceType.NameOfMaterial != "" ? c.ResourceType.NameOfMaterial : " - ",
                    CreatedDate = c.CreatedDate,
                    CreatedByUser = c.CreatedByUser.UserName,
                }).ToList();
