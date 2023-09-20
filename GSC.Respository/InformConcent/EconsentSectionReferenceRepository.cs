@@ -195,26 +195,33 @@ namespace GSC.Respository.InformConcent
 
                 if (extension == ".docx" || extension == ".doc")
                 {
-                    Stream stream = System.IO.File.OpenRead(path);
-                    WordDocument document = null;
-                    if (extension == ".docx")
-                        document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-                    if (extension == ".doc")
-                        document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Doc);
-                    document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
-                    MemoryStream ms = new MemoryStream();
-                    document.Save(ms, Syncfusion.DocIO.FormatType.Html);
-                    document.Close();
-                    ms.Position = 0;
-                    StreamReader reader = new StreamReader(ms);
-                    var htmlStringText = reader.ReadToEnd();
-                    ms.Dispose();
-                    reader.Dispose();
-                    stream.Close();
-                    stream.Dispose();
-                    type = "doc";
+                    //Stream stream = System.IO.File.OpenRead(path);
+                    //WordDocument document = null;
+                    //if (extension == ".docx")
+                    //    document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
+                    //if (extension == ".doc")
+                    //    document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Doc);
+                    //document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
+                    //MemoryStream ms = new MemoryStream();
+                    //document.Save(ms, Syncfusion.DocIO.FormatType.Html);
+                    //document.Close();
+                    //ms.Position = 0;
+                    //StreamReader reader = new StreamReader(ms);
+                    //var htmlStringText = reader.ReadToEnd();
+                    //ms.Dispose();
+                    //reader.Dispose();
+                    //stream.Close();
+                    //stream.Dispose();
+                    //type = "doc";
+                    //econsentSectionReferenceDocument.type = type;
+                    //econsentSectionReferenceDocument.data = htmlStringText;
+                    //econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
+                    //econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
+                    var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
+                    var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
+                    type = extension.Trim('.');
                     econsentSectionReferenceDocument.type = type;
-                    econsentSectionReferenceDocument.data = htmlStringText;
+                    econsentSectionReferenceDocument.data = pdfFullPath.Replace('\\', '/');
                     econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
                     econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                 }

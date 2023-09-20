@@ -356,5 +356,14 @@ namespace GSC.Api.Controllers.UserMgt
         {
             return Ok(_userRepository.GetUserNameDropdown());
         }
+
+        [HttpGet]
+        [Route("UpdateFirebaseToken/{token}")]
+        public IActionResult UpdateFirebaseToken(string token)
+        {
+            //_centreUserService.UpdateFirebaseToken($"{_environmentSetting.Value.CentralApi}user/updateFirebaseToken", token);
+            _userRepository.UpdateFirebaseToken(_jwtTokenAccesser.UserId, token);
+            return Ok(1);
+        }
     }
 }

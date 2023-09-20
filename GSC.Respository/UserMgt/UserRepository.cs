@@ -187,5 +187,12 @@ namespace GSC.Respository.UserMgt
             return result;
         }
 
+        public void UpdateFirebaseToken(int userId, string token)
+        {
+            var user = Find(userId);
+            user.FirebaseToken = token;
+            Update(user);
+            _context.Save();
+        }
     }
 }
