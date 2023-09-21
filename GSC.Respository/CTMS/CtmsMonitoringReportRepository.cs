@@ -202,13 +202,19 @@ namespace GSC.Respository.CTMS
 
             if(ActivityCode != "act_004")
             {
-                var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
-                                     && x.CtmsMonitoring.DeletedDate == null).ToList();
+                var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null).ToList();
+                var applicable = _context.CtmsMonitoring.Where(x => x.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId) && x.DeletedDate == null).ToList();
 
-                if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
-                    return "Please Approve " + CtmsActivity.ActivityName + " .";
+              if(applicable.OrderByDescending(c => c.Id).FirstOrDefault().If_Applicable != true){
+                    if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
+                        return "Please Approve " + CtmsActivity.ActivityName + " .";
 
-                return "";
+                    return "";
+                }
+                else
+                {
+                    return "";
+                }
             }
             else
             {

@@ -18,6 +18,7 @@ namespace GSC.Data.Dto.CTMS
         public int? ParentId { get; set; }
         public bool? If_Missed { get; set; }
         public bool?  If_ReSchedule { get; set; }
+        public bool? If_Applicable { get; set; }
     }
 
     public class CtmsMonitoringGridDto : BaseAuditDto
@@ -39,5 +40,6 @@ namespace GSC.Data.Dto.CTMS
         public string ScreenCode { get; set; }
         public bool? If_Missed { get; set; }
         public bool? If_ReSchedule { get; set; }
+        public bool? If_Applicable { get; set; }
     }
 }
