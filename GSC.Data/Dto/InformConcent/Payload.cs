@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GSC.Helper;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -10,6 +11,7 @@ namespace GSC.Data.Dto.InformConcent
         public string priority { get; set; }
         public string content_available { get; set; }
         public Notification notification { get; set; }
+        public FirebaseMsgType MessageType { get; set; }
     }
 
     public class Notification

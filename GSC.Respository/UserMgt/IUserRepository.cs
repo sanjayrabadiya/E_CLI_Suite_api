@@ -11,7 +11,7 @@ namespace GSC.Respository.UserMgt
 {
     public interface IUserRepository : IGenericRepository<User>
     {
-        
+
         string DuplicateUserName(User objSave);
         List<DropDownDto> GetUserName();
         Task<List<UserGridDto>> GetUsers(bool isDeleted);
@@ -19,7 +19,7 @@ namespace GSC.Respository.UserMgt
         List<UserGridDto> GetPatients(PatientDto userDto);
         LoginResponseDto GetLoginDetails();
         Task<UserLockedGridDto> GetLockedUsers();
-        void UpdateFirebaseToken(int userId, string token);
+        void UpdateFirebaseToken(int userId, UserFirebaseToken token);
 
     }
 }

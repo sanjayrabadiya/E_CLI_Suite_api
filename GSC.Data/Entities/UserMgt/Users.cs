@@ -87,5 +87,6 @@ namespace GSC.Data.Entities.UserMgt
         public Company Company { get; set; }
         public Randomization Randomization { get; set; }
         public string FirebaseToken { get; set; }
+        public DeviceType? DeviceType { get; set; }
     }
 }

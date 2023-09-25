@@ -9,6 +9,6 @@ namespace GSC.Respository.FirebaseNotification
     public interface IFirebaseNotification
     {
         void SendEConsentMessage(int receiverId);
-        void SendEConsentChatMessage(EconsentChat message);
+        Task<string> SendEConsentChatMessage(EconsentChat message);
     }
 }

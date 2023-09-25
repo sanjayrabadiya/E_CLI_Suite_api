@@ -39,26 +39,36 @@ namespace GSC.Respository.FirebaseNotification
         }
 
 
-        public async void SendEConsentChatMessage(EconsentChat message)
+        public async Task<string> SendEConsentChatMessage(EconsentChat message)
         {
-            var commonSettiongs = _settingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
-            var payload = new Payload()
+            try
             {
-                priority = "high",
-                to = message.Receiver.FirebaseToken,
-                notification = new Notification()
+                var commonSettiongs = _settingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+                var payload = new Payload()
                 {
-                    title = $"New Message - {message.Sender.UserName}",
-                    body = message.Message,
-                    icon = ""
-                }
-            };
+                    priority = "high",
+                    to = message.Receiver.FirebaseToken,
+                    MessageType = Helper.FirebaseMsgType.EConsetChat,
+                    notification = new Notification()
+                    {
+                        title = message.Sender.UserName,
+                        body = message.Message,
+                        icon = ""
+                    }
+                };
 
-            var sent = await SendFirebaseNotification(payload, commonSettiongs);
-            if (sent)
-            {
-                
+                var sent = await SendFirebaseNotification(payload, commonSettiongs);
+                if (sent)
+                {
+                    return "Message successfully sent";
+                }
             }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+
+            return "Message sending failed";
         }
 
         public async void SendEConsentMessage(int receiverId)

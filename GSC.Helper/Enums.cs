@@ -1176,4 +1176,16 @@ namespace GSC.Helper
         [Description("Consumable")] Consumable = 3,
         [Description("Non Consumable")] NonConsumable = 4
     }
+
+    public enum FirebaseMsgType : short
+    {
+        [Description("EConsetChat")] EConsetChat = 1
+    }
+
+    public enum DeviceType : short
+    {
+        [Description("Web")] Web = 1,
+        [Description("Android")] Android = 2,
+        [Description("IOS")] IOS = 3
+    }
 }

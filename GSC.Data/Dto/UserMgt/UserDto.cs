@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.UserMgt;
+using GSC.Helper;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
@@ -113,5 +114,11 @@ namespace GSC.Data.Dto.UserMgt
     public class UserLockedGridDto
     {
         public List<UserGridDto> Data { get; set; }
+    }
+
+    public class UserFirebaseToken
+    {
+        public string Token { get; set; }
+        public DeviceType DeviceType { get; set; }
     }
 }
