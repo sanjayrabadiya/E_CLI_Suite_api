@@ -15,6 +15,7 @@ using GSC.Common.UnitOfWork;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net;
+using AutoMapper;
 
 namespace GSC.Respository.FirebaseNotification
 {
@@ -25,17 +26,19 @@ namespace GSC.Respository.FirebaseNotification
         private readonly HttpClient _httpClient;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUnitOfWork _uow;
+        private readonly IMapper _mapper;
         public FirebaseNotification(IAppSettingRepository appSettingRepository,
             IEconsentChatRepository econsentChatRepository,
             HttpClient httpClient,
             IJwtTokenAccesser jwtTokenAccesser,
-            IUnitOfWork uow)
+            IUnitOfWork uow, IMapper mapper)
         {
             _settingRepository = appSettingRepository;
             _econsentChatRepository = econsentChatRepository;
             _httpClient = httpClient;
             _jwtTokenAccesser = jwtTokenAccesser;
             _uow = uow;
+            _mapper = mapper;
         }
 
 
@@ -48,15 +51,15 @@ namespace GSC.Respository.FirebaseNotification
                 {
                     priority = "high",
                     to = message.Receiver.FirebaseToken,
-                    MessageType = Helper.FirebaseMsgType.EConsetChat,
+                    data = _mapper.Map<EconsentChatDto>(message),
                     notification = new Notification()
                     {
-                        title = message.Sender.UserName,
+                        title = $"{message.Sender.FirstName} {message.Sender.LastName}",
                         body = message.Message,
                         icon = ""
                     }
                 };
-
+                payload.data.MessageType = Helper.FirebaseMsgType.EConsetChat;
                 var sent = await SendFirebaseNotification(payload, commonSettiongs);
                 if (sent)
                 {

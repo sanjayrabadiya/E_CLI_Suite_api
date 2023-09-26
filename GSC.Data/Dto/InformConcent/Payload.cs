@@ -10,8 +10,8 @@ namespace GSC.Data.Dto.InformConcent
         public string to { get; set; }
         public string priority { get; set; }
         public string content_available { get; set; }
-        public Notification notification { get; set; }
-        public FirebaseMsgType MessageType { get; set; }
+        public Notification notification { get; set; }      
+        public EconsentChatDto data { get; set; }
     }
 
     public class Notification
