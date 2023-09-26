@@ -433,6 +433,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IDesignationRepository, DesignationRepository>();
             services.AddScoped<ITaskResourceRepository, TaskResourceRepository>();
             services.AddHttpClient<IFirebaseNotification, FirebaseNotification>();
+            services.AddScoped<IStudyPlanResourceRepository, StudyPlanResourceRepository>();
         }
     }
 }

@@ -43,4 +43,12 @@ namespace GSC.Data.Dto.CTMS
         public string OwnerName { get; set; }
         public string ContractorName { get; set; }
     }
+    public class ResourceByEdit 
+    {
+        public int? resourceId { get; set; }
+        public int? subresource { get; set; }
+        public int? designation { get; set; }
+        public int? nameOfMaterial { get; set; }
+        public int? rollUser {  get; set; } 
+    }
 }

@@ -99,6 +99,18 @@ namespace GSC.Respository.CTMS
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
 
+            //Add by mitul task was Resource Add form to TaskResource
+            foreach (var task in tasklist) {
+                var taskResource = _context.TaskResource.Include(s=>s.TaskMaster).Where(d=>d.TaskMaster.Id==task.TaskId)
+                    .Select(t => new StudyPlanResource
+                    {
+                        StudyPlanTaskId = task.Id,
+                        ResourceTypeId = t.ResourceTypeId
+                    }).ToList();
+                _context.StudyPlanResource.AddRange(taskResource);
+                _context.Save();
+            }
+
             return "";
         }
 
@@ -112,8 +124,11 @@ namespace GSC.Respository.CTMS
 
             studyPlanList.ForEach(i =>
             {
+                if(studyPlanTaskList.Count() > 0)
+                { 
                 i.StartDate = studyPlanTaskList.Min(x => x.StartDate);
                 i.EndDate = studyPlanTaskList.Max(x => x.EndDate);
+                }
             });
 
             _context.StudyPlan.UpdateRange(studyPlanList);

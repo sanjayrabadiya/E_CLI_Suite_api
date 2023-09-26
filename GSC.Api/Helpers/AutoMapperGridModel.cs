@@ -810,6 +810,11 @@ namespace GSC.Api.Helpers
             CreateMap<Designation, DesignationGridDto>()
                 .ForMember(x => x.Department, x => x.MapFrom(a => a.Department.DepartmentName))
           .ReverseMap();
+
+            CreateMap<StudyPlanResource, StudyPlanResourceGridDto>()
+            .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
+            .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceType.ResourceSubType.GetDescription()))
+            .ReverseMap();
         }
     }
 }

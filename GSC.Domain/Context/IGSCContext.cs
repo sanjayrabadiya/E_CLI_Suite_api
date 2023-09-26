@@ -455,5 +455,6 @@ namespace GSC.Domain.Context
         DbSet<IDVerificationFile> IDVerificationFile { get; set; }
         public DbSet<Designation> Designation { get; set; }
         public DbSet<TaskResource> TaskResource { get; set; }
+        public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
     }
 }

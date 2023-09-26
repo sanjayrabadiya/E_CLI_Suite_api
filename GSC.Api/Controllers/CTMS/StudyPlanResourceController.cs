@@ -1,5 +1,4 @@
 using System;
-using System.Linq.Dynamic.Core;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -11,33 +10,29 @@ using GSC.Respository.CTMS;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using GSC.Data.Dto.Master;
-
 
 
 namespace GSC.Api.Controllers.Master
 {
     [Route("api/[controller]")]
-    public class TaskResourceController : BaseController
+    public class StudyPlanResourceController : BaseController
     {
 
-        private readonly ITaskResourceRepository _taskResourceRepository;
+        private readonly IStudyPlanResourceRepository _studyPlanTaskResourceRepository;
         private readonly IUserRepository _userRepository;
         private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
-        public TaskResourceController(ITaskResourceRepository taskResourceRepository,
+        public StudyPlanResourceController(IStudyPlanResourceRepository studyPlanTaskResourceRepository,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
             IGSCContext context)
         {
-            _taskResourceRepository = taskResourceRepository;
+            _studyPlanTaskResourceRepository = studyPlanTaskResourceRepository;
             _userRepository = userRepository;
             _companyRepository = companyRepository;
             _uow = uow;
@@ -50,7 +45,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}/{PlanTaskId}")]
         public IActionResult Get(bool isDeleted, int PlanTaskId)
         {
-            var taskResource = _taskResourceRepository.GetTaskResourceList(isDeleted, PlanTaskId);
+            var taskResource = _studyPlanTaskResourceRepository.GetTaskResourceList(isDeleted, PlanTaskId);
             return Ok(taskResource);
         }
 
@@ -58,77 +53,59 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var taskResource = _taskResourceRepository.Find(id);
-            var taskResourceDto = _mapper.Map<TaskResourceDto>(taskResource);
-            return Ok(taskResourceDto);
+            var taskResource = _studyPlanTaskResourceRepository.ResourceById(id);
+            return Ok(taskResource);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] TaskResourceDto taskResourceDto)
+        public IActionResult Post([FromBody] StudyPlanResourceDto studyPlanResourceDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            taskResourceDto.Id = 0;
+            studyPlanResourceDto.Id = 0;
 
-            //taskResourceDto.ResourceTypeId = _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == taskResourceDto.resource && ((int)x.ResourceSubType) == taskResourceDto.subresource && x.DesignationId== taskResourceDto.designation)
-            //                                 .Select(c =>c.Id ).FirstOrDefault();
-             
-
-            var taskResource = _mapper.Map<TaskResource>(taskResourceDto);
-                var validate = _taskResourceRepository.Duplicate(taskResource);
+            var taskResource = _mapper.Map<StudyPlanResource>(studyPlanResourceDto);
+                var validate = _studyPlanTaskResourceRepository.Duplicate(taskResource);
                 if (!string.IsNullOrEmpty(validate))
                 {
                     ModelState.AddModelError("Message", validate);
                     return BadRequest(ModelState);
                 }
-                _taskResourceRepository.Add(taskResource);        
+                _studyPlanTaskResourceRepository.Add(taskResource);        
 
             if (_uow.Save() <= 0) throw new Exception("Creating Resource failed on save.");
 
-            //Add by mitul task was Resource Add in StudyPlanTask
-            var studyPlanTask = _context.StudyPlanTask.Where(d=>d.TaskId == taskResource.TaskMasterId && d.DeletedDate==null)
-                    .Select(t => new StudyPlanResource
-                    {
-                        StudyPlanTaskId = t.Id,
-                        ResourceTypeId = taskResource.ResourceTypeId
-                    }).ToList();
-                _context.StudyPlanResource.AddRange(studyPlanTask);
-                _context.Save();
-            
             return Ok();
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] TaskResourceDto taskResourceDto)
+        public IActionResult Put([FromBody] StudyPlanResourceDto studyPlanResourceDto)
         {
-            if (taskResourceDto.Id <= 0) return BadRequest();
+            if (studyPlanResourceDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var taskResource = _mapper.Map<TaskResource>(taskResourceDto);
-            var validate = _taskResourceRepository.Duplicate(taskResource);
+            var taskResource = _mapper.Map<StudyPlanResource>(studyPlanResourceDto);
+            var validate = _studyPlanTaskResourceRepository.Duplicate(taskResource);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by swati for effective Date on 02-06-2019 */
-            _taskResourceRepository.Update(taskResource);
+            _studyPlanTaskResourceRepository.Update(taskResource);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Resource failed on save.");
             return Ok(taskResource.Id);
         }
 
-
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _taskResourceRepository.Find(id);
+            var record = _studyPlanTaskResourceRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            _taskResourceRepository.Delete(record);
+            _studyPlanTaskResourceRepository.Delete(record);
             _uow.Save();
 
             return Ok();
@@ -137,19 +114,19 @@ namespace GSC.Api.Controllers.Master
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _taskResourceRepository.Find(id);
+            var record = _studyPlanTaskResourceRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            var validate = _taskResourceRepository.Duplicate(record);
+            var validate = _studyPlanTaskResourceRepository.Duplicate(record);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _taskResourceRepository.Active(record);
+            _studyPlanTaskResourceRepository.Active(record);
             _uow.Save();
 
             return Ok();
