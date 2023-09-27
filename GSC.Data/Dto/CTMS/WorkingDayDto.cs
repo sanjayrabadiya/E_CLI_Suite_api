@@ -1,4 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,8 +8,8 @@ namespace GSC.Data.Dto.CTMS
 {
     public class WorkingDayDto : BaseDto
     {
-        public int ProjectId { get; set; }
-        public int? SiteId { get; set; }
+        public int? ParentProjectId { get; set; }
+        //public int? SiteId { get; set; }
         public bool? IsSite { get; set; }
         public string Description { get; set; }
         public bool? Sunday { get; set; }
@@ -39,12 +41,15 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? SatEndTime { get; set; }
         public string SatTotalHour { get; set; }
         public string TotalHour { get; set; }
+        public List<SiteTypes>? siteTypes { get; set; }
+        
     }
 
     public class WorkingDayListDto : BaseAuditDto
     {
-        public int Id { get; set; }  
-        public int ProjectId { get; set; }
+        public int Id { get; set; }
+
+        public int? ParentProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string SiteCode { get; set; }
         public bool? IsSite { get; set; }

@@ -1156,4 +1156,36 @@ namespace GSC.Helper
         [Description("Kit Wise")] KitWise = 1,
         [Description("Randomization Wise")] RandomizationWise = 2
     }
+
+
+    public enum DocumentVerifyStatus : int
+    {
+        [Description("Pending")] Pending = 1,
+        [Description("Approved")] Approved = 2,
+        [Description("Rejected")] Rejected = 3
+    }
+    public enum ResourceTypeEnum : short
+    {
+        [Description("Manpower")] Manpower = 1,
+        [Description("Material")] Material = 2,
+    }
+    public enum SubResourceType : short
+    {
+        [Description("Permanent")] Permanent = 1,
+        [Description("Contract")] Contract = 2,
+        [Description("Consumable")] Consumable = 3,
+        [Description("Non Consumable")] NonConsumable = 4
+    }
+
+    public enum FirebaseMsgType : short
+    {
+        [Description("EConsetChat")] EConsetChat = 1
+    }
+
+    public enum DeviceType : short
+    {
+        [Description("Web")] Web = 1,
+        [Description("Android")] Android = 2,
+        [Description("IOS")] IOS = 3
+    }
 }

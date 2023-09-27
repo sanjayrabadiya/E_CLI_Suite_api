@@ -37,6 +37,7 @@ namespace GSC.Respository.InformConcent
         private readonly IEconsentReviewDetailsRepository _econsentReviewDetailsRepository;
         private readonly IUnitOfWork _uow;
         private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         public EconsentSetupRepository(IGSCContext context,
             IProjectRepository projectRepository,
             IMapper mapper,
@@ -44,6 +45,7 @@ namespace GSC.Respository.InformConcent
             IRandomizationRepository randomizationRepository,
             IEconsentReviewDetailsRepository econsentReviewDetailsRepository,
             IUnitOfWork uow,
+            IUploadSettingRepository uploadSettingRepository,
             IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository) : base(context)
         {
             _projectRepository = projectRepository;
@@ -54,6 +56,7 @@ namespace GSC.Respository.InformConcent
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uow = uow;
             _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
+            _uploadSettingRepository= uploadSettingRepository;
         }
 
         public string Duplicate(EconsentSetup objSave)
@@ -77,6 +80,15 @@ namespace GSC.Respository.InformConcent
         {
             var econsentSetups = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectid). //intList.Contains(x.ProjectId
                    ProjectTo<EconsentSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            econsentSetups.ForEach(t =>
+            {
+                if (t.IntroVideoPath != null)
+                {
+                    t.IntroVideoPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), t.IntroVideoPath).Replace('\\', '/');
+                }
+            });
+
             return econsentSetups;
         }
 

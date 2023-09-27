@@ -60,7 +60,8 @@ namespace GSC.Respository.CTMS
                     DeletedByUser = x.DeletedByUser.UserName,
                     ParentId = x.ParentId,
                     If_Missed=x.If_Missed,
-                    If_ReSchedule = x.If_ReSchedule
+                    If_ReSchedule = x.If_ReSchedule,
+                    If_Applicable= x.If_Applicable
                 }).ToList();
 
             var StudyLevelFormList = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
@@ -81,7 +82,8 @@ namespace GSC.Respository.CTMS
                 DeletedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.DeletedByUser,
                 ParentId = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.ParentId,
                 If_Missed= ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_Missed,
-                If_ReSchedule = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_ReSchedule
+                If_ReSchedule = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_ReSchedule,
+                If_Applicable = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_Applicable
             }).ToList();
 
             var result = ctmsMonitorings.Count() == 0 ? StudyLevelFormList : ctmsMonitorings;

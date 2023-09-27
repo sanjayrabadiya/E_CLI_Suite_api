@@ -37,4 +37,17 @@ namespace GSC.Shared.Generic
         [Description("ProjectWorkPlaceSubSectionArtifact")] ProjectWorkPlaceSubSectionArtifact = 7
     }
 
+
+    public enum DocumentPickFromType : int
+    {
+        [Description("File,Gallery,Camera")] FileGalleryCamera = 1,
+        [Description("Only File")] OnlyFile = 2,
+        [Description("Only Camera")] OnlyCamera = 3,
+        [Description("Only Gallery")] OnlyGallery = 4,
+        [Description("File and Camera")] FileAndCamera = 5,
+        [Description("File and Gallery")] FileAandGallery = 6,
+        [Description("Gallery and Camera")] GalleryAandCamera = 7
+        
+    }
+
 }

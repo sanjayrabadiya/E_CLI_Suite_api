@@ -47,6 +47,8 @@ using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.LabReportManagement;
+using GSC.Respository.IDVerificationSystem;
+using GSC.Respository.FirebaseNotification;
 
 namespace GSC.Api.Helpers
 {
@@ -427,6 +429,11 @@ namespace GSC.Api.Helpers
             services.AddScoped<IDashboardCompanyRepository, DashboardCompanyRepository>();
             services.AddScoped<ILabReportRepository, LabReportRepository>();
             services.AddScoped<IWorkingDayRepository, WorkingDayRepository>();
+            services.AddScoped<IIDVerificationRepository, IDVerificationRepository>();
+            services.AddScoped<IDesignationRepository, DesignationRepository>();
+            services.AddScoped<ITaskResourceRepository, TaskResourceRepository>();
+            services.AddHttpClient<IFirebaseNotification, FirebaseNotification>();
+            services.AddScoped<IStudyPlanResourceRepository, StudyPlanResourceRepository>();
         }
     }
 }

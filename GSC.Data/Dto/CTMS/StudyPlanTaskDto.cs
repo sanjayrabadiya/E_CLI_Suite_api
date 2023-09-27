@@ -16,7 +16,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? EndDate { get; set; }
         public DateTime? EndDateDay { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
-
+       
     }
 
     public class StudyPlanTaskDto : BaseAuditDto
@@ -50,6 +50,7 @@ namespace GSC.Data.Dto.CTMS
         public string DocumentPath { get; set; }
         public string Site { get; set; }
         public decimal? Percentage { get; set; }
+        public List<ResourceTypeGridDto> TaskResource { get; set; }
     }
 
     public class StudyPlanTaskChartDto

@@ -4,6 +4,7 @@ using System.Linq;
 using GSC.Data.Dto.Master;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Common
@@ -1132,6 +1133,58 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Id).ToList();
 
             return Ok(pkenum);
+        }
+
+        [HttpGet]
+        [Route("DocumentPickFromType")]
+        public IActionResult DocumentPickFromType()
+        {
+            var pickFromTypes = Enum.GetValues(typeof(DocumentPickFromType))
+                .Cast<DocumentPickFromType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(pickFromTypes);
+        }
+
+        [HttpGet]
+        [Route("DocumentVerifyStatus")]
+        public IActionResult DocumentVerifyStatus()
+        {
+            var pickFromTypes = Enum.GetValues(typeof(DocumentVerifyStatus))
+                .Cast<DocumentVerifyStatus>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(pickFromTypes);
+        }
+        [HttpGet]
+        [Route("GetResourceType")]
+        public IActionResult GetResourceType()
+        {
+            var ResourceType = Enum.GetValues(typeof(ResourceTypeEnum))
+                .Cast<ResourceTypeEnum>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(ResourceType);
+        }
+        [HttpGet]
+        [Route("GetSubResourceType")]
+        public IActionResult GetSubResourceType()
+        {
+            var SubResourceType = Enum.GetValues(typeof(SubResourceType))
+                .Cast<SubResourceType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(SubResourceType);
         }
     }
 }

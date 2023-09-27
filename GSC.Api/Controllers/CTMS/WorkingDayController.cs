@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -41,11 +42,11 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var WorkingDayData = _workingDayRepository.Find(id);
-            var WorkingDayDto = _mapper.Map<WorkingDayDto>(WorkingDayData);
-            WorkingDayDto.SiteId = WorkingDayDto.IsSite == true ? WorkingDayDto.ProjectId : (int?)null;
-            WorkingDayDto.ProjectId = WorkingDayDto.IsSite == true ? (int)_context.Project.Find(WorkingDayDto.ProjectId).ParentProjectId : WorkingDayDto.ProjectId;
-            return Ok(WorkingDayDto);
+            var taskmaster = _workingDayRepository.FindByInclude(x => x.Id == id, x => x.siteTypes).FirstOrDefault();
+            if (taskmaster != null && taskmaster.siteTypes != null)
+                taskmaster.siteTypes = taskmaster.siteTypes.Where(x => x.DeletedDate == null).ToList();
+            var taskDto = _mapper.Map<WorkingDayDto>(taskmaster);
+            return Ok(taskDto);
         }
 
         [HttpPost]
@@ -56,6 +57,8 @@ namespace GSC.Api.Controllers.CTMS
             var WorkingDaydata = _mapper.Map<WorkingDay>(WorkingDay);
             _workingDayRepository.Add(WorkingDaydata);
             if (_uow.Save() <= 0) throw new Exception("Creating Holiday failed on save.");
+            WorkingDay.Id = WorkingDaydata.Id;
+            _workingDayRepository.AddSiteType(WorkingDay);
             return Ok(WorkingDaydata.Id);
         }
 
@@ -65,22 +68,50 @@ namespace GSC.Api.Controllers.CTMS
             if (WorkingDay.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var WorkingDaydata = _mapper.Map<WorkingDay>(WorkingDay);
+            UpdateSiteType(WorkingDaydata);
             _workingDayRepository.Update(WorkingDaydata);
             if (_uow.Save() <= 0) throw new Exception("Updating holiday failed on save.");
             return Ok(WorkingDaydata.Id);
+        }
+        private void UpdateSiteType(WorkingDay workingDay)
+        {
+            var SiteTyp = _context.SiteTypes.Where(x => x.WorkingDayId == workingDay.Id && x.DeletedDate == null)
+               .ToList();
+
+            SiteTyp.ForEach(t =>
+            {
+                if (SiteTyp != null)
+                {
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _context.SiteTypes.Update(t);
+                }
+            });
+            workingDay.siteTypes.ForEach(z =>
+            {
+                _context.SiteTypes.Add(z);
+            });
         }
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
             var record = _workingDayRepository.Find(id);
-
             if (record == null)
                 return NotFound();
-
             _workingDayRepository.Delete(record);
-            _uow.Save();
 
+            var siteTyp = _context.SiteTypes.Where(x => x.WorkingDayId == id && x.DeletedDate == null).ToList();
+            siteTyp.ForEach(t =>
+            {
+                if (siteTyp != null)
+                {
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _context.SiteTypes.Update(t);
+                }
+            });
+            _uow.Save();
             return Ok();
         }
 
@@ -88,13 +119,10 @@ namespace GSC.Api.Controllers.CTMS
         public ActionResult Active(int id)
         {
             var record = _workingDayRepository.Find(id);
-
             if (record == null)
                 return NotFound();
-
             _workingDayRepository.Active(record);
             _uow.Save();
-
             return Ok();
         }
     }

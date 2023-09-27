@@ -1315,6 +1315,7 @@ namespace GSC.Respository.Attendance
                 x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
                 x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
+                x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
             });
 
             return result;
@@ -1521,6 +1522,7 @@ namespace GSC.Respository.Attendance
                 var project = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
                 var parentproject = _context.Project.Where(x => x.Id == project.ParentProjectId).ToList().FirstOrDefault();
                 var investigator = _context.InvestigatorContact.Where(x => x.Id == project.InvestigatorContactId).ToList().FirstOrDefault();
+                var idVerification = _context.IDVerification.Where(x => x.UserId == randomization.UserId && x.DeletedDate == null).FirstOrDefault();
                 DashboardPatientDto dashboardPatientDto = new DashboardPatientDto();
                 dashboardPatientDto.projectId = project.Id;
                 dashboardPatientDto.studycode = parentproject.ProjectCode;
@@ -1551,6 +1553,15 @@ namespace GSC.Respository.Attendance
                 //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
                 //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
+                if (idVerification != null)
+                {
+                    dashboardPatientDto.IsUpload = idVerification.IsUpload;
+                    dashboardPatientDto.VerifyStatus = idVerification.VerifyStatus;
+                }
+                else
+                {
+                    dashboardPatientDto.IsUpload = false;
+                }
                 return dashboardPatientDto;
             }
             else

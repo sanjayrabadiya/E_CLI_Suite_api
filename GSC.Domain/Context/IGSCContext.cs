@@ -13,6 +13,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LabReportManagement;
@@ -449,5 +450,11 @@ namespace GSC.Domain.Context
         DbSet<LettersActivity> LettersActivity { get; set; }
         DbSet<LabReport> LabReport { get; set; }
         DbSet<WorkingDay> WorkingDay { get; set; }
+        DbSet<SiteTypes> SiteTypes { get; set; }
+        DbSet<IDVerification> IDVerification { get; set; }
+        DbSet<IDVerificationFile> IDVerificationFile { get; set; }
+        public DbSet<Designation> Designation { get; set; }
+        public DbSet<TaskResource> TaskResource { get; set; }
+        public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
     }
 }

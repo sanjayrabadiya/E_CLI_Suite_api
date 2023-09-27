@@ -10,5 +10,7 @@ namespace GSC.Respository.Configuration
     {
         List<DashboardCompanyGridDto> GetDashboardCompanyList();
         dynamic GetDashboardProjectsStatus();
+        dynamic GetDashboardManageStudy();
+       
     }
 }

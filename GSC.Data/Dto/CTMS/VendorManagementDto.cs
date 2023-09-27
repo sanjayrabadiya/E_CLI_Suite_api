@@ -21,7 +21,7 @@ namespace GSC.Data.Dto.Master
         public string BranchOfficeDetails { get; set; }
 
         /*[Required(ErrorMessage = "Selecting Audit is required.")]*/
-        public VendorManagementAudit? VendorManagementAuditId { get; set; }
+        public VendorManagementAudit VendorManagementAuditId { get; set; }
         public DateTime? VendorManagementAuditDate { get; set; }
     }
 
@@ -31,7 +31,7 @@ namespace GSC.Data.Dto.Master
         public string ContactNo { get; set; }
         public string RegOfficeAddress { get; set; }
         public string BranchOfficeDetails { get; set; }
-        public VendorManagementAudit? VendorManagementAuditId { get; set; }
+        public string VendorManagementAudit { get; set; }
         public DateTime? VendorManagementAuditDate { get; set; }
     }
 }

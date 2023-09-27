@@ -135,6 +135,26 @@ namespace GSC.Respository.CTMS
                     result.StudyPlanTask = tasklist;
                 }
             }
+            //Add by mitul task was Resource Add
+            foreach (var item in result.StudyPlanTask)
+            {
+                var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId==item.Id)
+               .Select(x => new ResourceTypeGridDto
+               {
+                   Id = x.Id,
+                   TaskId = item.Id,
+                   ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+                   ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+                   Role = x.ResourceType.Role.RoleName,
+                   User = x.ResourceType.User.UserName,
+                   Designation = x.ResourceType.Designation.NameOFDesignation,
+                   YersOfExperience = x.ResourceType.Designation.YersOfExperience,
+                   NameOfMaterial = x.ResourceType.NameOfMaterial,
+                   CreatedDate = x.CreatedDate,
+                   CreatedByUser = x.CreatedByUser.UserName
+               }).ToList();
+                item.TaskResource = resourcelist;
+            }
 
             return result;
         }

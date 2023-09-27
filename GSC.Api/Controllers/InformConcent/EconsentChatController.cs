@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
 using GSC.Respository.EmailSender;
+using GSC.Respository.FirebaseNotification;
 using GSC.Respository.InformConcent;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Configuration;
@@ -31,10 +32,12 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IMapper _mapper;
+        private readonly IFirebaseNotification _firebaseNotification;
 
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         ICentreUserService centreUserService,
+                                        IFirebaseNotification firebaseNotification,
                                          IOptions<EnvironmentSetting> environmentSetting,
                                         IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
                                         IMapper mapper)
@@ -48,6 +51,7 @@ namespace GSC.Api.Controllers.InformConcent
             _emailSenderRespository = emailSenderRespository;
             _environmentSetting = environmentSetting;
             _mapper = mapper;
+            _firebaseNotification = firebaseNotification;
         }
 
         [HttpGet]
@@ -103,6 +107,9 @@ namespace GSC.Api.Controllers.InformConcent
             //{
             //    _emailSenderRespository.SendOfflineChatNotification(senderdetails.Email, senderdetails.FirstName);
             //}
+            econsentChat.Sender = _userRepository.Find(econsentChat.SenderId);
+            econsentChat.Receiver = _userRepository.Find(econsentChat.ReceiverId);
+            _firebaseNotification.SendEConsentChatMessage(econsentChat);
             var result = _mapper.Map<EconsentChatDto>(econsentChat);
             return Ok(result);
         }
