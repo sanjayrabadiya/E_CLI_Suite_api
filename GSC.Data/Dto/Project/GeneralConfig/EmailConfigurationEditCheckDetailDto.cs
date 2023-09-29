@@ -13,8 +13,8 @@ namespace GSC.Data.Entities.Project.Generalconfig
     public class EmailConfigurationEditCheckDetailDto : BaseDto
     {
         public int EmailConfigurationEditCheckId { get; set; }
-        public int ProjectDesignTemplateId { get; set; }
-        public int ProjectDesignVariableId { get; set; }
+        public int? ProjectDesignTemplateId { get; set; }
+        public int? ProjectDesignVariableId { get; set; }
         public Operator Operator { get; set; }
         public string LogicalOperator { get; set; }
         public string startParens { get; set; }
@@ -23,11 +23,11 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
 
-        public int ProjectDesignId { get; set; }
+        public int? ProjectDesignId { get; set; }
 
-        public int ProjectDesignPeriodId { get; set; }
+        public int? ProjectDesignPeriodId { get; set; }
 
-        public int ProjectDesignVisitId { get; set; }
+        public int? ProjectDesignVisitId { get; set; }
 
         public string OperatorName { get; set; }
         public string TemplateName { get; set; }
@@ -47,7 +47,13 @@ namespace GSC.Data.Entities.Project.Generalconfig
 
         public CollectionSources? CollectionSource { get; set; }
 
+        public EditCheckRuleBy CheckBy { get; set; }
 
+        public string VariableAnnotation { get; set; }
+
+        public string CheckByName { get; set; }
+
+        public int? ProjectId { get; set; }
     }
 
     public class EmailConfigurationEditCheckDetailGridDto : BaseAuditDto

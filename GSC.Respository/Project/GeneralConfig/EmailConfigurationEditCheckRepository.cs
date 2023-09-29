@@ -87,15 +87,15 @@ namespace GSC.Respository.Project.GeneralConfig
         }
         EmailConfigurationEditCheckResult CheckEditCheckEmailParens(int editCheckId)
         {
-            var data = _emailConfigurationEditCheckDetailRepository.All.Include(s => s.ProjectDesignVariable).Include(s => s.ProjectDesignTemplate).AsNoTracking().
+            var data = _emailConfigurationEditCheckDetailRepository.All.Include(s => s.EmailConfigurationEditCheck).Include(s => s.ProjectDesignVariable).Include(s => s.ProjectDesignTemplate).AsNoTracking().
                 Where(x => x.DeletedDate == null &&
                 x.EmailConfigurationEditCheckId == editCheckId).Select(r => new EmailConfigurationEditCheckDetailDto
                 {
-
+                    ProjectId = r.EmailConfigurationEditCheck.ProjectId,
                     startParens = r.startParens,
                     InputValue = r.CollectionValue,
                     Operator = r.Operator,
-                    FieldName = r.ProjectDesignVariable.VariableName,
+                    FieldName = r.ProjectDesignVariable.Annotation ?? r.ProjectDesignVariable.VariableName ?? r.VariableAnnotation,
                     LogicalOperator = r.LogicalOperator,
                     OperatorName = r.Operator.GetDescription(),
                     endParens = r.endParens,
@@ -103,11 +103,31 @@ namespace GSC.Respository.Project.GeneralConfig
                     Id = r.Id,
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     ProjectDesignTemplateId = r.ProjectDesignTemplateId,
-                    ProjectDesignVisitId = r.ProjectDesignTemplate.ProjectDesignVisitId,
+                    ProjectDesignVisitId = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.ProjectDesignVisitId : 0,
                     dataType = r.ProjectDesignVariable.DataType,
-                    CollectionSource = r.ProjectDesignVariable.CollectionSource
+                    CollectionSource = r.ProjectDesignVariable != null ? r.ProjectDesignVariable.CollectionSource : CollectionSources.TextBox,
+                    CheckBy = r.CheckBy,
+                    VariableAnnotation = r.VariableAnnotation
 
                 }).ToList();
+
+            data.ForEach(x =>
+            {
+
+                x.ProjectDesignId = _context.ProjectDesign.Where(s => s.ProjectId == x.ProjectId).Select(s => s.Id).FirstOrDefault();
+
+                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                {
+                    var variableAnnotation = _context.ProjectDesignVariable.Include(t => t.Values).Where(a => a.Annotation == x.VariableAnnotation
+                               && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == x.ProjectDesignId).FirstOrDefault();
+                    x.CollectionSource = variableAnnotation?.CollectionSource;
+                    x.dataType = variableAnnotation?.DataType;
+                }
+
+
+            });
+
+
             return EmailEditCheckValidateRule(data);
         }
         string SingleQuote(Operator? _operator, DataType? dataType)
@@ -238,18 +258,19 @@ namespace GSC.Respository.Project.GeneralConfig
                 Where(x => x.EmailConfigurationEditCheckId == id
                 && x.DeletedDate == null).Select(r => r.CollectionValue).ToList();
 
-            var result = _context.EmailConfigurationEditCheckDetail.Where(x => x.EmailConfigurationEditCheckId == id && x.DeletedDate == null)
+            var result = _context.EmailConfigurationEditCheckDetail.Include(s => s.EmailConfigurationEditCheck).Where(x => x.EmailConfigurationEditCheckId == id && x.DeletedDate == null)
                 .Select(r => new EmailConfigurationEditCheckDetailDto
                 {
                     Id = r.Id,
+                    ProjectId = r.EmailConfigurationEditCheck.ProjectId,
                     PeriodName = r.ProjectDesignVariable != null
                          ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
                              .DisplayName
                          : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
                              .DisplayName : "",
-                    TemplateName = r.ProjectDesignTemplate.TemplateName,
+                    TemplateName = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.TemplateName : "",
                     VariableName = string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation,
-                    VisitName = r.ProjectDesignVariable != null
+                    VisitName = r.ProjectDesignVariable != null && r.ProjectDesignVariable.ProjectDesignTemplate != null && r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit != null
                          ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                          : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
                     Operator = r.Operator,
@@ -257,14 +278,26 @@ namespace GSC.Respository.Project.GeneralConfig
                     startParens = r.startParens,
                     endParens = r.endParens,
                     CollectionValue = r.CollectionValue,
-                    ProjectDesignId = r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId,
+                    CheckBy = r.CheckBy,
+                    VariableAnnotation = r.VariableAnnotation
 
                 }).ToList().OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
             result.ForEach(x =>
             {
-                var name = x.PeriodName + "." + x.VisitName + "." +
+                x.ProjectDesignId = _context.ProjectDesign.Where(s => s.ProjectId == x.ProjectId).Select(s => s.Id).FirstOrDefault();
+
+                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                {
+                    var variableAnnotation = _context.ProjectDesignVariable.Include(t => t.Values).Where(a => a.Annotation == x.VariableAnnotation
+                               && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == x.ProjectDesignId).FirstOrDefault();
+                    x.CollectionSource = variableAnnotation?.CollectionSource;
+                    x.dataType = variableAnnotation?.DataType;
+                }
+
+                var name = x.CheckBy == EditCheckRuleBy.ByVariableAnnotation
+                            ? x.VariableAnnotation : x.PeriodName + "." + x.VisitName + "." +
                              x.TemplateName + "." + x.VariableName;
 
                 var operatorName = x.Operator.GetDescription();
@@ -299,13 +332,18 @@ namespace GSC.Respository.Project.GeneralConfig
 
         public EmailConfigurationEditCheckResult ValidatWithScreeningTemplate(ScreeningTemplate screeningTemplate)
         {
-            var data = _emailConfigurationEditCheckDetailRepository.All.Include(s => s.ProjectDesignVariable).Include(s => s.ProjectDesignTemplate).AsNoTracking().
-                Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId).Select(r => new EmailConfigurationEditCheckDetailDto
+            var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign).Where(s => s.Id == screeningTemplate.ProjectDesignTemplateId).FirstOrDefault();
+            var annotationlist = _context.ProjectDesignVariable.Where(s => s.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId && s.Annotation != null).ToList();
+            var data = _emailConfigurationEditCheckDetailRepository.All.Include(s => s.EmailConfigurationEditCheck).Include(s => s.ProjectDesignVariable).Include(s => s.ProjectDesignTemplate).AsNoTracking().
+                Where(x => x.DeletedDate == null
+                && x.EmailConfigurationEditCheck.ProjectId == projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId
+                && (x.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId ||
+                (annotationlist != null && annotationlist.Count > 0 && annotationlist.Select(s => s.Annotation).Contains(x.VariableAnnotation)))).Select(r => new EmailConfigurationEditCheckDetailDto
                 {
 
                     startParens = r.startParens,
                     Operator = r.Operator,
-                    FieldName = r.ProjectDesignVariable.VariableName,
+                    FieldName = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.VariableName : r.VariableAnnotation,
                     LogicalOperator = r.LogicalOperator,
                     OperatorName = r.Operator.GetDescription(),
                     endParens = r.endParens,
@@ -313,25 +351,27 @@ namespace GSC.Respository.Project.GeneralConfig
                     Id = r.Id,
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     ProjectDesignTemplateId = r.ProjectDesignTemplateId,
-                    ProjectDesignVisitId = r.ProjectDesignTemplate.ProjectDesignVisitId,
-                    dataType = r.ProjectDesignVariable.DataType,
-                    CollectionSource = r.ProjectDesignVariable.CollectionSource,
+                    ProjectDesignVisitId = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.ProjectDesignVisitId : 0,
+                    dataType = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.DataType : null,
+                    CollectionSource = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.CollectionSource : CollectionSources.TextBox,
                     PeriodName = r.ProjectDesignVariable != null
-                         ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
-                             .DisplayName
-                         : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
-                             .DisplayName : "",
-                    TemplateName = r.ProjectDesignTemplate.TemplateName,
-                    VariableName = string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation,
+                             ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
+                                 .DisplayName
+                             : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
+                                 .DisplayName : "",
+                    TemplateName = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.TemplateName : "",
+                    VariableName = r.ProjectDesignVariable != null ? string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation : "",
                     VisitName = r.ProjectDesignVariable != null
-                         ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
-                         : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : ""
+                             ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
+                             : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
+                    CheckBy = r.CheckBy,
+                    VariableAnnotation = r.VariableAnnotation
 
                 }).ToList();
 
             data.ForEach(x =>
             {
-                if (screeningTemplate.ProjectDesignTemplateId == x.ProjectDesignTemplateId)
+                if (screeningTemplate.ProjectDesignTemplateId == x.ProjectDesignTemplateId && x.CheckBy == EditCheckRuleBy.ByVariable)
                 {
                     var data = screeningTemplate.ScreeningTemplateValues.Where(s => s.ProjectDesignVariableId == x.ProjectDesignVariableId && s.DeletedDate == null).FirstOrDefault();
                     if (data != null && !string.IsNullOrEmpty(data.Value))
@@ -348,6 +388,30 @@ namespace GSC.Respository.Project.GeneralConfig
                         }
                     }
                 }
+                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                {
+                    if (annotationlist.Count > 0 && annotationlist.Any(s => s.Annotation == x.VariableAnnotation))
+                    {
+                        var annotation = annotationlist.Where(s => s.Annotation == x.VariableAnnotation).FirstOrDefault();
+                        if (annotation != null)
+                        {
+                            var data = screeningTemplate.ScreeningTemplateValues.Where(s => s.ProjectDesignVariableId == annotation.Id && s.DeletedDate == null).FirstOrDefault();
+                            if (data != null && !string.IsNullOrEmpty(data.Value))
+                            {
+                                if (data.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || data.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox || data.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
+                                {
+                                    var child = _context.ProjectDesignVariableValue.Where(s => s.Id == Convert.ToInt32(data.Value)).FirstOrDefault();
+                                    if (child != null)
+                                        x.InputValue = child.ValueName.ToLower();
+                                }
+                                else
+                                {
+                                    x.InputValue = data.Value.ToLower();
+                                }
+                            }
+                        }
+                    }
+                }
             });
 
 
@@ -359,12 +423,15 @@ namespace GSC.Respository.Project.GeneralConfig
             List<EmailList> emails = new List<EmailList>();
             List<string> mobile = new List<string>();
             EmailConfigurationEditCheckSendEmail emaildata = new EmailConfigurationEditCheckSendEmail();
+            var annotationlist = _context.ProjectDesignVariable.Where(s => s.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId && s.Annotation != null).ToList();
+            var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign).Where(s => s.Id == screeningTemplate.ProjectDesignTemplateId).FirstOrDefault();
             var data = _emailConfigurationEditCheckDetailRepository.All.
                 Include(s => s.ProjectDesignVariable).
                 Include(s => s.ProjectDesignTemplate).
                 ThenInclude(s => s.ProjectDesignVisit)
                 .AsNoTracking().
-                Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId).ToList();
+                Where(x => x.DeletedDate == null && (x.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId ||
+                (annotationlist != null && annotationlist.Count > 0 && annotationlist.Select(s => s.Annotation).Contains(x.VariableAnnotation)))).ToList();
             if (data != null && data.Count > 0)
             {
                 var emailconfig = All.Where(s => s.Id == data.FirstOrDefault().EmailConfigurationEditCheckId).FirstOrDefault();
@@ -440,14 +507,14 @@ namespace GSC.Respository.Project.GeneralConfig
                                 }
                             }
                         }
-                        emaildata.VisitName = data.FirstOrDefault().ProjectDesignTemplate.ProjectDesignVisit.DisplayName;
-                        emaildata.TemplateName = data.FirstOrDefault().ProjectDesignTemplate.TemplateName;
+                        emaildata.VisitName = projectDesignTemplate.ProjectDesignVisit.DisplayName;
+                        emaildata.TemplateName = projectDesignTemplate.TemplateName;
                         emaildata.CurrentDate = DateTime.Now.Date.ToString("dddd, dd MMMM yyyy");
                         if (_jwtTokenAccesser.CompanyId > 0)
                             emaildata.CompanyName = _context.Company.Where(s => s.Id == _jwtTokenAccesser.CompanyId).FirstOrDefault().CompanyName;
                         if (data.Count == 1)
                         {
-                            emaildata.VariableName = data.FirstOrDefault().ProjectDesignVariable.VariableName;
+                            emaildata.VariableName = data.FirstOrDefault().ProjectDesignVariable != null ? data.FirstOrDefault().ProjectDesignVariable.VariableName : "";
                         }
                         if (emails.Count > 0)
                         {

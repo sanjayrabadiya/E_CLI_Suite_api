@@ -47,10 +47,9 @@ namespace GSC.Respository.Project.GeneralConfig
                                     {
                                         Id = z.Id,
                                         EmailConfigurationEditCheckId = z.EmailConfigurationEditCheckId,
-                                        ProjectDesignTemplateId = z.ProjectDesignTemplateId,
-                                        ProjectDesignVariableId = z.ProjectDesignVariableId,
-                                        ProjectDesignPeriodId = z.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
-                                        ProjectDesignId = z.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId,
+                                        ProjectDesignTemplateId = z.ProjectDesignTemplateId > 0 ? z.ProjectDesignTemplateId : 0,
+                                        ProjectDesignVariableId = z.ProjectDesignVariableId > 0 ? z.ProjectDesignVariableId : 0,
+                                        ProjectDesignPeriodId = z.ProjectDesignTemplateId > 0 ? z.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId : 0,
                                         Operator = z.Operator,
                                         CollectionValue = z.CollectionValue,
                                         LogicalOperator = z.LogicalOperator,
@@ -58,13 +57,27 @@ namespace GSC.Respository.Project.GeneralConfig
                                         startParens = z.startParens,
                                         endParens = z.endParens,
                                         OperatorName = z.Operator.GetDescription(),
-                                        VisitName = z.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
-                                        TemplateName = z.ProjectDesignTemplate.TemplateName,
-                                        VariableName = z.ProjectDesignVariable.VariableName,
+                                        VisitName = z.ProjectDesignTemplateId > 0 && z.ProjectDesignTemplate.ProjectDesignVisit != null ? z.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
+                                        TemplateName = z.ProjectDesignTemplateId > 0 && z.ProjectDesignTemplate != null ? z.ProjectDesignTemplate.TemplateName : "",
+                                        VariableName = z.ProjectDesignVariableId > 0 && z.ProjectDesignVariable != null ? z.ProjectDesignVariable.VariableName : z.VariableAnnotation,
                                         ReasonOth = z.ReasonOth,
-                                        ReasonName = z.AuditReasonId > 0 ? _context.AuditReason.Where(a => a.Id == z.AuditReasonId).FirstOrDefault().ReasonName : ""
+                                        ReasonName = z.AuditReasonId > 0 ? _context.AuditReason.Where(a => a.Id == z.AuditReasonId).FirstOrDefault().ReasonName : "",
+                                        CheckBy = z.CheckBy,
+                                        VariableAnnotation = z.VariableAnnotation,
+                                        CheckByName = z.CheckBy.GetDescription()
                                     }).ToList()
                 }).FirstOrDefault();
+            if (data != null)
+            {
+                foreach (var item in data.Children)
+                {
+                    if (item.ProjectDesignTemplateId > 0)
+                    {
+                        var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).Where(s => s.Id == item.ProjectDesignTemplateId).FirstOrDefault();
+                        item.ProjectDesignId = projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId;
+                    }
+                }
+            }
             return data;
         }
         public EmailConfigurationEditCheckDetailDto GetDetail(int id)
@@ -77,18 +90,30 @@ namespace GSC.Respository.Project.GeneralConfig
                                     {
                                         Id = z.Id,
                                         EmailConfigurationEditCheckId = z.EmailConfigurationEditCheckId,
-                                        ProjectDesignTemplateId = z.ProjectDesignTemplateId,
-                                        ProjectDesignVariableId = z.ProjectDesignVariableId,
-                                        ProjectDesignPeriodId = z.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId,
-                                        ProjectDesignId = z.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId,
-                                        ProjectDesignVisitId = z.ProjectDesignTemplate.ProjectDesignVisitId,
+                                        ProjectDesignTemplateId = z.ProjectDesignTemplateId > 0 ? z.ProjectDesignTemplateId : null,
+                                        ProjectDesignVariableId = z.ProjectDesignVariableId > 0 ? z.ProjectDesignVariableId : null,
+                                        //ProjectDesignPeriodId = z.ProjectDesignTemplateId > 0 && z.ProjectDesignTemplate != null && z.ProjectDesignTemplate.ProjectDesignVisit != null ? z.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId : 0,
+
+                                        //ProjectDesignVisitId = z.ProjectDesignTemplateId > 0 && z.ProjectDesignTemplate != null ? z.ProjectDesignTemplate.ProjectDesignVisitId : 0,
                                         Operator = z.Operator,
                                         CollectionValue = z.CollectionValue,
                                         LogicalOperator = z.LogicalOperator,
                                         IsDeleted = z.DeletedDate != null ? true : false,
                                         startParens = z.startParens,
-                                        endParens = z.endParens
+                                        endParens = z.endParens,
+                                        CheckBy = z.CheckBy,
+                                        VariableAnnotation = z.VariableAnnotation
                                     }).FirstOrDefault();
+            if (data != null && data.ProjectDesignTemplateId > 0)
+            {
+
+                var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).Where(s => s.Id == data.ProjectDesignTemplateId).FirstOrDefault();
+                data.ProjectDesignId = projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId;
+                data.ProjectDesignPeriodId = projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriodId;
+                data.ProjectDesignVisitId = projectDesignTemplate.ProjectDesignVisitId;
+
+
+            }
             return data;
         }
 
