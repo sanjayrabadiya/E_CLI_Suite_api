@@ -7,7 +7,7 @@ namespace GSC.Data.Entities.Master
     {
         public string DesignationCod { get; set; }
         public string NameOFDesignation { get; set; }
-        public int YersOfExperience { get; set; }
+        public string YersOfExperience { get; set; }
         public int? DepartmentId { get; set; }
         public Department Department { get; set; }
     }

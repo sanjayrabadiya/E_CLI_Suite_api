@@ -283,5 +283,30 @@ namespace GSC.Api.Controllers.CTMS
             _uow.Save();
             return Ok();
         }
+        [HttpPost]
+        [Route("ResourceMgmtQuerySearch")]
+        public IActionResult ResourceMgmtQuerySearch([FromBody] ResourceMgmtFilterDto search)
+        {
+            var volunteers = _studyPlanTaskRepository.ResourceMgmtSearch(search);
+            return Ok(volunteers);
+        }
+        [HttpGet]
+        [Route("GetRollDropDown/{studyplanId}")]
+        public IActionResult getRollDropDown(int studyplanId)
+        {
+            return Ok(_studyPlanTaskRepository.GetRollDropDown(studyplanId));
+        }
+        [HttpGet]
+        [Route("getUserDropDown/{studyplanId}")]
+        public IActionResult getUserDropDown(int studyplanId)
+        {
+            return Ok(_studyPlanTaskRepository.GetUserDropDown(studyplanId));
+        }
+        [HttpGet]
+        [Route("getDesignationStdDropDown/{studyplanId}")]
+        public IActionResult getDesignationStdDropDown(int studyplanId)
+        {
+            return Ok(_studyPlanTaskRepository.GetDesignationStdDropDown(studyplanId));
+        }
     }
 }

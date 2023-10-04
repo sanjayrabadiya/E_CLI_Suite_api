@@ -31,7 +31,7 @@ namespace GSC.Data.Dto.CTMS
         public string ResourceType { get; set; }
         public string ResourceSubType { get; set; }
         public string Designation { get; set; }
-        public int? YersOfExperience { get; set; }
+        public string YersOfExperience { get; set; }
         public string Role { get; set; }
         public string User { get; set; }
         public string Unit { get; set; }

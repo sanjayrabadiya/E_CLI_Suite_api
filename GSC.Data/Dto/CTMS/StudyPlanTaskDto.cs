@@ -75,4 +75,17 @@ namespace GSC.Data.Dto.CTMS
         public decimal? Percentage { get; set; }
 
     }
+    public class ResourceMgmtFilterDto
+    {
+        public int studyplanId { get; set; }
+        public int? siteId { get; set; }
+        public int? countryId { get; set; }
+        public int? ResourceId { get; set; }
+        public int? ResourceSubId { get; set; }
+        public int?  RoleId { get; set; }
+        public int? UserId { get; set; }
+        public int? DesignationId { get; set; }
+        public bool? ResourceNotAdded { get; set; }
+        public bool? ResourceAdded { get; set; }
+    }
 }

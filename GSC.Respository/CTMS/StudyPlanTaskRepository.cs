@@ -17,6 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
 using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
+using GSC.Data.Dto.Master;
 
 namespace GSC.Respository.CTMS
 {
@@ -136,6 +137,7 @@ namespace GSC.Respository.CTMS
                 }
             }
             //Add by mitul task was Resource Add
+            if(result.StudyPlanTask != null)
             foreach (var item in result.StudyPlanTask)
             {
                 var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId==item.Id)
@@ -620,8 +622,134 @@ namespace GSC.Respository.CTMS
                 TaskName = x.TaskName,
                 NoOfDeviatedDay = chartType == CtmsChartType.DeviatedDate ? (x.ActualEndDate - x.EndDate).Value.Days : 0,
             }).ToList();
+            return result;
+        }
+
+        public List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search)
+        {
+            var result = new List<StudyPlanTaskDto>();
+            if (search.countryId > 0)
+            {
+                var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == search.siteId
+                                                          && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                          && a.UserId == _jwtTokenAccesser.UserId
+                                                          && a.RoleId == _jwtTokenAccesser.RoleId
+                                                          && a.DeletedDate == null
+                                                          && a.RollbackReason == null)
+                                                          && x.ManageSite.City.State.CountryId == search.countryId
+                                                          && x.DeletedDate == null).ToList();
+
+                if (projectIds.Count == 0)
+                    projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
+                                                         _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                        && a.UserId == _jwtTokenAccesser.UserId
+                                                        && a.RoleId == _jwtTokenAccesser.RoleId
+                                                        && a.DeletedDate == null
+                                                        && a.RollbackReason == null)
+                                                        && x.ManageSite.City.State.CountryId == search.countryId
+                                                        && x.Id == search.siteId
+                                                        && x.DeletedDate == null).ToList();
+
+                var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+                foreach (var item in studyplans)
+                {
+                    if (studyplans != null)
+                    {
+                        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
+                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                        result = tasklist;
+                    }
+                }
+            }
+            else
+            {
+                var studyplan = _context.StudyPlan.Where(x => x.ProjectId == search.siteId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+                if (studyplan != null)
+                {
+                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
+                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                    result = tasklist;
+                }
+            }
+               
+            if(result !=null)
+            foreach (var item in result)
+            {
+                var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
+               .Select(x => new ResourceTypeGridDto
+               {
+                   Id = x.Id,
+                   TaskId = item.Id,
+                   ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+                   ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+                   Role = x.ResourceType.Role.RoleName,
+                   User = x.ResourceType.User.UserName,
+                   Designation = x.ResourceType.Designation.NameOFDesignation,
+                   YersOfExperience = x.ResourceType.Designation.YersOfExperience,
+                   NameOfMaterial = x.ResourceType.NameOfMaterial,
+                   CreatedDate = x.CreatedDate,
+                   CreatedByUser = x.CreatedByUser.UserName
+               }).ToList();
+                item.TaskResource = resourcelist;
+            }
+
+            //Apply Filter
+            if (search.ResourceId.HasValue)
+                result = result.Where(s => s.TaskResource
+                .Any(x => x.ResourceType == (search.ResourceId == (int)ResourceTypeEnum.Manpower ? ResourceTypeEnum.Manpower.GetDescription() : ResourceTypeEnum.Material.GetDescription()))).ToList();
+
+            if (search.ResourceSubId.HasValue)
+                result = result.Where(s => s.TaskResource
+                .Any(x => x.ResourceSubType == (
+                search.ResourceSubId == (int)SubResourceType.Permanent ? SubResourceType.Permanent.GetDescription():
+                search.ResourceSubId == (int)SubResourceType.Contract ? SubResourceType.Contract.GetDescription():
+                search.ResourceSubId == (int)SubResourceType.Consumable ? SubResourceType.Consumable.GetDescription() : SubResourceType.NonConsumable.GetDescription()
+                ))).ToList();
+
+            if (search.RoleId.HasValue)
+                 result = result.Where(s => s.TaskResource.Any(x => x.Role == _context.SecurityRole.Where(s => s.Id == search.RoleId).Select(x => x.RoleName).FirstOrDefault())).ToList();
+
+            if (search.UserId.HasValue)
+                result = result.Where(s => s.TaskResource.Any(x => x.User == _context.Users.Where(s => s.Id == search.UserId).Select(x => x.UserName).FirstOrDefault())).ToList();
+            
+            if (search.DesignationId.HasValue)
+                result = result.Where(s => s.TaskResource.Any(x => x.Designation == _context.Designation.Where(s => s.Id == search.DesignationId).Select(x => x.NameOFDesignation).FirstOrDefault())).ToList();
+
+            if (search.ResourceNotAdded == true)
+                result = result.Where(s => s.TaskResource.Count == 0).ToList();
+            
+            if (search.ResourceAdded == true)
+                result = result.Where(s => s.TaskResource.Count != 0).ToList();
 
             return result;
+        }
+
+        public List<DropDownDto> GetRollDropDown(int studyplanId)
+        {
+          var studyPlanTaskDada = _context.StudyPlanTask.Where(x=>x.StudyPlanId == studyplanId && x.DeletedDate == null).ToList();
+          var data= _context.StudyPlanResource.Include(x=>x.StudyPlanTask).Include(d=>d.ResourceType).ThenInclude(r => r.Role).
+                Where(s => studyPlanTaskDada.Select(f => f.Id).Contains(s.StudyPlanTaskId) && s.ResourceType.RoleId !=null).
+                Select(x=> new DropDownDto { Id = x.ResourceType.Role.Id, Value = x.ResourceType.Role.RoleName , IsDeleted = x.ResourceType.Role.DeletedDate != null }).Distinct().ToList();
+
+            return data;
+        }
+        public List<DropDownDto> GetUserDropDown(int studyplanId)
+        {
+            var studyPlanTaskDada = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplanId && x.DeletedDate == null).ToList();
+            var data = _context.StudyPlanResource.Include(x => x.StudyPlanTask).Include(d => d.ResourceType).ThenInclude(r => r.User).
+                  Where(s => studyPlanTaskDada.Select(f => f.Id).Contains(s.StudyPlanTaskId) && s.ResourceType.UserId != null).
+                  Select(x => new DropDownDto { Id = x.ResourceType.User.Id, Value = x.ResourceType.User.UserName, IsDeleted = x.ResourceType.Role.DeletedDate != null }).Distinct().ToList();
+
+            return data;
+        }
+        public List<DropDownDto> GetDesignationStdDropDown(int studyplanId)
+        {
+            var studyPlanTaskDada = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplanId && x.DeletedDate == null).ToList();
+            var data = _context.StudyPlanResource.Include(x => x.StudyPlanTask).Include(d => d.ResourceType).ThenInclude(r => r.Designation).
+                  Where(s => studyPlanTaskDada.Select(f => f.Id).Contains(s.StudyPlanTaskId) && s.ResourceType.DesignationId != null).
+                  Select(x => new DropDownDto { Id = x.ResourceType.Designation.Id, Value = x.ResourceType.Designation.NameOFDesignation, IsDeleted = x.ResourceType.Designation.DeletedDate != null }).Distinct().ToList();
+
+            return data;
         }
     }
 }
