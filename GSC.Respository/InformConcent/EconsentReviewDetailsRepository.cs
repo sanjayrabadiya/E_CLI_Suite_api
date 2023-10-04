@@ -31,6 +31,7 @@ using GSC.Shared.Extension;
 using GSC.Data.Dto.Configuration;
 using Syncfusion.Pdf.Parsing;
 using Microsoft.AspNetCore.Mvc;
+using GSC.Data.Entities.Attendance;
 
 namespace GSC.Respository.InformConcent
 {
@@ -86,19 +87,25 @@ namespace GSC.Respository.InformConcent
 
             if (noneregister == null) return new List<EConsentDocumentHeader>();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var result = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
+            var eConsentResult = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
                 && x.EconsentSetup.LanguageId == noneregister.LanguageId
-                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false))
-                .Select(x => new EConsentDocumentHeader
-                {
-                    DocumentId = x.EconsentSetup.Id,
-                    DocumentName = x.EconsentSetup.DocumentName,
-                    DocumentPath = x.EconsentSetup.DocumentPath,
-                    ReviewId = x.Id,
-                    IsReviewed = x.IsReviewedByPatient,
-                    TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds),
-                    IntroVideoPath = x.EconsentSetup.IntroVideoPath
-                }).OrderByDescending(x => x.DocumentId).ToList();
+                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).Include(x=>x.EconsentReviewDetailsSections).ToList();
+
+
+            var lastRecords = eConsentResult.Where(x => x.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < noneregister.CreatedDate.GetValueOrDefault().Ticks)
+                .OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
+            var afterRecords = eConsentResult.Where(x => x.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > noneregister.CreatedDate.GetValueOrDefault().Ticks).ToList();
+            afterRecords.Add(lastRecords);
+            var result = afterRecords.Select(x => new EConsentDocumentHeader
+            {
+                DocumentId = x.EconsentSetup.Id,
+                DocumentName = x.EconsentSetup.DocumentName,
+                DocumentPath = x.EconsentSetup.DocumentPath,
+                ReviewId = x.Id,
+                IsReviewed = x.IsReviewedByPatient,
+                TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds),
+                IntroVideoPath = x.EconsentSetup.IntroVideoPath
+            }).OrderByDescending(x => x.DocumentId).ToList();
 
             result.ForEach(t =>
             {
@@ -420,10 +427,14 @@ namespace GSC.Respository.InformConcent
                 return null;
 
             var result = All.Where(x => x.RandomizationId == randomization.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == randomization.LanguageId
-                         && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).
-                         ProjectTo<EconsentDocumentDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                         && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).ToList();
 
-            return result;
+
+            var lastRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < randomization.CreatedDate.GetValueOrDefault().Ticks).OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
+            var afterRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > randomization.CreatedDate.GetValueOrDefault().Ticks).ToList();
+            afterRecords.Add(lastRecords);
+            var resultDto = _mapper.Map<List<EconsentDocumentDetailsDto>>(afterRecords);
+            return resultDto.OrderByDescending(o => o.Id).ToList();
         }
 
         public int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto)
