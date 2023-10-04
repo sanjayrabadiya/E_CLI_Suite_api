@@ -148,7 +148,7 @@ namespace GSC.Respository.Project.GeneralConfig
             var dt = new DataTable();
             string ruleStr = "";
             string displayRule = "";
-
+            int id = 0;
             int i = 0;
             editCheck.ForEach(r =>
             {
@@ -162,9 +162,24 @@ namespace GSC.Respository.Project.GeneralConfig
                    Replace(Operator.NotNull.GetDescription(), "<>").
                    Replace(Operator.Null.GetDescription(), "=");
 
+                if (r.EmailConfigurationEditCheckId > 0 && id > 0)
+                {
+                    if (r.EmailConfigurationEditCheckId != id)
+                    {
+                        ruleStr = ruleStr + $" OR ";
+                    }
+                }
+
                 if (r.CollectionSource == CollectionSources.NumericScale)
                 {
-                    ruleStr = ruleStr + $"{r.startParens}{colName} {r.OperatorName} {r.CollectionValue}";
+                    if (!string.IsNullOrEmpty(r.CollectionValue))
+                    {
+                        ruleStr = ruleStr + $"{r.startParens}{colName} {r.OperatorName} {Convert.ToInt32(r.CollectionValue)}";
+                    }
+                    else
+                    {
+                        ruleStr = ruleStr + $"{r.startParens}{colName} {r.OperatorName} {r.CollectionValue}";
+                    }
                 }
                 else
                 {
@@ -177,8 +192,21 @@ namespace GSC.Respository.Project.GeneralConfig
                 ruleStr = ruleStr + $"{r.endParens} {r.LogicalOperator} ";
                 displayRule = displayRule + $"{r.endParens} {r.LogicalOperator} ";
 
+
+                id = r.EmailConfigurationEditCheckId;
                 var col = new DataColumn();
-                col.DefaultValue = r.InputValue ?? "";
+                if (r.CollectionSource == CollectionSources.NumericScale)
+                {
+                    if(!string.IsNullOrEmpty(r.InputValue))
+                    {
+                        col.DefaultValue = Convert.ToInt32(r.InputValue);
+                    }
+                }
+                else
+                {
+                    col.DefaultValue = r.InputValue ?? "";
+                }
+                
 
                 if (r.CollectionSource == CollectionSources.Date || r.CollectionSource == CollectionSources.DateTime || r.CollectionSource == CollectionSources.Time)
                 {
@@ -333,7 +361,7 @@ namespace GSC.Respository.Project.GeneralConfig
         public EmailConfigurationEditCheckResult ValidatWithScreeningTemplate(ScreeningTemplate screeningTemplate)
         {
             var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign).Where(s => s.Id == screeningTemplate.ProjectDesignTemplateId).FirstOrDefault();
-            var annotationlist = _context.ProjectDesignVariable.Where(s => s.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId && s.Annotation != null).ToList();
+            var annotationlist = _context.ProjectDesignVariable.Where(s => s.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId && s.Annotation != null && s.Annotation != null).ToList();
             var data = _emailConfigurationEditCheckDetailRepository.All.Include(s => s.EmailConfigurationEditCheck).Include(s => s.ProjectDesignVariable).Include(s => s.ProjectDesignTemplate).AsNoTracking().
                 Where(x => x.DeletedDate == null
                 && x.EmailConfigurationEditCheck.ProjectId == projectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId
@@ -365,7 +393,8 @@ namespace GSC.Respository.Project.GeneralConfig
                              ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                              : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
                     CheckBy = r.CheckBy,
-                    VariableAnnotation = r.VariableAnnotation
+                    VariableAnnotation = r.VariableAnnotation,
+                    EmailConfigurationEditCheckId = r.EmailConfigurationEditCheckId
 
                 }).ToList();
 
@@ -380,11 +409,15 @@ namespace GSC.Respository.Project.GeneralConfig
                         {
                             var child = _context.ProjectDesignVariableValue.Where(s => s.Id == Convert.ToInt32(data.Value)).FirstOrDefault();
                             if (child != null)
+                            {
                                 x.InputValue = child.ValueName.ToLower();
+                                x.CollectionSource = data.ProjectDesignVariable.CollectionSource;
+                            }
                         }
                         else
                         {
                             x.InputValue = data.Value.ToLower();
+                            x.CollectionSource = data.ProjectDesignVariable.CollectionSource;
                         }
                     }
                 }
@@ -402,13 +435,18 @@ namespace GSC.Respository.Project.GeneralConfig
                                 {
                                     var child = _context.ProjectDesignVariableValue.Where(s => s.Id == Convert.ToInt32(data.Value)).FirstOrDefault();
                                     if (child != null)
+                                    {
                                         x.InputValue = child.ValueName.ToLower();
+
+                                    }
                                 }
                                 else
                                 {
                                     x.InputValue = data.Value.ToLower();
+
                                 }
                             }
+                            x.CollectionSource = annotation.CollectionSource;
                         }
                     }
                 }

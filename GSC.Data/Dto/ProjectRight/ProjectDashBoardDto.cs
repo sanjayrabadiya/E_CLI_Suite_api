@@ -325,6 +325,12 @@ namespace GSC.Data.Dto.ProjectRight
         public string Weightfactor { get; set; }
 
         public string Dosefactor { get; set; }
+
+        public string SiteName { get; set; }
+
+        public int PatientCount { get; set; }
+
+        public int ProjectId { get; set; }
     }
     public class ImpShipmentGridDashboard
     {

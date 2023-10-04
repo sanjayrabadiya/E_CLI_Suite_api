@@ -416,7 +416,12 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetFactorDataReportDashbaord(projectId, countryId, siteId));
         }
-
+        [HttpGet]
+        [Route("GetFactorDataReportDashbaordCount/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetFactorDataReportDashbaordCount(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetFactorDataReportDashbaordCount(projectId, countryId, siteId));
+        }
         [HttpGet]
         [Route("GetIMPShipmentDetailsData/{projectId}/{countryId}/{siteId}")]
         public IActionResult GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
