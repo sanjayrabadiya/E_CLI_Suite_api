@@ -89,8 +89,10 @@ namespace GSC.Respository.InformConcent
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var eConsentResult = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
                 && x.EconsentSetup.LanguageId == noneregister.LanguageId
-                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).Include(x=>x.EconsentReviewDetailsSections).ToList();
+                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).Include(x => x.EconsentReviewDetailsSections).ToList();
 
+            if (eConsentResult.Count <= 0)
+                return null;
 
             var lastRecords = eConsentResult.Where(x => x.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < noneregister.CreatedDate.GetValueOrDefault().Ticks)
                 .OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
@@ -428,7 +430,8 @@ namespace GSC.Respository.InformConcent
 
             var result = All.Where(x => x.RandomizationId == randomization.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == randomization.LanguageId
                          && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).ToList();
-
+            if (result.Count <= 0)
+                return null;
 
             var lastRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < randomization.CreatedDate.GetValueOrDefault().Ticks).OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
             var afterRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > randomization.CreatedDate.GetValueOrDefault().Ticks).ToList();
