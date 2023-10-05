@@ -511,5 +511,6 @@ namespace GSC.Domain.Context
         public DbSet<Designation> Designation { get; set; }
         public DbSet<TaskResource> TaskResource { get; set; }
         public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
+        public DbSet<Currency> Currency { get; set; }
     }
 }

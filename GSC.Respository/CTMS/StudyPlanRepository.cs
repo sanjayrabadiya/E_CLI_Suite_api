@@ -44,7 +44,9 @@ namespace GSC.Respository.CTMS
             var projectList = _projectRightRepository.GetParentProjectRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && projectList.Any(c => c == x.ProjectId)).OrderByDescending(x => x.Id).
+            var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            var ctmsProjectList = _context.Project.Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c=>c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
                    ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
         }
 

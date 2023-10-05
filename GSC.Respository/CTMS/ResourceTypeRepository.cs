@@ -78,6 +78,11 @@ namespace GSC.Respository.CTMS
                             .Select(c => new DropDownDto { Id = c.Id, Value =  c.Role.RoleName +" - "+ c.User.UserName, IsDeleted = c.DeletedDate != null })
                             .OrderBy(o => o.Value).ToList();
         }
+        public List<DropDownDto> GetCurrencyDropDown()
+        {
+            return _context.Currency.Where(x => x.DeletedBy == null)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CurrencyName + " - " + c.CurrencySymbol, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+        }
 
     }
 }

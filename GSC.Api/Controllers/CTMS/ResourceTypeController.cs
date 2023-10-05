@@ -161,12 +161,17 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(_resourcetypeRepository.GetNameOfMaterialDropDown(resourceTypeID, resourceSubTypeID));
 
         }
-
         [HttpGet]
         [Route("GetRollUserDropDown/{designationID}")]
         public IActionResult getSelectDateDrop(int designationID)
         {
             return Ok(_resourcetypeRepository.GetRollUserDropDown(designationID));
+        }
+        [HttpGet]
+        [Route("GetCurrencyDropDown")]
+        public IActionResult GetCurrencyDropDown()
+        {
+            return Ok(_resourcetypeRepository.GetCurrencyDropDown());
         }
     }
 }

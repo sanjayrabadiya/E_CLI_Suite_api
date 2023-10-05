@@ -149,10 +149,16 @@ namespace GSC.Api.Controllers.Master
             var data = _context.LettersActivity.Include(c=> c.Activity).Include(m=> m.CtmsMonitoring).Where(x => x.Id == sendMailModel.Id).FirstOrDefault();
             if (record == null) return NotFound();
             var lettersActivityDto = _mapper.Map<LettersActivityDto>(record);
-            lettersActivityDto.Email= sendMailModel.Email;
 
             if (sendMailModel.Email != null && sendMailModel.Email != "")
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, data.Activity.ActivityName,data.CtmsMonitoring.ScheduleStartDate.ToString());
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+
+            foreach (var item in sendMailModel.OpstionLists)
+            {
+                lettersActivityDto.Email = item.Option;
+                if (item.Option != null && item.Option != "")
+                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+            }
 
             foreach (var item in sendMailModel.UserModel)
             {

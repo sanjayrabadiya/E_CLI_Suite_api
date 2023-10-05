@@ -37,8 +37,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "DomainClassId", DisplayName = "Domain Class", SourceColumn = "DomainClassName", TableName = "DomainClass", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "DomainClassName", DisplayName = "Domain Class Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DomainClassCode", DisplayName = "Domain Class Code" });
-            _dictionaries.Add(new Dictionary { FieldName = "TemplateName", DisplayName = "Form Name" });
-            _dictionaries.Add(new Dictionary { FieldName = "TemplateCode", DisplayName = "Form Code" });
+            _dictionaries.Add(new Dictionary { FieldName = "TemplateName", DisplayName = "Template Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "TemplateCode", DisplayName = "Template Code" });
             _dictionaries.Add(new Dictionary { FieldName = "IsRepeated", DisplayName = "Is Repeated" });
             _dictionaries.Add(new Dictionary { FieldName = "ActivityCode", DisplayName = "Activity Code" });
             _dictionaries.Add(new Dictionary { FieldName = "ActivityName", DisplayName = "Activity Name" });
@@ -603,6 +603,9 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "serviceType", DisplayName = "Service Type" });
             _dictionaries.Add(new Dictionary { FieldName = "regOfficeAddress", DisplayName = "Registered Office Address" });
             _dictionaries.Add(new Dictionary { FieldName = "branchOfficeDetails", DisplayName = "Branch Office Details" });
+
+            _dictionaries.Add(new Dictionary { FieldName = "CurrencyName", DisplayName = "Currency Name" });
+            _dictionaries.Add(new Dictionary { FieldName = "CurrencySymbol", DisplayName = "Currency Symbol" });
         }
 
 
