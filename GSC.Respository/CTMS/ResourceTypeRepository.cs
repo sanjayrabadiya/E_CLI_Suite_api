@@ -81,7 +81,7 @@ namespace GSC.Respository.CTMS
         public List<DropDownDto> GetCurrencyDropDown()
         {
             return _context.Currency.Where(x => x.DeletedBy == null)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.CurrencyName + " - " + c.CurrencySymbol, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CurrencyName + "- " + c.CurrencySymbol +"    - " + c.Country.CountryName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
     }

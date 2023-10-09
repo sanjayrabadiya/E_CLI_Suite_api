@@ -30,9 +30,9 @@ namespace GSC.Respository.Master
                    ProjectTo<CurrencyGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
         public string Duplicate(Currency objSave)
-        {
-            if (All.Any(x => x.Id != objSave.Id && x.CurrencyName == objSave.CurrencyName.Trim() && x.DeletedDate == null))
-                return "Duplicate Letter Name : " + objSave.CurrencyName;
+        {             
+            if (All.Any(x => x.Id != objSave.Id && x.CurrencyName == objSave.CurrencyName && x.CountryId== objSave.CountryId && x.DeletedDate == null))
+                return "Duplicate CurrencyName : " + objSave.CurrencyName;
             return "";
         }
         public List<DropDownDto> GetCountryDropDown()
