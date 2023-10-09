@@ -26,6 +26,6 @@ namespace GSC.Respository.InformConcent
         int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
         int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto);
         int ApproveWithDrawPatient(EconsentDocumetViwerDto econsentReviewDetailsDto, bool isWithdraw);
-        string ImportSectionDataHtml(int id, int sectionno);
+        AppEConsentSection ImportSectionDataHtml(int id, int sectionno);
     }
 }

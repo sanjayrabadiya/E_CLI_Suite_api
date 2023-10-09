@@ -51,4 +51,10 @@ namespace GSC.Data.Dto.InformConcent
         public string FileExtension { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
     }
+
+    public class AppEConsentSection
+    {
+        public bool isReference { get; set; }
+        public string SectionHtml { get; set; }
+    }
 }

@@ -220,7 +220,7 @@ namespace GSC.Respository.InformConcent
         }
 
 
-        public string ImportSectionDataHtml(int id, int sectionno)
+        public AppEConsentSection ImportSectionDataHtml(int id, int sectionno)
         {
             // this method is called when clicking particular sections from the left side grid in Inform consent page(patient portal)
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
@@ -284,7 +284,12 @@ namespace GSC.Respository.InformConcent
             document.Dispose();
             reader.Close();
             reader.Dispose();
-            return htmlStringText;
+
+            AppEConsentSection section = new AppEConsentSection();
+            section.SectionHtml = htmlStringText;
+            section.isReference = _context.EconsentSectionReference.Any(x => x.EconsentSetupId == id && x.DeletedDate == null);
+
+            return section;
         }
 
         public string ImportSectionData(int id, int sectionno)
