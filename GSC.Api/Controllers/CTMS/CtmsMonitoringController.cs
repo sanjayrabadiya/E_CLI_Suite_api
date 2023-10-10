@@ -45,6 +45,12 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             ctmsMonitoringDto.Id = 0;
+            var validatemsg = _ctmsMonitoringRepository.AddStudyPlanTask(ctmsMonitoringDto);
+            if (!string.IsNullOrEmpty(validatemsg))
+            {
+                ModelState.AddModelError("Message", validatemsg);
+                return BadRequest(ModelState);
+            }
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(ctmsMonitoringDto);
             _ctmsMonitoringRepository.Add(ctmsMonitoring);
             if (_uow.Save() <= 0) throw new Exception("Creating Monitoring failed on save.");
@@ -59,6 +65,12 @@ namespace GSC.Api.Controllers.CTMS
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
+            var validatemsg = _ctmsMonitoringRepository.UpdateStudyPlanTask(ctmsMonitoringDto);
+            if (!string.IsNullOrEmpty(validatemsg))
+            {
+                ModelState.AddModelError("Message", validatemsg);
+                return BadRequest(ModelState);
+            }
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(ctmsMonitoringDto);
 
             _ctmsMonitoringRepository.Update(ctmsMonitoring);

@@ -13,5 +13,7 @@ namespace GSC.Respository.CTMS
         string StudyLevelFormAlreadyUse(int StudyLevelFormId);
 
         CtmsMonitoringGridDto GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId);
+        string AddStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
+        string UpdateStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
     }
 }

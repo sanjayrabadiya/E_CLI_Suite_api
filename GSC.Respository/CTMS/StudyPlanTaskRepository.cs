@@ -510,6 +510,7 @@ namespace GSC.Respository.CTMS
             var result = new StudyPlanTaskGridDto();
 
             var studyplan = _context.StudyPlan.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+            result.StudyPlanId= studyplan.Id;
 
             if (studyplan != null)
             {
