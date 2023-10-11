@@ -60,7 +60,7 @@ namespace GSC.Respository.CTMS
 
         public List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID)
         { 
-                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID)
+                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID && x.DesignationId != null)
                                 .Select(c => new DropDownDto { Id = c.Designation.Id , Value = c.Designation.NameOFDesignation + " - " + c.Designation.YersOfExperience + " years of Experience" , IsDeleted = c.DeletedDate != null })
                                 .Distinct()
                                 .OrderBy(o => o.Value).ToList();
@@ -74,7 +74,7 @@ namespace GSC.Respository.CTMS
         }
         public List<DropDownDto> GetRollUserDropDown(int designationID)
         {
-            return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID)
+            return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID && x.RoleId !=null)
                             .Select(c => new DropDownDto { Id = c.Id, Value =  c.Role.RoleName +" - "+ c.User.UserName, IsDeleted = c.DeletedDate != null })
                             .OrderBy(o => o.Value).ToList();
         }

@@ -606,6 +606,28 @@ namespace GSC.Audit
 
             _dictionaries.Add(new Dictionary { FieldName = "CurrencyName", DisplayName = "Currency Name" });
             _dictionaries.Add(new Dictionary { FieldName = "CurrencySymbol", DisplayName = "Currency Symbol" });
+            _dictionaries.Add(new Dictionary { FieldName = "Sunday", DisplayName = "sunday" });
+            _dictionaries.Add(new Dictionary { FieldName = "SunStartTime", DisplayName = "Sunday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "SunEndTime", DisplayName = "Sunday End Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "Monday", DisplayName = "monday" });
+            _dictionaries.Add(new Dictionary { FieldName = "MonStartTime", DisplayName = "Monday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "MonEndTime", DisplayName = "Monday End Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "Tuesday", DisplayName = "Tuesday" });
+            _dictionaries.Add(new Dictionary { FieldName = "TueStartTime", DisplayName = "Tuesday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "TueEndTime", DisplayName = "Tuesday End Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "Wednesday", DisplayName = "Wednesday" });
+            _dictionaries.Add(new Dictionary { FieldName = "WedStartTime", DisplayName = "Wednesday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "WedEndTime", DisplayName = "Wednesday End Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "Thursday", DisplayName = "Thursday" });
+            _dictionaries.Add(new Dictionary { FieldName = "ThuStartTime", DisplayName = "Thursday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "ThuEndTime", DisplayName = "ThuEndTime End Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "Friday", DisplayName = "Friday" });
+            _dictionaries.Add(new Dictionary { FieldName = "FriStartTime", DisplayName = "Friday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "FriEndTime", DisplayName = "Friday End Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "Saturday", DisplayName = "Saturday" });
+            _dictionaries.Add(new Dictionary { FieldName = "SatStartTime", DisplayName = "Saturday Start Time" });
+            _dictionaries.Add(new Dictionary { FieldName = "SatEndTime", DisplayName = "Saturday End Time" });
+
         }
 
 

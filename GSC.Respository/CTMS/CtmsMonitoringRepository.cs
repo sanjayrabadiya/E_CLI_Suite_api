@@ -228,10 +228,9 @@ namespace GSC.Respository.CTMS
             var lisatdata = new StudyPlanTaskDto();
             var taskname = _context.StudyLevelForm.Include(x => x.Activity).ThenInclude(s => s.CtmsActivity).Where(d => d.Id == ctmsMonitoringDto.StudyLevelFormId && d.DeletedBy == null).Select(t => t.Activity.CtmsActivity.ActivityName).FirstOrDefault();
             var studyPlan = _context.StudyPlan.Where(x => x.ProjectId == ctmsMonitoringDto.ProjectId && x.DeletedBy == null).FirstOrDefault();
-            var StudyPlanTask = _context.StudyPlanTask.Where(s => s.StudyPlanId == studyPlan.Id && s.TaskName == taskname && s.DeletedBy == null).FirstOrDefault();
-
             if (studyPlan != null)
             {
+                var StudyPlanTask = _context.StudyPlanTask.Where(s => s.StudyPlanId == studyPlan.Id && s.TaskName == taskname && s.DeletedBy == null).FirstOrDefault();
                 lisatdata.Id = StudyPlanTask.Id;
                 lisatdata.StudyPlanId = studyPlan.Id;
                 lisatdata.TaskName = taskname;
