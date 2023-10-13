@@ -20,9 +20,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Reference Include="Telerik.Reporting">
-			<HintPath>..\..\..\..\..\Software\Telerik.Reporting.dll</HintPath>
-		</Reference>
+	  <Reference Include="Telerik.Reporting">
+	    <HintPath>..\..\..\Telerik.Reporting.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 </Project>

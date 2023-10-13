@@ -8,7 +8,6 @@ namespace GSC.Report
 {
     public interface IGscReport
     {
-        FileStreamResult GetProjectDesign(int id);
-        FileStreamResult GetProjectDesignWithFliter(ReportSettingNew reportSettingNew, CompanyDataDto companyData, JobMonitoring jobMonitoring);
+       
     }
 }
