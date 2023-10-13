@@ -208,7 +208,7 @@ namespace GSC.Respository.Screening
                    StudyVersion = a.ProjectDesignVisit.StudyVersion,
                    IsScheduleTerminate = a.IsScheduleTerminate,
                    ScreeningEntryId = a.ScreeningEntryId
-               }).ToListAsync();
+               }).OrderBy(b => b.DesignOrder).ToListAsync();
 
             randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
 
