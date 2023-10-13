@@ -10,8 +10,10 @@ using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Etmf;
+using GSC.Data.Dto.IDVerificationSystem;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.LabReportManagement;
 using GSC.Data.Dto.LanguageSetup;
 using GSC.Data.Dto.Location;
 using GSC.Data.Dto.Master;
@@ -42,8 +44,10 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
@@ -194,7 +198,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.AutoNumber, x => x.MapFrom(a => a.EditCheck.AutoNumber))
                 .ForMember(x => x.CollectionSource, y => y.MapFrom(a => a.ProjectDesignVariable.CollectionSource))
                 .ForMember(x => x.DataType, x => x.MapFrom(a => a.ProjectDesignVariable.DataType))
-                .ForMember(x => x.ProjectDesignVisitId, x => x.MapFrom(a => a.ProjectDesignTemplate.ProjectDesignVisitId))
+                .ForMember(x => x.ProjectDesignVisitId, x => x.MapFrom(a => a.CheckBy == Helper.EditCheckRuleBy.ByVisit ? a.ProjectDesignVisitId : a.ProjectDesignTemplate.ProjectDesignVisitId))
                 .ForMember(x => x.EditCheckDetailId, x => x.MapFrom(a => a.Id))
                 .ForMember(x => x.EditCheckId, x => x.MapFrom(a => a.EditCheckId))
                 .ForMember(x => x.IsOnlyTarget, x => x.MapFrom(a => a.EditCheck.IsOnlyTarget))
@@ -326,7 +330,7 @@ namespace GSC.Api.Helpers
             CreateMap<AdverseEventSettings, AdverseEventSettingsDto>().ReverseMap();
             CreateMap<EtmfUserPermission, EtmfUserPermissionDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementDto>().ReverseMap();
-            CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
+            
 
             CreateMap<ProjectDesignVariableEncryptRole, ProjectDesignVariableEncryptRoleDto>().ReverseMap();
             CreateMap<ProjectDesingTemplateRestriction, ProjectDesingTemplateRestrictionDto>().ReverseMap();
@@ -354,6 +358,9 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanTask, TaskMaster>()
                 .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskId))
                .ReverseMap();
+            CreateMap<RefrenceTypes, TaskMaster>()
+              .ForMember(x => x.Id, y => y.MapFrom(a => a.TaskMasterId))
+             .ReverseMap();
             CreateMap<ScreeningNumberSettings, ScreeningNumberSettingsDto>()
                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
               .ReverseMap();
@@ -509,6 +516,26 @@ namespace GSC.Api.Helpers
             CreateMap<EmailConfigurationEditCheck, EmailConfigurationEditCheckDto>().ReverseMap();
             CreateMap<EmailConfigurationEditCheckDetail, EmailConfigurationEditCheckDetailDto>().ReverseMap();
             CreateMap<VariableLabelLanguage, VariableLabelLanguageDto>().ReverseMap();
+            CreateMap<WorkflowVisit, WorkflowVisitDto>().ReverseMap();
+            CreateMap<WorkflowTemplate, WorkflowTemplateDto>().ReverseMap();
+            CreateMap<ProjectDesignVisitRestriction, ProjectDesignVisitRestrictionDto>().ReverseMap();
+            CreateMap<VisitEmailConfiguration, VisitEmailConfigurationDto>().ReverseMap();
+            CreateMap<VisitEmailConfigurationRoles, VisitEmailConfigurationRolesDto>().ReverseMap();
+            CreateMap<LettersFormate, LettersFormateDto>().ReverseMap();
+            CreateMap<LettersActivity, LettersActivityDto>().ReverseMap();
+            CreateMap<LabReport, LabReportDto>().ReverseMap();
+            CreateMap<WorkingDay, WorkingDayDto>().ReverseMap();
+            CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
+            CreateMap<IDVerificationFile, IDVerificationFileDto>().ReverseMap();
+            CreateMap<IDVerification, IDVerificationUpdateDto>().ReverseMap();
+            CreateMap<SiteTypes, WorkingDay>()
+              .ForMember(x => x.Id, y => y.MapFrom(a => a.WorkingDayId))
+             .ReverseMap();
+            CreateMap<Designation, DesignationDto>().ReverseMap();
+            CreateMap<ResourceType, ResourceTypeDto>().ReverseMap();
+            CreateMap<TaskResource, TaskResourceDto>().ReverseMap();
+            CreateMap<StudyPlanResource, StudyPlanResourceDto>().ReverseMap();
+            CreateMap<Currency, CurrencyDto>().ReverseMap();
         }
     }
 }

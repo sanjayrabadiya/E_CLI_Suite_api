@@ -67,6 +67,8 @@ namespace GSC.Respository.Project.GeneralConfig
                 {
                     obj.Subject = emailConfigurationEditCheckRoleDto.Subject;
                     obj.EmailBody = emailConfigurationEditCheckRoleDto.EmailBody;
+                    obj.IsSMS = emailConfigurationEditCheckRoleDto.IsSMS;
+                    
                     if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")
                         obj.EditCheckRoleReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
                     if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
@@ -80,7 +82,7 @@ namespace GSC.Respository.Project.GeneralConfig
         public List<DropDownDto> GetProjectRightsRoleEmailTemplate(int projectId)
         {
 
-            var projectrights = _context.ProjectRight.Include(x => x.User).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
+            var projectrights = _context.ProjectRight.Include(x => x.User).Where(x => (x.ProjectId == projectId || x.project.ParentProjectId == projectId) && x.DeletedDate == null)
                               .Select(x => new DropDownDto { Id = x.RoleId, Value = x.role.RoleName }).Distinct().ToList();
             var randmomization = _context.Randomization.Include(s => s.Project).Where(s => s.Project.ParentProjectId == projectId).Select(s => s.UserId).ToList();
             if (randmomization.Count > 0)

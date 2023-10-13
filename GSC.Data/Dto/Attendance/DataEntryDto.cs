@@ -93,6 +93,9 @@ namespace GSC.Data.Dto.Attendance
 
         // changes for visit order in data capture and review column 04/06/2023
         public int? VisitSeqNo { get; set; }
+        public HideDisableType? HideDisableType { get; set; }
+        public string EditCheckMsg { get; set; }
+        public int ProjectDesignId { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto
@@ -124,7 +127,8 @@ namespace GSC.Data.Dto.Attendance
         public int? ParentId { get; set; }
         public int? ProjectDesignPeriodId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
-        public string ProjectDesignTemplateName { get; set; }
+        // public string ProjectDesignTemplateName { get; set; }
+        public string ScreeningTemplateName { get; set; }
         public string DesignOrder { get; set; }
         public decimal DesignOrderForOrderBy { get; set; }
         public int Progress { get; set; }
@@ -137,7 +141,7 @@ namespace GSC.Data.Dto.Attendance
         public string PreLabel { get; set; }
     }
 
-    public class BarcodeDataEntrySubject 
+    public class BarcodeDataEntrySubject
     {
         public int AttendanceId { get; set; }
         public int VolunteerId { get; set; }
@@ -153,4 +157,12 @@ namespace GSC.Data.Dto.Attendance
         public int ScreeningEntryId { get; set; }
     }
 
+    public class ScreeningVisitForSubject
+    {
+        public string VisitName { get; set; }
+        public string VisitStatus { get; set; }
+        public DateTime? ActualDate { get; set; }
+        public bool OffOnSite { get; set; }
+        public DateTime? ScheduleDate { get; set; }
+    }
 }

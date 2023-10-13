@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Helper;
 using System;
@@ -11,7 +12,7 @@ namespace GSC.Respository.CTMS
 {
     public interface IStudyPlanTaskRepository : IGenericRepository<StudyPlanTask>
     {
-        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId);
+        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, int countryId);
         int UpdateTaskOrder(StudyPlantaskParameterDto taskmasterDto);
         string ValidateTask(StudyPlanTask taskmasterDto);
         void UpdateParentDate(int? ParentId);
@@ -26,5 +27,9 @@ namespace GSC.Respository.CTMS
         StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId);
         StudyPlanTaskChartDto GetDocChart(int projectId);
         List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType);
+        List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search);
+        List<DropDownDto> GetRollDropDown(int designationID);
+        List<DropDownDto> GetUserDropDown(int designationID);
+        List<DropDownDto> GetDesignationStdDropDown(int designationID);
     }
 }

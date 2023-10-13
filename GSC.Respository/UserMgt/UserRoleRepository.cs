@@ -37,9 +37,10 @@ namespace GSC.Respository.UserMgt
 
         public IList<DropDownDto> GetUserNameByRoleId(int roleId)
         {
-            return All.Where(x => x.SecurityRole.Id == roleId)
+            var data= All.Include(x => x.User).Where(x => x.SecurityRole.Id == roleId && x.User.DeletedBy == null )
                 .Select(c => new DropDownDto { Id = c.User.Id, Value = c.User.FirstName + ' ' + c.User.LastName, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
+            return data;
         }
 
         private List<MenuDto> PreparedMenu(List<AppScreen> appScreens, List<AppScreen> childAppScreens)

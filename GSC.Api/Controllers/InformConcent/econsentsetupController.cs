@@ -25,20 +25,20 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IMapper _mapper;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IUploadSettingRepository _uploadSettingRepository; 
+        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRepository _projectRepository;
         public EconsentsetupController(
             IEconsentSetupRepository econsentSetupRepository,
             IUnitOfWork uow,
-            IMapper mapper, IUploadSettingRepository uploadSettingRepository,             
+            IMapper mapper, IUploadSettingRepository uploadSettingRepository,
             IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IProjectRepository projectRepository)
         {
             _econsentSetupRepository = econsentSetupRepository;
             _uow = uow;
             _mapper = mapper;
-            _uploadSettingRepository = uploadSettingRepository;            
+            _uploadSettingRepository = uploadSettingRepository;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRepository = projectRepository;
@@ -103,13 +103,13 @@ namespace GSC.Api.Controllers.InformConcent
             // add econsent document
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
-            
+
             var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
             econsent.DocumentStatusId = DocumentStatus.Pending;
             var validate = _econsentSetupRepository.Duplicate(econsent);
             if (!string.IsNullOrEmpty(validate))
             {
-                ModelState.AddModelError("Message", validate);             
+                ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
@@ -120,22 +120,26 @@ namespace GSC.Api.Controllers.InformConcent
                     ModelState.AddModelError("Message", validateuploadlimit);
                     return BadRequest(ModelState);
                 }
-                econsent.DocumentPath = DocumentService.SaveUploadDocument(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDto.ProjectId), FolderType.InformConcent, "EconsentSetup");               
+                econsent.DocumentPath = DocumentService.SaveUploadDocument(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDto.ProjectId), FolderType.InformConcent, "EconsentSetup");
+            }
+            if (econsentSetupDto.IntroVideo?.Base64?.Length > 0)
+            {
+                econsent.IntroVideoPath = DocumentService.SaveUploadDocument(econsentSetupDto.IntroVideo, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "EconsentSetup");
             }
             string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
             var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
             if (!string.IsNullOrEmpty(validatedocument))
             {
-                ModelState.AddModelError("Message",validatedocument);
+                ModelState.AddModelError("Message", validatedocument);
                 if (Directory.Exists(fullpath))
                 {
                     Directory.Delete(fullpath, true);
                 }
                 return BadRequest(ModelState);
             }
-            _econsentSetupRepository.Add(econsent);      
+            _econsentSetupRepository.Add(econsent);
             if (_uow.Save() <= 0) throw new Exception($"Creating Econsent File failed on save.");
-            return Ok(econsent.Id);            
+            return Ok(econsent.Id);
         }
 
 
@@ -148,12 +152,12 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest();
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
-            var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);            
+            var econsent = _mapper.Map<EconsentSetup>(econsentSetupDto);
             var document = _econsentSetupRepository.Find(econsentSetupDto.Id);
             var validate = _econsentSetupRepository.Duplicate(econsent);
             if (!string.IsNullOrEmpty(validate))
             {
-                ModelState.AddModelError("Message",validate);               
+                ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
             if (econsentSetupDto.FileModel?.Base64?.Length > 0)
@@ -165,12 +169,12 @@ namespace GSC.Api.Controllers.InformConcent
                     return BadRequest(ModelState);
                 }
                 DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.DocumentPath);
-                econsent.DocumentPath = DocumentService.SaveUploadDocument(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(),_jwtTokenAccesser.CompanyId.ToString(),_projectRepository.GetStudyCode(econsentSetupDto.ProjectId),FolderType.InformConcent, "EconsentSetup");
+                econsent.DocumentPath = DocumentService.SaveUploadDocument(econsentSetupDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDto.ProjectId), FolderType.InformConcent, "EconsentSetup");
                 string fullpath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsent.DocumentPath);
                 var validatedocument = _econsentSetupRepository.validateDocument(fullpath);
                 if (!string.IsNullOrEmpty(validatedocument))
                 {
-                    ModelState.AddModelError("Message",validatedocument);
+                    ModelState.AddModelError("Message", validatedocument);
                     if (Directory.Exists(fullpath))
                     {
                         Directory.Delete(fullpath, true);
@@ -182,11 +186,16 @@ namespace GSC.Api.Controllers.InformConcent
             {
                 econsent.DocumentPath = document.DocumentPath;
             }
+            if (econsentSetupDto.IntroVideo?.Base64?.Length > 0)
+            {
+                DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.IntroVideoPath);
+                econsent.IntroVideoPath = DocumentService.SaveUploadDocument(econsentSetupDto.IntroVideo, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(econsentSetupDto.ProjectId), FolderType.InformConcent, "EconsentSetup");
+            }
             econsent.DocumentStatusId = document.DocumentStatusId;
-            _econsentSetupRepository.Update(econsent);           
-            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent File failed on save.");            
+            _econsentSetupRepository.Update(econsent);
+            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent File failed on save.");
             _uow.Save();
-            return Ok(econsent.Id);            
+            return Ok(econsent.Id);
         }
 
         //not use check

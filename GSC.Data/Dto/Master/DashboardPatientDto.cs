@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GSC.Helper;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -17,6 +18,8 @@ namespace GSC.Data.Dto.Master
         public string siteAddress { get; set; }
         public string hospitalName { get; set; }
         public string patientdetail { get; set; }
+        public bool IsUpload { get; set; }
+        public DocumentVerifyStatus VerifyStatus { get; set; }
         //public string investigatorName { get; set; }
         //public string investigatorcontact { get; set; }
         //public string investigatorEmail { get; set; }

@@ -6,6 +6,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -42,6 +43,7 @@ namespace GSC.Respository.Master
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IMetricsRepository _metricsRepository;
 
 
         public DashboardRepository(IJwtTokenAccesser jwtTokenAccesser, IScreeningVisitRepository screeningVisitRepository,
@@ -57,7 +59,8 @@ namespace GSC.Respository.Master
             IProjectRepository projectRepository,
             IProjectRightRepository projectRightRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
-            IGSCContext context)
+            IGSCContext context,
+            IMetricsRepository metricsRepository)
         {
             _screeningVisitRepository = screeningVisitRepository;
             _randomizationRepository = randomizationRepository;
@@ -73,6 +76,7 @@ namespace GSC.Respository.Master
             _projectRightRepository = projectRightRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
+            _metricsRepository = metricsRepository;
         }
 
 
@@ -914,6 +918,58 @@ namespace GSC.Respository.Master
 
             return list;
         }
+        //Add made by Mitul Pre Requisite
+        public List<StudyPlanTaskDto> GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            if (countryId > 0)
+            {
+                var list = _context.StudyPlanTask
+               .Include(i => i.StudyPlan)
+               .ThenInclude(i => i.Project)
+               .Where(z => z.DeletedDate == null && projectIds.Contains(z.StudyPlan.ProjectId) && z.PreApprovalStatus == true)
+               .Select
+               (b => new StudyPlanTaskDto
+               {
+                   Id = b.Id,
+                   Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
+                   TaskName = b.TaskName,
+                   StartDate = b.StartDate,
+                   EndDate = b.EndDate,
+                   Duration = b.Duration,
+                   ActualStartDate = b.ActualStartDate,
+                   ActualEndDate = b.ActualEndDate,
+                   ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
+                   CreatedDate = b.CreatedDate
+               }).ToList();
+
+                return list;
+            }
+            else
+            {
+                var list = _context.StudyPlanTask
+               .Include(i => i.StudyPlan)
+               .ThenInclude(i => i.Project)
+               .Where(z => z.DeletedDate == null && z.StudyPlan.ProjectId == projectId && z.PreApprovalStatus == true)
+               .Select
+               (b => new StudyPlanTaskDto
+               {
+                   Id = b.Id,
+                   Site = b.StudyPlan.Project.ProjectCode == null ? b.StudyPlan.Project.ManageSite.SiteName : b.StudyPlan.Project.ProjectCode,
+                   TaskName = b.TaskName,
+                   StartDate = b.StartDate,
+                   EndDate = b.EndDate,
+                   Duration = b.Duration,
+                   ActualStartDate = b.ActualStartDate,
+                   ActualEndDate = b.ActualEndDate,
+                   ApprovalStatus = (b.ApprovalStatus == true ? "Approve" : "NOT Approve").ToString(),
+                   CreatedDate = b.CreatedDate
+               }).ToList();
+
+                return list;
+            }
+        }
 
         //Add by mitul on 24-04-2024
         public List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId)
@@ -1313,7 +1369,7 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var details = _screeningTemplateRepository.All.
-                Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId)
+                Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true)
                 && (x.Status == ScreeningTemplateStatus.Pending || x.Status == ScreeningTemplateStatus.InProcess)
                 //  && x.ScreeningTemplateReview.OrderBy(r => r.Id).LastOrDefault().Status >= ScreeningTemplateStatus.Submitted
                 && x.ScheduleDate != null &&
@@ -1423,6 +1479,705 @@ namespace GSC.Respository.Master
             }
             return r;
         }
+        #region //Added Graphs Of Subject Recruitment in Site Monitoring By Sachin On 19/06/2023
+        public dynamic GetEnrolledGraph(int projectId, int countryId, int siteId)
+        {
+            int entotals = 0;
+            if (countryId != 0 && siteId != 0)
+            {
+                var EnStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var ensgraph = new List<DashboardEnrolledGraph>();
+                var endata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Enrolled) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
 
+                if (endata != null)
+                {
+                    var ensresults = _context.OverTimeMetrics.Where(x => EnStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == endata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
+
+                    entotals = (int)ensresults.Sum(c => c.Planned);
+
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = entotals * 100 / endata.Forecast;
+                    ensgraph.Add(r);
+
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    ensgraph.Add(s);
+                }
+                return ensgraph;
+            }
+            else
+            {
+                int EnSiteproject = projectId;
+                var engraph = new List<DashboardEnrolledGraph>();
+                var enresult = _context.PlanMetrics.Where(x => x.ProjectId == EnSiteproject
+                     && (x.MetricsType == MetricsType.Enrolled) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                if (enresult != null)
+                {
+                    var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id && x.If_Active != false
+                        && x.DeletedDate == null).ToList();
+
+                    entotals = (int)enresults.Sum(c => c.Planned);
+
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = entotals * 100 / enresult.Forecast;
+                    engraph.Add(r);
+
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    engraph.Add(s);
+                }
+                return engraph;
+            }
+        }
+        public dynamic GetScreenedGraph(int projectId, int countryId, int siteId)
+        {
+            int sctotals = 0;
+            if (countryId != 0 && siteId != 0)
+            {
+                var ScStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var scsgraph = new List<DashboardEnrolledGraph>();
+                var scdata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Screened) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                if (scdata != null)
+                {
+                    var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
+
+                    sctotals = (int)scsresults.Sum(c => c.Planned);
+
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = sctotals * 100 / scdata.Forecast;
+                    scsgraph.Add(r);
+
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    scsgraph.Add(s);
+                }
+
+                return scsgraph;
+            }
+            else
+            {
+                int ScSiteproject = projectId;
+                var scgraph = new List<DashboardScreenedGraph>();
+                var scresult = _context.PlanMetrics.Where(x => x.ProjectId == ScSiteproject
+                     && (x.MetricsType == MetricsType.Screened) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                if (scresult != null)
+                {
+                    var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id && x.If_Active != false
+                        && x.DeletedDate == null).ToList();
+
+                    sctotals = (int)scresults.Sum(c => c.Planned);
+
+                    var r = new DashboardScreenedGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = sctotals * 100 / scresult.Forecast;
+                    scgraph.Add(r);
+
+                    var s = new DashboardScreenedGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    scgraph.Add(s);
+                }
+
+                return scgraph;
+            }
+        }
+        public dynamic GetRandomizedGraph(int projectId, int countryId, int siteId)
+        {
+            int ratotals = 0;
+            if (countryId != 0 && siteId != 0)
+            {
+                var RaStudyproject = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+                var rasgraph = new List<DashboardEnrolledGraph>();
+                var radata = _context.PlanMetrics.Where(x => x.ProjectId == projectId && (x.MetricsType == MetricsType.Randomized) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                if (radata != null)
+                {
+                    var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
+
+                    ratotals = (int)rasresults.Sum(c => c.Planned);
+
+                    var r = new DashboardEnrolledGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = ratotals * 100 / radata.Forecast;
+                    rasgraph.Add(r);
+
+                    var s = new DashboardEnrolledGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    rasgraph.Add(s);
+                }
+
+                return rasgraph;
+            }
+            else
+            {
+                int RaSiteproject = projectId;
+                var ragraph = new List<DashboardRandomizedGraph>();
+                var raresult = _context.PlanMetrics.Where(x => x.ProjectId == RaSiteproject
+                     && (x.MetricsType == MetricsType.Randomized) && x.Forecast != null && x.DeletedDate == null).FirstOrDefault();
+
+                if (raresult != null)
+                {
+                    var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id && x.If_Active != false
+                        && x.DeletedDate == null).ToList();
+
+                    ratotals = (int)raresults.Sum(c => c.Planned);
+
+                    var r = new DashboardRandomizedGraph();
+                    r.DisplayName = "Planned";
+                    r.Total = ratotals * 100 / raresult.Forecast;
+                    ragraph.Add(r);
+
+                    var s = new DashboardRandomizedGraph();
+                    s.DisplayName = "Forecast";
+                    s.Total = 100 - r.Total;
+                    ragraph.Add(s);
+                }
+
+                return ragraph;
+            }
+        }
+
+        public List<PlanMetricsGridDto> GetDashboardNumberOfSubjectsGrid(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
+        {
+            var list = new List<PlanMetricsGridDto>();
+
+            if (countryId != 0 || siteId != 0)
+            {
+                var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+                var data = _context.PlanMetrics.Include(j => j.OverTimeMetrics).ThenInclude(i => i.Project).Where(x => projectIds.Contains(x.OverTimeMetrics.ProjectId) && x.DeletedDate == null)
+                    .Select(b => new PlanMetricsGridDto
+                    {
+                        SiteName = b.OverTimeMetrics.Project.ProjectCode,
+                        MetricsType = b.MetricsType.GetDescription(),
+                        Planned = b.OverTimeMetrics.Planned,
+                        Forecast = b.Forecast,
+                        Actual = b.OverTimeMetrics.Actual
+                    }).ToList();
+
+                return data;
+            }
+
+            else
+            {
+                var planMetrics = _context.PlanMetrics.Include(x => x.OverTimeMetrics).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
+                    .Select(b => new PlanMetricsGridDto
+                    {
+                        Id = b.Id,
+                        ProjectId = b.ProjectId,
+                        MetricsType = b.MetricsType.GetDescription(),
+                        Forecast = b.Forecast,
+                    }).ToList();
+
+                foreach (var item in planMetrics)
+                {
+                    var planMetricsr = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == item.Id && (x.If_Active != false) && x.DeletedDate == null).ToList();
+                    item.Planned = planMetricsr.Sum(c => c.Planned);
+                    item.Actual = planMetricsr.Sum(c => c.Actual);
+                }
+                return planMetrics;
+            }
+        }
+        #endregion
+        public dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            int UnblindPatientCount = 0;
+            var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                .Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+
+            var ImpReceiptCount = ImpReceipt.Count();
+
+            var shipmentdata = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
+                .Where(s => projectIds.Contains((int)s.SupplyManagementRequest.FromProjectId)
+                && !ImpReceipt.Select(a => a.SupplyManagementShipmentId).Contains(s.Id) && s.Status == SupplyMangementShipmentStatus.Approved).ToList();
+
+            var ImpShipmentCount = shipmentdata.Count();
+
+            var ImpRequestedCount = _context.SupplyManagementRequest.Where(s => projectIds.Contains((int)s.FromProjectId) && s.DeletedDate == null
+                                   && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var data = _context.SupplyManagementKITDetail
+                    .Include(x => x.SupplyManagementKIT)
+                    .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                    .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                    if (data.Count > 0)
+                    {
+
+                        data = data.Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                        if (data.Count > 0)
+                            UnblindPatientCount = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && data.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+
+                    }
+                }
+                else
+                {
+                    var kitpack = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).ThenInclude(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                             .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                    if (kitpack.Count > 0)
+                    {
+                        kitpack = kitpack.Where(s => projectIds.Contains((int)s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                        if (kitpack.Count > 0)
+                            UnblindPatientCount = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && kitpack.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+                    }
+                }
+
+            }
+
+
+
+            return new { ImpRequestedCount, ImpShipmentCount, ImpReceiptCount, UnblindPatientCount };
+        }
+
+        public List<TreatmentvsArms> GetTreatmentvsArmData(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var data = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Include(s => s.Randomization)
+                .Where(x => x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
+                 && x.Randomization != null && x.SupplyManagementUploadFile.ProjectId == projectId).ToList();
+            var r = new List<TreatmentvsArms>();
+            if (countryId > 0 || siteId > 0)
+            {
+                data = data.Where(s => projectIds.Contains(s.Randomization.ProjectId)).ToList();
+            }
+            var treatment = data.Select(s => s.TreatmentType).Distinct().ToList();
+            foreach (var item in treatment)
+            {
+                var result = new TreatmentvsArms();
+                result.Name = item;
+                result.Count = data.Where(e => e.TreatmentType == item).ToList().Count();
+                r.Add(result);
+            }
+            return r;
+        }
+
+        public List<FactoreDashboardModel> GetFactorDataReportDashbaord(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var data = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.ManageSite).Where(s => s.RandomizationNumber != null && projectIds.Contains(s.ProjectId)).Select(s => new FactoreDashboardModel
+            {
+                RandomizationNo = s.RandomizationNumber,
+                ScreeningNo = s.ScreeningNumber,
+                Genderfactor = s.Genderfactor.GetDescription(),
+                Diatoryfactor = s.Diatoryfactor.GetDescription(),
+                Eligibilityfactor = s.Eligibilityfactor.GetDescription(),
+                Jointfactor = s.Jointfactor.GetDescription(),
+                Agefactor = s.Agefactor,
+                BMIfactor = s.BMIfactor,
+                ProductCode = s.ProductCode,
+                Dosefactor = s.Dosefactor,
+                Weightfactor = s.Weightfactor,
+                SiteName = s.Project.ProjectCode + " " + s.Project.ManageSite.SiteName
+            }).ToList();
+
+
+
+            return data;
+        }
+        public List<FactoreDashboardModel> GetFactorDataReportDashbaordCount(int projectId, int countryId, int siteId)
+        {
+            List<FactoreDashboardModel> list = new List<FactoreDashboardModel>();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var fector = _context.SupplyManagementFectorDetail.Include(s => s.SupplyManagementFector).Where(s => s.SupplyManagementFector.ProjectId == projectId && s.DeletedDate == null).Select(s => s.Fector).Distinct().ToList();
+
+            var productCodes = _context.ProductReceipt.Where(c => c.ProjectId == projectId && c.DeletedDate == null
+             && c.Status == ProductVerificationStatus.Approved).Select(c => c.PharmacyStudyProductType.ProductType.ProductTypeCode).Distinct().ToList();
+
+            var data = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.ManageSite).Where(s => s.RandomizationNumber != null && projectIds.Contains(s.ProjectId)).Select(s => new FactoreDashboardModel
+            {
+                RandomizationNo = s.RandomizationNumber,
+                ScreeningNo = s.ScreeningNumber,
+                Genderfactor = s.Genderfactor.GetDescription(),
+                Diatoryfactor = s.Diatoryfactor.GetDescription(),
+                Eligibilityfactor = s.Eligibilityfactor.GetDescription(),
+                Jointfactor = s.Jointfactor.GetDescription(),
+                Agefactor = s.Agefactor,
+                BMIfactor = s.BMIfactor,
+                ProductCode = s.ProductCode,
+                Dosefactor = s.Dosefactor,
+                Weightfactor = s.Weightfactor,
+                SiteName = s.Project.ProjectCode + " " + s.Project.ManageSite.SiteName,
+                ProjectId = s.ProjectId
+            }).ToList();
+
+            if (fector != null && fector.Count > 0 && data != null && data.Count > 0)
+            {
+                foreach (var item in fector)
+                {
+                    if (productCodes != null && productCodes.Count > 0)
+                    {
+                        foreach (var product in productCodes)
+                        {
+                            if (item == Fector.Gender)
+                            {
+                                var data1 = data.Where(s => s.Genderfactor == "Male" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Genderfactor = "Male",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+                                if (data1 != null && data1.Count > 0)
+                                    list.AddRange(data1);
+
+                                var data2 = data.Where(s => s.Genderfactor == "Female" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Genderfactor = "Female",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+
+                                if (data2 != null && data2.Count > 0)
+                                    list.AddRange(data1);
+                            }
+
+                            if (item == Fector.Joint)
+                            {
+                                var data1 = data.Where(s => s.Jointfactor == "Knee" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Jointfactor = "Knee",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+                                if (data1 != null && data1.Count > 0)
+                                    list.AddRange(data1);
+
+                                var data2 = data.Where(s => s.Jointfactor == "Low Back" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Jointfactor = "Low Back",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+
+                                if (data2 != null && data2.Count > 0)
+                                    list.AddRange(data1);
+                            }
+
+                            if (item == Fector.Diatory)
+                            {
+                                var data1 = data.Where(s => s.Diatoryfactor == "Veg" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Diatoryfactor = "Veg",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+                                if (data1 != null && data1.Count > 0)
+                                    list.AddRange(data1);
+
+                                var data2 = data.Where(s => s.Diatoryfactor == "Non-Veg" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Diatoryfactor = "Non-Veg",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+
+                                if (data2 != null && data2.Count > 0)
+                                    list.AddRange(data1);
+                            }
+
+                            if (item == Fector.Eligibility)
+                            {
+                                var data1 = data.Where(s => s.Eligibilityfactor == "Yes" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Eligibilityfactor = "Yes",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+                                if (data1 != null && data1.Count > 0)
+                                    list.AddRange(data1);
+
+                                var data2 = data.Where(s => s.Eligibilityfactor == "No" && s.ProductCode == product).GroupBy(s => s.ProjectId).
+                                    Select(s => new FactoreDashboardModel
+                                    {
+                                        PatientCount = s.ToList().Count(),
+                                        Eligibilityfactor = "No",
+                                        ProductCode = s.FirstOrDefault().ProductCode,
+                                        ProjectId = s.Key
+                                    }).ToList();
+
+                                if (data2 != null && data2.Count > 0)
+                                    list.AddRange(data1);
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        if (item == Fector.Gender)
+                        {
+                            var data1 = data.Where(s => s.Genderfactor == "Male").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Genderfactor = "Male",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+                            if (data1 != null && data1.Count > 0)
+                                list.AddRange(data1);
+
+                            var data2 = data.Where(s => s.Genderfactor == "Female").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Genderfactor = "Female",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+
+                            if (data2 != null && data2.Count > 0)
+                                list.AddRange(data1);
+                        }
+
+                        if (item == Fector.Joint)
+                        {
+                            var data1 = data.Where(s => s.Jointfactor == "Knee").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Jointfactor = "Knee",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+                            if (data1 != null && data1.Count > 0)
+                                list.AddRange(data1);
+
+                            var data2 = data.Where(s => s.Jointfactor == "Low Back").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Jointfactor = "Low Back",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+
+                            if (data2 != null && data2.Count > 0)
+                                list.AddRange(data1);
+                        }
+
+                        if (item == Fector.Diatory)
+                        {
+                            var data1 = data.Where(s => s.Diatoryfactor == "Veg").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Diatoryfactor = "Veg",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+                            if (data1 != null && data1.Count > 0)
+                                list.AddRange(data1);
+
+                            var data2 = data.Where(s => s.Diatoryfactor == "Non-Veg").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Diatoryfactor = "Non-Veg",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+
+                            if (data2 != null && data2.Count > 0)
+                                list.AddRange(data1);
+                        }
+
+                        if (item == Fector.Eligibility)
+                        {
+                            var data1 = data.Where(s => s.Eligibilityfactor == "Yes").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Eligibilityfactor = "Yes",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+                            if (data1 != null && data1.Count > 0)
+                                list.AddRange(data1);
+
+                            var data2 = data.Where(s => s.Eligibilityfactor == "No").GroupBy(s => s.ProjectId).
+                                Select(s => new FactoreDashboardModel
+                                {
+                                    PatientCount = s.ToList().Count(),
+                                    Eligibilityfactor = "No",
+                                    ProductCode = s.FirstOrDefault().ProductCode,
+                                    ProjectId = s.Key
+                                }).ToList();
+
+                            if (data2 != null && data2.Count > 0)
+                                list.AddRange(data1);
+                        }
+                    }
+                }
+            }
+            if (list != null && list.Count > 0)
+            {
+                list.ForEach(x =>
+                {
+                    if (x.ProjectId > 0)
+                    {
+                        var project = _context.Project.Include(s => s.ManageSite).Where(s => s.Id == x.ProjectId).FirstOrDefault();
+                        if (project != null)
+                            x.SiteName = project.ProjectCode + "-" + project.ManageSite.SiteName;
+                    }
+                });
+            }
+
+            return list;
+        }
+        public List<ImpShipmentGridDashboard> GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
+        {
+            List<ImpShipmentGridDashboard> Data = new List<ImpShipmentGridDashboard>();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            foreach (var item in projectIds)
+            {
+                ImpShipmentGridDashboard obj = new ImpShipmentGridDashboard();
+
+                var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+
+                obj.ReceiptNo = ImpReceipt.Count();
+
+                var shipmentdata = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementRequest.FromProjectId == item
+                    && !ImpReceipt.Select(a => a.SupplyManagementShipmentId).Contains(s.Id) && s.Status == SupplyMangementShipmentStatus.Approved).ToList();
+
+                obj.ShipmentNo = shipmentdata.Count();
+
+                obj.RequestNo = _context.SupplyManagementRequest.Where(s => s.FromProjectId == item && s.DeletedDate == null
+                                       && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
+
+                var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+
+                if (setting != null)
+                {
+                    if (setting.KitCreationType == KitCreationType.KitWise)
+                    {
+                        var data = _context.SupplyManagementKITDetail
+                        .Include(x => x.SupplyManagementKIT)
+                        .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                        .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                        if (data.Count > 0)
+                        {
+
+                            data = data.Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+                            if (data.Count > 0)
+                                obj.UnblindNo = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && data.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+
+                        }
+                    }
+                    else
+                    {
+                        var kitpack = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).ThenInclude(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                                 .Where(s => s.RandomizationId != null && s.DeletedDate == null).ToList();
+                        if (kitpack.Count > 0)
+                        {
+                            kitpack = kitpack.Where(s => s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+                            if (kitpack.Count > 0)
+                                obj.UnblindNo = _context.SupplyManagementUnblindTreatment.Where(a => a.DeletedDate == null && kitpack.Select(s => s.RandomizationId).Contains(a.RandomizationId)).Count();
+                        }
+                    }
+
+                }
+                var project = _context.Project.Where(s => s.Id == item).FirstOrDefault();
+                if (project != null)
+                {
+
+                    var managesite = _context.ManageSite.Include(s => s.City).ThenInclude(s => s.State).ThenInclude(s => s.Country).Where(x => x.Id == project.ManageSiteId).FirstOrDefault();
+                    if (managesite != null)
+                    {
+                        obj.CountryName = managesite.City.State.Country.CountryName;
+                        obj.SiteName = project.ProjectCode + " - " + managesite.SiteName;
+                    }
+                }
+
+
+                Data.Add(obj);
+            }
+            return Data;
+        }
+
+        public List<TreatmentvsArms> GetVisitWiseAllocationData(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var r = new List<TreatmentvsArms>();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var data = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).
+                           Where(s => s.DeletedDate == null && s.RandomizationId != null && s.RandomizationId > 0 && s.SupplyManagementKIT.ProjectId == projectId).ToList();
+
+                    if (countryId > 0 || siteId > 0)
+                    {
+                        data = data.Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                    }
+                    var visitids = data.OrderBy(s => s.SupplyManagementKIT.ProjectDesignVisitId).Select(s => s.SupplyManagementKIT.ProjectDesignVisitId).Distinct().ToList();
+                    if (visitids.Count > 0)
+                    {
+                        foreach (var item in visitids)
+                        {
+                            var result = new TreatmentvsArms();
+                            result.Name = _context.ProjectDesignVisit.Where(s => s.Id == item).FirstOrDefault().DisplayName;
+                            result.Count = data.Where(e => e.SupplyManagementKIT.ProjectDesignVisitId == item).ToList().Count();
+                            r.Add(result);
+                        }
+                    }
+                }
+                else
+                {
+                    var data = _context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).ThenInclude(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).
+                           Where(s => s.DeletedDate == null && s.RandomizationId != null && s.RandomizationId > 0 && s.SupplyManagementKITSeries.ProjectId == projectId).ToList();
+
+                    if (countryId > 0 || siteId > 0)
+                    {
+                        data = data.Where(s => projectIds.Contains((int)s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
+                    }
+                    var visitids = data.OrderBy(s => s.ProjectDesignVisitId).Select(s => s.ProjectDesignVisitId).Distinct().ToList();
+                    if (visitids.Count > 0)
+                    {
+                        foreach (var item in visitids)
+                        {
+                            var result = new TreatmentvsArms();
+                            result.Name = _context.ProjectDesignVisit.Where(s => s.Id == item).FirstOrDefault().DisplayName;
+                            result.Count = data.Where(e => e.ProjectDesignVisitId == item).ToList().Count();
+                            r.Add(result);
+                        }
+                    }
+                }
+            }
+            return r;
+        }
     }
 }

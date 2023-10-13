@@ -489,7 +489,8 @@ namespace GSC.Respository.SupplyManagement
                                     ProductCode = visit.Value,
                                     ReasonOth = obj.ReasonOth,
                                     AuditReasonId = obj.AuditReasonId,
-                                    SupplyManagementKITDetailId = kit.Id
+                                    SupplyManagementKITDetailId = kit.Id,
+                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId
                                 };
                                 InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
                                 _context.Save();
@@ -534,7 +535,8 @@ namespace GSC.Respository.SupplyManagement
                         ProjectDesignVisitId = kitSequencedata.ProjectDesignVisitId,
                         KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo,
                         ProductCode = visit.Value,
-                        SupplyManagementKITSeriesdetailId = kitSequencedata.Id
+                        SupplyManagementKITSeriesdetailId = kitSequencedata.Id,
+                        SupplyManagementShipmentId = kitSequencedata.SupplyManagementKITSeries.SupplyManagementShipmentId
                     };
                     InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
                     obj.KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo;

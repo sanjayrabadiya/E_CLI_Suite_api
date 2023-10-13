@@ -8,20 +8,16 @@ using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Project.EditCheck;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Project.EditCheck
 {
     public class EditCheckDetailRepository : GenericRespository<EditCheckDetail>, IEditCheckDetailRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public EditCheckDetailRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public EditCheckDetailRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }
@@ -36,7 +32,7 @@ namespace GSC.Respository.Project.EditCheck
                 ByAnnotation = c.ByAnnotation,
                 ProjectDesignId = c.EditCheck.ProjectDesignId,
                 ProjectDesignTemplateId = c.ProjectDesignTemplateId,
-                ProjectDesignVisitId = c.ProjectDesignVariable != null
+                ProjectDesignVisitId = c.ProjectDesignVariableId == null ? c.ProjectDesignVisitId : c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.Id
                      : c.ProjectDesignTemplate.ProjectDesignVisit.Id,
                 ProjectDesignPeriodId = c.ProjectDesignVariable != null
@@ -57,12 +53,12 @@ namespace GSC.Respository.Project.EditCheck
                 Message = c.Message,
                 ExtraData = c.EditCheck.IsFormula ? null : _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
                 QueryFormula = c.QueryFormula,
-                PeriodName = c.ProjectDesignVariable != null
+                PeriodName = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.ProjectDesignPeriod.DisplayName : c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName
                      : "",
                 TemplateName = c.ProjectDesignTemplate.TemplateName,
                 VariableName = c.ProjectDesignVariable.VariableName,
-                VisitName = c.ProjectDesignVariable != null
+                VisitName = c.ProjectDesignVisitId > 0 ? c.ProjectDesignVisit.DisplayName : c.ProjectDesignVariable != null
                      ? c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
                      : "",
                 FetchingProjectDesignTemplateId = c.FetchingProjectDesignTemplateId,
@@ -91,6 +87,22 @@ namespace GSC.Respository.Project.EditCheck
                        && a.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault();
 
             return annotationVariable;
+
+        }
+
+        public List<EditCheckVisit> GetProjectDesignVisitIds(int projectDesignId)
+        {
+            var result = All.Where(x => x.EditCheck.ProjectDesignId == projectDesignId
+              && x.CheckBy == EditCheckRuleBy.ByVisit && x.IsTarget).
+                 Select(r => new EditCheckVisit
+                 {
+                     ProjectDesignVisitId = r.ProjectDesignVisitId,
+                     HideDisableType = r.Operator == Operator.Hide ? HideDisableType.Hide :
+                     (r.Operator == Operator.Enable ? HideDisableType.Disable : HideDisableType.None),
+                     EditCheckMsg = r.Message
+                 }).ToList();
+
+            return result;
 
         }
 

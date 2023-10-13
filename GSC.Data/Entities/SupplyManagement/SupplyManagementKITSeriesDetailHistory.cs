@@ -1,6 +1,7 @@
 ﻿
 using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
@@ -19,6 +20,10 @@ namespace GSC.Data.Entities.SupplyManagement
         public int RoleId { get; set; }
 
         public int? SupplyManagementShipmentId { get; set; }
+
+        public int? RandomizationId { get; set; }
+
+        public Randomization Randomization { get; set; }
 
         public SupplyManagementKITSeries SupplyManagementKITSeries { get; set; }
         

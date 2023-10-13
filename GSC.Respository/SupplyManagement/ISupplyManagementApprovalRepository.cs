@@ -20,5 +20,7 @@ namespace GSC.Respository.SupplyManagement
         List<DropDownDto> GetRoleUserShipmentApproval(int roleId,int projectId);
 
         void SendShipmentWorkflowApprovalEmail(SupplyManagementShipmentApproval supplyManagementShipmentApproval);
+
+        void DelectChildWorkflowEmailUser(SupplyManagementApprovalDto obj, int id);
     }
 }

@@ -350,6 +350,9 @@ namespace GSC.Helper
 
         [Description("By Variable Rule")]
         ByVariableRule = 5,
+
+        [Description("By Visit")]
+        ByVisit = 6
     }
 
     public enum Operator : short
@@ -671,7 +674,7 @@ namespace GSC.Helper
     {
         [Description("Study")] Study = 1,
         [Description("Sites")] Sites = 2,
-        [Description("Both")] Both = 3,
+        [Description("Country")] Country = 3,
 
     }
 
@@ -950,7 +953,9 @@ namespace GSC.Helper
         [Description("Randomization No")] RandomizationNo = 1,
         [Description("Kit No")] KitNo = 2,
         [Description("Product Code")] ProductCode = 3,
-        [Description("Product Name")] ProductName = 4
+        [Description("Product Name")] ProductName = 4,
+        [Description("Randomization Date")] RandomizationDate = 5
+
     }
 
     public enum InformConsentChart : short
@@ -964,11 +969,12 @@ namespace GSC.Helper
 
     public enum ProjectStatusEnum : short
     {
-        [Description("Ongoing")] Ongoing = 1,
-        [Description("Complete")] Complete = 2,
-        [Description("On Hold")] OnHold = 3,
-        [Description("Discountinue")] Discountinue = 4,
-        [Description("Terminate")] Terminate = 5,
+        [Description("Pre Start-Up")] PreStartUp = 1,
+        [Description("Not Started")] NotStarted = 2,
+        [Description("On Going")] Ongoing = 3,
+        [Description("On Hold")] OnHold = 4,
+        [Description("Completed")] Completed = 5,
+        [Description("Terminated")] Terminated = 6,
     }
     public enum Fector : short
     {
@@ -1090,8 +1096,8 @@ namespace GSC.Helper
 
     public enum SupplyManagementApprovalType : short
     {
-        [Description("Shipment Request Approval Email")] ShipmentApproval = 1,
-        [Description("Workflow Approval")] WorkflowApproval = 2
+        [Description("Shipment Request Approval")] ShipmentApproval = 1,
+        [Description("Workflow Approved")] WorkflowApproval = 2
     }
 
     public enum SupplyManagementApprovalStatus : short
@@ -1134,6 +1140,52 @@ namespace GSC.Helper
         [Description("Priority 1")] Priority1 = 1,
         [Description("Priority 2")] Priority2 = 2,
         [Description("Priority 3")] Priority3 = 3
-        
+
+    }
+
+    public enum HideDisableType : short
+    {
+        [Description("None")] None = 0,
+        [Description("Hide")] Hide = 1,
+        [Description("Disable")] Disable = 2
+
+    }
+
+    public enum KitHistoryReportType : int
+    {
+        [Description("Kit Wise")] KitWise = 1,
+        [Description("Randomization Wise")] RandomizationWise = 2
+    }
+
+
+    public enum DocumentVerifyStatus : int
+    {
+        [Description("Pending")] Pending = 1,
+        [Description("Approved")] Approved = 2,
+        [Description("Rejected")] Rejected = 3
+    }
+    public enum ResourceTypeEnum : short
+    {
+        [Description("Manpower")] Manpower = 1,
+        [Description("Material")] Material = 2,
+    }
+    public enum SubResourceType : short
+    {
+        [Description("Permanent")] Permanent = 1,
+        [Description("Contract")] Contract = 2,
+        [Description("Consumable")] Consumable = 3,
+        [Description("Non Consumable")] NonConsumable = 4
+    }
+
+    public enum FirebaseMsgType : short
+    {
+        [Description("EConsetChat")] EConsetChat = 1
+    }
+
+    public enum DeviceType : short
+    {
+        [Description("Web")] Web = 1,
+        [Description("Android")] Android = 2,
+        [Description("IOS")] IOS = 3
     }
 }

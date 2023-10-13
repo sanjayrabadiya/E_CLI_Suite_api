@@ -6,6 +6,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,18 +19,23 @@ namespace GSC.Respository.CTMS
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
+        private readonly IProjectRightRepository _projectRightRepository;
         public MetricsRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper) : base(context)
+            IMapper mapper, IProjectRightRepository projectRightRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
 
             _mapper = mapper;
             _context = context;
+            _projectRightRepository = projectRightRepository;
         }
         public List<PlanMetricsGridDto> GetMetricsList(bool isDeleted, int typesId)
         {
-            var planMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.MetricsType == (typesId == 1 ? MetricsType.Enrolled : typesId == 2 ? MetricsType.Screened : MetricsType.Randomized)).
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var planMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.MetricsType == (typesId == 1 ? MetricsType.Enrolled : typesId == 2 ? MetricsType.Screened : MetricsType.Randomized) && projectList.Any(c => c == x.ProjectId)).
             ProjectTo<PlanMetricsGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             foreach (var task in planMetrics)
             {

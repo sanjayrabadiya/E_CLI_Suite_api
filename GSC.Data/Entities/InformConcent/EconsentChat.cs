@@ -1,7 +1,9 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.UserMgt;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Text;
 
 namespace GSC.Data.Entities.InformConcent
@@ -21,5 +23,9 @@ namespace GSC.Data.Entities.InformConcent
         public DateTime? ReadDateTIme { get; set; }
         public bool IsDocument { get; set; }
         public string DocumentPath { get; set; }
+        [ForeignKey("SenderId")]
+        public User Sender { get; set; }
+        [ForeignKey("ReceiverId")]
+        public User Receiver { get; set; }
     }
 }

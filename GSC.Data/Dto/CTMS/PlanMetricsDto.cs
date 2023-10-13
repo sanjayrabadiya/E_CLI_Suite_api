@@ -30,9 +30,10 @@ namespace GSC.Data.Dto.CTMS
         public int ProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string MetricsType { get; set; }
+        public string SiteName { get; set; }
         public int Forecast { get; set; }
         public int Planned { get; set; }
-        public int Actual { get; set; }
+        public int? Actual { get; set; }
         public DateTime PlnStartDate { get; set; }
         public DateTime PlnEndDate { get; set; }
 

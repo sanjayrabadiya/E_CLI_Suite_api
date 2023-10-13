@@ -289,6 +289,7 @@ namespace GSC.Api.Controllers.Project.Design
                 visit.InActiveVersion = null;
                 visit.ProjectDesignPeriodId = data.projectDesignPeriodId;
                 visit.DesignOrder = ++designOrder;
+
                 visit.Templates.Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
                  {
                      template.Id = 0;
@@ -372,6 +373,9 @@ namespace GSC.Api.Controllers.Project.Design
 
                  });
 
+
+
+
                 visit.DisplayName = "Visit " + ++saved;
                 visit.IsSchedule = false;
                 _projectDesignVisitRepository.Add(visit);
@@ -391,11 +395,105 @@ namespace GSC.Api.Controllers.Project.Design
                     _projectDesignVisitStatusRepository.Add(e);
                 });
 
+
+                _uow.Save();
+
+                //Add Other visit templates by Tinku
+                if (data.visitIds != null)
+                    foreach (var id in data.visitIds)
+                    {
+                        var OtherVisit = _projectDesignVisitRepository.GetVisit(id);
+                        OtherVisit.Templates.ToList().Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
+                        {
+                            template.Id = 0;
+                            template.StudyVersion = checkVersion.VersionNumber;
+                            template.InActiveVersion = null;
+                            template.ProjectDesignVisit = null;
+                            template.ProjectDesignVisitId = visit.Id;
+                            template.Variables.ToList().ForEach(variable =>
+                            {
+                                visitStatus.Where(e => e.ProjectDesignVariableId == variable.Id).ToList().ForEach(g =>
+                                {
+                                    g.ProjectDesignVariable = variable;
+                                    g.ProjectDesignVariableId = 0;
+                                });
+                                variable.StudyVersion = checkVersion.VersionNumber;
+                                variable.InActiveVersion = null;
+                                variable.Id = 0;
+                                var Seq = 0;
+                                variable.Values.ToList().ForEach(value =>
+                                {
+                                    value.StudyVersion = checkVersion.VersionNumber;
+                                    value.InActiveVersion = null;
+                                    value.Id = 0;
+                                    value.SeqNo = ++Seq;
+                                    _projectDesignVariableValueRepository.Add(value);
+
+                                    //For variable value clone language
+                                    value.VariableValueLanguage.ToList().ForEach(x =>
+                                    {
+                                        x.Id = 0;
+                                        _variableValueLanguageRepository.Add(x);
+                                    });
+
+                                });
+
+                                _projectDesignVariableRepository.Add(variable);
+
+                                //For variable clone language
+                                variable.VariableLanguage.ToList().ForEach(r =>
+                                {
+                                    r.Id = 0;
+                                    _variableLanguageRepository.Add(r);
+                                });
+
+                                // For encrypt clone
+                                variable.Roles.ToList().ForEach(r =>
+                                {
+                                    r.Id = 0;
+                                    _projectDesignVariableEncryptRoleRepository.Add(r);
+                                });
+
+                                //For variable note clone language
+                                variable.VariableNoteLanguage.ToList().ForEach(r =>
+                                {
+                                    r.Id = 0;
+                                    _variableNoteLanguageRepository.Add(r);
+                                });
+
+                            });
+
+
+                            template.ProjectDesignTemplateNote.ToList().ForEach(templateNote =>
+                            {
+                                templateNote.Id = 0;
+                                _projectDesignTemplateNoteRepository.Add(templateNote);
+
+                                //For template note clone language
+                                templateNote.TemplateNoteLanguage.ToList().ForEach(x =>
+                                {
+                                    x.Id = 0;
+                                    _templateNoteLanguageRepository.Add(x);
+                                });
+                            });
+
+                            _projectDesignTemplateRepository.Add(template);
+
+                            //For template clone language
+                            template.TemplateLanguage.ToList().ForEach(x =>
+                            {
+                                x.Id = 0;
+                                _templateLanguageRepository.Add(x);
+                            });
+                        });
+                    }
+
+                //End Other visit Templates
+
+                _uow.Save();
+
                 if (i == 1) firstSaved = visit;
             }
-
-            _uow.Save();
-
             return Ok(firstSaved != null ? firstSaved.Id : data.Id);
         }
 
@@ -430,6 +528,13 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetVisitsforWorkflowVisit/{projectDesignId}")]
+        public IActionResult GetVisitsforWorkflowVisit(int projectDesignId)
+        {
+            return Ok(_projectDesignVisitRepository.GetVisitsforWorkflowVisit(projectDesignId));
         }
 
     }

@@ -145,7 +145,8 @@ namespace GSC.Respository.Screening
               {
                   t.Id,
                   t.IsSchedule,
-                  Templates = t.Templates.Where(r => r.DeletedDate == null).Select(b => b.Id).ToList()
+                  t.DisplayName,
+                  Templates = t.Templates.Where(r => r.DeletedDate == null).Select(b => new { b.Id, b.TemplateName }).ToList()
               }).ToList();
 
             var addVisitIds = addVisits.Select(t => t.Id).ToList();
@@ -178,16 +179,18 @@ namespace GSC.Respository.Screening
                         ScreeningEntryId = x.Id,
                         Status = ScreeningVisitStatus.NotStarted,
                         IsSchedule = t.IsSchedule ?? false,
-                        ScreeningTemplates = new List<ScreeningTemplate>()
+                        ScreeningTemplates = new List<ScreeningTemplate>(),
+                        ScreeningVisitName= t.DisplayName
                     };
 
                     t.Templates.ForEach(t =>
                     {
                         var screeningTemplate = new ScreeningTemplate
                         {
-                            ProjectDesignTemplateId = t,
+                            ProjectDesignTemplateId = t.Id,
                             ScreeningVisit = screeningVisit,
-                            Status = ScreeningTemplateStatus.Pending
+                            Status = ScreeningTemplateStatus.Pending,
+                            ScreeningTemplateName=t.TemplateName
                         };
                         _screeningTemplateRepository.Add(screeningTemplate);
                     });

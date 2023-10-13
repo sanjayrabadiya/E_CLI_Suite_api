@@ -86,6 +86,7 @@ namespace GSC.Respository.SupplyManagement
             int requestid = 0;
             int shipmentid = 0;
             int recieptid = 0;
+            int? projectId = 0;
             var data = All.Include(x => x.SupplyManagementShipment).Where(x => x.Id == id).FirstOrDefault();
             if (data == null)
             {
@@ -99,6 +100,13 @@ namespace GSC.Respository.SupplyManagement
                 requestid = data.SupplyManagementShipment.SupplyManagementRequestId;
                 shipmentid = data.SupplyManagementShipmentId;
                 recieptid = id;
+                projectId = _context.SupplyManagementRequest.Include(s => s.FromProject).Where(s => s.Id == requestid).Select(s => s.FromProject.ParentProjectId).FirstOrDefault();
+            }
+
+            var supplyManagementKitNumberSettings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
+            if (supplyManagementKitNumberSettings == null)
+            {
+                return new List<SupplyManagementReceiptHistoryGridDto>();
             }
             List<SupplyManagementReceiptHistoryGridDto> list = new List<SupplyManagementReceiptHistoryGridDto>();
             list.Add(_context.SupplyManagementRequest.Where(x => x.Id == requestid).Select(x => new SupplyManagementReceiptHistoryGridDto
@@ -152,8 +160,8 @@ namespace GSC.Respository.SupplyManagement
                                     _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault().ProjectCode : "",
                     StudyProductTypeUnitName = x.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType.GetDescription(),
                     ProductTypeName = x.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName,
-                    RequestQty = _context.SupplyManagementKITDetail.Where(z => z.SupplyManagementShipmentId == x.SupplyManagementShipmentId && (z.Status == KitStatus.WithoutIssue || z.Status == KitStatus.WithIssue)
-                                 && z.DeletedDate == null).Count(),
+                    RequestQty = supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise ? _context.SupplyManagementKITDetail.Where(z => z.SupplyManagementShipmentId == x.SupplyManagementShipmentId && z.DeletedDate == null).Count() :
+                                 _context.SupplyManagementKITSeries.Where(z => z.SupplyManagementShipmentId == x.SupplyManagementShipmentId && z.DeletedDate == null).Count(),
                     VisitName = x.SupplyManagementShipment.SupplyManagementRequest.ProjectDesignVisit.DisplayName
                 }).FirstOrDefault());
             }

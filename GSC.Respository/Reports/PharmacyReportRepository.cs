@@ -1,8 +1,11 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
+using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
@@ -23,12 +26,14 @@ namespace GSC.Respository.Reports
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
+        private readonly IMapper _mapper;
         public PharmacyReportRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
+            _mapper = mapper;
         }
 
         public FileStreamResult GetRandomizationKitReport(RandomizationIWRSReport randomizationIWRSReport)
@@ -1626,5 +1631,739 @@ namespace GSC.Respository.Reports
             return _context.ProductReceipt.Where(c => c.ProjectId == ProjectId && c.DeletedDate == null).Select(c => new DropDownDto { Id = c.PharmacyStudyProductType.Id, Value = c.PharmacyStudyProductType.ProductType.ProductTypeCode + "-" + c.PharmacyStudyProductType.ProductType.ProductTypeName })
                 .OrderBy(o => o.Value).Distinct().ToList();
         }
+
+        public List<DropDownDto> GetPatientforKitHistoryReport(int projectid)
+        {
+            return _context.Randomization.Include(s => s.Project).Where(a => a.DeletedDate == null && a.Project.ParentProjectId == projectid && a.RandomizationNumber != null)
+                .Select(x => new DropDownDto
+                {
+                    Id = (int)x.Id,
+                    Value = Convert.ToString(x.ScreeningNumber + " - " +
+                                           x.Initial +
+                                           (x.RandomizationNumber == null
+                                               ? ""
+                                               : " - " + x.RandomizationNumber))
+                }).Distinct().ToList();
+        }
+        public List<DropDownDto> GetKitlistforReport(int projectid)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(s => s.DeletedDate == null && s.ProjectId == projectid).FirstOrDefault();
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    var data = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT)
+                             .Where(s => s.SupplyManagementKIT.ProjectId == projectid && s.DeletedDate == null).Select(x => new DropDownDto
+                             {
+                                 Id = x.Id,
+                                 Value = x.KitNo
+                             }).Distinct().ToList();
+
+                    return data;
+                }
+                else
+                {
+                    var data = _context.SupplyManagementKITSeries
+                                 .Where(s => s.ProjectId == projectid && s.DeletedDate == null).Select(x => new DropDownDto
+                                 {
+                                     Id = x.Id,
+                                     Value = x.KitNo
+                                 }).Distinct().ToList();
+
+                    return data;
+                }
+            }
+
+
+            return new List<DropDownDto>();
+        }
+
+        public List<ProductAccountabilityCentralReport> GetKitHistoryReport(KitHistoryReportSearchModel randomizationIWRSReport)
+        {
+            List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
+                    {
+                        var data = _context.SupplyManagementKITDetailHistory.Include(s => s.SupplyManagementKITDetail).ThenInclude(s => s.SupplyManagementKIT).ThenInclude(s => s.ProjectDesignVisit)
+                            .Include(s => s.SupplyManagementKITDetail).ThenInclude(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType)
+                                .Where(s => s.SupplyManagementKITDetail.DeletedDate == null && s.SupplyManagementKITDetail.SupplyManagementKIT.DeletedDate == null
+                                      && s.SupplyManagementKITDetail.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).OrderByDescending(s => s.SupplyManagementKITDetail).ThenBy(s => s.Id).ToList();
+                        if (randomizationIWRSReport.KitId > 0)
+                        {
+                            data = data.Where(s => s.SupplyManagementKITDetailId == randomizationIWRSReport.KitId).ToList();
+                        }
+                        data.ForEach(x =>
+                        {
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            if (randomizationIWRSReport.ProjectId > 0)
+                            {
+                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                            }
+                            obj.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
+                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            obj.KitStatus = x.Status.GetDescription();
+                            obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
+                            obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
+                            obj.ProductTypeCode = x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (x.Status == KitStatus.Allocated)
+                            {
+                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                            }
+
+                            list.Add(obj);
+                        });
+                    }
+
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.RandomizationWise)
+                    {
+                        var data = _context.SupplyManagementVisitKITDetail
+                            .Include(s => s.SupplyManagementKITDetail)
+                            .ThenInclude(s => s.SupplyManagementKIT)
+                            .Where(x => x.DeletedDate == null
+                              && x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).
+                          ProjectTo<SupplyManagementVisitKITDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+                        if (randomizationIWRSReport.RandomizationId > 0)
+                        {
+                            data = data.Where(s => s.RandomizationId == randomizationIWRSReport.RandomizationId).ToList();
+                        }
+
+                        data.ForEach(x =>
+                        {
+                            var kit = _context.SupplyManagementKITDetail.Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            obj.ProjectCode = x.ProjectCode;
+                            obj.VisitName = x.VisitName;
+                            obj.KitNo = x.KitNo;
+                            obj.ScreeningNo = x.ScreeningNo;
+                            obj.RandomizationNo = x.RandomizationNo;
+                            obj.SiteCode = x.SiteCode;
+                            obj.ProductTypeCode = x.ProductCode;
+                            if (kit != null)
+                                obj.ImpPerKit = (int)kit.NoOfImp;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = x.CreatedByUser;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            list.Add(obj);
+                        });
+                    }
+                }
+                if (setting.KitCreationType == KitCreationType.SequenceWise)
+                {
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
+                    {
+                        var data = _context.SupplyManagementKITSeriesDetailHistory.Include(s => s.SupplyManagementKITSeries)
+                                .Where(s => s.SupplyManagementKITSeries.DeletedDate == null
+                                      && s.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId).OrderByDescending(s => s.SupplyManagementKITSeriesId).ThenBy(s => s.Id).ToList();
+                        if (randomizationIWRSReport.KitId > 0)
+                        {
+                            data = data.Where(s => s.SupplyManagementKITSeriesId == randomizationIWRSReport.KitId).ToList();
+                        }
+                        data.ForEach(x =>
+                        {
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            if (randomizationIWRSReport.ProjectId > 0)
+                            {
+                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                            }
+                            obj.KitNo = x.SupplyManagementKITSeries.KitNo;
+                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            obj.KitStatus = x.Status.GetDescription();
+
+                            var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
+                                        .Where(d => d.SupplyManagementKITSeriesId == x.SupplyManagementKITSeriesId && d.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
+                            if (visits.Count > 0)
+                                obj.VisitName = string.Join(",", visits.Distinct());
+
+
+                            obj.ProductTypeCode = x.SupplyManagementKITSeries.TreatmentType;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (x.Status == KitStatus.Allocated)
+                            {
+                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                            }
+
+                            list.Add(obj);
+                        });
+                    }
+
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.RandomizationWise)
+                    {
+                        var data = _context.SupplyManagementVisitKITSequenceDetail.Include(s => s.SupplyManagementKITSeriesDetail).ThenInclude(s => s.SupplyManagementKITSeries).Where(x =>
+                              x.DeletedDate == null
+                              && x.SupplyManagementKITSeriesDetail.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId).
+                          ProjectTo<SupplyManagementVisitKITDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+                        if (randomizationIWRSReport.RandomizationId > 0)
+                        {
+                            data = data.Where(s => s.RandomizationId == randomizationIWRSReport.RandomizationId).ToList();
+                        }
+                        data.ForEach(x =>
+                        {
+                            var kit = _context.SupplyManagementKITSeriesDetail.Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            obj.ProjectCode = x.ProjectCode;
+                            obj.VisitName = x.VisitName;
+                            obj.KitNo = x.KitNo;
+                            obj.ScreeningNo = x.ScreeningNo;
+                            obj.RandomizationNo = x.RandomizationNo;
+                            obj.SiteCode = x.SiteCode;
+                            obj.ProductTypeCode = x.ProductCode;
+                            if (kit != null)
+                                obj.ImpPerKit = (int)kit.NoOfImp;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = x.CreatedByUser;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            list.Add(obj);
+                        });
+                    }
+                }
+            }
+            return list;
+        }
+
+        public FileStreamResult GetKitHistoryReportExcelToExcel(KitHistoryReportSearchModel randomizationIWRSReport)
+        {
+            List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
+            if (setting != null)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
+                    {
+                        var data = _context.SupplyManagementKITDetailHistory.Include(s => s.SupplyManagementKITDetail).ThenInclude(s => s.SupplyManagementKIT).ThenInclude(s => s.ProjectDesignVisit)
+                            .Include(s => s.SupplyManagementKITDetail).ThenInclude(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType)
+                                .Where(s => s.SupplyManagementKITDetail.DeletedDate == null && s.SupplyManagementKITDetail.SupplyManagementKIT.DeletedDate == null
+                                      && s.SupplyManagementKITDetail.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).OrderByDescending(s => s.SupplyManagementKITDetail).ThenBy(s => s.Id).ToList();
+                        if (randomizationIWRSReport.KitId > 0)
+                        {
+                            data = data.Where(s => s.SupplyManagementKITDetailId == randomizationIWRSReport.KitId).ToList();
+                        }
+                        data.ForEach(x =>
+                        {
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            if (randomizationIWRSReport.ProjectId > 0)
+                            {
+                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                            }
+                            obj.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
+                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            obj.KitStatus = x.Status.GetDescription();
+                            obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
+                            obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
+                            obj.ProductTypeCode = x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (x.Status == KitStatus.Allocated)
+                            {
+                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                            }
+
+                            list.Add(obj);
+                        });
+                    }
+
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.RandomizationWise)
+                    {
+                        var data = _context.SupplyManagementVisitKITDetail
+                            .Include(s => s.SupplyManagementKITDetail)
+                            .ThenInclude(s => s.SupplyManagementKIT)
+                            .Where(x => x.DeletedDate == null
+                              && x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).
+                          ProjectTo<SupplyManagementVisitKITDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+                        if (randomizationIWRSReport.RandomizationId > 0)
+                        {
+                            data = data.Where(s => s.RandomizationId == randomizationIWRSReport.RandomizationId).ToList();
+                        }
+
+                        data.ForEach(x =>
+                        {
+                            var kit = _context.SupplyManagementKITDetail.Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            obj.ProjectCode = x.ProjectCode;
+                            obj.VisitName = x.VisitName;
+                            obj.KitNo = x.KitNo;
+                            obj.ScreeningNo = x.ScreeningNo;
+                            obj.RandomizationNo = x.RandomizationNo;
+                            obj.SiteCode = x.SiteCode;
+                            obj.ProductTypeCode = x.ProductCode;
+                            if (kit != null)
+                                obj.ImpPerKit = (int)kit.NoOfImp;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = x.CreatedByUser;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            list.Add(obj);
+                        });
+                    }
+                }
+                if (setting.KitCreationType == KitCreationType.SequenceWise)
+                {
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
+                    {
+                        var data = _context.SupplyManagementKITSeriesDetailHistory.Include(s => s.SupplyManagementKITSeries)
+                                .Where(s => s.SupplyManagementKITSeries.DeletedDate == null
+                                      && s.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId).OrderByDescending(s => s.SupplyManagementKITSeriesId).ThenBy(s => s.Id).ToList();
+                        if (randomizationIWRSReport.KitId > 0)
+                        {
+                            data = data.Where(s => s.SupplyManagementKITSeriesId == randomizationIWRSReport.KitId).ToList();
+                        }
+                        data.ForEach(x =>
+                        {
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            if (randomizationIWRSReport.ProjectId > 0)
+                            {
+                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                            }
+                            obj.KitNo = x.SupplyManagementKITSeries.KitNo;
+                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            obj.KitStatus = x.Status.GetDescription();
+
+                            var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
+                                        .Where(d => d.SupplyManagementKITSeriesId == x.SupplyManagementKITSeriesId && d.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
+                            if (visits.Count > 0)
+                                obj.VisitName = string.Join(",", visits.Distinct());
+
+
+                            obj.ProductTypeCode = x.SupplyManagementKITSeries.TreatmentType;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
+                            if (x.Status == KitStatus.Allocated)
+                            {
+                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
+                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                            }
+
+                            list.Add(obj);
+                        });
+                    }
+
+                    if (randomizationIWRSReport.Type == KitHistoryReportType.RandomizationWise)
+                    {
+                        var data = _context.SupplyManagementVisitKITSequenceDetail.Include(s => s.SupplyManagementKITSeriesDetail).ThenInclude(s => s.SupplyManagementKITSeries).Where(x =>
+                              x.DeletedDate == null
+                              && x.SupplyManagementKITSeriesDetail.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId).
+                          ProjectTo<SupplyManagementVisitKITDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+                        if (randomizationIWRSReport.RandomizationId > 0)
+                        {
+                            data = data.Where(s => s.RandomizationId == randomizationIWRSReport.RandomizationId).ToList();
+                        }
+                        data.ForEach(x =>
+                        {
+                            var kit = _context.SupplyManagementKITSeriesDetail.Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+                            ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
+                            obj.ProjectCode = x.ProjectCode;
+                            obj.VisitName = x.VisitName;
+                            obj.KitNo = x.KitNo;
+                            obj.ScreeningNo = x.ScreeningNo;
+                            obj.RandomizationNo = x.RandomizationNo;
+                            obj.SiteCode = x.SiteCode;
+                            obj.ProductTypeCode = x.ProductCode;
+                            if (kit != null)
+                                obj.ImpPerKit = (int)kit.NoOfImp;
+                            obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
+                            obj.ActionBy = x.CreatedByUser;
+                            if (x.SupplyManagementShipmentId > 0)
+                            {
+                                var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
+                                if (shipment != null)
+                                {
+                                    if (shipment.SupplyManagementRequest.IsSiteRequest)
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+
+                                        if (shipment.SupplyManagementRequest.ToProjectId > 0)
+                                        {
+                                            var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                                            if (project != null)
+                                            {
+                                                obj.RequestedTo = project.ProjectCode;
+                                            }
+                                        }
+
+                                    }
+                                    else
+                                    {
+                                        obj.RequestedFrom = shipment.SupplyManagementRequest.FromProject.ProjectCode;
+                                        var project = _context.Project.Where(a => a.Id == shipment.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                        if (project != null)
+                                        {
+                                            var parentproject = _context.Project.Where(a => a.Id == project.ParentProjectId).FirstOrDefault();
+                                            if (parentproject != null)
+                                            {
+                                                obj.RequestedTo = parentproject.ProjectCode;
+
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            list.Add(obj);
+                        });
+                    }
+                }
+            }
+
+            #region Excel Report Kit History
+
+            if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    IXLWorksheet worksheet = workbook.Worksheets.Add("Sheet1");
+                    worksheet.Cell(1, 1).Value = "Study";
+                    worksheet.Cell(1, 2).Value = "Requested from";
+                    worksheet.Cell(1, 3).Value = "Requested to";
+                    worksheet.Cell(1, 4).Value = "Treatment";
+                    worksheet.Cell(1, 5).Value = "Kit Number";
+                    worksheet.Cell(1, 6).Value = "IMP per kit";
+                    worksheet.Cell(1, 7).Value = "Status";
+                    worksheet.Cell(1, 8).Value = "Visit";
+                    worksheet.Cell(1, 9).Value = "Role";
+                    worksheet.Cell(1, 10).Value = "Randomization No";
+                    worksheet.Cell(1, 11).Value = "Screening No";
+                    worksheet.Cell(1, 12).Value = "Action By";
+                    worksheet.Cell(1, 13).Value = "Action On";
+
+                    var j = 2;
+
+                    list.ToList().ForEach(d =>
+                    {
+                        worksheet.Row(j).Cell(1).SetValue(d.ProjectCode);
+                        worksheet.Row(j).Cell(2).SetValue(d.RequestedFrom);
+                        worksheet.Row(j).Cell(3).SetValue(d.RequestedTo);
+                        worksheet.Row(j).Cell(4).SetValue(d.ProductTypeCode);
+                        worksheet.Row(j).Cell(5).SetValue(d.KitNo);
+                        worksheet.Row(j).Cell(6).SetValue(d.ImpPerKit);
+                        worksheet.Row(j).Cell(7).SetValue(d.KitStatus);
+                        worksheet.Row(j).Cell(8).SetValue(d.VisitName);
+                        worksheet.Row(j).Cell(9).SetValue(d.RoleName);
+                        worksheet.Row(j).Cell(10).SetValue(d.RandomizationNo);
+                        worksheet.Row(j).Cell(11).SetValue(d.ScreeningNo);
+                        worksheet.Row(j).Cell(12).SetValue(d.ActionBy);
+                        worksheet.Row(j).Cell(13).SetValue(d.ActionDatestr);
+
+                        j++;
+                    });
+                    MemoryStream memoryStream = new MemoryStream();
+                    workbook.SaveAs(memoryStream);
+                    memoryStream.Position = 0;
+                    FileStreamResult fileStreamResult = new FileStreamResult(memoryStream, "application/vnd.ms-excel");
+                    fileStreamResult.FileDownloadName = "KitHistory.xls";
+                    return fileStreamResult;
+                }
+                #endregion
+            }
+
+            if (randomizationIWRSReport.Type == KitHistoryReportType.RandomizationWise)
+            {
+                using (var workbook = new XLWorkbook())
+                {
+                    IXLWorksheet worksheet = workbook.Worksheets.Add("Sheet1");
+                    worksheet.Cell(1, 1).Value = "Study";
+                    worksheet.Cell(1, 2).Value = "Site";
+                    worksheet.Cell(1, 3).Value = "Requested from";
+                    worksheet.Cell(1, 4).Value = "Requested to";
+                    worksheet.Cell(1, 5).Value = "Treatment";
+                    worksheet.Cell(1, 6).Value = "Kit Number";
+                    worksheet.Cell(1, 7).Value = "IMP per kit";
+                    worksheet.Cell(1, 8).Value = "Visit";
+                    worksheet.Cell(1, 9).Value = "Randomization No";
+                    worksheet.Cell(1, 10).Value = "Screening No";
+                    worksheet.Cell(1, 11).Value = "Action By";
+                    worksheet.Cell(1, 12).Value = "Action On";
+
+                    var j = 2;
+
+                    list.ToList().ForEach(d =>
+                    {
+                        worksheet.Row(j).Cell(1).SetValue(d.ProjectCode);
+                        worksheet.Row(j).Cell(2).SetValue(d.SiteCode);
+                        worksheet.Row(j).Cell(3).SetValue(d.RequestedFrom);
+                        worksheet.Row(j).Cell(4).SetValue(d.RequestedTo);
+                        worksheet.Row(j).Cell(5).SetValue(d.ProductTypeCode);
+                        worksheet.Row(j).Cell(6).SetValue(d.KitNo);
+                        worksheet.Row(j).Cell(7).SetValue(d.ImpPerKit);
+                        worksheet.Row(j).Cell(8).SetValue(d.VisitName);
+                        worksheet.Row(j).Cell(9).SetValue(d.RandomizationNo);
+                        worksheet.Row(j).Cell(10).SetValue(d.ScreeningNo);
+                        worksheet.Row(j).Cell(11).SetValue(d.ActionBy);
+                        worksheet.Row(j).Cell(12).SetValue(d.ActionDatestr);
+                        j++;
+                    });
+                    MemoryStream memoryStream = new MemoryStream();
+                    workbook.SaveAs(memoryStream);
+                    memoryStream.Position = 0;
+                    FileStreamResult fileStreamResult2 = new FileStreamResult(memoryStream, "application/vnd.ms-excel");
+                    fileStreamResult2.FileDownloadName = "KitHistory.xls";
+                    return fileStreamResult2;
+                }
+            }
+
+            FileStreamResult fileStreamResult1 = new FileStreamResult(null, "application/vnd.ms-excel");
+            fileStreamResult1.FileDownloadName = "KitHistory.xls";
+            return fileStreamResult1;
+        }
+
     }
 }

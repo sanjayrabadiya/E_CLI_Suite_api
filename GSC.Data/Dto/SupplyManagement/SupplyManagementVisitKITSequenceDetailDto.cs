@@ -33,6 +33,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int ProjectId { get; set; }
 
         public int? SupplyManagementKITSeriesdetailId { get; set; }
+
+        public int? SupplyManagementShipmentId { get; set; }
     }
     public class SupplyManagementVisitKITSequenceDetailGridDto : BaseAuditDto
     {

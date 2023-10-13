@@ -16,7 +16,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? EndDate { get; set; }
         public DateTime? EndDateDay { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
-
+       
     }
 
     public class StudyPlanTaskDto : BaseAuditDto
@@ -44,6 +44,13 @@ namespace GSC.Data.Dto.CTMS
         public RefrenceType RefrenceType { get; set; }
         public int CreatedBy { get; set; }
         public string Status { get; set; }
+        public bool? PreApprovalStatus { get; set; }
+        public string ApprovalStatus { get; set; }
+        public string FileName { get; set; }
+        public string DocumentPath { get; set; }
+        public string Site { get; set; }
+        public decimal? Percentage { get; set; }
+        public List<ResourceTypeGridDto> TaskResource { get; set; }
     }
 
     public class StudyPlanTaskChartDto
@@ -54,7 +61,7 @@ namespace GSC.Data.Dto.CTMS
         public int DeviatedDate { get; set; }
         public int NotStartedDate { get; set; }
         public int OnGoingDate { get; set; }
-       
+
     }
 
     public class StudyPlanTaskChartReportDto
@@ -65,6 +72,20 @@ namespace GSC.Data.Dto.CTMS
         public string TaskName { get; set; }
         public int Duration { get; set; }
         public int NoOfDeviatedDay { get; set; }
+        public decimal? Percentage { get; set; }
 
+    }
+    public class ResourceMgmtFilterDto
+    {
+        public int studyplanId { get; set; }
+        public int? siteId { get; set; }
+        public int? countryId { get; set; }
+        public int? ResourceId { get; set; }
+        public int? ResourceSubId { get; set; }
+        public int?  RoleId { get; set; }
+        public int? UserId { get; set; }
+        public int? DesignationId { get; set; }
+        public bool? ResourceNotAdded { get; set; }
+        public bool? ResourceAdded { get; set; }
     }
 }

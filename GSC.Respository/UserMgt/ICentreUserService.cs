@@ -37,5 +37,6 @@ namespace GSC.Respository.UserMgt
         Task<EConsentVideoDto> CallNotAnswered(string clientUrl, EConsentVideo obj);
         Task<EConsentVideoDto> CallEndBySenderBeforeConnecting(string clientUrl, EConsentVideo obj);
         Task<EConsentVideoDto> CallEndsuccessfullyafterconnecting(string clientUrl, EConsentVideo obj);
+        void UpdateFirebaseToken(string clientUrl, string token);
     }
 }

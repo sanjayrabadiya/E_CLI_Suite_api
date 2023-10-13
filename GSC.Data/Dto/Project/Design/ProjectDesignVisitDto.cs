@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? StudyVersion { get; set; }
         public string PreLabel { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
+        public bool OffSite { get; set; }
     }
 
 
@@ -34,6 +35,7 @@ namespace GSC.Data.Dto.Project.Design
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
         public bool IsNonCRF { get; set; }
+        public string DisplayName { get; set; }
         public List<InsertScreeningTemplate> Templates { get; set; }
     }
 
@@ -42,6 +44,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public double? StudyVersion { get; set; }
         public double? InActiveVersion { get; set; }
+        public string ScreeningTemplateName { get; set; }
     }
 
     public class ProjectDesignVisitClone
@@ -50,5 +53,14 @@ namespace GSC.Data.Dto.Project.Design
         public int projectDesignPeriodId { get; set; }
         public int noOfVisits { get; set; }
         public int[] noOfTemplate { get; set; }
+        public int[] visitIds { get; set; }
+    }
+
+    public class BasicProjectDesignVisit
+    {
+        public int ProjectDesignId { get; set; }
+        public int ProjectDesignVisitId { get; set; }
+        public bool IsNonCRF { get; set; }
+
     }
 }

@@ -31,6 +31,8 @@ namespace GSC.Respository.Master
         dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId);
 
         List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId);
+        List<StudyPlanTaskDto> GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId);
+
         List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId);
         List<CtmsMonitoringReportVariableValueQueryDto> getCTMSQueriesDashboard(int projectId, int countryId, int siteId);
 
@@ -45,5 +47,18 @@ namespace GSC.Respository.Master
         dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag);
         dynamic GetDashboardByCriticalGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardByDiscontinuationGraph(int projectId, int countryId, int siteId);
+        dynamic GetEnrolledGraph(int projectId, int countryId, int siteId);
+        dynamic GetScreenedGraph(int projectId, int countryId, int siteId);
+        dynamic GetRandomizedGraph(int projectId, int countryId, int siteId);
+        List<PlanMetricsGridDto> GetDashboardNumberOfSubjectsGrid(bool isDeleted, int metricsId, int projectId, int countryId, int siteId);
+        dynamic GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId);
+        List<TreatmentvsArms> GetTreatmentvsArmData(int projectId, int countryId, int siteId);
+        List<FactoreDashboardModel> GetFactorDataReportDashbaord(int projectId, int countryId, int siteId);
+        List<ImpShipmentGridDashboard> GetIMPShipmentDetailsData(int projectId, int countryId, int siteId);
+
+        List<TreatmentvsArms> GetVisitWiseAllocationData(int projectId, int countryId, int siteId);
+
+        List<FactoreDashboardModel> GetFactorDataReportDashbaordCount(int projectId, int countryId, int siteId);
+
     }
 }

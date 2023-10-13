@@ -57,6 +57,7 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignTemplateId { get; set; }
         public string TemplateName { get; set; }
         public string ProjectDesignVisitName { get; set; }
+        public string ScreeningVisitName { get; set; }
         public string DesignOrder { get; set; }
         public int? DomainId { get; set; }
         public string DomainName { get; set; }

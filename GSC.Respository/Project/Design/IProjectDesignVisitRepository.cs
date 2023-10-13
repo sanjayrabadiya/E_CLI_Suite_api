@@ -17,5 +17,6 @@ namespace GSC.Respository.Project.Design
         List<ProjectDesignVisitBasicDto> GetVisitAndTemplateByPeriordId(int projectDesignPeriodId);
         CheckVersionDto CheckStudyVersion(int projectDesignPeriodId);
         IList<ProjectDesignVisitDto> GetVisitList(int projectDesignPeriodId);
+        IList<DropDownDto> GetVisitsforWorkflowVisit(int projectDesignId);
     }
 }

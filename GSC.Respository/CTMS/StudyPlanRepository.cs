@@ -6,7 +6,9 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,10 +24,11 @@ namespace GSC.Respository.CTMS
         private readonly IHolidayMasterRepository _holidayMasterRepository;
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
+        private readonly IProjectRightRepository _projectRightRepository;
 
         public StudyPlanRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IStudyPlanTaskRepository studyPlanTaskRepository) : base(context)
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IStudyPlanTaskRepository studyPlanTaskRepository, IProjectRightRepository projectRightRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -33,13 +36,18 @@ namespace GSC.Respository.CTMS
             _holidayMasterRepository = holidayMasterRepository;
             _weekEndMasterRepository = weekEndMasterRepository;
             _studyPlanTaskRepository = studyPlanTaskRepository;
+            _projectRightRepository = projectRightRepository;
         }
 
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
         {
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null).OrderByDescending(x => x.Id).
-                   ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
 
+            var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            var ctmsProjectList = _context.Project.Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c=>c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
+                   ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
         }
 
         public string ImportTaskMasterData(StudyPlan studyplan)
@@ -51,23 +59,23 @@ namespace GSC.Respository.CTMS
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
 
-            var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.TaskTemplateId == studyplan.TaskTemplateId
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+            var tasklist = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.DeletedDate == null && x.TaskMaster.TaskTemplateId == studyplan.TaskTemplateId
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
-                    TaskId = t.Id,
-                    TaskName = t.TaskName,
-                    ParentId = t.ParentId,
-                    isMileStone = t.IsMileStone,
-                    TaskOrder = t.TaskOrder,
-                    Duration = t.Duration,
+                    TaskId = t.TaskMaster.Id,
+                    TaskName = t.TaskMaster.TaskName,
+                    ParentId = t.TaskMaster.ParentId,
+                    isMileStone = t.TaskMaster.IsMileStone,
+                    TaskOrder = t.TaskMaster.TaskOrder,
+                    Duration = t.TaskMaster.Duration,
                     StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
-                    DependentTaskId = t.DependentTaskId,
-                    ActivityType = t.ActivityType,
-                    OffSet = t.OffSet,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                    DependentTaskId = t.TaskMaster.DependentTaskId,
+                    ActivityType = t.TaskMaster.ActivityType,
+                    OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType
                 }).ToList();
 
@@ -93,6 +101,18 @@ namespace GSC.Respository.CTMS
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
 
+            //Add by mitul task was Resource Add form to TaskResource
+            foreach (var task in tasklist) {
+                var taskResource = _context.TaskResource.Include(s=>s.TaskMaster).Where(d=>d.TaskMaster.Id==task.TaskId)
+                    .Select(t => new StudyPlanResource
+                    {
+                        StudyPlanTaskId = task.Id,
+                        ResourceTypeId = t.ResourceTypeId
+                    }).ToList();
+                _context.StudyPlanResource.AddRange(taskResource);
+                _context.Save();
+            }
+
             return "";
         }
 
@@ -106,8 +126,11 @@ namespace GSC.Respository.CTMS
 
             studyPlanList.ForEach(i =>
             {
+                if(studyPlanTaskList.Count() > 0)
+                { 
                 i.StartDate = studyPlanTaskList.Min(x => x.StartDate);
                 i.EndDate = studyPlanTaskList.Max(x => x.EndDate);
+                }
             });
 
             _context.StudyPlan.UpdateRange(studyPlanList);
@@ -198,45 +221,66 @@ namespace GSC.Respository.CTMS
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
 
-            var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == id
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+            var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
-                    TaskId = t.Id,
-                    TaskName = t.TaskName,
-                    ParentId = t.ParentId,
-                    isMileStone = t.IsMileStone,
-                    TaskOrder = t.TaskOrder,
-                    Duration = t.Duration,
+                    TaskId = t.TaskMaster.Id,
+                    TaskName = t.TaskMaster.TaskName,
+                    ParentId = t.TaskMaster.ParentId,
+                    isMileStone = t.TaskMaster.IsMileStone,
+                    TaskOrder = t.TaskMaster.TaskOrder,
+                    Duration = t.TaskMaster.Duration,
                     StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
-                    DependentTaskId = t.DependentTaskId,
-                    ActivityType = t.ActivityType,
-                    OffSet = t.OffSet,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                    DependentTaskId = t.TaskMaster.DependentTaskId,
+                    ActivityType = t.TaskMaster.ActivityType,
+                    OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType
                 }).ToList();
 
+
+            //var tasklist = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == id
+            //&& (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+            //: x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
+            //    .Select(t => new StudyPlanTask
+            //    {
+            //        StudyPlanId = studyplan.Id,
+            //        TaskId = t.Id,
+            //        TaskName = t.TaskName,
+            //        ParentId = t.ParentId,
+            //        isMileStone = t.IsMileStone,
+            //        TaskOrder = t.TaskOrder,
+            //        Duration = t.Duration,
+            //        StartDate = studyplan.StartDate,
+            //        EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
+            //        DependentTaskId = t.DependentTaskId,
+            //        ActivityType = t.ActivityType,
+            //        OffSet = t.OffSet,
+            //        RefrenceType = t.RefrenceType
+            //    }).ToList();
+
             tasklist.ForEach(t =>
             {
-                var tasklist1 = _context.TaskMaster.Where(x => x.DeletedDate == null && x.Id == t.DependentTaskId
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Both || x.RefrenceType == RefrenceType.Sites))
+                var tasklist1 = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == t.DependentTaskId
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
+            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
-                    TaskId = t.Id,
-                    TaskName = t.TaskName,
-                    ParentId = t.ParentId,
-                    isMileStone = t.IsMileStone,
-                    TaskOrder = t.TaskOrder,
-                    Duration = t.Duration,
+                    TaskId = t.TaskMaster.Id,
+                    TaskName = t.TaskMaster.TaskName,
+                    ParentId = t.TaskMaster.ParentId,
+                    isMileStone = t.TaskMaster.IsMileStone,
+                    TaskOrder = t.TaskMaster.TaskOrder,
+                    Duration = t.TaskMaster.Duration,
                     StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.Duration > 0 ? t.Duration - 1 : 0),
-                    DependentTaskId = t.DependentTaskId,
-                    ActivityType = t.ActivityType,
-                    OffSet = t.OffSet,
+                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                    DependentTaskId = t.TaskMaster.DependentTaskId,
+                    ActivityType = t.TaskMaster.ActivityType,
+                    OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType
                 }).ToList();
 

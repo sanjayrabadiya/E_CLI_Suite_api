@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
@@ -60,7 +61,8 @@ namespace GSC.Respository.CTMS
                     DeletedByUser = x.DeletedByUser.UserName,
                     ParentId = x.ParentId,
                     If_Missed=x.If_Missed,
-                    If_ReSchedule = x.If_ReSchedule
+                    If_ReSchedule = x.If_ReSchedule,
+                    If_Applicable= x.If_Applicable
                 }).ToList();
 
             var StudyLevelFormList = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
@@ -81,7 +83,8 @@ namespace GSC.Respository.CTMS
                 DeletedByUser = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.DeletedByUser,
                 ParentId = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.ParentId,
                 If_Missed= ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_Missed,
-                If_ReSchedule = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_ReSchedule
+                If_ReSchedule = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_ReSchedule,
+                If_Applicable = ctmsMonitorings.Where(y => y.StudyLevelFormId == x.Id).FirstOrDefault()?.If_Applicable
             }).ToList();
 
             var result = ctmsMonitorings.Count() == 0 ? StudyLevelFormList : ctmsMonitorings;
@@ -186,6 +189,61 @@ namespace GSC.Respository.CTMS
             });
 
             return result.FirstOrDefault();
+        }
+        public string AddStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto)
+        { 
+            TimeSpan duration = (ctmsMonitoringDto.ScheduleEndDate - ctmsMonitoringDto.ScheduleStartDate).Value;
+            var lisatdata = new StudyPlanTaskDto();
+            var taskname = _context.StudyLevelForm.Include(x=>x.Activity).ThenInclude(s=>s.CtmsActivity).Where(d=>d.Id == ctmsMonitoringDto.StudyLevelFormId && d.DeletedBy==null).Select(t=>t.Activity.CtmsActivity.ActivityName).FirstOrDefault();
+            var studyPlanId = _context.StudyPlan.Where(x=>x.ProjectId == ctmsMonitoringDto.ProjectId && x.DeletedBy==null).FirstOrDefault();
+           
+            var data = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyPlanId.Id && x.TaskOrder >= 1 && x.DeletedDate == null).ToList();
+            foreach (var item in data)
+            {
+                item.TaskOrder = ++item.TaskOrder;
+                _context.StudyPlanTask.Update(item);
+            }
+         
+            if (studyPlanId != null)
+            {
+                lisatdata.Id = 0;
+                lisatdata.StudyPlanId = studyPlanId.Id;
+                lisatdata.TaskName = taskname;
+                lisatdata.DurationDay = Convert.ToInt16(duration.Days);
+                lisatdata.RefrenceType = RefrenceType.Sites;//fix site
+                //lisatdata.TaskOrder = 1;
+                var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
+                studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
+                studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
+                studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                _context.StudyPlanTask.Add(studyPlanTask);
+                _context.Save();
+            }
+            return "";
+        }
+        public string UpdateStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto)
+        {
+            TimeSpan duration = (ctmsMonitoringDto.ScheduleEndDate - ctmsMonitoringDto.ScheduleStartDate).Value;
+            var lisatdata = new StudyPlanTaskDto();
+            var taskname = _context.StudyLevelForm.Include(x => x.Activity).ThenInclude(s => s.CtmsActivity).Where(d => d.Id == ctmsMonitoringDto.StudyLevelFormId && d.DeletedBy == null).Select(t => t.Activity.CtmsActivity.ActivityName).FirstOrDefault();
+            var studyPlan = _context.StudyPlan.Where(x => x.ProjectId == ctmsMonitoringDto.ProjectId && x.DeletedBy == null).FirstOrDefault();
+            if (studyPlan != null)
+            {
+                var StudyPlanTask = _context.StudyPlanTask.Where(s => s.StudyPlanId == studyPlan.Id && s.TaskName == taskname && s.DeletedBy == null).FirstOrDefault();
+                lisatdata.Id = StudyPlanTask.Id;
+                lisatdata.StudyPlanId = studyPlan.Id;
+                lisatdata.TaskName = taskname;
+                lisatdata.DurationDay = Convert.ToInt16(duration.Days);
+                var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
+                studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
+                studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
+                studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                _context.StudyPlanTask.Update(studyPlanTask);
+                _context.Save();
+            }
+            return "";
         }
     }
 }

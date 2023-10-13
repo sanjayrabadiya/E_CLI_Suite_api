@@ -22,5 +22,13 @@ namespace GSC.Respository.Reports
         List<DropDownDto> GetPharmacyStudyProductTypeDropDownPharmacyReport(int ProjectId);
 
         List<ProductAccountabilityCentralReport> GetProductShipmentReportData(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
+
+        List<DropDownDto> GetPatientforKitHistoryReport(int projectid);
+
+        List<DropDownDto> GetKitlistforReport(int projectid);
+
+        List<ProductAccountabilityCentralReport> GetKitHistoryReport(KitHistoryReportSearchModel randomizationIWRSReport);
+
+        FileStreamResult GetKitHistoryReportExcelToExcel(KitHistoryReportSearchModel randomizationIWRSReport);
     }
 }

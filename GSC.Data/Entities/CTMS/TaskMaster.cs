@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace GSC.Data.Entities.CTMS
         public int? DependentTaskId { get; set; }
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
-        public RefrenceType? RefrenceType { get; set; }
+        public List<RefrenceTypes> RefrenceTypes { get; set; } = null;
 
     }
 }

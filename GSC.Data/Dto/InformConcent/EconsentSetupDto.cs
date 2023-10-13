@@ -23,14 +23,16 @@ namespace GSC.Data.Dto.InformConcent
         public string Version { get; set; }
         public int LanguageId { get; set; }
         //public Data.Entities.Master.Project Project { get; set; }
-       // public Language Language { get; set; }
+        // public Language Language { get; set; }
         public string LanguageName { get; set; }
         public string ProjectName { get; set; }
         //temp open remove this
         public FileModel FileModel { get; set; }
-       // public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
+        // public List<EconsentSetupPatientStatus> PatientStatus { get; set; }
         //public List<EconsentSetupRoles> Roles { get; set; }
-        public string OriginalFileName { get; set; }       
+        public string OriginalFileName { get; set; }
+        public string IntroVideoPath { get; set; }
+        public FileModel IntroVideo { get; set; }
     }
 
     public class SaveFileDto
@@ -44,7 +46,7 @@ namespace GSC.Data.Dto.InformConcent
 
     public class EconsentSetupGridDto : BaseAuditDto
     {
-        
+
         //public int Id { get; set; }
         public int ProjectId { get; set; }
         public int DocumentTypeId { get; set; }
@@ -59,6 +61,7 @@ namespace GSC.Data.Dto.InformConcent
         //public string ApproveBy { get; set; }
         public DocumentStatus DocumentStatusId { get; set; }
         public string DocumentStatus { get; set; }
+        public string IntroVideoPath { get; set; }
 
     }
 

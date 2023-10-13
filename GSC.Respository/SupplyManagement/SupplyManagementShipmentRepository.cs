@@ -85,7 +85,7 @@ namespace GSC.Respository.SupplyManagement
                 t.SiteRequest = t.IsSiteRequest ? "Site to Site" : "Site to Study";
 
                 var workflowdetail = _context.SupplyManagementApprovalDetails.Include(a => a.SupplyManagementApproval)
-               .Where(s => s.DeletedDate == null && s.SupplyManagementApproval.ProjectId == parentProjectId).ToList();
+               .Where(s => s.DeletedDate == null && s.SupplyManagementApproval.ProjectId == parentProjectId && s.SupplyManagementApproval.ApprovalType == SupplyManagementApprovalType.ShipmentApproval).ToList();
                 if (workflowdetail.Count > 0)
                 {
                     var workflow = workflowdetail.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.SupplyManagementApproval.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();

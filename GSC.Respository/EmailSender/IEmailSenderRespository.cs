@@ -1,10 +1,13 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Shared.Email;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -53,5 +56,12 @@ namespace GSC.Respository.EmailSender
 
         void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone);
 
+        void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight item,Randomization randomization);
+
+        void SendALettersMailtoInvestigator(string fullPath ,string email,string CtmsActivity, string ScheduleStartDate);
+
+        Task SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmail email, EmailMessage EmailMessage, int userId, string toMails, string tophone);
+
+        EmailMessage ConfigureEmail(string keyName, string userName);
     }
 }

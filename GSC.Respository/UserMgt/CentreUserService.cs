@@ -224,5 +224,12 @@ namespace GSC.Respository.UserMgt
             var result = await HttpService.Put<EConsentVideoDto>(_httpClient, clientUrl, obj);
             return result;
         }
+
+        public async void UpdateFirebaseToken(string clientUrl, string token)
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
+
+            var result = await HttpService.Get<int>(_httpClient, $"{clientUrl}/{_jwtTokenAccesser.UserId}/{token}");
+        }
     }
 }

@@ -54,6 +54,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 obj.Subject = data.Subject;
                 obj.EmailConfigurationEditCheckId = id;
                 obj.EmailBody = data.EmailBody;
+                obj.IsSMS = data.IsSMS;
                 obj.RoleId = _emailConfigurationEditCheckRoleRepository.All.Where(s => s.EmailConfigurationEditCheckId == id && s.DeletedDate == null).Select(s => s.RoleId).ToList();
             }
 

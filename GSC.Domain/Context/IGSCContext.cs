@@ -13,8 +13,10 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Etmf;
+using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
+using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
@@ -437,7 +439,23 @@ namespace GSC.Domain.Context
 
         DbSet<EmailConfigurationEditCheckSendMailHistory> EmailConfigurationEditCheckSendMailHistory { get; set; }
         DbSet<VariableLabelLanguage> VariableLabelLanguage { get; set; }
-
+        DbSet<RefrenceTypes> RefrenceTypes { get; set; }
         DbSet<SupplyManagementKitDosePriority> SupplyManagementKitDosePriority { get; set; }
+        DbSet<WorkflowVisit> WorkflowVisit { get; set; }
+        DbSet<WorkflowTemplate> WorkflowTemplate { get; set; }
+        DbSet<ProjectDesignVisitRestriction> ProjectDesignVisitRestriction { get; set; }
+        DbSet<VisitEmailConfiguration> VisitEmailConfiguration { get; set; }
+        DbSet<VisitEmailConfigurationRoles> VisitEmailConfigurationRoles { get; set; }
+        DbSet<LettersFormate> LettersFormate { get; set; }
+        DbSet<LettersActivity> LettersActivity { get; set; }
+        DbSet<LabReport> LabReport { get; set; }
+        DbSet<WorkingDay> WorkingDay { get; set; }
+        DbSet<SiteTypes> SiteTypes { get; set; }
+        DbSet<IDVerification> IDVerification { get; set; }
+        DbSet<IDVerificationFile> IDVerificationFile { get; set; }
+        public DbSet<Designation> Designation { get; set; }
+        public DbSet<TaskResource> TaskResource { get; set; }
+        public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
+        public DbSet<Currency> Currency { get; set; }
     }
 }

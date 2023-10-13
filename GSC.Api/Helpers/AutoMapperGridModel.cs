@@ -42,6 +42,10 @@ using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Entities.Project.Generalconfig;
+using GSC.Data.Dto.LabReportManagement;
+using GSC.Data.Entities.LabReportManagement;
+using GSC.Data.Entities.IDVerificationSystem;
+using GSC.Data.Dto.IDVerificationSystem;
 
 namespace GSC.Api.Helpers
 {
@@ -79,7 +83,9 @@ namespace GSC.Api.Helpers
             CreateMap<ClientType, ClientTypeGridDto>().ReverseMap();
             CreateMap<Department, DepartmentGridDto>().ReverseMap();
             CreateMap<DocumentType, DocumentTypeGridDto>().ReverseMap();
-            CreateMap<DocumentName, DocumentNameGridDto>().ReverseMap();
+            CreateMap<DocumentName, DocumentNameGridDto>()
+                .ForMember(x => x.PickFromTypeName, a => a.MapFrom(x => x.PickFromType.GetDescription()))
+                .ReverseMap();
             CreateMap<Freezer, FreezerGridDto>().ReverseMap();
             CreateMap<FoodType, FoodTypeGridDto>().ReverseMap();
             CreateMap<Language, LanguageGridDto>().ReverseMap();
@@ -278,7 +284,16 @@ namespace GSC.Api.Helpers
 
             CreateMap<SiteTeam, SiteTeamGridDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementGridDto>().ReverseMap();
-            CreateMap<ResourceType, ResourceTypeGridDto>().ReverseMap();
+            CreateMap<ResourceType, ResourceTypeGridDto>()
+                .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceTypes.GetDescription()))
+                .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceSubType.GetDescription()))
+                .ForMember(x => x.Role, x => x.MapFrom(a => a.Role.RoleName))
+                .ForMember(x => x.User, x => x.MapFrom(a => a.User.UserName))
+                .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
+                .ForMember(x => x.Designation, x => x.MapFrom(a => a.Designation.NameOFDesignation))
+                .ForMember(x => x.YersOfExperience, x => x.MapFrom(a => a.Designation.YersOfExperience))
+                .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName +"-"+ a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName: ""))
+                .ReverseMap();
             CreateMap<TaskTemplate, TaskTemplateGridDto>().ReverseMap();
 
             CreateMap<TaskMaster, TaskMasterGridDto>().ReverseMap();
@@ -293,8 +308,9 @@ namespace GSC.Api.Helpers
 
             CreateMap<TaskMaster, TaskMasterGridDto>()
                 .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
-                .ForMember(x => x.RefrenceType, x => x.MapFrom(a => a.RefrenceType.GetDescription()))
+                .ForMember(x => x.RefrenceTypes, x => x.MapFrom(a => string.Join(", ", a.RefrenceTypes.Where(x => x.DeletedDate == null).Select(s => s.RefrenceType.GetDescription()).ToList())))
                 .ReverseMap();
+            CreateMap<RefrenceTypes, TaskMasterGridDto>().ReverseMap();
 
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
                            .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
@@ -585,6 +601,7 @@ namespace GSC.Api.Helpers
               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
               .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
               .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+              .ForMember(x => x.SupplyManagementKITDetailId, x => x.MapFrom(a => a.SupplyManagementKITDetailId))
               .ReverseMap();
 
             CreateMap<SupplyManagementKITDetailHistory, SupplyManagementKITDetailHistoryDto>()
@@ -638,6 +655,7 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
              .ForMember(x => x.ScreeningNo, x => x.MapFrom(a => a.Randomization.ScreeningNumber))
              .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
+             .ForMember(x => x.SupplyManagementKITDetailId, x => x.MapFrom(a => a.SupplyManagementKITSeriesdetailId))
              .ReverseMap();
 
             CreateMap<Randomization, SupplyManagementUnblindTreatmentGridDto>()
@@ -730,7 +748,9 @@ namespace GSC.Api.Helpers
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
              .ForMember(x => x.ApprovalTypeName, x => x.MapFrom(a => a.ApprovalType.GetDescription()))
              .ReverseMap();
-            CreateMap<VendorManagement, VendorManagementGridDto>().ReverseMap();
+            CreateMap<VendorManagement, VendorManagementGridDto>()
+                .ForMember(x => x.VendorManagementAudit, x => x.MapFrom(a => a.VendorManagementAuditId.GetDescription()))
+                .ReverseMap();
 
             CreateMap<PlanMetrics, PlanMetricsGridDto>()
                    .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
@@ -759,6 +779,47 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.Note, x => x.MapFrom(a => a.ProjectDesignVariable.Note))
            .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
            .ReverseMap();
+
+            CreateMap<VisitEmailConfiguration, VisitEmailConfigurationGridDto>()
+              .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+              .ForMember(x => x.UserRoles, x => x.MapFrom(a => string.Join(",", a.VisitEmailConfigurationRoles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList())))
+              .ForMember(x => x.VisitStatus, x => x.MapFrom(a => a.VisitStatusId.GetDescription()))
+              .ReverseMap();
+            CreateMap<LettersFormate, LettersFormateGridDto>().ReverseMap();
+
+            CreateMap<LettersActivity, LettersActivityGridDto>()
+              .ForMember(x => x.Project, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ForMember(x => x.Activity, x => x.MapFrom(a => a.Activity.ActivityName))
+              .ForMember(x => x.LettersFormate, x => x.MapFrom(a => a.LettersFormate.LetterName))
+              .ForMember(x => x.ScheduleStartDate, x => x.MapFrom(a => a.CtmsMonitoring.ScheduleStartDate))
+              .ReverseMap();
+
+            CreateMap<LabReport, LabReportGridDto>().ReverseMap();
+
+            CreateMap<WorkingDay, WorkingDayListDto>()
+            .ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteTypes.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
+            .ReverseMap();
+            CreateMap<SiteTypes, WorkingDayListDto>().ReverseMap();
+
+            CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
+
+           CreateMap<TaskResource, TaskResourceGridDto>().ReverseMap();
+           CreateMap<TaskResource, TaskResourceGridDto>()
+          .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
+          .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceType.ResourceSubType.GetDescription()))
+          .ReverseMap();
+            CreateMap<Designation, DesignationGridDto>()
+                .ForMember(x => x.Department, x => x.MapFrom(a => a.Department.DepartmentName))
+          .ReverseMap();
+
+            CreateMap<StudyPlanResource, StudyPlanResourceGridDto>()
+            .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
+            .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceType.ResourceSubType.GetDescription()))
+            .ReverseMap();
+
+            CreateMap<Currency, CurrencyGridDto>()
+               .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName))
+         .ReverseMap();
         }
     }
 }

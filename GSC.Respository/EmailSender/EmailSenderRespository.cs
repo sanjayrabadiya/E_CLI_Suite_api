@@ -9,8 +9,10 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
+using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
@@ -30,14 +32,16 @@ namespace GSC.Respository.EmailSender
         private readonly IEmailService _emailService;
         private readonly ISMSSettingRepository _iSMSSettingRepository;
         private readonly HttpClient _httpClient;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public EmailSenderRespository(IGSCContext context,
-            HttpClient httpClient,
-            IJwtTokenAccesser jwtTokenAccesser,
+             IJwtTokenAccesser jwtTokenAccesser,
+        HttpClient httpClient,
             IEmailService emailService,
             ISMSSettingRepository iSMSSettingRepository)
             : base(context)
         {
+            _jwtTokenAccesser = jwtTokenAccesser;
             _emailService = emailService;
             _context = context;
             _httpClient = httpClient;
@@ -315,7 +319,6 @@ namespace GSC.Respository.EmailSender
                 RegexOptions.IgnoreCase);
             return body;
         }
-
         public async Task SendSMS(string mobile, string messagebody, string? DLTTemplateId)
         {
             var smstemplate = messagebody;//emailMessage.MessageBody;
@@ -338,6 +341,28 @@ namespace GSC.Respository.EmailSender
             await HttpService.Get(_httpClient, url, null);
             //var responseresult = _aPICall.Get(url);
         }
+        public async Task SendSMSParticaularStudyWise(string mobile, string messagebody, string? DLTTemplateId)
+        {
+            var smstemplate = messagebody;//emailMessage.MessageBody;
+            smstemplate = smstemplate.Replace("<p>", "");
+            smstemplate = smstemplate.Replace("</p>", "\r\n");
+            smstemplate = smstemplate.Replace("<strong>", "");
+            smstemplate = smstemplate.Replace("</strong>", "");
+            smstemplate = Regex.Replace(smstemplate, "<.*?>", String.Empty);
+            
+            var url = "https://api.msg91.com/api/sendhttp.php?authkey=##AuthKey##&mobiles=##Mobile##&country=91&message=##message##&sender=##senderid##&route=##route##&DLT_TE_ID=##DLTTemplateId##&dev_mode=1";
+            url = url.Replace("##AuthKey##", "349610As7MvryDDp5fdb3d6bP1");
+            url = url.Replace("##Mobile##", "91" + mobile);
+            url = url.Replace("##senderid##", "425096");
+            url = url.Replace("##route##", "1");
+            url = url.Replace("##message##", Uri.EscapeDataString(smstemplate));//emailMessage.MessageBody
+            if (DLTTemplateId != null && DLTTemplateId != "")
+                url = url.Replace("##DLTTemplateId##", DLTTemplateId);
+            else
+                url = url.Replace("&DLT_TE_ID=##DLTTemplateId##", "");
+            await HttpService.Get(_httpClient, url, null);
+            
+        }
 
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
         {
@@ -354,9 +379,34 @@ namespace GSC.Respository.EmailSender
         }
 
 
-        private EmailMessage ConfigureEmail(string keyName, string userName)
+        public EmailMessage ConfigureEmail(string keyName, string userName)
         {
             //        var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
+            var result = All.AsNoTracking().Include(x => x.EmailSetting).FirstOrDefault(x =>
+               x.DeletedDate == null && x.KeyName == keyName);
+            var emailMessage = new EmailMessage();
+
+            if (result != null)
+            {
+                emailMessage.SendFrom = result.EmailSetting.EmailFrom;
+                emailMessage.Subject = result.SubjectName;
+                emailMessage.MessageBody = result.Body;
+                emailMessage.Cc = result.Bcc;
+                emailMessage.Bcc = result.Bcc;
+                emailMessage.IsBodyHtml = true;
+                emailMessage.Attachments =null;
+                emailMessage.EmailFrom = result.EmailSetting.EmailFrom;
+                emailMessage.PortName = result.EmailSetting.PortName;
+                emailMessage.DomainName = result.EmailSetting.DomainName;
+                emailMessage.EmailPassword = result.EmailSetting.EmailPassword;
+                emailMessage.MailSsl = result.EmailSetting.MailSsl;
+                emailMessage.DLTTemplateId = result.DLTTemplateId;
+            }
+
+            return emailMessage;
+        }
+        private EmailMessage ConfigureEmailLetters(string keyName, string userName,string fullPath)
+        {
             var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
                x.DeletedDate == null && x.KeyName == keyName);
             var emailMessage = new EmailMessage();
@@ -369,7 +419,8 @@ namespace GSC.Respository.EmailSender
                 emailMessage.Cc = result.Bcc;
                 emailMessage.Bcc = result.Bcc;
                 emailMessage.IsBodyHtml = true;
-                emailMessage.Attachments = null;
+                Attachment file = new Attachment(fullPath);
+                emailMessage.Attachments.Add(file);
                 emailMessage.EmailFrom = result.EmailSetting.EmailFrom;
                 emailMessage.PortName = result.EmailSetting.PortName;
                 emailMessage.DomainName = result.EmailSetting.DomainName;
@@ -751,7 +802,10 @@ namespace GSC.Respository.EmailSender
         public void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration)
         {
             var emailMessage = ConfigureEmailForVariable();
-            emailMessage.Subject = "Shipment Request Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
+            if (supplyManagementEmailConfiguration.ApprovalType == Helper.SupplyManagementApprovalType.ShipmentApproval)
+                emailMessage.Subject = "Shipment Request Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
+            if (supplyManagementEmailConfiguration.ApprovalType == Helper.SupplyManagementApprovalType.WorkflowApproval)
+                emailMessage.Subject = "Shipment Workflow Approval " + supplyManagementEmailConfiguration.Project.ProjectCode;
             emailMessage.MessageBody = ReplaceBodyForIWRSEmail(supplyManagementEmailConfiguration.EmailTemplate, iWRSEmailModel);
 
             if (toMails != null && toMails.Count > 0)
@@ -949,6 +1003,20 @@ namespace GSC.Respository.EmailSender
             emailMessage.MessageBody = ReplaceBodyForEmailvariableConfiguration(email.EmailBody, email, userId);
             _emailService.SendMail(emailMessage);
 
+
+        }
+
+        public async Task SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmail email, EmailMessage EmailMessage, int userId, string toMails, string tophone)
+        {
+            if (email.IsSMS)
+            {
+                var emailMessagesms = EmailMessage;
+                if (!string.IsNullOrEmpty(tophone))
+                {
+                    var body = ReplaceBodyForEmailvariableConfigurationSMS(emailMessagesms.MessageBody, email, userId);
+                    await SendSMSParticaularStudyWise(tophone, body, emailMessagesms.DLTTemplateId);
+                }
+            }
         }
 
         private string ReplaceBodyForEmailvariableConfiguration(string body, EmailConfigurationEditCheckSendEmail email, int? userId)
@@ -1003,6 +1071,79 @@ namespace GSC.Respository.EmailSender
             }
 
             return str;
+        }
+        private string ReplaceBodyForEmailvariableConfigurationSMS(string body, EmailConfigurationEditCheckSendEmail email, int? userId)
+        {
+
+            var str = body;
+           
+            if (!string.IsNullOrEmpty(email.TemplateName))
+            {
+                str = Regex.Replace(str, "#TemplateName#", email.TemplateName, RegexOptions.IgnoreCase);
+            }
+            
+            if (!string.IsNullOrEmpty(email.ScreeningNo))
+            {
+                str = Regex.Replace(str, "#ScreeningNo#", email.ScreeningNo, RegexOptions.IgnoreCase);
+            }
+          
+
+            return str;
+        }
+        // for visit email
+        public void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight data, Randomization randomization)
+        {
+            var emailMessage = ConfigureEmailForVariable();
+            emailMessage.Subject = email.Subject;
+            emailMessage.SendTo = data.User.Email;
+            emailMessage.MessageBody = ReplaceBodyForVisitStatusEmail(email.EmailBody, email, data, randomization);
+            _emailService.SendMail(emailMessage);
+        }
+
+        private string ReplaceBodyForVisitStatusEmail(string body, VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight data, Randomization randomization)
+        {
+            var str = body;
+
+            if (data.User != null)
+                str = Regex.Replace(str, "##UserName##", data.User.UserName, RegexOptions.IgnoreCase);
+
+            str = Regex.Replace(str, "##StudyCode##", _context.Project.Find(_context.Project.Find(randomization.ProjectId).ParentProjectId).ProjectCode, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##SiteCode##", _context.Project.Find(randomization.ProjectId).ProjectCode, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##VisitName##", email.VisitName, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##VisitStatus##", email.VisitStatus, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##ScreeningNo##", randomization.ScreeningNumber, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##CompanyName##", _context.Company.Find(_jwtTokenAccesser.CompanyId).CompanyName, RegexOptions.IgnoreCase);
+            str = Regex.Replace(str, "##CurrentDate##", DateTime.Now.Date.ToString("dddd, dd MMMM yyyy"), RegexOptions.IgnoreCase);
+
+            if (!string.IsNullOrEmpty(randomization.RandomizationNumber))
+                str = Regex.Replace(str, "##RandomizationNo##", randomization.RandomizationNumber, RegexOptions.IgnoreCase);
+
+            return str;
+        }
+        public void SendALettersMailtoInvestigator(string fullPath, string email,string CtmsActivity,string ScheduleStartDate)
+        {
+            var userName = _jwtTokenAccesser.UserName;
+            var emailMessage = ConfigureEmailLetters("Letters", userName, fullPath) ;
+            emailMessage.SendTo = email;
+            emailMessage.MessageBody = ReplaceBodyForLetters(emailMessage.MessageBody, userName);
+            emailMessage.Subject = ReplaceSubjectForLetters(emailMessage.Subject, CtmsActivity, ScheduleStartDate);
+            _emailService.SendMail(emailMessage);
+        }
+        private string ReplaceBodyForLetters(string body, string userName)
+        {
+            body = Regex.Replace(body, "##UserName##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>UserName</strong>##", "<strong>" + userName + "</strong>",RegexOptions.IgnoreCase);
+            return body;
+        }
+        private string ReplaceSubjectForLetters(string body, string CtmsActivity, string ScheduleStartDate)
+        {
+            body = Regex.Replace(body, "##CTMSACTVITY##", CtmsActivity, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>CTMSACTVITY</strong>##", "<strong>" + CtmsActivity + "</strong>",RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##DATE##", ScheduleStartDate.ToString(), RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>DATE</strong>##", "<strong>" + ScheduleStartDate + "</strong>", RegexOptions.IgnoreCase);
+
+            return body;
         }
     }
 }

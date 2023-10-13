@@ -256,6 +256,15 @@ namespace GSC.Api.Controllers.Etmf
             return Ok(EtmfProjectWorkPlace);
         }
 
+
+        [Route("GetChartNewReport/{projectId}/{chartType:int?}")]
+        [HttpGet]
+        public IActionResult GetChartNewReport(int projectId, EtmfChartType? chartType)
+        {
+            var EtmfProjectWorkPlace = _eTMFWorkplaceRepository.GetChartDocumentReport(projectId, chartType);
+            return Ok(EtmfProjectWorkPlace);
+        }
+
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {

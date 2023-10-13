@@ -78,6 +78,12 @@ namespace GSC.Api.Controllers.CTMS
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
+            var studyPlan = _taskTemplateRepository.AlreadyUSed(id);
+            if (!string.IsNullOrEmpty(studyPlan))
+            {
+                ModelState.AddModelError("Message", studyPlan);
+                return BadRequest(ModelState);
+            }
             var record = _taskTemplateRepository.Find(id);
 
             if (record == null)

@@ -195,5 +195,13 @@ namespace GSC.Api.Controllers.InformConcent
             // use for display the uploaded reference documents like (image,video,pdf,word)
             return Ok(_econsentSectionReferenceRepository.GetEconsentSectionReferenceDocumentNew(id));
         }
+
+        [HttpGet]
+        [Route("GetEconsentSectionReferenceDocumentByUser")]
+        public IActionResult GetEconsentSectionReferenceDocumentByUser()
+        {
+            // use for display the uploaded reference documents like (image,video,pdf,word)
+            return Ok(_econsentSectionReferenceRepository.GetEconsentSectionReferenceDocumentByUser());
+        }
     }
 }

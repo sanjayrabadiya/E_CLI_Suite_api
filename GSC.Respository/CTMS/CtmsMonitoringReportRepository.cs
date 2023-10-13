@@ -200,15 +200,30 @@ namespace GSC.Respository.CTMS
                                 .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
                                 && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
-            if(ActivityCode != "act_004")
+            if(ActivityCode != "act_004" && ActivityCode != "act_001")
             {
-                var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
-                                     && x.CtmsMonitoring.DeletedDate == null).ToList();
+                    var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null).ToList();
+                    if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
+                        return "Please Approve " + CtmsActivity.ActivityName + " .";
 
-                if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
-                    return "Please Approve " + CtmsActivity.ActivityName + " .";
+                    return "";
+            }
+            else if(ActivityCode == "act_001")
+            {
+                //Add by mitul on 04-10-2023 Is Not Applicable in feasibility
+                var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null).ToList();
+                var applicable = _context.CtmsMonitoring.Where(x => x.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId) && x.DeletedDate == null).ToList();
+                if(applicable.Count > 0 && applicable.OrderByDescending(c => c.Id).FirstOrDefault().If_Applicable != true)
+                {
+                    if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
+                        return "Please Approve " + CtmsActivity.ActivityName + " .";
 
-                return "";
+                    return "";
+                }
+                else
+                {
+                    return "";
+                }
             }
             else
             {

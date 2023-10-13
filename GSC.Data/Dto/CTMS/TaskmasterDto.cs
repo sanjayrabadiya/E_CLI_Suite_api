@@ -1,5 +1,8 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
+using Syncfusion.DocIO;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -24,6 +27,6 @@ namespace GSC.Data.Dto.CTMS
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
         public RefrenceType? RefrenceType { get; set; }
-
+        public List<RefrenceTypes> RefrenceTypes { get; set; }
     }
 }

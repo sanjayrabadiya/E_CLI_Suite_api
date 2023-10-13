@@ -115,6 +115,25 @@ namespace GSC.Data.Dto.ProjectRight
         public double? Avg { get; set; }
     }
 
+    #region //Added Graphs Of Subject Recruitment in Site Monitoring By Sachin On 19/06/2023
+    public class DashboardEnrolledGraph
+    {
+        public string DisplayName { get; set; }
+        public int Total { get; set; }
+    }
+
+    public class DashboardScreenedGraph
+    {
+        public string DisplayName { get; set; }
+        public int Total { get; set; }
+    }
+
+    public class DashboardRandomizedGraph
+    {
+        public string DisplayName { get; set; }
+        public int Total { get; set; }
+    }
+    #endregion
     public class DashboardStudyStatusDto
     {
         public string DisplayName { get; set; }
@@ -273,7 +292,11 @@ namespace GSC.Data.Dto.ProjectRight
         public string X { get; set; }
         public int Y { get; set; }
     }
-
+    public class TreatmentvsArms
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
+    }
     public class DynamicAeChartData
     {
         public string VariableName { get; set; }
@@ -284,4 +307,39 @@ namespace GSC.Data.Dto.ProjectRight
         public int ProjectDesignVariableId { get; set; }
     }
 
+    public class FactoreDashboardModel
+    {
+        public string ScreeningNo { get; set; }
+        public string RandomizationNo { get; set; }
+        public string Genderfactor { get; set; }
+        public string Diatoryfactor { get; set; }
+
+        public string Jointfactor { get; set; }
+
+        public string Eligibilityfactor { get; set; }
+
+        public string Agefactor { get; set; }
+        public string BMIfactor { get; set; }
+        public string ProductCode { get; set; }
+
+        public string Weightfactor { get; set; }
+
+        public string Dosefactor { get; set; }
+
+        public string SiteName { get; set; }
+
+        public int PatientCount { get; set; }
+
+        public int ProjectId { get; set; }
+    }
+    public class ImpShipmentGridDashboard
+    {
+        public string CountryName { get; set; }
+        public string SiteName { get; set; }
+        public int ShipmentNo { get; set; }
+        public int RequestNo { get; set; }
+        public int ReceiptNo { get; set; }
+        public int UnblindNo { get; set; }
+
+    }
 }

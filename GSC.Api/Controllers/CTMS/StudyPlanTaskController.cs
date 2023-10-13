@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Api.Controllers.Common;
 using GSC.Common;
 using GSC.Common.UnitOfWork;
@@ -10,7 +12,9 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
+using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -27,10 +31,11 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IGSCContext _context;
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
         private readonly IStudyPlanRepository _studyPlanRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public StudyPlanTaskController(IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository,
-            ITaskMasterRepository taskMasterRepository)
+            ITaskMasterRepository taskMasterRepository, IUploadSettingRepository uploadSettingRepository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -38,12 +43,13 @@ namespace GSC.Api.Controllers.CTMS
             _context = context;
             _studyPlanTaskRepository = studyPlanTaskRepository;
             _studyPlanRepository = studyPlanRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}")]
-        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId)
+        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}/{countryId:int}")]
+        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId, int countryId)
         {
-            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId);
+            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId, countryId);
             return Ok(studyplan);
         }
 
@@ -62,17 +68,19 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
+            tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
             tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
+                tastMaster.Percentage = data.Percentage;
             }
-            
+
             _studyPlanTaskRepository.Add(tastMaster);
             _uow.Save();
-                    
+
             _studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.Id);
 
             var ProjectId = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault().ProjectId;
@@ -89,13 +97,19 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
+            var document = _studyPlanTaskRepository.Find(taskmasterDto.Id);
+            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.DocumentPath);
+            if (taskmasterDto.FileModel?.Base64?.Length > 0)
+            {
+                tastMaster.DocumentPath = DocumentService.SaveUploadDocument(taskmasterDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+            }
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
             }
-           
+
             var revertdata = _studyPlanTaskRepository.Find(taskmasterDto.Id);
             _studyPlanTaskRepository.Update(tastMaster);
 
@@ -212,6 +226,87 @@ namespace GSC.Api.Controllers.CTMS
         {
             var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType);
             return Ok(report);
+        }
+        [HttpPut("AddPreApproval")]
+        public IActionResult AddPreApproval([FromBody] PreApprovalStatusDto data)
+        {
+            if (data.Id <= 0) return BadRequest();
+            var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == data.Id && x.DependentTaskId == null) || (x.Id == data.DependentTaskId && x.DependentTaskId == data.Id)).ToList();
+            foreach (var item in task)
+            {
+                var tastMaster = _mapper.Map<StudyPlanTask>(item);
+                tastMaster.PreApprovalStatus = data.PreApprovalStatus;
+                _studyPlanTaskRepository.Update(tastMaster);
+                _uow.Save();
+
+            }
+            return Ok(data);
+        }
+        [HttpGet("GetPreApprovalList/{isDeleted:bool?}/{studyPlanTaskId}")]
+        public IActionResult GetPreApprovalList(bool isDeleted, int studyPlanTaskId)
+        {
+            var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == studyPlanTaskId && x.PreApprovalStatus == true) || (x.DependentTaskId == studyPlanTaskId && x.PreApprovalStatus == true)).ToList();
+            return Ok(task);
+        }
+
+        [HttpPatch("patchPreApproval/{id}")]
+        public ActionResult patchPreApproval(int id)
+        {
+            var record = _studyPlanTaskRepository.Find(id);
+            if (record == null) return NotFound();
+            var tastMaster = _mapper.Map<StudyPlanTask>(record);
+            tastMaster.PreApprovalStatus = false;
+            tastMaster.ApprovalStatus = false;
+            tastMaster.FileName = null;
+            tastMaster.DocumentPath = null;
+            _studyPlanTaskRepository.Update(tastMaster);
+            _uow.Save();
+            return Ok();
+        }
+
+        [HttpPut("AddApproval")]
+        public IActionResult AddApproval([FromBody] ApprovalStatusDto data)
+        {
+            if (data.Id <= 0) return BadRequest();
+
+            var record = _studyPlanTaskRepository.Find(data.Id);
+            var tastMaster = _mapper.Map<StudyPlanTask>(record);
+
+            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), record.DocumentPath);
+            if (data.FileModel?.Base64?.Length > 0)
+            {
+                tastMaster.DocumentPath = _uploadSettingRepository.GetWebDocumentUrl()+DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+            }
+            tastMaster.ApprovalStatus = data.ApprovalStatus;
+            tastMaster.FileName = data.FileName;
+            _studyPlanTaskRepository.Update(tastMaster);
+            _uow.Save();
+            return Ok();
+        }
+        [HttpPost]
+        [Route("ResourceMgmtQuerySearch")]
+        public IActionResult ResourceMgmtQuerySearch([FromBody] ResourceMgmtFilterDto search)
+        {
+            var volunteers = _studyPlanTaskRepository.ResourceMgmtSearch(search);
+            return Ok(volunteers);
+        }
+        [HttpGet]
+        [Route("GetRollDropDown/{studyplanId}")]
+        public IActionResult getRollDropDown(int studyplanId)
+        {
+            return Ok(_studyPlanTaskRepository.GetRollDropDown(studyplanId));
+        }
+        [HttpGet]
+        [Route("getUserDropDown/{studyplanId}")]
+        public IActionResult getUserDropDown(int studyplanId)
+        {
+            return Ok(_studyPlanTaskRepository.GetUserDropDown(studyplanId));
+        }
+        [HttpGet]
+        [Route("getDesignationStdDropDown/{studyplanId}")]
+        public IActionResult getDesignationStdDropDown(int studyplanId)
+        {
+            return Ok(_studyPlanTaskRepository.GetDesignationStdDropDown(studyplanId));
         }
     }
 }

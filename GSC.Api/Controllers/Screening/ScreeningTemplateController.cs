@@ -57,12 +57,12 @@ namespace GSC.Api.Controllers.Screening
             _scheduleTerminate = scheduleTerminate;
         }
 
-        [HttpPost("Repeat/{screeningTemplateId}")]
-        public IActionResult Repeat(int screeningTemplateId)
+        [HttpPost("Repeat")]
+        public IActionResult Repeat([FromBody] ScreeningTemplateRepeat screeningTemplateRepeat)
         {
-            if (screeningTemplateId <= 0) return BadRequest();
+            if (screeningTemplateRepeat.ScreeningTemplateId <= 0) return BadRequest();
 
-            var screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplateId);
+            var screeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplateRepeat);
             _uow.Save();
             return Ok(screeningTemplate.Id);
         }
@@ -211,15 +211,18 @@ namespace GSC.Api.Controllers.Screening
             var screeningTemplate = _screeningTemplateRepository.Find(id);
 
 
-            var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(id);
-            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesignId);
+            var basicProjectDesignVisit = _screeningTemplateRepository.GetProjectDesignId(id);
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(basicProjectDesignVisit.ProjectDesignId);
+            var templateLevel = _projectWorkflowRepository.GetTemplateWorkFlow(screeningTemplate.ProjectDesignTemplateId, basicProjectDesignVisit.ProjectDesignId, 0);
 
             screeningTemplate.ReviewLevel = 1;
             screeningTemplate.StartLevel = -1;
-
-            var isNonCRF = _screeningTemplateRepository.All.Any(x => x.Id == id && x.ScreeningVisit.ProjectDesignVisit.IsNonCRF);
-            if (isNonCRF)
-                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(projectDesignId, (short)screeningTemplate.StartLevel);
+            if (templateLevel > 0)
+                screeningTemplate.ReviewLevel = templateLevel;
+            else if (basicProjectDesignVisit.IsNonCRF)
+                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(basicProjectDesignVisit.ProjectDesignId, (short)screeningTemplate.StartLevel);
+            else if (workflowlevel.IsVisitBase)
+                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetVisitLevel(basicProjectDesignVisit.ProjectDesignVisitId, basicProjectDesignVisit.ProjectDesignId, 0);
 
             screeningTemplate.Status = ScreeningTemplateStatus.Submitted;
             screeningTemplate.IsDisable = false;
@@ -231,7 +234,7 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateValueRepository.UpdateVariableOnSubmit(screeningTemplate.ProjectDesignTemplateId, screeningTemplate.Id);
 
-            CheckCompletedStatus(screeningTemplate, projectDesignId);
+            CheckCompletedStatus(screeningTemplate, basicProjectDesignVisit.ProjectDesignId);
 
             _screeningTemplateRepository.Update(screeningTemplate);
 
@@ -308,15 +311,19 @@ namespace GSC.Api.Controllers.Screening
 
             _screeningTemplateReviewRepository.Save(screeningTemplate.Id, screeningTemplate.Status, (short)screeningTemplate.ReviewLevel);
 
-            var projectDesignId = _screeningTemplateRepository.GetProjectDesignId(screeningTemplate.Id);
-
-            var isNonCRF = _screeningTemplateRepository.All.Any(x => x.Id == id && x.ScreeningVisit.ProjectDesignVisit.IsNonCRF);
-            if (isNonCRF)
-                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(projectDesignId, (short)screeningTemplate.ReviewLevel);
+            var basicProjectDesignVisit = _screeningTemplateRepository.GetProjectDesignId(screeningTemplate.Id);
+            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(basicProjectDesignVisit.ProjectDesignId);
+            var templateLevel = _projectWorkflowRepository.GetTemplateWorkFlow(screeningTemplate.ProjectDesignTemplateId, basicProjectDesignVisit.ProjectDesignId, workflowlevel.LevelNo);
+            if (templateLevel > 0)
+                screeningTemplate.ReviewLevel = templateLevel;
+            else if (basicProjectDesignVisit.IsNonCRF)
+                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetNoCRFLevel(basicProjectDesignVisit.ProjectDesignId, (short)screeningTemplate.ReviewLevel);
+            else if (workflowlevel.IsVisitBase)
+                screeningTemplate.ReviewLevel = _projectWorkflowRepository.GetVisitLevel(basicProjectDesignVisit.ProjectDesignVisitId, basicProjectDesignVisit.ProjectDesignId, workflowlevel.LevelNo);
             else
                 screeningTemplate.ReviewLevel = Convert.ToInt16(screeningTemplate.ReviewLevel + 1);
 
-            CheckCompletedStatus(screeningTemplate, projectDesignId);
+            CheckCompletedStatus(screeningTemplate, basicProjectDesignVisit.ProjectDesignId);
             screeningTemplate.Status = ScreeningTemplateStatus.Reviewed;
             _screeningTemplateRepository.Update(screeningTemplate);
 

@@ -34,5 +34,10 @@ namespace GSC.Data.Entities.CTMS
         [ForeignKey("DependentTaskId")]
         public StudyPlanTask DependentTask { get; set; }
         public StudyPlan StudyPlan { get; set; }
+        public bool? PreApprovalStatus { get; set; }
+        public bool? ApprovalStatus { get; set; }
+        public string FileName { get; set; }
+        public string DocumentPath { get; set; }
+        public decimal? Percentage { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GSC.Helper;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -19,6 +20,7 @@ namespace GSC.Data.Dto.InformConcent
         public bool IsDocument { get; set; }
         public string DocumentPath { get; set; }
         public int TotalRecord { get; set; }
+        public FirebaseMsgType MessageType { get; set; }
     }
 
     public class EconsentChatDetailDto

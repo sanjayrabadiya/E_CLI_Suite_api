@@ -31,7 +31,7 @@ using GSC.Shared.Extension;
 using GSC.Data.Dto.Configuration;
 using Syncfusion.Pdf.Parsing;
 using Microsoft.AspNetCore.Mvc;
-using Syncfusion.DocIO.DLS;
+using GSC.Data.Entities.Attendance;
 
 namespace GSC.Respository.InformConcent
 {
@@ -87,20 +87,36 @@ namespace GSC.Respository.InformConcent
 
             if (noneregister == null) return new List<EConsentDocumentHeader>();
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var result = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
+            var eConsentResult = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
                 && x.EconsentSetup.LanguageId == noneregister.LanguageId
-                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false))
-                .Select(x => new EConsentDocumentHeader
-                {
-                    DocumentId = x.EconsentSetup.Id,
-                    DocumentName = x.EconsentSetup.DocumentName,
-                    DocumentPath = x.EconsentSetup.DocumentPath,
-                    ReviewId = x.Id,
-                    IsReviewed = x.IsReviewedByPatient,
-                    TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds)
-                }).OrderByDescending(x => x.DocumentId).ToList();
+                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).Include(x => x.EconsentReviewDetailsSections).ToList();
 
-            result.ForEach(t => t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath));
+            if (eConsentResult.Count <= 0)
+                return null;
+
+            var lastRecords = eConsentResult.Where(x => x.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < noneregister.CreatedDate.GetValueOrDefault().Ticks)
+                .OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
+            var afterRecords = eConsentResult.Where(x => x.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > noneregister.CreatedDate.GetValueOrDefault().Ticks).ToList();
+            afterRecords.Add(lastRecords);
+            var result = afterRecords.Select(x => new EConsentDocumentHeader
+            {
+                DocumentId = x.EconsentSetup.Id,
+                DocumentName = x.EconsentSetup.DocumentName,
+                DocumentPath = x.EconsentSetup.DocumentPath,
+                ReviewId = x.Id,
+                IsReviewed = x.IsReviewedByPatient,
+                TotalReviewTime = x.EconsentReviewDetailsSections.Sum(x => x.TimeInSeconds),
+                IntroVideoPath = x.EconsentSetup.IntroVideoPath
+            }).OrderByDescending(x => x.DocumentId).ToList();
+
+            result.ForEach(t =>
+            {
+                t.DocumentPath = System.IO.Path.Combine(upload.DocumentPath, t.DocumentPath);
+                if (t.IntroVideoPath != null)
+                {
+                    t.IntroVideoPath = System.IO.Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), t.IntroVideoPath).Replace('\\', '/');
+                }
+            });
 
             return result;
         }
@@ -204,8 +220,9 @@ namespace GSC.Respository.InformConcent
         }
 
 
-        public string ImportSectionDataHtml(int id, int sectionno)
+        public AppEConsentSection ImportSectionDataHtml(int id, int sectionno)
         {
+            // this method is called when clicking particular sections from the left side grid in Inform consent page(patient portal)
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
@@ -213,18 +230,66 @@ namespace GSC.Respository.InformConcent
             if (!System.IO.File.Exists(path))
                 return null;
             Stream stream = System.IO.File.OpenRead(path);
-            WordDocument document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-            document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
-            MemoryStream ms = new MemoryStream();
-            document.Save(ms, Syncfusion.DocIO.FormatType.Html);
-            document.Close();
-            ms.Position = 0;
-            StreamReader reader = new StreamReader(ms);
+            string sfdtText = "";
+            EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+            wdocument.Dispose();
+            string json = sfdtText;
+            stream.Position = 0;
+            stream.Close();
+            GSC.Helper.DocumentReader.Root jsonobj = JsonConvert.DeserializeObject<GSC.Helper.DocumentReader.Root>(json);
+            List<GSC.Helper.DocumentReader.Block> blocks = new List<GSC.Helper.DocumentReader.Block>();
+            int headercount = 0;
+            foreach (var e1 in jsonobj.sections)
+            {
+                foreach (var e2 in e1.blocks)
+                {
+                    if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
+                    {
+                        headercount++;
+                    }
+                    if (sectionno == headercount)
+                    {
+                        blocks.Add(e2);
+                    }
+                }
+            }
+
+            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
+            {
+                jsonobj.sections[i].blocks = new List<GSC.Helper.DocumentReader.Block>();
+                if (i == 0)
+                {
+                    jsonobj.sections[0].blocks = blocks;
+                }
+            }
+            List<GSC.Helper.DocumentReader.Section> newsections = new List<GSC.Helper.DocumentReader.Section>();
+            for (int i = 0; i <= jsonobj.sections.Count - 1; i++)
+            {
+                if (jsonobj.sections[i].blocks.Count > 0)
+                {
+                    newsections.Add(jsonobj.sections[i]);
+                }
+            }
+            jsonobj.sections = newsections;
+            string jsonnew = JsonConvert.SerializeObject(jsonobj, Formatting.None, new JsonSerializerSettings
+            {
+                NullValueHandling = NullValueHandling.Ignore
+            });
+
+            Stream document = EJ2WordDocument.Save(jsonnew, Syncfusion.EJ2.DocumentEditor.FormatType.Html);
+            StreamReader reader = new StreamReader(document);
             var htmlStringText = reader.ReadToEnd();
-            ms.Dispose();
+            document.Close();
+            document.Dispose();
+            reader.Close();
             reader.Dispose();
 
-            return htmlStringText;
+            AppEConsentSection section = new AppEConsentSection();
+            section.SectionHtml = htmlStringText;
+            section.isReference = _context.EconsentSectionReference.Any(x => x.EconsentSetupId == id && x.DeletedDate == null);
+
+            return section;
         }
 
         public string ImportSectionData(int id, int sectionno)
@@ -369,10 +434,15 @@ namespace GSC.Respository.InformConcent
                 return null;
 
             var result = All.Where(x => x.RandomizationId == randomization.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == randomization.LanguageId
-                         && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).
-                         ProjectTo<EconsentDocumentDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                         && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).ToList();
+            if (result.Count <= 0)
+                return null;
 
-            return result;
+            var lastRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < randomization.CreatedDate.GetValueOrDefault().Ticks).OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
+            var afterRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > randomization.CreatedDate.GetValueOrDefault().Ticks).ToList();
+            afterRecords.Add(lastRecords);
+            var resultDto = _mapper.Map<List<EconsentDocumentDetailsDto>>(afterRecords);
+            return resultDto.OrderByDescending(o => o.Id).ToList();
         }
 
         public int UpdateDocument(EconsentReviewDetailsDto econsentReviewDetailsDto)
@@ -767,9 +837,18 @@ namespace GSC.Respository.InformConcent
             {
                 FileModel fileModel = new FileModel();
                 fileModel.Base64 = econsentReviewDetailsDto.PatientdigitalSignBase64;
-                fileModel.Extension = "png";
-                reviewdetails.PatientdigitalSignImagepath = new ImageService().ImageSave(fileModel,
-                    _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "");
+                if (string.IsNullOrEmpty(econsentReviewDetailsDto.FileExtension))
+                {
+                    fileModel.Extension = "png";
+                    reviewdetails.PatientdigitalSignImagepath = new ImageService().ImageSave(fileModel,
+                   _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "");
+                }
+                else
+                {
+                    fileModel.Extension = econsentReviewDetailsDto.FileExtension;
+                    reviewdetails.PatientdigitalSignImagepath = DocumentService.SaveUploadDocument(fileModel,
+                        _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.InformConcent, "EconsentReviewVideo");
+                }
             }
             reviewdetails.EconsentReviewDetailsSections = _mapper.Map<List<EconsentReviewDetailsSections>>(econsentReviewDetailsDto.EconsentReviewDetailsSections);
             string filepath = "";
@@ -812,10 +891,14 @@ namespace GSC.Respository.InformConcent
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
             PdfGraphics graphics = page.Graphics;
             //Load the image from the disk
-            FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
-            PdfImage image = new PdfBitmap(logoinputstream);
-            logoinputstream.Close();
-            logoinputstream.Dispose();
+            PdfImage image = null;
+            if (string.IsNullOrEmpty(econsentReviewDetailsDto.FileExtension))
+            {
+                FileStream logoinputstream = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{reviewdetails.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
+                image = new PdfBitmap(logoinputstream);
+                logoinputstream.Close();
+                logoinputstream.Dispose();
+            }
             //Draw the image   
 
             PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
@@ -836,8 +919,10 @@ namespace GSC.Respository.InformConcent
                 //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
                 //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
                 result = AddString(reviewdetails.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
-                result.Page.Graphics.DrawImage(image, new PointF(70, result.Bounds.Y + 20), new SizeF(400f, 100f));
-
+                if (image != null)
+                {
+                    result.Page.Graphics.DrawImage(image, new PointF(70, result.Bounds.Y + 20), new SizeF(400f, 100f));
+                }
                 //graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
                 //graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
 

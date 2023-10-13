@@ -15,6 +15,8 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public string Subject { get; set; }
         public string EmailBody { get; set; }
         public List<int> RoleId { get; set; }
-       
+
+        public bool IsSMS { get; set; }
+
     }
 }

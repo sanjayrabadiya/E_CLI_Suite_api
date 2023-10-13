@@ -136,6 +136,8 @@ namespace GSC.Respository.Screening
 
             var statusId = (int)screeningTemplateBasic.Status;
 
+            designTemplateDto.ScreeningVisitName = _context.ScreeningVisit.Find(screeningTemplateBasic.ScreeningVisitId).ScreeningVisitName;
+
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningTemplateBasic.ProjectDesignId);
 
             designTemplateDto.ScreeningTemplateId = screeningTemplateId;
@@ -229,23 +231,31 @@ namespace GSC.Respository.Screening
 
             var isRestriction = false;
 
-            if (_projectDesingTemplateRestrictionRepository.All.Any(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null))
+            var templateRestriction = _projectDesingTemplateRestrictionRepository.All.Where(x => x.ProjectDesignTemplateId == designTemplateDto.ProjectDesignTemplateId
+            && x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).Select(r => new { r.ProjectDesignTemplateId, r.IsHide }).FirstOrDefault();
+
+            if (templateRestriction != null)
             {
                 designTemplateDto.IsSubmittedButton = false;
                 designTemplateDto.IsRepeated = false;
                 isRestriction = true;
                 designTemplateDto.IsUnSubmittedButton = false;
+
+                if (templateRestriction.IsHide)
+                    throw new Exception("You can't view the template!");
             }
+
+
 
             designTemplateDto.Variables = designTemplateDto.Variables.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
             && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
 
             designTemplateDto.Variables.ToList().ForEach(r =>
-             {
-                 if (r.Values != null)
-                     r.Values = r.Values.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
-                     && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
-             });
+            {
+                if (r.Values != null)
+                    r.Values = r.Values.Where(t => (t.StudyVersion == null || t.StudyVersion <= screeningTemplateBasic.StudyVersion)
+                    && (t.InActiveVersion == null || t.InActiveVersion > screeningTemplateBasic.StudyVersion)).ToList();
+            });
 
             designTemplateDto.Variables.Where(x => x.CollectionSource == CollectionSources.Relation && x.RelationProjectDesignVariableId > 0).ToList().
                 ForEach(t => t.Values = _screeningTemplateValueRepository.GetScreeningRelation(t.RelationProjectDesignVariableId ?? 0, screeningTemplateBasic.ScreeningEntryId));
@@ -253,9 +263,9 @@ namespace GSC.Respository.Screening
             designTemplateDto.Variables.Where(x => x.CollectionSource == CollectionSources.Table).ToList().ForEach(t =>
             {
                 t.Values.Where(c => c.LevelNo == null).ToList().ForEach(v =>
-                  {
-                      v.LevelNo = 1;
-                  });
+                {
+                    v.LevelNo = 1;
+                });
             });
 
             values.ForEach(t =>
@@ -549,13 +559,19 @@ namespace GSC.Respository.Screening
             var values = GetScreeningValues(screeningTemplateBasic.Id);
             var result = _editCheckImpactRepository.CheckValidation(null, values, screeningTemplateBasic, !isFromLockUnLock);
             _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, true, true);
+            _editCheckImpactRepository.HideDisableVisit(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId);
             _scheduleRuleRespository.ValidateByTemplate(values, screeningTemplateBasic, true);
 
         }
 
-        public int GetProjectDesignId(int screeningTemplateId)
+        public BasicProjectDesignVisit GetProjectDesignId(int screeningTemplateId)
         {
-            return All.Where(x => x.Id == screeningTemplateId).Select(r => r.ScreeningVisit.ScreeningEntry.ProjectDesignId).FirstOrDefault();
+            return All.Where(x => x.Id == screeningTemplateId).Select(r => new BasicProjectDesignVisit
+            {
+                ProjectDesignId = r.ScreeningVisit.ScreeningEntry.ProjectDesignId,
+                ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
+                IsNonCRF = r.ScreeningVisit.ProjectDesignVisit.IsNonCRF
+            }).FirstOrDefault();
         }
 
         public int GeScreeningEntryId(int screeningTemplateId)
@@ -623,7 +639,9 @@ namespace GSC.Respository.Screening
                 ScreeningVisitId = t.ScreeningVisitId,
                 ProjectDesignTemplateId = t.ProjectDesignTemplateId,
                 Status = t.Status,
-                ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                ScreeningTemplateName = t.ScreeningTemplateName,
+                //ProjectDesignTemplateName = t.ProjectDesignTemplate.TemplateName,
                 DesignOrder = sequenseDeatils.IsTemplateSeqNo == true ? t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString() : "",
                 DesignOrderForOrderBy = t.RepeatSeqNo == null ? Convert.ToString(t.ProjectDesignTemplate.DesignOrder) : t.ProjectDesignTemplate.DesignOrder.ToString() + "." + t.RepeatSeqNo.Value.ToString(),
                 Progress = t.Progress ?? 0,
@@ -676,8 +694,14 @@ namespace GSC.Respository.Screening
                 VolunteerName = a.ScreeningVisit.ScreeningEntry.RandomizationId != null
                     ? a.ScreeningVisit.ScreeningEntry.Randomization.Initial
                     : a.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
-                TemplateName = a.ProjectDesignTemplate.TemplateName,
-                VistName = a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
+
+                // changes on 13/06/2023 for add template name in screeningtecmplate table change by vipul rokad
+                TemplateName = a.ScreeningTemplateName,
+                //TemplateName = a.ProjectDesignTemplate.TemplateName,
+
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                VistName = a.ScreeningVisit.ScreeningVisitName,
+                //VistName = a.ProjectDesignTemplate.ProjectDesignVisit.DisplayName,
                 ReviewedLevel = a.ReviewLevel.ToString(),
                 SubmittedDate = a.ScreeningTemplateReview.FirstOrDefault(c => c.Status == ScreeningTemplateStatus.Submitted)
                     .CreatedDate,
@@ -694,10 +718,11 @@ namespace GSC.Respository.Screening
             return result;
         }
 
-        public ScreeningTemplate TemplateRepeat(int id)
+        public ScreeningTemplate TemplateRepeat(ScreeningTemplateRepeat screeningTemplateRepeat)
         {
             var screeningTemplate = new ScreeningTemplate();
-            var originalTemplate = All.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
+            var originalTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateRepeat.ScreeningTemplateId).FirstOrDefault();
+            screeningTemplate.ScreeningTemplateName = screeningTemplateRepeat.ScreeningTemplateName;
             screeningTemplate.ParentId = originalTemplate.Id;
             screeningTemplate.Id = 0;
             screeningTemplate.RepeatSeqNo = All.Count(x => x.ParentId == originalTemplate.Id) + 1;
@@ -759,8 +784,10 @@ namespace GSC.Respository.Screening
                 StatusName = r.Status.GetDescription(),
                 ScreeningTemplateId = r.Id,
                 ProjectCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
-                ScreeningTemplateValue = r.ProjectDesignTemplate.TemplateName,
-                Visit = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                ScreeningTemplateValue = r.ScreeningTemplateName,
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                Visit = r.ScreeningVisit.ScreeningVisitName,
                 VolunteerName = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
                 SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
@@ -814,8 +841,10 @@ namespace GSC.Respository.Screening
                 StatusName = r.Status.GetDescription(),
                 ScreeningTemplateId = r.Id,
                 ProjectCode = r.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
-                ScreeningTemplateValue = r.ProjectDesignTemplate.TemplateName,
-                Visit = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                ScreeningTemplateValue = r.ScreeningTemplateName,
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                Visit = r.ScreeningVisit.ScreeningVisitName,
                 VolunteerName = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName : r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
                 SubjectNo = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo : r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNumber = r.ScreeningVisit.ScreeningEntry.AttendanceId != null ? r.ScreeningVisit.ScreeningEntry.Attendance.ProjectSubject.Number : r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
@@ -981,10 +1010,12 @@ namespace GSC.Respository.Screening
                         PeriodName = t.ScreeningVisit.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
                         ParentProjectId = t.ScreeningVisit.ScreeningEntry.Project.ParentProjectId,
                         VisitId = t.ScreeningVisit.ProjectDesignVisitId,
-                        VisitName = t.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + t.ScreeningVisit.RepeatedVisitNumber),
+                        // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                        VisitName = t.ScreeningVisit.ScreeningVisitName + Convert.ToString(t.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + t.ScreeningVisit.RepeatedVisitNumber),
                         ScreeningTemplateParentId = t.ParentId,
-                        TemplateName = t.RepeatSeqNo == null && t.ParentId == null ? t.ProjectDesignTemplate.DesignOrder + " " + t.ProjectDesignTemplate.TemplateName
-                                        : t.ProjectDesignTemplate.DesignOrder + "." + t.RepeatSeqNo + " " + t.ProjectDesignTemplate.TemplateName,
+                        // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                        TemplateName = t.RepeatSeqNo == null && t.ParentId == null ? t.ProjectDesignTemplate.DesignOrder + " " + t.ScreeningTemplateName
+                                        : t.ProjectDesignTemplate.DesignOrder + "." + t.RepeatSeqNo + " " + t.ScreeningTemplateName,
                         DesignOrder = t.ProjectDesignTemplate.DesignOrder.ToString(),
                         SeqNo = t.ProjectDesignTemplate.DesignOrder,
                         ReviewLevel = t.ReviewLevel,
@@ -1061,7 +1092,8 @@ namespace GSC.Respository.Screening
             return Templates.GroupBy(w => w.ProjectDesignTemplateId).Select(x => new DropDownDto
             {
                 Id = x.FirstOrDefault().ProjectDesignTemplateId,
-                Value = x.FirstOrDefault().ProjectDesignTemplate.TemplateName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                Value = x.FirstOrDefault().ScreeningTemplateName,
                 ExtraData = x.FirstOrDefault().ProjectDesignTemplate.DesignOrder
             }).OrderBy(x => x.ExtraData).ToList();
         }
@@ -1450,8 +1482,10 @@ namespace GSC.Respository.Screening
                 screeningNo = r.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 initial = r.ScreeningVisit.ScreeningEntry.Randomization.Initial,
                 randomizationNumber = r.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
-                visitName = r.ScreeningVisit.ProjectDesignVisit.DisplayName,
-                templateName = r.ProjectDesignTemplate.TemplateName,
+                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                visitName = r.ScreeningVisit.ScreeningVisitName,
+                // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                templateName = r.ScreeningTemplateName,
                 scheduleDate = r.ScheduleDate,
                 scheduleDateExcel = Convert.ToDateTime(r.ScheduleDate).ToString(dateformat)
             }).OrderBy(x => x.screeningNo).ThenBy(x => x.visitName).ThenBy(x => x.templateName).ToList();
@@ -1545,6 +1579,8 @@ namespace GSC.Respository.Screening
 
                 var repatTemplate = designTemplateDto.DeepCopy();
                 repatTemplate.DesignOrder = item.RepeatSeqNo.ToString();
+                repatTemplate.TemplateName = item.ScreeningTemplateName;
+
                 var values = GetScreeningValues(item.Id);
                 values.ForEach(t =>
                 {
@@ -1662,7 +1698,7 @@ namespace GSC.Respository.Screening
             if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
                 _screeningTemplateValueRepository.UpdateDefaultValue(designTemplateDto.Variables, screeningTemplateId);
 
-            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending)
+            if (screeningTemplateBasic.Status == ScreeningTemplateStatus.Pending || screeningTemplateBasic.Status == ScreeningTemplateStatus.InProcess)
                 _screeningTemplateValueRepository.UpdateTemplateConfigurationUploadRandomizationValue(designTemplateDto, screeningTemplateId);
 
             if (!firstTime)
@@ -1702,7 +1738,9 @@ namespace GSC.Respository.Screening
             var result = _emailConfigurationEditCheckRepository.ValidatWithScreeningTemplate(screeningTemplate);
             if (result != null && result.IsValid)
             {
-                _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfiguration(screeningTemplate);
+                var finaldata = _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfiguration(screeningTemplate);
+                _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfigurationSMS(finaldata);
+
             }
         }
 

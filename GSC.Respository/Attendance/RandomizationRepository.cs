@@ -282,10 +282,12 @@ namespace GSC.Respository.Attendance
                         if (!string.IsNullOrEmpty(result.ErrorMessage))
                         {
                             randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                            return randomizationNumberDto;
                         }
                         if (!string.IsNullOrEmpty(result.Result))
                         {
                             randomizationNumberDto.ErrorMessage = result.Result;
+                            return randomizationNumberDto;
                         }
                         if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
                         {
@@ -470,7 +472,7 @@ namespace GSC.Respository.Attendance
                 if (supplyManagementKitNumberSettings.IsDoseWiseKit)
                 {
                     randomizationNumberDto.IsDoseWiseKit = supplyManagementKitNumberSettings.IsDoseWiseKit;
-                    if(string.IsNullOrEmpty(randomization.Dosefactor))
+                    if (string.IsNullOrEmpty(randomization.Dosefactor))
                     {
                         randomizationNumberDto.ErrorMessage = "Dose not found for this patient";
                         return randomizationNumberDto;
@@ -554,7 +556,7 @@ namespace GSC.Respository.Attendance
                         return randomizationNumberDto;
                     }
 
-                    
+
                     foreach (var visititem in visitlist)
                     {
                         randomizationNumberDto.Dose = 0;
@@ -594,7 +596,7 @@ namespace GSC.Respository.Attendance
                                                 randomizationNumberDto.KitDoseList.Add(obj);
                                                 randomizationNumberDto.Dose += kitdose.SupplyManagementKIT.Dose;
                                                 totaldose = Convert.ToDecimal(randomization.Dosefactor) - (decimal)kitdose.SupplyManagementKIT.Dose;
-                                                if(totaldose < firstpriority)
+                                                if (totaldose < firstpriority)
                                                 {
                                                     break;
                                                 }
@@ -830,13 +832,13 @@ namespace GSC.Respository.Attendance
 
                     if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                     {
-                        kitdata = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
-                                          x.DeletedDate == null
-                                          && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
-                                          && x.SupplyManagementKIT.DeletedDate == null
-                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
-                                          && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
-                                          && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
+                        kitdata = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                                           x.DeletedDate == null
+                                           && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
+                                           && x.SupplyManagementKIT.DeletedDate == null
+                                           && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
+                                           && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                                           && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
                         randomizationNumberDto.KitCount = kitdata.Count;
 
                         if (kitdata == null || kitdata.Count == 0)
@@ -1313,6 +1315,7 @@ namespace GSC.Respository.Attendance
                 x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
                 x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
+                x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
             });
 
             return result;
@@ -1519,6 +1522,7 @@ namespace GSC.Respository.Attendance
                 var project = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
                 var parentproject = _context.Project.Where(x => x.Id == project.ParentProjectId).ToList().FirstOrDefault();
                 var investigator = _context.InvestigatorContact.Where(x => x.Id == project.InvestigatorContactId).ToList().FirstOrDefault();
+                var idVerification = _context.IDVerification.Where(x => x.UserId == randomization.UserId && x.DeletedDate == null).FirstOrDefault();
                 DashboardPatientDto dashboardPatientDto = new DashboardPatientDto();
                 dashboardPatientDto.projectId = project.Id;
                 dashboardPatientDto.studycode = parentproject.ProjectCode;
@@ -1549,6 +1553,15 @@ namespace GSC.Respository.Attendance
                 //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
                 //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
                 //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
+                if (idVerification != null)
+                {
+                    dashboardPatientDto.IsUpload = idVerification.IsUpload;
+                    dashboardPatientDto.VerifyStatus = idVerification.VerifyStatus;
+                }
+                else
+                {
+                    dashboardPatientDto.IsUpload = false;
+                }
                 return dashboardPatientDto;
             }
             else
@@ -1568,8 +1581,10 @@ namespace GSC.Respository.Attendance
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
-                            DisplayName = ((_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
-                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignVisit.DisplayName), //r.ProjectDesignVisit.DisplayName,
+                            DisplayName = (_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
+                                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault()
+                                // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                                : r.ScreeningVisitName, //r.ProjectDesignVisit.DisplayName,
                             ScreeningEntryId = r.ScreeningEntryId
                         }).ToList();
 
@@ -1584,8 +1599,10 @@ namespace GSC.Respository.Attendance
                             ScreeningTemplateId = r.Id,
                             ProjectDesignTemplateId = r.ProjectDesignTemplateId,
                             ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
+                            // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                             TemplateName = ((_jwtTokenAccesser.Language != 1) ?
-                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ProjectDesignTemplate.TemplateName),// r.ProjectDesignTemplate.TemplateName,
+                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language
+                && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ScreeningTemplateName),// r.ProjectDesignTemplate.TemplateName,
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
                             ScheduleDate = r.ScheduleDate,
@@ -2038,7 +2055,8 @@ namespace GSC.Respository.Attendance
                             ProjectDesignVisitId = item.VisitId,
                             KitNo = item.kitNo,
                             ProductCode = item.ProductCode,
-                            SupplyManagementKITDetailId = kitdata.Id
+                            SupplyManagementKITDetailId = kitdata.Id,
+                            SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId
                         };
                         _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
 
@@ -2047,6 +2065,7 @@ namespace GSC.Respository.Attendance
                         history.SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId;
                         history.Status = KitStatus.Allocated;
                         history.RoleId = _jwtTokenAccesser.RoleId;
+                        history.RandomizationId = obj.Id;
                         _supplyManagementKITRepository.InsertKitHistory(history);
                         _context.Save();
                     }
@@ -2075,7 +2094,8 @@ namespace GSC.Respository.Attendance
                                 ProjectDesignVisitId = randomizationNumberDto.VisitId,
                                 KitNo = randomizationNumberDto.KitNo,
                                 ProductCode = randomizationNumberDto.ProductCode,
-                                SupplyManagementKITDetailId = kitdata.Id
+                                SupplyManagementKITDetailId = kitdata.Id,
+                                SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId
                             };
                             _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
 
@@ -2084,6 +2104,7 @@ namespace GSC.Respository.Attendance
                             history.SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId;
                             history.Status = KitStatus.Allocated;
                             history.RoleId = _jwtTokenAccesser.RoleId;
+                            history.RandomizationId = obj.Id;
                             _supplyManagementKITRepository.InsertKitHistory(history);
                             _context.Save();
                             obj.KitNo = randomizationNumberDto.KitNo;
@@ -2103,24 +2124,27 @@ namespace GSC.Respository.Attendance
                                 kit.RandomizationId = obj.Id;
                                 kit.Status = KitStatus.Allocated;
                                 _context.SupplyManagementKITSeries.Update(kit);
-                            }
-                            var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITSequenceDetailDto
-                            {
-                                RandomizationId = obj.Id,
-                                ProjectDesignVisitId = randomizationNumberDto.VisitId,
-                                KitNo = randomizationNumberDto.KitNo,
-                                ProductCode = randomizationNumberDto.ProductCode,
-                                SupplyManagementKITSeriesdetailId = kitdata.Id
-                            };
-                            _supplyManagementKITRepository.InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
 
-                            SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
-                            history.SupplyManagementKITSeriesId = kitdata.SupplyManagementKITSeriesId;
-                            history.Status = KitStatus.Allocated;
-                            history.RoleId = _jwtTokenAccesser.RoleId;
-                            _supplyManagementKITRepository.InsertKitSequenceHistory(history);
-                            _context.Save();
-                            obj.KitNo = randomizationNumberDto.KitNo;
+                                var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITSequenceDetailDto
+                                {
+                                    RandomizationId = obj.Id,
+                                    ProjectDesignVisitId = randomizationNumberDto.VisitId,
+                                    KitNo = randomizationNumberDto.KitNo,
+                                    ProductCode = randomizationNumberDto.ProductCode,
+                                    SupplyManagementKITSeriesdetailId = kitdata.Id,
+                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId
+                                };
+                                _supplyManagementKITRepository.InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
+
+                                SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
+                                history.SupplyManagementKITSeriesId = kitdata.SupplyManagementKITSeriesId;
+                                history.Status = KitStatus.Allocated;
+                                history.RoleId = _jwtTokenAccesser.RoleId;
+                                history.RandomizationId = obj.Id;
+                                _supplyManagementKITRepository.InsertKitSequenceHistory(history);
+                                _context.Save();
+                                obj.KitNo = randomizationNumberDto.KitNo;
+                            }
                         }
                     }
                 }
@@ -2258,7 +2282,7 @@ namespace GSC.Respository.Attendance
                     {
                         emailconfig = emailconfiglist.FirstOrDefault();
                     }
-                    var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                    var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                     if (details.Count() > 0)
                     {
                         iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault().ProjectCode;
@@ -2311,7 +2335,7 @@ namespace GSC.Respository.Attendance
                         {
                             emailconfig = emailconfiglist.FirstOrDefault();
                         }
-                        var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                        var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
                         if (details.Count() > 0)
                         {
                             iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault().ProjectCode;
@@ -2572,7 +2596,7 @@ namespace GSC.Respository.Attendance
                 obj.ErrorMessage = "Kit is not available";
                 return obj;
             }
-            if (numerformate.IsIWRS == true && obj.KitDoseList.Count == 0 && obj.IsDoseWiseKit)
+            if (numerformate.IsIWRS == true && obj.KitDoseList != null && obj.KitDoseList.Count == 0 && obj.IsDoseWiseKit)
             {
                 UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = "Kit is not available";
@@ -2599,6 +2623,31 @@ namespace GSC.Respository.Attendance
             }
 
             return obj;
+        }
+
+        public List<ScreeningVisitForSubject> GetPatientVisitsForMobile()
+        {
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            if (randomization != null)
+            {
+                var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
+                            Where(x => x.ScreeningEntry.RandomizationId == randomization.Id && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate == null
+                            && (x.Status == ScreeningVisitStatus.Scheduled || x.Status == ScreeningVisitStatus.ReSchedule ||
+                            x.Status == ScreeningVisitStatus.Open || x.Status == ScreeningVisitStatus.InProgress ||
+                            x.Status == ScreeningVisitStatus.Missed || x.Status == ScreeningVisitStatus.Withdrawal ||
+                            x.Status == ScreeningVisitStatus.OnHold || x.Status == ScreeningVisitStatus.ScreeningFailure || x.Status == ScreeningVisitStatus.Completed)).
+                            Select(a => new ScreeningVisitForSubject
+                            {
+                                VisitName = a.ProjectDesignVisit.DisplayName + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
+                                VisitStatus = a.Status.GetDescription(),
+                                ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
+                                OffOnSite = a.ProjectDesignVisit.OffSite,
+                                ScheduleDate = a.ScheduleDate
+                            }).ToList();
+
+                return data;
+            }
+            return null;
         }
     }
 }

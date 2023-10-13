@@ -161,7 +161,8 @@ namespace GSC.Respository.Screening
                                           {
                                               ProjectId = x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId,
                                               RandomizationId = x.ScreeningVisit.ScreeningEntry.RandomizationId,
-                                              RandomizationNo = x.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber
+                                              RandomizationNo = x.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                                              RandomizationDate = x.ScreeningVisit.ScreeningEntry.Randomization.DateOfRandomization
                                           }).FirstOrDefault();
 
             if (projectdata == null)
@@ -193,6 +194,10 @@ namespace GSC.Respository.Screening
                         {
                             value = projectdata.RandomizationNo;
                         }
+                        if (allocationsetting.Type == SupplyManagementAllocationType.RandomizationDate)
+                        {
+                            value = projectdata.RandomizationDate.ToString();
+                        }
                         if (allocationsetting.Type == SupplyManagementAllocationType.ProductCode)
                         {
                             var uploadvisits = _context.SupplyManagementUploadFileVisit
@@ -211,9 +216,19 @@ namespace GSC.Respository.Screening
                         {
                             if (numbersetting.KitCreationType == KitCreationType.KitWise)
                             {
-                                var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
-                                  && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
-                                value = producttype != null ? producttype.KitNo : "";
+                                if (numbersetting.IsDoseWiseKit)
+                                {
+                                    var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                 && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).Select(s => s.KitNo).ToList();
+                                    value = producttype != null && producttype.Count > 0 ? String.Join(",", producttype.Distinct()) : "";
+                                }
+                                else
+                                {
+                                    var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
+                                 && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).FirstOrDefault();
+                                    value = producttype != null ? producttype.KitNo : "";
+                                }
+
                             }
                             if (numbersetting.KitCreationType == KitCreationType.SequenceWise)
                             {
@@ -254,7 +269,7 @@ namespace GSC.Respository.Screening
                             Update(data);
                         }
 
-                        
+
 
                     }
 
@@ -503,13 +518,15 @@ namespace GSC.Respository.Screening
                                      DesignOrder = template.ProjectDesignTemplate.DesignOrder,
                                      DesignOrderOfVariable = value == null ? 0 : value.ProjectDesignVariable.DesignOrder,
                                      TemplateId = template.ProjectDesignTemplateId,
-                                     TemplateName = template.ProjectDesignTemplate.TemplateName,
+                                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                                     TemplateName = template.ScreeningTemplateName,
                                      DomainName = template.ProjectDesignTemplate.Domain.DomainName,
                                      DomainCode = template.ProjectDesignTemplate.Domain.DomainCode,
                                      DomainId = template.ProjectDesignTemplate.DomainId,
                                      VisitId = template.ScreeningVisit.ProjectDesignVisitId,
                                      RepeatedVisit = template.ScreeningVisit.RepeatedVisitNumber,
-                                     Visit = template.ScreeningVisit.ProjectDesignVisit.DisplayName +
+                                     // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                                     Visit = template.ScreeningVisit.ScreeningVisitName +
                                           Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
                                      VariableName = value == null ? null : value.ProjectDesignVariable.VariableName,
                                      VariableId = value == null ? 0 : value.ProjectDesignVariableId,
@@ -683,8 +700,10 @@ namespace GSC.Respository.Screening
                                          ScreeningNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.ScreeningNumber : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                                          RandomizationNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.RandomizationNumber : "",
                                          RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
-                                         Visit = st.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
-                                         TemplateName = st.ProjectDesignTemplate.TemplateName,
+                                         // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
+                                         Visit = st.ScreeningVisit.ScreeningVisitName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
+                                         // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
+                                         TemplateName = st.ScreeningTemplateName,
                                          VariableAnnotation = pdv.Annotation,
                                          VariableTerm = stv.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
                                            from stvc in _context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == stv.Id && x.Value == "true")
@@ -1116,28 +1135,28 @@ namespace GSC.Respository.Screening
                         visitCell++;
 
                         TemplateList.OrderBy(z => z.VisitId).ThenBy(z => z.DesignOrder).Where(x => x.Visit == vst.Key).GroupBy(x => new { x.TemplateName, x.TemplateId }).ToList().ForEach(temp =>
-                         {
-                             worksheet.Row(1).Cell(visitCell).SetValue(temp.Key.TemplateName);
+                        {
+                            worksheet.Row(1).Cell(visitCell).SetValue(temp.Key.TemplateName);
 
-                             var FirstCell = visitCell;
+                            var FirstCell = visitCell;
 
-                             var ProjectDesignVariableList = _context.ProjectDesignVariable.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == temp.FirstOrDefault().TemplateId).OrderBy(x => x.DesignOrder).ToList();
-                             ProjectDesignVariableList.ForEach(variable =>
-                             {
-                                 worksheet.Row(2).Cell(visitCell).SetValue(variable.VariableName);
-                                 visitCell++;
-                             });
+                            var ProjectDesignVariableList = _context.ProjectDesignVariable.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == temp.FirstOrDefault().TemplateId).OrderBy(x => x.DesignOrder).ToList();
+                            ProjectDesignVariableList.ForEach(variable =>
+                            {
+                                worksheet.Row(2).Cell(visitCell).SetValue(variable.VariableName);
+                                visitCell++;
+                            });
 
-                             var ObjRange = new RangeOfTemplate();
-                             ObjRange.TemplateId = temp.FirstOrDefault().TemplateId;
-                             ObjRange.TemplateName = temp.Key.TemplateName;
-                             ObjRange.FirstCell = FirstCell;
-                             ObjRange.LastCell = FirstCell + ProjectDesignVariableList.Count() - 1;
-                             ObjRange.Visit = vst.Key;
-                             RangeList.Add(ObjRange);
+                            var ObjRange = new RangeOfTemplate();
+                            ObjRange.TemplateId = temp.FirstOrDefault().TemplateId;
+                            ObjRange.TemplateName = temp.Key.TemplateName;
+                            ObjRange.FirstCell = FirstCell;
+                            ObjRange.LastCell = FirstCell + ProjectDesignVariableList.Count() - 1;
+                            ObjRange.Visit = vst.Key;
+                            RangeList.Add(ObjRange);
 
-                             worksheet.Range(1, FirstCell, 1, FirstCell + ProjectDesignVariableList.Count() - 1).Merge(false);
-                         });
+                            worksheet.Range(1, FirstCell, 1, FirstCell + ProjectDesignVariableList.Count() - 1).Merge(false);
+                        });
                     });
 
                     VariableValueList.Where(x => x.SubjectNo != null).OrderByDescending(x => x.ScreeningTemplateValueId).ToList().ForEach(x =>

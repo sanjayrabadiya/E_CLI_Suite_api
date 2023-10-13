@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using GSC.Helper;
+using GSC.Shared.DocumentService;
 
 namespace GSC.Data.Dto.CTMS
 {
@@ -31,15 +32,21 @@ namespace GSC.Data.Dto.CTMS
         public int OffSet { get; set; }
         public int? SiteId { get; set; }
         public RefrenceType RefrenceType { get; set; }
+        public bool? PreApprovalStatus { get; set; } = false;
+        public bool? ApprovalStatus { get; set; } = false;
+        public FileModel FileModel { get; set; }
+        public string FileName { get; set; }
+        public string DocumentPath { get; set; }
+        public decimal? Percentage { get; set; }
 
     }
 
     public class DependentTaskParameterDto : BaseDto
     {
-     public int StudyPlanTaskId { get; set; }
-     public int DependentTaskId { get; set; }
-     public ActivityType ActivityType { get; set; }
-     public int OffSet { get; set; }
+        public int StudyPlanTaskId { get; set; }
+        public int DependentTaskId { get; set; }
+        public ActivityType ActivityType { get; set; }
+        public int OffSet { get; set; }
 
     }
 
@@ -49,5 +56,20 @@ namespace GSC.Data.Dto.CTMS
         public int Duration { get; set; }
         public DateTime StartDate { get; set; }
 
+    }
+
+    public class PreApprovalStatusDto
+    {
+        public int Id { get; set; }
+        public bool? PreApprovalStatus { get; set; }
+        public int? DependentTaskId { get; set; }
+    }
+    public class ApprovalStatusDto
+    {
+        public int Id { get; set; }
+        public bool? ApprovalStatus { get; set; } = false;
+        public FileModel FileModel { get; set; }
+        public string FileName { get; set; }
+        public string DocumentPath { get; set; }
     }
 }

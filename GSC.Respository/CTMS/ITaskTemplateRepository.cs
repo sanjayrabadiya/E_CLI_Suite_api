@@ -13,5 +13,6 @@ namespace GSC.Respository.CTMS
         List<TaskTemplateGridDto> GetStudyTrackerList(bool isDeleted);
         string Duplicate(TaskTemplate objSave);
         List<DropDownDto> GetTaskTemplateDropDown();
+        string AlreadyUSed(int id);
     }
 }

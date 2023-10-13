@@ -27,5 +27,6 @@ namespace GSC.Respository.Etmf
         void DeleteAllEtmfTableRecords(int id);
         byte[] DownloadPdf(string filename);
         List<CommonArtifactDocumentDto> GetExpiredDocuments(int projectId);
+        List<ChartReport> GetChartDocumentReport(int id, EtmfChartType? chartType);
     }
 }

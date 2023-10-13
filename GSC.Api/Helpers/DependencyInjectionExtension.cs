@@ -46,6 +46,9 @@ using GSC.Respository.SupplyManagement;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Project.StudyLevelFormSetup;
+using GSC.Respository.LabReportManagement;
+using GSC.Respository.IDVerificationSystem;
+using GSC.Respository.FirebaseNotification;
 
 namespace GSC.Api.Helpers
 {
@@ -416,6 +419,22 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEmailConfigurationEditCheckDetailRepository, EmailConfigurationEditCheckDetailRepository>();
             services.AddScoped<IEmailConfigurationEditCheckRoleRepository, EmailConfigurationEditCheckRoleRepository>();
             services.AddScoped<IVariabeLabelLanguageRepository, VariabeLabelLanguageRepository>();
+            services.AddScoped<IWorkflowVisitRepository, WorkflowVisitRepository>();
+            services.AddScoped<IWorkflowTemplateRepository, WorkflowTemplateRepository>();
+            services.AddScoped<IProjectDesignVisitRestrictionRepository, ProjectDesignVisitRestrictionRepository>();
+            services.AddScoped<IVisitEmailConfigurationRolesRepository, VisitEmailConfigurationRolesRepository>();
+            services.AddScoped<IVisitEmailConfigurationRepository, VisitEmailConfigurationRepository>();
+            services.AddScoped<ILettersFormateRepository, LettersFormateRepository>();
+            services.AddScoped<ILettersActivityRepository, LettersActivityRepository>();
+            services.AddScoped<IDashboardCompanyRepository, DashboardCompanyRepository>();
+            services.AddScoped<ILabReportRepository, LabReportRepository>();
+            services.AddScoped<IWorkingDayRepository, WorkingDayRepository>();
+            services.AddScoped<IIDVerificationRepository, IDVerificationRepository>();
+            services.AddScoped<IDesignationRepository, DesignationRepository>();
+            services.AddScoped<ITaskResourceRepository, TaskResourceRepository>();
+            services.AddHttpClient<IFirebaseNotification, FirebaseNotification>();
+            services.AddScoped<IStudyPlanResourceRepository, StudyPlanResourceRepository>();
+            services.AddScoped<ICurrencyRepository, CurrencyRepository>();
         }
     }
 }

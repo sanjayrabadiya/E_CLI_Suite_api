@@ -21,5 +21,6 @@ namespace GSC.Data.Entities.Project.Design
         public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public List<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
+        public bool OffSite { get; set; }
     }
 }

@@ -35,6 +35,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? SupplyManagementKITDetailId { get; set; }
 
         public string ExpiryMesage { get; set; }
+
+        public int? SupplyManagementShipmentId { get; set; }
     }
     public class SupplyManagementVisitKITDetailGridDto : BaseAuditDto
     {
@@ -60,5 +62,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public int ParentProjectId { get; set; }
 
         public int ProjectId { get; set; }
+
+        public int? SupplyManagementShipmentId { get; set; }
+
+        public int? SupplyManagementKITDetailId { get; set; }
     }
 }

@@ -62,7 +62,7 @@ namespace GSC.Respository.SupplyManagement
                 {
                     t.Users = string.Join(",", Users.Distinct());
                 }
-                if(t.AuditReasonId > 0)
+                if (t.AuditReasonId > 0)
                 {
                     t.AuditReasonName = _context.AuditReason.Where(s => s.Id == t.AuditReasonId).FirstOrDefault().ReasonName;
                 }
@@ -101,6 +101,16 @@ namespace GSC.Respository.SupplyManagement
             }
         }
 
+        public void DelectChildWorkflowEmailUser(SupplyManagementApprovalDto obj, int id)
+        {
+            var list = _context.SupplyManagementApprovalDetails.Where(s => s.DeletedDate == null && s.SupplyManagementApprovalId == id).ToList();
+            if (list.Count > 0)
+            {
+                _context.SupplyManagementApprovalDetails.RemoveRange(list);
+                _context.Save();
+            }
+        }
+
         public string Duplicate(SupplyManagementApprovalDto obj)
         {
             if (obj.Id > 0)
@@ -128,14 +138,14 @@ namespace GSC.Respository.SupplyManagement
 
         public List<DropDownDto> GetProjectRightsRoleShipmentApproval(int projectId)
         {
-            
+
             var projectrights = _context.ProjectRight.Include(x => x.User).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                               .Select(x => new DropDownDto { Id = x.RoleId, Value = x.role.RoleName }).Distinct().ToList();
 
             return projectrights; ;
 
         }
-        public List<DropDownDto> GetRoleUserShipmentApproval(int roleId,int projectId)
+        public List<DropDownDto> GetRoleUserShipmentApproval(int roleId, int projectId)
         {
 
             var projectrights = _context.ProjectRight.Include(x => x.User).Where(x => x.ProjectId == projectId && x.RoleId == roleId && x.DeletedDate == null)
@@ -147,7 +157,7 @@ namespace GSC.Respository.SupplyManagement
 
         public void SendShipmentWorkflowApprovalEmail(SupplyManagementShipmentApproval supplyManagementShipmentApproval)
         {
-            
+
             IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == supplyManagementShipmentApproval.SupplyManagementRequestId).FirstOrDefault();
             if (request != null)

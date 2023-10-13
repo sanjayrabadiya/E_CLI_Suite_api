@@ -33,18 +33,15 @@ namespace GSC.Api.Controllers.CTMS
             _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-
             _jwtTokenAccesser = jwtTokenAccesser;
         }
         // GET: api/<controller>
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-
             var resourcetype = _resourcetypeRepository.GetResourceTypeList(isDeleted);
             return Ok(resourcetype);
         }
-
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
@@ -54,7 +51,6 @@ namespace GSC.Api.Controllers.CTMS
             var resourcetypeDto = _mapper.Map<ResourceTypeDto>(resourcetype);
             return Ok(resourcetypeDto);
         }
-
 
         [HttpPost]
         public IActionResult Post([FromBody] ResourceTypeDto resourcetypeDto)
@@ -110,7 +106,6 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
-
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
@@ -132,11 +127,51 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
+        //[HttpGet]
+        //[Route("GetResourceTypeDropDown")]
+        //public IActionResult GetResourceTypeDropDown()
+        //{
+        //    return Ok(_resourcetypeRepository.GetResourceTypeDropDown());
+        //}
+
         [HttpGet]
-        [Route("GetResourceTypeDropDown")]
-        public IActionResult GetResourceTypeDropDown()
+        [Route("GetUnitTypeDropDown")]
+        public IActionResult GetUnitTypeDropDown()
         {
-            return Ok(_resourcetypeRepository.GetResourceTypeDropDown());
+            return Ok(_resourcetypeRepository.GetUnitTypeDropDown());
+        }
+
+        [HttpGet]
+        [Route("GetDesignationDropDown")]
+        public IActionResult GetDesignationDropDown()
+        {
+            return Ok(_resourcetypeRepository.GetDesignationDropDown());
+        }
+        [HttpGet]
+        [Route("GetDesignationDropDown/{resourceTypeID}/{resourceSubTypeID}")]
+        public IActionResult getSelectDateDrop(int resourceTypeID, int resourceSubTypeID)
+        {
+            return Ok(_resourcetypeRepository.GetDesignationDropDown(resourceTypeID, resourceSubTypeID));
+        }
+
+        [HttpGet]
+        [Route("GetNameOfMaterialDropDown/{resourceTypeID}/{resourceSubTypeID}")]
+        public IActionResult getNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID)
+        {
+            return Ok(_resourcetypeRepository.GetNameOfMaterialDropDown(resourceTypeID, resourceSubTypeID));
+
+        }
+        [HttpGet]
+        [Route("GetRollUserDropDown/{designationID}")]
+        public IActionResult getSelectDateDrop(int designationID)
+        {
+            return Ok(_resourcetypeRepository.GetRollUserDropDown(designationID));
+        }
+        [HttpGet]
+        [Route("GetCurrencyDropDown")]
+        public IActionResult GetCurrencyDropDown()
+        {
+            return Ok(_resourcetypeRepository.GetCurrencyDropDown());
         }
     }
 }

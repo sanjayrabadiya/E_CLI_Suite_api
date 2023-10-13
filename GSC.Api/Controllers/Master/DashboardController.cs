@@ -275,6 +275,13 @@ namespace GSC.Api.Controllers.Master
             return Ok(queries);
         }
         [HttpGet]
+        [Route("GetCTMSPreRequisiteDashboard/{ProjectId}/{countryId}/{SiteId}")]
+        public IActionResult GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId)
+        {
+            var queries = _dashboardRepository.GetCTMSPreRequisiteDashboard(projectId, countryId, siteId);
+            return Ok(queries);
+        }
+        [HttpGet]
         [Route("GetCTMSMonitoringActionPointChartDashboard/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
         {
@@ -358,5 +365,74 @@ namespace GSC.Api.Controllers.Master
             return Ok(queries);
         }
 
+        [HttpGet]
+        [Route("GetEnrolledGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetEnrolledGraph(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.GetEnrolledGraph(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetScreenedGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetScreenedGraph(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.GetScreenedGraph(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetRandomizedGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetRandomizedGraph(int projectId, int countryId, int siteId)
+        {
+            var result = _dashboardRepository.GetRandomizedGraph(projectId, countryId, siteId);
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardNumberOfSubjectsGrid/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardNumberOfSubjectsGrid(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
+        {
+            var subjectsGrid = _dashboardRepository.GetDashboardNumberOfSubjectsGrid(isDeleted, metricsId, projectId, countryId, siteId);
+            return Ok(subjectsGrid);
+        }
+
+        [HttpGet]
+        [Route("GetIMPShipmentDetailsCount/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetIMPShipmentDetailsCount(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetIMPShipmentDetailsCount(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetTreatmentvsArmData/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetTreatmentvsArmData(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetTreatmentvsArmData(projectId, countryId, siteId));
+        }
+
+        [HttpGet]
+        [Route("GetFactorDataReportDashbaord/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetFactorDataReportDashbaord(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetFactorDataReportDashbaord(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetFactorDataReportDashbaordCount/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetFactorDataReportDashbaordCount(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetFactorDataReportDashbaordCount(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetIMPShipmentDetailsData/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetIMPShipmentDetailsData(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetVisitWiseAllocationData/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetVisitWiseAllocationData(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetVisitWiseAllocationData(projectId, countryId, siteId));
+        }
     }
 }

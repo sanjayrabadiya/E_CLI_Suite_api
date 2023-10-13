@@ -2,6 +2,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
+using GSC.Shared.Generic;
 
 namespace GSC.Data.Dto.Master
 {
@@ -13,7 +14,10 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Document Name is required.")]
         public string Name { get; set; }
 
-      //  public int? CompanyId { get; set; }
+        //  public int? CompanyId { get; set; }
+        public string Description { get; set; }
+        public int? DocumentSize { get; set; }
+        public DocumentPickFromType? PickFromType { get; set; }
 
         public DocumentType DocumentType { get; set; }
         public int? CompanyId { get; set; }
@@ -23,6 +27,10 @@ namespace GSC.Data.Dto.Master
     {
         public int DocumentTypeId { get; set; }
         public string Name { get; set; }
+        public string Description { get; set; }
+        public int? DocumentSize { get; set; }
+        public string PickFromTypeName { get; set; }
+        public DocumentPickFromType? PickFromType { get; set; }
         public DocumentType DocumentType { get; set; }
     }
 }

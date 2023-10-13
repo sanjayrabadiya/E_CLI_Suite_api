@@ -641,5 +641,12 @@ namespace GSC.Api.Controllers.Attendance
             }
             return Ok(randomizationDto);
         }
+
+        [HttpGet("GetPatientVisitsForMobile")]
+        public IActionResult GetPatientVisitsForMobile()
+        {
+            var data = _randomizationRepository.GetPatientVisitsForMobile();
+            return Ok(data);
+        }
     }
 }

@@ -9,6 +9,7 @@ using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 using System.Text;
 
 namespace GSC.Respository.CTMS
@@ -17,6 +18,7 @@ namespace GSC.Respository.CTMS
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
+        private readonly IGSCContext _context;
 
         public TaskTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -24,6 +26,7 @@ namespace GSC.Respository.CTMS
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _context = context;
 
         }
         public List<DropDownDto> GetTaskTemplateDropDown()
@@ -42,6 +45,14 @@ namespace GSC.Respository.CTMS
         {
             if (All.Any(x => x.Id != objSave.Id && x.TemplateCode == objSave.TemplateCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Template Code : " + objSave.TemplateCode;
+
+            return "";
+        }
+        //add by mitul on 03-10-2023 #GS1-I3054
+        public string AlreadyUSed(int id)
+        {
+            if (_context.StudyPlan.Where(x=>x.TaskTemplateId == id && x.DeletedDate==null).Count()>0)
+                return "Tracker already in use - Should not be Deleted";
 
             return "";
         }

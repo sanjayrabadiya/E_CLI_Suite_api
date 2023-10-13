@@ -33,6 +33,10 @@ namespace GSC.Data.Entities.Project.EditCheck
         public int? FetchingProjectDesignTemplateId { get; set; }
         public int? FetchingProjectDesignVariableId { get; set; }
 
+        public int? ProjectDesignVisitId { get; set; }
+
+        public ProjectDesignVisit ProjectDesignVisit { get; set; }
+
 
     }
 }
