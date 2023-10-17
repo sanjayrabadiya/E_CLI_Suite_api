@@ -5,10 +5,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AgoraDynamicKey" Version="1.0.0" />
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="ClosedXML" Version="0.95.4" />
-    <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
     <PackageReference Include="IronPdf" Version="2023.7.4" />
     <PackageReference Include="OpenTok" Version="3.6.0" />

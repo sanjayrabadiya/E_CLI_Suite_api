@@ -44,7 +44,5 @@ namespace GSC.Shared.Configuration
     {
         public string API_KEY { get; set; }
         public string API_SECRET { get; set; }
-        public string APP_ID { get; set; }
-        public string APP_CERTIFICATE { get; set; }
     }
 }

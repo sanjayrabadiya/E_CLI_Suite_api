@@ -5,9 +5,12 @@ using GSC.Domain.Context;
 using GSC.Shared.Configuration;
 using GSC.Shared.JWTAuth;
 using Microsoft.Extensions.Options;
-using AgoraIO.Rtm;
-using AgoraIO.Media;
+using OpenTokSDK;
+using OpenTokSDK.Util;
 using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
@@ -26,22 +29,16 @@ namespace GSC.Respository.InformConcent
         }
         public EConsentVideoDto GenerateVideoSessionandToken(int ReceiverUserId)
         {
-            //ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
-            //OpenTok opentok = new OpenTok(Convert.ToInt32(_VideoAPISettings.Value.API_KEY), _VideoAPISettings.Value.API_SECRET);
-            //string sessionId = opentok.CreateSession("",MediaMode.ROUTED, ArchiveMode.ALWAYS).Id;
-            //string token = opentok.GenerateToken(sessionId);
-            //string token2 = opentok.GenerateToken(sessionId);
-            //uint privilegeExpiredTs =
-            string channelName = $"CHANNEL-{_jwtTokenAccesser.UserId}";
-            uint _expireTimeInSeconds = 3600;
-            uint privilegeExpiredTs = _expireTimeInSeconds + (uint)Utils.getTimestamp();
-            string token1 = RtcTokenBuilder.buildTokenWithUID(_VideoAPISettings.Value.APP_ID, _VideoAPISettings.Value.APP_CERTIFICATE, channelName, (uint)_jwtTokenAccesser.UserId, RtcTokenBuilder.Role.RolePublisher, privilegeExpiredTs);
-            string token2 = RtcTokenBuilder.buildTokenWithUID(_VideoAPISettings.Value.APP_ID, _VideoAPISettings.Value.APP_CERTIFICATE, channelName, (uint)ReceiverUserId, RtcTokenBuilder.Role.RoleSubscriber, privilegeExpiredTs);
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            OpenTok opentok = new OpenTok(Convert.ToInt32(_VideoAPISettings.Value.API_KEY), _VideoAPISettings.Value.API_SECRET);
+            string sessionId = opentok.CreateSession("",MediaMode.ROUTED, ArchiveMode.ALWAYS).Id;
+            string token = opentok.GenerateToken(sessionId);
+            string token2 = opentok.GenerateToken(sessionId);
             EConsentVideoDto eConsentVideoDto = new EConsentVideoDto();
-            eConsentVideoDto.SessionId = channelName;
-            eConsentVideoDto.Publishertoken = token1;
+            eConsentVideoDto.SessionId = sessionId;
+            eConsentVideoDto.Publishertoken = token;
             eConsentVideoDto.Subscribertoken = token2;
-            eConsentVideoDto.ApiKey = "NA";
+            eConsentVideoDto.ApiKey = _VideoAPISettings.Value.API_KEY;
             eConsentVideoDto.SenderUserId = _jwtTokenAccesser.UserId;
             eConsentVideoDto.ReceiverUserId = ReceiverUserId;
             eConsentVideoDto.RequestDelivered = false;
