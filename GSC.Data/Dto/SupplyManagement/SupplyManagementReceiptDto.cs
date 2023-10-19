@@ -93,6 +93,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string Status { get; set; }
 
-       
+        public string ProductTypeName { get; set; }
+
+
     }
 }

@@ -85,17 +85,17 @@ namespace GSC.Api
             app.UseStaticFiles();
             var doc = _configuration["DocPath:DocDir"];
 
-            if (!string.IsNullOrEmpty(doc))
-            {
-                if (!Directory.Exists(doc))
-                    Directory.CreateDirectory(doc);
-                app.UseStaticFiles(new StaticFileOptions
-                {
-                    FileProvider = new PhysicalFileProvider(
-                        Path.Combine(Directory.GetCurrentDirectory(), "TempDoc")),
-                    RequestPath = "/static"
-                });
-            }
+            //if (!string.IsNullOrEmpty(doc))
+            //{
+            //    if (!Directory.Exists(doc))
+            //        Directory.CreateDirectory(doc);
+            //    app.UseStaticFiles(new StaticFileOptions
+            //    {
+            //        FileProvider = new PhysicalFileProvider(
+            //            Path.Combine(Directory.GetCurrentDirectory(), "TempDoc")),
+            //        RequestPath = "/static"
+            //    });
+            //}
 
             app.UseSwagger();
 

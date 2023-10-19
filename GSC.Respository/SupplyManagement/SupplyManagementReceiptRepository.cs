@@ -179,7 +179,7 @@ namespace GSC.Respository.SupplyManagement
                 var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault();
                 if (settings.KitCreationType == KitCreationType.KitWise)
                 {
-                    return _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
+                    return _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
                                     x.SupplyManagementShipmentId == id
                                     && x.DeletedDate == null).Select(x => new KitAllocatedList
                                     {
@@ -188,7 +188,8 @@ namespace GSC.Respository.SupplyManagement
                                         VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                                         SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                         Comments = x.Comments,
-                                        Status = KitStatus.Shipped.ToString()
+                                        Status = KitStatus.Shipped.ToString(),
+                                        ProductTypeName = settings.IsBlindedStudy == true ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
                                     }).OrderByDescending(x => x.KitNo).ToList();
                 }
                 else
@@ -201,7 +202,8 @@ namespace GSC.Respository.SupplyManagement
                                         KitNo = x.KitNo,
                                         SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                         Comments = x.Comments,
-                                        Status = KitStatus.Shipped.ToString()
+                                        Status = KitStatus.Shipped.ToString(),
+                                        ProductTypeName = settings.IsBlindedStudy == true ? "" : x.TreatmentType
                                     }).OrderByDescending(x => x.KitNo).ToList();
                 }
 
@@ -215,7 +217,7 @@ namespace GSC.Respository.SupplyManagement
                 if (settings.KitCreationType == KitCreationType.KitWise)
                 {
 
-                    return _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
+                    return _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
                         x.SupplyManagementShipmentId == obj.SupplyManagementShipmentId
                         && x.DeletedDate == null).Select(x => new KitAllocatedList
                         {
@@ -224,7 +226,8 @@ namespace GSC.Respository.SupplyManagement
                             VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
                             SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
                             Comments = x.Comments,
-                            Status = x.Status.GetDescription()
+                            Status = x.Status.GetDescription(),
+                            ProductTypeName = settings.IsBlindedStudy == true ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
                         }).OrderByDescending(x => x.KitNo).ToList();
                 }
                 else
@@ -237,7 +240,8 @@ namespace GSC.Respository.SupplyManagement
                             KitNo = x.KitNo,
                             SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
                             Comments = x.Comments,
-                            Status = x.Status.GetDescription()
+                            Status = x.Status.GetDescription(),
+                            ProductTypeName = settings.IsBlindedStudy == true ? "" : x.TreatmentType
                         }).OrderByDescending(x => x.KitNo).ToList();
                 }
             }

@@ -41,7 +41,7 @@ namespace GSC.Respository.Reports
             List<RandomizationIWRSReportData> list = new List<RandomizationIWRSReportData>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
-            if (setting.KitCreationType == KitCreationType.SequenceWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 list = _context.SupplyManagementKITSeriesDetail.Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.ProjectDesignVisit).Include(x => x.SupplyManagementKITSeries).ThenInclude(x => x.Project).Include(x => x.Randomization).
                        Where(x => x.DeletedDate == null && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
@@ -73,7 +73,7 @@ namespace GSC.Respository.Reports
                     });
                 }
             }
-            if (setting.KitCreationType == KitCreationType.KitWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
                 list = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementKIT).ThenInclude(x => x.Project).
                        Where(x => x.DeletedDate == null && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
@@ -120,12 +120,12 @@ namespace GSC.Respository.Reports
                     });
                 }
             }
-            if (randomizationIWRSReport.SiteId > 0)
+            if (list != null && list.Count > 0 && randomizationIWRSReport.SiteId > 0)
             {
                 list = list.Where(x => x.SiteId == randomizationIWRSReport.SiteId).ToList();
             }
 
-            if (randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
+            if (list != null && list.Count > 0 && randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
             {
                 list = list.Where(x => randomizationIWRSReport.VisitIds.Contains((int)x.VisitId)).ToList();
             }
@@ -180,7 +180,7 @@ namespace GSC.Respository.Reports
             List<RandomizationIWRSReportData> list = new List<RandomizationIWRSReportData>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
-            if (setting.KitCreationType == KitCreationType.SequenceWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 list = _context.SupplyManagementKITSeriesDetail.Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.ProjectDesignVisit).Include(x => x.SupplyManagementKITSeries).ThenInclude(x => x.Project).Include(x => x.Randomization).
                        Where(x => x.DeletedDate == null && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
@@ -212,7 +212,7 @@ namespace GSC.Respository.Reports
                     });
                 }
             }
-            if (setting.KitCreationType == KitCreationType.KitWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
                 list = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementKIT).ThenInclude(x => x.Project).
                        Where(x => x.DeletedDate == null && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
@@ -259,12 +259,12 @@ namespace GSC.Respository.Reports
                     });
                 }
             }
-            if (randomizationIWRSReport.SiteId > 0)
+            if (list != null && list.Count > 0 && randomizationIWRSReport.SiteId > 0)
             {
                 list = list.Where(x => x.SiteId == randomizationIWRSReport.SiteId).ToList();
             }
 
-            if (randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
+            if (list != null && list.Count > 0 && randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
             {
                 list = list.Where(x => randomizationIWRSReport.VisitIds.Contains((int)x.VisitId)).ToList();
             }
@@ -397,7 +397,7 @@ namespace GSC.Respository.Reports
             }
 
 
-            if (setting.KitCreationType == KitCreationType.SequenceWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 List<SupplyManagementKITSeries> kitpack = new List<SupplyManagementKITSeries>();
                 var detailkit = _context.SupplyManagementKITSeriesDetail.Where(s => s.DeletedDate == null && productreciptIds.Contains(s.ProductReceiptId)).Select(s => s.SupplyManagementKITSeriesId).ToList();
@@ -520,7 +520,7 @@ namespace GSC.Respository.Reports
                     });
                 }
             }
-            if (setting.KitCreationType == KitCreationType.KitWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
                 List<SupplyManagementKITDetail> detail = new List<SupplyManagementKITDetail>();
                 if (productreciptIds.Count > 0)
@@ -737,7 +737,7 @@ namespace GSC.Respository.Reports
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
 
-            if (randomizationIWRSReport.ActionType == ProductAccountabilityActions.KitPack)
+            if (setting != null && randomizationIWRSReport.ActionType == ProductAccountabilityActions.KitPack)
             {
                 var kitpack = _context.SupplyManagementKITSeries.
                     Include(x => x.Project).
@@ -818,7 +818,7 @@ namespace GSC.Respository.Reports
                     });
                 }
             }
-            if (setting.KitCreationType == KitCreationType.KitWise)
+            if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
                 var kitpack = _context.SupplyManagementKITDetail.
                     Include(x => x.SupplyManagementKIT).

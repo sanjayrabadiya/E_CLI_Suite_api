@@ -46,24 +46,12 @@ namespace GSC.Api.Controllers.Report
         [Route("GetRandomizationKitReport")]
         public IActionResult GetRandomizationKitReport([FromBody] RandomizationIWRSReport search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return _pharmacyReportRepository.GetRandomizationKitReport(search);
         }
         [HttpPost]
         [Route("GetRandomizationKitReportData")]
         public IActionResult GetRandomizationKitReportData([FromBody] RandomizationIWRSReport search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return Ok(_pharmacyReportRepository.GetRandomizationKitReportData(search));
         }
 
@@ -71,48 +59,24 @@ namespace GSC.Api.Controllers.Report
         [Route("GetProductAccountabilityCentralReport")]
         public IActionResult GetProductAccountabilityCentralReport([FromBody] ProductAccountabilityCentralReportSearch search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return _pharmacyReportRepository.GetProductAccountabilityCentralReport(search);
         }
         [HttpPost]
         [Route("GetProductAccountabilitySiteReport")]
         public IActionResult GetProductAccountabilitySiteReport([FromBody] ProductAccountabilityCentralReportSearch search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return _pharmacyReportRepository.GetProductAccountabilitySiteReport(search);
         }
         [HttpPost]
         [Route("GetProductShipmentReport")]
         public IActionResult GetProductShipmentReport([FromBody] ProductAccountabilityCentralReportSearch search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return _pharmacyReportRepository.GetProductShipmentReport(search);
         }
         [HttpPost]
         [Route("GetProductShipmentReportData")]
         public IActionResult GetProductShipmentReportData([FromBody] ProductAccountabilityCentralReportSearch search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return Ok(_pharmacyReportRepository.GetProductShipmentReportData(search));
         }
 
@@ -141,26 +105,14 @@ namespace GSC.Api.Controllers.Report
         [Route("GetKitHistoryReport")]
         public IActionResult GetKitHistoryReport([FromBody] KitHistoryReportSearchModel search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return Ok(_pharmacyReportRepository.GetKitHistoryReport(search));
         }
         [HttpPost]
         [Route("GetKitHistoryReportExcelToExcel")]
         public IActionResult GetKitHistoryReportExcelToExcel([FromBody] KitHistoryReportSearchModel search)
         {
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == search.ProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting");
-                return BadRequest(ModelState);
-            }
             return _pharmacyReportRepository.GetKitHistoryReportExcelToExcel(search);
         }
-        
+
     }
 }
