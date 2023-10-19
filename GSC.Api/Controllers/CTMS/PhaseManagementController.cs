@@ -3,10 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
-using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
-using GSC.Respository.UserMgt;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -17,25 +14,15 @@ namespace GSC.Api.Controllers.CTMS
     {
         
         private readonly IPhaseManagementRepository _phasemanagementRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public PhaseManagementController(IPhaseManagementRepository phasemanagementRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _phasemanagementRepository = phasemanagementRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
 

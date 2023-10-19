@@ -4,31 +4,25 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.CTMS
 {
     public class CtmsMonitoringReportVariableValueRepository : GenericRespository<CtmsMonitoringReportVariableValue>, ICtmsMonitoringReportVariableValueRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly ICtmsMonitoringReportVariableValueAuditRepository _ctmsMonitoringReportVariableValueAuditRepository;
         private readonly ICtmsMonitoringReportVariableValueChildRepository _ctmsMonitoringReportVariableValueChildRepository;
         //private readonly ICtmsMonitoringReportRepository _ctmsMonitoringReportRepository;
-        public CtmsMonitoringReportVariableValueRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
+        public CtmsMonitoringReportVariableValueRepository(IGSCContext context, IMapper mapper,
             ICtmsMonitoringReportVariableValueAuditRepository ctmsMonitoringReportVariableValueAuditRepository,
             ICtmsMonitoringReportVariableValueChildRepository ctmsMonitoringReportVariableValueChildRepository)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _ctmsMonitoringReportVariableValueAuditRepository = ctmsMonitoringReportVariableValueAuditRepository;

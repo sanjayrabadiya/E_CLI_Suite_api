@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 
@@ -15,9 +14,7 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "Task Name is required.")]
         public string TaskName { get; set; }
         public int? ParentId { get; set; }
-        //[Required(ErrorMessage = "Start Date is required.")]
         public DateTime? StartDate { get; set; }
-        //[Required(ErrorMessage = "End Date is required.")]
         public DateTime? EndDate { get; set; }
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
@@ -38,9 +35,7 @@ namespace GSC.Data.Dto.CTMS
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
         public decimal? Percentage { get; set; }
-
     }
-
     public class DependentTaskParameterDto : BaseDto
     {
         public int StudyPlanTaskId { get; set; }
@@ -49,7 +44,6 @@ namespace GSC.Data.Dto.CTMS
         public int OffSet { get; set; }
 
     }
-
     public class NextWorkingDateParameterDto
     {
         public int StudyPlanId { get; set; }
@@ -57,7 +51,6 @@ namespace GSC.Data.Dto.CTMS
         public DateTime StartDate { get; set; }
 
     }
-
     public class PreApprovalStatusDto
     {
         public int Id { get; set; }

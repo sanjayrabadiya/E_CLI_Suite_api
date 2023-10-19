@@ -6,7 +6,6 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Master
 {

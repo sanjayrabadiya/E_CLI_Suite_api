@@ -4,27 +4,21 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using static GSC.Common.WorkingDayHelper;
 
 namespace GSC.Respository.CTMS
 {
     public class WeekEndMasterRepository : GenericRespository<WeekEndMaster>, IWeekEndMasterRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         public WeekEndMasterRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }

@@ -1,15 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.CTMS;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
@@ -23,7 +20,6 @@ namespace GSC.Respository.CTMS
     public class CtmsMonitoringReportReviewRepository : GenericRespository<CtmsMonitoringReportReview>, ICtmsMonitoringReportReviewRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IUserRepository _userRepository;
@@ -31,20 +27,18 @@ namespace GSC.Respository.CTMS
         private readonly IProjectRepository _projectRepository;
 
         public CtmsMonitoringReportReviewRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IProjectRightRepository projectRightRepository,
+            IJwtTokenAccesser jwtTokenAccesser, IProjectRightRepository projectRightRepository,
             IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
             IProjectRepository projectRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _context = context;
             _projectRightRepository = projectRightRepository;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
             _projectRepository = projectRepository;
         }
-
 
         public List<CtmsMonitoringReportReviewDto> UserRoles(int Id, int ProjectId)
         {

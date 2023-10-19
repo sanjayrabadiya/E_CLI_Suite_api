@@ -269,9 +269,9 @@ namespace GSC.Api.Controllers.Master
         }
         [HttpGet]
         [Route("GetCTMSMonitoringPlanDashboard/{ProjectId}/{countryId}/{SiteId}")]
-        public IActionResult getCTMSMonitoringPlanDashboard(int projectId,int countryId, int siteId)
+        public IActionResult GetCTMSMonitoringPlanDashboard(int projectId,int countryId, int siteId)
         {
-            var queries = _dashboardRepository.getCTMSMonitoringPlanDashboard(projectId, countryId, siteId);
+            var queries = _dashboardRepository.GetCTMSMonitoringPlanDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
         [HttpGet]
@@ -283,9 +283,9 @@ namespace GSC.Api.Controllers.Master
         }
         [HttpGet]
         [Route("GetCTMSMonitoringActionPointChartDashboard/{ProjectId}/{countryId}/{siteId}")]
-        public IActionResult getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
+        public IActionResult GetCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId)
         {
-            var queries = _dashboardRepository.getCTMSMonitoringActionPointChartDashboard(projectId, countryId, siteId);
+            var queries = _dashboardRepository.GetCTMSMonitoringActionPointChartDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
 
@@ -293,7 +293,7 @@ namespace GSC.Api.Controllers.Master
         [Route("GetCTMSMonitoringActionPointGridDashboard/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult GetCTMSMonitoringActionPointGridDashboard(int projectId, int countryId, int siteId)
         {
-            var queries = _dashboardRepository.getCTMSOpenActionDashboard(projectId, countryId, siteId);
+            var queries = _dashboardRepository.GetCTMSOpenActionDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
 
@@ -301,7 +301,7 @@ namespace GSC.Api.Controllers.Master
         [Route("GetCTMSMonitoringQueriesGridDashboard/{ProjectId}/{countryId}/{siteId}")]
         public IActionResult GetCTMSMonitoringQueriesGridDashboard(int projectId, int countryId, int siteId)
         {
-            var queries = _dashboardRepository.getCTMSQueriesDashboard(projectId, countryId, siteId);
+            var queries = _dashboardRepository.GetCTMSQueriesDashboard(projectId, countryId, siteId);
             return Ok(queries);
         }
 

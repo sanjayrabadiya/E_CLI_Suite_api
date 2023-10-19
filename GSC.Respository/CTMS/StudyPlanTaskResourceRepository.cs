@@ -5,12 +5,9 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using GSC.Helper;
-using GSC.Common;
+
 
 namespace GSC.Respository.CTMS
 {

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
-using DocumentFormat.OpenXml.Drawing.Charts;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Api.Controllers.Common;
 using GSC.Common;
 using GSC.Common.UnitOfWork;
@@ -16,7 +12,6 @@ using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
 using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -35,7 +30,7 @@ namespace GSC.Api.Controllers.CTMS
 
         public StudyPlanTaskController(IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository,
-            ITaskMasterRepository taskMasterRepository, IUploadSettingRepository uploadSettingRepository)
+            IUploadSettingRepository uploadSettingRepository)
         {
             _uow = uow;
             _mapper = mapper;

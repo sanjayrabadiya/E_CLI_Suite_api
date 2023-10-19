@@ -1,6 +1,4 @@
-﻿using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.SupplyManagement;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Dto.CTMS;

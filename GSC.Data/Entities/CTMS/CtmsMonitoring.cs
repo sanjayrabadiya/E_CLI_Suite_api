@@ -19,9 +19,9 @@ namespace GSC.Data.Entities.CTMS
         public StudyLevelForm StudyLevelForm { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
         public int? ParentId { get; set; }
-        public bool? If_Missed { get; set; }
-        public bool? If_ReSchedule { get; set; }
-        public bool? If_Applicable { get; set; }
+        public bool? IfMissed { get; set; }
+        public bool? IfReSchedule { get; set; }
+        public bool? IfApplicable { get; set; }
 
     }
 }

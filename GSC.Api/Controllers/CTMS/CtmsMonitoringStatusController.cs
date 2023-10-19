@@ -4,7 +4,6 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
 
@@ -14,17 +13,14 @@ namespace GSC.Api.Controllers.CTMS
     public class CtmsMonitoringStatusController : BaseController
     {
         private readonly ICtmsMonitoringStatusRepository _ctmsMonitoringStatusRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public CtmsMonitoringStatusController(ICtmsMonitoringStatusRepository ctmsMonitoringStatusRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _ctmsMonitoringStatusRepository = ctmsMonitoringStatusRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 

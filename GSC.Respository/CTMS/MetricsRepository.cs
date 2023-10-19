@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml.Vml;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
@@ -10,21 +9,17 @@ using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Respository.CTMS
 {
     public class MetricsRepository : GenericRespository<PlanMetrics>, IMetricsRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IProjectRightRepository _projectRightRepository;
         public MetricsRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper, IProjectRightRepository projectRightRepository) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
 
             _mapper = mapper;
             _context = context;

@@ -8,7 +8,6 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,20 +20,18 @@ namespace GSC.Api.Controllers.Master
         private readonly ILettersFormateRepository _lettersFormateRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public LettersActivityController(ILettersActivityRepository lettersActivityRepository,
             ILettersFormateRepository lettersFormateRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IEmailSenderRespository emailSenderRespository, IGSCContext context
+            IEmailSenderRespository emailSenderRespository, IGSCContext context
             )
         {
             _lettersActivityRepository = lettersActivityRepository;
             _lettersFormateRepository = lettersFormateRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _emailSenderRespository = emailSenderRespository;
             _context = context;

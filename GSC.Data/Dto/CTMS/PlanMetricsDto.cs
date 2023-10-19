@@ -1,10 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Data.Entities.CTMS;
-using GSC.Helper;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace GSC.Data.Dto.CTMS
 {
@@ -26,7 +22,6 @@ namespace GSC.Data.Dto.CTMS
 
     public class PlanMetricsGridDto : BaseAuditDto
     {
-        public int Id { get; set; }
         public int ProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string MetricsType { get; set; }

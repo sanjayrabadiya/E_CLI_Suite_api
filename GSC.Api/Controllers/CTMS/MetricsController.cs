@@ -6,7 +6,6 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -15,20 +14,17 @@ namespace GSC.Api.Controllers.CTMS
     [ApiController]
     public class MetricsController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IOverTimeMetricsRepository _overTimeMetricsRepository;
         private readonly IMetricsRepository _metricsRepository;
         public MetricsController(
            IUnitOfWork uow, IMapper mapper,
-           IJwtTokenAccesser jwtTokenAccesser,
            IMetricsRepository MetricsRepository,
            IOverTimeMetricsRepository overTimeMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _overTimeMetricsRepository = overTimeMasterRepository;
             _metricsRepository = MetricsRepository;
         }

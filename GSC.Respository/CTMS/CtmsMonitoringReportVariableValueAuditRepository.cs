@@ -1,27 +1,19 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Respository.CTMS;
-using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.CTMS
 {
     public class CtmsMonitoringReportVariableValueAuditRepository : GenericRespository<CtmsMonitoringReportVariableValueAudit>, ICtmsMonitoringReportVariableValueAuditRepository
     {
-        private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public CtmsMonitoringReportVariableValueAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
-            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 

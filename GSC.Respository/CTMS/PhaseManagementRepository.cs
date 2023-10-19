@@ -4,33 +4,22 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
-using GSC.Respository.Master;
-using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GSC.Respository.CTMS
 {
     public class PhaseManagementRepository : GenericRespository<PhaseManagement>, IPhaseManagementRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
         public PhaseManagementRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
-
 
         public List<DropDownDto> GetPhaseManagementDropDown()
         {

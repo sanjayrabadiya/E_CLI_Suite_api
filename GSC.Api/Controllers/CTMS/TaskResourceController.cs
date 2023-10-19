@@ -11,10 +11,7 @@ using GSC.Respository.CTMS;
 using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using GSC.Data.Dto.Master;
-
 
 
 namespace GSC.Api.Controllers.Master
@@ -118,7 +115,6 @@ namespace GSC.Api.Controllers.Master
             if (_uow.Save() <= 0) throw new Exception("Updating Resource failed on save.");
             return Ok(taskResource.Id);
         }
-
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
