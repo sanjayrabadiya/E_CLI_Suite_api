@@ -6,7 +6,6 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -14,18 +13,16 @@ namespace GSC.Api.Controllers.CTMS
     [Route("api/[controller]")]
     public class HolidayMasterController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IHolidayMasterRepository _holidayMasterRepository;
 
         public HolidayMasterController(IUnitOfWork uow, IMapper mapper,
-         IJwtTokenAccesser jwtTokenAccesser, IGSCContext context, IHolidayMasterRepository holidayMasterRepository)
+          IGSCContext context, IHolidayMasterRepository holidayMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _holidayMasterRepository = holidayMasterRepository;
         }
@@ -44,8 +41,8 @@ namespace GSC.Api.Controllers.CTMS
             if (id <= 0) return BadRequest();
             var holiday = _holidayMasterRepository.Find(id);
             var holidayDto = _mapper.Map<HolidayMasterDto>(holiday);
-            holidayDto.SiteId = holidayDto.IsSite == true ? holidayDto.ProjectId : (int?)null;
-            holidayDto.ProjectId = holidayDto.IsSite == true ? (int)_context.Project.Find(holidayDto.ProjectId).ParentProjectId : holidayDto.ProjectId;
+            holidayDto.SiteId = holidayDto.IsSite ? holidayDto.ProjectId : (int?)null;
+            holidayDto.ProjectId = holidayDto.IsSite ? (int)_context.Project.Find(holidayDto.ProjectId).ParentProjectId : holidayDto.ProjectId;
             return Ok(holidayDto);
         }
 

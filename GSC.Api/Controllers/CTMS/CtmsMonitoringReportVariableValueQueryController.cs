@@ -6,14 +6,9 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.Screening;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.CTMS;
-using GSC.Respository.Screening;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Screening
@@ -21,7 +16,6 @@ namespace GSC.Api.Controllers.Screening
     [Route("api/[controller]")]
     public class CtmsMonitoringReportVariableValueQueryController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ICtmsMonitoringReportVariableValueQueryRepository _ctmsMonitoringReportVariableValueQueryRepository;
         private readonly ICtmsMonitoringReportVariableValueRepository _ctmsMonitoringReportVariableValueRepository;
@@ -30,14 +24,13 @@ namespace GSC.Api.Controllers.Screening
 
         public CtmsMonitoringReportVariableValueQueryController(
             ICtmsMonitoringReportVariableValueQueryRepository ctmsMonitoringReportVariableValueQueryRepository,
-            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
+            IUnitOfWork uow, IMapper mapper,
             ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
             ICtmsMonitoringReportRepository ctmsMonitoringReportRepository)
         {
             _ctmsMonitoringReportVariableValueQueryRepository = ctmsMonitoringReportVariableValueQueryRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
             _ctmsMonitoringReportRepository = ctmsMonitoringReportRepository;
         }

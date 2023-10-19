@@ -1,12 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
-using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.CTMS
 {
@@ -46,8 +43,6 @@ namespace GSC.Data.Dto.CTMS
 
     public class CtmsMonitoringReportVariableValueSaveDto : BaseDto
     {
-        //public int VariableTemplateId { get; set; }
         public List<CtmsMonitoringReportVariableValueDto> CtmsMonitoringReportVariableValueList { get; set; }
     }
-
 }

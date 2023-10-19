@@ -28,5 +28,6 @@ namespace GSC.Data.Entities.CTMS
         public User User { get; set; }
         public Unit Unit { get; set; }
         public Designation Designation { get; set; }
+        public Currency Currency { get; set; }
     }
 }

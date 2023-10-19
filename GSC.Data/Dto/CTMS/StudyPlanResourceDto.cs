@@ -1,10 +1,4 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Data.Entities.CTMS;
-using GSC.Helper;
-using GSC.Shared.Extension;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Dto.CTMS
 {

@@ -1,12 +1,10 @@
 ﻿using System;
 using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -15,17 +13,15 @@ namespace GSC.Api.Controllers.CTMS
     [ApiController]
     public class OverTimeMetricsController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IOverTimeMetricsRepository _overTimeMetricsRepository;
 
         public OverTimeMetricsController(IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IOverTimeMetricsRepository overTimeMasterRepository)
+            IOverTimeMetricsRepository overTimeMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _overTimeMetricsRepository = overTimeMasterRepository;
         }
 

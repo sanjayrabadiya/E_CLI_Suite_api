@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -24,34 +21,25 @@ namespace GSC.Api.Controllers.Master
     public class CtmsMonitoringReportVariableValueController : BaseController
     {
         private readonly IStudyLevelFormRepository _studyLevelFormRepository;
-        private readonly IStudyLevelFormVariableRepository _studyLevelFormVariableRepository;
         private readonly ICtmsMonitoringReportRepository _ctmsMonitoringReportRepository;
         private readonly ICtmsMonitoringReportVariableValueRepository _ctmsMonitoringReportVariableValueRepository;
-        private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IGSCContext _context;
-        public CtmsMonitoringReportVariableValueController(IUnitOfWork uow, IMapper mapper,
+        public CtmsMonitoringReportVariableValueController(IUnitOfWork uow,
             IJwtTokenAccesser jwtTokenAccesser,
             IStudyLevelFormRepository studyLevelFormRepository,
             ICtmsMonitoringReportRepository ctmsMonitoringReportRepository,
             ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
-            IStudyLevelFormVariableRepository studyLevelFormVariableRepository,
-            IVariableTemplateRepository variableTemplateRepository,
             IUploadSettingRepository uploadSettingRepository, IProjectRepository projectRepository, IGSCContext context)
         {
             _studyLevelFormRepository = studyLevelFormRepository;
-            _studyLevelFormVariableRepository = studyLevelFormVariableRepository;
             _ctmsMonitoringReportRepository = ctmsMonitoringReportRepository;
             _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
-
-            _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
             _projectRepository = projectRepository;
             _context = context;

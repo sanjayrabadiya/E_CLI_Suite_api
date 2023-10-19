@@ -1,7 +1,5 @@
-﻿using GSC.Common;
-using GSC.Common.GenericRespository;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using System.Collections.Generic;
 
@@ -13,5 +11,7 @@ namespace GSC.Respository.CTMS
         string StudyLevelFormAlreadyUse(int StudyLevelFormId);
 
         CtmsMonitoringGridDto GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId);
+        string AddStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
+        string UpdateStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
     }
 }

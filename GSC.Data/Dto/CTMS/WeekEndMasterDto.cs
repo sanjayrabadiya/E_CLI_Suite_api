@@ -1,9 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace GSC.Data.Dto.CTMS
 {
@@ -19,7 +16,6 @@ namespace GSC.Data.Dto.CTMS
         public bool? IsSite { get; set; }
 
     }
-
     public class WeekEndGridDto : BaseAuditDto
     {
         public string ProjectCode { get; set; }

@@ -30,13 +30,13 @@ namespace GSC.Respository.Master
 
         dynamic GetCTMSMonitoringPIChart(int projectId, int countryId, int siteId);
 
-        List<CtmsMonitoringPlanDashoardDto> getCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId);
+        List<CtmsMonitoringPlanDashoardDto> GetCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId);
         List<StudyPlanTaskDto> GetCTMSPreRequisiteDashboard(int projectId, int countryId, int siteId);
 
-        List<CtmsActionPointGridDto> getCTMSOpenActionDashboard(int projectId, int countryId, int siteId);
-        List<CtmsMonitoringReportVariableValueQueryDto> getCTMSQueriesDashboard(int projectId, int countryId, int siteId);
+        List<CtmsActionPointGridDto> GetCTMSOpenActionDashboard(int projectId, int countryId, int siteId);
+        List<CtmsMonitoringReportVariableValueQueryDto> GetCTMSQueriesDashboard(int projectId, int countryId, int siteId);
 
-        dynamic getCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId);
+        dynamic GetCTMSMonitoringActionPointChartDashboard(int projectId, int countryId, int siteId);
         dynamic GetDashboardAesBySeverityGraph(int projectId, int countryId, int siteId);
 
         dynamic GetDashboardAEDetail(int projectId, int countryId, int siteId);

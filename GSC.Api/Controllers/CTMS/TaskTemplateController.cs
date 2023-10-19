@@ -5,7 +5,6 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Respository.CTMS;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -14,18 +13,15 @@ namespace GSC.Api.Controllers.CTMS
     [ApiController]
     public class TaskTemplateController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly ITaskTemplateRepository _taskTemplateRepository;
         public TaskTemplateController(
            IUnitOfWork uow, IMapper mapper,
-           IJwtTokenAccesser jwtTokenAccesser,
            ITaskTemplateRepository taskTemplateRepository)
         {
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _taskTemplateRepository = taskTemplateRepository;
 
         }
@@ -53,7 +49,6 @@ namespace GSC.Api.Controllers.CTMS
             if (_uow.Save() <= 0) throw new Exception("Creating Study Tracker template failed on save.");
             return Ok(taskTemplate.Id);
         }
-
 
         [HttpPut]
         public IActionResult Put([FromBody] TaskTemplateDto tasktemplateDto)

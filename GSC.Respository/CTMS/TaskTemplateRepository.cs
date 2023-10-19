@@ -6,25 +6,20 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
-using System.Text;
 
 namespace GSC.Respository.CTMS
 {
     public class TaskTemplateRepository : GenericRespository<TaskTemplate>, ITaskTemplateRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
         public TaskTemplateRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
 
@@ -48,6 +43,7 @@ namespace GSC.Respository.CTMS
 
             return "";
         }
+
         //add by mitul on 03-10-2023 #GS1-I3054
         public string AlreadyUSed(int id)
         {

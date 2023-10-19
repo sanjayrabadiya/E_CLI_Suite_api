@@ -1,9 +1,7 @@
-﻿using AutoMapper;
-using GSC.Common.GenericRespository;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
@@ -11,16 +9,10 @@ namespace GSC.Respository.CTMS
 {
     public class TaskResourceRepository : GenericRespository<TaskResource>, ITaskResourceRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public TaskResourceRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper) : base(context)
+        public TaskResourceRepository(IGSCContext context) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _context = context;
         }
         public dynamic GetTaskResourceList(bool isDeleted, int PlanTaskId)

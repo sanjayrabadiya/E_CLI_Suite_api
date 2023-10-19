@@ -5,24 +5,19 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.CTMS
 {
     public class HolidayMasterRepository : GenericRespository<HolidayMaster>, IHolidayMasterRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         public HolidayMasterRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }

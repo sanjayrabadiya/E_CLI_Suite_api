@@ -1,12 +1,9 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
-using Syncfusion.DocIO;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
+
 
 namespace GSC.Data.Dto.CTMS
 {

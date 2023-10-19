@@ -5,28 +5,21 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Helper;
-using GSC.Respository.CTMS;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.CTMS
 {
     public class CtmsMonitoringStatusRepository : GenericRespository<CtmsMonitoringStatus>, ICtmsMonitoringStatusRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public CtmsMonitoringStatusRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public CtmsMonitoringStatusRepository(IGSCContext context,IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }

@@ -292,6 +292,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
                 .ForMember(x => x.Designation, x => x.MapFrom(a => a.Designation.NameOFDesignation))
                 .ForMember(x => x.YersOfExperience, x => x.MapFrom(a => a.Designation.YersOfExperience))
+                .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName +"-"+ a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName: ""))
                 .ReverseMap();
             CreateMap<TaskTemplate, TaskTemplateGridDto>().ReverseMap();
 
@@ -815,6 +816,10 @@ namespace GSC.Api.Helpers
             .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
             .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceType.ResourceSubType.GetDescription()))
             .ReverseMap();
+
+            CreateMap<Currency, CurrencyGridDto>()
+               .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName))
+         .ReverseMap();
         }
     }
 }

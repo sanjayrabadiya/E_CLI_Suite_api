@@ -46,7 +46,6 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(ctmsActionPoint);
         }
 
-
         [HttpPost]
         public IActionResult Post([FromBody] CtmsActionPointDto ctmsActionPointDto)
         {
@@ -76,7 +75,6 @@ namespace GSC.Api.Controllers.CTMS
             if (_uow.Save() <= 0) throw new Exception("Updating action point failed on save.");
             return Ok(ctmsActionPoint.Id);
         }
-
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)

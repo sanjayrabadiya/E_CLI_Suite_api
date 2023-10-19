@@ -52,10 +52,15 @@ namespace GSC.Data.Dto.CTMS
     {
         public int Id { get; set; } 
         public string Email { get; set; }
+        public List<EmailModel> OpstionLists { get; set; }
         public List<UserModel> UserModel { get; set; }
     }
     public class UserModel
     {
         public int userId { get; set; }
+    }
+    public class EmailModel
+    {
+        public string Option { get; set; }
     }
 }

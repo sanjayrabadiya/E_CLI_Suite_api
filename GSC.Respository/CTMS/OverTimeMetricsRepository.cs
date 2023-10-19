@@ -4,7 +4,6 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Master;

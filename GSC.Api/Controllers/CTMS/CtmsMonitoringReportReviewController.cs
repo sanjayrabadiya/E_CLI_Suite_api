@@ -4,7 +4,6 @@ using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
-using GSC.Respository.UserMgt;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared.JWTAuth;
 using GSC.Respository.CTMS;
