@@ -196,16 +196,15 @@ namespace GSC.Respository.CTMS
             var lisatdata = new StudyPlanTaskDto();
             var taskname = _context.StudyLevelForm.Include(x=>x.Activity).ThenInclude(s=>s.CtmsActivity).Where(d=>d.Id == ctmsMonitoringDto.StudyLevelFormId && d.DeletedBy==null).Select(t=>t.Activity.CtmsActivity.ActivityName).FirstOrDefault();
             var studyPlanId = _context.StudyPlan.Where(x=>x.ProjectId == ctmsMonitoringDto.ProjectId && x.DeletedBy==null).FirstOrDefault();
-           
-            var data = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyPlanId.Id && x.TaskOrder >= 1 && x.DeletedDate == null).ToList();
-            foreach (var item in data)
-            {
-                item.TaskOrder = ++item.TaskOrder;
-                _context.StudyPlanTask.Update(item);
-            }
          
             if (studyPlanId != null)
             {
+                var data = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyPlanId.Id && x.TaskOrder >= 1 && x.DeletedDate == null).ToList();
+                foreach (var item in data)
+                {
+                    item.TaskOrder = ++item.TaskOrder;
+                    _context.StudyPlanTask.Update(item);
+                }
                 lisatdata.Id = 0;
                 lisatdata.StudyPlanId = studyPlanId.Id;
                 lisatdata.TaskName = taskname;

@@ -1120,12 +1120,12 @@ namespace GSC.Respository.EmailSender
 
             return str;
         }
-        public void SendALettersMailtoInvestigator(string fullPath, string email,string CtmsActivity,string ScheduleStartDate)
+        public void SendALettersMailtoInvestigator(string fullPath, string email,string body ,string CtmsActivity,string ScheduleStartDate)
         {
             var userName = _jwtTokenAccesser.UserName;
             var emailMessage = ConfigureEmailLetters("Letters", userName, fullPath) ;
             emailMessage.SendTo = email;
-            emailMessage.MessageBody = ReplaceBodyForLetters(emailMessage.MessageBody, userName);
+            emailMessage.MessageBody = body + ReplaceBodyForLetters(emailMessage.MessageBody, userName);
             emailMessage.Subject = ReplaceSubjectForLetters(emailMessage.Subject, CtmsActivity, ScheduleStartDate);
             _emailService.SendMail(emailMessage);
         }

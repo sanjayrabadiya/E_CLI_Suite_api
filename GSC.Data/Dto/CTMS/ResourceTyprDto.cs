@@ -21,7 +21,6 @@ namespace GSC.Data.Dto.CTMS
         public string NameOfMaterial { get; set; }
         public DateTime? BoughtDate { get; set; }
         public string OwnerName { get; set; }
-        public string ContractorName { get; set; }
     }
 
     public class ResourceTypeGridDto: BaseAuditDto
@@ -41,7 +40,6 @@ namespace GSC.Data.Dto.CTMS
         public string NameOfMaterial { get; set; }
         public DateTime? BoughtDate { get; set; }
         public string OwnerName { get; set; }
-        public string ContractorName { get; set; }
     }
     public class ResourceByEdit 
     {
