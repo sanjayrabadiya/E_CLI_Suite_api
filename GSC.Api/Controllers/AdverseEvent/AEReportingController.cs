@@ -114,7 +114,7 @@ namespace GSC.Api.Controllers.AdverseEvent
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var aEReporting = _mapper.Map<AEReporting>(aEReportingDto);
-            var randomization = _randomizationRepository.AllIncluding(x => x.ScreeningEntry).FirstOrDefault(x => x.UserId == _jwtTokenAccesser.UserId);
+            var randomization = await _randomizationRepository.AllIncluding(x => x.ScreeningEntry).FirstOrDefaultAsync(x => x.UserId == _jwtTokenAccesser.UserId);
 
             var template = _context.ScreeningTemplate.Include(x => x.ScreeningVisit.ScreeningEntry).FirstOrDefault(q => q.ProjectDesignTemplateId == aEReporting.ScreeningTemplateId && q.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
             if (template != null)

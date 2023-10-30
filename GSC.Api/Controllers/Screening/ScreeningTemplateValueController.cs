@@ -200,7 +200,9 @@ namespace GSC.Api.Controllers.Screening
                 ScreeningTemplateValueId = screeningTemplateValue.Id,
                 Value = value,
                 Note = screeningTemplateValueDto.IsDeleted ? "Clear Data" : null,
-                OldValue = screeningTemplateValueDto.OldValue
+                OldValue = screeningTemplateValueDto.OldValue,
+                ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth"),
+                ReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"))
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
 

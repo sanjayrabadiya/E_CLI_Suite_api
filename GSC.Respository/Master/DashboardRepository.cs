@@ -33,7 +33,7 @@ namespace GSC.Respository.Master
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-     
+
 
 
         public DashboardRepository(IJwtTokenAccesser jwtTokenAccesser, IScreeningVisitRepository screeningVisitRepository,
@@ -1046,7 +1046,9 @@ namespace GSC.Respository.Master
                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
             return StudyLevelForm;
         }
-        //Ae Detail
+
+
+        #region Ae Sae Chart
 
         public dynamic GetDashboardAEDetail(int projectId, int countryId, int siteId)
         {
@@ -1064,7 +1066,8 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "V003" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
+            var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "V003"
+            && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
             && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
             && x.ProjectDesignVariable.DeletedDate == null
             && x.ProjectDesignVariable.ProjectDesignTemplate.DeletedDate == null
@@ -1072,15 +1075,15 @@ namespace GSC.Respository.Master
             && x.DeletedDate == null
             ).ToList();
 
-
-            //      var ser = _context.VariableValue.Where(x => x.Variable.VariableCode == "V003").ToList();
             var tenoResult = _screeningTemplateValueRepository.All.
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
                 && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
                 && (x.ProjectDesignVariable.VariableCode == "V003")
-                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null)
+                .Select(r => new DynamicAeChartData
                 {
                     ScreeningTemplateId = r.ScreeningTemplateId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
@@ -1102,11 +1105,9 @@ namespace GSC.Respository.Master
             return result;
         }
 
-
         public dynamic GetDashboardAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            //var ser = _context.VariableValue.Where(x => x.Variable.VariableCode == "V004").ToList();
             var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "V004" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
             && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
              && x.ProjectDesignVariable.DeletedDate == null
@@ -1118,9 +1119,11 @@ namespace GSC.Respository.Master
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
                 && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "AE001"
                 && (x.ProjectDesignVariable.VariableCode == "V004")
-                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null)
+                .Select(r => new DynamicAeChartData
                 {
                     ScreeningTemplateId = r.ScreeningTemplateId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
@@ -1131,7 +1134,6 @@ namespace GSC.Respository.Master
 
             var result = new List<DynamicAeChart>();
 
-
             foreach (var t in ser)
             {
                 var r = new DynamicAeChart();
@@ -1139,26 +1141,8 @@ namespace GSC.Respository.Master
                 r.Data = GetDetails(tenoResult, t.ValueName, "001");
                 result.Add(r);
             }
-
             return result;
-
         }
-
-        //  public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser)
-        //{
-        //    var types = _context.VariableValue.Where(x => x.Variable.VariableCode == "001").Select(x => x.ValueName).ToList();
-        //    var r = new List<DynamicAeChartDetails>();
-
-        //    foreach (var item in types)
-        //    {
-        //        var result = new DynamicAeChartDetails();
-        //        result.X = item;
-        //        result.Y = data.Where(e => e.Against == item && e.VariableValue == ser).ToList().Count();
-        //        r.Add(result);
-        //    }
-        //    return r;
-        //}
-
 
         public dynamic GetDashboardSAesBySeverityGraph(int projectId, int countryId, int siteId)
         {
@@ -1175,9 +1159,11 @@ namespace GSC.Respository.Master
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
                 && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "SAE001"
                 && (x.ProjectDesignVariable.VariableCode == "SAE003")
-                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null)
+                .Select(r => new DynamicAeChartData
                 {
                     ScreeningTemplateId = r.ScreeningTemplateId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
@@ -1199,7 +1185,6 @@ namespace GSC.Respository.Master
 
             return result;
         }
-
 
         public dynamic GetDashboardSAesBySeverityandCausalityGraph(int projectId, int countryId, int siteId)
         {
@@ -1216,9 +1201,11 @@ namespace GSC.Respository.Master
                 Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
                 && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "SAE001"
                 && (x.ProjectDesignVariable.VariableCode == "SAE002")
-                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null)
+                .Select(r => new DynamicAeChartData
                 {
                     ScreeningTemplateId = r.ScreeningTemplateId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
                     ProjectDesignVariableId = r.ProjectDesignVariableId,
                     VariableName = r.ProjectDesignVariable.VariableName,
                     Value = r.Value,
@@ -1239,21 +1226,102 @@ namespace GSC.Respository.Master
             return result;
         }
 
+        public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser, string vCode)
+        {
+            var r = new List<DynamicAeChartDetails>();
 
-        //public List<DynamicAeChartDetails> GetAECDetails(List<DynamicAeChartData> data, string ser)
-        //{
-        //    var types = _context.VariableValue.Where(x => x.Variable.VariableCode == "SAE001").Select(x => x.ValueName).ToList();
-        //    var r = new List<DynamicAeChartDetails>();
+            if (data.Count > 0)
+            {
+                var types = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == vCode && x.ProjectDesignVariable.ProjectDesignTemplateId == data[0].ProjectDesignTemplateId && x.DeletedDate == null).Select(x => x.ValueName).ToList();
 
-        //    foreach (var item in types)
-        //    {
-        //        var result = new DynamicAeChartDetails();
-        //        result.X = item;
-        //        result.Y = data.Where(e => e.Against == item && e.VariableValue == ser).ToList().Count();
-        //        r.Add(result);
-        //    }
-        //    return r;
-        //}
+                foreach (var item in types)
+                {
+                    var result = new DynamicAeChartDetails();
+                    result.X = item;
+                    result.Y = data.Where(e => e.Against == item && e.VariableValue == ser).ToList().Count();
+                    if (result.Y != 0)
+                        r.Add(result);
+                }
+            }
+            return r;
+        }
+
+        #endregion
+
+        public dynamic GetDashboardByCriticalGraph(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "Cd001" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "DV001"
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
+
+
+            var tenoResult = _screeningTemplateValueRepository.All.
+                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "DV001"
+                && (x.ProjectDesignVariable.VariableCode == "Cd001")
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null)
+                .Select(r => new DynamicAeChartData
+                {
+                    ScreeningTemplateId = r.ScreeningTemplateId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
+                    ProjectDesignVariableId = r.ProjectDesignVariableId,
+                    VariableName = r.ProjectDesignVariable.VariableName,
+                    Value = r.Value,
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "Dev001")
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                }).ToList();
+
+            var result = new List<DynamicAeChart>();
+
+            foreach (var t in ser)
+            {
+                var r = new DynamicAeChart();
+                r.SeriesName = t.ValueName;
+                r.Data = GetDetails(tenoResult, t.ValueName, "Dev001");
+                result.Add(r);
+            }
+
+            return result;
+        }
+
+        public dynamic GetDashboardByDiscontinuationGraph(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "Disc001" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "Disc001"
+            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
+
+            var tenoResult = _screeningTemplateValueRepository.All.
+                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
+                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "Disc001"
+                && (x.ProjectDesignVariable.VariableCode == "Disc001")
+                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
+                {
+                    ScreeningTemplateId = r.ScreeningTemplateId,
+                    ProjectDesignTemplateId = r.ProjectDesignVariable.ProjectDesignTemplateId,
+                    ProjectDesignVariableId = r.ProjectDesignVariableId,
+                    VariableName = r.ProjectDesignVariable.VariableName,
+                    Value = r.Value,
+                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
+                    Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "DiscR001")
+                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
+                }).ToList();
+
+            var result = new List<DynamicAeChart>();
+
+            foreach (var t in ser)
+            {
+                var r = new DynamicAeChart();
+                r.SeriesName = t.ValueName;
+                r.Data = GetDetails(tenoResult, t.ValueName, "DiscR001");
+                result.Add(r);
+            }
+
+            return result;
+        }
+
 
         public dynamic GetDashboardPatientEngagementGraph(int projectId, int countryId, int siteId, int FilterFlag)
         {
@@ -1290,91 +1358,7 @@ namespace GSC.Respository.Master
 
         }
 
-        public dynamic GetDashboardByCriticalGraph(int projectId, int countryId, int siteId)
-        {
-            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "Cd001" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "DV001"
-            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
-
-
-            var tenoResult = _screeningTemplateValueRepository.All.
-                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
-                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "DV001"
-                && (x.ProjectDesignVariable.VariableCode == "Cd001")
-                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
-                {
-                    ScreeningTemplateId = r.ScreeningTemplateId,
-                    ProjectDesignVariableId = r.ProjectDesignVariableId,
-                    VariableName = r.ProjectDesignVariable.VariableName,
-                    Value = r.Value,
-                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
-                    Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "Dev001")
-                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
-                }).ToList();
-
-            var result = new List<DynamicAeChart>();
-
-            foreach (var t in ser)
-            {
-                var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "Dev001");
-                result.Add(r);
-            }
-
-            return result;
-        }
-
-        public dynamic GetDashboardByDiscontinuationGraph(int projectId, int countryId, int siteId)
-        {
-            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-
-            var ser = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == "Disc001" && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "Disc001"
-            && x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).ToList();
-
-            var tenoResult = _screeningTemplateValueRepository.All.
-                Where(x => projectIds.Contains(x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
-                && x.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode == "Disc001"
-                && (x.ProjectDesignVariable.VariableCode == "Disc001")
-                && (siteId == 0 ? (!x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).Select(r => new DynamicAeChartData
-                {
-                    ScreeningTemplateId = r.ScreeningTemplateId,
-                    ProjectDesignVariableId = r.ProjectDesignVariableId,
-                    VariableName = r.ProjectDesignVariable.VariableName,
-                    Value = r.Value,
-                    VariableValue = _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(r.Value)).Select(g => g.ValueName).FirstOrDefault(),
-                    Against = _screeningTemplateValueRepository.All.Where(x => x.ScreeningTemplateId == r.ScreeningTemplateId && x.ProjectDesignVariable.VariableCode == "DiscR001")
-                    .Select(x => _context.ProjectDesignVariableValue.Where(m => m.Id == Convert.ToInt32(x.Value)).Select(g => g.ValueName).FirstOrDefault()).FirstOrDefault()
-                }).ToList();
-
-            var result = new List<DynamicAeChart>();
-
-            foreach (var t in ser)
-            {
-                var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "DiscR001");
-                result.Add(r);
-            }
-
-            return result;
-        }
-
-        public List<DynamicAeChartDetails> GetDetails(List<DynamicAeChartData> data, string ser, string vCode)
-        {
-            var types = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.VariableCode == vCode && x.DeletedDate == null).Select(x => x.ValueName).ToList();
-            var r = new List<DynamicAeChartDetails>();
-
-            foreach (var item in types)
-            {
-                var result = new DynamicAeChartDetails();
-                result.X = item;
-                result.Y = data.Where(e => e.Against == item && e.VariableValue == ser).ToList().Count();
-                r.Add(result);
-            }
-            return r;
-        }
         #region //Added Graphs Of Subject Recruitment in Site Monitoring By Sachin On 19/06/2023
         public dynamic GetEnrolledGraph(int projectId, int countryId, int siteId)
         {
