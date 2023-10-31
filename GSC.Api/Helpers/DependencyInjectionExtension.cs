@@ -435,6 +435,7 @@ namespace GSC.Api.Helpers
             services.AddHttpClient<IFirebaseNotification, FirebaseNotification>();
             services.AddScoped<IStudyPlanResourceRepository, StudyPlanResourceRepository>();
             services.AddScoped<ICurrencyRepository, CurrencyRepository>();
+            services.AddScoped<IUserAccessRepository, UserAccessRepository>();
         }
     }
 }

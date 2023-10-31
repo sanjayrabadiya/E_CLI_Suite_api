@@ -48,14 +48,27 @@ namespace GSC.Respository.CTMS
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOFDesignation+" - "+ c.YersOfExperience + " years of Experience", IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
-        public List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID)
+        public List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID ,int projectId)
         { 
-                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID && x.DesignationId != null)
-                                .Select(c => new DropDownDto { Id = c.Designation.Id , Value = c.Designation.NameOFDesignation + " - " + c.Designation.YersOfExperience + " years of Experience" , IsDeleted = c.DeletedDate != null })
+            if(projectId!=0)
+            {
+                var userAccessData = _context.UserAccess.Include(x=>x.UserRole).Where(s=>s.ProjectId==projectId && s.DeletedBy==null).ToList();
+
+                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID && x.DesignationId != null
+                                 && userAccessData.Select(y => y.UserRole.UserId).Contains(x.UserId))
+                                .Select(c => new DropDownDto { Id = c.Designation.Id, Value = c.Designation.NameOFDesignation + " - " + c.Designation.YersOfExperience + " years of Experience", IsDeleted = c.DeletedDate != null })
                                 .Distinct()
                                 .OrderBy(o => o.Value).ToList();
+            }
+            else
+            {
+                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID && x.DesignationId != null)
+                                .Select(c => new DropDownDto { Id = c.Designation.Id, Value = c.Designation.NameOFDesignation + " - " + c.Designation.YersOfExperience + " years of Experience", IsDeleted = c.DeletedDate != null })
+                                .Distinct()
+                                .OrderBy(o => o.Value).ToList();
+            }
+                
         }
-
         public List<DropDownDto> GetNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID)
         {
             return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID)

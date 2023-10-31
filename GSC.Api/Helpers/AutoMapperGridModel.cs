@@ -288,7 +288,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceTypes.GetDescription()))
                 .ForMember(x => x.ResourceSubType, x => x.MapFrom(a => a.ResourceSubType.GetDescription()))
                 .ForMember(x => x.Role, x => x.MapFrom(a => a.Role.RoleName))
-                .ForMember(x => x.User, x => x.MapFrom(a => a.User.UserName))
+                .ForMember(x => x.User, x => x.MapFrom(a => a.User.FirstName + ' ' + a.User.LastName))
                 .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
                 .ForMember(x => x.Designation, x => x.MapFrom(a => a.Designation.NameOFDesignation))
                 .ForMember(x => x.YersOfExperience, x => x.MapFrom(a => a.Designation.YersOfExperience))
@@ -820,6 +820,18 @@ namespace GSC.Api.Helpers
             CreateMap<Currency, CurrencyGridDto>()
                .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName))
          .ReverseMap();
+
+          CreateMap<UserAccess, UserAccessGridDto>()
+         .ForMember(x => x.RoleUser, x => x.MapFrom(a => a.UserRole.User.FirstName + ' ' + a.UserRole.User.LastName))
+         .ForMember(x => x.Role, x => x.MapFrom(a => a.UserRole.SecurityRole.RoleName))
+         .ReverseMap();
+
+            //.ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+            //.ForMember(x => x.RoleUser, x => x.MapFrom(a => a.UserRole.SecurityRole.RoleName + "-" + a.UserRole.User.UserName))
+            //.ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteUserAccess.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
+            //.ForMember(x => x.InactiveSiteCode, x => x.MapFrom(a => string.Join(", ", a.siteUserAccess.Where(x => x.DeletedDate != null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
+            ////.ReverseMap();
+            ////     CreateMap<SiteUserAccess, UserAccessGridDto>().ReverseMap();
         }
     }
 }

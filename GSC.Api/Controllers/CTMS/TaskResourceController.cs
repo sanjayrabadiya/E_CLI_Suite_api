@@ -12,7 +12,7 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
-
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -68,29 +68,41 @@ namespace GSC.Api.Controllers.Master
 
             //taskResourceDto.ResourceTypeId = _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == taskResourceDto.resource && ((int)x.ResourceSubType) == taskResourceDto.subresource && x.DesignationId== taskResourceDto.designation)
             //                                 .Select(c =>c.Id ).FirstOrDefault();
-             
+
 
             var taskResource = _mapper.Map<TaskResource>(taskResourceDto);
-                var validate = _taskResourceRepository.Duplicate(taskResource);
-                if (!string.IsNullOrEmpty(validate))
-                {
-                    ModelState.AddModelError("Message", validate);
-                    return BadRequest(ModelState);
-                }
-                _taskResourceRepository.Add(taskResource);        
+            var validate = _taskResourceRepository.Duplicate(taskResource);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+            _taskResourceRepository.Add(taskResource);
 
             if (_uow.Save() <= 0) throw new Exception("Creating Resource failed on save.");
 
-            //Add by mitul task was Resource Add in StudyPlanTask
-            var studyPlanTask = _context.StudyPlanTask.Where(d=>d.TaskId == taskResource.TaskMasterId && d.DeletedDate==null)
-                    .Select(t => new StudyPlanResource
+            //Add by mitul task was Resource Add in StudyPlanTask && Apply validation User Access
+            var studyPlanTaskData = _context.StudyPlanTask.Include(e => e.StudyPlan).Where(d => d.TaskId == taskResource.TaskMasterId && d.DeletedDate == null).ToList();
+            if (studyPlanTaskData.Count > 0)
+            {
+                var userAccessData = _context.UserAccess.Include(x => x.UserRole).Where(s => s.DeletedBy == null && studyPlanTaskData.Select(y => y.StudyPlan.ProjectId).Contains(s.ProjectId)).ToList();
+                if (userAccessData.Count > 0)
+                {
+                    var resourceTypedata = _context.ResourceType.Where(s => s.Id == taskResourceDto.ResourceTypeId && s.DeletedBy == null && userAccessData.Select(y => y.UserRole.UserId).Contains(s.UserId)).FirstOrDefault();
+                    if (resourceTypedata != null)
                     {
-                        StudyPlanTaskId = t.Id,
-                        ResourceTypeId = taskResource.ResourceTypeId
-                    }).ToList();
-                _context.StudyPlanResource.AddRange(studyPlanTask);
-                _context.Save();
-            
+                        var studyPlanTask = _context.StudyPlanTask.Include(e => e.StudyPlan).Where(d => d.TaskId == taskResource.TaskMasterId && d.DeletedDate == null && userAccessData.Select(y => y.ProjectId).Contains(d.StudyPlan.ProjectId))
+                            .Select(t => new StudyPlanResource
+                            {
+                                StudyPlanTaskId = t.Id,
+                                ResourceTypeId = taskResource.ResourceTypeId
+                            }).ToList();
+                        _context.StudyPlanResource.AddRange(studyPlanTask);
+                        _context.Save();
+                    }
+                }
+            }
+
             return Ok();
         }
 

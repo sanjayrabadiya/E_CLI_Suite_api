@@ -536,6 +536,11 @@ namespace GSC.Api.Helpers
             CreateMap<TaskResource, TaskResourceDto>().ReverseMap();
             CreateMap<StudyPlanResource, StudyPlanResourceDto>().ReverseMap();
             CreateMap<Currency, CurrencyDto>().ReverseMap();
+
+            //CreateMap<UserAccess, UserAccessDto>().ReverseMap();
+            //CreateMap<SiteUserAccess, UserAccess>()
+            //  .ForMember(x => x.Id, y => y.MapFrom(a => a.UserAccessId))
+            // .ReverseMap();
         }
     }
 }
