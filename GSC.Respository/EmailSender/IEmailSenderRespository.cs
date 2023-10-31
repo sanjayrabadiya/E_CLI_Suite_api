@@ -62,6 +62,7 @@ namespace GSC.Respository.EmailSender
 
         Task SendEmailonEmailvariableConfigurationSMS(EmailConfigurationEditCheckSendEmail email, EmailMessage EmailMessage, int userId, string toMails, string tophone);
 
+        void SendDesignAuditGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
         EmailMessage ConfigureEmail(string keyName, string userName);
     }
 }

@@ -1050,7 +1050,7 @@ namespace GSC.Respository.Audit
                     var ProjectName = Project.ProjectCode + "-" + Project.ProjectName;
                     string pathofdoc = Path.Combine(savepath, FileName);
                     var linkOfDoc = "<a href='" + pathofdoc + "'>Click Here</a>";
-                    _emailSenderRespository.SendDBDSGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfDoc);
+                    _emailSenderRespository.SendDesignAuditGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfDoc);
                     #endregion
                 }
 

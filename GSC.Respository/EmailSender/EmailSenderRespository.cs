@@ -440,6 +440,14 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendDesignAuditGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf)
+        {
+            var emailMessage = ConfigureEmail("DesignAuditReport", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForPDF(emailMessage.MessageBody, userName, projectName, linkOfPdf);
+            _emailService.SendMail(emailMessage);
+        }
+
         private string ReplaceBody(string body, string userName, string password, string companyName)
         {
             body = Regex.Replace(body, "##name##", userName, RegexOptions.IgnoreCase);
