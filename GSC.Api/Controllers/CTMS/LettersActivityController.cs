@@ -148,19 +148,19 @@ namespace GSC.Api.Controllers.Master
             var lettersActivityDto = _mapper.Map<LettersActivityDto>(record);
 
             if (sendMailModel.Email != null && sendMailModel.Email != "")
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
 
             foreach (var item in sendMailModel.OpstionLists)
             {
                 lettersActivityDto.Email = item.Option;
                 if (item.Option != null && item.Option != "")
-                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
             }
 
             foreach (var item in sendMailModel.UserModel)
             {
                 var email =_context.Users.Where(x => x.Id == item.userId && x.DeletedBy==null).Select(x => x.Email).FirstOrDefault();
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, email, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
             }
                 
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);

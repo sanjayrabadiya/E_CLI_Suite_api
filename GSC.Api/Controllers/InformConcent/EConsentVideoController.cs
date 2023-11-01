@@ -82,7 +82,7 @@ namespace GSC.Api.Controllers.InformConcent
         public async Task<IActionResult> DeliverFlagUpdate(int id)
         {
             //when user1 calls to user2 then if user2 receives call request then this flag is updated
-            var eConsentVideo = _EConsentVideoRepository.Find(id);
+            var eConsentVideo = await _EConsentVideoRepository.FindAsync(id);
             eConsentVideo.RequestDelivered = true;
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
@@ -105,7 +105,7 @@ namespace GSC.Api.Controllers.InformConcent
         public async Task<IActionResult> CallDeclined(int id)
         {
             // when user1 calls to user2 then if user2 decline the call then this method is called
-            var eConsentVideo = _EConsentVideoRepository.Find(id);
+            var eConsentVideo = await _EConsentVideoRepository.FindAsync(id);
             eConsentVideo.CallStatus = VideoCallStatus.CallDeclined;
             eConsentVideo.EndCallBy = VideoCallStatusCallEndBy.Receiver;
             _EConsentVideoRepository.Update(eConsentVideo);
@@ -125,7 +125,7 @@ namespace GSC.Api.Controllers.InformConcent
         public async Task<IActionResult> CallNotAnswered(int id)
         {
             // when user1 calls to user2 then if user2 not answer the call then this method is called
-            var eConsentVideo = _EConsentVideoRepository.Find(id);
+            var eConsentVideo = await _EConsentVideoRepository.FindAsync(id);
             eConsentVideo.CallStatus = VideoCallStatus.NotAnswered;
             _EConsentVideoRepository.Update(eConsentVideo);
             _uow.Save();
@@ -143,7 +143,7 @@ namespace GSC.Api.Controllers.InformConcent
         public async Task<IActionResult> CallEndBySenderBeforeConnecting(int id)
         {
             // when user1 calls to user2 then if user1 ends the call before recived by the user2 then this method is called
-            var eConsentVideo = _EConsentVideoRepository.Find(id);
+            var eConsentVideo = await _EConsentVideoRepository.FindAsync(id);
             eConsentVideo.CallStatus = VideoCallStatus.CallEndBySenderBeforeConnecting;
             eConsentVideo.EndCallBy = VideoCallStatusCallEndBy.Sender;
             _EConsentVideoRepository.Update(eConsentVideo);
@@ -175,7 +175,7 @@ namespace GSC.Api.Controllers.InformConcent
         public async Task<IActionResult> CallEndsuccessfullyafterconnecting(int id)
         {
             //calls this method when any of the user end the call
-            var eConsentVideo = _EConsentVideoRepository.Find(id);
+            var eConsentVideo = await _EConsentVideoRepository.FindAsync(id);
             eConsentVideo.EndCallBy = (eConsentVideo.SenderUserId == _jwtTokenAccesser.UserId) ? VideoCallStatusCallEndBy.Sender : VideoCallStatusCallEndBy.Receiver;
             eConsentVideo.CallEndTime = _jwtTokenAccesser.GetClientDate();
             _EConsentVideoRepository.Update(eConsentVideo);

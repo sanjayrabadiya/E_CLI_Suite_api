@@ -13,7 +13,7 @@ namespace GSC.Respository.CTMS
         List<ResourceTypeGridDto> GetResourceTypeList(bool isDeleted);
         List<DropDownDto> GetUnitTypeDropDown();
         List<DropDownDto> GetDesignationDropDown();
-        List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID);
+        List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID,int projectId);
         List<DropDownDto> GetNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID);
         List<DropDownDto> GetRollUserDropDown(int designationID);
         List<DropDownDto> GetCurrencyDropDown();

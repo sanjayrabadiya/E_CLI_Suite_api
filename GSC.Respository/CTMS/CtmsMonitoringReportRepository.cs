@@ -230,8 +230,13 @@ namespace GSC.Respository.CTMS
                 var CtmsMonitoringStatus = _context.CtmsMonitoringReport.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
                                       && x.CtmsMonitoring.DeletedDate == null).ToList();
 
+                var openQuerydata = _context.CtmsActionPoint.Include(s=>s.CtmsMonitoring).ThenInclude(d=>d.StudyLevelForm).ThenInclude(x=>x.Activity).ThenInclude(r=>r.CtmsActivity).
+                    Where(x=>x.CtmsMonitoring.ProjectId == siteId && x.Status == CtmsActionPointStatus.Open && x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity .ActivityCode != "act_005").Count() > 0;
+
                 if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().ReportStatus == MonitoringReportStatus.Approved))
                     return "Please Approve " + CtmsActivity.ActivityName + " .";
+                else if(openQuerydata)
+                    return "Please Close All Open Query.";
 
                 return "";
             }

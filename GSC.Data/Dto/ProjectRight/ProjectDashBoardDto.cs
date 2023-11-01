@@ -305,6 +305,7 @@ namespace GSC.Data.Dto.ProjectRight
         public int ScreeningTemplateId { get; set; }
         public string Value { get; set; }
         public int ProjectDesignVariableId { get; set; }
+        public int ProjectDesignTemplateId { get; set; }
     }
 
     public class FactoreDashboardModel

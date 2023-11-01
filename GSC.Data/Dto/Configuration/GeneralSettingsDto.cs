@@ -11,5 +11,7 @@
         public string FirebaseServerId { get; set; }
         public string FirebaseSenderId { get; set; }
         public string FirebaseUrl { get; set; }
+        public string AgoraAppId { get; set; }
+        public string AgoraAppCertificate { get; set; }
     }
 }

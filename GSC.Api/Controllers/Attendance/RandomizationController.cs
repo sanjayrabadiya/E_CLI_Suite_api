@@ -27,6 +27,7 @@ using GSC.Data.Entities.UserMgt;
 using GSC.Data.Dto.Medra;
 using GSC.Domain.Context;
 using GSC.Respository.SupplyManagement;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Attendance
 {
@@ -303,8 +304,8 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
-            var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
-            var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
+            var Project = await _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefaultAsync();
+            var projectSetting =await _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefaultAsync();
 
 
             if (randomization.UserId != null)

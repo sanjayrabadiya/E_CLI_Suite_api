@@ -59,7 +59,9 @@ namespace GSC.Respository.Project.Design
 
         public string Duplicate(ProjectDesignVisitStatusDto objSave)
         {
-            if (All.Any(x => x.ProjectDesignVisitId == objSave.ProjectDesignVisitId && x.ProjectDesignVariable.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
+            if (All.Any(x => x.ProjectDesignVisitId == objSave.ProjectDesignVisitId && 
+            x.ProjectDesignVariable.Id==objSave.ProjectDesignVariableId &&
+            x.ProjectDesignVariable.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
             x.DeletedDate == null))
                 return "Template already use.";
 
