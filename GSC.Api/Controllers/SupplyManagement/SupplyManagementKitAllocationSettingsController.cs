@@ -3,6 +3,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -96,7 +97,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 if (setting.KitCreationType == KitCreationType.KitWise)
                 {
-                    if (_context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Any(z => z.DeletedDate == null && z.SupplyManagementKIT.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId))
+                    if (_context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Any(z => z.DeletedDate == null && z.SupplyManagementKIT.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId && z.SupplyManagementKIT.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId))
                     {
                         ModelState.AddModelError("Message", "Kit already been prepared you can not modify record!");
                         return BadRequest(ModelState);
@@ -104,7 +105,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 }
                 else
                 {
-                    if (_context.SupplyManagementKITSeries.Any(z => z.DeletedDate == null && z.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId))
+                    if (_context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).Any(z => z.DeletedDate == null && z.SupplyManagementKITSeries.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId && z.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId))
                     {
                         ModelState.AddModelError("Message", "Kit already been prepared you can not modify record!");
                         return BadRequest(ModelState);
@@ -129,14 +130,27 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (record == null)
                 return NotFound();
-            var kit = _context.SupplyManagementKIT.Where(x => x.ProjectDesignVisitId == record.ProjectDesignVisitId && x.DeletedDate == null).Select(x => x.Id).ToList();
-            if (kit.Count > 0)
+
+            var project = _context.ProjectDesignVisit.Include(x => x.ProjectDesignPeriod).ThenInclude(x => x.ProjectDesign).Where(x => x.DeletedDate == null && x.Id == record.ProjectDesignVisitId).FirstOrDefault();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId).FirstOrDefault();
+            if (setting != null)
             {
-                var kitdetail = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null && kit.Contains(x.SupplyManagementKITId) && x.Status != KitStatus.AllocationPending).Count();
-                if (kitdetail > 0)
+                if (setting.KitCreationType == KitCreationType.KitWise)
                 {
-                    ModelState.AddModelError("Message", "You can't able to delete because kit has already created!");
-                    return BadRequest(ModelState);
+                    var kit = _context.SupplyManagementKIT.Where(x => x.ProjectDesignVisitId == record.ProjectDesignVisitId && x.PharmacyStudyProductTypeId == record.PharmacyStudyProductTypeId && x.DeletedDate == null).Select(x => x.Id).ToList();
+                    if (kit.Count > 0)
+                    {
+                        ModelState.AddModelError("Message", "You can't able to delete because kit has already created!");
+                        return BadRequest(ModelState);
+                    }
+                }
+                else
+                {
+                    if (_context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).Any(z => z.DeletedDate == null && z.SupplyManagementKITSeries.ProjectId == project.ProjectDesignPeriod.ProjectDesign.ProjectId && z.PharmacyStudyProductTypeId == record.PharmacyStudyProductTypeId))
+                    {
+                        ModelState.AddModelError("Message", "Kit already been prepared you can not modify record!");
+                        return BadRequest(ModelState);
+                    }
                 }
             }
             if (_jwtTokenAccesser.GetHeader("audit-reason-oth") != null && _jwtTokenAccesser.GetHeader("audit-reason-oth") != "")

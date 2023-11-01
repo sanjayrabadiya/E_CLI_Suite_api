@@ -1014,7 +1014,7 @@ namespace GSC.Helper
         [Description("Damaged")] Damaged = 3,
         [Description("Returned")] Return = 4,
         [Description("Discard")] Discard = 5,
-        [Description("Send to sponser")] Sendtosponser = 6,
+        [Description("Send to sponsor")] Sendtosponser = 6,
         [Description("Missing")] Missing = 7,
         [Description("Return Receive")] ReturnReceive = 8,
         [Description("Return Receive With Issue")] ReturnReceiveWithIssue = 9,
