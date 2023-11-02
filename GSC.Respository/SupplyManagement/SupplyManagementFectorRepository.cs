@@ -455,7 +455,7 @@ namespace GSC.Respository.SupplyManagement
                 col.ColumnName = colName;
                 dt.Columns.Add(col);
 
-                if (!string.IsNullOrEmpty(r.ProductTypeCode))
+                if (!string.IsNullOrEmpty(r.ProductTypeCode) && productType != r.ProductTypeCode)
                     productType = productType + r.ProductTypeCode;
                 if (r.LogicalOperator == "OR")
                     productType = productType + " OR ";
