@@ -440,7 +440,8 @@ namespace GSC.Respository.InformConcent
 
             var lastRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < randomization.CreatedDate.GetValueOrDefault().Ticks).OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
             var afterRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > randomization.CreatedDate.GetValueOrDefault().Ticks).ToList();
-            afterRecords.Add(lastRecords);
+            if (lastRecords != null)
+                afterRecords.Add(lastRecords);
             var resultDto = _mapper.Map<List<EconsentDocumentDetailsDto>>(afterRecords);
             return resultDto.OrderByDescending(o => o.Id).ToList();
         }
