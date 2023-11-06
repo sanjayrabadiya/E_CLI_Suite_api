@@ -1,9 +1,4 @@
-﻿using GSC.Common.Base;
-using GSC.Common.Common;
-using GSC.Data.Entities.Common;
-using GSC.Data.Entities.CTMS;
-using GSC.Helper;
-using System;
+﻿using GSC.Data.Entities.Common;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
@@ -26,8 +21,6 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "User is required.")]
         public int UserRoleId { get; set; }
     }
-
-
     public class UserAccessGridDto : BaseAuditDto
     {
         public int ParentProjectId { get; set; }

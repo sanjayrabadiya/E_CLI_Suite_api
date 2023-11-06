@@ -12,9 +12,6 @@ namespace GSC.Respository.CTMS
         string DuplicateIActive(UserAccess objSave);
         List<UserAccessGridDto> GetUserAccessList(bool isDeleted, int studyId, int siteId);
         void AddSiteUserAccesse(UserAccessDto userAccessDto);
-        void UpdateSiteUserAccess(UserAccess userAccess);
-        void DeleteSiteUserAccess(int id);
-        void ActiveSiteUserAccess(int id);
         List<DropDownDto> GetRollUserDropDown(int projectId);
     }
 }
