@@ -222,5 +222,13 @@ namespace GSC.Api.Controllers.Etmf
             if (replaceUserDto.DocumentId <= 0) return BadRequest();
             return Ok(_projectArtificateDocumentApproverRepository.ReplaceUser(replaceUserDto.DocumentId, replaceUserDto.UserId, replaceUserDto.ReplaceUserId));
         }
+
+        [HttpGet]
+        [Route("GetMaxDueDate/{documentId}")]
+        public IActionResult GetMaxDueDate(int documentId)
+        {
+            if (documentId <= 0) return BadRequest();
+            return Ok(_projectArtificateDocumentApproverRepository.GetMaxDueDate(documentId));
+        }
     }
 }

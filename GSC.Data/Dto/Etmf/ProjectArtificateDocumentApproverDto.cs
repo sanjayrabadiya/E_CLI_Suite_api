@@ -15,6 +15,7 @@ namespace GSC.Data.Dto.Etmf
         public string Comment { get; set; }
         public int CompanyId { get; set; }
         public int? SequenceNo { get; set; }
+        public DateTime? DueDate { get; set; }
     }
 
     public class ProjectArtificateDocumentApproverHistory : BaseAuditDto

@@ -228,7 +228,7 @@ namespace GSC.Respository.Etmf
 
             foreach (var item in documentList)
             {
-                var reviewerList = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, isSendBack = z.IsSendBack, IsReview = z.IsReviewed, CreatedDate = z.CreatedDate, SendBackDate = z.SendBackDate }).ToList();
+                var reviewerList = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, isSendBack = z.IsSendBack, IsReview = z.IsReviewed, CreatedDate = z.CreatedDate, SendBackDate = z.SendBackDate, DueDate = z.DueDate }).ToList();
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
@@ -242,6 +242,8 @@ namespace GSC.Respository.Etmf
                     obj.IsReview = r.IsReview;
                     obj.CreatedDate = r.CreatedDate;
                     obj.SendBackDate = r.SendBackDate;
+                    obj.DueDate = r.DueDate;
+                    obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && r.IsReview == false;
                     users.Add(obj);
                 });
                 var Review = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
@@ -256,7 +258,8 @@ namespace GSC.Respository.Etmf
                         IsApproved = y.IsApproved,
                         SequenceNo = y.SequenceNo,
                         CreatedDate = y.CreatedDate,
-                        ModifiedDate = y.ModifiedDate
+                        ModifiedDate = y.ModifiedDate,
+                        DueDate = y.DueDate
                     }).ToList();
 
                 var ApproverName = new List<DocumentUsers>();
@@ -270,6 +273,8 @@ namespace GSC.Respository.Etmf
                     obj.IsSendBack = r.IsApproved;
                     obj.CreatedDate = r.CreatedDate;
                     obj.SendBackDate = r.ModifiedDate;
+                    obj.DueDate = r.DueDate;
+                    obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && (r.IsApproved == null || r.IsApproved == false);
                     ApproverName.Add(obj);
                 });
 
@@ -297,7 +302,7 @@ namespace GSC.Respository.Etmf
                     obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
-                obj.Level = 5.2;               
+                obj.Level = 5.2;
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;

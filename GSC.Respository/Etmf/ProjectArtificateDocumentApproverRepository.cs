@@ -154,6 +154,8 @@ namespace GSC.Respository.Etmf
                     ExtraData = s.ProjectWorkplaceArtificatedDocumentId,
                     CreatedDate = s.CreatedDate,
                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                    DueDate = s.DueDate,
+                    IsDeleted = s.DueDate == null ? false : s.DueDate.Value.Date < DateTime.Now.Date && (s.IsApproved == null || s.IsApproved == false),
                     Module = "e-TMF",
                     DataType = MyTaskMethodModule.Approved.GetDescription(),
                     Level = 6,
@@ -336,6 +338,19 @@ namespace GSC.Respository.Etmf
                         return false;
                     }
                 }
+            }
+        }
+
+        public DateTime? GetMaxDueDate(int documentId)
+        {
+            var dueDate = All.Where(x => x.DeletedDate == null && (x.IsApproved == null || x.IsApproved == false) && x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo != null).OrderByDescending(o => o.SequenceNo).FirstOrDefault();
+            if (dueDate != null)
+            {
+                return dueDate.DueDate.Value.AddDays(1);
+            }
+            else
+            {
+                return DateTime.Now.Date;
             }
         }
     }

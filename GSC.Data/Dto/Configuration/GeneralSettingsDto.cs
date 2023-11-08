@@ -13,5 +13,6 @@
         public string FirebaseUrl { get; set; }
         public string AgoraAppId { get; set; }
         public string AgoraAppCertificate { get; set; }
+        public string EtmfScheduleDueDate { get; set; }
     }
 }
