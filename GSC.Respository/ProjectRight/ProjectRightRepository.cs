@@ -292,6 +292,20 @@ namespace GSC.Respository.ProjectRight
                                   c.RoleId == _jwtTokenAccesser.RoleId
                                   && c.IsReviewDone).Select(x => x.project.ParentProjectId ?? x.project.Id).Distinct().ToList();
         }
+        //Add by Mitul On 09-11-2023 GS1-I3112 -> All study code get as based on User Access for CTMS
+        public List<int> GetProjectCTMSRightIdList()
+        {
+            var userRoleId = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedDate == null)
+                             .Select(d => d.Id).FirstOrDefault();
+            return _context.UserAccess.Where(c => c.DeletedDate == null && c.UserRoleId == userRoleId).Select(x => x.ParentProjectId).Distinct().ToList();
+        }
+        //Add by Mitul On 09-11-2023 GS1-I3112 -> All Site code get as based on User Access for CTMS
+        public List<int> GetProjectChildCTMSRightIdList()
+        {
+            var userRoleId = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedDate == null)
+                             .Select(d => d.Id).FirstOrDefault();
+            return _context.UserAccess.Where(c => c.DeletedDate == null && c.UserRoleId == userRoleId).Select(x => x.ProjectId).Distinct().ToList();
+        }
 
         public List<int> GetChildProjectRightIdList()
         {

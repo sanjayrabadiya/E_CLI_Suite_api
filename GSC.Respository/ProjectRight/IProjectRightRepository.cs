@@ -26,6 +26,8 @@ namespace GSC.Respository.ProjectRight
         List<ProjectDocumentReviewDto> EtmfUserDropDown(int projectId, int? userId);
         List<int> GetChildProjectRightIdList();
         List<int> GetParentProjectRightIdList();
+        List<int> GetProjectCTMSRightIdList();
+        List<int> GetProjectChildCTMSRightIdList();
 
         List<int> GetEtmfProjectRightIdList();
 

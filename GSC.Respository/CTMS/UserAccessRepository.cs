@@ -9,6 +9,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace GSC.Respository.CTMS
 {
@@ -96,6 +97,29 @@ namespace GSC.Respository.CTMS
                 }).ToList();
                 return result;
             }
+        }
+        //Add by Mitul On 09-11-2023 GS1-I3112 -> If CTMS On By default Add CTMS Access table.
+        public void AddProjectRight(int ProjectId, bool isCtms)
+        {
+            var projectRightData = _context.ProjectRight.Where(s=>s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy== _jwtTokenAccesser.UserId && s.DeletedBy==null && s.ProjectId== ProjectId).FirstOrDefault();
+            var userRoleData= _context.UserRole.Where(s=> s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId== _jwtTokenAccesser.RoleId).Select(r => r.Id).FirstOrDefault();
+            var ctmsOnData= _context.ProjectSettings.Include(d=>d.Project).Where(s=>s.DeletedBy == null && s.IsCtms == isCtms && s.ProjectId== projectRightData.ProjectId).FirstOrDefault();
+            var userAccessData = new UserAccess();
+            if (isCtms){ 
+                userAccessData.Id = 0;
+                userAccessData.UserRoleId = userRoleData;
+                userAccessData.ParentProjectId = ctmsOnData.ProjectId;
+                userAccessData.ProjectId = ctmsOnData.ProjectId;
+                _context.UserAccess.Add(userAccessData);
+            }
+            else{
+                userAccessData = _context.UserAccess.Where(s => s.ProjectId == ctmsOnData.ProjectId && s.ParentProjectId == ctmsOnData.ProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
+                userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
+                userAccessData.DeletedDate = DateTime.UtcNow;
+                _context.UserAccess.Update(userAccessData);
+            }
+            _context.Save();
+
         }
         public void AddSiteUserAccesse(UserAccessDto userAccessDto)
         {

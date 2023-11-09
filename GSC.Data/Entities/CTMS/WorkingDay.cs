@@ -6,7 +6,7 @@ namespace GSC.Data.Entities.CTMS
 {
     public class WorkingDay : BaseEntity, ICommonAduit
     {
-        public int? ParentProjectId { get; set; }
+        public int ParentProjectId { get; set; }
         public string Description { get; set; }
         public bool? IsSite { get; set; }
         public bool? Sunday { get; set; }
