@@ -431,7 +431,6 @@ namespace GSC.Api.Helpers
             services.AddScoped<IWorkingDayRepository, WorkingDayRepository>();
             services.AddScoped<IIDVerificationRepository, IDVerificationRepository>();
             services.AddScoped<IDesignationRepository, DesignationRepository>();
-            services.AddScoped<ITaskResourceRepository, TaskResourceRepository>();
             services.AddHttpClient<IFirebaseNotification, FirebaseNotification>();
             services.AddScoped<IStudyPlanResourceRepository, StudyPlanResourceRepository>();
             services.AddScoped<ICurrencyRepository, CurrencyRepository>();

@@ -20,5 +20,6 @@ namespace GSC.Respository.Etmf
         List<ProjectArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);
         int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
         public void SendMailForApprovedRejected(ProjectArtificateDocumentApprover ProjectArtificateDocumentApproverDto);
+        DateTime? GetMaxDueDate(int documentId);
     }
 }

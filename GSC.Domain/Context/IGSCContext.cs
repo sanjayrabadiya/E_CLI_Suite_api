@@ -454,10 +454,8 @@ namespace GSC.Domain.Context
         DbSet<IDVerification> IDVerification { get; set; }
         DbSet<IDVerificationFile> IDVerificationFile { get; set; }
         public DbSet<Designation> Designation { get; set; }
-        public DbSet<TaskResource> TaskResource { get; set; }
         public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
         public DbSet<Currency> Currency { get; set; }
         public DbSet<UserAccess> UserAccess { get; set; }
-        public DbSet<SiteUserAccess> SiteUserAccess { get; set; }
     }
 }

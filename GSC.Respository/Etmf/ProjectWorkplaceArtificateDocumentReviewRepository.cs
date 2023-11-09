@@ -99,7 +99,8 @@ namespace GSC.Respository.Etmf
                         UserId = ReviewDto.UserId,
                         IsSendBack = false,
                         Message = ReviewDto.Message,
-                        SequenceNo = ReviewDto.SequenceNo
+                        SequenceNo = ReviewDto.SequenceNo,
+                        DueDate = ReviewDto.DueDate
                     });
                     if (_context.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
@@ -231,6 +232,8 @@ namespace GSC.Respository.Etmf
                                CreatedDate = s.CreatedDate,
                                CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
                                Module = "e-TMF",
+                               DueDate = s.DueDate,
+                               IsDeleted = s.DueDate == null ? false : s.DueDate.Value.Date < DateTime.Now.Date && s.IsReviewed == false,
                                DataType = MyTaskMethodModule.Reviewed.GetDescription(),
                                Level = 6,
                                ControlType = DashboardMyTaskType.ETMFSendData
@@ -381,6 +384,19 @@ namespace GSC.Respository.Etmf
                         return false;
                     }
                 }
+            }
+        }
+
+        public DateTime? GetMaxDueDate(int documentId)
+        {
+            var dueDate = All.Where(x => x.DeletedDate == null && x.IsReviewed == false && x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo != null).OrderByDescending(o => o.SequenceNo).FirstOrDefault();
+            if (dueDate != null)
+            {
+                return dueDate.DueDate.Value.AddDays(1);
+            }
+            else
+            {
+                return DateTime.Now.Date;
             }
         }
     }

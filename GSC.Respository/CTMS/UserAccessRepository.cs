@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
@@ -10,6 +9,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
+using System;
 
 namespace GSC.Respository.CTMS
 {
@@ -62,15 +62,6 @@ namespace GSC.Respository.CTMS
         }
         public List<UserAccessGridDto> GetUserAccessList(bool isDeleted, int studyId, int siteId)
         {
-            //var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).
-            // ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
-            //var data = result.Select(r =>
-            //{
-            //    r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
-            //    r.SiteCode = isDeleted ? r.InactiveSiteCode : r.SiteCode;
-            //    return r;
-            //}).ToList();
-
             if (studyId > 0 && siteId == 0)
             {
                 var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ParentProjectId == studyId).OrderByDescending(x => x.Id).
@@ -106,6 +97,29 @@ namespace GSC.Respository.CTMS
                 }).ToList();
                 return result;
             }
+        }
+        //Add by Mitul On 09-11-2023 GS1-I3112 -> If CTMS On By default Add CTMS Access table.
+        public void AddProjectRight(int ProjectId, bool isCtms)
+        {
+            var projectRightData = _context.ProjectRight.Where(s=>s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy== _jwtTokenAccesser.UserId && s.DeletedBy==null && s.ProjectId== ProjectId).FirstOrDefault();
+            var userRoleData= _context.UserRole.Where(s=> s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId== _jwtTokenAccesser.RoleId).Select(r => r.Id).FirstOrDefault();
+            var ctmsOnData= _context.ProjectSettings.Include(d=>d.Project).Where(s=>s.DeletedBy == null && s.IsCtms == isCtms && s.ProjectId== projectRightData.ProjectId).FirstOrDefault();
+            var userAccessData = new UserAccess();
+            if (isCtms){ 
+                userAccessData.Id = 0;
+                userAccessData.UserRoleId = userRoleData;
+                userAccessData.ParentProjectId = ctmsOnData.ProjectId;
+                userAccessData.ProjectId = ctmsOnData.ProjectId;
+                _context.UserAccess.Add(userAccessData);
+            }
+            else{
+                userAccessData = _context.UserAccess.Where(s => s.ProjectId == ctmsOnData.ProjectId && s.ParentProjectId == ctmsOnData.ProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
+                userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
+                userAccessData.DeletedDate = DateTime.UtcNow;
+                _context.UserAccess.Update(userAccessData);
+            }
+            _context.Save();
+
         }
         public void AddSiteUserAccesse(UserAccessDto userAccessDto)
         {
@@ -144,70 +158,7 @@ namespace GSC.Respository.CTMS
                     });
                 });
             }
-
-            //if (userAccessDto.siteUserAccess != null && userAccessDto.siteUserAccess[0].ProjectId != 0)
-            //{
-            //    userAccessDto.siteUserAccess.ForEach(t =>
-            //    {
-            //            t.UserAccessId = userAccessDto.Id;
-            //            t.DeletedDate = null;
-            //            _context.SiteUserAccess.Add(t);
-            //            _context.Save();
-            //    });
-            //}
-            //else
-            //{
-            //    userAccessDto.siteUserAccess[0].UserAccessId = userAccessDto.Id;
-            //    userAccessDto.siteUserAccess[0].DeletedDate = null;
-            //    userAccessDto.siteUserAccess[0].ProjectId = userAccessDto.ParentProjectId;
-            //    _context.SiteUserAccess.Add(userAccessDto.siteUserAccess[0]);
-            //    _context.Save();
-            //}
         }
-        public void UpdateSiteUserAccess(UserAccess userAccess)
-        {
-            var userAccessdata = _context.SiteUserAccess.Where(x => x.UserAccessId == userAccess.Id && x.DeletedDate == null)
-               .ToList();
-
-            userAccessdata.ForEach(t =>
-            {
-                if (userAccessdata != null)
-                {
-                    _context.SiteUserAccess.Remove(t);
-                }
-            });
-            //userAccess.siteUserAccess.ForEach(z =>
-            //{
-            //    _context.SiteUserAccess.Add(z);
-            //});
-        }
-        public void DeleteSiteUserAccess(int id)
-        {
-            var siteUserAccessData = _context.SiteUserAccess.Where(x => x.UserAccessId == id && x.DeletedDate == null).ToList();
-            siteUserAccessData.ForEach(t =>
-            {
-                if (siteUserAccessData != null)
-                {
-                    t.DeletedBy = _jwtTokenAccesser.UserId;
-                    t.DeletedDate = DateTime.UtcNow;
-                    _context.SiteUserAccess.Update(t);
-                }
-            });
-        }
-        public void ActiveSiteUserAccess(int id)
-        {
-            var siteUserAccessData = _context.SiteUserAccess.Where(x => x.UserAccessId == id && x.DeletedDate != null).ToList();
-            siteUserAccessData.ForEach(t =>
-            {
-                if (siteUserAccessData != null)
-                {
-                    t.DeletedBy = null;
-                    t.DeletedDate = null;
-                    _context.SiteUserAccess.Update(t);
-                }
-            });
-        }
-
         public List<DropDownDto> GetRollUserDropDown(int projectId)
         {
            var data =_context.UserRole.Where(x => x.DeletedBy == null && x.User.DeletedBy==null && x.SecurityRole.DeletedBy==null)

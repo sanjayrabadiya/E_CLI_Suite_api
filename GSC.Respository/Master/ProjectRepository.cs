@@ -420,10 +420,33 @@ namespace GSC.Respository.Master
 
             return projects;
         }
-
+      
         public List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null && x.ParentProjectId == parentProjectId
+                    && projectList.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                    CountryId = c.ManageSite != null && c.ManageSite.City != null && c.ManageSite.City.State != null ? c.ManageSite.City.State.CountryId : 0,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsTestSite = c.IsTestSite,
+                    ParentProjectId = c.ParentProjectId ?? 0,
+                    AttendanceLimit = c.AttendanceLimit ?? 0, //Add for site limt (Tinku Mahato)
+                }).OrderBy(o => o.Value).ToList();
+        }
+
+        //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
+        public List<ProjectDropDown> GetChildProjectCTMSDropDown(int parentProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             return All.Where(x =>
@@ -1373,7 +1396,7 @@ namespace GSC.Respository.Master
 
         public List<ProjectDropDown> GetParentProjectCTMSDropDown()
         {
-            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             return All.Where(x =>
@@ -1391,6 +1414,26 @@ namespace GSC.Respository.Master
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
 
+        public List<ProjectDropDown> GetParentProjectCTMSTrueDropDown()
+        {
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+            var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ProjectCode != null
+                    && projectsctms.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).Distinct().OrderBy(o => o.Value).ToList();
+        }
+     
         public List<ProjectDropDown> GetParentStaticProjectDropDownIWRS()
         {
 

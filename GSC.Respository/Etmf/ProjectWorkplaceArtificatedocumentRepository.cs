@@ -192,8 +192,8 @@ namespace GSC.Respository.Etmf
 
             var _docuService = new DocumentService();
 
-           var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == id).Include(x => x.ProjectWorkPlace)
-                .ThenInclude(x => x.ProjectWorkPlace).FirstOrDefault();
+            var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == id).Include(x => x.ProjectWorkPlace)
+                 .ThenInclude(x => x.ProjectWorkPlace).FirstOrDefault();
 
             var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == artificate.ProjectWorkPlace.ProjectWorkPlace.EtmfProjectWorkPlaceId
                          && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
@@ -209,7 +209,7 @@ namespace GSC.Respository.Etmf
 
             foreach (var item in documentList)
             {
-                var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, IsSendBack = z.IsSendBack, IsReview = z.IsReviewed, CreatedDate = z.CreatedDate, SendBackDate = z.SendBackDate }).ToList();
+                var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, IsSendBack = z.IsSendBack, IsReview = z.IsReviewed, CreatedDate = z.CreatedDate, SendBackDate = z.SendBackDate, DueDate = z.DueDate }).ToList();
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
@@ -223,6 +223,8 @@ namespace GSC.Respository.Etmf
                     obj.IsReview = r.IsReview;
                     obj.CreatedDate = r.CreatedDate;
                     obj.SendBackDate = r.SendBackDate;
+                    obj.DueDate = r.DueDate;
+                    obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && r.IsReview == false;
                     users.Add(obj);
                 });
 
@@ -238,7 +240,8 @@ namespace GSC.Respository.Etmf
                        IsApproved = y.IsApproved,
                        SequenceNo = y.SequenceNo,
                        CreatedDate = y.CreatedDate,
-                       ModifiedDate = y.ModifiedDate
+                       ModifiedDate = y.ModifiedDate,
+                       DueDate = y.DueDate,
                    }).ToList();
 
                 var ApproverName = new List<DocumentUsers>();
@@ -252,6 +255,8 @@ namespace GSC.Respository.Etmf
                     obj.IsSendBack = r.IsApproved;
                     obj.CreatedDate = r.CreatedDate;
                     obj.SendBackDate = r.ModifiedDate;
+                    obj.DueDate = r.DueDate;
+                    obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && (r.IsApproved == null || r.IsApproved == false);
                     ApproverName.Add(obj);
                 });
 
@@ -272,7 +277,7 @@ namespace GSC.Respository.Etmf
                 obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
                 if (item.Status == ArtifactDocStatusType.Final)
-                {                  
+                {
                     var changeDocumentName = _docuService.GetEtmfOldFileName(obj.FullDocPath, obj.ExtendedName);
                     obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, changeDocumentName);
                     obj.DocumentName = changeDocumentName;

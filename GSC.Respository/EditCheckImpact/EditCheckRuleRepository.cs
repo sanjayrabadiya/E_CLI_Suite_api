@@ -148,7 +148,7 @@ namespace GSC.Respository.EditCheckImpact
                         targetResult.IsValid = true;
                         targetResult.Result = editCheck.Where(x => !x.IsTarget).FirstOrDefault()?.InputValue;
                     }
-                    if (c.Operator == Operator.Default)
+                    else if (c.Operator == Operator.Default)
                     {
                         targetResult.IsValid = true;
                         targetResult.Result = c.CollectionValue;

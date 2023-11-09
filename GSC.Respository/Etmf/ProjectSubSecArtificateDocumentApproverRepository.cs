@@ -15,6 +15,7 @@ using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -145,6 +146,8 @@ namespace GSC.Respository.Etmf
                      Module = "e-TMF",
                      DataType = MyTaskMethodModule.Approved.GetDescription(),
                      Level = 5.2,
+                     DueDate = s.DueDate,
+                     IsDeleted = s.DueDate == null ? false : s.DueDate.Value.Date < DateTime.Now.Date && (s.IsApproved == null || s.IsApproved == false),
                      ControlType = DashboardMyTaskType.ETMFSubSecApproveData
                  }).OrderByDescending(x => x.CreatedDate).ToList();
 
@@ -309,6 +312,20 @@ namespace GSC.Respository.Etmf
                         return false;
                     }
                 }
+            }
+        }
+
+
+        public DateTime? GetMaxDueDate(int documentId)
+        {
+            var dueDate = All.Where(x => x.DeletedDate == null && (x.IsApproved == null || x.IsApproved == false) && x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo != null).OrderByDescending(o => o.SequenceNo).FirstOrDefault();
+            if (dueDate != null)
+            {
+                return dueDate.DueDate.Value.AddDays(1);
+            }
+            else
+            {
+                return DateTime.Now.Date;
             }
         }
     }

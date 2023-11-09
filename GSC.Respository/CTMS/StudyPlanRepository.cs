@@ -41,7 +41,7 @@ namespace GSC.Respository.CTMS
 
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
         {
-            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
@@ -101,17 +101,6 @@ namespace GSC.Respository.CTMS
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
 
-            //Add by mitul task was Resource Add form to TaskResource
-            foreach (var task in tasklist) {
-                var taskResource = _context.TaskResource.Include(s=>s.TaskMaster).Where(d=>d.TaskMaster.Id==task.TaskId)
-                    .Select(t => new StudyPlanResource
-                    {
-                        StudyPlanTaskId = task.Id,
-                        ResourceTypeId = t.ResourceTypeId
-                    }).ToList();
-                _context.StudyPlanResource.AddRange(taskResource);
-                _context.Save();
-            }
 
             return "";
         }

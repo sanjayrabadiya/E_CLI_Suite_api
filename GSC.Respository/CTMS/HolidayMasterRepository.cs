@@ -5,6 +5,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Respository.ProjectRight;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,16 +16,23 @@ namespace GSC.Respository.CTMS
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IProjectRightRepository _projectRightRepository;
         public HolidayMasterRepository(IGSCContext context,
+            IProjectRightRepository projectRightRepository,
             IMapper mapper) : base(context)
         {
             _mapper = mapper;
             _context = context;
+            _projectRightRepository = projectRightRepository;
         }
 
         public List<HolidayMasterGridDto> GetHolidayList(bool isDeleted)
         {
-            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).
+            //Add by Mitul On 09-11-2023 GS1-I3112 -> If CTMS On By default Add CTMS Access table.
+            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Contains(x.ProjectId)).OrderByDescending(x => x.Id).
                    ProjectTo<HolidayMasterGridDto>(_mapper.ConfigurationProvider).ToList();
             var data = result.Select(r =>
             {

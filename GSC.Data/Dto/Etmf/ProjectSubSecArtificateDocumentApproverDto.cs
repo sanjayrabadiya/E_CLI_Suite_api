@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using System;
 
 namespace GSC.Data.Dto.Etmf
 {
@@ -10,6 +11,7 @@ namespace GSC.Data.Dto.Etmf
         public string Comment { get; set; }
         public int CompanyId { get; set; }
         public int? SequenceNo { get; set; }
+        public DateTime? DueDate { get; set; }
     }
 
     public class ProjectSubSecArtificateDocumentApproverHistory : BaseAuditDto

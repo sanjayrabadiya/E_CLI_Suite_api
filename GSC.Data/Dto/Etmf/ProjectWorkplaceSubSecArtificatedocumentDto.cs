@@ -84,6 +84,8 @@ namespace GSC.Data.Dto.Etmf
         public int UserId { get; set; }
         public DateTime? CreatedDate { get; set; }
         public DateTime? SendBackDate { get; set; }
+        public DateTime? DueDate { get; set; }
+        public bool IsDueDateExpired { get; set; }
     }
     public class CustomParameter
     {

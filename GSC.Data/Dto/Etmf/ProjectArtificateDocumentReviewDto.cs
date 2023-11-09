@@ -20,6 +20,7 @@ namespace GSC.Data.Dto.Etmf
         public int? SequenceNo { get; set; }
         public int? TempSeqNo { get; set; }
         public bool IsReview { get; set; }
+        public DateTime? DueDate { get; set; }
         public List<ProjectArtificateDocumentReviewDto> users { get; set; }
     }
 

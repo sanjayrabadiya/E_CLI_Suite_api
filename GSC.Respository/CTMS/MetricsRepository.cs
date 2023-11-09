@@ -27,7 +27,7 @@ namespace GSC.Respository.CTMS
         }
         public List<PlanMetricsGridDto> GetMetricsList(bool isDeleted, int typesId)
         {
-            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             var planMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.MetricsType == (typesId == 1 ? MetricsType.Enrolled : typesId == 2 ? MetricsType.Screened : MetricsType.Randomized) && projectList.Any(c => c == x.ProjectId)).

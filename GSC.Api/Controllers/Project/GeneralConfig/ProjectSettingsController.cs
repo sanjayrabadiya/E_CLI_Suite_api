@@ -7,6 +7,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Entities.Project.Generalconfig;
+using GSC.Respository.CTMS;
 using GSC.Respository.Project.GeneralConfig;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,12 +22,14 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IProjectSettingsRepository _projectSettingsRepository;
+        private readonly IUserAccessRepository _userAccessRepository;
         public ProjectSettingsController(
-            IUnitOfWork uow, IMapper mapper, IProjectSettingsRepository projectSettingsRepository)
+            IUnitOfWork uow, IMapper mapper, IProjectSettingsRepository projectSettingsRepository, IUserAccessRepository userAccessRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _projectSettingsRepository = projectSettingsRepository;
+            _userAccessRepository = userAccessRepository;
         }
 
         [HttpGet("{id}")]
@@ -47,6 +50,10 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             _projectSettingsRepository.Add(projectSettings);
             if (_uow.Save() <= 0) throw new Exception("Creating ctms settings failed on save.");
+
+            //Add by Mitul ->CTMS on Bydeful Add CTMS Access table
+             _userAccessRepository.AddProjectRight(projectSettingsDto.ProjectId, projectSettingsDto.IsCtms);
+
             return Ok(projectSettings.Id);
         }
         [HttpPut]
@@ -61,6 +68,9 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             _projectSettingsRepository.Update(projectSettings);
 
             if (_uow.Save() <= 0) throw new Exception("Update ctms settings failed on save.");
+
+            //Add by Mitul ->CTMS on Bydeful Add CTMS Access table
+             _userAccessRepository.AddProjectRight(projectSettingsDto.ProjectId, projectSettingsDto.IsCtms);
             return Ok(projectSettings.Id);
         }
 

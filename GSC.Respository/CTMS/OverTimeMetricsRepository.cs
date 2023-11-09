@@ -57,8 +57,12 @@ namespace GSC.Respository.CTMS
 
         public List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
+            //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId== metricsId).OrderBy(x => x.Id).
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId== metricsId && projectList.Contains(x.ProjectId)).OrderBy(x => x.Id).
                  ProjectTo<OverTimeMetricsGridDto>(_mapper.ConfigurationProvider).ToList();
         }
         private List<Data.Entities.Master.Project> GetProjectIds(int projectId, int countryId, int siteId)

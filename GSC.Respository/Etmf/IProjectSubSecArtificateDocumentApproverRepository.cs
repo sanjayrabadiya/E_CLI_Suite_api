@@ -2,6 +2,7 @@
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
+using System;
 using System.Collections.Generic;
 
 namespace GSC.Respository.Etmf
@@ -17,5 +18,6 @@ namespace GSC.Respository.Etmf
         List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);
         int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
         void SendMailForApprovedRejected(ProjectSubSecArtificateDocumentApprover ProjectSubSecArtificateDocumentApproverDto);
+        DateTime? GetMaxDueDate(int documentId);
     }
 }
