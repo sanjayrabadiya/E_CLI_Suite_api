@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTok" Version="3.6.0" />
+    <PackageReference Include="OpenTok" Version="3.12.2" />
   </ItemGroup>
 
   <ItemGroup>

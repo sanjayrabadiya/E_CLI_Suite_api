@@ -168,7 +168,7 @@ namespace GSC.Respository.SupplyManagement
                     j++;
                 });
 
-                worksheet.Row(1).Cell(2).SetValue(studyCode);
+                worksheet.Row(1).Cell(2).SetValue(studyCode.ToString());
                 worksheet.Row(2).Cell(2).SetValue(country);
                 worksheet.Row(3).Cell(2).SetValue(site);
 

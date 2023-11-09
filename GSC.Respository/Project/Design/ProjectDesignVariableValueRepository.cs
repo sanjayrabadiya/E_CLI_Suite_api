@@ -192,8 +192,8 @@ namespace GSC.Respository.Project.Design
                                 worksheet.Row(j).Cell(28).SetValue(d.HighRangeValue);
                                 worksheet.Row(j).Cell(29).SetValue(d.DefaultValue);
                                 worksheet.Row(j).Cell(30).SetValue(d.Note);
-                                worksheet.Row(j).Cell(31).SetValue(d.IsDocument);
-                                worksheet.Row(j).Cell(32).SetValue(d.IsEncrypt);
+                                worksheet.Row(j).Cell(31).SetValue(d.IsDocument == true ? "Yes" : "No");
+                                worksheet.Row(j).Cell(32).SetValue(d.IsEncrypt == true ? "Yes" : "No");
                                 worksheet.Row(j).Cell(33).SetValue(d.EncryptRole);
                                 worksheet.Row(j).Cell(34).SetValue(d.CollectionValue);
                                 worksheet.Row(j).Cell(35).SetValue(d.DisplayValue);
