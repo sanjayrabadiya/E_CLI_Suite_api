@@ -167,5 +167,13 @@ namespace GSC.Api.Controllers.Etmf
             if (documentId <= 0) return BadRequest();
             return Ok(_projectSubSecArtificateDocumentReviewRepository.GetMaxDueDate(documentId));
         }
+
+        [HttpGet]
+        [Route("SkipDocumentReview/{documentId}")]
+        public IActionResult SkipDocumentReview(int documentId)
+        {
+            if (documentId <= 0) return BadRequest();
+            return Ok(_projectSubSecArtificateDocumentReviewRepository.SkipDocumentReview(documentId));
+        }
     }
 }

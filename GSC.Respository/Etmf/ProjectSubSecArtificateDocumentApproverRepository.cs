@@ -328,5 +328,36 @@ namespace GSC.Respository.Etmf
                 return DateTime.Now.Date;
             }
         }
+
+        public void SaveByDocumentIdInApprove(int projectWorkplaceArtificateDocumentId)
+        {
+            Add(new ProjectSubSecArtificateDocumentApprover
+            {
+                ProjectWorkplaceSubSecArtificateDocumentId = projectWorkplaceArtificateDocumentId,
+                UserId = _jwtTokenAccesser.UserId
+            });
+
+            _context.Save();
+        }
+
+        public int SkipDocumentApproval(int documentId, bool isApproval)
+        {
+            var defaultUser = All.FirstOrDefault(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId
+            && x.DeletedDate == null && x.UserId == x.CreatedBy && x.IsApproved == null);
+            if (defaultUser != null)
+            {
+                defaultUser.IsApproved = true;
+                Update(defaultUser);
+                if (isApproval)
+                {
+                    var document = _context.ProjectWorkplaceSubSecArtificatedocument.FirstOrDefault(x => x.Id == documentId);
+                    document.IsAccepted = true;
+                    _context.ProjectWorkplaceSubSecArtificatedocument.Update(document);
+                }
+                return _context.Save();
+            }
+
+            return 0;
+        }
     }
 }

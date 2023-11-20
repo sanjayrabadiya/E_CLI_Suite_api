@@ -21,5 +21,6 @@ namespace GSC.Respository.Etmf
         List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);
         int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
         DateTime? GetMaxDueDate(int documentId);
+        int SkipDocumentReview(int documentId);
     }
 }

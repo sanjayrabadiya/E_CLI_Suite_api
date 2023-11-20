@@ -103,9 +103,9 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
 
             _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
+            _projectArtificateDocumentApproverRepository.SaveByDocumentIdInApprove(projectWorkplaceArtificatedocument.Id);
             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
             return Ok(projectWorkplaceArtificatedocument.Id);
-
         }
 
         [HttpPost, DisableRequestSizeLimit]

@@ -209,7 +209,7 @@ namespace GSC.Respository.Etmf
 
             foreach (var item in documentList)
             {
-                var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId != item.CreatedBy && x.DeletedDate == null).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, IsSendBack = z.IsSendBack, IsReview = z.IsReviewed, CreatedDate = z.CreatedDate, SendBackDate = z.SendBackDate, DueDate = z.DueDate }).ToList();
+                var reviewerList = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.DeletedDate == null && x.UserId != item.CreatedBy).Select(z => new { UserId = z.UserId, SequenceNo = z.SequenceNo, IsSendBack = z.IsSendBack, IsReview = z.IsReviewed, CreatedDate = z.CreatedDate, SendBackDate = z.SendBackDate, DueDate = z.DueDate }).ToList();
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
@@ -229,7 +229,7 @@ namespace GSC.Respository.Etmf
                 });
 
                 var Review = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
-                && x.UserId != item.CreatedBy && x.DeletedDate == null).ToList();
+                 && x.DeletedDate == null).ToList();
 
                 var ApproveList = _context.ProjectArtificateDocumentApprover.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList()
                    .Select(y => new ProjectArtificateDocumentApprover
@@ -247,17 +247,20 @@ namespace GSC.Respository.Etmf
                 var ApproverName = new List<DocumentUsers>();
                 ApproveList.ForEach(r =>
                 {
-                    var role = item.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
-                    DocumentUsers obj = new DocumentUsers();
-                    obj.UserName = _userRepository.Find(r.UserId).UserName;
-                    obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
-                    obj.SequenceNo = r.SequenceNo;
-                    obj.IsSendBack = r.IsApproved;
-                    obj.CreatedDate = r.CreatedDate;
-                    obj.SendBackDate = r.ModifiedDate;
-                    obj.DueDate = r.DueDate;
-                    obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && (r.IsApproved == null || r.IsApproved == false);
-                    ApproverName.Add(obj);
+                    if (r.UserId != item.CreatedBy)
+                    {
+                        var role = item.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
+                        DocumentUsers obj = new DocumentUsers();
+                        obj.UserName = _userRepository.Find(r.UserId).UserName;
+                        obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
+                        obj.SequenceNo = r.SequenceNo;
+                        obj.IsSendBack = r.IsApproved;
+                        obj.CreatedDate = r.CreatedDate;
+                        obj.SendBackDate = r.ModifiedDate;
+                        obj.DueDate = r.DueDate;
+                        obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && (r.IsApproved == null || r.IsApproved == false);
+                        ApproverName.Add(obj);
+                    }
                 });
 
                 var currentReviewer = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
@@ -294,14 +297,16 @@ namespace GSC.Respository.Etmf
                 obj.Level = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
+                var tempReview = Review.Where(x => x.UserId != x.CreatedBy);
+                obj.ReviewStatus = tempReview.Count() == 0 ? Review.FirstOrDefault(x => x.UserId == item.CreatedBy).IsReviewed ? "Reviewed" : "" : tempReview.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : tempReview.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
                 obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
                 obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 obj.IsAccepted = item.IsAccepted;
-                obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";
+                var tempApprover = ApproveList.Where(x => x.UserId != item.CreatedBy);
+                obj.ApprovedStatus = tempApprover.Count() == 0 ? ApproveList.FirstOrDefault(x => x.UserId == item.CreatedBy).IsApproved.GetValueOrDefault() ? "Approved" : "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";
                 obj.Approver = ApproverName.OrderBy(x => x.SequenceNo).ToList();
                 obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceArtificate.EtmfArtificateMasterLbraryId;
-                obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
+                obj.IsApproveDoc = tempApprover.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
                 obj.IsReplyAllComment = item.IsReplyAllComment;
                 obj.SequenceNo = currentReviewer?.SequenceNo;

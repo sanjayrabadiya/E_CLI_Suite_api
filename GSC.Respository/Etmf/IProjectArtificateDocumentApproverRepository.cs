@@ -21,5 +21,7 @@ namespace GSC.Respository.Etmf
         int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
         public void SendMailForApprovedRejected(ProjectArtificateDocumentApprover ProjectArtificateDocumentApproverDto);
         DateTime? GetMaxDueDate(int documentId);
+        void SaveByDocumentIdInApprove(int projectWorkplaceArtificateDocumentId);
+        int SkipDocumentApproval(int documentId, bool isApproval);
     }
 }

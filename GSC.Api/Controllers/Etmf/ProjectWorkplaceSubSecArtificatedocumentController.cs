@@ -68,6 +68,7 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
 
             _projectSubSecArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
+            _projectSubSecArtificateDocumentApproverRepository.SaveByDocumentIdInApprove(projectWorkplaceArtificatedocument.Id);
             _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
             return Ok(projectWorkplaceArtificatedocument.Id);
         }
@@ -214,7 +215,7 @@ namespace GSC.Api.Controllers.Etmf
         [Route("GetDcoumentHistory/{documentId}")]
         public IActionResult GetDcoumentHistory(int documentId)
         {
-            var docHistory = _projectWorkplaceSubSecArtificatedocumentRepository.GetSubSectionDocumentHistory(documentId).OrderByDescending(q => q.ExpiryDate); 
+            var docHistory = _projectWorkplaceSubSecArtificatedocumentRepository.GetSubSectionDocumentHistory(documentId).OrderByDescending(q => q.ExpiryDate);
             return Ok(docHistory);
         }
     }
