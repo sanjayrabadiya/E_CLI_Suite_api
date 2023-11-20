@@ -153,7 +153,7 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(1).SetValue(d.ProjectCode);
                     worksheet.Row(j).Cell(2).SetValue(d.SiteCode);
                     worksheet.Row(j).Cell(3).SetValue(d.Visit);
-                    worksheet.Row(j).Cell(4).SetValue(d.Treatment);
+                    worksheet.Row(j).Cell(4).SetValue(setting.IsBlindedStudy == false ? d.Treatment : "");
                     worksheet.Row(j).Cell(5).SetValue(d.KitNo);
                     worksheet.Row(j).Cell(6).SetValue(d.ScreeningNo);
                     worksheet.Row(j).Cell(7).SetValue(d.RandomizationNumber);
@@ -190,7 +190,7 @@ namespace GSC.Respository.Reports
                            SiteCode = x.SupplyManagementKITSeries.Randomization.Project.ProjectCode,
                            KitNo = x.SupplyManagementKITSeries.KitNo,
                            Visit = x.ProjectDesignVisit.DisplayName,
-                           Treatment = x.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                           Treatment = setting.IsBlindedStudy == false ? x.PharmacyStudyProductType.ProductType.ProductTypeCode : "",
                            ScreeningNo = x.SupplyManagementKITSeries.Randomization.ScreeningNumber,
                            RandomizationNumber = x.SupplyManagementKITSeries.Randomization.RandomizationNumber,
                            RandomizationDate = x.SupplyManagementKITSeries.Randomization.DateOfRandomization,
@@ -220,7 +220,7 @@ namespace GSC.Respository.Reports
                        {
                            ProjectCode = x.SupplyManagementKIT.Project.ProjectCode,
                            KitNo = x.KitNo,
-                           Treatment = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                           Treatment = setting.IsBlindedStudy == false ? x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode : "",
                            ProjectId = x.SupplyManagementKIT.ProjectId,
                            VisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
                            RandomizationId = x.RandomizationId

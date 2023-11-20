@@ -55,14 +55,20 @@ namespace GSC.Respository.SupplyManagement
 
         public IList<DropDownDto> GetVisitDropDownByProjectId(int projectId)
         {
+            var othervisits = _context.SupplyManagementUploadFileVisit.Include(x => x.ProjectDesignVisit).ThenInclude(x => x.ProjectDesignPeriod).ThenInclude(x => x.ProjectDesign).ThenInclude(x => x.Project).Where(x =>
+                                                               x.DeletedDate == null
+                                                               && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).Select(s => s.ProjectDesignVisitId).ToList();
+            
+            if (othervisits == null)
+                return new List<DropDownDto>();
+
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId
-                        
-                         && x.DeletedDate == null && x.InActiveVersion == null)
+                         && x.DeletedDate == null && x.InActiveVersion == null && othervisits.Contains(x.Id))
                     .Select(x => new DropDownDto
-                    {
-                        Id = x.Id,
-                        Value = x.DisplayName,
-                    }).Distinct().ToList();
+                     {
+                         Id = x.Id,
+                         Value = x.DisplayName,
+                     }).Distinct().ToList();
             return visits;
 
         }

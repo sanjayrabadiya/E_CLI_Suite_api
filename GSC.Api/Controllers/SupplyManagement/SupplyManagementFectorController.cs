@@ -6,11 +6,13 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.SupplyManagement;
 using GSC.Respository.UserMgt;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -179,6 +181,24 @@ namespace GSC.Api.Controllers.SupplyManagement
                 return Ok(data);
             }
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("GetFactorsTypes/{id}")]
+        public IActionResult GetFactorsTypes(int id)
+        {
+            var data = _context.SupplyManagementUploadFile.Where(s => s.DeletedDate == null && s.Status == LabManagementUploadStatus.Approve && s.ProjectId == id).Select(s => (int)s.SupplyManagementUploadFileLevel).ToList();
+            if (data == null)
+                return Ok(new List<DropDownEnum>());
+
+            var fectore = Enum.GetValues(typeof(FectoreType))
+                    .Cast<FectoreType>().Select(e => new DropDownEnum
+                    {
+                        Id = Convert.ToInt16(e),
+                        Value = e.GetDescription()
+                    }).Where(s => data.Contains(s.Id)).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
         }
     }
 }

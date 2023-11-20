@@ -877,19 +877,7 @@ namespace GSC.Api.Controllers.Common
             }
 
         }
-        [HttpGet]
-        [Route("GetFactorsTypes")]
-        public IActionResult GetFactorsTypes()
-        {
-            var fectore = Enum.GetValues(typeof(FectoreType))
-                .Cast<FectoreType>().Select(e => new DropDownEnum
-                {
-                    Id = Convert.ToInt16(e),
-                    Value = e.GetDescription()
-                }).OrderBy(o => o.Id).ToList();
-
-            return Ok(fectore);
-        }
+       
         [HttpGet]
         [Route("GetKitStatusRandomization")]
         public IActionResult GetKitStatusRandomization()

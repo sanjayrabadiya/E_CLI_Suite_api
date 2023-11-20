@@ -1,12 +1,17 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.SupplyManagement;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,15 +27,16 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ISupplyManagementFactorMappingRepository _supplyManagementFactorMappingRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IGSCContext _context;
         public SupplyManagementFactorMappingController(ISupplyManagementFactorMappingRepository supplyManagementFactorMappingRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IJwtTokenAccesser jwtTokenAccesser, IGSCContext context)
         {
             _supplyManagementFactorMappingRepository = supplyManagementFactorMappingRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _context = context;
         }
 
         [HttpGet("GetSupplyFactorMappingList/{projectId}/{isDeleted:bool?}")]
@@ -125,6 +131,22 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             return Ok();
         }
-        
+        [HttpGet("GetFactorsByFactorSetting/{projectId}")]
+        public IActionResult GetFactorsByFactorSetting(int projectId)
+        {
+            var setting = _context.SupplyManagementFectorDetail.Include(s => s.SupplyManagementFector).Where(s => s.SupplyManagementFector.ProjectId == projectId
+                          && s.SupplyManagementFector.DeletedDate == null && s.DeletedDate == null).Select(s => (int)s.Fector).ToList();
+            if (setting == null)
+                return Ok(new List<DropDownEnum>());
+
+            var fectore = Enum.GetValues(typeof(Fector))
+                .Cast<Fector>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).Where(s => setting.Contains(s.Id)).OrderBy(o => o.Id).ToList();
+
+            return Ok(fectore);
+        }
     }
 }

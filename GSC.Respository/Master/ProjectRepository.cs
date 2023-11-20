@@ -1491,7 +1491,7 @@ namespace GSC.Respository.Master
             var list = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && projectList.Contains(x.ProjectId) && x.IsIWRS == true).Select(x => x.ProjectId).ToList();
             if (list == null && list.Count == 0)
                 return null;
-            var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && list.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.IsBlindedStudy == true && list.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             if (numbersetting == null || numbersetting.Count == 0)
                 return null;
             return All.Where(x =>
