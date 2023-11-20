@@ -104,6 +104,8 @@ namespace GSC.Api.Controllers.Etmf
                     _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(firstRecord);
             }
 
+            _projectSubSecArtificateDocumentApproverRepository.SkipDocumentApproval(projectArtificateDocumentApproveDto.FirstOrDefault().ProjectWorkplaceSubSecArtificateDocumentId, false);
+
             return Ok(1);
         }
 
@@ -218,6 +220,14 @@ namespace GSC.Api.Controllers.Etmf
         {
             if (documentId <= 0) return BadRequest();
             return Ok(_projectSubSecArtificateDocumentApproverRepository.GetMaxDueDate(documentId));
+        }
+
+        [HttpGet]
+        [Route("SkipDocumentApproval/{documentId}")]
+        public IActionResult SkipDocumentApproval(int documentId)
+        {
+            if (documentId <= 0) return BadRequest();
+            return Ok(_projectSubSecArtificateDocumentApproverRepository.SkipDocumentApproval(documentId, true));
         }
     }
 }

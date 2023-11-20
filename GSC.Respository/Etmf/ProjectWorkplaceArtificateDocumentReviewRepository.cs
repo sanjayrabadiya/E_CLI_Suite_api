@@ -126,6 +126,19 @@ namespace GSC.Respository.Etmf
                 if (firstRecord.IsReview == false)
                     SendMailToReviewer(firstRecord);
             }
+
+
+            var defaultUser = All.FirstOrDefault(x => x.ProjectWorkplaceArtificatedDocumentId == pojectArtificateDocumentReviewDto.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId
+            && x.DeletedDate == null && x.UserId == x.CreatedBy && x.IsReviewed == false);
+            if (defaultUser != null)
+            {
+                defaultUser.SendBackDate = DateTime.Now;
+                defaultUser.IsSendBack = true;
+                defaultUser.IsReviewed = true;
+
+                Update(defaultUser);
+                _context.Save();
+            }
         }
 
         // Send mail for review
@@ -398,6 +411,23 @@ namespace GSC.Respository.Etmf
             {
                 return DateTime.Now.Date;
             }
+        }
+
+        public int SkipDocumentReview(int documentId)
+        {
+            var defaultUser = All.FirstOrDefault(x => x.ProjectWorkplaceArtificatedDocumentId == documentId
+            && x.DeletedDate == null && x.UserId == x.CreatedBy && x.IsReviewed == false);
+            if (defaultUser != null)
+            {
+                defaultUser.SendBackDate = DateTime.Now;
+                defaultUser.IsSendBack = true;
+                defaultUser.IsReviewed = true;
+
+                Update(defaultUser);
+                return _context.Save();
+            }
+
+            return 0;
         }
     }
 }

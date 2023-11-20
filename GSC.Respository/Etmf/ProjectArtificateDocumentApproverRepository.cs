@@ -15,6 +15,7 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -352,6 +353,37 @@ namespace GSC.Respository.Etmf
             {
                 return DateTime.Now.Date;
             }
+        }
+
+        public void SaveByDocumentIdInApprove(int projectWorkplaceArtificateDocumentId)
+        {
+            Add(new ProjectArtificateDocumentApprover
+            {
+                ProjectWorkplaceArtificatedDocumentId = projectWorkplaceArtificateDocumentId,
+                UserId = _jwtTokenAccesser.UserId
+            });
+
+            _context.Save();
+        }
+
+        public int SkipDocumentApproval(int documentId, bool isApproval)
+        {
+            var defaultUser = All.FirstOrDefault(x => x.ProjectWorkplaceArtificatedDocumentId == documentId
+            && x.DeletedDate == null && x.UserId == x.CreatedBy && x.IsApproved == null);
+            if (defaultUser != null)
+            {
+                defaultUser.IsApproved = true;
+                Update(defaultUser);
+                if (isApproval)
+                {
+                    var document = _context.ProjectWorkplaceArtificatedocument.FirstOrDefault(x => x.Id == documentId);
+                    document.IsAccepted = true;
+                    _context.ProjectWorkplaceArtificatedocument.Update(document);
+                }
+                return _context.Save();
+            }
+
+            return 0;
         }
     }
 }
