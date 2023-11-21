@@ -3,6 +3,7 @@ using AutoMapper.QueryableExtensions;
 using ClosedXML.Excel;
 using ExcelDataReader;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Project.Design;
@@ -46,6 +47,11 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITGridDto> GetKITList(bool isDeleted, int ProjectId, int siteId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == ProjectId).FirstOrDefault();
+
             var data = _context.SupplyManagementKITDetail.
                 Include(s => s.SupplyManagementShipment).
                 ThenInclude(s => s.SupplyManagementRequest).
@@ -89,7 +95,7 @@ namespace GSC.Respository.SupplyManagement
                         x.LotBatchNo = productreciept.BatchLotNumber;
                     }
                 }
-
+                x.ProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : x.ProductTypeName;
 
             });
             return data;
@@ -252,6 +258,9 @@ namespace GSC.Respository.SupplyManagement
         {
             List<SupplyManagementVisitKITDetailGridDto> data = new List<SupplyManagementVisitKITDetailGridDto>();
             SupplyManagementUploadFileDetail supplyManagementUploadFileDetail = new SupplyManagementUploadFileDetail();
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+             && s.RoleId == _jwtTokenAccesser.RoleId);
 
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
             if (setting == null)
@@ -670,6 +679,10 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITReturnGridDto> GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
             if (setting == null)
                 return new List<SupplyManagementKITReturnGridDto>();
@@ -685,7 +698,7 @@ namespace GSC.Respository.SupplyManagement
                                                               {
                                                                   KitNo = x.KitNo,
                                                                   ProjectDesignVisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
-                                                                  ProductTypeName = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                                                  ProductTypeName = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                                                   NoOfImp = x.NoOfImp,
                                                                   RandomizationId = x.RandomizationId,
                                                                   StudyCode = x.SupplyManagementKIT.Project.ProjectCode,
@@ -1038,6 +1051,11 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITDiscardGridDto> GetKitDiscardList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+
             var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Include(x => x.SupplyManagementKIT)
                                                          .ThenInclude(x => x.PharmacyStudyProductType)
                                                          .ThenInclude(x => x.ProductType)
@@ -1048,7 +1066,7 @@ namespace GSC.Respository.SupplyManagement
                                                           {
                                                               KitNo = x.KitNo,
                                                               ProjectDesignVisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
-                                                              ProductTypeName = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                                              ProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                                               NoOfImp = x.NoOfImp,
                                                               RandomizationId = x.RandomizationId,
                                                               StudyCode = x.SupplyManagementKIT.Project.ProjectCode,
@@ -1300,6 +1318,12 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementKITSeriesGridDto> GetKITSeriesList(bool isDeleted, int ProjectId, int siteId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == ProjectId).FirstOrDefault();
+
             var data = _context.SupplyManagementKITSeries
                 .Include(s => s.SupplyManagementShipment)
                 .ThenInclude(s => s.SupplyManagementRequest)
@@ -1335,12 +1359,21 @@ namespace GSC.Respository.SupplyManagement
 
                     }
                 }
+                x.TreatmentType = setting != null && setting.IsBlindedStudy == true && isShow ? "" : x.TreatmentType;
             });
             return data;
         }
 
         public List<SupplyManagementKITSeriesDetailGridDto> GetKITSeriesDetailList(int id)
         {
+            var supplyManagementKITSeries = _context.SupplyManagementKITSeries.Where(s => s.Id == id).FirstOrDefault();
+
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == supplyManagementKITSeries.ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == supplyManagementKITSeries.ProjectId).FirstOrDefault();
+
             var data = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == id).
                    ProjectTo<SupplyManagementKITSeriesDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(x =>
@@ -1354,7 +1387,7 @@ namespace GSC.Respository.SupplyManagement
                         x.LotBatchNo = productreciept.BatchLotNumber;
                     }
                 }
-
+                x.ProductType = setting.IsBlindedStudy == true && isShow ? "" : x.ProductType;
             });
             return data;
         }
@@ -1465,6 +1498,13 @@ namespace GSC.Respository.SupplyManagement
 
         public List<SupplyManagementUnblindTreatmentGridDto> GetUnblindList(int projectId, int? siteId, int? randomizationId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                        Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                        && s.RoleId == _jwtTokenAccesser.RoleId);
+
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+
             var data = _context.Randomization.Include(x => x.Project).Where(x => x.DeletedDate == null && x.Project.ParentProjectId == projectId && x.RandomizationNumber != null).
                     ProjectTo<SupplyManagementUnblindTreatmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             if (data == null || data.Count == 0)
@@ -1495,35 +1535,32 @@ namespace GSC.Respository.SupplyManagement
                     x.ActionDate = unblind.CreatedDate;
                     x.ActionByRole = _context.SecurityRole.Where(s => s.Id == unblind.RoleId).FirstOrDefault().RoleName;
 
-                    var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == x.ParentProjectId).FirstOrDefault();
 
-                    if (setting != null)
+                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
                     {
-                        if (setting.KitCreationType == KitCreationType.KitWise)
-                        {
-                            var visits = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
-                             .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.ProjectDesignVisit.DisplayName).ToList();
-                            if (visits.Count > 0)
-                                x.VisitName = string.Join(",", visits);
+                        var visits = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
+                         .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.ProjectDesignVisit.DisplayName).ToList();
+                        if (visits.Count > 0)
+                            x.VisitName = string.Join(",", visits);
 
-                            var treatment = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
-                            .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
-                            if (visits.Count > 0)
-                                x.TreatmentType = string.Join(",", treatment.Distinct());
-                        }
-                        else
-                        {
-                            var visits = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
-                             .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
-                            if (visits.Count > 0)
-                                x.VisitName = string.Join(",", visits);
-
-                            var treatment = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
-                            .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
-                            if (visits.Count > 0)
-                                x.TreatmentType = string.Join(",", treatment.Distinct());
-                        }
+                        var treatment = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType).Include(z => z.SupplyManagementKIT).ThenInclude(z => z.ProjectDesignVisit)
+                        .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
+                        if (visits.Count > 0)
+                            x.TreatmentType = string.Join(",", treatment.Distinct());
                     }
+                    else
+                    {
+                        var visits = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
+                         .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
+                        if (visits.Count > 0)
+                            x.VisitName = string.Join(",", visits);
+
+                        var treatment = _context.SupplyManagementKITSeriesDetail.Include(x => x.SupplyManagementKITSeries).Include(z => z.ProjectDesignVisit).Include(x => x.PharmacyStudyProductType).ThenInclude(z => z.ProductType)
+                        .Where(s => s.RandomizationId == x.RandomizationId && s.DeletedDate == null).Select(z => z.PharmacyStudyProductType.ProductType.ProductTypeCode).ToList();
+                        if (visits.Count > 0)
+                            x.TreatmentType = string.Join(",", treatment.Distinct());
+                    }
+
                 }
             });
 

@@ -64,5 +64,7 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetProjectDropDownIWRSUnblind();
 
         List<ProjectDropDown> GetChildProjectDropDownIWRS(int parentProjectId);
+
+        List<ProjectDropDown> GetLiveProjectDropDownIWRS();
     }
 }

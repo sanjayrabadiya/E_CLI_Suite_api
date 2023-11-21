@@ -50,6 +50,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (id <= 0) return BadRequest();
             var centralDepo = _supplyManagementKitNumberSettingsRepository.Find(id);
             var centralDepoDto = _mapper.Map<SupplyManagementKitNumberSettingsDto>(centralDepo);
+            centralDepoDto.RoleId = _context.SupplyManagementKitNumberSettingsRole.Where(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettingsId == id).Select(s => s.RoleId).Distinct().ToList();
             return Ok(centralDepoDto);
         }
 
@@ -72,7 +73,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementKitNumberSettings.KitNoseries = supplyManagementKitNumberSettingsDto.KitNumberStartWIth;
             _supplyManagementKitNumberSettingsRepository.Add(supplyManagementKitNumberSettings);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
-
+            supplyManagementKitNumberSettingsDto.Id = supplyManagementKitNumberSettings.Id;
+            _supplyManagementKitNumberSettingsRepository.SaveRoleNumberSetting(supplyManagementKitNumberSettingsDto);
             return Ok(supplyManagementKitNumberSettings.Id);
 
         }
@@ -88,13 +90,15 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementKitNumberSettings.KitNoseries = supplyManagementKitNumberSettingsDto.KitNumberStartWIth;
             _supplyManagementKitNumberSettingsRepository.Update(supplyManagementKitNumberSettings);
             var mesage = _supplyManagementKitNumberSettingsRepository.CheckKitCreateion(setting);
-            if(!string.IsNullOrEmpty(mesage))
+            if (!string.IsNullOrEmpty(mesage))
             {
                 ModelState.AddModelError("Message", mesage);
                 return BadRequest(ModelState);
             }
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
-
+            if (supplyManagementKitNumberSettingsDto.IsBlindedStudy == true)
+                _supplyManagementKitNumberSettingsRepository.DeleteRoleNumberSetting(supplyManagementKitNumberSettingsDto.Id);
+            _supplyManagementKitNumberSettingsRepository.SaveRoleNumberSetting(supplyManagementKitNumberSettingsDto);
             return Ok(supplyManagementKitNumberSettings.Id);
 
         }
@@ -121,6 +125,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             _supplyManagementKitNumberSettingsRepository.Update(record);
             _supplyManagementKitNumberSettingsRepository.Delete(record);
             _uow.Save();
+            if (record.IsBlindedStudy == true)
+                _supplyManagementKitNumberSettingsRepository.DeleteRoleNumberSetting(id);
             return Ok();
         }
 

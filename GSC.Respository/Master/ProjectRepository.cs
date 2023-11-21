@@ -1494,11 +1494,14 @@ namespace GSC.Respository.Master
             var numbersetting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.IsBlindedStudy == true && list.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             if (numbersetting == null || numbersetting.Count == 0)
                 return null;
+
+            var liveVersion = _context.StudyVersion.Where(s => s.DeletedDate == null && numbersetting.Contains(s.ProjectId)).Select(s => s.ProjectId).ToList();
+
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                     && x.ParentProjectId == null
                     && x.ProjectCode != null
-                    && numbersetting.Contains(x.Id))
+                    && liveVersion.Contains(x.Id))
                 .Select(c => new ProjectDropDown
                 {
                     Id = c.Id,
@@ -1532,6 +1535,34 @@ namespace GSC.Respository.Master
                     ParentProjectId = c.ParentProjectId ?? 0,
                     AttendanceLimit = c.AttendanceLimit ?? 0, //Add for site limt (Tinku Mahato)
                 }).OrderBy(o => o.Value).ToList();
+        }
+
+        public List<ProjectDropDown> GetLiveProjectDropDownIWRS()
+        {
+
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+
+            var list = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && projectList.Contains(x.ProjectId) && x.IsIGT == true).Select(x => x.ProjectId).ToList();
+
+            var liveVersion = _context.StudyVersion.Where(s => s.DeletedDate == null && list.Contains(s.ProjectId)).Select(s => s.ProjectId).ToList();
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ParentProjectId == null
+                    && x.ProjectCode != null
+                    && liveVersion.Contains(x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsSendEmail = c.IsSendEmail,
+                    IsSendSMS = c.IsSendSMS,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                }).Distinct().OrderBy(o => o.Value).ToList();
         }
 
     }

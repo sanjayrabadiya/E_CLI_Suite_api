@@ -31,6 +31,8 @@ namespace GSC.Respository.Project.Design
         IList<DropDownVaribleDto> GetVariabeAnnotationDropDownforhardsoftfetch(int projectDesignTemplateId, int variableId);
         string NonChangeVariableCode(ProjectDesignVariableDto variable);
 
+        string ValidationIWRS(ProjectDesignVariable objSave);
+
 
     }
 }

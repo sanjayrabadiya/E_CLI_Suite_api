@@ -10,6 +10,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,13 +27,16 @@ namespace GSC.Respository.Project.Design
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
+        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
+        private readonly ISupplyManagementFactorMappingRepository _supplyManagementFactorMappingRepository;
         public ProjectDesignTemplateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
             ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
         IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IStudyVersionRepository studyVersionRepository,
-            IProjectDesignVisitRepository projectDesignVisitRepository) : base(context)
+            IProjectDesignVisitRepository projectDesignVisitRepository, ISupplyManagementAllocationRepository supplyManagementAllocationRepository,
+            ISupplyManagementFactorMappingRepository supplyManagementFactorMappingRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -42,6 +46,8 @@ namespace GSC.Respository.Project.Design
             _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _studyVersionRepository = studyVersionRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
+            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
+            _supplyManagementFactorMappingRepository = supplyManagementFactorMappingRepository;
         }
 
         public ProjectDesignTemplate GetTemplateClone(int id)
@@ -466,6 +472,20 @@ namespace GSC.Respository.Project.Design
         {
             var result = All.Where(x => x.Id == templateId).FirstOrDefault();
             return result;
+        }
+
+        public string ValidationTemplateIWRS(ProjectDesignTemplate template)
+        {
+            if (template.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignTemplateId == template.Id))
+            {
+                return "Can't edit/delete record, Already used in Allocation!";
+            }
+            if (template.InActiveVersion == null && _supplyManagementFactorMappingRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignTemplateId == template.Id))
+            {
+                return "Can't edit/delete record, Already used in Fector Mapping!";
+            }
+           
+            return "";
         }
 
     }

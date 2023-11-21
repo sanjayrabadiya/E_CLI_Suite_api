@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IVariabeLanguageRepository _variabeLanguageRepository;
-        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
+        
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
@@ -44,8 +44,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
-            IVariabeLanguageRepository variabeLanguageRepository,
-            ISupplyManagementAllocationRepository supplyManagementAllocationRepository
+            IVariabeLanguageRepository variabeLanguageRepository
             )
         {
             _projectDesignVariableRepository = projectDesignVariableRepository;
@@ -61,7 +60,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _variabeLanguageRepository = variabeLanguageRepository;
             _domainRepository = domainRepository;
-            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
+            
         }
 
         [HttpGet("{id}")]
@@ -177,11 +176,6 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't edit record!");
                 return BadRequest(ModelState);
             }
-            if (variable.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == variableDto.Id))
-            {
-                ModelState.AddModelError("Message", "Can't edit record, Already used in Allocation!");
-                return BadRequest(ModelState);
-            }
 
             var validate = _projectDesignVariableRepository.Duplicate(variable);
             if (!string.IsNullOrEmpty(validate))
@@ -190,6 +184,12 @@ namespace GSC.Api.Controllers.Project.Design
                 return BadRequest(ModelState);
             }
 
+            var validateIWRS = _projectDesignVariableRepository.ValidationIWRS(variable);
+            if (!string.IsNullOrEmpty(validateIWRS))
+            {
+                ModelState.AddModelError("Message", validateIWRS);
+                return BadRequest(ModelState);
+            }
             // added by vipul validation if variable use in visit status than data type not except date or datetime deleted on 25092020
             var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariableId == variableDto.Id && x.DeletedDate == null).Any();
             if (Exists)
@@ -228,9 +228,10 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't delete record!");
                 return BadRequest(ModelState);
             }
-            if (record.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVariableId == id))
+            var validateIWRS = _projectDesignVariableRepository.ValidationIWRS(record);
+            if (!string.IsNullOrEmpty(validateIWRS))
             {
-                ModelState.AddModelError("Message", "Can't delete record, Already used in Allocation!");
+                ModelState.AddModelError("Message", validateIWRS);
                 return BadRequest(ModelState);
             }
 

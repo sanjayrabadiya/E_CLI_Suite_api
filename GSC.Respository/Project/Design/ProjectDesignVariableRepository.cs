@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Web.Http.ModelBinding;
 using AutoMapper;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Project.Design
@@ -19,12 +22,17 @@ namespace GSC.Respository.Project.Design
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IStudyVersionRepository _studyVersionRepository;
+        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
+        private readonly ISupplyManagementFactorMappingRepository _supplyManagementFactorMappingRepository;
         public ProjectDesignVariableRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IStudyVersionRepository studyVersionRepository) : base(context)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IStudyVersionRepository studyVersionRepository, ISupplyManagementAllocationRepository supplyManagementAllocationRepository,
+            ISupplyManagementFactorMappingRepository supplyManagementFactorMappingRepository) : base(context)
         {
             _mapper = mapper;
             _context = context;
             _studyVersionRepository = studyVersionRepository;
+            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
+            _supplyManagementFactorMappingRepository = supplyManagementFactorMappingRepository;
         }
 
 
@@ -339,12 +347,26 @@ namespace GSC.Respository.Project.Design
                 }
                 return "";
             }
-            else {
+            else
+            {
                 if (Array.Exists(codes, element => element == variable.VariableCode))
                     return "Can't add record with this variable code!";
                 else
                     return "";
             }
+        }
+
+        public string ValidationIWRS(ProjectDesignVariable variable)
+        {
+            if (variable.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignVariableId == variable.Id))
+            {
+                return "Can't edit record, Already used in Allocation!";
+            }
+            if (variable.InActiveVersion == null && _supplyManagementFactorMappingRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignVariableId == variable.Id))
+            {
+                return "Can't edit record, Already used in Fector Mapping!";
+            }
+            return "";
         }
     }
 }

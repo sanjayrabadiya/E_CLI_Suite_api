@@ -12,5 +12,9 @@ namespace GSC.Respository.SupplyManagement
         List<SupplyManagementKitNumberSettingsGridDto> GetKITNumberList(bool isDeleted, int ProjectId);
 
         string CheckKitCreateion(SupplyManagementKitNumberSettings obj);
+
+       void SaveRoleNumberSetting(SupplyManagementKitNumberSettingsDto supplyManagementKitNumberSettingsDto);
+
+        void DeleteRoleNumberSetting(int id);
     }
 }

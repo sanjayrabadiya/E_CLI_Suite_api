@@ -26,7 +26,7 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementKitNumberSettingsRepository : GenericRespository<SupplyManagementKitNumberSettings>, ISupplyManagementKitNumberSettingsRepository
     {
-        
+
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
@@ -45,7 +45,7 @@ namespace GSC.Respository.SupplyManagement
         }
         public string CheckKitCreateion(SupplyManagementKitNumberSettings obj)
         {
-            
+
             if (obj.KitCreationType == KitCreationType.KitWise)
             {
                 if (_context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Count(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == obj.ProjectId) > 0)
@@ -62,6 +62,30 @@ namespace GSC.Respository.SupplyManagement
             }
 
             return "";
+        }
+
+        public void SaveRoleNumberSetting(SupplyManagementKitNumberSettingsDto supplyManagementKitNumberSettingsDto)
+        {
+            if (supplyManagementKitNumberSettingsDto.IsBlindedStudy == true && supplyManagementKitNumberSettingsDto.RoleId != null && supplyManagementKitNumberSettingsDto.RoleId.Count > 0)
+            {
+                foreach (var item in supplyManagementKitNumberSettingsDto.RoleId)
+                {
+                    SupplyManagementKitNumberSettingsRole supplyManagementKitNumberSettingsRole = new SupplyManagementKitNumberSettingsRole();
+                    supplyManagementKitNumberSettingsRole.SupplyManagementKitNumberSettingsId = supplyManagementKitNumberSettingsDto.Id;
+                    supplyManagementKitNumberSettingsRole.RoleId = item;
+                    _context.SupplyManagementKitNumberSettingsRole.Add(supplyManagementKitNumberSettingsRole);
+
+                }
+                _context.Save();
+            }
+        }
+
+        public void DeleteRoleNumberSetting(int id)
+        {
+            var data = _context.SupplyManagementKitNumberSettingsRole.Where(s => s.SupplyManagementKitNumberSettingsId == id).ToList();
+            _context.SupplyManagementKitNumberSettingsRole.RemoveRange(data);
+            _context.Save();
+
         }
     }
 }

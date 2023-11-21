@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
@@ -51,6 +52,11 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementRequestGridDto> GetShipmentRequestList(int parentProjectId, int SiteId, bool isDeleted)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == parentProjectId
+                             && s.RoleId == _jwtTokenAccesser.RoleId);
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).FirstOrDefault();
+
             var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.FromProjectId == SiteId).
                     ProjectTo<SupplyManagementRequestGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             data.ForEach(t =>
@@ -73,6 +79,8 @@ namespace GSC.Respository.SupplyManagement
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     t.StudyProjectCode = study != null ? study.ProjectCode : "";
+                    if (setting != null)
+                        t.StudyProductTypeName = setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
                 }
                 t.siteRequest = t.IsSiteRequest ? "Site to Site" : "Site to Study";
 

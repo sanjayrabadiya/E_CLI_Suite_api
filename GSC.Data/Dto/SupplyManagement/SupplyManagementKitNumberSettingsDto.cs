@@ -28,6 +28,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public bool IsDoseWiseKit { get; set; }
 
+        public List<int> RoleId { get; set; }
+
     }
 
     public class SupplyManagementKitNumberSettingsGridDto : BaseAuditDto

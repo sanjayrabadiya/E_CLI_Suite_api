@@ -147,13 +147,16 @@ namespace GSC.Respository.Reports
                 worksheet.Cell(1, 9).Value = "Allocation By";
                 worksheet.Cell(1, 10).Value = "Allocation Date";
                 var j = 2;
+                var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                             && s.RoleId == _jwtTokenAccesser.RoleId);
 
                 list.ToList().ForEach(d =>
                 {
                     worksheet.Row(j).Cell(1).SetValue(d.ProjectCode);
                     worksheet.Row(j).Cell(2).SetValue(d.SiteCode);
                     worksheet.Row(j).Cell(3).SetValue(d.Visit);
-                    worksheet.Row(j).Cell(4).SetValue(setting.IsBlindedStudy == false ? d.Treatment : "");
+                    worksheet.Row(j).Cell(4).SetValue(setting.IsBlindedStudy == true && isShow ? "" : d.Treatment);
                     worksheet.Row(j).Cell(5).SetValue(d.KitNo);
                     worksheet.Row(j).Cell(6).SetValue(d.ScreeningNo);
                     worksheet.Row(j).Cell(7).SetValue(d.RandomizationNumber);
@@ -179,6 +182,9 @@ namespace GSC.Respository.Reports
         {
             List<RandomizationIWRSReportData> list = new List<RandomizationIWRSReportData>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
 
             if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
@@ -190,7 +196,7 @@ namespace GSC.Respository.Reports
                            SiteCode = x.SupplyManagementKITSeries.Randomization.Project.ProjectCode,
                            KitNo = x.SupplyManagementKITSeries.KitNo,
                            Visit = x.ProjectDesignVisit.DisplayName,
-                           Treatment = setting.IsBlindedStudy == false ? x.PharmacyStudyProductType.ProductType.ProductTypeCode : "",
+                           Treatment = setting.IsBlindedStudy == true && isShow ? "" : x.PharmacyStudyProductType.ProductType.ProductTypeCode,
                            ScreeningNo = x.SupplyManagementKITSeries.Randomization.ScreeningNumber,
                            RandomizationNumber = x.SupplyManagementKITSeries.Randomization.RandomizationNumber,
                            RandomizationDate = x.SupplyManagementKITSeries.Randomization.DateOfRandomization,
@@ -220,7 +226,7 @@ namespace GSC.Respository.Reports
                        {
                            ProjectCode = x.SupplyManagementKIT.Project.ProjectCode,
                            KitNo = x.KitNo,
-                           Treatment = setting.IsBlindedStudy == false ? x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode : "",
+                           Treatment = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                            ProjectId = x.SupplyManagementKIT.ProjectId,
                            VisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
                            RandomizationId = x.RandomizationId
@@ -279,7 +285,9 @@ namespace GSC.Respository.Reports
             List<int?> productreciptIds = new List<int?>();
             List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
-
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                        Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                        && s.RoleId == _jwtTokenAccesser.RoleId);
             var productreceipt = _context.ProductReceipt.Include(x => x.CentralDepot).Include(x => x.Project).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType)
                                 .Where(x => x.DeletedDate == null && (x.Status == ProductVerificationStatus.Quarantine || x.Status == ProductVerificationStatus.SentForApproval
                                  || x.Status == ProductVerificationStatus.Approved) && x.ProjectId == randomizationIWRSReport.ProjectId).ToList();
@@ -683,7 +691,7 @@ namespace GSC.Respository.Reports
                 {
                     worksheet.Row(j).Cell(1).SetValue(d.ProjectCode);
                     worksheet.Row(j).Cell(2).SetValue(d.SiteCode);
-                    worksheet.Row(j).Cell(3).SetValue(d.ProductTypeCode);
+                    worksheet.Row(j).Cell(3).SetValue(setting.IsBlindedStudy == true && isShow ? "" : d.ProductTypeCode);
                     worksheet.Row(j).Cell(4).SetValue(d.ActionName);
                     worksheet.Row(j).Cell(5).SetValue(d.NoofBoxorBottle);
                     worksheet.Row(j).Cell(6).SetValue(d.Noofimp);
@@ -736,6 +744,9 @@ namespace GSC.Respository.Reports
             List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
 
             if (setting != null && randomizationIWRSReport.ActionType == ProductAccountabilityActions.KitPack)
             {
@@ -777,7 +788,7 @@ namespace GSC.Respository.Reports
                         {
                             productAccountabilityCentralReport.RequestedTo = x.Project.ProjectCode;
                         }
-                        productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
+                        productAccountabilityCentralReport.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.TreatmentType;
                         productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
                         productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
@@ -872,7 +883,7 @@ namespace GSC.Respository.Reports
                         {
                             productAccountabilityCentralReport.RequestedTo = x.SupplyManagementKIT.Project.ProjectCode;
                         }
-                        productAccountabilityCentralReport.ProductTypeCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                        productAccountabilityCentralReport.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.PreStatus = x.PrevStatus;
@@ -987,7 +998,9 @@ namespace GSC.Respository.Reports
         {
             List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
-
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Where(x => x.DeletedDate == null && (x.FromProjectId == randomizationIWRSReport.SiteId || x.ToProjectId == randomizationIWRSReport.SiteId)).OrderBy(x => x.Id).ToList();
 
             if (request.Count > 0)
@@ -1308,7 +1321,7 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(4).SetValue(d.ActionName);
                     worksheet.Row(j).Cell(5).SetValue(d.TrackingNumber);
                     worksheet.Row(j).Cell(6).SetValue(d.Type);
-                    worksheet.Row(j).Cell(7).SetValue(d.ProductTypeCode);
+                    worksheet.Row(j).Cell(7).SetValue(setting.IsBlindedStudy == true && isShow ? "" : d.ProductTypeCode);
                     worksheet.Row(j).Cell(8).SetValue(d.VisitName);
                     worksheet.Row(j).Cell(9).SetValue(d.KitStatus);
                     worksheet.Row(j).Cell(10).SetValue(d.KitNo);
@@ -1338,7 +1351,9 @@ namespace GSC.Respository.Reports
         {
             List<ProductAccountabilityCentralReport> list = new List<ProductAccountabilityCentralReport>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
-
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Where(x => x.DeletedDate == null && (x.FromProjectId == randomizationIWRSReport.SiteId || x.ToProjectId == randomizationIWRSReport.SiteId)).OrderBy(x => x.Id).ToList();
 
             if (request.Count > 0)
@@ -1379,7 +1394,7 @@ namespace GSC.Respository.Reports
                             }
                             if (type != null && type.ProductType != null)
                             {
-                                requestobj.ProductTypeCode = type.ProductType.ProductTypeCode;
+                                requestobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : type.ProductType.ProductTypeCode;
                             }
                         }
                     }
@@ -1435,7 +1450,7 @@ namespace GSC.Respository.Reports
                                 }
                                 if (type != null && type.ProductType != null)
                                 {
-                                    shipmentobj.ProductTypeCode = type.ProductType.ProductTypeCode;
+                                    shipmentobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : type.ProductType.ProductTypeCode;
                                 }
                             }
                         }
@@ -1510,7 +1525,7 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.KitStatus = s.Status.GetDescription();
                                         }
-                                        recieptobj.ProductTypeCode = s.TreatmentType;
+                                        recieptobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : s.TreatmentType;
                                         recieptobj.Comments = s.Comments;
                                         var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
                                          .Where(d => d.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
@@ -1594,7 +1609,7 @@ namespace GSC.Respository.Reports
                                             recieptobj.KitStatus = s.Status.GetDescription();
                                         }
 
-                                        recieptobj.ProductTypeCode = s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                                        recieptobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
 
                                         if (s.SupplyManagementKIT.ProductReceiptId > 0)
                                         {
@@ -1684,6 +1699,10 @@ namespace GSC.Respository.Reports
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
             if (setting != null)
             {
+                var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                             && s.RoleId == _jwtTokenAccesser.RoleId);
+
                 if (setting.KitCreationType == KitCreationType.KitWise)
                 {
                     if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
@@ -1708,7 +1727,7 @@ namespace GSC.Respository.Reports
                             obj.KitStatus = x.Status.GetDescription();
                             obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                             obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
-                            obj.ProductTypeCode = x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
                             obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
                             if (x.SupplyManagementShipmentId > 0)
@@ -1782,7 +1801,7 @@ namespace GSC.Respository.Reports
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
-                            obj.ProductTypeCode = x.ProductCode;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.ProductCode;
                             if (kit != null)
                                 obj.ImpPerKit = (int)kit.NoOfImp;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
@@ -1854,7 +1873,7 @@ namespace GSC.Respository.Reports
                                 obj.VisitName = string.Join(",", visits.Distinct());
 
 
-                            obj.ProductTypeCode = x.SupplyManagementKITSeries.TreatmentType;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITSeries.TreatmentType;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
                             obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
                             if (x.SupplyManagementShipmentId > 0)
@@ -1924,7 +1943,7 @@ namespace GSC.Respository.Reports
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
-                            obj.ProductTypeCode = x.ProductCode;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.ProductCode;
                             if (kit != null)
                                 obj.ImpPerKit = (int)kit.NoOfImp;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
@@ -1978,6 +1997,9 @@ namespace GSC.Respository.Reports
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
             if (setting != null)
             {
+                var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
+                             && s.RoleId == _jwtTokenAccesser.RoleId);
                 if (setting.KitCreationType == KitCreationType.KitWise)
                 {
                     if (randomizationIWRSReport.Type == KitHistoryReportType.KitWise)
@@ -2002,7 +2024,7 @@ namespace GSC.Respository.Reports
                             obj.KitStatus = x.Status.GetDescription();
                             obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                             obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
-                            obj.ProductTypeCode = x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
                             obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
                             if (x.SupplyManagementShipmentId > 0)
@@ -2076,7 +2098,7 @@ namespace GSC.Respository.Reports
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
-                            obj.ProductTypeCode = x.ProductCode;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.ProductCode;
                             if (kit != null)
                                 obj.ImpPerKit = (int)kit.NoOfImp;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
@@ -2148,7 +2170,7 @@ namespace GSC.Respository.Reports
                                 obj.VisitName = string.Join(",", visits.Distinct());
 
 
-                            obj.ProductTypeCode = x.SupplyManagementKITSeries.TreatmentType;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITSeries.TreatmentType;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
                             obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
                             if (x.SupplyManagementShipmentId > 0)
@@ -2218,7 +2240,7 @@ namespace GSC.Respository.Reports
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
-                            obj.ProductTypeCode = x.ProductCode;
+                            obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.ProductCode;
                             if (kit != null)
                                 obj.ImpPerKit = (int)kit.NoOfImp;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");

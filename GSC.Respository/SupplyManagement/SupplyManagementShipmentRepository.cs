@@ -2,6 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
@@ -44,9 +45,21 @@ namespace GSC.Respository.SupplyManagement
         public List<SupplyManagementShipmentGridDto> GetSupplyShipmentList(int parentProjectId, int SiteId, bool isDeleted)
         {
             List<SupplyManagementShipmentGridDto> FinalData = new List<SupplyManagementShipmentGridDto>();
+
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                        Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == parentProjectId
+                        && s.RoleId == _jwtTokenAccesser.RoleId);
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).FirstOrDefault();
+
             var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && ((x.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementRequest.ToProjectId == SiteId)
             || (x.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementRequest.FromProjectId == SiteId))).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            data.ForEach(t =>
+            {
+                t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
+            });
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
                        && ((x.IsSiteRequest == true && x.ToProjectId == SiteId)
@@ -61,7 +74,8 @@ namespace GSC.Respository.SupplyManagement
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
                 obj.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
-                obj.StudyProductTypeName = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductType.ProductTypeName).FirstOrDefault() : "";
+                var product = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductType.ProductTypeName).FirstOrDefault() : "";
+                obj.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : product;
                 if (t.StudyProductTypeId > 0)
                 {
                     var ptype = _context.PharmacyStudyProductType.Where(x => x.Id == t.StudyProductTypeId).FirstOrDefault();

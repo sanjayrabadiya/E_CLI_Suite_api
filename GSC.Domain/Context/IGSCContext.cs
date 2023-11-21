@@ -457,5 +457,7 @@ namespace GSC.Domain.Context
         public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
         public DbSet<Currency> Currency { get; set; }
         public DbSet<UserAccess> UserAccess { get; set; }
+
+        DbSet<SupplyManagementKitNumberSettingsRole> SupplyManagementKitNumberSettingsRole { get; set; }
     }
 }

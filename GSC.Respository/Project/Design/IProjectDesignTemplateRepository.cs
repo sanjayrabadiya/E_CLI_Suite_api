@@ -34,5 +34,7 @@ namespace GSC.Respository.Project.Design
         bool GetAllTemplateIsLocked(int ProjectDesignId);
         ProjectDesignTemplate GetTemplateSetting(int templateId);
         IList<DropDownDto> GetTemplateCRFDropDown(int projectDesignVisitId);
+
+        string ValidationTemplateIWRS(ProjectDesignTemplate template);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
@@ -37,6 +38,12 @@ namespace GSC.Respository.SupplyManagement
         }
         public List<SupplyManagementReceiptGridDto> GetSupplyShipmentReceiptList(int parentProjectId, int SiteId, bool isDeleted)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == parentProjectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).FirstOrDefault();
+
             var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == SiteId
             ).ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
@@ -50,6 +57,7 @@ namespace GSC.Respository.SupplyManagement
                     t.ProjectId = study.ParentProjectId;
                 }
                 t.WithIssueName = t.WithIssue == true ? "Yes" : "No";
+                t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
             });
 
 
@@ -68,7 +76,7 @@ namespace GSC.Respository.SupplyManagement
                 obj.CreatedByUser = null;
                 obj.CreatedDate = null;
                 obj.WithIssue = null;
-
+                obj.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
@@ -103,8 +111,12 @@ namespace GSC.Respository.SupplyManagement
                 projectId = _context.SupplyManagementRequest.Include(s => s.FromProject).Where(s => s.Id == requestid).Select(s => s.FromProject.ParentProjectId).FirstOrDefault();
             }
 
-            var supplyManagementKitNumberSettings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
-            if (supplyManagementKitNumberSettings == null)
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                         Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                         && s.RoleId == _jwtTokenAccesser.RoleId);
+
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
+            if (setting == null)
             {
                 return new List<SupplyManagementReceiptHistoryGridDto>();
             }
@@ -123,7 +135,7 @@ namespace GSC.Respository.SupplyManagement
                 StudyProjectCode = _context.Project.Where(z => z.Id == x.FromProject.ParentProjectId).FirstOrDefault() != null ?
                                   _context.Project.Where(z => z.Id == x.FromProject.ParentProjectId).FirstOrDefault().ProjectCode : "",
                 StudyProductTypeUnitName = x.PharmacyStudyProductType.ProductUnitType.GetDescription(),
-                ProductTypeName = x.PharmacyStudyProductType.ProductType.ProductTypeName,
+                ProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : x.PharmacyStudyProductType.ProductType.ProductTypeName,
                 VisitName = x.ProjectDesignVisit.DisplayName
             }).FirstOrDefault());
 
@@ -140,7 +152,7 @@ namespace GSC.Respository.SupplyManagement
                 StudyProjectCode = _context.Project.Where(z => z.Id == x.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault() != null ?
                                  _context.Project.Where(z => z.Id == x.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault().ProjectCode : "",
                 StudyProductTypeUnitName = x.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType.GetDescription(),
-                ProductTypeName = x.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName,
+                ProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName,
                 RequestQty = x.ApprovedQty,
                 VisitName = x.SupplyManagementRequest.ProjectDesignVisit.DisplayName
             }).FirstOrDefault());
@@ -159,8 +171,8 @@ namespace GSC.Respository.SupplyManagement
                     StudyProjectCode = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault() != null ?
                                     _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault().ProjectCode : "",
                     StudyProductTypeUnitName = x.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductUnitType.GetDescription(),
-                    ProductTypeName = x.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName,
-                    RequestQty = supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise ? _context.SupplyManagementKITDetail.Where(z => z.SupplyManagementShipmentId == x.SupplyManagementShipmentId && z.DeletedDate == null).Count() :
+                    ProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementShipment.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName,
+                    RequestQty = setting.KitCreationType == KitCreationType.KitWise ? _context.SupplyManagementKITDetail.Where(z => z.SupplyManagementShipmentId == x.SupplyManagementShipmentId && z.DeletedDate == null).Count() :
                                  _context.SupplyManagementKITSeries.Where(z => z.SupplyManagementShipmentId == x.SupplyManagementShipmentId && z.DeletedDate == null).Count(),
                     VisitName = x.SupplyManagementShipment.SupplyManagementRequest.ProjectDesignVisit.DisplayName
                 }).FirstOrDefault());
@@ -175,9 +187,12 @@ namespace GSC.Respository.SupplyManagement
                 var obj = _context.SupplyManagementShipment.Include(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x => x.Id == id).FirstOrDefault();
                 if (obj == null)
                     return new List<KitAllocatedList>();
+                var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == obj.SupplyManagementRequest.FromProject.ParentProjectId
+                             && s.RoleId == _jwtTokenAccesser.RoleId);
 
                 var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault();
-                if (settings.KitCreationType == KitCreationType.KitWise)
+                if (settings != null && settings.KitCreationType == KitCreationType.KitWise)
                 {
                     return _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
                                     x.SupplyManagementShipmentId == id
@@ -189,7 +204,7 @@ namespace GSC.Respository.SupplyManagement
                                         SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                         Comments = x.Comments,
                                         Status = KitStatus.Shipped.ToString(),
-                                        ProductTypeName = settings.IsBlindedStudy == true ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
+                                        ProductTypeName = settings.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
                                     }).OrderByDescending(x => x.KitNo).ToList();
                 }
                 else
@@ -203,7 +218,7 @@ namespace GSC.Respository.SupplyManagement
                                         SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                         Comments = x.Comments,
                                         Status = KitStatus.Shipped.ToString(),
-                                        ProductTypeName = settings.IsBlindedStudy == true ? "" : x.TreatmentType
+                                        ProductTypeName = settings.IsBlindedStudy == true && isShow ? "" : x.TreatmentType
                                     }).OrderByDescending(x => x.KitNo).ToList();
                 }
 
@@ -213,8 +228,12 @@ namespace GSC.Respository.SupplyManagement
                 var obj = _context.SupplyManagementReceipt.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x => x.Id == id).FirstOrDefault();
                 if (obj == null)
                     return new List<KitAllocatedList>();
+                var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                          Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == obj.SupplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId
+                          && s.RoleId == _jwtTokenAccesser.RoleId);
+
                 var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.SupplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault();
-                if (settings.KitCreationType == KitCreationType.KitWise)
+                if (settings != null && settings.KitCreationType == KitCreationType.KitWise)
                 {
 
                     return _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
@@ -227,7 +246,7 @@ namespace GSC.Respository.SupplyManagement
                             SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
                             Comments = x.Comments,
                             Status = x.Status.GetDescription(),
-                            ProductTypeName = settings.IsBlindedStudy == true ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
+                            ProductTypeName = settings.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
                         }).OrderByDescending(x => x.KitNo).ToList();
                 }
                 else
@@ -241,7 +260,7 @@ namespace GSC.Respository.SupplyManagement
                             SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
                             Comments = x.Comments,
                             Status = x.Status.GetDescription(),
-                            ProductTypeName = settings.IsBlindedStudy == true ? "" : x.TreatmentType
+                            ProductTypeName = settings.IsBlindedStudy == true && isShow ? "" : x.TreatmentType
                         }).OrderByDescending(x => x.KitNo).ToList();
                 }
             }

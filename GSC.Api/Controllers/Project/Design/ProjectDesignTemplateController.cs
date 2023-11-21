@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesingTemplateRestrictionRepository _templatePermissioRepository;
         private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
+        
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
@@ -64,8 +64,7 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesingTemplateRestrictionRepository templatePermissioRepository,
             IWorkflowTemplateRepository workflowTemplateRepository,
         IUnitOfWork uow, IMapper mapper,
-         IJwtTokenAccesser jwtTokenAccesser,
-         ISupplyManagementAllocationRepository supplyManagementAllocationRepository)
+         IJwtTokenAccesser jwtTokenAccesser)
         {
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -87,7 +86,6 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _templatePermissioRepository = templatePermissioRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
             _workflowTemplateRepository = workflowTemplateRepository;
         }
 
@@ -140,13 +138,14 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't edit record!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignTemplateId == projectDesignTemplateDto.Id))
+           
+            var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(projectDesignTemplateDto);
+            var validateIWRS = _projectDesignTemplateRepository.ValidationTemplateIWRS(projectDesignTemplate);
+            if (!string.IsNullOrEmpty(validateIWRS))
             {
-                ModelState.AddModelError("Message", "Can't edit record, Already used in Allocation!");
+                ModelState.AddModelError("Message", validateIWRS);
                 return BadRequest(ModelState);
             }
-            var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(projectDesignTemplateDto);
-
             _projectDesignTemplateRepository.Update(projectDesignTemplate);
 
             _uow.Save();
@@ -510,9 +509,10 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't delete record!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignTemplateId == id))
+            var validateIWRS = _projectDesignTemplateRepository.ValidationTemplateIWRS(record);
+            if (!string.IsNullOrEmpty(validateIWRS))
             {
-                ModelState.AddModelError("Message", "Can't delete record, Already used in Allocation!");
+                ModelState.AddModelError("Message", validateIWRS);
                 return BadRequest(ModelState);
             }
 

@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
-        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
+        
         public ProjectDesignVisitController(IProjectDesignVisitRepository projectDesignVisitRepository,
             IUnitOfWork uow, IMapper mapper,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -49,8 +49,7 @@ namespace GSC.Api.Controllers.Project.Design
             IVariabeLanguageRepository variableLanguageRepository,
             IVariabeNoteLanguageRepository variableNoteLanguageRepository,
             IVariabeValueLanguageRepository variableValueLanguageRepository,
-            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository,
-            ISupplyManagementAllocationRepository supplyManagementAllocationRepository)
+            IProjectDesignVariableEncryptRoleRepository projectDesignVariableEncryptRoleRepository)
         {
             _projectDesignVisitRepository = projectDesignVisitRepository;
             _uow = uow;
@@ -68,7 +67,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
-            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
+            
         }
 
         [HttpGet("{id}/{projectDesignPeriodId}")]
@@ -133,11 +132,7 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't edit visit!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVisitId == projectDesignVisitDto.Id))
-            {
-                ModelState.AddModelError("Message", "Can't edit record, Already used in Allocation!");
-                return BadRequest(ModelState);
-            }
+            
 
             var projectDesignVisit = _mapper.Map<ProjectDesignVisit>(projectDesignVisitDto);
 
@@ -147,7 +142,12 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", validateMessage);
                 return BadRequest(ModelState);
             }
-
+            var validateIWRS = _projectDesignVisitRepository.ValidationVisitIWRS(projectDesignVisit);
+            if (!string.IsNullOrEmpty(validateIWRS))
+            {
+                ModelState.AddModelError("Message", validateIWRS);
+                return BadRequest(ModelState);
+            }
             _projectDesignVisitRepository.Update(projectDesignVisit);
 
             _uow.Save();
@@ -168,12 +168,12 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't delete visit!");
                 return BadRequest(ModelState);
             }
-            if (_supplyManagementAllocationRepository.All.Any(x => x.ProjectDesignVisitId == id))
+            var validateIWRS = _projectDesignVisitRepository.ValidationVisitIWRS(visit);
+            if (!string.IsNullOrEmpty(validateIWRS))
             {
-                ModelState.AddModelError("Message", "Can't delete visit Already used in Allocation!");
+                ModelState.AddModelError("Message", validateIWRS);
                 return BadRequest(ModelState);
             }
-
             var checkVersion = _projectDesignVisitRepository.CheckStudyVersion(visit.ProjectDesignPeriodId);
 
 

@@ -5,6 +5,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
+using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,11 +18,19 @@ namespace GSC.Respository.Project.Design
         private readonly IGSCContext _context;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
-        public ProjectDesignVisitRepository(IGSCContext context, IStudyVersionRepository studyVersionRepository, IWorkflowTemplateRepository workflowTemplateRepository) : base(context)
+        private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
+        private readonly ISupplyManagementFactorMappingRepository _supplyManagementFactorMappingRepository;
+        private readonly ISupplyManagementUploadFileVisitRepository _supplyManagementUploadFileVisitRepository;
+        public ProjectDesignVisitRepository(IGSCContext context, IStudyVersionRepository studyVersionRepository, IWorkflowTemplateRepository workflowTemplateRepository,
+            ISupplyManagementAllocationRepository supplyManagementAllocationRepository, ISupplyManagementFactorMappingRepository supplyManagementFactorMappingRepository,
+            ISupplyManagementUploadFileVisitRepository supplyManagementUploadFileVisitRepository) : base(context)
         {
             _context = context;
             _studyVersionRepository = studyVersionRepository;
             _workflowTemplateRepository = workflowTemplateRepository;
+            _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
+            _supplyManagementFactorMappingRepository = supplyManagementFactorMappingRepository;
+            _supplyManagementUploadFileVisitRepository = supplyManagementUploadFileVisitRepository;
         }
 
         public ProjectDesignVisit GetVisit(int id)
@@ -193,6 +202,23 @@ namespace GSC.Respository.Project.Design
 
             result.RemoveAll(item => removeItem.Contains(item));
             return result;
+        }
+        public string ValidationVisitIWRS(ProjectDesignVisit visit)
+        {
+            if (visit.InActiveVersion == null && _supplyManagementAllocationRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignVisitId == visit.Id))
+            {
+                return "Can't edit/delete record, Already used in Allocation!";
+            }
+            if (visit.InActiveVersion == null && _supplyManagementFactorMappingRepository.All.Any(x => x.DeletedDate == null && x.ProjectDesignVisitId == visit.Id))
+            {
+                return "Can't edit/delete record, Already used in Fector Mapping!";
+            }
+            if (visit.InActiveVersion == null && _supplyManagementUploadFileVisitRepository.All.Include(s=>s.SupplyManagementUploadFileDetail).ThenInclude(s=>s.SupplyManagementUploadFile)
+                .Any(x => x.DeletedDate == null && x.ProjectDesignVisitId == visit.Id && x.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.Status == Helper.LabManagementUploadStatus.Approve))
+            {
+                return "Can't edit/delete record, Already used in randomization sheet!";
+            }
+            return "";
         }
     }
 }
