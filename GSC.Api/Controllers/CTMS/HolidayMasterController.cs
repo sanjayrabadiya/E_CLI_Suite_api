@@ -53,6 +53,12 @@ namespace GSC.Api.Controllers.CTMS
             holidayDto.Id = 0;
             var holiDay = _mapper.Map<HolidayMaster>(holidayDto);
 
+            var validate = _holidayMasterRepository.DuplicateHoliday(holiDay);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _holidayMasterRepository.Add(holiDay);
             if (_uow.Save() <= 0) throw new Exception("Creating Holiday failed on save.");
             return Ok(holiDay.Id);
@@ -66,6 +72,12 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var holiDay = _mapper.Map<HolidayMaster>(holidayDto);
+            var validate = _holidayMasterRepository.DuplicateHoliday(holiDay);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             _holidayMasterRepository.Update(holiDay);
 

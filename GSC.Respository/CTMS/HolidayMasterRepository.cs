@@ -4,6 +4,7 @@ using GSC.Common;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Respository.ProjectRight;
 using System;
@@ -29,7 +30,7 @@ namespace GSC.Respository.CTMS
         public List<HolidayMasterGridDto> GetHolidayList(bool isDeleted)
         {
             //Add by Mitul On 09-11-2023 GS1-I3112 -> If CTMS On By default Add CTMS Access table.
-            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Contains(x.ProjectId)).OrderByDescending(x => x.Id).
@@ -63,6 +64,13 @@ namespace GSC.Respository.CTMS
                    ProjectTo<HolidayMasterListDto>(_mapper.ConfigurationProvider).ToList();
             return result;
 
+        }
+        public string DuplicateHoliday(HolidayMaster objSave)
+        {
+            if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.HolidayName == objSave.HolidayName.Trim() && x.DeletedDate == null))
+                return "Duplicate Holiday : " + objSave.HolidayName;
+
+            return "";
         }
     }
 }

@@ -30,7 +30,7 @@ namespace GSC.Respository.CTMS
         public List<WeekEndGridDto> GetWeekendList(bool isDeleted)
         {
             //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
-            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Contains(x.ProjectId)).
