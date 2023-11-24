@@ -1286,6 +1286,28 @@ namespace GSC.Respository.Etmf
             return json;
         }
 
+        // update approve document
+        public void IsApproveDocument(int Id)
+        {
+            var DocumentApprover = _projectArtificateDocumentApproverRepository.All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
+           && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList().GroupBy(x => x.UserId).Select(x => new ProjectArtificateDocumentApprover
+           {
+               Id = x.FirstOrDefault().Id,
+               IsApproved = x.FirstOrDefault().IsApproved,
+               ProjectWorkplaceArtificatedDocumentId = x.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId
+           }).ToList();
+
+            if (DocumentApprover.All(x => x.IsApproved == true))
+            {
+                //_projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
+                var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == Id).FirstOrDefault();
+                document.IsAccepted = true;
+                _context.ProjectWorkplaceArtificatedocument.Update(document);
+                WordToPdf(document.Id);
+                _context.Save();
+            }
+        }
+
         public ProjectWorkplaceArtificatedocument WordToPdf(int Id)
         {
             var document = Find(Id);

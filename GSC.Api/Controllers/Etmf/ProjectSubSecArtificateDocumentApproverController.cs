@@ -130,7 +130,7 @@ namespace GSC.Api.Controllers.Etmf
             if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
             _projectSubSecArtificateDocumentApproverRepository.SendMailForApprovedRejected(ProjectSubSecArtificateDocumentApprover);
 
-            _projectSubSecArtificateDocumentApproverRepository.IsApproveDocument(Id);
+            _projectWorkplaceSubSecArtificatedocumentRepository.IsApproveDocument(Id);
             var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(ProjectSubSecArtificateDocumentApprover.ProjectWorkplaceSubSecArtificateDocumentId);
             _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, null, ProjectSubSecArtificateDocumentApprover.Id);
 

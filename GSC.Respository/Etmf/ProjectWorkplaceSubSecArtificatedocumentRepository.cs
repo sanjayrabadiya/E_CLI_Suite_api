@@ -20,6 +20,8 @@ using Syncfusion.Pdf;
 using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Microsoft.AspNetCore.Http.HttpResults;
+using DocumentFormat.OpenXml.Office2010.Word;
 
 namespace GSC.Respository.Etmf
 {
@@ -617,6 +619,27 @@ namespace GSC.Respository.Etmf
                                   ExpiryDate = history.ExpiryDate
                               }).ToList();
             return docHistory;
+        }
+
+        public void IsApproveDocument(int Id)
+        {
+            var DocumentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id
+            && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList().GroupBy(x => x.UserId).Select(x => new ProjectSubSecArtificateDocumentApprover
+            {
+                Id = x.FirstOrDefault().Id,
+                IsApproved = x.FirstOrDefault().IsApproved,
+                ProjectWorkplaceSubSecArtificateDocumentId = x.FirstOrDefault().ProjectWorkplaceSubSecArtificateDocumentId
+            }).ToList();
+
+            if (DocumentApprover.All(x => x.IsApproved == true))
+            {
+                //UpdateApproveDocument(Id, true);
+                var document = All.Where(x => x.Id == Id).FirstOrDefault();
+                document.IsAccepted = true;
+                Update(document);
+                WordToPdf(Id);
+                _context.Save();
+            }
         }
     }
 }
