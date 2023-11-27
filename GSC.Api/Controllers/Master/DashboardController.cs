@@ -434,5 +434,23 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetVisitWiseAllocationData(projectId, countryId, siteId));
         }
+        [HttpGet]
+        [Route("GetKitCountReport/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetKitCountReport(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetKitCountReport(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetProductWiseVerificationReport/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetProductWiseVerificationReport(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetProductWiseVerificationReport(projectId, countryId, siteId));
+        }
+        [HttpGet]
+        [Route("GetkitCreatedDataReport/{projectId}/{countryId}/{siteId}")]
+        public IActionResult GetkitCreatedDataReport(int projectId, int countryId, int siteId)
+        {
+            return Ok(_dashboardRepository.GetkitCreatedDataReport(projectId, countryId, siteId));
+        }
     }
 }

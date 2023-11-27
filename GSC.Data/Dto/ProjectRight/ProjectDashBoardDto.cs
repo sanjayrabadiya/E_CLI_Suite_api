@@ -343,4 +343,20 @@ namespace GSC.Data.Dto.ProjectRight
         public int UnblindNo { get; set; }
 
     }
+
+    public class KitCountReport
+    {
+        public string SiteName { get; set; }
+        public string Treatment{ get; set; }
+        public int Available { get; set; }
+        public int Allocated { get; set; }
+
+    }
+    public class ProductWiseVerificationCountReport
+    {
+        public string Treatment { get; set; }
+        public int Quarantine { get; set; }
+        public int Verified { get; set; }
+
+    }
 }

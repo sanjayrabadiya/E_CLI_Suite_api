@@ -1,6 +1,8 @@
-﻿using GSC.Data.Dto.CTMS;
+﻿using GSC.Data.Dto.Configuration;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -12,6 +14,7 @@ using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using JWT.Builder;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -1573,19 +1576,14 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             int UnblindPatientCount = 0;
-            var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
-                .Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
 
-            var ImpReceiptCount = ImpReceipt.Count();
+            var ImpReceiptCount = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                .Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).Count();
 
-            var shipmentdata = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
-                .Where(s => projectIds.Contains((int)s.SupplyManagementRequest.FromProjectId)
-                && !ImpReceipt.Select(a => a.SupplyManagementShipmentId).Contains(s.Id) && s.Status == SupplyMangementShipmentStatus.Approved).ToList();
+            var ImpShipmentCount = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
+                .Where(s => projectIds.Contains((int)s.SupplyManagementRequest.FromProjectId) && s.Status == SupplyMangementShipmentStatus.Approved).Count();
 
-            var ImpShipmentCount = shipmentdata.Count();
-
-            var ImpRequestedCount = _context.SupplyManagementRequest.Where(s => projectIds.Contains((int)s.FromProjectId) && s.DeletedDate == null
-                                   && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
+            var ImpRequestedCount = _context.SupplyManagementRequest.Where(s => projectIds.Contains((int)s.FromProjectId) && s.DeletedDate == null).Count();
 
             var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
 
@@ -1943,19 +1941,13 @@ namespace GSC.Respository.Master
             {
                 ImpShipmentGridDashboard obj = new ImpShipmentGridDashboard();
 
-                var ImpReceipt = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
-                    .Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).ToList();
+                obj.ReceiptNo = _context.SupplyManagementReceipt.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item).Count();
 
-                obj.ReceiptNo = ImpReceipt.Count();
+                obj.ShipmentNo = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementRequest.FromProjectId == item && s.Status == SupplyMangementShipmentStatus.Approved).Count();
 
-                var shipmentdata = _context.SupplyManagementShipment.Include(s => s.SupplyManagementRequest)
-                    .Where(s => s.SupplyManagementRequest.FromProjectId == item
-                    && !ImpReceipt.Select(a => a.SupplyManagementShipmentId).Contains(s.Id) && s.Status == SupplyMangementShipmentStatus.Approved).ToList();
-
-                obj.ShipmentNo = shipmentdata.Count();
-
-                obj.RequestNo = _context.SupplyManagementRequest.Where(s => s.FromProjectId == item && s.DeletedDate == null
-                                       && !shipmentdata.Select(a => a.SupplyManagementRequestId).Contains(s.Id)).Count();
+                obj.RequestNo = _context.SupplyManagementRequest.Where(s => s.FromProjectId == item && s.DeletedDate == null).Count();
 
                 var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
 
@@ -2023,7 +2015,9 @@ namespace GSC.Respository.Master
                     {
                         data = data.Where(s => projectIds.Contains((int)s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
                     }
-                    var visitids = data.OrderBy(s => s.SupplyManagementKIT.ProjectDesignVisitId).Select(s => s.SupplyManagementKIT.ProjectDesignVisitId).Distinct().ToList();
+                    var visitids = _context.SupplyManagementUploadFileVisit.Include(s => s.SupplyManagementUploadFileDetail).ThenInclude(s => s.SupplyManagementUploadFile).
+                        Where(s => s.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve &&
+                        s.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.ProjectId == projectId).Select(s => s.ProjectDesignVisitId).Distinct().ToList();
                     if (visitids.Count > 0)
                     {
                         foreach (var item in visitids)
@@ -2044,7 +2038,10 @@ namespace GSC.Respository.Master
                     {
                         data = data.Where(s => projectIds.Contains((int)s.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId)).ToList();
                     }
-                    var visitids = data.OrderBy(s => s.ProjectDesignVisitId).Select(s => s.ProjectDesignVisitId).Distinct().ToList();
+                    var visitids = _context.SupplyManagementUploadFileVisit.Include(s => s.SupplyManagementUploadFileDetail).ThenInclude(s => s.SupplyManagementUploadFile).
+                       Where(s => s.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve &&
+                       s.SupplyManagementUploadFileDetail.SupplyManagementUploadFile.ProjectId == projectId).Select(s => s.ProjectDesignVisitId).Distinct().ToList();
+
                     if (visitids.Count > 0)
                     {
                         foreach (var item in visitids)
@@ -2058,6 +2055,155 @@ namespace GSC.Respository.Master
                 }
             }
             return r;
+        }
+
+        public List<KitCountReport> GetKitCountReport(int projectId, int countryId, int siteId)
+        {
+            List<KitCountReport> Data = new List<KitCountReport>();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+            if (setting == null)
+                return new List<KitCountReport>();
+
+            var PharmacyStudyProductTypeIds = _context.SupplyManagementKitAllocationSettings.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
+                       .Where(x => x.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).Select(s => s.PharmacyStudyProductTypeId).Distinct().ToList();
+
+            var products = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null && PharmacyStudyProductTypeIds.Contains(s.Id) && s.ProjectId == projectId).ToList();
+            foreach (var item in projectIds)
+            {
+                if (setting.KitCreationType == KitCreationType.KitWise)
+                {
+                    foreach (var product in products)
+                    {
+                        KitCountReport obj = new KitCountReport();
+
+                        var kitdata = _context.SupplyManagementKITDetail
+                        .Include(x => x.SupplyManagementKIT)
+                        .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                        .Where(s => s.SupplyManagementKIT.PharmacyStudyProductTypeId == product.Id
+                              && s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item
+                              && s.DeletedDate == null
+                              && s.SupplyManagementKIT.DeletedDate == null && (s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue || s.Status == KitStatus.Allocated)).ToList();
+
+                        obj.Available = kitdata.Where(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue).Count();
+                        obj.Allocated = kitdata.Where(s => s.Status == KitStatus.Allocated).Count();
+                        obj.Treatment = product.ProductType.ProductTypeCode;
+                        var project = _context.Project.Where(s => s.Id == item).FirstOrDefault();
+                        if (project != null)
+                        {
+
+                            var managesite = _context.ManageSite.Include(s => s.City).ThenInclude(s => s.State).ThenInclude(s => s.Country).Where(x => x.Id == project.ManageSiteId).FirstOrDefault();
+                            if (managesite != null)
+                            {
+                                obj.SiteName = project.ProjectCode + " - " + managesite.SiteName;
+                            }
+                        }
+
+                        Data.Add(obj);
+                    }
+
+                }
+                else
+                {
+                    KitCountReport obj = new KitCountReport();
+
+                    var kitdata = _context.SupplyManagementKITSeries
+                    .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
+                    .Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item
+                          && s.DeletedDate == null && (s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue || s.Status == KitStatus.Allocated)).ToList();
+
+                    obj.Available = kitdata.Where(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue).Count();
+                    obj.Allocated = kitdata.Where(s => s.Status == KitStatus.Allocated).Count();
+                    var project = _context.Project.Where(s => s.Id == item).FirstOrDefault();
+                    if (project != null)
+                    {
+
+                        var managesite = _context.ManageSite.Include(s => s.City).ThenInclude(s => s.State).ThenInclude(s => s.Country).Where(x => x.Id == project.ManageSiteId).FirstOrDefault();
+                        if (managesite != null)
+                        {
+                            obj.SiteName = project.ProjectCode + " - " + managesite.SiteName;
+                        }
+                    }
+
+                    Data.Add(obj);
+                }
+
+            }
+            return Data;
+        }
+
+        public List<ProductWiseVerificationCountReport> GetProductWiseVerificationReport(int projectId, int countryId, int siteId)
+        {
+            List<ProductWiseVerificationCountReport> Data = new List<ProductWiseVerificationCountReport>();
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+          
+
+            var products = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null  && s.ProjectId == projectId).ToList();
+            foreach (var item in products)
+            {
+                ProductWiseVerificationCountReport obj = new ProductWiseVerificationCountReport();
+                var productreceipt = _context.ProductVerificationDetail.Include(s => s.ProductReceipt).Where(x => x.DeletedDate == null && (x.ProductReceipt.Status == ProductVerificationStatus.Quarantine || x.ProductReceipt.Status == ProductVerificationStatus.SentForApproval
+                     || x.ProductReceipt.Status == ProductVerificationStatus.Approved) && x.ProductReceipt.ProjectId == projectId && x.ProductReceipt.PharmacyStudyProductTypeId == item.Id).ToList();
+                if (productreceipt != null && productreceipt.Count > 0)
+                {
+                    foreach (var rec in productreceipt)
+                    {
+                        if (rec.NumberOfQty == null)
+                            rec.NumberOfQty = 0;
+                        if (rec.NumberOfBox == null)
+                            rec.NumberOfBox = 0;
+                        if (rec.QuantityVerification == null)
+                            rec.QuantityVerification = 0;
+                        if (rec.RetentionSampleQty == null)
+                            rec.RetentionSampleQty = 0;
+                    }
+                    obj.Quarantine = productreceipt.Where(s => s.ProductReceipt.Status == ProductVerificationStatus.Quarantine || s.ProductReceipt.Status == ProductVerificationStatus.SentForApproval)
+                        .Select(s => (((int)s.NumberOfQty * (int)s.NumberOfBox) - ((int)s.QuantityVerification + (int)s.RetentionSampleQty))).Sum();
+                    obj.Verified = productreceipt.Where(s => s.ProductReceipt.Status == ProductVerificationStatus.Approved).Select(s => (((int)s.NumberOfQty * (int)s.NumberOfBox) - ((int)s.QuantityVerification + (int)s.RetentionSampleQty))).Sum();
+                    obj.Treatment = item.ProductType.ProductTypeCode;
+                    Data.Add(obj);
+                }
+
+            }
+            return Data;
+        }
+
+        public List<TreatmentvsArms> GetkitCreatedDataReport(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+            var data = new List<TreatmentvsArms>();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
+            if (setting == null)
+                return new List<TreatmentvsArms>();
+            var PharmacyStudyProductTypeIds = _context.SupplyManagementKitAllocationSettings.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
+                       .Where(x => x.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).Select(s => s.PharmacyStudyProductTypeId).Distinct().ToList();
+
+            var products = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null && PharmacyStudyProductTypeIds.Contains(s.Id) && s.ProjectId == projectId).ToList();
+
+            if (setting.KitCreationType == KitCreationType.KitWise)
+            {
+                foreach (var item in products)
+                {
+                    var kitdata = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).
+                           Where(s => s.DeletedDate == null && s.SupplyManagementKIT.PharmacyStudyProductTypeId == item.Id && s.SupplyManagementKIT.ProjectId == projectId).ToList();
+
+                    var result = new TreatmentvsArms();
+                    result.Name = item.ProductType.ProductTypeCode;
+                    result.Count = kitdata.Count();
+                    data.Add(result);
+                }
+            }
+            else
+            {
+                var kitpack = _context.SupplyManagementKITSeries.Where(s => s.DeletedDate == null && s.ProjectId == projectId).Count();
+                var result = new TreatmentvsArms();
+                result.Name = "Kit Pack";
+                result.Count = kitpack;
+                data.Add(result);
+            }
+
+            return data.Where(s => s.Count > 0).ToList();
         }
     }
 }
