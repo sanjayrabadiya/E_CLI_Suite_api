@@ -12,7 +12,6 @@ namespace GSC.Respository.Etmf
         List<ProjectSubSecArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id);
         List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId);
         void SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto ProjectSubSecArtificateDocumentApproverDto);
-        void IsApproveDocument(int Id);
         List<DashboardDto> GetEtmfMyTaskList(int ProjectId);
         bool GetApprovePending(int documentId);
         List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId);

@@ -199,22 +199,6 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
-        public void IsApproveDocument(int Id)
-        {
-            var DocumentApprover = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id
-            && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList().GroupBy(x => x.UserId).Select(x => new ProjectSubSecArtificateDocumentApprover
-            {
-                Id = x.FirstOrDefault().Id,
-                IsApproved = x.FirstOrDefault().IsApproved,
-                ProjectWorkplaceSubSecArtificateDocumentId = x.FirstOrDefault().ProjectWorkplaceSubSecArtificateDocumentId
-            }).ToList();
-
-            if (DocumentApprover.All(x => x.IsApproved == true))
-            {
-                _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(Id, true);
-            }
-        }
-
         public List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId)
         {
             var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();

@@ -194,8 +194,8 @@ namespace GSC.Respository.Etmf
                           select new ProjectArtificateDocumentApproverHistory
                           {
                               Id = approver.Id,
-                              DocumentName = approver.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
-                              ProjectArtificateDocumentHistoryId = approver.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
+                              DocumentName = approver.ProjectArtificateDocumentHistory.Count <= 0 ? "" : approver.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+                              ProjectArtificateDocumentHistoryId = approver.ProjectArtificateDocumentHistory.Count <= 0 ? 0 : approver.ProjectArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
                               UserName = _context.Users.Where(y => y.Id == approver.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                               UserId = approver.UserId,
                               IsApproved = approver.IsApproved,
@@ -212,26 +212,7 @@ namespace GSC.Respository.Etmf
             return result;
         }
 
-        // update approve document
-        public void IsApproveDocument(int Id)
-        {
-            var DocumentApprover = All.Where(x => x.ProjectWorkplaceArtificatedDocumentId == Id
-           && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList().GroupBy(x => x.UserId).Select(x => new ProjectArtificateDocumentApprover
-           {
-               Id = x.FirstOrDefault().Id,
-               IsApproved = x.FirstOrDefault().IsApproved,
-               ProjectWorkplaceArtificatedDocumentId = x.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId
-           }).ToList();
 
-            if (DocumentApprover.All(x => x.IsApproved == true))
-            {
-                //_projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(Id, true);
-                var document = _context.ProjectWorkplaceArtificatedocument.Where(x => x.Id == Id).FirstOrDefault();
-                document.IsAccepted = true;
-                _context.ProjectWorkplaceArtificatedocument.Update(document);
-                _context.Save();
-            }
-        }
 
 
         public List<ProjectArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId)
@@ -378,7 +359,7 @@ namespace GSC.Respository.Etmf
                 {
                     var document = _context.ProjectWorkplaceArtificatedocument.FirstOrDefault(x => x.Id == documentId);
                     document.IsAccepted = true;
-                    _context.ProjectWorkplaceArtificatedocument.Update(document);
+                    _context.ProjectWorkplaceArtificatedocument.Update(document);                  
                 }
                 return _context.Save();
             }

@@ -2,9 +2,11 @@
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Entities.InformConcent;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.InformConcent;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Configuration;
@@ -28,11 +30,13 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
+        private readonly IAppSettingRepository _appSettingRepository;
 
         public EConsentVideoController(IEConsentVideoRepository EConsentVideoRepository,
                                         IUnitOfWork uow,
                                         IMapper mapper,
                                         ICentreUserService centreUserService,
+                                        IAppSettingRepository appSettingRepository,
                                         IOptions<EnvironmentSetting> environmentSetting,
                                         IUserRepository userRepository,
                                         IOptions<VideoAPISettings> VideoAPISettings,
@@ -82,6 +86,7 @@ namespace GSC.Api.Controllers.InformConcent
         public async Task<IActionResult> DeliverFlagUpdate(int id)
         {
             //when user1 calls to user2 then if user2 receives call request then this flag is updated
+            var commonSettiongs = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             var eConsentVideo = await _EConsentVideoRepository.FindAsync(id);
             eConsentVideo.RequestDelivered = true;
             _EConsentVideoRepository.Update(eConsentVideo);
@@ -89,7 +94,7 @@ namespace GSC.Api.Controllers.InformConcent
             var eConsentVideoDto = _mapper.Map<EConsentVideoDto>(eConsentVideo);
             eConsentVideoDto.SenderUserName = _userRepository.Find(eConsentVideoDto.SenderUserId).UserName;
             eConsentVideoDto.ReceiverUserName = _userRepository.Find(eConsentVideoDto.ReceiverUserId).UserName;
-            eConsentVideoDto.ApiKey = _VideoAPISettings.Value.API_KEY;
+            eConsentVideoDto.ApiKey = commonSettiongs.AgoraAppId; //_VideoAPISettings.Value.API_KEY;
 
             //await _centreUserService.DeliverFlagUpdate($"{_environmentSetting.Value.CentralApi}Video/DeliverFlagUpdate", eConsentVideoDto);
             //if (ConnectedUser.Ids.Where(x => x.userId == eConsentVideo.SenderUserId).ToList().FirstOrDefault() != null)
