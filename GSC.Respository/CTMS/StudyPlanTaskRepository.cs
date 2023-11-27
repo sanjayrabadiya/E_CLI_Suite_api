@@ -508,10 +508,10 @@ namespace GSC.Respository.CTMS
             var result = new StudyPlanTaskGridDto();
 
             var studyplan = _context.StudyPlan.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
-            result.StudyPlanId= studyplan.Id;
 
             if (studyplan != null)
             {
+                result.StudyPlanId = studyplan.Id;
                 var tasklist = All.Where(x => x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.Id != StudyPlanTaskId).OrderBy(x => x.TaskOrder).
                ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 //result.StudyPlanTask = tasklist.Where(x => x.DependentTaskId != StudyPlanTaskId).ToList();
