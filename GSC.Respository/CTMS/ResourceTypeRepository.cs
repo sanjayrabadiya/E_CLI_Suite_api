@@ -33,7 +33,7 @@ namespace GSC.Respository.CTMS
         public List<ResourceTypeGridDto> GetResourceTypeList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-                   ProjectTo<ResourceTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                  ProjectTo<ResourceTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
         public List<DropDownDto> GetUnitTypeDropDown()
@@ -75,11 +75,22 @@ namespace GSC.Respository.CTMS
                             .Select(c => new DropDownDto { Id =  c.Id, Value =  c.NameOfMaterial, IsDeleted = c.DeletedDate != null })
                             .OrderBy(o => o.Value).ToList();
         }
-        public List<DropDownDto> GetRollUserDropDown(int designationID)
+        public List<DropDownDto> GetRollUserDropDown(int designationID, int projectId)
         {
-            return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID && x.RoleId !=null)
-                            .Select(c => new DropDownDto { Id = c.Id, Value =  c.Role.RoleName +" - "+ c.User.UserName, IsDeleted = c.DeletedDate != null })
+            if (projectId != 0)
+            {
+                var userAccessData = _context.UserAccess.Include(x => x.UserRole).Where(s => s.ProjectId == projectId && s.DeletedBy == null).ToList();
+
+                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID && x.RoleId != null &&  userAccessData.Select(y => y.UserRole.UserId).Contains(x.UserId))
+                            .Select(c => new DropDownDto { Id = c.Id, Value = c.Role.RoleName + " - " + c.User.UserName, IsDeleted = c.DeletedDate != null })
                             .OrderBy(o => o.Value).ToList();
+            }
+            else
+            {
+                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID && x.RoleId != null)
+                          .Select(c => new DropDownDto { Id = c.Id, Value = c.Role.RoleName + " - " + c.User.UserName, IsDeleted = c.DeletedDate != null })
+                          .OrderBy(o => o.Value).ToList();
+            }
         }
         public List<DropDownDto> GetCurrencyDropDown()
         {

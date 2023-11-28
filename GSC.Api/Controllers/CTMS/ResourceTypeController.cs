@@ -29,6 +29,7 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Get(bool isDeleted)
         {
             var resourcetype = _resourcetypeRepository.GetResourceTypeList(isDeleted);
+            resourcetype.ForEach(x => x.User = x.ResourceType == "Material" ? null : x.User);
             return Ok(resourcetype);
         }
 
@@ -151,10 +152,10 @@ namespace GSC.Api.Controllers.CTMS
 
         }
         [HttpGet]
-        [Route("GetRollUserDropDown/{designationID}")]
-        public IActionResult getSelectDateDrop(int designationID)
+        [Route("GetRollUserDropDown/{designationID}/{projectId}")]
+        public IActionResult getSelectDateDrop(int designationID, int projectId)
         {
-            return Ok(_resourcetypeRepository.GetRollUserDropDown(designationID));
+            return Ok(_resourcetypeRepository.GetRollUserDropDown(designationID, projectId));
         }
         [HttpGet]
         [Route("GetCurrencyDropDown")]
