@@ -1132,7 +1132,10 @@ namespace GSC.Helper
         [Description("Bottle")] Bottle = 1,
         [Description("HDPE")] HDPE = 2,
         [Description("Strip")] Strip = 3,
-        [Description("Patch")] Patch = 4
+        [Description("Patch")] Patch = 4,
+        [Description("Tablet")] Tablet = 5,
+        [Description("Injection")] Injection = 6,
+        [Description("Ointment")] Ointment = 7
     }
 
     public enum DosePriority : short
