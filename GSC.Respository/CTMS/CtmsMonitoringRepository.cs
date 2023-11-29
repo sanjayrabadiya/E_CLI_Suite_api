@@ -214,8 +214,10 @@ namespace GSC.Respository.CTMS
                 var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
                 studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
                 studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
-                studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
-                studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                if(ctmsMonitoringDto.ActualStartDate !=null){
+                    studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                    studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                }
                 _context.StudyPlanTask.Add(studyPlanTask);
                 _context.Save();
             }

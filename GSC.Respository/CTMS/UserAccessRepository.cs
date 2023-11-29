@@ -10,6 +10,7 @@ using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
+using GSC.Respository.Master;
 
 namespace GSC.Respository.CTMS
 {
@@ -18,14 +19,16 @@ namespace GSC.Respository.CTMS
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IProjectRepository _projectRepository;
 
-        public UserAccessRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
+        public UserAccessRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IProjectRepository projectRepository,
             IMapper mapper)
             : base(context)
         {
             _mapper = mapper;
             _context=context;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _projectRepository = projectRepository;
         }
         public string Duplicate(UserAccessDto userAccessDto)
         {
@@ -102,7 +105,7 @@ namespace GSC.Respository.CTMS
         public void AddProjectRight(int ProjectId, bool isCtms)
         {
             var projectRightData = _context.ProjectRight.Where(s=>s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy== _jwtTokenAccesser.UserId && s.DeletedBy==null && s.ProjectId== ProjectId).FirstOrDefault();
-            var userRoleData= _context.UserRole.Where(s=> s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId== _jwtTokenAccesser.RoleId).Select(r => r.Id).FirstOrDefault();
+            var userRoleData= _context.UserRole.Where(s=> s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId== _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
             var ctmsOnData= _context.ProjectSettings.Include(d=>d.Project).Where(s=>s.DeletedBy == null && s.IsCtms == isCtms && s.ProjectId== projectRightData.ProjectId).FirstOrDefault();
             var userAccessData = new UserAccess();
             if (isCtms){ 
@@ -114,12 +117,48 @@ namespace GSC.Respository.CTMS
             }
             else{
                 userAccessData = _context.UserAccess.Where(s => s.ProjectId == ctmsOnData.ProjectId && s.ParentProjectId == ctmsOnData.ProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
+                if(userAccessData != null) { 
                 userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
                 userAccessData.DeletedDate = DateTime.UtcNow;
                 _context.UserAccess.Update(userAccessData);
+                }
             }
             _context.Save();
 
+            //Add site in ctms access table
+            var sitProject = _projectRepository.GetChildProjectDropDown(ProjectId);
+            foreach (var item in sitProject)
+            {
+                AddProjectSiteRight(ProjectId, item.Id);
+            }
+
+        }
+        public void AddProjectSiteRight(int ParentProjectId, int ProjectId)
+        {
+            bool IsCtms = _context.ProjectSettings.Where(x => x.ProjectId == ParentProjectId).Select(s => s.IsCtms).FirstOrDefault();
+            var projectRightData = _context.ProjectRight.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy == _jwtTokenAccesser.UserId && s.DeletedBy == null && s.ProjectId == ProjectId).FirstOrDefault();
+            var userRoleData = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
+            var ctmsOnData = _context.Project.Where(s => s.DeletedBy == null && s.Id == projectRightData.ProjectId).FirstOrDefault();
+            var userAccessData = new UserAccess();
+            if (IsCtms)
+            {
+                userAccessData.Id = 0;
+                userAccessData.UserRoleId = userRoleData;
+                userAccessData.ParentProjectId = ParentProjectId;
+                userAccessData.ProjectId = ctmsOnData.Id;
+                _context.UserAccess.Add(userAccessData);
+            }
+            else
+            {
+                userAccessData = _context.UserAccess.Where(s => s.ProjectId == ProjectId && s.ParentProjectId == ParentProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
+                if (userAccessData != null)
+                {
+                    userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
+                    userAccessData.DeletedDate = DateTime.UtcNow;
+                    _context.UserAccess.Update(userAccessData);
+                }
+            }
+            _context.Save();
         }
         public void AddSiteUserAccesse(UserAccessDto userAccessDto)
         {

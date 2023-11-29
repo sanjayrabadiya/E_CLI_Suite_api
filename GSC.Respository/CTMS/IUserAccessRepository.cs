@@ -14,5 +14,6 @@ namespace GSC.Respository.CTMS
         void AddSiteUserAccesse(UserAccessDto userAccessDto);
         List<DropDownDto> GetRollUserDropDown(int projectId);
         void AddProjectRight(int projectId, bool isCtms);
+        void AddProjectSiteRight(int ParentProjectId, int projectIdd);
     }
 }

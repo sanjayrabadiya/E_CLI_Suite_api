@@ -13,6 +13,7 @@ using GSC.Helper;
 using GSC.Respository.Attendance;
 using GSC.Respository.Common;
 using GSC.Respository.Configuration;
+using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Respository.UserMgt;
@@ -42,6 +43,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
+        private readonly IUserAccessRepository _userAccessRepository;
         private readonly IGSCContext _context;
 
         public ProjectController(IProjectRepository projectRepository,
@@ -58,6 +60,7 @@ namespace GSC.Api.Controllers.Master
             IRandomizationRepository randomizationRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
+            IUserAccessRepository userAccessRepository,
             IGSCContext context
             )
         {
@@ -76,6 +79,7 @@ namespace GSC.Api.Controllers.Master
             _randomizationRepository = randomizationRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
+            _userAccessRepository = userAccessRepository;
             _context = context;
         }
 
@@ -146,6 +150,9 @@ namespace GSC.Api.Controllers.Master
             _projectRepository.Save(project);
             if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
 
+            //Add by Mitul on 28-11-2023 -> CTMS on Bydeful Add site add on CTMS Access table
+                _userAccessRepository.AddProjectSiteRight((int)projectDto.ParentProjectId,project.Id);
+          
             ScreeningNumberSettings screeningNumberSettings = new ScreeningNumberSettings();
             screeningNumberSettings.Id = 0;
             screeningNumberSettings.ProjectId = project.Id;

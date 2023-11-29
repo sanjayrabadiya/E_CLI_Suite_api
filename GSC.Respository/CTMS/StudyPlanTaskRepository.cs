@@ -28,7 +28,7 @@ namespace GSC.Respository.CTMS
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
-
+       
         public StudyPlanTaskRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IProjectRightRepository projectRightRepository, IProjectRepository projectRepository) : base(context)
@@ -516,6 +516,19 @@ namespace GSC.Respository.CTMS
                ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 //result.StudyPlanTask = tasklist.Where(x => x.DependentTaskId != StudyPlanTaskId).ToList();
                 result.StudyPlanTask = tasklist;
+            }
+            else
+            {
+                var TaskMaster = _context.StudyPlan.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+                var data = new StudyPlan();
+                data.Id = 0;
+                data.StartDate = TaskMaster.StartDate;
+                data.EndDate = TaskMaster.EndDate;
+                data.ProjectId = ProjectId;
+                data.TaskTemplateId = TaskMaster.TaskTemplateId;
+                _context.StudyPlan.Add(data);
+                _context.Save();
+                result.StudyPlanId = data.Id;
             }
 
             return result;
