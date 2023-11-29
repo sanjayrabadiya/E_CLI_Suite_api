@@ -187,18 +187,41 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetFactorsTypes/{id}")]
         public IActionResult GetFactorsTypes(int id)
         {
-            var data = _context.SupplyManagementUploadFile.Where(s => s.DeletedDate == null && s.Status == LabManagementUploadStatus.Approve && s.ProjectId == id).Select(s => (int)s.SupplyManagementUploadFileLevel).ToList();
-            if (data == null)
+            var data = _context.SupplyManagementUploadFile.Where(s => s.DeletedDate == null && s.Status == LabManagementUploadStatus.Approve && s.ProjectId == id).Select(s => (int)s.SupplyManagementUploadFileLevel).FirstOrDefault();
+            if (data == 0)
                 return Ok(new List<DropDownEnum>());
 
-            var fectore = Enum.GetValues(typeof(FectoreType))
-                    .Cast<FectoreType>().Select(e => new DropDownEnum
-                    {
-                        Id = Convert.ToInt16(e),
-                        Value = e.GetDescription()
-                    }).Where(s => data.Contains(s.Id)).OrderBy(o => o.Id).ToList();
-
-            return Ok(fectore);
+            if (data == 1)
+            {
+                var fectore = Enum.GetValues(typeof(FectoreType))
+                        .Cast<FectoreType>().Select(e => new DropDownEnum
+                        {
+                            Id = Convert.ToInt16(e),
+                            Value = e.GetDescription()
+                        }).Where(s => s.Id == 1).OrderBy(o => o.Id).ToList();
+                return Ok(fectore);
+            }
+            if (data == 2)
+            {
+                var fectore = Enum.GetValues(typeof(FectoreType))
+                        .Cast<FectoreType>().Select(e => new DropDownEnum
+                        {
+                            Id = Convert.ToInt16(e),
+                            Value = e.GetDescription()
+                        }).Where(s => s.Id == 3).OrderBy(o => o.Id).ToList();
+                return Ok(fectore);
+            }
+            if (data == 3)
+            {
+                var fectore = Enum.GetValues(typeof(FectoreType))
+                        .Cast<FectoreType>().Select(e => new DropDownEnum
+                        {
+                            Id = Convert.ToInt16(e),
+                            Value = e.GetDescription()
+                        }).Where(s => s.Id == 2).OrderBy(o => o.Id).ToList();
+                return Ok(fectore);
+            }
+            return Ok(new List<DropDownEnum>());
         }
     }
 }

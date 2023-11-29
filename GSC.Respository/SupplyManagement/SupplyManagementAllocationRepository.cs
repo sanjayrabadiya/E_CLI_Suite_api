@@ -140,7 +140,7 @@ namespace GSC.Respository.SupplyManagement
 
         public string CheckDuplicate(SupplyManagementAllocation obj)
         {
-            var variable = _context.ProjectDesignVariable.Where(s => s.Id == obj.ProjectDesignVariableId && s.StudyVersion == null).FirstOrDefault();
+            var variable = _context.ProjectDesignVariable.Where(s => s.Id == obj.ProjectDesignVariableId && s.InActiveVersion == null).FirstOrDefault();
             if (variable == null)
                 return "variable not found";
             if (obj.Type == SupplyManagementAllocationType.RandomizationDate && variable.CollectionSource != CollectionSources.DateTime)
