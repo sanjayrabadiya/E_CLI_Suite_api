@@ -237,7 +237,7 @@ namespace GSC.Respository.Screening
 
             var addTemplates = _projectDesignTemplateRepository.All.AsNoTracking().Where(t => t.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId
               && t.DeletedDate == null && (t.StudyVersion > 0 && t.StudyVersion <= versionNumber) &&
-              (t.InActiveVersion == null || t.InActiveVersion > versionNumber)).Select(t => new { t.Id, t.ProjectDesignVisitId }).ToList();
+              (t.InActiveVersion == null || t.InActiveVersion > versionNumber)).Select(t => new { t.Id, t.ProjectDesignVisitId,t.TemplateName }).ToList();
 
             var addTemplateIds = addTemplates.Select(t => t.Id).ToList();
             var projectDesignVisitIds = addTemplates.Select(t => t.ProjectDesignVisitId).ToList();
@@ -263,6 +263,7 @@ namespace GSC.Respository.Screening
                         var screeningTemplate = new ScreeningTemplate
                         {
                             ProjectDesignTemplateId = template.Id,
+                            ScreeningTemplateName = template.TemplateName,
                             ScreeningVisitId = r.Id,
                             Id = 0,
                             Status = ScreeningTemplateStatus.Pending
