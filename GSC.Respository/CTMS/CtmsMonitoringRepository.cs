@@ -263,20 +263,23 @@ namespace GSC.Respository.CTMS
             if (studyPlan != null)
             {
                 var StudyPlanTask = _context.StudyPlanTask.Where(s => s.StudyPlanId == studyPlan.Id && s.TaskName == taskname && s.DeletedBy == null).FirstOrDefault();
-                lisatdata.Id = StudyPlanTask.Id;
-                lisatdata.StudyPlanId = studyPlan.Id;
-                lisatdata.TaskName = taskname;
-                lisatdata.DurationDay = Convert.ToInt16(duration.Days);
-                var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
-                studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
-                studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
-                if (ctmsMonitoringDto.ActualStartDate != null)
+                if (StudyPlanTask != null)
                 {
-                    studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
-                    studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                    lisatdata.Id = StudyPlanTask.Id;
+                    lisatdata.StudyPlanId = studyPlan.Id;
+                    lisatdata.TaskName = taskname;
+                    lisatdata.DurationDay = Convert.ToInt16(duration.Days);
+                    var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
+                    studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
+                    studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
+                    if (ctmsMonitoringDto.ActualStartDate != null)
+                    {
+                        studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                        studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                    }
+                    _context.StudyPlanTask.Update(studyPlanTask);
+                    _context.Save();
                 }
-                _context.StudyPlanTask.Update(studyPlanTask);
-                _context.Save();
             }
             return "";
         }
