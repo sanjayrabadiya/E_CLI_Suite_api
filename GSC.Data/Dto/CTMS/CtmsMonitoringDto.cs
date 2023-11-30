@@ -16,9 +16,9 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
         public int? ParentId { get; set; }
-        public bool? If_Missed { get; set; }
-        public bool?  If_ReSchedule { get; set; }
-        public bool? If_Applicable { get; set; }
+        public bool? IfMissed { get; set; }
+        public bool?  IfReSchedule { get; set; }
+        public bool? IfApplicable { get; set; }
     }
 
     public class CtmsMonitoringGridDto : BaseAuditDto

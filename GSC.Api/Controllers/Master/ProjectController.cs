@@ -613,6 +613,12 @@ namespace GSC.Api.Controllers.Master
             return Ok(_projectRepository.GetParentProjectCTMSDropDown());
         }
         [HttpGet]
+        [Route("GetEditParentProjectCTMSDropDown")]
+        public IActionResult GetEditParentProjectCTMSDropDown()
+        {
+            return Ok(_projectRepository.GetEditParentProjectCTMSDropDown());
+        }
+        [HttpGet]
         [Route("GetChildProjectCTMSDropDown/{parentProjectId}")]
         public IActionResult GetChildProjectCTMSDropDown(int parentProjectId)
         {
