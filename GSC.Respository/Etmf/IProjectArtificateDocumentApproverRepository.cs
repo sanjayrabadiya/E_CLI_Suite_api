@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GSC.Data.Dto.Master;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Etmf
 {
@@ -23,5 +24,6 @@ namespace GSC.Respository.Etmf
         DateTime? GetMaxDueDate(int documentId);
         void SaveByDocumentIdInApprove(int projectWorkplaceArtificateDocumentId);
         int SkipDocumentApproval(int documentId, bool isApproval);
+        Task SendDueApproveEmail();
     }
 }

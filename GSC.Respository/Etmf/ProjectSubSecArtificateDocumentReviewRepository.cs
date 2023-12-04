@@ -1,11 +1,13 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.ProjectRight;
 using GSC.Respository.UserMgt;
@@ -17,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Etmf
 {
@@ -31,6 +34,7 @@ namespace GSC.Respository.Etmf
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IMapper _mapper;
+        private readonly IAppSettingRepository _appSettingRepository;
 
         public ProjectSubSecArtificateDocumentReviewRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
@@ -40,7 +44,8 @@ namespace GSC.Respository.Etmf
             IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
             IProjectRightRepository projectRightRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
-            IMapper mapper
+            IMapper mapper,
+             IAppSettingRepository appSettingRepository
             )
            : base(context)
         {
@@ -53,6 +58,7 @@ namespace GSC.Respository.Etmf
             _projectRightRepository = projectRightRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _mapper = mapper;
+            _appSettingRepository = appSettingRepository;
         }
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserRoles(int Id, int ProjectId, int ProjectDetailsId)
@@ -125,7 +131,7 @@ namespace GSC.Respository.Etmf
 
 
             var defaultUser = All.FirstOrDefault(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentReviewDto.FirstOrDefault().ProjectWorkplaceSubSecArtificateDocumentId
-            && x.DeletedDate == null && x.UserId == x.CreatedBy && x.IsReviewed==false);
+            && x.DeletedDate == null && x.UserId == x.CreatedBy && x.IsReviewed == false);
             if (defaultUser != null)
             {
                 defaultUser.SendBackDate = DateTime.Now;
@@ -444,6 +450,30 @@ namespace GSC.Respository.Etmf
             }
 
             return 0;
+        }
+
+        public async Task SendDueReviewEmail()
+        {
+            var commonSettiongs = _appSettingRepository.Get<GeneralSettingsDto>(2);
+            var compareDate = DateTime.Now.Date.AddDays(Convert.ToDouble(commonSettiongs.EtmfScheduleDueDate));
+            var dueDates = await All.Where(x => x.DeletedDate == null && x.DueDate != null
+            && x.UserId != x.CreatedBy && x.IsReviewed == false
+            && x.ProjectWorkplaceSubSecArtificateDocument.DeletedDate == null
+            && x.DueDate.Value.Date == compareDate).ToListAsync();
+            foreach (var due in dueDates)
+            {
+                var user = await _context.Users.FindAsync((int)due.UserId);
+                var document = await _context.ProjectWorkplaceArtificatedocument.FindAsync(due.ProjectWorkplaceSubSecArtificateDocumentId);
+                var artificate = await _context.EtmfProjectWorkPlace.FindAsync(document.ProjectWorkplaceArtificateId);
+                string artificateName = artificate.ArtifactName;
+                if (artificate.EtmfArtificateMasterLbraryId > 0)
+                {
+                    var EtfArtificate = await _context.EtmfArtificateMasterLbrary.FindAsync(artificate.EtmfArtificateMasterLbraryId);
+                    artificateName = EtfArtificate.ArtificateName;
+                }
+                var project = await _context.Project.FindAsync(artificate.ProjectId);
+                _emailSenderRespository.SendEmailOfReviewDue(user.Email, user.UserName, document.DocumentName, artificateName, project.ProjectCode);
+            }
         }
     }
 }

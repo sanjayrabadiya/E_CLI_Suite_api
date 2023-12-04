@@ -17,6 +17,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using GSC.Api.Hosted;
+using Quartz;
+using GSC.Api.QuartzJob;
+using System;
 
 namespace GSC.Api
 {
@@ -38,7 +41,32 @@ namespace GSC.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-         
+            services.Configure<QuartzOptions>(options =>
+            {
+                options.Scheduling.IgnoreDuplicates = true; // default: false
+                options.Scheduling.OverWriteExistingData = true; // default: true
+            });
+
+            services.AddQuartz(q =>
+            {
+                q.SchedulerId = "Scheduler-Core";
+
+                q.UseSimpleTypeLoader();
+                q.UseInMemoryStore();
+                q.UseDefaultThreadPool(tp =>
+                {
+                    tp.MaxConcurrency = 10;
+                });
+
+                q.ScheduleJob<ProjectJob>(trigger => trigger.WithIdentity("Combined Configuration Trigger")
+                    .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddMinutes(30)))
+                    .WithCronSchedule("0 0 0 1/1 * ? *")
+                    //.WithDailyTimeIntervalSchedule(x=>x.WithInterval(2,IntervalUnit.Minute))
+                    .WithDescription("Trigger configured for a job with single call"));
+            });
+
+            services.AddTransient<ProjectJob>();
+            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
             services.AddAuth(_configuration);
             services.AddConfig(_configuration);
 
@@ -46,7 +74,7 @@ namespace GSC.Api
 
             services.AddAutoMapper(Assembly.GetAssembly(typeof(AutoMapperConfiguration)));
             services.AddScoped<AllowedSafeCallerFilter>();
-            
+
             services.AddControllers(options =>
             {
                 options.EnableEndpointRouting = false;
@@ -75,7 +103,7 @@ namespace GSC.Api
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
             app.UseAuthentication();
             app.UseMiddleware<LogMiddleware>();
-           // app.UseCors("AllowCorsPolicy");
+            // app.UseCors("AllowCorsPolicy");
             app.UseCors(builder =>
             {
                 builder.WithOrigins(new[] { "http://localhost:4100", "http://localhost:4200", "http://localhost:63980", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com",
@@ -103,10 +131,10 @@ namespace GSC.Api
 
             app.UseRouting();
             app.UseAuthorization();
-            app.UseEndpoints(e => 
+            app.UseEndpoints(e =>
             {
                 e.MapControllers();
-               // e.MapHub<MessageHub>("/MessageHub");
+                // e.MapHub<MessageHub>("/MessageHub");
             });
             //app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzgxNjc2QDMxMzgyZTM0MmUzMG9ETm5BR0xPZzdMbjN0dTcwbjJhUmw2SUtqNUxYaEc4WFNrNXcwUzZvdEk9");
