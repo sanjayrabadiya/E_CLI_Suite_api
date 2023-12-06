@@ -4,6 +4,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Respository.CTMS;
 using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -40,46 +41,41 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            _userAccessRepository.AddSiteUserAccesse(userAccessDto);
+            var ActiveData = _userAccessRepository.getActive(userAccessDto);
+            if(ActiveData.Count==0)
+                _userAccessRepository.AddSiteUserAccesse(userAccessDto);
+
             return Ok(true);
         }
 
-        [HttpDelete("{id}")]
-        public ActionResult Delete(int id)
+        [HttpPost("GetRevokeUser")]
+        public ActionResult GetRevokeUser([FromBody] List<int> mySelection)
         {
-            var record = _userAccessRepository.Find(id);
-            if (record == null)
-                return NotFound();
-            _userAccessRepository.Delete(record);
-            _uow.Save();
-            return Ok();
-        }
-
-        [HttpPatch("{id}")]
-        public ActionResult Active(int id)
-        {
-            var record = _userAccessRepository.Find(id);
-
-            if (record == null)
-                return NotFound();
-            var validate = _userAccessRepository.DuplicateIActive(record);
-            if (!string.IsNullOrEmpty(validate))
+            foreach (var item in mySelection)
             {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
+                var record = _userAccessRepository.Find(item);
+                if (record == null)
+                    return NotFound();
+                _userAccessRepository.Delete(record);
+                _uow.Save();
             }
-            _userAccessRepository.Active(record);
-            _uow.Save();
-
-            return Ok();
+            return Ok(true);
         }
 
         [HttpGet]
-        [Route("GetRollUserDropDown/{projectId}")]
-
-        public IActionResult getSelectDateDrop(int projectId)
+        [Route("GetRollUserDropDown")]
+        public IActionResult GetRollUserDropDown()
         {
-            return Ok(_userAccessRepository.GetRollUserDropDown(projectId));
+            return Ok(_userAccessRepository.GetRollUserDropDown());
+        }
+
+        [HttpGet("GetUserAccessHistory/{id}")]
+        public IActionResult GetUserAccessHistory(int id)
+        {
+            if (id <= 0) return BadRequest();
+
+            var result = _userAccessRepository.GetUserAccessHistory(id);
+            return Ok(result);
         }
     }
 }
