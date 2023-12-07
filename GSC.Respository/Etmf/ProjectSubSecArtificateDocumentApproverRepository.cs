@@ -25,7 +25,7 @@ namespace GSC.Respository.Etmf
     public class ProjectSubSecArtificateDocumentApproverRepository : GenericRespository<ProjectSubSecArtificateDocumentApprover>, IProjectSubSecArtificateDocumentApproverRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
+        //private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IGSCContext _context;
@@ -36,7 +36,7 @@ namespace GSC.Respository.Etmf
         private readonly IAppSettingRepository _appSettingRepository;
         public ProjectSubSecArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
-           IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
+           //IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
            IEmailSenderRespository emailSenderRespository,
            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
@@ -46,7 +46,7 @@ namespace GSC.Respository.Etmf
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
+            //_projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
             _projectRightRepository = projectRightRepository;
@@ -184,8 +184,11 @@ namespace GSC.Respository.Etmf
                           select new ProjectSubSecArtificateDocumentApproverHistory
                           {
                               Id = approver.Id,
-                              DocumentName = approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
-                              ProjectArtificateDocumentHistoryId = approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
+                              //DocumentName = approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+                              //ProjectArtificateDocumentHistoryId = approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
+                              //UserName = _context.Users.Where(y => y.Id == approver.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
+                              DocumentName = approver.ProjectSubSecArtificateDocumentHistory.Count <= 0 ? "" : approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
+                              ProjectArtificateDocumentHistoryId = approver.ProjectSubSecArtificateDocumentHistory.Count <= 0 ? 0 : approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
                               UserName = _context.Users.Where(y => y.Id == approver.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                               UserId = approver.UserId,
                               IsApproved = approver.IsApproved,
@@ -241,7 +244,7 @@ namespace GSC.Respository.Etmf
                     _context.Save();
 
                     //_projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceSubSecArtificateDocumentId, false);
-                    var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
+                    var projectWorkplaceArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, All.Max(p => p.Id));
 
                     var replaceUserDto = _mapper.Map<ProjectSubSecArtificateDocumentApproverDto>(replaceUser);
