@@ -27,7 +27,7 @@ namespace GSC.Respository.Etmf
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
+        //private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
@@ -40,7 +40,7 @@ namespace GSC.Respository.Etmf
            IJwtTokenAccesser jwtTokenAccesser,
             IEmailSenderRespository emailSenderRespository,
             IUserRepository userRepository,
-            IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
+            //IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
             IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
             IProjectRightRepository projectRightRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
@@ -54,7 +54,7 @@ namespace GSC.Respository.Etmf
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
-            _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
+            //_projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _projectRightRepository = projectRightRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _mapper = mapper;
@@ -106,7 +106,7 @@ namespace GSC.Respository.Etmf
                     });
                     if (_context.Save() < 0) throw new Exception("Artificate Send failed on save.");
 
-                    var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(ReviewDto.ProjectWorkplaceSubSecArtificateDocumentId);
+                    var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Find(ReviewDto.ProjectWorkplaceSubSecArtificateDocumentId);
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, All.Max(p => p.Id), null);
                 }
             }
@@ -360,7 +360,7 @@ namespace GSC.Respository.Etmf
 
                     _context.Save();
 
-                    var projectWorkplaceSubSecArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
+                    var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, All.Max(p => p.Id), null);
 
                     var replaceUserDto = _mapper.Map<ProjectSubSecArtificateDocumentReviewDto>(replaceUser);
