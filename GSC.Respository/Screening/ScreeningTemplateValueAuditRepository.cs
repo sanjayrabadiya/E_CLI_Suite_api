@@ -483,7 +483,11 @@ namespace GSC.Respository.Screening
             audit.CreatedDate = _jwtTokenAccesser.GetClientDate();
 
             audit.DeviceBrowser = _jwtTokenAccesser.GetHeader("device-browser");
-            audit.Uuid = Convert.ToString(JsonConvert.DeserializeObject(_jwtTokenAccesser.GetHeader("uuid")));
+            if (int.Parse(_jwtTokenAccesser.GetHeader("device-type")) == 1)
+                audit.Uuid = Convert.ToString(JsonConvert.DeserializeObject(_jwtTokenAccesser.GetHeader("uuid")));
+            else
+                audit.Uuid = _jwtTokenAccesser.GetHeader("uuid");
+
             audit.Platform = _jwtTokenAccesser.GetHeader("platform");
             audit.System = _jwtTokenAccesser.GetHeader("system");
 
