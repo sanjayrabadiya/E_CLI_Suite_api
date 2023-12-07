@@ -33,5 +33,10 @@ namespace GSC.Data.Entities.Screening
         public ScreeningTemplateValue ScreeningTemplateValue { get; set; }
         public ProjectDesignVariableValue ProjectDesignVariableValue { get; set; }
         [ForeignKey("ReasonId")] public AuditReason AuditReason { get; set; }
+
+        public string Uuid { get; set; }
+        public string System { get; set; }
+        public string Platform { get; set; }
+        public string DeviceBrowser { get; set; }
     }
 }

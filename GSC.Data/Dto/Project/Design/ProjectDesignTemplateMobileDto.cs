@@ -33,5 +33,6 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsTemplateRestricted { get; set; }
         public bool IsPastTemplate { get; set; }
         public bool IsHide { get; set; }
+        public bool IsDateTime { get; set; }
     }
 }
