@@ -1616,7 +1616,8 @@ namespace GSC.Respository.Attendance
                             ScheduleDate = r.ScheduleDate,
                             IsTemplateRestricted = false,
                             IsPastTemplate = false,
-                            IsHide = r.IsHide ?? false
+                            IsHide = r.IsHide ?? false,
+                            IsDateTime = false
                         }).OrderBy(r => r.DesignOrder).ToList();
 
             data = data.Where(x => x.IsHide == false).ToList();
@@ -1628,7 +1629,17 @@ namespace GSC.Respository.Attendance
                 }
                 if (x.ScheduleDate != null)
                 {
-                    var ProjectScheduleTemplates = _context.ProjectScheduleTemplate.Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null);
+                    var ProjectScheduleTemplates = _context.ProjectScheduleTemplate
+                    .Where(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId
+                    && t.ProjectDesignVisitId == x.ProjectDesignVisitId && t.DeletedDate == null).Include(x => x.ProjectDesignVariable);
+
+                    if (ProjectScheduleTemplates != null)
+                    {
+                        var datetime = ProjectScheduleTemplates.Where(x => x.ProjectDesignVariable.CollectionSource == CollectionSources.DateTime).ToList();
+                        if (datetime.Count != 0)
+                            x.IsDateTime = true;
+                    }
+
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
                     var noofHH = ProjectScheduleTemplates.Min(t => t.HH);
                     var noofMM = ProjectScheduleTemplates.Min(t => t.MM);
@@ -1656,9 +1667,13 @@ namespace GSC.Respository.Attendance
                     }
                     else
                     {
-                        var mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
-                        var maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
-
+                        var mindate = ((DateTime)x.ScheduleDate);
+                        var maxdate = ((DateTime)x.ScheduleDate);
+                        if (ProjectScheduleTemplate != null)
+                        {
+                            mindate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.NegativeDeviation * -1);
+                            maxdate = ((DateTime)x.ScheduleDate).AddDays(ProjectScheduleTemplate.PositiveDeviation);
+                        }
                         if (DateTime.Today >= mindate && DateTime.Today <= maxdate)
                             x.IsTemplateRestricted = false;
                         else

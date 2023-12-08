@@ -20,6 +20,7 @@ using GSC.Respository.Reports;
 using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
+using Newtonsoft.Json;
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
@@ -73,7 +74,11 @@ namespace GSC.Respository.Screening
                 User = r.UserName,
                 CollectionSource = r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
                 TableCollectionSource = r.ProjectDesignVariableValue.TableCollectionSource,
-                Id = r.Id
+                Id = r.Id,
+                Uuid = r.Uuid,
+                System = r.System,
+                Platform = r.Platform,
+                DeviceBrowser = r.DeviceBrowser
             }).OrderByDescending(t => t.Id).ToList();
 
         }
@@ -98,7 +103,11 @@ namespace GSC.Respository.Screening
                 Variable = r.ScreeningTemplateValue.ProjectDesignVariable.VariableName,
                 // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
                 Visit = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
-                Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber)
+                Convert.ToString(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                Uuid = r.Uuid,
+                System = r.System,
+                Platform = r.Platform,
+                DeviceBrowser = r.DeviceBrowser
             }).OrderByDescending(t => t.CreatedDate).ToList();
         }
 
@@ -163,8 +172,11 @@ namespace GSC.Respository.Screening
                 ScreeningNo = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                 RandomizationNo = r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
                 StudyCode = ProjectCode,
-                CollectionSource = r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource
-
+                CollectionSource = r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource,
+                Uuid = r.Uuid,
+                System = r.System,
+                Platform = r.Platform,
+                DeviceBrowser = r.DeviceBrowser
             }).OrderByDescending(t => t.CreatedDate).ToList();
 
             #region Job Monitoring Save - Inprocess Status
@@ -223,12 +235,16 @@ namespace GSC.Respository.Screening
                     dataTable.Columns.Add("Created Date");
                     dataTable.Columns.Add("TimeZone");
                     dataTable.Columns.Add("IpAddress");
+                    dataTable.Columns.Add("Uuid");
+                    dataTable.Columns.Add("System");
+                    dataTable.Columns.Add("Platform");
+                    dataTable.Columns.Add("DeviceBrowser");
 
                     //Add rows to the DataTable
                     MainData.ForEach(d =>
                     {
                         dataTable.Rows.Add(new object[] { d.StudyCode, d.SiteCode, d.ScreeningNo, d.RandomizationNo, d.PatientInitial, d.Visit, d.Template, d.Variable, d.OldValue,
-                    d.NewValue,d.User,d.Role,d.Reason,d.ReasonOth,d.Note,d.CreatedDate,d.TimeZone,d.IpAddress});
+                    d.NewValue,d.User,d.Role,d.Reason,d.ReasonOth,d.Note,d.CreatedDate,d.TimeZone,d.IpAddress,d.Uuid,d.System,d.Platform,d.DeviceBrowser});
                     });
 
                     //Assign data source
@@ -321,6 +337,11 @@ namespace GSC.Respository.Screening
                     worksheet.Cell(1, 16).Value = "Created Date";
                     worksheet.Cell(1, 17).Value = "TimeZone";
                     worksheet.Cell(1, 18).Value = "IpAddress";
+                    worksheet.Cell(1, 19).Value = "Uuid";
+                    worksheet.Cell(1, 20).Value = "System";
+                    worksheet.Cell(1, 21).Value = "Platform";
+                    worksheet.Cell(1, 22).Value = "DeviceBrowser";
+
                     var j = 3;
 
                     MainData.ForEach(d =>
@@ -399,6 +420,10 @@ namespace GSC.Respository.Screening
                         worksheet.Row(j).Cell(16).SetValue(d.CreatedDate);
                         worksheet.Row(j).Cell(17).SetValue(d.TimeZone);
                         worksheet.Row(j).Cell(18).SetValue(d.IpAddress);
+                        worksheet.Row(j).Cell(19).SetValue(d.Uuid);
+                        worksheet.Row(j).Cell(20).SetValue(d.System);
+                        worksheet.Row(j).Cell(21).SetValue(d.Platform);
+                        worksheet.Row(j).Cell(22).SetValue(d.DeviceBrowser);
                         j++;
                     });
 
@@ -456,6 +481,15 @@ namespace GSC.Respository.Screening
             }
 
             audit.CreatedDate = _jwtTokenAccesser.GetClientDate();
+
+            audit.DeviceBrowser = _jwtTokenAccesser.GetHeader("device-browser");
+            if (int.Parse(_jwtTokenAccesser.GetHeader("device-type")) == 1)
+                audit.Uuid = Convert.ToString(JsonConvert.DeserializeObject(_jwtTokenAccesser.GetHeader("uuid")));
+            else
+                audit.Uuid = _jwtTokenAccesser.GetHeader("uuid");
+
+            audit.Platform = _jwtTokenAccesser.GetHeader("platform");
+            audit.System = _jwtTokenAccesser.GetHeader("system");
 
             Add(audit);
         }

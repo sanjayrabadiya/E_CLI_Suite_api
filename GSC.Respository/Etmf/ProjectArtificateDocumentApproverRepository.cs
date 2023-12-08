@@ -1,11 +1,9 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.Master;
-using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.Etmf;
-using GSC.Data.Entities.UserMgt;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -15,13 +13,11 @@ using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Etmf
 {
@@ -38,6 +34,7 @@ namespace GSC.Respository.Etmf
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
+        private readonly IAppSettingRepository _appSettingRepository;
         public ProjectArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             //IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
@@ -47,7 +44,8 @@ namespace GSC.Respository.Etmf
             IUserRepository userRepository,
             IUploadSettingRepository uploadSettingRepository,
             IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
-            IProjectRightRepository projectRightRepository)
+            IProjectRightRepository projectRightRepository,
+            IAppSettingRepository appSettingRepository)
            : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -61,6 +59,7 @@ namespace GSC.Respository.Etmf
             _uploadSettingRepository = uploadSettingRepository;
             _projectRightRepository = projectRightRepository;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
+            _appSettingRepository = appSettingRepository;
         }
 
         // Get UserName for approval
@@ -359,12 +358,36 @@ namespace GSC.Respository.Etmf
                 {
                     var document = _context.ProjectWorkplaceArtificatedocument.FirstOrDefault(x => x.Id == documentId);
                     document.IsAccepted = true;
-                    _context.ProjectWorkplaceArtificatedocument.Update(document);                  
+                    _context.ProjectWorkplaceArtificatedocument.Update(document);
                 }
                 return _context.Save();
             }
 
             return 0;
+        }
+
+        public async Task SendDueApproveEmail()
+        {
+            var commonSettiongs = _appSettingRepository.Get<GeneralSettingsDto>(2);
+            var compareDate = DateTime.Now.Date.AddDays(Convert.ToDouble(commonSettiongs.EtmfScheduleDueDate));
+            var dueDates = await All.Where(x => x.DeletedDate == null && x.DueDate != null
+            && x.UserId != x.CreatedBy && (x.IsApproved == false || x.IsApproved == null)
+            && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
+            && x.DueDate.Value.Date == compareDate).ToListAsync();
+            foreach (var due in dueDates)
+            {
+                var user = await _context.Users.FindAsync((int)due.UserId);
+                var document = await _context.ProjectWorkplaceArtificatedocument.FindAsync(due.ProjectWorkplaceArtificatedDocumentId);
+                var artificate = await _context.EtmfProjectWorkPlace.FindAsync(document.ProjectWorkplaceArtificateId);
+                string artificateName = artificate.ArtifactName;
+                if (artificate.EtmfArtificateMasterLbraryId > 0)
+                {
+                    var EtfArtificate = await _context.EtmfArtificateMasterLbrary.FindAsync(artificate.EtmfArtificateMasterLbraryId);
+                    artificateName = EtfArtificate.ArtificateName;
+                }
+                var project = await _context.Project.FindAsync(artificate.ProjectId);
+                _emailSenderRespository.SendEmailOfApproveDue(user.Email, user.UserName, document.DocumentName, artificateName, project.ProjectCode);
+            }
         }
     }
 }

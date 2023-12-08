@@ -214,8 +214,41 @@ namespace GSC.Respository.CTMS
                 var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
                 studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
                 studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
-                studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
-                studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                if(ctmsMonitoringDto.ActualStartDate !=null){
+                    studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                    studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                }
+                _context.StudyPlanTask.Add(studyPlanTask);
+                _context.Save();
+            }
+            else
+            {
+                //Add CTMS Monitoring schedule after then Automatic Add Study plan
+                var ParentProjectId = _context.Project.Where(x=>x.Id == ctmsMonitoringDto.ProjectId && x.DeletedBy==null).Select(s=>s.ParentProjectId).FirstOrDefault();
+                var TaskMaster = _context.StudyPlan.Where(x => x.ProjectId == ParentProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
+                var data = new StudyPlan();
+                data.Id = 0;
+                data.StartDate = TaskMaster.StartDate;
+                data.EndDate = TaskMaster.EndDate;
+                data.ProjectId = ctmsMonitoringDto.ProjectId;
+                data.TaskTemplateId = TaskMaster.TaskTemplateId;
+                _context.StudyPlan.Add(data);
+                _context.Save();
+
+                //Add CTMS Monitoring schedule after then Automatic Study plan task
+                lisatdata.Id = 0;
+                lisatdata.StudyPlanId = data.Id;
+                lisatdata.TaskName = taskname;
+                lisatdata.DurationDay = Convert.ToInt16(duration.Days);
+                lisatdata.RefrenceType = RefrenceType.Sites;//fix site
+                var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
+                studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
+                studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
+                if (ctmsMonitoringDto.ActualStartDate != null)
+                {
+                    studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                    studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                }
                 _context.StudyPlanTask.Add(studyPlanTask);
                 _context.Save();
             }
@@ -230,17 +263,23 @@ namespace GSC.Respository.CTMS
             if (studyPlan != null)
             {
                 var StudyPlanTask = _context.StudyPlanTask.Where(s => s.StudyPlanId == studyPlan.Id && s.TaskName == taskname && s.DeletedBy == null).FirstOrDefault();
-                lisatdata.Id = StudyPlanTask.Id;
-                lisatdata.StudyPlanId = studyPlan.Id;
-                lisatdata.TaskName = taskname;
-                lisatdata.DurationDay = Convert.ToInt16(duration.Days);
-                var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
-                studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
-                studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
-                studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
-                studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
-                _context.StudyPlanTask.Update(studyPlanTask);
-                _context.Save();
+                if (StudyPlanTask != null)
+                {
+                    lisatdata.Id = StudyPlanTask.Id;
+                    lisatdata.StudyPlanId = studyPlan.Id;
+                    lisatdata.TaskName = taskname;
+                    lisatdata.DurationDay = Convert.ToInt16(duration.Days);
+                    var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
+                    studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
+                    studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
+                    if (ctmsMonitoringDto.ActualStartDate != null)
+                    {
+                        studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                        studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
+                    }
+                    _context.StudyPlanTask.Update(studyPlanTask);
+                    _context.Save();
+                }
             }
             return "";
         }

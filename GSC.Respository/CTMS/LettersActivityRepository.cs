@@ -253,17 +253,27 @@ namespace GSC.Respository.Master
         }
         public List<LettersActivityDto> UserRoles(int ProjectId)
         {
-            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null && x.User.DeletedDate == null).ToList();
-            var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
-                .GroupBy(c => new { c.UserId }, (key, group) => group.First());
-
-            var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
-                .Select(c => new LettersActivityDto
+            //add by mitul on 30-11-2023 -> CTMS UserAccess wise user get
+            var users =_context.UserAccess.Include(x=>x.UserRole).ThenInclude(x=>x.User).Where(s=>s.ProjectId== ProjectId && s.DeletedDate == null && s.UserRole.UserId != _jwtTokenAccesser.UserId)
+                .OrderByDescending(s=>s.Id).Select(c => new LettersActivityDto
                 {
-                    UserId = c.UserId,
-                    Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+                    UserId = c.UserRole.UserId,
+                    Name = c.UserRole.User.UserName,
                     IsSelected = true,
                 }).ToList();
+
+            //Commit by mitul on 30-11-2023 Remove user Access for projectRight
+            //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null && x.User.DeletedDate == null).ToList();
+            //var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
+            //    .GroupBy(c => new { c.UserId }, (key, group) => group.First());
+
+            //var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
+            //    .Select(c => new LettersActivityDto
+            //    {
+            //        UserId = c.UserId,
+            //        Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
+            //        IsSelected = true,
+            //    }).ToList();
 
             return users;
         }

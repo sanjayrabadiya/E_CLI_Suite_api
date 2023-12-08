@@ -122,6 +122,22 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
+        public void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("ArtificateReviewDue", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            _emailService.SendMail(emailMessage);
+        }
+
+        public void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
+        {
+            var emailMessage = ConfigureEmail("ArtificateApproverDue", userName);
+            emailMessage.SendTo = toMail;
+            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            _emailService.SendMail(emailMessage);
+        }
+
         public void SendEmailOfReviewed(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
         {
             var emailMessage = ConfigureEmail("ArtificateReviewed", userName);

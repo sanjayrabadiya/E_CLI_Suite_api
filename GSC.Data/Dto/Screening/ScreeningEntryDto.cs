@@ -85,6 +85,11 @@ namespace GSC.Data.Dto.Screening
         public TableCollectionSource? TableCollectionSource { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
+
+        public string Uuid { get; set; }
+        public string System { get; set; }
+        public string Platform { get; set; }
+        public string DeviceBrowser { get; set; }
     }
 
     public class SaveRandomizationDto
@@ -127,5 +132,9 @@ namespace GSC.Data.Dto.Screening
         public CollectionSources? CollectionSource { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
+        public string Uuid { get; set; }
+        public string System { get; set; }
+        public string Platform { get; set; }
+        public string DeviceBrowser { get; set; }
     }
 }

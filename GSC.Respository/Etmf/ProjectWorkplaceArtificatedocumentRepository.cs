@@ -30,6 +30,7 @@ using Syncfusion.Pdf.Grid;
 using Syncfusion.Pdf.Parsing;
 using GSC.Data.Dto.Configuration;
 using GSC.Shared.Generic;
+using Syncfusion.Pdf.Interactive;
 
 namespace GSC.Respository.Etmf
 {
@@ -190,7 +191,7 @@ namespace GSC.Respository.Etmf
         {
             List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
 
-            var _docuService = new DocumentService();
+            //var _docuService = new DocumentService();
 
             var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == id).Include(x => x.ProjectWorkPlace)
                  .ThenInclude(x => x.ProjectWorkPlace).FirstOrDefault();
@@ -279,14 +280,14 @@ namespace GSC.Respository.Etmf
                 obj.DocumentName = item.DocumentName;
                 obj.FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                if (item.Status == ArtifactDocStatusType.Final)
-                {
-                    var changeDocumentName = _docuService.GetEtmfOldFileName(obj.FullDocPath, obj.ExtendedName);
-                    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, changeDocumentName);
-                    obj.DocumentName = changeDocumentName;
-                }
-                else
-                    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+                //if (item.Status == ArtifactDocStatusType.Final)
+                //{
+                //    var changeDocumentName = _docuService.GetEtmfOldFileName(obj.FullDocPath, obj.ExtendedName);
+                //    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, changeDocumentName);
+                //    obj.DocumentName = changeDocumentName;
+                //}
+                //else
+                obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.Reviewer = users.OrderBy(x => x.SequenceNo).OrderBy(x => x.CreatedDate).ToList();
                 obj.CreatedDate = item.CreatedDate;
@@ -1311,12 +1312,16 @@ namespace GSC.Respository.Etmf
         public ProjectWorkplaceArtificatedocument WordToPdf(int Id)
         {
             var document = Find(Id);
+            var _docuService = new DocumentService();
+            var FullDocPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath);
+            var ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
+            var changeDocumentName = _docuService.GetEtmfOldFileName(FullDocPath, ExtendedName);
             var outputname = "";
             if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
             {
                 var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
 
-                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, changeDocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
                 DocIORenderer render = new DocIORenderer();
@@ -1345,7 +1350,7 @@ namespace GSC.Respository.Etmf
             }
             else if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
             {
-                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, changeDocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
                 PdfDocument pdfDocument = new PdfDocument();
@@ -1372,6 +1377,7 @@ namespace GSC.Respository.Etmf
             document.Status = ArtifactDocStatusType.Final;
             //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
             //document.Version = "1.0";
+            _context.ProjectWorkplaceArtificatedocument.Update(document);
             return document;
         }
 

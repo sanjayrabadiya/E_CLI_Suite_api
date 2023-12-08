@@ -45,11 +45,14 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             ctmsMonitoringDto.Id = 0;
-            var validatemsg = _ctmsMonitoringRepository.AddStudyPlanTask(ctmsMonitoringDto);
-            if (!string.IsNullOrEmpty(validatemsg))
+            if (ctmsMonitoringDto.IfApplicable != true)//if not Applicable so not add in StudyPlanTask
             {
-                ModelState.AddModelError("Message", validatemsg);
-                return BadRequest(ModelState);
+                var validatemsg = _ctmsMonitoringRepository.AddStudyPlanTask(ctmsMonitoringDto);
+                if (!string.IsNullOrEmpty(validatemsg))
+                {
+                    ModelState.AddModelError("Message", validatemsg);
+                    return BadRequest(ModelState);
+                }
             }
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(ctmsMonitoringDto);
             _ctmsMonitoringRepository.Add(ctmsMonitoring);
@@ -64,15 +67,17 @@ namespace GSC.Api.Controllers.CTMS
             if (ctmsMonitoringDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            var validatemsg = _ctmsMonitoringRepository.UpdateStudyPlanTask(ctmsMonitoringDto);
-            if (!string.IsNullOrEmpty(validatemsg))
+            
+            if(ctmsMonitoringDto.IfApplicable != true)//if not Applicable so not add in StudyPlanTask
             {
-                ModelState.AddModelError("Message", validatemsg);
-                return BadRequest(ModelState);
+                var validatemsg = _ctmsMonitoringRepository.UpdateStudyPlanTask(ctmsMonitoringDto);
+                if (!string.IsNullOrEmpty(validatemsg))
+                {
+                    ModelState.AddModelError("Message", validatemsg);
+                    return BadRequest(ModelState);
+                }
             }
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(ctmsMonitoringDto);
-
             _ctmsMonitoringRepository.Update(ctmsMonitoring);
             if (_uow.Save() <= 0) throw new Exception("Updating Monitoring failed on save.");
             return Ok(ctmsMonitoring.Id);

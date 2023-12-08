@@ -628,6 +628,11 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "SatStartTime", DisplayName = "Saturday Start Time" });
             _dictionaries.Add(new Dictionary { FieldName = "SatEndTime", DisplayName = "Saturday End Time" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "Uuid", DisplayName = "UUID" });
+            _dictionaries.Add(new Dictionary { FieldName = "System", DisplayName = "System" });
+            _dictionaries.Add(new Dictionary { FieldName = "Platform", DisplayName = "Platform" });
+            _dictionaries.Add(new Dictionary { FieldName = "DeviceBrowser", DisplayName = "Device Browser" });
+
         }
 
 

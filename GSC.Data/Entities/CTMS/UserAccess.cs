@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.CTMS
         public int ParentProjectId { get; set; }
         public int ProjectId { get; set; }
         public int UserRoleId { get; set; }
-        public bool IsSite {  get; set; }   
+        public bool IsSite {  get; set; }
         public UserRole UserRole { get; set; }
         public Master.Project Project { get; set; }
     }

@@ -51,6 +51,7 @@ namespace GSC.Api.Controllers.InformConcent
             _userRepository = userRepository;
             _VideoAPISettings = VideoAPISettings;
             _jwtTokenAccesser = jwtTokenAccesser;
+            _appSettingRepository = appSettingRepository;
         }
 
         [HttpGet]

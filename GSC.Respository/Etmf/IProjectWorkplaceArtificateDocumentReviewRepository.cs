@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using GSC.Data.Dto.Master;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.Etmf
 {
@@ -24,5 +25,6 @@ namespace GSC.Respository.Etmf
         int ReplaceUser(int documentId, int actualUserId, int replaceUserId);
         DateTime? GetMaxDueDate(int documentId);
         int SkipDocumentReview(int documentId);
+        Task SendDueReviewEmail();
     }
 }

@@ -1413,6 +1413,24 @@ namespace GSC.Respository.Master
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
+        public List<ProjectDropDown> GetEditParentProjectCTMSDropDown()
+        {
+            var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
+            if (projectList == null || projectList.Count == 0) return null;
+            var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.ProjectCode != null
+                    && projectsctms.Any(c => c == x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    ParentProjectId = c.ParentProjectId ?? c.Id
+                }).Distinct().OrderBy(o => o.Value).ToList();
+        }
 
         public List<ProjectDropDown> GetParentProjectCTMSTrueDropDown()
         {

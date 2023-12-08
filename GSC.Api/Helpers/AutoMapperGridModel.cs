@@ -820,6 +820,8 @@ namespace GSC.Api.Helpers
 
           CreateMap<UserAccess, UserAccessGridDto>()
          .ForMember(x => x.RoleUser, x => x.MapFrom(a => a.UserRole.User.FirstName + ' ' + a.UserRole.User.LastName))
+         .ForMember(x => x.UserId, x => x.MapFrom(a => a.UserRole.User.Id))
+         .ForMember(x => x.roleId, x => x.MapFrom(a => a.UserRole.SecurityRole.Id))
          .ForMember(x => x.Role, x => x.MapFrom(a => a.UserRole.SecurityRole.RoleName))
          .ReverseMap();
 
