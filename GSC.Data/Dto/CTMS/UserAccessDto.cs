@@ -28,7 +28,7 @@ namespace GSC.Data.Dto.CTMS
         public int? ProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string SiteCode { get; set; }
-
+        public string Access { get; set; }
         public int LoginUser { get; set; }
         public int projectCreatedBy { get; set; }
         public int UserId { get; set; }

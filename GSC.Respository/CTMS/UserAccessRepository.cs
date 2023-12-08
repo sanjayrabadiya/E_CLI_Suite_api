@@ -137,6 +137,7 @@ namespace GSC.Respository.CTMS
                 ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
                 var data = result.Select(r =>
                 {
+                    r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId && x.DeletedDate == null).Select(s => s.ProjectCode).FirstOrDefault();
                     r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId && x.DeletedDate == null).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName:"").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
@@ -150,6 +151,7 @@ namespace GSC.Respository.CTMS
                  ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
                 var data = result.Select(r =>
                 {
+                    r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
                     r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName:"").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
@@ -164,6 +166,7 @@ namespace GSC.Respository.CTMS
                 ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
                 var data = result.Select(r =>
                 {
+                    r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
                     r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName :"").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
