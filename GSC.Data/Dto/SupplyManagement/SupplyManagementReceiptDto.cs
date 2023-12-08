@@ -55,6 +55,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public ProductUnitType? ProductUnitType { get; set; }
 
         public string WithIssueName { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 
     public class SupplyManagementReceiptHistoryGridDto : BaseAuditDto

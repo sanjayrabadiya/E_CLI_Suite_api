@@ -21,13 +21,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ISupplyLocationRepository _supplyLocationRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public SupplyLocationController(ISupplyLocationRepository supplyLocationRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
         {
             _supplyLocationRepository = supplyLocationRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -58,7 +59,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            location.IpAddress = _jwtTokenAccesser.IpAddress;
+            location.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyLocationRepository.Add(location);
             if (_uow.Save() <= 0) throw new Exception("Creating Location failed on save.");
             return Ok(location.Id);
@@ -78,6 +80,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            location.IpAddress = _jwtTokenAccesser.IpAddress;
+            location.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyLocationRepository.AddOrUpdate(location);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Location failed on save.");

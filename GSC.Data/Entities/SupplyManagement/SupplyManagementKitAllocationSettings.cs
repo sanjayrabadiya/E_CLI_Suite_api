@@ -18,6 +18,10 @@ namespace GSC.Data.Entities.SupplyManagement
         public string ReasonOth { get; set; }
         public int Days { get; set; }
         public int PharmacyStudyProductTypeId { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
        
     }

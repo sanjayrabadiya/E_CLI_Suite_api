@@ -44,7 +44,7 @@ namespace GSC.Respository.Reports
             if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 list = _context.SupplyManagementKITSeriesDetail.Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.ProjectDesignVisit).Include(x => x.SupplyManagementKITSeries).ThenInclude(x => x.Project).Include(x => x.Randomization).
-                       Where(x => x.DeletedDate == null && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
+                       Where(x => x.DeletedDate == null && !x.SupplyManagementKITSeries.IsRetension && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
                        && x.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId && x.RandomizationId != null).Select(x => new RandomizationIWRSReportData
                        {
                            ProjectCode = x.SupplyManagementKITSeries.Project.ProjectCode,
@@ -76,7 +76,7 @@ namespace GSC.Respository.Reports
             if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
                 list = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementKIT).ThenInclude(x => x.Project).
-                       Where(x => x.DeletedDate == null && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
+                       Where(x => x.DeletedDate == null && !x.IsRetension && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
                        && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).Select(x => new RandomizationIWRSReportData
                        {
                            ProjectCode = x.SupplyManagementKIT.Project.ProjectCode,
@@ -189,7 +189,7 @@ namespace GSC.Respository.Reports
             if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 list = _context.SupplyManagementKITSeriesDetail.Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.ProjectDesignVisit).Include(x => x.SupplyManagementKITSeries).ThenInclude(x => x.Project).Include(x => x.Randomization).
-                       Where(x => x.DeletedDate == null && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
+                       Where(x => x.DeletedDate == null && !x.SupplyManagementKITSeries.IsRetension && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
                        && x.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId && x.RandomizationId != null).Select(x => new RandomizationIWRSReportData
                        {
                            ProjectCode = x.SupplyManagementKITSeries.Project.ProjectCode,
@@ -221,7 +221,7 @@ namespace GSC.Respository.Reports
             if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
                 list = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementKIT).ThenInclude(x => x.Project).
-                       Where(x => x.DeletedDate == null && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
+                       Where(x => x.DeletedDate == null && !x.IsRetension && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
                        && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).Select(x => new RandomizationIWRSReportData
                        {
                            ProjectCode = x.SupplyManagementKIT.Project.ProjectCode,
@@ -770,6 +770,7 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.ProjectCode = x.Project.ProjectCode;
                         productAccountabilityCentralReport.Id = x.Id;
                         productAccountabilityCentralReport.KitNo = x.KitNo;
+                        productAccountabilityCentralReport.IsRetension = x.IsRetension;
                         if (x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId > 0)
                         {
                             productAccountabilityCentralReport.RequestedFrom = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
@@ -865,6 +866,7 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.ProjectCode = x.SupplyManagementKIT.Project.ProjectCode;
                         productAccountabilityCentralReport.Id = x.Id;
                         productAccountabilityCentralReport.KitNo = x.KitNo;
+                        productAccountabilityCentralReport.IsRetension = x.IsRetension;
                         if (x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId > 0)
                         {
                             productAccountabilityCentralReport.RequestedFrom = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode;
@@ -948,13 +950,15 @@ namespace GSC.Respository.Reports
                 worksheet.Cell(list.Count + 11, 7).Value = "Returned";
                 worksheet.Cell(list.Count + 12, 7).Value = "Send to sponsor";
                 worksheet.Cell(list.Count + 13, 7).Value = "Shipped";
-                worksheet.Cell(list.Count + 14, 7).Value = "Total kit";
-                worksheet.Cell(list.Count + 15, 7).Value = "Total IMP";
+                worksheet.Cell(list.Count + 14, 7).Value = "Retention";
+                worksheet.Cell(list.Count + 15, 7).Value = "Total kit";
+                worksheet.Cell(list.Count + 16, 7).Value = "Total IMP";
 
                 var noofkis = list.Sum(x => x.NoofBoxorBottle);
                 var noofimp = list.Sum(x => x.Noofimp);
 
-                var withwithoutissue = list.Count(x => x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
+                var withwithoutissue = list.Count(x => !x.IsRetension && x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
+                var retention = list.Count(x => x.IsRetension && x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue);
                 var invalid = list.Count(x => x.Status == KitStatus.ReturnReceive || x.Status == KitStatus.ReturnReceiveMissing);
                 var damaged = list.Count(x => x.Status == KitStatus.Damaged || x.Status == KitStatus.ReturnReceiveDamaged);
                 var missiing = list.Count(x => x.Status == KitStatus.Missing);
@@ -977,8 +981,9 @@ namespace GSC.Respository.Reports
                 worksheet.Row(list.Count + 11).Cell(8).SetValue(returns);
                 worksheet.Row(list.Count + 12).Cell(8).SetValue(sendtosponser);
                 worksheet.Row(list.Count + 13).Cell(8).SetValue(shipped);
-                worksheet.Row(list.Count + 14).Cell(8).SetValue(totalkit);
-                worksheet.Row(list.Count + 15).Cell(8).SetValue(totalimp);
+                worksheet.Row(list.Count + 14).Cell(8).SetValue(retention);
+                worksheet.Row(list.Count + 15).Cell(8).SetValue(totalkit);
+                worksheet.Row(list.Count + 16).Cell(8).SetValue(totalimp);
 
 
 
@@ -1059,6 +1064,7 @@ namespace GSC.Respository.Reports
                     {
                         requestobj.TrackingNumber = shipment.CourierTrackingNo;
                         requestobj.KitStatus = shipment.Status.GetDescription();
+
                     }
 
                     list.Add(requestobj);
@@ -1130,6 +1136,7 @@ namespace GSC.Respository.Reports
                                         ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
                                         recieptobj.ProjectCode = project.ProjectCode;
                                         recieptobj.RequestedFrom = x.FromProject.ProjectCode;
+                                        recieptobj.IsRetension = s.IsRetension;
                                         if (x.IsSiteRequest)
                                         {
                                             recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
@@ -1215,6 +1222,7 @@ namespace GSC.Respository.Reports
                                         ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
                                         recieptobj.ProjectCode = project.ProjectCode;
                                         recieptobj.RequestedFrom = x.FromProject.ProjectCode;
+                                        recieptobj.IsRetension = s.IsRetension;
                                         if (x.IsSiteRequest)
                                         {
                                             recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
@@ -1308,8 +1316,9 @@ namespace GSC.Respository.Reports
                 worksheet.Cell(1, 12).Value = "Courier Details";
                 worksheet.Cell(1, 13).Value = "Expiry";
                 worksheet.Cell(1, 14).Value = "Lot No.";
-                worksheet.Cell(1, 15).Value = "Action By";
-                worksheet.Cell(1, 16).Value = "Action On";
+                worksheet.Cell(1, 15).Value = "Retention";
+                worksheet.Cell(1, 16).Value = "Action By";
+                worksheet.Cell(1, 17).Value = "Action On";
 
                 var j = 2;
 
@@ -1329,8 +1338,9 @@ namespace GSC.Respository.Reports
                     worksheet.Row(j).Cell(12).SetValue(d.CourierName);
                     worksheet.Row(j).Cell(13).SetValue(d.RetestExpiryDatestr);
                     worksheet.Row(j).Cell(14).SetValue(d.LotBatchNo);
-                    worksheet.Row(j).Cell(15).SetValue(d.ActionBy);
-                    worksheet.Row(j).Cell(16).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
+                    worksheet.Row(j).Cell(15).SetValue(d.IsRetension ? "Yes" : "No");
+                    worksheet.Row(j).Cell(16).SetValue(d.ActionBy);
+                    worksheet.Row(j).Cell(17).SetValue(Convert.ToDateTime(d.ActionDate).ToString("dddd, dd MMMM yyyy hh:mm"));
                     j++;
                 });
 
@@ -1483,6 +1493,7 @@ namespace GSC.Respository.Reports
                                         ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
                                         recieptobj.ProjectCode = project.ProjectCode;
                                         recieptobj.RequestedFrom = x.FromProject.ProjectCode;
+                                        recieptobj.IsRetension = s.IsRetension;
                                         if (x.IsSiteRequest)
                                         {
                                             recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
@@ -1562,6 +1573,7 @@ namespace GSC.Respository.Reports
                                         ProductAccountabilityCentralReport recieptobj = new ProductAccountabilityCentralReport();
                                         recieptobj.ProjectCode = project.ProjectCode;
                                         recieptobj.RequestedFrom = x.FromProject.ProjectCode;
+                                        recieptobj.IsRetension = s.IsRetension;
                                         if (x.IsSiteRequest)
                                         {
                                             recieptobj.RequestedTo = toproject != null ? toproject.ProjectCode : "";
@@ -1725,6 +1737,7 @@ namespace GSC.Respository.Reports
                             obj.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
                             obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
                             obj.KitStatus = x.Status.GetDescription();
+                            obj.IsRetension = x.SupplyManagementKITDetail.IsRetension;
                             obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                             obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
@@ -1798,6 +1811,7 @@ namespace GSC.Respository.Reports
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
+                            obj.IsRetension = kit.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
@@ -1864,6 +1878,7 @@ namespace GSC.Respository.Reports
                                 obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
                             }
                             obj.KitNo = x.SupplyManagementKITSeries.KitNo;
+                            obj.IsRetension = x.SupplyManagementKITSeries.IsRetension;
                             obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
                             obj.KitStatus = x.Status.GetDescription();
 
@@ -1935,11 +1950,12 @@ namespace GSC.Respository.Reports
                         }
                         data.ForEach(x =>
                         {
-                            var kit = _context.SupplyManagementKITSeriesDetail.Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+                            var kit = _context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
                             ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
+                            obj.IsRetension = kit.SupplyManagementKITSeries.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
@@ -2019,7 +2035,8 @@ namespace GSC.Respository.Reports
                             {
                                 obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
                             }
-                            obj.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
+                            obj.KitNo = x.SupplyManagementKITDetail.KitNo;
+                            obj.IsRetension = x.SupplyManagementKITDetail.IsRetension;
                             obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
                             obj.KitStatus = x.Status.GetDescription();
                             obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
@@ -2095,6 +2112,7 @@ namespace GSC.Respository.Reports
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
+                            obj.IsRetension = kit.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
@@ -2161,6 +2179,7 @@ namespace GSC.Respository.Reports
                                 obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
                             }
                             obj.KitNo = x.SupplyManagementKITSeries.KitNo;
+                            obj.IsRetension = x.SupplyManagementKITSeries.IsRetension;
                             obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
                             obj.KitStatus = x.Status.GetDescription();
 
@@ -2232,11 +2251,12 @@ namespace GSC.Respository.Reports
                         }
                         data.ForEach(x =>
                         {
-                            var kit = _context.SupplyManagementKITSeriesDetail.Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+                            var kit = _context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).Where(s => s.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
                             ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
+                            obj.IsRetension = kit.SupplyManagementKITSeries.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
@@ -2304,8 +2324,9 @@ namespace GSC.Respository.Reports
                     worksheet.Cell(1, 9).Value = "Role";
                     worksheet.Cell(1, 10).Value = "Randomization No";
                     worksheet.Cell(1, 11).Value = "Screening No";
-                    worksheet.Cell(1, 12).Value = "Action By";
-                    worksheet.Cell(1, 13).Value = "Action On";
+                    worksheet.Cell(1, 12).Value = "Retention";
+                    worksheet.Cell(1, 13).Value = "Action By";
+                    worksheet.Cell(1, 14).Value = "Action On";
 
                     var j = 2;
 
@@ -2322,8 +2343,9 @@ namespace GSC.Respository.Reports
                         worksheet.Row(j).Cell(9).SetValue(d.RoleName);
                         worksheet.Row(j).Cell(10).SetValue(d.RandomizationNo);
                         worksheet.Row(j).Cell(11).SetValue(d.ScreeningNo);
-                        worksheet.Row(j).Cell(12).SetValue(d.ActionBy);
-                        worksheet.Row(j).Cell(13).SetValue(d.ActionDatestr);
+                        worksheet.Row(j).Cell(12).SetValue(d.IsRetension ? "Yes" : "No");
+                        worksheet.Row(j).Cell(13).SetValue(d.ActionBy);
+                        worksheet.Row(j).Cell(14).SetValue(d.ActionDatestr);
 
                         j++;
                     });
@@ -2352,8 +2374,9 @@ namespace GSC.Respository.Reports
                     worksheet.Cell(1, 8).Value = "Visit";
                     worksheet.Cell(1, 9).Value = "Randomization No";
                     worksheet.Cell(1, 10).Value = "Screening No";
-                    worksheet.Cell(1, 11).Value = "Action By";
-                    worksheet.Cell(1, 12).Value = "Action On";
+                    worksheet.Cell(1, 11).Value = "Retention";
+                    worksheet.Cell(1, 12).Value = "Action By";
+                    worksheet.Cell(1, 13).Value = "Action On";
 
                     var j = 2;
 
@@ -2369,8 +2392,9 @@ namespace GSC.Respository.Reports
                         worksheet.Row(j).Cell(8).SetValue(d.VisitName);
                         worksheet.Row(j).Cell(9).SetValue(d.RandomizationNo);
                         worksheet.Row(j).Cell(10).SetValue(d.ScreeningNo);
-                        worksheet.Row(j).Cell(11).SetValue(d.ActionBy);
-                        worksheet.Row(j).Cell(12).SetValue(d.ActionDatestr);
+                        worksheet.Row(j).Cell(11).SetValue(d.IsRetension ? "Yes" : "No");
+                        worksheet.Row(j).Cell(12).SetValue(d.ActionBy);
+                        worksheet.Row(j).Cell(13).SetValue(d.ActionDatestr);
                         j++;
                     });
                     MemoryStream memoryStream = new MemoryStream();

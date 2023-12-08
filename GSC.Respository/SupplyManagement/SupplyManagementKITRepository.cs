@@ -139,7 +139,9 @@ namespace GSC.Respository.SupplyManagement
                             SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
                             RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                             LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-                            Dose = x.SupplyManagementKIT.Dose
+                            Dose = x.SupplyManagementKIT.Dose,
+                            IsRetension = x.IsRetension,
+                            IsDisable = true
                         }).OrderByDescending(x => x.KitNo).ToList();
                 foreach (var item in data)
                 {
@@ -165,7 +167,9 @@ namespace GSC.Respository.SupplyManagement
                             Id = x.Id,
                             KitNo = x.KitNo,
                             SiteCode = x.SiteId > 0 ? _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
-                            KitValidity = x.KitExpiryDate
+                            KitValidity = x.KitExpiryDate,
+                            IsRetension = x.IsRetension,
+                            IsDisable = true
                         }).OrderByDescending(x => x.KitNo).ToList();
 
 
@@ -466,6 +470,7 @@ namespace GSC.Respository.SupplyManagement
                                     && x.SupplyManagementKIT.ProjectId == obj.ParentProjectId
                                     && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visit.Value
                                     && x.SupplyManagementKIT.DeletedDate == null
+                                    && !x.IsRetension
                                     && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ProjectId
                                     && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                     && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -499,8 +504,11 @@ namespace GSC.Respository.SupplyManagement
                                     ReasonOth = obj.ReasonOth,
                                     AuditReasonId = obj.AuditReasonId,
                                     SupplyManagementKITDetailId = kit.Id,
-                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId
-                                };
+                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId,
+                                    IpAddress = _jwtTokenAccesser.IpAddress,
+                                    TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
+
+                            };
                                 InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
                                 _context.Save();
                                 obj.KitNo = kit.KitNo;
@@ -545,7 +553,9 @@ namespace GSC.Respository.SupplyManagement
                         KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo,
                         ProductCode = visit.Value,
                         SupplyManagementKITSeriesdetailId = kitSequencedata.Id,
-                        SupplyManagementShipmentId = kitSequencedata.SupplyManagementKITSeries.SupplyManagementShipmentId
+                        SupplyManagementShipmentId = kitSequencedata.SupplyManagementKITSeries.SupplyManagementShipmentId,
+                        IpAddress = _jwtTokenAccesser.IpAddress,
+                        TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                     };
                     InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
                     obj.KitNo = kitSequencedata.SupplyManagementKITSeries.KitNo;
@@ -738,6 +748,8 @@ namespace GSC.Respository.SupplyManagement
                             x.ReturnBy = _context.Users.Where(z => z.Id == returndata.CreatedBy).FirstOrDefault().UserName;
                             x.ReasonOth = returndata.ReasonOth;
                             x.Reason = returndata.AuditReasonId > 0 ? _context.AuditReason.Where(s => s.Id == returndata.AuditReasonId).FirstOrDefault().ReasonName : "";
+                            x.IpAddressReturn = returndata.IpAddress;
+                            x.TimeZoneReturn = returndata.TimeZone;
                         }
                         var returnverificationdata = _context.SupplyManagementKITReturnVerification.Include(x => x.AuditReason).Where(z => z.SupplyManagementKITDetailId == x.SupplyManagementKITDetailId).FirstOrDefault();
                         if (returnverificationdata != null)
@@ -747,6 +759,8 @@ namespace GSC.Respository.SupplyManagement
                             x.ReturnVerificationBy = _context.Users.Where(z => z.Id == returnverificationdata.CreatedBy).FirstOrDefault().UserName;
                             x.ReturnVerificationReasonOth = returnverificationdata.ReasonOth;
                             x.ReturnVerificationReason = returnverificationdata.AuditReason.ReasonName;
+                            x.IpAddressVerification = returnverificationdata.IpAddress;
+                            x.TimeZoneVerification = returnverificationdata.TimeZone;
                         }
                         x.ActionByName = x.ActionBy > 0 ? _context.Users.Where(z => z.Id == x.ActionBy).FirstOrDefault().UserName : "";
                         x.ActionDate = x.ActionDate;
@@ -866,6 +880,8 @@ namespace GSC.Respository.SupplyManagement
                             x.ReturnBy = _context.Users.Where(z => z.Id == returndata.CreatedBy).FirstOrDefault().UserName;
                             x.ReasonOth = returndata.ReasonOth;
                             x.Reason = returndata.AuditReasonId > 0 ? _context.AuditReason.Where(s => s.Id == returndata.AuditReasonId).FirstOrDefault().ReasonName : "";
+                            x.IpAddressReturn = returndata.IpAddress;
+                            x.TimeZoneReturn = returndata.TimeZone;
                         }
                         var returnverificationdata = _context.SupplyManagementKITReturnVerificationSeries.Include(x => x.AuditReason).Where(z => z.SupplyManagementKITSeriesId == x.SupplyManagementKITSeriesId).FirstOrDefault();
                         if (returnverificationdata != null)
@@ -875,6 +891,8 @@ namespace GSC.Respository.SupplyManagement
                             x.ReturnVerificationBy = _context.Users.Where(z => z.Id == returnverificationdata.CreatedBy).FirstOrDefault().UserName;
                             x.ReturnVerificationReasonOth = returnverificationdata.ReasonOth;
                             x.ReturnVerificationReason = returnverificationdata.AuditReason.ReasonName;
+                            x.IpAddressVerification = returnverificationdata.IpAddress;
+                            x.TimeZoneVerification = returnverificationdata.TimeZone;
                         }
 
                         if (kitType == KitStatusRandomization.Return)
@@ -1000,6 +1018,8 @@ namespace GSC.Respository.SupplyManagement
                             returnkit.ReasonOth = data.ReasonOth;
                             returnkit.SupplyManagementKITDetailId = obj.SupplyManagementKITDetailId;
                             returnkit.AuditReasonId = data.AuditReasonId;
+                            returnkit.IpAddress = _jwtTokenAccesser.IpAddress;
+                            returnkit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                             _context.SupplyManagementKITReturn.Add(returnkit);
 
                             SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -1033,6 +1053,8 @@ namespace GSC.Respository.SupplyManagement
                             returnkit.ReasonOth = data.ReasonOth;
                             returnkit.SupplyManagementKITSeriesId = obj.SupplyManagementKITSeriesId;
                             returnkit.AuditReasonId = data.AuditReasonId;
+                            returnkit.IpAddress = _jwtTokenAccesser.IpAddress;
+                            returnkit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                             _context.SupplyManagementKITReturnSeries.Add(returnkit);
 
                             SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
@@ -1109,6 +1131,8 @@ namespace GSC.Respository.SupplyManagement
                         x.SupplyManagementKITDiscardId = discarddata.Id;
                         x.DiscardDate = discarddata.CreatedDate;
                         x.DiscardBy = _context.Users.Where(z => z.Id == discarddata.CreatedBy).FirstOrDefault().UserName;
+                        x.IpAddress = _jwtTokenAccesser.IpAddress;
+                        x.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                     }
 
                 });
@@ -1171,6 +1195,8 @@ namespace GSC.Respository.SupplyManagement
                         returnkit.AuditReasonId = data.AuditReasonId;
                         returnkit.Status = KitStatus.Discard;
                         returnkit.RoleId = _jwtTokenAccesser.RoleId;
+                        returnkit.IpAddress = _jwtTokenAccesser.IpAddress;
+                        returnkit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                         _context.SupplyManagementKITDiscard.Add(returnkit);
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -1206,6 +1232,8 @@ namespace GSC.Respository.SupplyManagement
                         returnkit.AuditReasonId = data.AuditReasonId;
                         returnkit.Status = KitStatus.Sendtosponser;
                         returnkit.RoleId = _jwtTokenAccesser.RoleId;
+                        returnkit.IpAddress = _jwtTokenAccesser.IpAddress;
+                        returnkit.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                         _context.SupplyManagementKITDiscard.Add(returnkit);
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -1279,7 +1307,8 @@ namespace GSC.Respository.SupplyManagement
                 supplyManagementKITReturnVerification.Status = data.Status;
                 supplyManagementKITReturnVerification.AuditReasonId = data.AuditReasonId;
                 supplyManagementKITReturnVerification.ReasonOth = data.ReasonOth;
-
+                supplyManagementKITReturnVerification.IpAddress = _jwtTokenAccesser.IpAddress;
+                supplyManagementKITReturnVerification.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 _context.SupplyManagementKITReturnVerification.Add(supplyManagementKITReturnVerification);
 
                 SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
@@ -1304,6 +1333,8 @@ namespace GSC.Respository.SupplyManagement
                 supplyManagementKITReturnVerification.Status = data.Status;
                 supplyManagementKITReturnVerification.AuditReasonId = data.AuditReasonId;
                 supplyManagementKITReturnVerification.ReasonOth = data.ReasonOth;
+                supplyManagementKITReturnVerification.IpAddress = _jwtTokenAccesser.IpAddress;
+                supplyManagementKITReturnVerification.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 _context.SupplyManagementKITReturnVerificationSeries.Add(supplyManagementKITReturnVerification);
 
                 SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
@@ -1484,6 +1515,8 @@ namespace GSC.Respository.SupplyManagement
                         supplyManagementUnblindTreatment.AuditReasonId = data.AuditReasonId;
                         supplyManagementUnblindTreatment.RandomizationId = item.RandomizationId;
                         supplyManagementUnblindTreatment.TypeofUnblind = data.TypeofUnblind;
+                        supplyManagementUnblindTreatment.IpAddress = _jwtTokenAccesser.IpAddress;
+                        supplyManagementUnblindTreatment.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                         _context.SupplyManagementUnblindTreatment.Add(supplyManagementUnblindTreatment);
                         _context.Save();
                         data.UnblindDatetime = supplyManagementUnblindTreatment.CreatedDate;
@@ -1534,7 +1567,8 @@ namespace GSC.Respository.SupplyManagement
                     x.ActionBy = _context.Users.Where(z => z.Id == unblind.CreatedBy).FirstOrDefault().UserName;
                     x.ActionDate = unblind.CreatedDate;
                     x.ActionByRole = _context.SecurityRole.Where(s => s.Id == unblind.RoleId).FirstOrDefault().RoleName;
-
+                    x.IpAddress = unblind.IpAddress;
+                    x.TimeZone = unblind.TimeZone;
 
                     if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
                     {

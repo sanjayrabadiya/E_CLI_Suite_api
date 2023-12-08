@@ -31,5 +31,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int? SendBySecurityRoleId { get; set; }
         public string SendByRole { get; set; }
+
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

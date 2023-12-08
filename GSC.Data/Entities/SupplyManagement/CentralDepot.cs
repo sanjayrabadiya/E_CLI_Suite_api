@@ -24,5 +24,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public Data.Entities.Master.Project Project { get; set; }
         public SupplyLocation SupplyLocation { get; set; }
         public Country Country { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 }

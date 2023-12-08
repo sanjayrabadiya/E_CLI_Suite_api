@@ -71,6 +71,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
+            centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFactorMappingRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating factor mapping failed on save.");
             return Ok(centralDepot.Id);
@@ -94,6 +96,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             centralDepot.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
             centralDepot.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
+            centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFactorMappingRepository.Update(centralDepot);
 
             if (_uow.Save() <= 0) throw new Exception("Updating factor mapping failed on save.");

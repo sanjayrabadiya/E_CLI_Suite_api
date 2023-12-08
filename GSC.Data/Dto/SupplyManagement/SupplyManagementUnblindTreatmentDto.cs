@@ -44,6 +44,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ActionByRole { get; set; }
         public DateTime? ActionDate { get; set; }
 
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
     }
 
 }

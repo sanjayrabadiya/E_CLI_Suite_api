@@ -64,6 +64,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            supplyManagementEmailConfiguration.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementEmailConfiguration.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementApprovalRepository.Add(supplyManagementEmailConfiguration);
             if (_uow.Save() <= 0) throw new Exception("Creating shipment apporval failed on save.");
 
@@ -89,6 +91,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 supplyManagementEmailConfiguration.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
             if (_jwtTokenAccesser.GetHeader("audit-reason-id") != null && _jwtTokenAccesser.GetHeader("audit-reason-id") != "")
                 supplyManagementEmailConfiguration.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            supplyManagementEmailConfiguration.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementEmailConfiguration.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementApprovalRepository.Update(supplyManagementEmailConfiguration);
 
             if (_uow.Save() <= 0) throw new Exception("Updating shipment apporval study product type failed on save.");

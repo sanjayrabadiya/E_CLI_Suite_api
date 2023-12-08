@@ -46,5 +46,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public KitStatus? PrevStatus { get; set; }
 
         public int? ToSiteId { get; set; }
+
+        public bool IsRetension { get; set; }
     }
 }

@@ -191,7 +191,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 }
                 _productReceiptRepository.Update(receipt);
             }
-
+            verificationApprovalTemplate.IpAddress = _jwtTokenAccesser.IpAddress;
+            verificationApprovalTemplate.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate);
             if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
             return Ok(verificationApprovalTemplate.Id);
@@ -228,6 +229,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 history.SendBy = _jwtTokenAccesser.UserId;
                 history.SendOn = _jwtTokenAccesser.GetClientDate();
                 history.SecurityRoleId = _jwtTokenAccesser.RoleId;
+                history.IpAddress = _jwtTokenAccesser.IpAddress;
+                history.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 _verificationApprovalTemplateHistoryRepository.Add(history);
             }
             else
@@ -241,6 +244,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 history.SendBy = _jwtTokenAccesser.UserId;
                 history.SendOn = _jwtTokenAccesser.GetClientDate();
                 history.SecurityRoleId = _jwtTokenAccesser.RoleId;
+                history.IpAddress = _jwtTokenAccesser.IpAddress;
+                history.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 _verificationApprovalTemplateHistoryRepository.Add(history);
             }
             _verificationApprovalTemplateRepository.Update(verificationApprovalTemplate);

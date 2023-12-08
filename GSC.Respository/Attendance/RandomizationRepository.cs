@@ -372,6 +372,7 @@ namespace GSC.Respository.Attendance
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && productarray.Contains(x.PharmacyStudyProductType.ProductType.ProductTypeCode)
                                             && x.SupplyManagementKITSeries.SupplyManagementShipmentId != null
+                                            && !x.SupplyManagementKITSeries.IsRetension
                                             && x.SupplyManagementKITSeries.DeletedDate == null
                                             && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
@@ -432,6 +433,7 @@ namespace GSC.Respository.Attendance
                                             && x.ProjectDesignVisitId == visits.FirstOrDefault().ProjectDesignVisitId
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && x.SupplyManagementKITSeries.DeletedDate == null
+                                            && !x.SupplyManagementKITSeries.IsRetension
                                             && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -525,6 +527,7 @@ namespace GSC.Respository.Attendance
                                                 && x.SupplyManagementKIT.ProjectDesignVisitId == visitlist.FirstOrDefault().ProjectDesignVisitId
                                                 && x.SupplyManagementKIT.ProjectId == projectid
                                                 && productarray.Contains(x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode)
+                                                && !x.IsRetension
                                                 && x.SupplyManagementKIT.DeletedDate == null
                                                 && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
@@ -536,6 +539,7 @@ namespace GSC.Respository.Attendance
                                           x.DeletedDate == null
                                           && x.SupplyManagementKIT.ProjectDesignVisitId == visitlist.FirstOrDefault().ProjectDesignVisitId
                                           && x.SupplyManagementKIT.DeletedDate == null
+                                          && !x.IsRetension
                                           && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                           && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                           && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -716,6 +720,7 @@ namespace GSC.Respository.Attendance
                                                 && x.SupplyManagementKIT.ProjectId == projectid
                                                 && productarray.Contains(x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode)
                                                 && x.SupplyManagementKIT.DeletedDate == null
+                                                && !x.IsRetension
                                                 && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                                 && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                                 && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -742,6 +747,7 @@ namespace GSC.Respository.Attendance
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && productarray.Contains(x.PharmacyStudyProductType.ProductType.ProductTypeCode)
                                             && x.SupplyManagementKITSeries.DeletedDate == null
+                                            && !x.SupplyManagementKITSeries.IsRetension
                                             && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -836,6 +842,7 @@ namespace GSC.Respository.Attendance
                                            x.DeletedDate == null
                                            && x.SupplyManagementKIT.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                            && x.SupplyManagementKIT.DeletedDate == null
+                                           && !x.IsRetension
                                            && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                            && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                            && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -860,6 +867,7 @@ namespace GSC.Respository.Attendance
                                             && x.ProjectDesignVisitId == visit.FirstOrDefault().ProjectDesignVisitId
                                             && x.SupplyManagementKITSeries.ProjectId == projectid
                                             && x.SupplyManagementKITSeries.DeletedDate == null
+                                            && !x.SupplyManagementKITSeries.IsRetension
                                             && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
                                             && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                             && x.RandomizationId == null).OrderBy(x => x.Id).ToList();
@@ -2061,7 +2069,9 @@ namespace GSC.Respository.Attendance
                             KitNo = item.kitNo,
                             ProductCode = item.ProductCode,
                             SupplyManagementKITDetailId = kitdata.Id,
-                            SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId
+                            SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId,
+                            IpAddress = _jwtTokenAccesser.IpAddress,
+                            TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                         };
                         _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
 
@@ -2100,7 +2110,9 @@ namespace GSC.Respository.Attendance
                                 KitNo = randomizationNumberDto.KitNo,
                                 ProductCode = randomizationNumberDto.ProductCode,
                                 SupplyManagementKITDetailId = kitdata.Id,
-                                SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId
+                                SupplyManagementShipmentId = kitdata.SupplyManagementShipmentId,
+                                IpAddress = _jwtTokenAccesser.IpAddress,
+                                TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                             };
                             _supplyManagementKITRepository.InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
 
@@ -2137,7 +2149,9 @@ namespace GSC.Respository.Attendance
                                     KitNo = randomizationNumberDto.KitNo,
                                     ProductCode = randomizationNumberDto.ProductCode,
                                     SupplyManagementKITSeriesdetailId = kitdata.Id,
-                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId
+                                    SupplyManagementShipmentId = kit.SupplyManagementShipmentId,
+                                    IpAddress = _jwtTokenAccesser.IpAddress,
+                                    TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
                                 };
                                 _supplyManagementKITRepository.InsertKitSequenceRandomizationDetail(supplyManagementVisitKITDetailDto);
 

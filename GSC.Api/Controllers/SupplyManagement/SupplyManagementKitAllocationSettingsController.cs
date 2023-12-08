@@ -75,6 +75,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             var supplyManagementKitAllocationSettings = _mapper.Map<SupplyManagementKitAllocationSettings>(supplyManagementKitAllocationSettingsDto);
+            supplyManagementKitAllocationSettings.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementKitAllocationSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitAllocationSettingsRepository.Add(supplyManagementKitAllocationSettings);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
 
@@ -115,6 +117,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var supplyManagementKitAllocationSettings = _mapper.Map<SupplyManagementKitAllocationSettings>(supplyManagementKitAllocationSettingsDto);
+            supplyManagementKitAllocationSettings.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementKitAllocationSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitAllocationSettingsRepository.Update(supplyManagementKitAllocationSettings);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
 

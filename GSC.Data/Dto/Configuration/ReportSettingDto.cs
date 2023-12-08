@@ -199,6 +199,8 @@ namespace GSC.Data.Dto.Configuration
         public string RandomizationNo { get; set; }
 
         public string ScreeningNo { get; set; }
+
+        public bool IsRetension { get; set; }
     }
 
     public class ProductAccountabilityCentralReportSearch

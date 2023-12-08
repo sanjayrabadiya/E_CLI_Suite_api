@@ -35,6 +35,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? SupplyManagementKITSeriesdetailId { get; set; }
 
         public int? SupplyManagementShipmentId { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
     public class SupplyManagementVisitKITSequenceDetailGridDto : BaseAuditDto
     {

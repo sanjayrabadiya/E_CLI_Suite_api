@@ -19,6 +19,10 @@ namespace GSC.Data.Entities.SupplyManagement
 
         public KitStatus Status { get; set; }
         public SupplyManagementKITDetail SupplyManagementKITDetail { get; set; }
-       
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
     }
 }

@@ -35,5 +35,10 @@ namespace GSC.Data.Entities.SupplyManagement
 
         public bool? IsUnUsed { get; set; }
         public DateTime? KitExpiryDate { get; set; }
+
+        public string TimeZone { get; set; }
+        public string IpAddress { get; set; }
+
+        public bool IsRetension { get; set; }
     }
 }

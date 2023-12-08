@@ -25,5 +25,8 @@ namespace GSC.Data.Entities.SupplyManagement
         [ForeignKey("SendBy")]
         public User User { get; set; }
         public SecurityRole SecurityRole { get; set; }
+
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

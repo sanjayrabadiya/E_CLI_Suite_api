@@ -21,13 +21,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ICentralDepotRepository _centralDepotRepository;
         private readonly IUnitOfWork _uow;
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public CentralDepotController(ICentralDepotRepository centralDepotRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
         {
             _centralDepotRepository = centralDepotRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -68,7 +69,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", receipt);
                 return BadRequest(ModelState);
             }
-
+            centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
+            centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _centralDepotRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating central depot failed on save.");
             return Ok(centralDepot.Id);
@@ -103,7 +105,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", receipt);
                 return BadRequest(ModelState);
             }
-
+            centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
             _centralDepotRepository.AddOrUpdate(centralDepot);
 
             if (_uow.Save() <= 0) throw new Exception("Updating central depot failed on save.");

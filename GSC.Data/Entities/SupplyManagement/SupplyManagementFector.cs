@@ -21,5 +21,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public string SampleResult { get; set; }
 
         public string ErrorMessage { get; set; }
+
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

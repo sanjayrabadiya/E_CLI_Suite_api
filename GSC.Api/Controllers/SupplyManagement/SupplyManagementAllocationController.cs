@@ -69,7 +69,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
+            centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementAllocationRepository.Add(centralDepot);
             if (_uow.Save() <= 0) throw new Exception("Creating central depot failed on save.");
             return Ok(centralDepot.Id);
@@ -97,6 +98,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             centralDepot.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
             centralDepot.AuditReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+            centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
+            centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementAllocationRepository.AddOrUpdate(centralDepot);
 
             if (_uow.Save() <= 0) throw new Exception("Updating central depot failed on save.");

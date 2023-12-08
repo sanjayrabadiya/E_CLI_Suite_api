@@ -34,5 +34,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ReasonOth { get; set; }
         public string StatusName { get; set; }
         public LabManagementUploadStatus Status { get; set; }
+
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

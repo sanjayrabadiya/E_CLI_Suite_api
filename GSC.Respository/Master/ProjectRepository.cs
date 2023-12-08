@@ -1545,7 +1545,7 @@ namespace GSC.Respository.Master
 
             var list = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && projectList.Contains(x.ProjectId) && x.IsIGT == true).Select(x => x.ProjectId).ToList();
 
-            var liveVersion = _context.StudyVersion.Where(s => s.DeletedDate == null && list.Contains(s.ProjectId)).Select(s => s.ProjectId).ToList();
+            var liveVersion = _context.StudyVersion.Where(s => s.DeletedDate == null && list.Contains(s.ProjectId) && s.VersionStatus == VersionStatus.GoLive).Select(s => s.ProjectId).ToList();
 
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)

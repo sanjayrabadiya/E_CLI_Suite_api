@@ -73,6 +73,11 @@ namespace GSC.Data.Dto.SupplyManagement
         public decimal? Dose { get; set; }
         public SupplyManagementShipment? SupplyManagementShipment { get; set; }
 
+        public string TimeZone { get; set; }
+        public string IpAddress { get; set; }
+
+        public bool IsRetension { get; set; }
+
 
     }
 
@@ -124,5 +129,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public List<DropDownStudyDto> StatusList { get; set; }
 
         public decimal? Dose { get; set; }
+
+        public bool IsRetension { get; set; }
+
+        public bool IsDisable { get; set; }
     }
 }

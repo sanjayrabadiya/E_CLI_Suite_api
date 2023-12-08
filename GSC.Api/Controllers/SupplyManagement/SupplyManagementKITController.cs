@@ -89,6 +89,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", "Quantity is not available");
                 return BadRequest(ModelState);
             }
+            supplyManagementUploadFile.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementUploadFile.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKITRepository.Add(supplyManagementUploadFile);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
 

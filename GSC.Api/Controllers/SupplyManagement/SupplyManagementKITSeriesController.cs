@@ -113,6 +113,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                     supplyManagementKitSeries.Status = KitStatus.AllocationPending;
                     supplyManagementKitSeries.KitNo = _supplyManagementKITSeriesRepository.GenerateKitSequenceNo(kitsettings, 1, supplyManagementKITSeriesDto);
                     supplyManagementKitSeries.KitExpiryDate = _supplyManagementKITSeriesRepository.GetExpiryDateSequenceWise(supplyManagementKITSeriesDto);
+                    supplyManagementKitSeries.IpAddress = _jwtTokenAccesser.IpAddress;
+                    supplyManagementKitSeries.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                     _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
                     if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo && x.ProjectId == supplyManagementKITSeriesDto.ProjectId && x.DeletedDate == null))
                     {

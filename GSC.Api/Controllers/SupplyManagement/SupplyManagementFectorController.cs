@@ -87,7 +87,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             supplyManagementFectorDto.Id = 0;
             var supplyManagementFector = _mapper.Map<SupplyManagementFector>(supplyManagementFectorDto);
-
+            supplyManagementFector.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementFector.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFectorRepository.Add(supplyManagementFector);
             if (_uow.Save() <= 0) throw new Exception("Creating fector failed on save.");
             return Ok(supplyManagementFector.Id);
@@ -99,6 +100,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var supplyManagementFector = _mapper.Map<SupplyManagementFector>(supplyManagementFectorDto);
             _supplyManagementFectorRepository.DeleteChild(supplyManagementFectorDto.Id);
+            supplyManagementFector.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementFector.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFectorRepository.Update(supplyManagementFector);
             if (_uow.Save() <= 0) throw new Exception("Updating fector failed on save.");
 

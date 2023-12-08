@@ -19,19 +19,20 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyMangementRequestController : BaseController
     {
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementRequestRepository _supplyManagementRequestRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         public SupplyMangementRequestController(ISupplyManagementRequestRepository supplyManagementRequestRepository,
             IUnitOfWork uow, IMapper mapper,
-             IGSCContext context)
+             IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
         {
             _supplyManagementRequestRepository = supplyManagementRequestRepository;
             _uow = uow;
             _mapper = mapper;
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -61,7 +62,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             supplyManagementRequestDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementRequest>(supplyManagementRequestDto);
-
+            supplyManagementRequest.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementRequest.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementRequestRepository.Add(supplyManagementRequest);
             if (_uow.Save() <= 0) throw new Exception("Creating request failed on save.");
 

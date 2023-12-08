@@ -125,7 +125,8 @@ namespace GSC.Respository.SupplyManagement
                 {
                     obj.WorkflowStatus = SupplyManagementApprovalStatus.Approved;
                 }
-
+                obj.IpAddress = t.IpAddress;
+                obj.TimeZone = t.TimeZone;
                 FinalData.Add(obj);
 
             });

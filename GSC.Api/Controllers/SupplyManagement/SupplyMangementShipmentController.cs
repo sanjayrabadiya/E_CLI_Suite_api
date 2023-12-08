@@ -20,7 +20,7 @@ namespace GSC.Api.Controllers.SupplyManagement
     [ApiController]
     public class SupplyMangementShipmentController : BaseController
     {
-
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
         private readonly IUnitOfWork _uow;
@@ -28,12 +28,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IGSCContext _context;
         public SupplyMangementShipmentController(ISupplyManagementShipmentRepository supplyManagementShipmentRepository,
             IUnitOfWork uow, IMapper mapper,
-            ISupplyManagementRequestRepository supplyManagementRequestRepository, IGSCContext context)
+            ISupplyManagementRequestRepository supplyManagementRequestRepository, IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
         {
             _supplyManagementShipmentRepository = supplyManagementShipmentRepository;
             _uow = uow;
             _mapper = mapper;
-
+            _jwtTokenAccesser = jwtTokenAccesser;
             _supplyManagementRequestRepository = supplyManagementRequestRepository;
             _context = context;
         }
@@ -69,6 +69,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             {
                 supplyManagementRequest.ShipmentNo = _supplyManagementShipmentRepository.GetShipmentNo();
             }
+            supplyManagementRequest.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementRequest.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementShipmentRepository.Add(supplyManagementRequest);
             if (_uow.Save() <= 0) throw new Exception("Creating shipment failed on save.");
 

@@ -81,6 +81,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public SupplyManagementApprovalStatus WorkflowStatus { get; set; }
 
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
     }
 
 }

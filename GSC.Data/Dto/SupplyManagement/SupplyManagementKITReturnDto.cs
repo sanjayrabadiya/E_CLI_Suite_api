@@ -73,6 +73,14 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ReturnVerificationReasonOth { get; set; }
 
+        public string IpAddressReturn { get; set; }
+
+        public string TimeZoneReturn { get; set; }
+
+        public string IpAddressVerification{ get; set; }
+
+        public string TimeZoneVerification { get; set; }
+
 
     }
 
@@ -129,6 +137,9 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public bool? IsUnUsed { get; set; }
 
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
 
     }
 

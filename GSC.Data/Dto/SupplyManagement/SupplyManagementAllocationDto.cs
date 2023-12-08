@@ -38,6 +38,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 
 }

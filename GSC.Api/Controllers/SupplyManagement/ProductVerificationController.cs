@@ -98,7 +98,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
-
+            productVerification.IpAddress = _jwtTokenAccesser.IpAddress;
+            productVerification.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productVerificationRepository.Add(productVerification);
 
             if (_uow.Save() <= 0) throw new Exception("Creating product verification failed on save.");
@@ -135,7 +136,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             var productVerification = _mapper.Map<ProductVerification>(productVerificationDto);
-
+            productVerification.IpAddress = _jwtTokenAccesser.IpAddress;
+            productVerification.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productVerificationRepository.AddOrUpdate(productVerification);
 
             if (_uow.Save() <= 0) throw new Exception("Updating product verification failed on save.");

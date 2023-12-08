@@ -49,6 +49,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public bool IsUploadWithKit { get; set; }
 
         public bool IsDoseWiseKit { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 
 }

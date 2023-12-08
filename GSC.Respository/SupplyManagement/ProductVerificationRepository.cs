@@ -115,7 +115,9 @@ namespace GSC.Respository.SupplyManagement
                                VerificationMimeType = productverification.MimeType,
                                PacketTypeName = productverification.PacketTypeId > 0 ? productverification.PacketTypeId.GetDescription() : "",
                                Dose = productverification.Dose > 0 ? productverification.Dose : 0,
-                               UnitName = productverification.UnitId > 0 ? _context.Unit.Where(s => s.Id == productverification.UnitId).FirstOrDefault().UnitName : ""
+                               UnitName = productverification.UnitId > 0 ? _context.Unit.Where(s => s.Id == productverification.UnitId).FirstOrDefault().UnitName : "",
+                               IpAddress = productverification.IpAddress,
+                               TimeZone = productverification.TimeZone
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;

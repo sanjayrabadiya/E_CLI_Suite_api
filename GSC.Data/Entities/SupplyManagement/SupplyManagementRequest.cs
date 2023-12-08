@@ -20,6 +20,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? StudyProductTypeId { get; set; }
         public int RequestQty { get; set; }
         public int? VisitId { get; set; }
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
 
         [ForeignKey("FromProjectId")]
         public GSC.Data.Entities.Master.Project FromProject { get; set; }

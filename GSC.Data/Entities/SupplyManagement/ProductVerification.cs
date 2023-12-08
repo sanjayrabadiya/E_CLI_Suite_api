@@ -31,5 +31,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public decimal? Dose { get; set; }
 
         public int? UnitId { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 }

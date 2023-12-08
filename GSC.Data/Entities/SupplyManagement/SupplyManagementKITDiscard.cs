@@ -20,5 +20,10 @@ namespace GSC.Data.Entities.SupplyManagement
         public SupplyManagementKITDetail SupplyManagementKITDetail { get; set; }
         public int? RoleId { get; set; }
 
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
     }
 }

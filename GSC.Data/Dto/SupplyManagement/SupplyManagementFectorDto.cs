@@ -31,6 +31,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ProjectCode { get; set; }
         public string SourceFormula { get; set; }
 
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
+
     }
 
     public class FactorCheckResult

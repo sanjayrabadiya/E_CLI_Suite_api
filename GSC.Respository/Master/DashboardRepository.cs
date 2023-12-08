@@ -1625,6 +1625,13 @@ namespace GSC.Respository.Master
 
         public List<TreatmentvsArms> GetTreatmentvsArmData(int projectId, int countryId, int siteId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                 Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                 && s.RoleId == _jwtTokenAccesser.RoleId);
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+            if (setting == null || isShow)
+                return new List<TreatmentvsArms>();
+
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             var data = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Include(s => s.Randomization)
                 .Where(x => x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
@@ -1647,6 +1654,14 @@ namespace GSC.Respository.Master
 
         public List<FactoreDashboardModel> GetFactorDataReportDashbaord(int projectId, int countryId, int siteId)
         {
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                 Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                 && s.RoleId == _jwtTokenAccesser.RoleId);
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+
+            if (setting == null)
+                return new List<FactoreDashboardModel>();
+
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var data = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.ManageSite).Where(s => s.RandomizationNumber != null && projectIds.Contains(s.ProjectId)).Select(s => new FactoreDashboardModel
@@ -1659,7 +1674,7 @@ namespace GSC.Respository.Master
                 Jointfactor = s.Jointfactor.GetDescription(),
                 Agefactor = s.Agefactor,
                 BMIfactor = s.BMIfactor,
-                ProductCode = s.ProductCode,
+                ProductCode = setting.IsBlindedStudy == true && isShow ? "" : s.ProductCode,
                 Dosefactor = s.Dosefactor,
                 Weightfactor = s.Weightfactor,
                 SiteName = s.Project.ProjectCode + " " + s.Project.ManageSite.SiteName
@@ -1669,270 +1684,7 @@ namespace GSC.Respository.Master
 
             return data;
         }
-        public List<FactoreDashboardModel> GetFactorDataReportDashbaordCount(int projectId, int countryId, int siteId)
-        {
-            List<FactoreDashboardModel> list = new List<FactoreDashboardModel>();
-            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-            var fector = _context.SupplyManagementFectorDetail.Include(s => s.SupplyManagementFector).Where(s => s.SupplyManagementFector.ProjectId == projectId && s.DeletedDate == null).Select(s => s.Fector).Distinct().ToList();
-
-            var productCodes = _context.ProductReceipt.Where(c => c.ProjectId == projectId && c.DeletedDate == null
-             && c.Status == ProductVerificationStatus.Approved).Select(c => c.PharmacyStudyProductType.ProductType.ProductTypeCode).Distinct().ToList();
-
-            var data = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.ManageSite).Where(s => s.RandomizationNumber != null && projectIds.Contains(s.ProjectId)).Select(s => new FactoreDashboardModel
-            {
-                RandomizationNo = s.RandomizationNumber,
-                ScreeningNo = s.ScreeningNumber,
-                Genderfactor = s.Genderfactor.GetDescription(),
-                Diatoryfactor = s.Diatoryfactor.GetDescription(),
-                Eligibilityfactor = s.Eligibilityfactor.GetDescription(),
-                Jointfactor = s.Jointfactor.GetDescription(),
-                Agefactor = s.Agefactor,
-                BMIfactor = s.BMIfactor,
-                ProductCode = s.ProductCode,
-                Dosefactor = s.Dosefactor,
-                Weightfactor = s.Weightfactor,
-                SiteName = s.Project.ProjectCode + " " + s.Project.ManageSite.SiteName,
-                ProjectId = s.ProjectId
-            }).ToList();
-
-            if (fector != null && fector.Count > 0 && data != null && data.Count > 0)
-            {
-                foreach (var item in fector)
-                {
-                    if (productCodes != null && productCodes.Count > 0)
-                    {
-                        foreach (var product in productCodes)
-                        {
-                            if (item == Fector.Gender)
-                            {
-                                var data1 = data.Where(s => s.Genderfactor == "Male" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Genderfactor = "Male",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-                                if (data1 != null && data1.Count > 0)
-                                    list.AddRange(data1);
-
-                                var data2 = data.Where(s => s.Genderfactor == "Female" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Genderfactor = "Female",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-
-                                if (data2 != null && data2.Count > 0)
-                                    list.AddRange(data1);
-                            }
-
-                            if (item == Fector.Joint)
-                            {
-                                var data1 = data.Where(s => s.Jointfactor == "Knee" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Jointfactor = "Knee",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-                                if (data1 != null && data1.Count > 0)
-                                    list.AddRange(data1);
-
-                                var data2 = data.Where(s => s.Jointfactor == "Low Back" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Jointfactor = "Low Back",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-
-                                if (data2 != null && data2.Count > 0)
-                                    list.AddRange(data1);
-                            }
-
-                            if (item == Fector.Diatory)
-                            {
-                                var data1 = data.Where(s => s.Diatoryfactor == "Veg" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Diatoryfactor = "Veg",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-                                if (data1 != null && data1.Count > 0)
-                                    list.AddRange(data1);
-
-                                var data2 = data.Where(s => s.Diatoryfactor == "Non-Veg" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Diatoryfactor = "Non-Veg",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-
-                                if (data2 != null && data2.Count > 0)
-                                    list.AddRange(data1);
-                            }
-
-                            if (item == Fector.Eligibility)
-                            {
-                                var data1 = data.Where(s => s.Eligibilityfactor == "Yes" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Eligibilityfactor = "Yes",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-                                if (data1 != null && data1.Count > 0)
-                                    list.AddRange(data1);
-
-                                var data2 = data.Where(s => s.Eligibilityfactor == "No" && s.ProductCode == product).GroupBy(s => s.ProjectId).
-                                    Select(s => new FactoreDashboardModel
-                                    {
-                                        PatientCount = s.ToList().Count(),
-                                        Eligibilityfactor = "No",
-                                        ProductCode = s.FirstOrDefault().ProductCode,
-                                        ProjectId = s.Key
-                                    }).ToList();
-
-                                if (data2 != null && data2.Count > 0)
-                                    list.AddRange(data1);
-                            }
-                        }
-
-                    }
-                    else
-                    {
-                        if (item == Fector.Gender)
-                        {
-                            var data1 = data.Where(s => s.Genderfactor == "Male").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Genderfactor = "Male",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-                            if (data1 != null && data1.Count > 0)
-                                list.AddRange(data1);
-
-                            var data2 = data.Where(s => s.Genderfactor == "Female").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Genderfactor = "Female",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-
-                            if (data2 != null && data2.Count > 0)
-                                list.AddRange(data1);
-                        }
-
-                        if (item == Fector.Joint)
-                        {
-                            var data1 = data.Where(s => s.Jointfactor == "Knee").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Jointfactor = "Knee",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-                            if (data1 != null && data1.Count > 0)
-                                list.AddRange(data1);
-
-                            var data2 = data.Where(s => s.Jointfactor == "Low Back").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Jointfactor = "Low Back",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-
-                            if (data2 != null && data2.Count > 0)
-                                list.AddRange(data1);
-                        }
-
-                        if (item == Fector.Diatory)
-                        {
-                            var data1 = data.Where(s => s.Diatoryfactor == "Veg").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Diatoryfactor = "Veg",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-                            if (data1 != null && data1.Count > 0)
-                                list.AddRange(data1);
-
-                            var data2 = data.Where(s => s.Diatoryfactor == "Non-Veg").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Diatoryfactor = "Non-Veg",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-
-                            if (data2 != null && data2.Count > 0)
-                                list.AddRange(data1);
-                        }
-
-                        if (item == Fector.Eligibility)
-                        {
-                            var data1 = data.Where(s => s.Eligibilityfactor == "Yes").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Eligibilityfactor = "Yes",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-                            if (data1 != null && data1.Count > 0)
-                                list.AddRange(data1);
-
-                            var data2 = data.Where(s => s.Eligibilityfactor == "No").GroupBy(s => s.ProjectId).
-                                Select(s => new FactoreDashboardModel
-                                {
-                                    PatientCount = s.ToList().Count(),
-                                    Eligibilityfactor = "No",
-                                    ProductCode = s.FirstOrDefault().ProductCode,
-                                    ProjectId = s.Key
-                                }).ToList();
-
-                            if (data2 != null && data2.Count > 0)
-                                list.AddRange(data1);
-                        }
-                    }
-                }
-            }
-            if (list != null && list.Count > 0)
-            {
-                list.ForEach(x =>
-                {
-                    if (x.ProjectId > 0)
-                    {
-                        var project = _context.Project.Include(s => s.ManageSite).Where(s => s.Id == x.ProjectId).FirstOrDefault();
-                        if (project != null)
-                            x.SiteName = project.ProjectCode + "-" + project.ManageSite.SiteName;
-                    }
-                });
-            }
-
-            return list;
-        }
         public List<ImpShipmentGridDashboard> GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
         {
             List<ImpShipmentGridDashboard> Data = new List<ImpShipmentGridDashboard>();
@@ -2060,9 +1812,14 @@ namespace GSC.Respository.Master
         public List<KitCountReport> GetKitCountReport(int projectId, int countryId, int siteId)
         {
             List<KitCountReport> Data = new List<KitCountReport>();
+
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                 Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                 && s.RoleId == _jwtTokenAccesser.RoleId);
+
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
-            if (setting == null)
+            if (setting == null || isShow)
                 return new List<KitCountReport>();
 
             var PharmacyStudyProductTypeIds = _context.SupplyManagementKitAllocationSettings.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
@@ -2083,6 +1840,7 @@ namespace GSC.Respository.Master
                         .Where(s => s.SupplyManagementKIT.PharmacyStudyProductTypeId == product.Id
                               && s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item
                               && s.DeletedDate == null
+                              && !s.IsRetension
                               && s.SupplyManagementKIT.DeletedDate == null && (s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue || s.Status == KitStatus.Allocated)).ToList();
 
                         obj.Available = kitdata.Where(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue).Count();
@@ -2110,6 +1868,7 @@ namespace GSC.Respository.Master
                     var kitdata = _context.SupplyManagementKITSeries
                     .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest)
                     .Where(s => s.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == item
+                          && !s.IsRetension
                           && s.DeletedDate == null && (s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue || s.Status == KitStatus.Allocated)).ToList();
 
                     obj.Available = kitdata.Where(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue).Count();
@@ -2137,9 +1896,16 @@ namespace GSC.Respository.Master
             List<ProductWiseVerificationCountReport> Data = new List<ProductWiseVerificationCountReport>();
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
-          
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                 Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                 && s.RoleId == _jwtTokenAccesser.RoleId);
 
-            var products = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null  && s.ProjectId == projectId).ToList();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+            if (setting == null || isShow)
+                return new List<ProductWiseVerificationCountReport>();
+
+
+            var products = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null && s.ProjectId == projectId).ToList();
             foreach (var item in products)
             {
                 ProductWiseVerificationCountReport obj = new ProductWiseVerificationCountReport();
@@ -2173,9 +1939,14 @@ namespace GSC.Respository.Master
         {
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             var data = new List<TreatmentvsArms>();
+
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                             Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId && s.RoleId == _jwtTokenAccesser.RoleId);
+
             var setting = _context.SupplyManagementKitNumberSettings.Where(z => z.DeletedDate == null && z.ProjectId == projectId).FirstOrDefault();
-            if (setting == null)
+            if (setting == null || isShow)
                 return new List<TreatmentvsArms>();
+
             var PharmacyStudyProductTypeIds = _context.SupplyManagementKitAllocationSettings.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
                        .Where(x => x.DeletedDate == null && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).Select(s => s.PharmacyStudyProductTypeId).Distinct().ToList();
 

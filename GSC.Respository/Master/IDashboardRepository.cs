@@ -58,8 +58,6 @@ namespace GSC.Respository.Master
 
         List<TreatmentvsArms> GetVisitWiseAllocationData(int projectId, int countryId, int siteId);
 
-        List<FactoreDashboardModel> GetFactorDataReportDashbaordCount(int projectId, int countryId, int siteId);
-
         List<KitCountReport> GetKitCountReport(int projectId, int countryId, int siteId);
 
         List<ProductWiseVerificationCountReport> GetProductWiseVerificationReport(int projectId, int countryId, int siteId);

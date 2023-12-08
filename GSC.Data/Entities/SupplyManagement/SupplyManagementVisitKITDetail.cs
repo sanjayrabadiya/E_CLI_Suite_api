@@ -21,6 +21,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
         public string ProductCode { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public AuditReason AuditReason { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public Randomization Randomization { get; set; }

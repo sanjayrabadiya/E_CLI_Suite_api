@@ -71,6 +71,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var supplyManagementKitNumberSettings = _mapper.Map<SupplyManagementKitNumberSettings>(supplyManagementKitNumberSettingsDto);
             supplyManagementKitNumberSettings.KitNoseries = supplyManagementKitNumberSettingsDto.KitNumberStartWIth;
+            supplyManagementKitNumberSettings.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementKitNumberSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitNumberSettingsRepository.Add(supplyManagementKitNumberSettings);
             if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
             supplyManagementKitNumberSettingsDto.Id = supplyManagementKitNumberSettings.Id;
@@ -88,6 +90,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             var setting = _supplyManagementKitNumberSettingsRepository.Find(supplyManagementKitNumberSettingsDto.Id);
             var supplyManagementKitNumberSettings = _mapper.Map<SupplyManagementKitNumberSettings>(supplyManagementKitNumberSettingsDto);
             supplyManagementKitNumberSettings.KitNoseries = supplyManagementKitNumberSettingsDto.KitNumberStartWIth;
+            supplyManagementKitNumberSettings.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementKitNumberSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitNumberSettingsRepository.Update(supplyManagementKitNumberSettings);
             var mesage = _supplyManagementKitNumberSettingsRepository.CheckKitCreateion(setting);
             if (!string.IsNullOrEmpty(mesage))
@@ -172,6 +176,24 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsUploadWithKit == true))
             {
                 Isblined = true;
+            }
+            else
+            {
+                Isblined = false;
+            }
+            return Ok(Isblined);
+        }
+
+        [HttpGet("CheckIsBlidedStudyWithRole/{projectId}")]
+        public IActionResult CheckIsBlidedStudyWithRole(int projectId)
+        {
+            bool Isblined = false;
+            var isShow = _context.SupplyManagementKitNumberSettingsRole.
+                Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
+                && s.RoleId == _jwtTokenAccesser.RoleId);
+            if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsBlindedStudy == true))
+            {
+                Isblined = isShow;
             }
             else
             {

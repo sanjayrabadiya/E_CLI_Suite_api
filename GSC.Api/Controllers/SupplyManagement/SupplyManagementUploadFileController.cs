@@ -71,8 +71,10 @@ namespace GSC.Api.Controllers.SupplyManagement
                 supplyManagementUploadFileDto.MimeType = supplyManagementUploadFileDto.FileModel.Extension;
                 supplyManagementUploadFileDto.FileName = "SupplyManagementData_" + DateTime.Now.Ticks + "." + supplyManagementUploadFileDto.FileModel.Extension;
             }
-
+            
             var supplyManagementUploadFile = _mapper.Map<SupplyManagementUploadFile>(supplyManagementUploadFileDto);
+            supplyManagementUploadFile.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementUploadFile.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
             //Upload Excel data into database table
             var validate = _supplyManagementUploadFileRepository.InsertExcelDataIntoDatabaseTable(supplyManagementUploadFile, setting);

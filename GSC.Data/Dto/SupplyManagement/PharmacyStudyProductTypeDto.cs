@@ -18,5 +18,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string Project { get; set; }
         public string ProductType { get; set; }
         public string ProductUnitType { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
     }
 }

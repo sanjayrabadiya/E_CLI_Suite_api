@@ -19,6 +19,10 @@ namespace GSC.Data.Entities.SupplyManagement
         public SupplyManagementAllocationType? Type { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
         public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }

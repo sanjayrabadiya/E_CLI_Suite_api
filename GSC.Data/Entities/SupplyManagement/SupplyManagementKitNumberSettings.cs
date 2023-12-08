@@ -26,6 +26,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? ThresholdValue { get; set; }
         public bool IsUploadWithKit { get; set; }
 
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
         public bool IsDoseWiseKit { get; set; }
 
     }

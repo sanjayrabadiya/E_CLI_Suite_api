@@ -25,7 +25,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public DateTime? EstimatedCourierDate { get; set; }
         public SupplyManagementRequest SupplyManagementRequest { get; set; }
 
-        //public AuditReason AuditReason { get; set; }
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
 
     }
 }

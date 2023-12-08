@@ -44,6 +44,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string Reason { get; set; }
         public string EmailBody { get; set; }
 
+        public string TimeZone { get; set; }
+        public string IpAddress { get; set; }
         public IList<SupplyManagementEmailConfigurationDetail> SupplyManagementEmailConfigurationDetail { get; set; }
 
 

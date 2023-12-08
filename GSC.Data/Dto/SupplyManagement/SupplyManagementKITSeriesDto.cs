@@ -73,6 +73,11 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public SupplyManagementShipment SupplyManagementShipment { get; set; }
 
+        public string TimeZone { get; set; }
+        public string IpAddress { get; set; }
+
+        public bool IsRetension { get; set; }
+
     }
     public class SupplyManagementKITSeriesDetailGridDto : BaseAuditDto
     {

@@ -30,5 +30,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public ProductVerificationStatus? Status { get; set; }
 
         public Country Country { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 }

@@ -571,6 +571,8 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.NoofPatient, x => x.MapFrom(a => a.SupplyManagementKIT.NoofPatient))
                .ForMember(x => x.ProjectId, x => x.MapFrom(a => a.SupplyManagementKIT.ProjectId))
                .ForMember(x => x.Dose, x => x.MapFrom(a => a.SupplyManagementKIT.Dose))
+               .ForMember(x => x.IpAddress, x => x.MapFrom(a => a.SupplyManagementKIT.IpAddress))
+               .ForMember(x => x.TimeZone, x => x.MapFrom(a => a.SupplyManagementKIT.TimeZone))
                .ForMember(x => x.Reason, x => x.MapFrom(a => a.SupplyManagementKIT.AuditReason.ReasonName)).ReverseMap();
 
             CreateMap<SupplyManagementUploadFileDetail, SupplyManagementUploadFileDetailDto>()

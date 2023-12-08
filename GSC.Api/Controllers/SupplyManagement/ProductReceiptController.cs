@@ -92,7 +92,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
             productReceipt.Status = ProductVerificationStatus.Quarantine;
-
+            productReceipt.IpAddress = _jwtTokenAccesser.IpAddress;
+            productReceipt.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productReceiptRepository.Add(productReceipt);
             if (_uow.Save() <= 0) throw new Exception("Creating product receipt failed on save.");
             return Ok(productReceipt.Id);
@@ -130,6 +131,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var productReceipt = _mapper.Map<ProductReceipt>(productReceiptDto);
             productReceipt.Status = productRec.Status;
+            productReceipt.IpAddress = _jwtTokenAccesser.IpAddress;
+            productReceipt.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productReceiptRepository.AddOrUpdate(productReceipt);
             if (_uow.Save() <= 0) throw new Exception("Updating product receipt failed on save.");
             return Ok(productReceipt.Id);

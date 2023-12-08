@@ -84,6 +84,8 @@ namespace GSC.Respository.SupplyManagement
                     obj.StudyProjectCode = study != null ? study.ProjectCode : "";
                     obj.ProjectId = study.Id;
                 }
+                obj.IpAddress = t.IpAddress;
+                obj.TimeZone = t.TimeZone;
                 data.Add(obj);
             });
             return data.OrderByDescending(x => x.ApproveRejectDateTime).ToList();
@@ -321,6 +323,7 @@ namespace GSC.Respository.SupplyManagement
                         {
                             data.Status = item.Status;
                             data.Comments = item.Comments;
+                            data.IsRetension = item.IsRetension;
                             _context.SupplyManagementKITDetail.Update(data);
                             _context.Save();
 
@@ -358,6 +361,7 @@ namespace GSC.Respository.SupplyManagement
                         {
                             data.Status = item.Status;
                             data.Comments = item.Comments;
+                            data.IsRetension = item.IsRetension;
                             if (request.IsSiteRequest)
                             {
                                 data.ToSiteId = request.FromProjectId;

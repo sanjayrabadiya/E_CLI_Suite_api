@@ -37,6 +37,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ExpiryMesage { get; set; }
 
         public int? SupplyManagementShipmentId { get; set; }
+
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
     public class SupplyManagementVisitKITDetailGridDto : BaseAuditDto
     {
@@ -66,5 +69,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? SupplyManagementShipmentId { get; set; }
 
         public int? SupplyManagementKITDetailId { get; set; }
+
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

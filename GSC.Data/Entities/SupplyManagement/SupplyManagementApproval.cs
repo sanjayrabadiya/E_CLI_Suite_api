@@ -20,6 +20,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public Entities.Master.Project Project { get; set; }
         public AuditReason AuditReason { get; set; }
 
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
         public int RoleId { get; set; }
     }
 }

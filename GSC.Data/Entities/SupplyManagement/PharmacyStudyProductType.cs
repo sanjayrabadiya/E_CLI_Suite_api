@@ -14,6 +14,11 @@ namespace GSC.Data.Entities.SupplyManagement
         public ProductUnitType ProductUnitType { get; set; }
         public Entities.Master.Project Project { get; set; }
         public ProductType ProductType { get; set; }
-       
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
+
+
     }
 }

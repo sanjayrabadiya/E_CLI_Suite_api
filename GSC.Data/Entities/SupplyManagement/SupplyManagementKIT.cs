@@ -36,6 +36,8 @@ namespace GSC.Data.Entities.SupplyManagement
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
         public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
 
-       
+        public string TimeZone { get; set; }
+        public string IpAddress { get; set; }
+
     }
 }

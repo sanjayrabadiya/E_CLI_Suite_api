@@ -33,5 +33,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? MaxTemp { get; set; }
         public int? MinHumidity { get; set; }
         public int? MaxHumidity { get; set; }
+
+        public string IpAddress { get; set; }
+
+        public string TimeZone { get; set; }
     }
 }
