@@ -1649,13 +1649,8 @@ namespace GSC.Respository.Attendance
                     {
                         var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
                         var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
-                        var clientDate = _jwtTokenAccesser.GetClientDate(); //DateTime.Now.AddHours(4).AddMinutes(30);
-
-                        if ((noofHH != null || noofMM != null) && ProjectScheduleTemplate.NegativeDeviation == 0)
-                        {
-                            mindate = ((DateTime)x.ScheduleDate).AddHours(-noofHH.GetValueOrDefault()).AddMinutes(-noofMM.GetValueOrDefault());
-                        }
-
+                        var dateWithMin = _jwtTokenAccesser.GetClientDate().ToString("yyyy-MMM-dd HH:mm"); //DateTime.Now.AddHours(4).AddMinutes(30);
+                        var clientDate = DateTime.ParseExact(dateWithMin, "yyyy-MMM-dd HH:mm", null);
                         if (clientDate >= mindate && clientDate <= maxdate)
                             x.IsTemplateRestricted = false;
                         else
