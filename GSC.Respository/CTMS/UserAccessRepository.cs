@@ -79,7 +79,7 @@ namespace GSC.Respository.CTMS
                                 userAccessData.DeletedDate = null;
                                 _context.UserAccess.Update(userAccessData);
 
-                            //Add auditTrailDat manually
+                            //Add by mitul on 08-12-2023 auditTrail Data add manually
                             auditTrailData.Id = 0;
                             auditTrailData.TableName = "UserAccess";
                             auditTrailData.RecordId = userAccessData.Id;
@@ -111,7 +111,7 @@ namespace GSC.Respository.CTMS
                             userAccessData.DeletedDate = null;
                             _context.UserAccess.Update(userAccessData);
 
-                            //Add auditTrailDat manually
+                            //Add by mitul on 08-12-2023 auditTrail Data add manually
                             auditTrailData.Id = 0;
                             auditTrailData.TableName = "UserAccess";
                             auditTrailData.RecordId = userAccessData.Id;
