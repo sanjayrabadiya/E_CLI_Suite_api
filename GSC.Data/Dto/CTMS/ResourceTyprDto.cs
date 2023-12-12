@@ -12,7 +12,7 @@ namespace GSC.Data.Dto.CTMS
         public ResourceTypeEnum ResourceTypes { get; set; }
         public SubResourceType ResourceSubType { get; set; }
         public int? RoleId { get; set; }
-        public int UserId { get; set; }
+        public int? UserId { get; set; }
         public int? DesignationId { get; set; }
         public int? UnitId { get; set; }
         public int? NumberOfUnit { get; set; }
