@@ -22,6 +22,7 @@ namespace GSC.Respository.SupplyManagement
 
         void SendrequestApprovalEmail(int id);
 
+        string CheckValidationShipmentRequest(SupplyManagementRequestDto supplyManagementRequestDto);
 
     }
 }

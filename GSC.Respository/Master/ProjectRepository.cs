@@ -25,6 +25,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GSC.Shared.Extension;
+using GSC.Data.Entities.Project.Generalconfig;
 
 namespace GSC.Respository.Master
 {
@@ -129,13 +130,17 @@ namespace GSC.Respository.Master
             if (project.ParentProjectId == null)
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "project" && x.DeletedDate == null).FirstOrDefault();
-                project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectCode(project);
+                if (project.IsTestStudy)
+                    project.ProjectCode = "TS-" + project.ProjectCode;
+                else
+                    project.ProjectCode = numberFormat.IsManual ? project.ProjectCode : GetProjectCode(project);
+
             }
             else
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
                 var projectSettings = _projectSettingsRepository.All.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
-
+                project.Status = MonitoringSiteStatus.Active;
                 if (projectSettings != null && projectSettings.IsCtms)
                 {
                     project.ProjectCode = null;
@@ -420,7 +425,7 @@ namespace GSC.Respository.Master
 
             return projects;
         }
-      
+
         public List<ProjectDropDown> GetChildProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
@@ -692,19 +697,17 @@ namespace GSC.Respository.Master
             {
                 x.ParentProjectCode = projectCode;
                 x.ProjectName = projectName; // Added By Neel
+                x.StatusName = x.Status.GetDescription();
+                var projectSettings = _context.ProjectSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
+                if (projectSettings != null)
+                {
+                    x.IsCtms = projectSettings.IsCtms;
+                }
+                else
+                {
+                    x.IsCtms = false;
+                }
             });
-
-            //projects.ForEach(x =>
-            //{
-            //    x.ParentProjectCode = _context.Project.Find(x.ParentProjectId).ProjectCode;
-            //    var design = _context.ProjectDesign.Where(t =>
-            //        t.ProjectId == (x.ParentProjectId != null ? x.ParentProjectId : x.Id) && t.DeletedDate == null).FirstOrDefault();
-            //    if (design != null)
-            //    {
-            //        x.ProjectDesignId = design.Id;
-            //        x.Locked = !design.IsUnderTesting;
-            //    }
-            //});
             return projects;
         }
 
@@ -1049,7 +1052,7 @@ namespace GSC.Respository.Master
 
                         var editcheckDetails = _context.EditCheckDetail.Where(q => q.EditCheckId == editcheckId && q.DeletedDate == null
                         && _context.ProjectDesignTemplate.Any(pdt => pdt.Id == q.ProjectDesignTemplateId && pdt.DeletedDate == null && pdt.InActiveVersion == null)
-                        && _context.ProjectDesignVariable.Any(pd => pd.Id == q.ProjectDesignVariableId && pd.DeletedDate == null && pd.InActiveVersion==null)).ToList();
+                        && _context.ProjectDesignVariable.Any(pd => pd.Id == q.ProjectDesignVariableId && pd.DeletedDate == null && pd.InActiveVersion == null)).ToList();
 
                         foreach (var editcheckDetail in editcheckDetails)
                         {
@@ -1075,71 +1078,71 @@ namespace GSC.Respository.Master
                             if (editcheckDetail.FetchingProjectDesignTemplateId != null)
                                 variableIdMap.TryGetValue((int)editcheckDetail.FetchingProjectDesignVariableId, out value);
                             editcheckDetail.FetchingProjectDesignVariableId = editcheckDetail.FetchingProjectDesignVariableId != null ? value : editcheckDetail.FetchingProjectDesignVariableId;
-                           if (editcheckDetail.ProjectDesignVariableId != null)
+                            if (editcheckDetail.ProjectDesignVariableId != null)
+                            {
+                                CollectionSources collectionSource = new CollectionSources();
+
+                                if (editcheckDetail.CheckBy == EditCheckRuleBy.ByVariable || editcheckDetail.CheckBy == EditCheckRuleBy.ByVariableRule)
+                                    collectionSource = _context.ProjectDesignVariable.Find(editcheckDetail.ProjectDesignVariableId).CollectionSource;
+                                if (editcheckDetail.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                                    collectionSource = _context.ProjectDesignVariable.Where(x => x.DeletedDate == null && x.Annotation == editcheckDetail.VariableAnnotation && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault().CollectionSource;
+
+                                if (collectionSource == CollectionSources.ComboBox || collectionSource == CollectionSources.RadioButton || collectionSource == CollectionSources.CheckBox
+                                       || collectionSource == CollectionSources.MultiCheckBox)
                                 {
-                                        CollectionSources collectionSource = new CollectionSources();
+                                    if (editcheckDetail.Operator != Operator.In && editcheckDetail.Operator != Operator.NotIn && collectionSource != CollectionSources.MultiCheckBox)
+                                    {
+                                        if (editcheckDetail.CollectionValue != null)
+                                            variableValueIdMap.TryGetValue(Convert.ToInt32(editcheckDetail.CollectionValue), out value);
+                                        editcheckDetail.CollectionValue = editcheckDetail.CollectionValue != null ? value.ToString() : editcheckDetail.CollectionValue;
 
-                                        if (editcheckDetail.CheckBy == EditCheckRuleBy.ByVariable || editcheckDetail.CheckBy == EditCheckRuleBy.ByVariableRule)
-                                            collectionSource = _context.ProjectDesignVariable.Find(editcheckDetail.ProjectDesignVariableId).CollectionSource;
-                                        if (editcheckDetail.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
-                                            collectionSource = _context.ProjectDesignVariable.Where(x => x.DeletedDate == null && x.Annotation == editcheckDetail.VariableAnnotation && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesignId == projectDesignId).FirstOrDefault().CollectionSource;
-
-                                        if (collectionSource == CollectionSources.ComboBox || collectionSource == CollectionSources.RadioButton || collectionSource == CollectionSources.CheckBox
-                                               || collectionSource == CollectionSources.MultiCheckBox)
+                                        if (editcheckDetail.CollectionValue2 != null)
+                                            variableValueIdMap.TryGetValue(Convert.ToInt32(editcheckDetail.CollectionValue2), out value);
+                                        editcheckDetail.CollectionValue2 = editcheckDetail.CollectionValue2 != null ? value.ToString() : editcheckDetail.CollectionValue2;
+                                    }
+                                    else
+                                    {
+                                        if (editcheckDetail.CollectionValue != null)
                                         {
-                                            if (editcheckDetail.Operator != Operator.In && editcheckDetail.Operator != Operator.NotIn && collectionSource != CollectionSources.MultiCheckBox)
+                                            var CollectionValues = editcheckDetail.CollectionValue.Split(',').ToArray();
+
+                                            string values = "";
+                                            int index = 0;
+                                            foreach (var item in CollectionValues)
                                             {
-                                                if (editcheckDetail.CollectionValue != null)
-                                                    variableValueIdMap.TryGetValue(Convert.ToInt32(editcheckDetail.CollectionValue), out value);
-                                                editcheckDetail.CollectionValue = editcheckDetail.CollectionValue != null ? value.ToString() : editcheckDetail.CollectionValue;
-
-                                                if (editcheckDetail.CollectionValue2 != null)
-                                                    variableValueIdMap.TryGetValue(Convert.ToInt32(editcheckDetail.CollectionValue2), out value);
-                                                editcheckDetail.CollectionValue2 = editcheckDetail.CollectionValue2 != null ? value.ToString() : editcheckDetail.CollectionValue2;
+                                                variableValueIdMap.TryGetValue(Convert.ToInt32(item), out value);
+                                                if (index == 0)
+                                                    values = value.ToString();
+                                                else
+                                                    values = values + ',' + value;
+                                                index++;
                                             }
-                                            else
-                                            {
-                                                if (editcheckDetail.CollectionValue != null)
-                                                {
-                                                    var CollectionValues = editcheckDetail.CollectionValue.Split(',').ToArray();
 
-                                                    string values = "";
-                                                    int index = 0;
-                                                    foreach (var item in CollectionValues)
-                                                    {
-                                                        variableValueIdMap.TryGetValue(Convert.ToInt32(item), out value);
-                                                        if (index == 0)
-                                                            values = value.ToString();
-                                                        else
-                                                            values = values + ',' + value;
-                                                        index++;
-                                                    }
-
-                                                    editcheckDetail.CollectionValue = values;
-                                                }
-
-                                                if (editcheckDetail.CollectionValue2 != null)
-                                                {
-                                                    var CollectionValues = editcheckDetail.CollectionValue2.Split(',').ToArray();
-
-                                                    string values = "";
-                                                    int index = 0;
-                                                    foreach (var item in CollectionValues)
-                                                    {
-                                                        variableValueIdMap.TryGetValue(Convert.ToInt32(item), out value);
-                                                        if (index == 0)
-                                                            values = value.ToString();
-                                                        else
-                                                            values = values + ',' + value;
-                                                        index++;
-                                                    }
-
-                                                    editcheckDetail.CollectionValue2 = values;
-                                                }
-                                            }
+                                            editcheckDetail.CollectionValue = values;
                                         }
+
+                                        if (editcheckDetail.CollectionValue2 != null)
+                                        {
+                                            var CollectionValues = editcheckDetail.CollectionValue2.Split(',').ToArray();
+
+                                            string values = "";
+                                            int index = 0;
+                                            foreach (var item in CollectionValues)
+                                            {
+                                                variableValueIdMap.TryGetValue(Convert.ToInt32(item), out value);
+                                                if (index == 0)
+                                                    values = value.ToString();
+                                                else
+                                                    values = values + ',' + value;
+                                                index++;
+                                            }
+
+                                            editcheckDetail.CollectionValue2 = values;
+                                        }
+                                    }
                                 }
-                                _context.EditCheckDetail.Add(editcheckDetail);
+                            }
+                            _context.EditCheckDetail.Add(editcheckDetail);
                             _context.Save();
                         }
                     }
@@ -1181,8 +1184,8 @@ namespace GSC.Respository.Master
                     _context.Save();
 
                     var projectScheduleTemplates = _context.ProjectScheduleTemplate.Where(q => q.ProjectScheduleId == projectScheduleId && q.DeletedDate == null
-                    && _context.ProjectDesignVisit.Any(pdv=>pdv.Id == q.ProjectDesignVisitId && pdv.DeletedDate == null && pdv.InActiveVersion == null)
-                    && _context.ProjectDesignTemplate.Any(pdt => pdt.Id == q.ProjectDesignTemplateId && pdt.DeletedDate == null && pdt.InActiveVersion==null)
+                    && _context.ProjectDesignVisit.Any(pdv => pdv.Id == q.ProjectDesignVisitId && pdv.DeletedDate == null && pdv.InActiveVersion == null)
+                    && _context.ProjectDesignTemplate.Any(pdt => pdt.Id == q.ProjectDesignTemplateId && pdt.DeletedDate == null && pdt.InActiveVersion == null)
                     && _context.ProjectDesignVariable.Any(pd => pd.Id == q.ProjectDesignVariableId && pd.DeletedDate == null && pd.InActiveVersion == null)).ToList();
 
                     foreach (var projectScheduleTemplate in projectScheduleTemplates)
@@ -1451,7 +1454,7 @@ namespace GSC.Respository.Master
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
         }
-     
+
         public List<ProjectDropDown> GetParentStaticProjectDropDownIWRS()
         {
 
@@ -1581,6 +1584,25 @@ namespace GSC.Respository.Master
                     ParentProjectId = c.ParentProjectId ?? c.Id,
                     IsDeleted = c.DeletedDate != null
                 }).Distinct().OrderBy(o => o.Value).ToList();
+        }
+
+        public CheckSiteStatusDto CheckSiteStatus(int siteId)
+        {
+            CheckSiteStatusDto data = new CheckSiteStatusDto();
+            if (siteId > 0)
+            {
+                var project = _context.Project.Where(s => s.Id == siteId && (s.Status == Helper.MonitoringSiteStatus.CloseOut || s.Status == Helper.MonitoringSiteStatus.Terminated || s.Status == Helper.MonitoringSiteStatus.OnHold || s.Status == Helper.MonitoringSiteStatus.Rejected)).FirstOrDefault();
+                if (project != null)
+                {
+                    data.Message = "you can't set email config, selected site is " + project.Status.GetDescription() + "!";
+                    data.IsSuccess = false;
+                    return data;
+                }
+            }
+            data.Message = "";
+            data.IsSuccess = true;
+            return data;
+            
         }
 
     }

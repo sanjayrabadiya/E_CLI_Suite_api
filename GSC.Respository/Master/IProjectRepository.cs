@@ -67,5 +67,7 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetChildProjectDropDownIWRS(int parentProjectId);
 
         List<ProjectDropDown> GetLiveProjectDropDownIWRS();
+
+        CheckSiteStatusDto CheckSiteStatus(int siteId);
     }
 }

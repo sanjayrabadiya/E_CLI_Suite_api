@@ -6,6 +6,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
@@ -415,7 +416,37 @@ namespace GSC.Respository.SupplyManagement
 
         public SupplyManagementVisitKITDetailDto SetKitNumber(SupplyManagementVisitKITDetailDto obj)
         {
+
             int kitcount = 0;
+
+            var randdata = _context.Randomization.Include(s => s.Project).Where(x => x.Id == obj.RandomizationId).FirstOrDefault();
+            if (randdata == null)
+            {
+                obj.ExpiryMesage = "Randomization not found";
+                return obj;
+            }
+            if (randdata.Project != null && (randdata.Project.Status == Helper.MonitoringSiteStatus.CloseOut || randdata.Project.Status == Helper.MonitoringSiteStatus.Terminated || randdata.Project.Status == Helper.MonitoringSiteStatus.OnHold || randdata.Project.Status == Helper.MonitoringSiteStatus.Rejected))
+            {
+                obj.ExpiryMesage = "Selected site is " + randdata.Project.Status.GetDescription() + "!";
+                return obj;
+            }
+            if (randdata != null && randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
+            {
+                obj.ExpiryMesage = "Patient status is not eligible for randomization";
+                return obj;
+            }
+            var screeningentry = _context.ScreeningEntry.Where(x => x.RandomizationId == obj.RandomizationId).FirstOrDefault();
+            if (screeningentry != null)
+            {
+                var screeningvisit = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == screeningentry.Id && x.ProjectDesignVisitId == obj.ProjectDesignVisitId && x.Status == ScreeningVisitStatus.Missed).FirstOrDefault();
+                if (screeningvisit != null)
+                {
+                    obj.ExpiryMesage = "Patient Visit status is not eligible for randomization";
+                    return obj;
+                }
+            }
+
+
             SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (setting == null)
@@ -508,7 +539,7 @@ namespace GSC.Respository.SupplyManagement
                                     IpAddress = _jwtTokenAccesser.IpAddress,
                                     TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
 
-                            };
+                                };
                                 InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
                                 _context.Save();
                                 obj.KitNo = kit.KitNo;
@@ -993,6 +1024,48 @@ namespace GSC.Respository.SupplyManagement
 
             return obj;
         }
+
+        public string ValidateReturnAllsave(SupplyManagementKITReturnDtofinal data)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == data.ProjectId).FirstOrDefault();
+            if (setting.KitCreationType == KitCreationType.KitWise)
+            {
+                if (data != null && data.list.Count > 0)
+                {
+                    foreach (var obj in data.list)
+                    {
+                        var datakit = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).
+                            Where(x => x.Id == obj.SupplyManagementKITDetailId).FirstOrDefault();
+                        if (datakit != null && datakit.SupplyManagementShipment != null && datakit.SupplyManagementShipment.SupplyManagementRequest != null && datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject != null)
+                        {
+                            if (datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.CloseOut || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Terminated || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.OnHold || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Rejected)
+                            {
+                                return "You can't return record, selected recode which have site is " + datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!";
+                            }
+                        }
+                    }
+                }
+            }
+            if (setting.KitCreationType == KitCreationType.SequenceWise)
+            {
+                if (data != null && data.list.Count > 0)
+                {
+                    foreach (var obj in data.list)
+                    {
+                        var datakit = _context.SupplyManagementKITSeries.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(x => x.Id == obj.SupplyManagementKITSeriesId).FirstOrDefault();
+                        if (datakit != null && datakit.SupplyManagementShipment != null && datakit.SupplyManagementShipment.SupplyManagementRequest != null && datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject != null)
+                        {
+                            if (datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.CloseOut || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Terminated || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.OnHold || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Rejected)
+                            {
+                                return "You can't return record, selected recode which have site is " + datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!";
+                            }
+                        }
+                    }
+                }
+            }
+            return "";
+        }
+
         public void ReturnSaveAll(SupplyManagementKITReturnDtofinal data)
         {
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == data.ProjectId).FirstOrDefault();

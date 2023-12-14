@@ -72,6 +72,8 @@ namespace GSC.Respository.SupplyManagement
 
         List<DropDownDto> GetDoseListByProductRecieptId(int ProjectId, int PharmacyStudyProductTypeId, int productReceiptId);
 
+        string ValidateReturnAllsave(SupplyManagementKITReturnDtofinal data);
+
 
     }
 }

@@ -151,8 +151,9 @@ namespace GSC.Api.Controllers.Master
             if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
 
             //Add by Mitul on 28-11-2023 -> CTMS on Bydeful Add site add on CTMS Access table
-                _userAccessRepository.AddProjectSiteRight((int)projectDto.ParentProjectId,project.Id);
-          
+            if (projectDto.ParentProjectId != null)
+                _userAccessRepository.AddProjectSiteRight((int)projectDto.ParentProjectId, project.Id);
+
             ScreeningNumberSettings screeningNumberSettings = new ScreeningNumberSettings();
             screeningNumberSettings.Id = 0;
             screeningNumberSettings.ProjectId = project.Id;
@@ -687,6 +688,29 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetLiveProjectDropDownIWRS()
         {
             return Ok(_projectRepository.GetLiveProjectDropDownIWRS());
+        }
+
+        [HttpPost("UpdateSiteStatus")]
+        public IActionResult UpdateSiteStatus([FromBody] SiteStatusDto projectDto)
+        {
+            var project = _projectRepository.Find(projectDto.Id);
+            if (project == null)
+            {
+                ModelState.AddModelError("Message", "Site not found");
+                return BadRequest(ModelState);
+            }
+
+            project.Status = projectDto.Status;
+            _context.Project.Update(project);
+            if (_uow.Save() <= 0) throw new Exception("Update project failed on save.");
+            return Ok(project);
+        }
+
+        [HttpGet]
+        [Route("CheckSiteStatus/{projectId}")]
+        public IActionResult CheckSiteStatus(int projectId)
+        {
+            return Ok(_projectRepository.CheckSiteStatus(projectId));
         }
     }
 }

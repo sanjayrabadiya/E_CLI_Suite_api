@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Web.Http.ModelBinding;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -561,6 +562,26 @@ namespace GSC.Respository.SupplyManagement
                 }
             }
 
+        }
+
+        public string CheckValidationShipmentRequest(SupplyManagementRequestDto supplyManagementRequestDto)
+        {
+            var project = _context.Project.Where(x => x.Id == supplyManagementRequestDto.FromProjectId).FirstOrDefault();
+            if (project == null)
+            {
+                return "From site not found";
+            }
+            if (project.Status == Helper.MonitoringSiteStatus.CloseOut || project.Status == Helper.MonitoringSiteStatus.Terminated || project.Status == Helper.MonitoringSiteStatus.OnHold || project.Status == Helper.MonitoringSiteStatus.Rejected)
+            {
+                return "From site is " + project.Status.GetDescription() + "!";
+            }
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == project.ParentProjectId).FirstOrDefault();
+            if (setting == null)
+            {
+                return "Please set kit number setting!";
+            }
+
+            return "";
         }
     }
 }

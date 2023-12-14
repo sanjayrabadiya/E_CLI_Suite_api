@@ -5,6 +5,7 @@ using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.Project.Design;
+using GSC.Helper;
 using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Master
@@ -65,5 +66,9 @@ namespace GSC.Data.Entities.Master
         public bool IsSendSMS { get; set; }
         public bool IsSendEmail { get; set; }
         public int? Recruitment { get; set; }
+
+        public bool IsTestStudy { get; set; }
+
+        public MonitoringSiteStatus? Status { get; set; }
     }
 }

@@ -17,7 +17,7 @@ namespace GSC.Respository.CTMS
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public CtmsMonitoringStatusRepository(IGSCContext context,IMapper mapper)
+        public CtmsMonitoringStatusRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
             _mapper = mapper;
@@ -49,7 +49,7 @@ namespace GSC.Respository.CTMS
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
 
             string ActivityCode = tabNumber == 0 ? "act_001" : tabNumber == 1 ? "act_002" : tabNumber == 2 ? "act_003" :
-                tabNumber == 3 ? "act_004" :  tabNumber == 4 ? "act_005" : "act_006";
+                tabNumber == 3 ? "act_004" : tabNumber == 4 ? "act_005" : "act_006";
 
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == ActivityCode && x.DeletedDate == null).FirstOrDefault();
 
@@ -65,6 +65,18 @@ namespace GSC.Respository.CTMS
             //    return "Please Complete Previous Form.";
 
             return "";
+        }
+
+        public void UpdateSiteStatus(CtmsMonitoringStatusDto ctmsMonitoringDto)
+        {
+            var data = _context.CtmsMonitoring.Include(s => s.Project).Where(s => s.Id == ctmsMonitoringDto.CtmsMonitoringId).FirstOrDefault();
+            if (data != null && data.Project != null)
+            {
+                var project = data.Project;
+                project.Status = ctmsMonitoringDto.Status;
+                _context.Project.Update(project);
+                _context.Save();
+            }
         }
     }
 }

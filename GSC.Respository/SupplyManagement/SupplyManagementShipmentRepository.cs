@@ -151,6 +151,10 @@ namespace GSC.Respository.SupplyManagement
             {
                 return "From project code not found!";
             }
+            if (project.Status == Helper.MonitoringSiteStatus.CloseOut || project.Status == Helper.MonitoringSiteStatus.Terminated || project.Status == Helper.MonitoringSiteStatus.OnHold || project.Status == Helper.MonitoringSiteStatus.Rejected)
+            {
+                return "You can't approve this shipment,Request from site is " + project.Status.GetDescription() + "!";
+            }
             var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
             if (settings == null)
             {

@@ -5,6 +5,7 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.SupplyManagement;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -47,19 +48,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult Post([FromBody] SupplyManagementRequestDto supplyManagementRequestDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            var project = _context.Project.Where(x => x.Id == supplyManagementRequestDto.FromProjectId).FirstOrDefault();
-            if (project == null)
+            var message = _supplyManagementRequestRepository.CheckValidationShipmentRequest(supplyManagementRequestDto);
+            if (!string.IsNullOrEmpty(message))
             {
-                ModelState.AddModelError("Message", "From site not found");
+                ModelState.AddModelError("Message", message);
                 return BadRequest(ModelState);
             }
-            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == project.ParentProjectId).FirstOrDefault();
-            if (setting == null)
-            {
-                ModelState.AddModelError("Message", "Please set kit number setting!");
-                return BadRequest(ModelState);
-            }
-
             supplyManagementRequestDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementRequest>(supplyManagementRequestDto);
             supplyManagementRequest.IpAddress = _jwtTokenAccesser.IpAddress;

@@ -12,6 +12,7 @@ using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -75,6 +76,14 @@ namespace GSC.Respository.SupplyManagement
                 if (validate.SupplyManagementUploadFileLevel != supplyManagementUploadFile.SupplyManagementUploadFileLevel)
                     return "Please Select Appropriate Level.";
 
+            if (supplyManagementUploadFile.SiteId > 0)
+            {
+                var project = _context.Project.Where(s => s.Id == supplyManagementUploadFile.SiteId && (s.Status == Helper.MonitoringSiteStatus.CloseOut || s.Status == Helper.MonitoringSiteStatus.Terminated || s.Status == Helper.MonitoringSiteStatus.OnHold || s.Status == Helper.MonitoringSiteStatus.Rejected)).FirstOrDefault();
+                if (project != null)
+                {
+                    return "You can't upload sheet,selected site is " + project.Status.GetDescription() + "!";
+                }
+            }
             // Read excel to stream reader
             var documentUrl = _uploadSettingRepository.GetDocumentPath();
             string pathname = documentUrl + supplyManagementUploadFile.PathName;

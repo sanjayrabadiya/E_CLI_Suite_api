@@ -61,6 +61,8 @@ namespace GSC.Data.Dto.Master
         public bool IsSendEmail { get; set; }
         public int? Recruitment { get; set; }
         public CloneProjectDto CloneProjectDto { get; set; }
+
+        public bool IsTestStudy { get; set; }
     }
 
 
@@ -100,6 +102,14 @@ namespace GSC.Data.Dto.Master
         public string ProjectStatusName { get; set; }
 
         public bool? IsCtmsStudy { get; set; }
+
+        public bool IsTestStudy { get; set; }
+
+        public MonitoringSiteStatus? Status { get; set; }
+
+        public string StatusName { get; set; }
+
+        public bool? IsCtms { get; set; }
     }
 
     public class ProjectDetailsDto
@@ -228,5 +238,14 @@ namespace GSC.Data.Dto.Master
 
         public bool WorkflowClone { get; set; }
     }
-
+    public class SiteStatusDto
+    {
+        public int Id { get; set; }
+        public MonitoringSiteStatus? Status { get; set; }
+    }
+    public class CheckSiteStatusDto
+    {
+        public bool IsSuccess { get; set; }
+        public string Message { get; set; }
+    }
 }

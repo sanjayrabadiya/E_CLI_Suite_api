@@ -16,7 +16,7 @@ using GSC.Common.Common;
 
 namespace GSC.Respository.CTMS
 {
-   public  class UserAccessRepository : GenericRespository<UserAccess>, IUserAccessRepository
+    public class UserAccessRepository : GenericRespository<UserAccess>, IUserAccessRepository
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
@@ -28,7 +28,7 @@ namespace GSC.Respository.CTMS
             : base(context)
         {
             _mapper = mapper;
-            _context=context;
+            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRepository = projectRepository;
         }
@@ -38,17 +38,19 @@ namespace GSC.Respository.CTMS
         {
             string msg = "";
             int count = 1;
-            if (userAccessDto.siteUserAccess != null && userAccessDto.siteUserAccess[0].ProjectId != 0 && userAccessDto.IsSite == true){
+            if (userAccessDto.siteUserAccess != null && userAccessDto.siteUserAccess[0].ProjectId != 0 && userAccessDto.IsSite == true)
+            {
                 userAccessDto.siteUserAccess.ForEach(t =>
                 {
                     t.multiUserAccess.ForEach(s =>
                     {
                         if (All.Any(x => x.Id != userAccessDto.Id && x.ParentProjectId == userAccessDto.ParentProjectId && x.ProjectId == t.ProjectId && x.UserRoleId == s.UserRoleId && x.DeletedDate == null))
-                            msg = msg + count++ +") "+ _context.UserRole.Include(x=>x.User).Where(d=>d.Id == s.UserRoleId && d.DeletedByUser ==null).Select(m=>m.User.UserName).FirstOrDefault() + " has already been given access to this site ";
+                            msg = msg + count++ + ") " + _context.UserRole.Include(x => x.User).Where(d => d.Id == s.UserRoleId && d.DeletedByUser == null).Select(m => m.User.UserName).FirstOrDefault() + " has already been given access to this site ";
                     });
                 });
             }
-            else{
+            else
+            {
                 userAccessDto.siteUserAccess.ForEach(t =>
                 {
                     t.multiUserAccess.ForEach(s =>
@@ -72,12 +74,12 @@ namespace GSC.Respository.CTMS
                 {
                     t.multiUserAccess.ForEach(s =>
                     {
-                            userAccessData = _context.UserAccess.Where(x => x.Id != userAccessDto.Id && x.ParentProjectId == userAccessDto.ParentProjectId && x.ProjectId == t.ProjectId && x.UserRoleId == s.UserRoleId && x.DeletedDate != null).FirstOrDefault();
-                            if (userAccessData != null)
-                            {
-                                userAccessData.DeletedBy = null;
-                                userAccessData.DeletedDate = null;
-                                _context.UserAccess.Update(userAccessData);
+                        userAccessData = _context.UserAccess.Where(x => x.Id != userAccessDto.Id && x.ParentProjectId == userAccessDto.ParentProjectId && x.ProjectId == t.ProjectId && x.UserRoleId == s.UserRoleId && x.DeletedDate != null).FirstOrDefault();
+                        if (userAccessData != null)
+                        {
+                            userAccessData.DeletedBy = null;
+                            userAccessData.DeletedDate = null;
+                            _context.UserAccess.Update(userAccessData);
 
                             //Add by mitul on 08-12-2023 auditTrail Data add manually
                             auditTrailData.Id = 0;
@@ -91,9 +93,9 @@ namespace GSC.Respository.CTMS
 
                             _context.Save();
                             UserAccessList.Add(userAccessData);
-                            }
+                        }
                     });
-                    
+
                 });
 
                 return UserAccessList;
@@ -139,21 +141,22 @@ namespace GSC.Respository.CTMS
                 {
                     r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId && x.DeletedDate == null).Select(s => s.ProjectCode).FirstOrDefault();
-                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId && x.DeletedDate == null).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName:"").FirstOrDefault();
+                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId && x.DeletedDate == null).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName : "").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
                     r.projectCreatedBy = _context.Project.Where(x => x.Id == studyId && x.DeletedDate == null).Select(s => s.CreatedByUser.Id).FirstOrDefault();
                     return r;
                 }).ToList();
                 return result;
             }
-            else if(studyId > 0 && siteId > 0){
-                 var result = All.Where(x =>x.ParentProjectId == studyId && x.ProjectId == siteId).OrderByDescending(x => x.Id).
-                 ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
+            else if (studyId > 0 && siteId > 0)
+            {
+                var result = All.Where(x => x.ParentProjectId == studyId && x.ProjectId == siteId).OrderByDescending(x => x.Id).
+                ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
                 var data = result.Select(r =>
                 {
                     r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
-                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName:"").FirstOrDefault();
+                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName : "").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
                     r.projectCreatedBy = _context.Project.Where(x => x.Id == studyId && x.DeletedDate == null).Select(s => s.CreatedByUser.Id).FirstOrDefault();
                     return r;
@@ -168,7 +171,7 @@ namespace GSC.Respository.CTMS
                 {
                     r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
-                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName :"").FirstOrDefault();
+                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName : "").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
                     r.projectCreatedBy = _context.Project.Where(x => x.Id == studyId && x.DeletedDate == null).Select(s => s.CreatedByUser.Id).FirstOrDefault();
                     return r;
@@ -179,23 +182,26 @@ namespace GSC.Respository.CTMS
         //Add by Mitul On 09-11-2023 GS1-I3112 -> If CTMS On By default Add CTMS Access table.
         public void AddProjectRight(int ProjectId, bool isCtms)
         {
-            var projectRightData = _context.ProjectRight.Where(s=>s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy== _jwtTokenAccesser.UserId && s.DeletedBy==null && s.ProjectId== ProjectId).FirstOrDefault();
-            var userRoleData= _context.UserRole.Where(s=> s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId== _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
-            var ctmsOnData= _context.ProjectSettings.Include(d=>d.Project).Where(s=>s.DeletedBy == null && s.IsCtms == isCtms && s.ProjectId== projectRightData.ProjectId).FirstOrDefault();
+            var projectRightData = _context.ProjectRight.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy == _jwtTokenAccesser.UserId && s.DeletedBy == null && s.ProjectId == ProjectId).FirstOrDefault();
+            var userRoleData = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
+            var ctmsOnData = _context.ProjectSettings.Include(d => d.Project).Where(s => s.DeletedBy == null && s.IsCtms == isCtms && s.ProjectId == projectRightData.ProjectId).FirstOrDefault();
             var userAccessData = new UserAccess();
-            if (isCtms){ 
+            if (isCtms)
+            {
                 userAccessData.Id = 0;
                 userAccessData.UserRoleId = userRoleData;
                 userAccessData.ParentProjectId = ctmsOnData.ProjectId;
                 userAccessData.ProjectId = ctmsOnData.ProjectId;
                 _context.UserAccess.Add(userAccessData);
             }
-            else{
+            else
+            {
                 userAccessData = _context.UserAccess.Where(s => s.ProjectId == ctmsOnData.ProjectId && s.ParentProjectId == ctmsOnData.ProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
-                if(userAccessData != null) { 
-                userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
-                userAccessData.DeletedDate = DateTime.UtcNow;
-                _context.UserAccess.Update(userAccessData);
+                if (userAccessData != null)
+                {
+                    userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
+                    userAccessData.DeletedDate = DateTime.UtcNow;
+                    _context.UserAccess.Update(userAccessData);
                 }
             }
             _context.Save();
@@ -213,24 +219,27 @@ namespace GSC.Respository.CTMS
             bool IsCtms = _context.ProjectSettings.Where(x => x.ProjectId == ParentProjectId).Select(s => s.IsCtms).FirstOrDefault();
             var projectRightData = _context.ProjectRight.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy == _jwtTokenAccesser.UserId && s.DeletedBy == null && s.ProjectId == ProjectId).FirstOrDefault();
             var userRoleData = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
-            var ctmsOnData = _context.Project.Where(s => s.DeletedBy == null && s.Id == projectRightData.ProjectId).FirstOrDefault();
-            var userAccessData = new UserAccess();
-            if (IsCtms)
+            if (projectRightData != null)
             {
-                userAccessData.Id = 0;
-                userAccessData.UserRoleId = userRoleData;
-                userAccessData.ParentProjectId = ParentProjectId;
-                userAccessData.ProjectId = ctmsOnData.Id;
-                _context.UserAccess.Add(userAccessData);
-            }
-            else
-            {
-                userAccessData = _context.UserAccess.Where(s => s.ProjectId == ProjectId && s.ParentProjectId == ParentProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
-                if (userAccessData != null)
+                var ctmsOnData = _context.Project.Where(s => s.DeletedBy == null && s.Id == projectRightData.ProjectId).FirstOrDefault();
+                var userAccessData = new UserAccess();
+                if (IsCtms && ctmsOnData != null)
                 {
-                    userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
-                    userAccessData.DeletedDate = DateTime.UtcNow;
-                    _context.UserAccess.Update(userAccessData);
+                    userAccessData.Id = 0;
+                    userAccessData.UserRoleId = userRoleData;
+                    userAccessData.ParentProjectId = ParentProjectId;
+                    userAccessData.ProjectId = ctmsOnData.Id;
+                    _context.UserAccess.Add(userAccessData);
+                }
+                else
+                {
+                    userAccessData = _context.UserAccess.Where(s => s.ProjectId == ProjectId && s.ParentProjectId == ParentProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
+                    if (userAccessData != null)
+                    {
+                        userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
+                        userAccessData.DeletedDate = DateTime.UtcNow;
+                        _context.UserAccess.Update(userAccessData);
+                    }
                 }
             }
             _context.Save();
@@ -246,14 +255,15 @@ namespace GSC.Respository.CTMS
                         var userAccessData = new UserAccess();
                         userAccessData.Id = 0;
                         userAccessData.UserRoleId = s.UserRoleId;
-                        userAccessData.ProjectId=t.ProjectId;
+                        userAccessData.ProjectId = t.ProjectId;
                         userAccessData.ParentProjectId = userAccessDto.ParentProjectId;
                         userAccessData.IsSite = userAccessDto.IsSite;
                         _context.UserAccess.Add(userAccessData);
                         _context.Save();
                     });
                 });
-            }else
+            }
+            else
             {
                 userAccessDto.siteUserAccess.ForEach(t =>
                 {
@@ -273,9 +283,9 @@ namespace GSC.Respository.CTMS
         }
         public List<DropDownDto> GetRollUserDropDown()
         {
-           var data =_context.UserRole.Where(x => x.DeletedBy == null && x.User.DeletedBy==null && x.SecurityRole.DeletedBy==null)
-                            .Select(c => new DropDownDto { Id = c.Id, Value = c.User.FirstName + ' ' + c.User.LastName, ExtraData = c.SecurityRole.RoleName,IsDeleted = c.DeletedDate != null })
-                            .OrderBy(o => o.Value).ToList();
+            var data = _context.UserRole.Where(x => x.DeletedBy == null && x.User.DeletedBy == null && x.SecurityRole.DeletedBy == null)
+                             .Select(c => new DropDownDto { Id = c.Id, Value = c.User.FirstName + ' ' + c.User.LastName, ExtraData = c.SecurityRole.RoleName, IsDeleted = c.DeletedDate != null })
+                             .OrderBy(o => o.Value).ToList();
             return data;
         }
         //Add by Mitul on 06-12-2023 get History in AuditTrail Deleted=Revoke And Added,Modified=Gran
@@ -287,15 +297,15 @@ namespace GSC.Respository.CTMS
                     Id = x.Id,
                     TableName = x.TableName,
                     RecordId = x.RecordId,
-                    Action = x.Action == "Deleted"? "Revoke" : x.Action == "Added"? "Grant" : x.Action == "Modified"? "Grant" : "",
+                    Action = x.Action == "Deleted" ? "Revoke" : x.Action == "Added" ? "Grant" : x.Action == "Modified" ? "Grant" : "",
                     ReasonOth = x.ReasonOth,
                     ReasonName = x.Reason,
                     RevokeOn = x.Action == "Deleted" ? x.CreatedDate : null,
                     RevokeBy = x.Action == "Deleted" ? x.User.UserName : "",
                     RevokeByRole = x.Action == "Deleted" ? x.UserRole : "",
-                    GrantOn = x.Action == "Added" ? x.CreatedDate : x.Action == "Modified" ? x.CreatedDate:null,
-                    GrantBy = x.Action == "Added" ? x.User.UserName : x.Action == "Modified" ? x.User.UserName:"",
-                    GrantByRole = x.Action == "Added" ? x.UserRole : x.Action == "Modified" ? x.UserRole: "",
+                    GrantOn = x.Action == "Added" ? x.CreatedDate : x.Action == "Modified" ? x.CreatedDate : null,
+                    GrantBy = x.Action == "Added" ? x.User.UserName : x.Action == "Modified" ? x.User.UserName : "",
+                    GrantByRole = x.Action == "Added" ? x.UserRole : x.Action == "Modified" ? x.UserRole : "",
                     TimeZone = x.TimeZone
                 }).ToList();
 

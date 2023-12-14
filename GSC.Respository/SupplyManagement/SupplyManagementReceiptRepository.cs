@@ -4,6 +4,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -278,7 +279,14 @@ namespace GSC.Respository.SupplyManagement
                 Message = "Shipment not found";
                 return Message;
             }
-
+            if (shipment.SupplyManagementRequest != null && shipment.SupplyManagementRequest.FromProject != null)
+            {
+                if (shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.CloseOut || shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Terminated || shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.OnHold || shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Rejected)
+                {
+                    return "You can't receipt this shipment,Request from site is " + shipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!";
+                }
+            }
+            
             if (supplyManagementshipmentDto.Kits != null)
             {
 
