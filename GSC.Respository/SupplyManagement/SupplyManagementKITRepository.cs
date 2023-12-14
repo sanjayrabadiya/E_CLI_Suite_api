@@ -425,11 +425,11 @@ namespace GSC.Respository.SupplyManagement
                 obj.ExpiryMesage = "Randomization not found";
                 return obj;
             }
-            if (randdata.Project != null && (randdata.Project.Status == Helper.MonitoringSiteStatus.CloseOut || randdata.Project.Status == Helper.MonitoringSiteStatus.Terminated || randdata.Project.Status == Helper.MonitoringSiteStatus.OnHold || randdata.Project.Status == Helper.MonitoringSiteStatus.Rejected))
-            {
-                obj.ExpiryMesage = "Selected site is " + randdata.Project.Status.GetDescription() + "!";
-                return obj;
-            }
+            //if (randdata.Project != null && (randdata.Project.Status == Helper.MonitoringSiteStatus.CloseOut || randdata.Project.Status == Helper.MonitoringSiteStatus.Terminated || randdata.Project.Status == Helper.MonitoringSiteStatus.OnHold || randdata.Project.Status == Helper.MonitoringSiteStatus.Rejected))
+            //{
+            //    obj.ExpiryMesage = "Selected site is " + randdata.Project.Status.GetDescription() + "!";
+            //    return obj;
+            //}
             if (randdata != null && randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
             {
                 obj.ExpiryMesage = "Patient status is not eligible for randomization";

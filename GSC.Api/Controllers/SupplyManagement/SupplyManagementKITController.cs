@@ -281,15 +281,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetKitReturnList/{projectId}/{kitType}/{siteId?}/{visitId?}/{randomizationId?}")]
         public IActionResult GetKitReturnList(int projectId, KitStatusRandomization kitType, int? siteId, int? visitId, int? randomizationId)
         {
-            if (siteId > 0)
-            {
-                var project = _context.Project.Where(s => s.Id == siteId && (s.Status == Helper.MonitoringSiteStatus.CloseOut || s.Status == Helper.MonitoringSiteStatus.Terminated || s.Status == Helper.MonitoringSiteStatus.OnHold || s.Status == Helper.MonitoringSiteStatus.Rejected)).FirstOrDefault();
-                if (project != null)
-                {
-                    ModelState.AddModelError("Message", "Selected site is " + project.Status.GetDescription() + "!");
-                    return BadRequest(ModelState);
-                }
-            }
             return Ok(_supplyManagementKITRepository.GetKitReturnList(projectId, kitType, siteId, visitId, randomizationId));
         }
 
@@ -297,15 +288,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("ReturnSave")]
         public IActionResult ReturnSave([FromBody] SupplyManagementKITReturnGridDto supplyManagementKITReturnGridDto)
         {
-            if (supplyManagementKITReturnGridDto.SiteId > 0)
-            {
-                var project = _context.Project.Where(s => s.Id == supplyManagementKITReturnGridDto.SiteId && (s.Status == Helper.MonitoringSiteStatus.CloseOut || s.Status == Helper.MonitoringSiteStatus.Terminated || s.Status == Helper.MonitoringSiteStatus.OnHold || s.Status == Helper.MonitoringSiteStatus.Rejected)).FirstOrDefault();
-                if (project != null)
-                {
-                    ModelState.AddModelError("Message", "Selected site is " + project.Status.GetDescription() + "!");
-                    return BadRequest(ModelState);
-                }
-            }
             var returnkit = _supplyManagementKITRepository.ReturnSave(supplyManagementKITReturnGridDto);
             return Ok(returnkit);
         }
@@ -313,12 +295,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("ReturnSaveAll")]
         public IActionResult ReturnSaveAll([FromBody] SupplyManagementKITReturnDtofinal supplyManagementKITReturnGridDto)
         {
-            var message = _supplyManagementKITRepository.ValidateReturnAllsave(supplyManagementKITReturnGridDto);
-            if (!string.IsNullOrEmpty(message))
-            {
-                ModelState.AddModelError("Message", message);
-                return BadRequest(ModelState);
-            }
             _supplyManagementKITRepository.ReturnSaveAll(supplyManagementKITReturnGridDto);
             if (supplyManagementKITReturnGridDto != null && supplyManagementKITReturnGridDto.ProjectId > 0)
                 _supplyManagementKITRepository.SendKitReturnEmail(supplyManagementKITReturnGridDto);
@@ -350,16 +326,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("returnVerificationStatus")]
         public IActionResult returnVerificationStatus([FromBody] SupplyManagementKITReturnVerificationDto supplyManagementKITReturnVerificationDto)
         {
-            var datakit = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).
-                          Where(x => x.Id == supplyManagementKITReturnVerificationDto.SupplyManagementKITDetailId).FirstOrDefault();
-            if (datakit != null && datakit.SupplyManagementShipment != null && datakit.SupplyManagementShipment.SupplyManagementRequest != null && datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject != null)
-            {
-                if (datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.CloseOut || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Terminated || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.OnHold || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Rejected)
-                {
-                    ModelState.AddModelError("Message", "You can't return record, selected recode which have site is " + datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!");
-                    return BadRequest(ModelState);
-                }
-            }
             _supplyManagementKITRepository.returnVerificationStatus(supplyManagementKITReturnVerificationDto);
             return Ok();
         }
@@ -367,15 +333,6 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("returnVerificationStatusSequence")]
         public IActionResult returnVerificationStatusSequence([FromBody] SupplyManagementKITReturnVerificationSequenceDto supplyManagementKITReturnVerificationDto)
         {
-            var datakit = _context.SupplyManagementKITSeries.Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(x => x.Id == supplyManagementKITReturnVerificationDto.SupplyManagementKITSeriesId).FirstOrDefault();
-            if (datakit != null && datakit.SupplyManagementShipment != null && datakit.SupplyManagementShipment.SupplyManagementRequest != null && datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject != null)
-            {
-                if (datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.CloseOut || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Terminated || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.OnHold || datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Rejected)
-                {
-                    ModelState.AddModelError("Message", "You can't return record, selected recode which have site is " + datakit.SupplyManagementShipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!");
-                    return BadRequest(ModelState);
-                }
-            }
             _supplyManagementKITRepository.returnVerificationStatusSequence(supplyManagementKITReturnVerificationDto);
             return Ok();
         }

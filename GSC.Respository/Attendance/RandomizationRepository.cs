@@ -325,6 +325,12 @@ namespace GSC.Respository.Attendance
                 randomizationNumberDto.ErrorMessage = "Please set first kit number setting!";
                 return randomizationNumberDto;
             }
+            var project = _context.Project.Where(s => s.Id == siteId).FirstOrDefault();
+            if (project != null && (project.Status == Helper.MonitoringSiteStatus.CloseOut || project.Status == Helper.MonitoringSiteStatus.Terminated || project.Status == Helper.MonitoringSiteStatus.OnHold || project.Status == Helper.MonitoringSiteStatus.Rejected))
+            {
+                randomizationNumberDto.ErrorMessage = "Selected site is " + project.Status.GetDescription() + "!";
+                return randomizationNumberDto;
+            }
 
             if (isIwrs)
             {
