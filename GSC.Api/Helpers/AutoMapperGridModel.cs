@@ -326,7 +326,7 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.UserName, x => x.MapFrom(a => a.User.FirstName + ' ' + a.User.LastName))
                           .ReverseMap();
             CreateMap<HolidayMaster, HolidayMasterGridDto>()
-                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode : ""))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode == null? a.Project.ManageSite.SiteName : a.Project.ProjectCode +" - " + a.Project.ManageSite.SiteName: ""))
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.IsSite == true ? Convert.ToString(a.Project.ParentProjectId) : a.Project.ProjectCode))
                 .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationGridDto>().ReverseMap();
@@ -347,7 +347,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<WeekEndMaster, WeekEndGridDto>()
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.IsSite == true ? Convert.ToString(a.Project.ParentProjectId) : a.Project.ProjectCode))
-                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode : ""))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode == null ? a.Project.ManageSite.SiteName : a.Project.ProjectCode + " - " + a.Project.ManageSite.SiteName : ""))
                 .ForMember(x => x.AllWeekOff, x => x.MapFrom(a => a.AllWeekOff.GetDescription()))
                 .ForMember(x => x.Frequency, x => x.MapFrom(a => a.Frequency.GetDescription()))
                 .ReverseMap();
@@ -799,7 +799,7 @@ namespace GSC.Api.Helpers
             CreateMap<LabReport, LabReportGridDto>().ReverseMap();
 
             CreateMap<WorkingDay, WorkingDayListDto>()
-            .ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteTypes.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
+            .ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteTypes.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ManageSite.SiteName : s.Project.ProjectCode +" - "+ s.Project.ManageSite.SiteName).ToList())))
             .ReverseMap();
             CreateMap<SiteTypes, WorkingDayListDto>().ReverseMap();
 

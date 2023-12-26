@@ -16,6 +16,9 @@ using GSC.Shared.Extension;
 using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
 using GSC.Data.Dto.Master;
+using System.Linq.Dynamic.Core;
+using GSC.Data.Entities.Master;
+using Microsoft.Extensions.Hosting;
 
 namespace GSC.Respository.CTMS
 {
@@ -762,6 +765,95 @@ namespace GSC.Respository.CTMS
                   Select(x => new DropDownDto { Id = x.ResourceType.Designation.Id, Value = x.ResourceType.Designation.NameOFDesignation, IsDeleted = x.ResourceType.Designation.DeletedDate != null }).Distinct().ToList();
 
             return data;
+        }
+        public List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId)
+        {
+            var result = new List<StudyPlanTaskDto>();
+            if (countryId > 0)
+            {
+                var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == studyId
+                                                          && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                          && a.UserId == _jwtTokenAccesser.UserId
+                                                          && a.RoleId == _jwtTokenAccesser.RoleId
+                                                          && a.DeletedDate == null
+                                                          && a.RollbackReason == null)
+                                                          && x.ManageSite.City.State.CountryId == countryId
+                                                          && x.DeletedDate == null).ToList();
+
+                if (projectIds.Count == 0)
+                    projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
+                                                         _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                                        && a.UserId == _jwtTokenAccesser.UserId
+                                                        && a.RoleId == _jwtTokenAccesser.RoleId
+                                                        && a.DeletedDate == null
+                                                        && a.RollbackReason == null)
+                                                        && x.ManageSite.City.State.CountryId == countryId
+                                                        && x.Id == siteId
+                                                        && x.DeletedDate == null).ToList();
+
+                var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+                foreach (var item in studyplans)
+                {
+                    if (studyplans != null)
+                    {
+                        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
+                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                        tasklist.ForEach(task =>
+                        {
+                            task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                            task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
+                            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                        });
+                        result = tasklist;
+                    }
+                }
+            }
+            else
+            {
+                var studyplan = _context.StudyPlan.Where(x => x.ProjectId == studyId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+                if (studyplan != null)
+                {
+                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
+                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                    tasklist.ForEach(task =>
+                    {
+                        task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                        task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
+                        task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                    });
+
+                    result = tasklist;
+                }
+            }
+
+            if (result != null)
+                foreach (var item in result)
+                {
+                    var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
+                   .Select(x => new ResourceTypeGridDto
+                   {
+                       Id = x.Id,
+                       TaskId = item.Id,
+                       ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+                       ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+                       Role = x.ResourceType.Role.RoleName,
+                       User = x.ResourceType.User.UserName,
+                       Designation = x.ResourceType.Designation.NameOFDesignation,
+                       YersOfExperience = x.ResourceType.Designation.YersOfExperience,
+                       NameOfMaterial = x.ResourceType.NameOfMaterial,
+                       Unit=x.ResourceType.Unit.UnitName,
+                       NumberOfUnit =x.ResourceType.NumberOfUnit,
+                       Cost=x.ResourceType.Cost,
+                       CurrencyType = x.ResourceType.Currency.CurrencySymbol+" - "+x.ResourceType.Currency.CurrencyName,
+                       CreatedDate = x.CreatedDate,
+                       CreatedByUser = x.CreatedByUser.UserName
+                   }).ToList();
+                    item.TaskResource = resourcelist;
+                }
+            if (result != null)
+                result = result.Where(s => s.TaskResource.Count != 0).ToList();
+
+            return result;
         }
     }
 }

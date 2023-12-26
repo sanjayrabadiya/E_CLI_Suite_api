@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using System;
+using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
@@ -7,6 +8,8 @@ namespace GSC.Data.Dto.CTMS
     {
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
+
+        [Required(ErrorMessage = "Holiday Name is required.")]
         public string HolidayName { get; set; }
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }

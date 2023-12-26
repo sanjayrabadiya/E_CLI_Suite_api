@@ -47,6 +47,10 @@ namespace GSC.Data.Dto.CTMS
         public string DocumentPath { get; set; }
         public string Site { get; set; }
         public decimal? Percentage { get; set; }
+        public string StudayName { get; set; }
+        public string SiteName { get; set; }
+        public string CountryName { get; set; }
+
         public List<ResourceTypeGridDto> TaskResource { get; set; }
     }
 
