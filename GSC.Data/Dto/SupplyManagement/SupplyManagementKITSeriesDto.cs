@@ -43,6 +43,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int Days { get; set; }
         public int ProductReceiptId { get; set; }
 
+        public string Barcode { get; set; }
+
     }
 
     public class SupplyManagementKITSeriesGridDto : BaseAuditDto
@@ -77,6 +79,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string IpAddress { get; set; }
 
         public bool IsRetension { get; set; }
+
+        public string Barcode { get; set; }
 
     }
     public class SupplyManagementKITSeriesDetailGridDto : BaseAuditDto

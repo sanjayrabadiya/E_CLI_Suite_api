@@ -13,5 +13,8 @@ namespace GSC.Respository.UserMgt
         List<DropDownDto> GetAppScreenChildParentFromDropDown(int id);
         List<DropDownDto> GetTableColunms(int id);
         List<DropDownDto> GetAppScreenDropDownByParentScreenCode(string parentScreenCode);
+
+        List<DropDownDto> GetTableColunmsIWRS(int id);
+
     }
 }

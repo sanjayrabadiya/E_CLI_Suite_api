@@ -117,7 +117,8 @@ namespace GSC.Respository.SupplyManagement
                                Dose = productverification.Dose > 0 ? productverification.Dose : 0,
                                UnitName = productverification.UnitId > 0 ? _context.Unit.Where(s => s.Id == productverification.UnitId).FirstOrDefault().UnitName : "",
                                IpAddress = productverification.IpAddress,
-                               TimeZone = productverification.TimeZone
+                               TimeZone = productverification.TimeZone,
+                               Barcode = productReceipt.Barcode
                            }).ToList().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;

@@ -1,6 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Barcode;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using Microsoft.AspNetCore.Mvc;
@@ -74,6 +75,8 @@ namespace GSC.Respository.SupplyManagement
 
         string ValidateReturnAllsave(SupplyManagementKITReturnDtofinal data);
 
+        string GenerateKitBarcode(SupplyManagementKITDetail supplyManagementKITDetail);
 
+        List<ProductRecieptBarcodeGenerateGridDto> GetkitBarcodeDetail(int id, string type);
     }
 }

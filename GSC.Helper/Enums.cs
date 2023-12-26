@@ -1191,4 +1191,14 @@ namespace GSC.Helper
         [Description("Android")] Android = 2,
         [Description("IOS")] IOS = 3
     }
+    public enum BarcodeModuleType : short
+    {
+        [Description("Product Reciept")] Verification = 1,
+        [Description("Kit Management")] kit = 2
+    }
+    public enum BarcodeTypes : short
+    {
+        [Description("Linear")] Linear = 1,
+        [Description("QR")] QR = 2
+    }
 }

@@ -81,6 +81,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string TimeZoneVerification { get; set; }
 
+        public bool Isdisable { get; set; }
+
+        public string Barcode { get; set; }
+
 
     }
 
@@ -140,6 +144,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string IpAddress { get; set; }
 
         public string TimeZone { get; set; }
+
+        public bool Isdisable { get; set; }
+
+        public string Barcode { get; set; }
 
     }
 

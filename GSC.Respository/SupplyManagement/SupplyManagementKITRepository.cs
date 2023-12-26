@@ -6,6 +6,8 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
+using GSC.Data.Entities.Attendance;
+using GSC.Data.Entities.Barcode;
 using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
@@ -24,6 +26,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Web.Http.ModelBinding;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -759,7 +762,9 @@ namespace GSC.Respository.SupplyManagement
                                                                   SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
                                                                   ActionBy = x.ReturnBy,
                                                                   ActionDate = x.ReturnDate,
-                                                                  IsUnUsed = x.IsUnUsed
+                                                                  IsUnUsed = x.IsUnUsed,
+                                                                  Isdisable = setting.IsBarcodeScan,
+                                                                  Barcode = x.Barcode
                                                               }).ToList();
                 if (data.Count > 0)
                 {
@@ -898,6 +903,8 @@ namespace GSC.Respository.SupplyManagement
                                                                  IsUnUsed = x.IsUnUsed,
                                                                  RandomizationNo = x.Randomization != null ? x.Randomization.RandomizationNumber : "",
                                                                  ScreeningNo = x.Randomization != null ? x.Randomization.ScreeningNumber : "",
+                                                                 Isdisable = setting.IsBarcodeScan,
+                                                                 Barcode = x.Barcode
                                                              }).ToList();
                 if (data.Count > 0)
                 {
@@ -1150,6 +1157,8 @@ namespace GSC.Respository.SupplyManagement
                          Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
                          && s.RoleId == _jwtTokenAccesser.RoleId);
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+            if (setting == null)
+                return new List<SupplyManagementKITDiscardGridDto>();
 
             var data = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Include(x => x.SupplyManagementKIT)
                                                          .ThenInclude(x => x.PharmacyStudyProductType)
@@ -1178,7 +1187,9 @@ namespace GSC.Respository.SupplyManagement
                                                               DeletedDate = x.DeletedDate,
                                                               SiteId = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId : 0,
                                                               SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : "",
-                                                              IsUnUsed = x.IsUnUsed
+                                                              IsUnUsed = x.IsUnUsed,
+                                                              Isdisable = setting.IsBarcodeScan,
+                                                              Barcode = x.Barcode
                                                           }).ToList();
             if (data.Count > 0)
             {
@@ -1807,6 +1818,179 @@ namespace GSC.Respository.SupplyManagement
 
 
             return verification;
+        }
+
+        public string GenerateKitBarcode(SupplyManagementKITDetail supplyManagementKITDetail)
+        {
+            string barcode = string.Empty;
+            var detail = _context.SupplyManagementKIT.Include(s => s.Project).Include(s => s.ProjectDesignVisit)
+                  .Include(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Where(s => s.Id == supplyManagementKITDetail.SupplyManagementKITId).FirstOrDefault();
+            if (detail != null)
+            {
+                barcode = detail.Project.ProjectCode + supplyManagementKITDetail.KitNo + detail.ProjectDesignVisit.DisplayName + detail.PharmacyStudyProductType.ProductType.ProductTypeCode;
+            }
+            return barcode;
+        }
+        public List<ProductRecieptBarcodeGenerateGridDto> GetkitBarcodeDetail(int id, string type)
+        {
+            List<ProductRecieptBarcodeGenerateGridDto> lst = new List<ProductRecieptBarcodeGenerateGridDto>();
+            if (type == "Kit")
+            {
+                var kit = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Where(x => x.Id == id).FirstOrDefault();
+
+                var pharmacyBarcodeConfig = _context.PharmacyBarcodeConfig.Include(s => s.BarcodeDisplayInfo).Where(x => x.ProjectId == kit.SupplyManagementKIT.ProjectId && x.BarcodeModuleType == BarcodeModuleType.kit && x.DeletedBy == null).FirstOrDefault();
+
+
+                var sublst = new ProductRecieptBarcodeGenerateGridDto
+                {
+                    BarcodeString = kit.Barcode,
+                    BarcodeType = pharmacyBarcodeConfig.BarcodeType.GetDescription(),
+                    DisplayValue = pharmacyBarcodeConfig.DisplayValue,
+                    DisplayInformationLength = pharmacyBarcodeConfig.DisplayInformationLength,
+                    FontSize = pharmacyBarcodeConfig.FontSize,
+                    FontSizeStr = pharmacyBarcodeConfig.FontSize + "px",
+                    BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count()]
+                };
+                int index = 0;
+                foreach (var subitem in pharmacyBarcodeConfig.BarcodeDisplayInfo)
+                {
+                    var tablefieldName = _context.TableFieldName.Where(s => s.Id == subitem.TableFieldNameId).FirstOrDefault();
+                    if (tablefieldName != null)
+                    {
+                        sublst.BarcodeDisplayInfo[index] = new PharmacyBarcodeDisplayInfo();
+                        sublst.BarcodeDisplayInfo[index].Alignment = subitem.Alignment;
+                        sublst.BarcodeDisplayInfo[index].DisplayInformation = GetKitColumnValue(id, tablefieldName.FieldName, type);
+                        sublst.BarcodeDisplayInfo[index].OrderNumber = subitem.OrderNumber;
+                        sublst.BarcodeDisplayInfo[index].IsSameLine = subitem.IsSameLine;
+                        index++;
+                    }
+                }
+                lst.Add(sublst);
+            }
+            if (type == "KitPack")
+            {
+                var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == id).FirstOrDefault();
+                var pharmacyBarcodeConfig = _context.PharmacyBarcodeConfig.Include(s => s.BarcodeDisplayInfo).Where(x => x.ProjectId == kit.ProjectId && x.BarcodeModuleType == BarcodeModuleType.kit && x.DeletedBy == null).FirstOrDefault();
+                var sublst = new ProductRecieptBarcodeGenerateGridDto
+                {
+                    BarcodeString = kit.Barcode,
+                    BarcodeType = pharmacyBarcodeConfig.BarcodeType.GetDescription(),
+                    DisplayValue = pharmacyBarcodeConfig.DisplayValue,
+                    DisplayInformationLength = pharmacyBarcodeConfig.DisplayInformationLength,
+                    FontSize = pharmacyBarcodeConfig.FontSize,
+                    FontSizeStr = pharmacyBarcodeConfig.FontSize + "px",
+                    BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count()]
+                };
+                int index = 0;
+                foreach (var subitem in pharmacyBarcodeConfig.BarcodeDisplayInfo)
+                {
+                    var tablefieldName = _context.TableFieldName.Where(s => s.Id == subitem.TableFieldNameId).FirstOrDefault();
+                    if (tablefieldName != null)
+                    {
+                        sublst.BarcodeDisplayInfo[index] = new PharmacyBarcodeDisplayInfo();
+                        sublst.BarcodeDisplayInfo[index].Alignment = subitem.Alignment;
+                        sublst.BarcodeDisplayInfo[index].DisplayInformation = GetKitColumnValue(id, tablefieldName.FieldName, type);
+                        sublst.BarcodeDisplayInfo[index].OrderNumber = subitem.OrderNumber;
+                        sublst.BarcodeDisplayInfo[index].IsSameLine = subitem.IsSameLine;
+                        index++;
+                    }
+                }
+                lst.Add(sublst);
+            }
+            return lst;
+        }
+        string GetKitColumnValue(int id, string ColumnName, string type)
+        {
+            if (type == "Kit")
+            {
+                var tableRepository = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(s => s.Project)
+                    .Include(s => s.SupplyManagementKIT).ThenInclude(s => s.ProjectDesignVisit)
+                    .Include(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Where(x => x.Id == id).FirstOrDefault();
+                if (tableRepository == null) return "";
+
+                if (ColumnName == "ProjectId")
+                    return _context.Project.Find(tableRepository.SupplyManagementKIT.ProjectId).ProjectCode;
+
+                if (ColumnName == "SiteId" || ColumnName == "RandomizationId" || ColumnName == "InvestigatorContactId")
+                {
+                    if (tableRepository.RandomizationId > 0)
+                    {
+                        if (ColumnName == "SiteId")
+                        {
+                            var randomization = _context.Randomization.Include(s => s.Project).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
+                            return randomization != null && randomization.Project != null ? randomization.Project.ProjectCode : "";
+                        }
+                        if (ColumnName == "RandomizationId")
+                        {
+                            var randomization = _context.Randomization.Include(s => s.Project).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
+                            return randomization != null ? randomization.ScreeningNumber : "";
+                        }
+                        if (ColumnName == "InvestigatorContactId")
+                        {
+                            var randomization = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.InvestigatorContact).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
+                            return randomization != null ? randomization.Project.InvestigatorContact.NameOfInvestigator : "";
+                        }
+                    }
+                }
+
+                if (ColumnName == "PharmacyStudyProductTypeId")
+                    return tableRepository.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+
+                if (ColumnName == "ProjectDesignVisitId")
+                    return tableRepository.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
+
+                if (ColumnName == "KitNo")
+                {
+                    return tableRepository.KitNo;
+                }
+            }
+
+            if (type == "KitPack")
+            {
+                var tableRepository = _context.SupplyManagementKITSeries.Include(s => s.Project).Where(x => x.Id == id).FirstOrDefault();
+                if (tableRepository == null) return "";
+
+                if (ColumnName == "ProjectId")
+                    return _context.Project.Find(tableRepository.ProjectId).ProjectCode;
+
+                if (ColumnName == "SiteId" || ColumnName == "RandomizationId" || ColumnName == "InvestigatorContactId")
+                {
+                    if (tableRepository.RandomizationId > 0)
+                    {
+                        if (ColumnName == "SiteId")
+                        {
+                            var randomization = _context.Randomization.Include(s => s.Project).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
+                            return randomization != null && randomization.Project != null ? randomization.Project.ProjectCode : "";
+                        }
+                        if (ColumnName == "RandomizationId")
+                        {
+                            var randomization = _context.Randomization.Include(s => s.Project).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
+                            return randomization != null ? randomization.ScreeningNumber : "";
+                        }
+                        if (ColumnName == "InvestigatorContactId")
+                        {
+                            var randomization = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.InvestigatorContact).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
+                            return randomization != null ? randomization.Project.InvestigatorContact.NameOfInvestigator : "";
+                        }
+                    }
+                }
+
+                if (ColumnName == "PharmacyStudyProductTypeId")
+                    return tableRepository.TreatmentType;
+
+                if (ColumnName == "ProjectDesignVisitId")
+                {
+                    var kitdetail = _context.SupplyManagementKITSeriesDetail.Include(s => s.ProjectDesignVisit).Where(s => s.SupplyManagementKITSeriesId == tableRepository.Id).OrderBy(s => s.ProjectDesignVisit.Id).Select(s => s.ProjectDesignVisit.DisplayName).ToList();
+                    return kitdetail.Count > 0 ? string.Join(",", kitdetail) : "";
+                }
+
+                if (ColumnName == "KitNo")
+                {
+                    return tableRepository.KitNo;
+                }
+            }
+
+            return "";
         }
 
     }

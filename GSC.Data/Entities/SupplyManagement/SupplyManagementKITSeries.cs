@@ -40,5 +40,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public string IpAddress { get; set; }
 
         public bool IsRetension { get; set; }
+
+        public string Barcode { get; set; }
     }
 }

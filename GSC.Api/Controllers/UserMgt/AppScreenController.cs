@@ -161,5 +161,13 @@ namespace GSC.Api.Controllers.UserMgt
         {
             return Ok(_appScreenRepository.GetAppScreenDropDownByParentScreenCode(screenCode));
         }
+
+        [HttpGet]
+        [Route("GetTableColunmsIWRS/{Id}")]
+        public IActionResult GetTableColunmsIWRS(int Id)
+        {
+            return Ok(_appScreenRepository.GetTableColunmsIWRS(Id));
+        }
+
     }
 }

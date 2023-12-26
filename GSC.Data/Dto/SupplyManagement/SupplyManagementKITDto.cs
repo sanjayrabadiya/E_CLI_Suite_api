@@ -78,6 +78,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public bool IsRetension { get; set; }
 
+        public string Barcode { get; set; }
+
 
     }
 
@@ -107,6 +109,9 @@ namespace GSC.Data.Dto.SupplyManagement
         public DateTime? KitValidity { get; set; }
 
         public decimal? Dose { get; set; }
+
+        public string Barcode { get; set; }
+        public bool Isdisable { get; set; }
     }
 
     public class KitListApproved

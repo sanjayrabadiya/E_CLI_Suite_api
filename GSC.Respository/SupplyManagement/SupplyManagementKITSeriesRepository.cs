@@ -159,5 +159,17 @@ namespace GSC.Respository.SupplyManagement
             }
             return new DateTime();
         }
+
+        public string GenerateKitPackBarcode(SupplyManagementKITSeriesDto supplyManagementKitSeries)
+        {
+            string barcode = string.Empty;
+            var detail = _context.Project.Where(s => s.Id == supplyManagementKitSeries.ProjectId).FirstOrDefault();
+            var visits = _context.ProjectDesignVisit.Where(s => supplyManagementKitSeries.SupplyManagementKITSeriesDetail.Select(a => a.ProjectDesignVisitId).Contains(s.Id)).Select(a => a.DisplayName).ToList();
+            if (detail != null && visits.Count > 0)
+            {
+                barcode = detail.ProjectCode + supplyManagementKitSeries.KitNo + string.Join(",", visits.Distinct()) + supplyManagementKitSeries.TreatmentType;
+            }
+            return barcode;
+        }
     }
 }

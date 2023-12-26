@@ -27,26 +27,24 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
-        private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly ISupplyManagementKITSeriesRepository _supplyManagementKITSeriesRepository;
         public SupplyManagementKITSeriesController(ISupplyManagementKITRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKITSeriesRepository supplyManagementKITSeriesRepository)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITSeriesRepository supplyManagementKITSeriesRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
             _supplyManagementKITSeriesRepository = supplyManagementKITSeriesRepository;
         }
 
         [HttpGet("GetKITSeriesList/{projectId}/{siteId}/{isDeleted:bool?}")]
-        public IActionResult GetKITSeriesList(int projectId,int siteId, bool isDeleted)
+        public IActionResult GetKITSeriesList(int projectId, int siteId, bool isDeleted)
         {
             var productTypes = _supplyManagementKITRepository.GetKITSeriesList(isDeleted, projectId, siteId);
             return Ok(productTypes);
@@ -115,6 +113,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                     supplyManagementKitSeries.KitExpiryDate = _supplyManagementKITSeriesRepository.GetExpiryDateSequenceWise(supplyManagementKITSeriesDto);
                     supplyManagementKitSeries.IpAddress = _jwtTokenAccesser.IpAddress;
                     supplyManagementKitSeries.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
+                    if (kitsettings.IsBarcodeScan)
+                        supplyManagementKitSeries.Barcode = _supplyManagementKITSeriesRepository.GenerateKitPackBarcode(supplyManagementKITSeriesDto);
                     _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
                     if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo && x.ProjectId == supplyManagementKITSeriesDto.ProjectId && x.DeletedDate == null))
                     {
@@ -133,16 +133,8 @@ namespace GSC.Api.Controllers.SupplyManagement
 
                 }
             }
-
-
             return Ok(supplyManagementKITSeriesDto.Id);
-
         }
-
-
-
-
-
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
@@ -233,7 +225,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (expirydate != null)
             {
                 obj.RetestExpirystr = Convert.ToDateTime(expirydate.RetestExpiryDate).ToString("dd MMM yyyy");
-                
+
             }
             return Ok(obj);
         }
@@ -246,8 +238,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                 .Where(x => x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved
                 && x.ProductReceipt.PharmacyStudyProductTypeId == pharmacyStudyProductTypeId
                 && x.ProductReceipt.ProjectId == projectId)
-                .GroupBy(s=>s.BatchLotNumber)
-                .Select(x => new { Id = x.FirstOrDefault().ProductReceiptId, Value = x.FirstOrDefault().BatchLotNumber,Code = x.FirstOrDefault().BatchLotNumber })
+                .GroupBy(s => s.BatchLotNumber)
+                .Select(x => new { Id = x.FirstOrDefault().ProductReceiptId, Value = x.FirstOrDefault().BatchLotNumber, Code = x.FirstOrDefault().BatchLotNumber })
                 .Distinct()
                 .ToList();
             return Ok(data);

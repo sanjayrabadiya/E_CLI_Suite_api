@@ -48,5 +48,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? ToSiteId { get; set; }
 
         public bool IsRetension { get; set; }
+
+        public string Barcode { get; set; }
     }
 }

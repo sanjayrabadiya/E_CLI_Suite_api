@@ -30,6 +30,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public List<int> RoleId { get; set; }
 
+        public bool IsBarcodeScan { get; set; }
+
     }
 
     public class SupplyManagementKitNumberSettingsGridDto : BaseAuditDto

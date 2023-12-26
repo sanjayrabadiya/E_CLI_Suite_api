@@ -1,6 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
+using OpenTokSDK;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -59,6 +60,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string IpAddress { get; set; }
 
         public string TimeZone { get; set; }
+
+        public string RoleName { get; set; }
+
+        public int? RoleId { get; set; }
     }
 
     public class SupplyManagementReceiptHistoryGridDto : BaseAuditDto
@@ -70,7 +75,7 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ProductTypeName { get; set; }
 
-        public string  StudyProductTypeUnitName { get; set; }
+        public string StudyProductTypeUnitName { get; set; }
 
         public string StudyProjectCode { get; set; }
 

@@ -59,6 +59,8 @@ namespace GSC.Respository.SupplyManagement
                 }
                 t.WithIssueName = t.WithIssue == true ? "Yes" : "No";
                 t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
+                if (t.RoleId > 0)
+                    t.RoleName = _context.SecurityRole.Where(s => s.Id == t.RoleId).FirstOrDefault().RoleName;
             });
 
 
@@ -286,7 +288,7 @@ namespace GSC.Respository.SupplyManagement
             //        return "You can't receipt this shipment,Request from site is " + shipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!";
             //    }
             //}
-            
+
             if (supplyManagementshipmentDto.Kits != null)
             {
 

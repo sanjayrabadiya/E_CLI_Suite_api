@@ -56,6 +56,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementshipmentDto.Id = 0;
             var supplyManagementRequest = _mapper.Map<SupplyManagementReceipt>(supplyManagementshipmentDto);
             supplyManagementRequest.IpAddress = _jwtTokenAccesser.IpAddress;
+            supplyManagementRequest.RoleId = _jwtTokenAccesser.RoleId;
             supplyManagementRequest.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementReceiptRepository.Add(supplyManagementRequest);
             _supplyManagementReceiptRepository.UpdateKitStatus(supplyManagementshipmentDto, shipment);

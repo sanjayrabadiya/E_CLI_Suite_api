@@ -292,7 +292,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
                 .ForMember(x => x.Designation, x => x.MapFrom(a => a.Designation.NameOFDesignation))
                 .ForMember(x => x.YersOfExperience, x => x.MapFrom(a => a.Designation.YersOfExperience))
-                .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName +"-"+ a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName: ""))
+                .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName + "-" + a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName : ""))
                 .ReverseMap();
             CreateMap<TaskTemplate, TaskTemplateGridDto>().ReverseMap();
 
@@ -805,9 +805,9 @@ namespace GSC.Api.Helpers
 
             CreateMap<IDVerification, IDVerificationDto>().ReverseMap();
 
-           CreateMap<Designation, DesignationGridDto>()
-                .ForMember(x => x.Department, x => x.MapFrom(a => a.Department.DepartmentName))
-          .ReverseMap();
+            CreateMap<Designation, DesignationGridDto>()
+                 .ForMember(x => x.Department, x => x.MapFrom(a => a.Department.DepartmentName))
+           .ReverseMap();
 
             CreateMap<StudyPlanResource, StudyPlanResourceGridDto>()
             .ForMember(x => x.ResourceType, x => x.MapFrom(a => a.ResourceType.ResourceTypes.GetDescription()))
@@ -818,19 +818,20 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.Country, x => x.MapFrom(a => a.Country.CountryName))
          .ReverseMap();
 
-          CreateMap<UserAccess, UserAccessGridDto>()
-         .ForMember(x => x.RoleUser, x => x.MapFrom(a => a.UserRole.User.FirstName + ' ' + a.UserRole.User.LastName))
-         .ForMember(x => x.UserId, x => x.MapFrom(a => a.UserRole.User.Id))
-         .ForMember(x => x.roleId, x => x.MapFrom(a => a.UserRole.SecurityRole.Id))
-         .ForMember(x => x.Role, x => x.MapFrom(a => a.UserRole.SecurityRole.RoleName))
-         .ReverseMap();
+            CreateMap<UserAccess, UserAccessGridDto>()
+           .ForMember(x => x.RoleUser, x => x.MapFrom(a => a.UserRole.User.FirstName + ' ' + a.UserRole.User.LastName))
+           .ForMember(x => x.UserId, x => x.MapFrom(a => a.UserRole.User.Id))
+           .ForMember(x => x.roleId, x => x.MapFrom(a => a.UserRole.SecurityRole.Id))
+           .ForMember(x => x.Role, x => x.MapFrom(a => a.UserRole.SecurityRole.RoleName))
+           .ReverseMap();
 
-            //.ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
-            //.ForMember(x => x.RoleUser, x => x.MapFrom(a => a.UserRole.SecurityRole.RoleName + "-" + a.UserRole.User.UserName))
-            //.ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteUserAccess.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
-            //.ForMember(x => x.InactiveSiteCode, x => x.MapFrom(a => string.Join(", ", a.siteUserAccess.Where(x => x.DeletedDate != null).Select(s => s.Project.ProjectCode == null ? s.Project.ProjectName : s.Project.ProjectCode).ToList())))
-            ////.ReverseMap();
-            ////     CreateMap<SiteUserAccess, UserAccessGridDto>().ReverseMap();
+            CreateMap<PharmacyBarcodeConfig, PharmacyBarcodeConfigGridDto>()
+                           .ForMember(x => x.BarcodeTypeName, x => x.MapFrom(a => a.BarcodeType.GetDescription()))
+                           .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+                           .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.Site.ProjectCode))
+                           .ForMember(x => x.BarcodeModuleTypeName, x => x.MapFrom(a => a.BarcodeModuleType.GetDescription()))
+                           .ForMember(x => x.BarcodeDisplayInfo, x => x.MapFrom(a => string.Join(",", a.BarcodeDisplayInfo.Where(x => x.DeletedDate == null).Select(s => s.TableFieldName.LabelName).ToList())))
+                           .ReverseMap();
         }
     }
 }

@@ -1174,5 +1174,30 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Value).ToList();
             return Ok(SubResourceType);
         }
+        [HttpGet]
+        [Route("GetBarcodeModuleType")]
+        public IActionResult GetBarcodeModuleType()
+        {
+            var SubResourceType = Enum.GetValues(typeof(BarcodeModuleType))
+                .Cast<BarcodeModuleType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(SubResourceType);
+        }
+        [HttpGet]
+        [Route("GetBarcodeTypesKit")]
+        public IActionResult GetBarcodeTypesKit()
+        {
+            var SubResourceType = Enum.GetValues(typeof(BarcodeTypes))
+                .Cast<BarcodeTypes>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(SubResourceType);
+        }
+       
     }
 }

@@ -24,6 +24,8 @@ namespace GSC.Data.Entities.SupplyManagement
 
         public AuditReason AuditReason { get; set; }
 
+        public int? RoleId { get; set; }
+
         
     }
 }

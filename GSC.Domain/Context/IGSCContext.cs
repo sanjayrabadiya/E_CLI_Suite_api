@@ -459,5 +459,10 @@ namespace GSC.Domain.Context
         public DbSet<UserAccess> UserAccess { get; set; }
 
         DbSet<SupplyManagementKitNumberSettingsRole> SupplyManagementKitNumberSettingsRole { get; set; }
+
+        DbSet<PharmacyBarcodeConfig> PharmacyBarcodeConfig { get; set; }
+        DbSet<PharmacyBarcodeDisplayInfo> PharmacyBarcodeDisplayInfo { get; set; }
+
+        
     }
 }

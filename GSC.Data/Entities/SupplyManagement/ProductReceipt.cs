@@ -34,5 +34,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public string IpAddress { get; set; }
 
         public string TimeZone { get; set; }
+
+        public string Barcode { get; set; }
     }
 }

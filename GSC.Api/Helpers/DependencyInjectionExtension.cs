@@ -435,6 +435,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IStudyPlanResourceRepository, StudyPlanResourceRepository>();
             services.AddScoped<ICurrencyRepository, CurrencyRepository>();
             services.AddScoped<IUserAccessRepository, UserAccessRepository>();
+            services.AddScoped<IPharmacyBarcodeConfigRepository, PharmacyBarcodeConfigRepository>();
+            services.AddScoped<IPharmacyBarcodeDisplayInfoRepository, PharmacyBarcodeDisplayInfoRepository>();
+            
         }
     }
 }

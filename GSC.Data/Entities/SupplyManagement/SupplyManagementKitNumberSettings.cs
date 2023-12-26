@@ -30,6 +30,7 @@ namespace GSC.Data.Entities.SupplyManagement
 
         public string TimeZone { get; set; }
         public bool IsDoseWiseKit { get; set; }
+        public bool IsBarcodeScan { get; set; }
 
     }
 }

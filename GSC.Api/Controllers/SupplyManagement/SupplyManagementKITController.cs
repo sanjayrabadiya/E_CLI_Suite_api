@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         }
 
         [HttpGet("GetKITList/{projectId}/{siteId}/{isDeleted:bool?}")]
-        public IActionResult Get(int projectId,int siteId, bool isDeleted)
+        public IActionResult Get(int projectId, int siteId, bool isDeleted)
         {
             var kits = _supplyManagementKITRepository.GetKITList(isDeleted, projectId, siteId);
             return Ok(kits);
@@ -108,6 +108,8 @@ namespace GSC.Api.Controllers.SupplyManagement
                     obj.SupplyManagementKITId = supplyManagementUploadFile.Id;
                     obj.Status = KitStatus.AllocationPending;
                     obj.NoOfImp = supplyManagementUploadFileDto.NoOfImp;
+                    if (kitsettings.IsBarcodeScan)
+                        obj.Barcode = _supplyManagementKITRepository.GenerateKitBarcode(obj);
                     _supplyManagementKITDetailRepository.Add(obj);
                     if (!_supplyManagementKITDetailRepository.All.Any(x => x.KitNo == obj.KitNo))
                     {
@@ -255,7 +257,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("AssignKitNumber")]
         public IActionResult AssignKitNumber([FromBody] SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto)
         {
-            
+
             supplyManagementVisitKITDetailDto = _supplyManagementKITRepository.SetKitNumber(supplyManagementVisitKITDetailDto);
             if (!string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.ExpiryMesage))
             {
@@ -361,6 +363,35 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult GetDoseListByProductRecieptId(int projectId, int projecttypeId, int productReceiptId)
         {
             return Ok(_supplyManagementKITRepository.GetDoseListByProductRecieptId(projectId, projecttypeId, productReceiptId));
+        }
+
+        [HttpGet]
+        [Route("KitViewBarcode/{id}/{type}")]
+        public IActionResult KitViewBarcode(int id, string type)
+        {
+            if (type == "Kit")
+            {
+                var kit = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).Where(x => x.Id == id).FirstOrDefault();
+
+                var barcodeConfig = _context.PharmacyBarcodeConfig.Include(s => s.BarcodeDisplayInfo).Where(x => x.ProjectId == kit.SupplyManagementKIT.ProjectId && x.BarcodeModuleType == BarcodeModuleType.kit && x.DeletedBy == null).FirstOrDefault();
+                if (barcodeConfig == null)
+                {
+                    ModelState.AddModelError("Message", "Barcode configuration not found.");
+                    return BadRequest(ModelState);
+                }
+            }
+            if (type == "KitPack")
+            {
+                var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == id).FirstOrDefault();
+
+                var barcodeConfig = _context.PharmacyBarcodeConfig.Include(s => s.BarcodeDisplayInfo).Where(x => x.ProjectId == kit.ProjectId && x.BarcodeModuleType == BarcodeModuleType.kit && x.DeletedBy == null).FirstOrDefault();
+                if (barcodeConfig == null)
+                {
+                    ModelState.AddModelError("Message", "Barcode configuration not found.");
+                    return BadRequest(ModelState);
+                }
+            }
+            return Ok(_supplyManagementKITRepository.GetkitBarcodeDetail(id, type));
         }
     }
 }

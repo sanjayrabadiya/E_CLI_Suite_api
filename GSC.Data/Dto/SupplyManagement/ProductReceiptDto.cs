@@ -1,4 +1,5 @@
-﻿using GSC.Data.Entities.Common;
+﻿using GSC.Data.Entities.Barcode;
+using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System;
@@ -60,5 +61,21 @@ namespace GSC.Data.Dto.SupplyManagement
         public string IpAddress { get; set; }
 
         public string TimeZone { get; set; }
+
+        public string Barcode { get; set; }
+    }
+
+    public class ProductRecieptBarcodeGenerateGridDto : BaseDto
+    {
+        public string ProjectCode { get; set; }
+        public int? SiteId { get; set; }
+        public int ProjectId { get; set; }
+        public string BarcodeString { get; set; }
+        public string BarcodeType { get; set; }
+        public bool DisplayValue { get; set; }
+        public int? FontSize { get; set; }
+        public string FontSizeStr { get; set; }
+        public int? DisplayInformationLength { get; set; }
+        public IList<PharmacyBarcodeDisplayInfo> BarcodeDisplayInfo { get; set; } = null;
     }
 }

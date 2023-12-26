@@ -312,7 +312,9 @@ namespace GSC.Respository.SupplyManagement
                                 ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                 RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                 LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-                                Dose = x.SupplyManagementKIT.Dose
+                                Dose = x.SupplyManagementKIT.Dose,
+                                Barcode = x.Barcode,
+                                Isdisable = setting.IsBarcodeScan
                             }).OrderBy(x => x.KitNo).ToList();
 
 
@@ -331,7 +333,9 @@ namespace GSC.Respository.SupplyManagement
                                       ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                       RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                       LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-                                      Dose = x.SupplyManagementKIT.Dose
+                                      Dose = x.SupplyManagementKIT.Dose,
+                                      Barcode = x.Barcode,
+                                      Isdisable = setting.IsBarcodeScan
                                   }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
@@ -353,7 +357,9 @@ namespace GSC.Respository.SupplyManagement
                                      ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
                                      RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
                                      LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-                                     Dose = x.SupplyManagementKIT.Dose
+                                     Dose = x.SupplyManagementKIT.Dose,
+                                     Barcode = x.Barcode,
+                                     Isdisable = setting.IsBarcodeScan
                                  }).OrderBy(x => x.KitNo).ToList();
                 }
             }
@@ -373,7 +379,9 @@ namespace GSC.Respository.SupplyManagement
                                 ProjectCode = x.Project.ProjectCode,
                                 TreatmentType = x.TreatmentType,
                                 SiteCode = x.SiteId > 0 ? _context.Project.Where(s => s.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
-                                KitValidity = x.KitExpiryDate
+                                KitValidity = x.KitExpiryDate,
+                                Barcode = x.Barcode,
+                                Isdisable = setting.IsBarcodeScan
                             }).OrderBy(x => x.KitNo).ToList();
 
                     var data1 = _context.SupplyManagementKITSeries.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
@@ -386,7 +394,9 @@ namespace GSC.Respository.SupplyManagement
                                        ProjectCode = x.Project.ProjectCode,
                                        TreatmentType = x.TreatmentType,
                                        SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode,
-                                       KitValidity = x.KitExpiryDate
+                                       KitValidity = x.KitExpiryDate,
+                                       Barcode = x.Barcode,
+                                       Isdisable = setting.IsBarcodeScan
                                    }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
@@ -406,7 +416,9 @@ namespace GSC.Respository.SupplyManagement
                                 KitNo = x.KitNo,
                                 ProjectCode = x.Project.ProjectCode,
                                 TreatmentType = x.TreatmentType,
-                                KitValidity = x.KitExpiryDate
+                                KitValidity = x.KitExpiryDate,
+                                Barcode = x.Barcode,
+                                Isdisable = setting.IsBarcodeScan
                             }).OrderBy(x => x.KitNo).ToList();
 
 
@@ -569,11 +581,11 @@ namespace GSC.Respository.SupplyManagement
             var project = _context.Project.Where(x => x.Id == supplyManagementRequestDto.FromProjectId).FirstOrDefault();
             if (project == null)
             {
-                return "From site not found";
+                return " site not found";
             }
             if (project.Status == Helper.MonitoringSiteStatus.CloseOut || project.Status == Helper.MonitoringSiteStatus.Terminated || project.Status == Helper.MonitoringSiteStatus.OnHold || project.Status == Helper.MonitoringSiteStatus.Rejected)
             {
-                return "From site is " + project.Status.GetDescription() + "!";
+                return " site " + project.ProjectCode + " is " + project.Status.GetDescription() + "!";
             }
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == project.ParentProjectId).FirstOrDefault();
             if (setting == null)

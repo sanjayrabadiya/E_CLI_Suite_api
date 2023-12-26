@@ -41,10 +41,10 @@ namespace GSC.Respository.UserMgt
             var appscreen = All.Where(x => x.DeletedDate == null && x.Id == id).ToList();
             if (appscreen != null)
             {
-                if(appscreen[0].TableName != null)
+                if (appscreen[0].TableName != null)
                 {
-                    return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == appscreen[0].TableName).Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList(); 
-                }    
+                    return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == appscreen[0].TableName).Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList();
+                }
             }
             return null;
         }
@@ -61,6 +61,19 @@ namespace GSC.Respository.UserMgt
             var parent = All.Where(x => x.DeletedDate == null && x.ScreenCode == parentScreenCode).FirstOrDefault().Id;
             return All.Where(x => x.DeletedDate == null && x.ParentAppScreenId == parent)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.ScreenName }).OrderBy(o => o.Value).ToList();
+        }
+        public List<DropDownDto> GetTableColunmsIWRS(int id)
+        {
+            if (id == 1)
+            {
+                return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == "ProductReceipt").Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList();
+            }
+            if (id == 2)
+            {
+                return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == "KitManagement").Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList();
+            }
+
+            return null;
         }
     }
 }

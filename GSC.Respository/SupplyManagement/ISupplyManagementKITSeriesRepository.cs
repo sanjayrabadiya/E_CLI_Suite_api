@@ -18,5 +18,7 @@ namespace GSC.Respository.SupplyManagement
         string CheckExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
 
         DateTime GetExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto);
+
+        string GenerateKitPackBarcode(SupplyManagementKITSeriesDto supplyManagementKitSeries);
     }
 }
