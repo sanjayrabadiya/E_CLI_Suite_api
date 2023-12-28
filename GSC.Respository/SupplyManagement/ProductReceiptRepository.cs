@@ -66,7 +66,7 @@ namespace GSC.Respository.SupplyManagement
             var pharmacyStudyProductType = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.Id == productReceipt.PharmacyStudyProductTypeId).FirstOrDefault();
             if (project != null && pharmacyStudyProductType != null && pharmacyStudyProductType.ProductType != null)
             {
-                productReceipt.Barcode = project.ProjectCode + pharmacyStudyProductType.ProductType.ProductTypeCode + Convert.ToDateTime(productReceipt.ReceiptDate).ToString("dd/MMM/yyyy hh:mm");
+                productReceipt.Barcode = project.ProjectCode + pharmacyStudyProductType.ProductType.ProductTypeCode + Convert.ToDateTime(productReceipt.ReceiptDate).ToString("dd/MMM/yyyy");
                 Update(productReceipt);
                 _context.Save();
             }

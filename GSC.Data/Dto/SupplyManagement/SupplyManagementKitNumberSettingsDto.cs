@@ -55,6 +55,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string IpAddress { get; set; }
 
         public string TimeZone { get; set; }
+
+        public bool IsBarcodeScan { get; set; }
     }
 
 }
