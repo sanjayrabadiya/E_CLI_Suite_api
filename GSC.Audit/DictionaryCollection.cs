@@ -633,6 +633,10 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Platform", DisplayName = "Platform" });
             _dictionaries.Add(new Dictionary { FieldName = "DeviceBrowser", DisplayName = "Device Browser" });
 
+            _dictionaries.Add(new Dictionary { FieldName = "forecast", DisplayName = "Fore Cast" });
+            _dictionaries.Add(new Dictionary { FieldName = "plnStartDate", DisplayName = "Pln Start Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "plnEndDate", DisplayName = "Pln End Date" });
+
         }
 
 

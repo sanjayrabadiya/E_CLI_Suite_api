@@ -802,10 +802,26 @@ namespace GSC.Respository.CTMS
                         {
                             task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
                             task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-                            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode ==null ? r.ManageSite.SiteName: r.ProjectCode).FirstOrDefault();
                         });
                         result = tasklist;
                     }
+                }
+            }
+            else if(siteId > 0){
+                var studyplan = _context.StudyPlan.Where(x => x.ProjectId == siteId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+                if (studyplan != null)
+                {
+                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
+                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                    tasklist.ForEach(task =>
+                    {
+                        task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                        task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
+                        task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
+                    });
+
+                    result = tasklist;
                 }
             }
             else
@@ -819,7 +835,7 @@ namespace GSC.Respository.CTMS
                     {
                         task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
                         task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-                        task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                        task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
                     });
 
                     result = tasklist;
@@ -829,7 +845,7 @@ namespace GSC.Respository.CTMS
             if (result != null)
                 foreach (var item in result)
                 {
-                    var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
+                    var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Include(r => r.StudyPlanTask).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
                    .Select(x => new ResourceTypeGridDto
                    {
                        Id = x.Id,
@@ -842,14 +858,20 @@ namespace GSC.Respository.CTMS
                        YersOfExperience = x.ResourceType.Designation.YersOfExperience,
                        NameOfMaterial = x.ResourceType.NameOfMaterial,
                        Unit=x.ResourceType.Unit.UnitName,
-                       NumberOfUnit =x.ResourceType.NumberOfUnit,
-                       Cost=x.ResourceType.Cost,
+                       //NumberOfUnit =x.ResourceType.NumberOfUnit,
+                       NumberOfUnit = x.NoOfUnit,
+                       Cost =x.ResourceType.Cost,
+                       TotalCost = x.TotalCost,
+                       ConvertTotalCost = x.ConvertTotalCost,
                        CurrencyType = x.ResourceType.Currency.CurrencySymbol+" - "+x.ResourceType.Currency.CurrencyName,
                        CreatedDate = x.CreatedDate,
-                       CreatedByUser = x.CreatedByUser.UserName
+                       CreatedByUser = x.CreatedByUser.UserName,
+                       LocalCurrencyRate= _context.CurrencyRate.Where(s=>s.StudyPlanId==x.StudyPlanTask.StudyPlanId && s.LocalCurrencyId==x.ResourceType.CurrencyId && s.DeletedBy==null).Select(t=>t.LocalCurrencyRate).FirstOrDefault(),
                    }).ToList();
                     item.TaskResource = resourcelist;
                 }
+
+            //Apply flitter display only Resource Added display
             if (result != null)
                 result = result.Where(s => s.TaskResource.Count != 0).ToList();
 

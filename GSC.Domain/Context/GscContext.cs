@@ -515,8 +515,9 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementKitNumberSettingsRole> SupplyManagementKitNumberSettingsRole { get; set; }
         public DbSet<PharmacyBarcodeConfig> PharmacyBarcodeConfig { get; set; }
         public DbSet<PharmacyBarcodeDisplayInfo> PharmacyBarcodeDisplayInfo { get; set; }
-        
+        public DbSet<CurrencyRate> CurrencyRate { get; set; }
 
-        
+
+
     }
 }

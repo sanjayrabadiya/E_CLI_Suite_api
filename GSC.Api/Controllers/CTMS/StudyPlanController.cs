@@ -45,6 +45,20 @@ namespace GSC.Api.Controllers.CTMS
             if (id <= 0) return BadRequest();
             var studyplan = _studyPlanRepository.Find(id);
             var studyplandetail = _mapper.Map<StudyPlanDto>(studyplan);
+            if (studyplan != null)
+            {
+                var currencyRatedata = _context.CurrencyRate.Where(s => s.StudyPlanId == studyplan.Id && s.DeletedBy==null).ToList();
+                List<CurrencyRateDTO> CurrencyRateList1 = new List<CurrencyRateDTO>();
+                currencyRatedata.ForEach(s=>{
+                    var CurrencyRateList = new CurrencyRateDTO()
+                    {
+                        localCurrencyId = s.LocalCurrencyId,
+                        localCurrencyRate = s.LocalCurrencyRate
+                    };
+                    CurrencyRateList1.Add(CurrencyRateList);
+                });
+                studyplandetail.CurrencyRateList = CurrencyRateList1;
+            }
             return Ok(studyplandetail);
         }
 
@@ -83,6 +97,7 @@ namespace GSC.Api.Controllers.CTMS
                 }
                 _studyPlanRepository.Add(studyplan);
                 if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+                studyplanDto.Id = studyplan.Id;
 
 
                 var validate = _studyPlanRepository.ImportTaskMasterData(studyplan);
@@ -95,6 +110,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _studyPlanRepository.PlanUpdate(studyplanDto.ProjectId);
+            _studyPlanRepository.CurrencyRateAdd(studyplanDto);
             return Ok();
         }
 
@@ -114,6 +130,7 @@ namespace GSC.Api.Controllers.CTMS
 
             _studyPlanRepository.Update(studyplan);
             if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+            _studyPlanRepository.CurrencyRateUpdate(studyplanDto);
             return Ok(studyplan.Id);
         }
 

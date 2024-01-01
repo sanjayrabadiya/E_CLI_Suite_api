@@ -245,10 +245,10 @@ namespace GSC.Respository.CTMS
                 studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
                 studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
                 if (ctmsMonitoringDto.ActualStartDate != null)
-                {
-                    studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                     studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                if (ctmsMonitoringDto.ActualEndDate != null)
                     studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
-                }
+                
                 _context.StudyPlanTask.Add(studyPlanTask);
                 _context.Save();
             }
@@ -273,10 +273,10 @@ namespace GSC.Respository.CTMS
                     studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
                     studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
                     if (ctmsMonitoringDto.ActualStartDate != null)
-                    {
                         studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                    if (ctmsMonitoringDto.ActualEndDate != null)
                         studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
-                    }
+                    
                     _context.StudyPlanTask.Update(studyPlanTask);
                     _context.Save();
                 }

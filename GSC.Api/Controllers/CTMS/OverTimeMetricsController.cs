@@ -28,8 +28,8 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("{isDeleted:bool?}/{metricsId}/{projectId}/{countryId}/{siteId}")]
         public IActionResult Get(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
-           _overTimeMetricsRepository.UpdateAllActualNo(isDeleted, metricsId, projectId, countryId, siteId);
-            if (_uow.Save() <= 0);
+            //Get ActualNo then Update from Randomization
+            _overTimeMetricsRepository.UpdateAllActualNo(isDeleted, metricsId, projectId, countryId, siteId);
             var tasklist = _overTimeMetricsRepository.GetTasklist(isDeleted, metricsId, projectId, countryId, siteId);    
             return Ok(tasklist);
         }

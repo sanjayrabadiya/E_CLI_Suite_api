@@ -1,10 +1,8 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Master;
 using GSC.Shared.Extension;
 using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace GSC.Data.Entities.CTMS
 {
     public class StudyPlan : BaseEntity, ICommonAduit
@@ -28,6 +26,11 @@ namespace GSC.Data.Entities.CTMS
         }
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
+        public int? CurrencyId { get; set; } // Global Currency
+        public int? TotalCost { get; set; }
         public Master.Project Project { get; set; }
+
+        public Currency Currency { get; set; }
+
     }
 }

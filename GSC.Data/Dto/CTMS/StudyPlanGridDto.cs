@@ -10,5 +10,7 @@ namespace GSC.Data.Dto.CTMS
         public int ProjectId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
+        public string GlobalCurrency { get; set; }
+        public int? TotalCost { get; set; }
     }
 }

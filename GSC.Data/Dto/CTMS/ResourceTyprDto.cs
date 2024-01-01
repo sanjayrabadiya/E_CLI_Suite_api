@@ -37,9 +37,13 @@ namespace GSC.Data.Dto.CTMS
         public string CurrencyType { get; set; }
         public int? NumberOfUnit { get; set; }
         public int? Cost { get; set; }
+        public int? TotalCost { get; set; }
+        public int? ConvertTotalCost { get; set; }
         public string NameOfMaterial { get; set; }
         public DateTime? BoughtDate { get; set; }
         public string OwnerName { get; set; }
+        public string GlobalCurrency { get; set; }
+        public decimal? LocalCurrencyRate { get; set; }
     }
     public class ResourceByEdit 
     {
@@ -47,6 +51,12 @@ namespace GSC.Data.Dto.CTMS
         public int? subresource { get; set; }
         public int? designation { get; set; }
         public int? nameOfMaterial { get; set; }
-        public int? rollUser {  get; set; } 
+        public int? rollUser {  get; set; }
+        public int? Cost { get; set; }
+        public int? NoOfUnit { get; set; }
+        public int? TotalCost { get; set; }
+        public int? ConvertTotalCost { get; set; }
+        public string ResourceUnit { get; set; }
+        public string GlobalCurrency { get; set; }
     }
 }

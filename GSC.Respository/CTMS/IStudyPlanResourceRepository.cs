@@ -8,6 +8,9 @@ namespace GSC.Respository.CTMS
     {
         dynamic GetTaskResourceList(bool isDeleted, int PlanTaskId);
         string Duplicate(StudyPlanResource objSave);
+        string ValidationCurrency(int resourceId,int studyplanId);
         dynamic ResourceById( int id);
+        dynamic GetResourceInf(int studyPlantaskId ,int resourceId);
+        void TotalCostUpdate(StudyPlanResource studyPlanResource);
     }
 }

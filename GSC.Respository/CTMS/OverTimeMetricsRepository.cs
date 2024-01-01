@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
@@ -25,10 +26,12 @@ namespace GSC.Respository.CTMS
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMetricsRepository _metricsRepository;
+        private readonly IUnitOfWork _uow;
         public OverTimeMetricsRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
+            IJwtTokenAccesser jwtTokenAccesser, IUnitOfWork uow,
             IMapper mapper, IProjectRepository projectRepository, IProjectRightRepository projectRightRepository, IMetricsRepository MetricsRepository) : base(context)
         {
+            _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
@@ -51,6 +54,7 @@ namespace GSC.Respository.CTMS
                 x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate).ToList();
                 task.Actual = ProjectSettings.Count();
                 Update(task);
+                _uow.Save();
             }
             return overTimeMetrics;
         }
@@ -179,7 +183,7 @@ namespace GSC.Respository.CTMS
         //select site only select Approved in CTMS Monitoring
         public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId)
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();

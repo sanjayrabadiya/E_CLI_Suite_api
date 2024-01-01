@@ -39,5 +39,6 @@ namespace GSC.Data.Entities.CTMS
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
         public decimal? Percentage { get; set; }
+        public int? TotalCost { get; set; }
     }
 }

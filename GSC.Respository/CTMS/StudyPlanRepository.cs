@@ -47,7 +47,7 @@ namespace GSC.Respository.CTMS
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             var ctmsProjectList = _context.Project.Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
             return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c=>c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
-                   ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
+            ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
         }
 
         public string ImportTaskMasterData(StudyPlan studyplan)
@@ -125,7 +125,47 @@ namespace GSC.Respository.CTMS
             _context.StudyPlan.UpdateRange(studyPlanList);
             _context.Save();
         }
-
+        #region User will able to add Multiple Local currency in Study plan 
+        public void CurrencyRateAdd(StudyPlanDto objSave)
+        {
+            objSave.CurrencyRateList.ForEach(i =>
+            {
+                var currencyRateData = new CurrencyRate();
+                currencyRateData.Id = 0;
+                currencyRateData.StudyPlanId = objSave.Id;
+                currencyRateData.GlobalCurrencyId=objSave.CurrencyId;
+                currencyRateData.LocalCurrencyId=i.localCurrencyId;
+                currencyRateData.LocalCurrencyRate=i.localCurrencyRate;
+                _context.CurrencyRate.Add(currencyRateData);
+                _context.Save();
+            });
+        }
+        public void CurrencyRateUpdate(StudyPlanDto objSave)
+        {
+            var CurrencyRateData = _context.CurrencyRate.Where(x => x.StudyPlanId == objSave.Id && x.DeletedDate == null).ToList();
+            CurrencyRateData.ForEach(t =>
+            {
+                if (CurrencyRateData != null)
+                {
+                    t.DeletedBy = _jwtTokenAccesser.UserId;
+                    t.DeletedDate = DateTime.UtcNow;
+                    _context.CurrencyRate.Update(t);
+                    _context.Save();
+                }
+            });
+            objSave.CurrencyRateList.ForEach(i =>
+            {
+                var currencyRateData = new CurrencyRate();
+                currencyRateData.Id = 0;
+                currencyRateData.StudyPlanId = objSave.Id;
+                currencyRateData.GlobalCurrencyId = objSave.CurrencyId;
+                currencyRateData.LocalCurrencyId = i.localCurrencyId;
+                currencyRateData.LocalCurrencyRate = i.localCurrencyRate;
+                _context.CurrencyRate.Add(currencyRateData);
+                _context.Save();
+            });
+        }
+        #endregion
         private StudyPlanTask UpdateDependentTaskDate(StudyPlanTask maintask, ref List<StudyPlanTask> tasklist)
         {
             if (maintask.DependentTaskId > 0)

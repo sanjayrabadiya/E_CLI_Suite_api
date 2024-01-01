@@ -73,6 +73,8 @@ namespace GSC.Api.Controllers.Master
                 _studyPlanTaskResourceRepository.Add(taskResource);        
 
             if (_uow.Save() <= 0) throw new Exception("Creating Resource failed on save.");
+            //Update TotalCost in Study level and task level
+            _studyPlanTaskResourceRepository.TotalCostUpdate(taskResource);
 
             return Ok();
         }
@@ -94,6 +96,8 @@ namespace GSC.Api.Controllers.Master
             _studyPlanTaskResourceRepository.Update(taskResource);
 
             if (_uow.Save() <= 0) throw new Exception("Updating Resource failed on save.");
+            //Update TotalCost in Study level and task level
+            _studyPlanTaskResourceRepository.TotalCostUpdate(taskResource);
             return Ok(taskResource.Id);
         }
 
@@ -130,6 +134,20 @@ namespace GSC.Api.Controllers.Master
             _uow.Save();
 
             return Ok();
+        }
+        
+        [HttpGet]
+        [Route("ValidationCurrency/{studyPlantaskId}/{resourceId}/{studyplanId}")]
+        public IActionResult ValidationCurrency(int studyPlantaskId ,int resourceId,int studyplanId)
+        {
+            var validate = _studyPlanTaskResourceRepository.ValidationCurrency(resourceId,studyplanId);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+            var taskResource = _studyPlanTaskResourceRepository.GetResourceInf(studyPlantaskId,resourceId);
+            return Ok(taskResource);
         }
     }
 }

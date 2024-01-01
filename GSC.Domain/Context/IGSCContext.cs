@@ -276,6 +276,7 @@ namespace GSC.Domain.Context
         DbSet<ResourceType> ResourceType { get; set; }
         DbSet<TaskMaster> TaskMaster { get; set; }
         DbSet<StudyPlan> StudyPlan { get; set; }
+        DbSet<CurrencyRate> CurrencyRate { get; set; }
         DbSet<StudyPlanTask> StudyPlanTask { get; set; }
         DbSet<ProjectDesignVariableEncryptRole> ProjectDesignVariableEncryptRole { get; set; }
         DbSet<ProjectDesingTemplateRestriction> ProjectDesingTemplateRestriction { get; set; }

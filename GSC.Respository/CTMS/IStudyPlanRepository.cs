@@ -12,7 +12,8 @@ namespace GSC.Respository.CTMS
         string Duplicate(StudyPlan objSave);
         string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist, StudyPlan studyplan);
         void PlanUpdate(int ProjectId);
-
+        void CurrencyRateAdd(StudyPlanDto objSave);
+        void CurrencyRateUpdate(StudyPlanDto objSave);
         string ImportTaskMasterDataFromTaskMaster(StudyPlan studyplan, int id);
     }
 }
