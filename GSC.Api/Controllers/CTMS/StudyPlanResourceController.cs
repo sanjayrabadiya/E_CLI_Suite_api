@@ -42,10 +42,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         // GET: api/<controller>
-        [HttpGet("{isDeleted:bool?}/{PlanTaskId}")]
-        public IActionResult Get(bool isDeleted, int PlanTaskId)
+        [HttpGet("{isDeleted:bool?}/{studyPlanTaskId}")]
+        public IActionResult Get(bool isDeleted, int studyPlanTaskId)
         {
-            var taskResource = _studyPlanTaskResourceRepository.GetTaskResourceList(isDeleted, PlanTaskId);
+            var taskResource = _studyPlanTaskResourceRepository.GetTaskResourceList(isDeleted, studyPlanTaskId);
             return Ok(taskResource);
         }
 

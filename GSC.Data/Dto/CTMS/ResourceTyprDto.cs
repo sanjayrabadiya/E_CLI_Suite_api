@@ -44,6 +44,8 @@ namespace GSC.Data.Dto.CTMS
         public string OwnerName { get; set; }
         public string GlobalCurrency { get; set; }
         public decimal? LocalCurrencyRate { get; set; }
+        public int?  UserId { get; set; }
+        public int?  SecurityRoleId { get; set; }
     }
     public class ResourceByEdit 
     {

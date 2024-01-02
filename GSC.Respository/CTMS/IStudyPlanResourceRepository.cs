@@ -6,7 +6,7 @@ namespace GSC.Respository.CTMS
 {
     public interface IStudyPlanResourceRepository : IGenericRepository<StudyPlanResource>
     {
-        dynamic GetTaskResourceList(bool isDeleted, int PlanTaskId);
+        dynamic GetTaskResourceList(bool isDeleted, int studyPlanTaskId);
         string Duplicate(StudyPlanResource objSave);
         string ValidationCurrency(int resourceId,int studyplanId);
         dynamic ResourceById( int id);

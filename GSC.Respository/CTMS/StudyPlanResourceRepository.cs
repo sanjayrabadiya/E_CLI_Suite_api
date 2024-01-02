@@ -7,6 +7,7 @@ using GSC.Shared.JWTAuth;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
+using GSC.Helper;
 
 
 
@@ -26,22 +27,24 @@ namespace GSC.Respository.CTMS
             _mapper = mapper;
             _context = context;
         }
-        public dynamic GetTaskResourceList(bool isDeleted, int PlanTaskId)
+        public dynamic GetTaskResourceList(bool isDeleted, int studyPlanTaskId)
         {
-            //var gridResource = _context.TaskResource.Include(r=>r.ResourceType).ThenInclude(d=>d.Designation).Where(x => x.TaskMasterId == PlanTaskId && x.DeletedDate == null)
-            //   .Select(c => new ResourceTypeGridDto
-            //   {
-            //       Id = c.Id,
-            //       ResourceType = c.ResourceType.ResourceTypes.GetDescription(),
-            //       ResourceSubType = c.ResourceType.ResourceSubType.GetDescription(),
-            //       Designation = c.ResourceType.Designation.NameOFDesignation != null ? c.ResourceType.Designation.NameOFDesignation+" - "+ c.ResourceType.Designation.YersOfExperience+ " Years" : " - ",
-            //       Role = c.ResourceType.Role.RoleName != null ? c.ResourceType.Role.RoleName+" - " + c.ResourceType.User.UserName : " - ",
-            //       NameOfMaterial = c.ResourceType.NameOfMaterial != "" ? c.ResourceType.NameOfMaterial : " - ",
-            //       CreatedDate = c.CreatedDate,
-            //       CreatedByUser = c.CreatedByUser.UserName,
-            //   }).ToList();
+            var gridResource = _context.StudyPlanResource.Include(r => r.ResourceType).Where(x => x.StudyPlanTaskId == studyPlanTaskId && x.DeletedDate == null && x.ResourceType.ResourceTypes == ResourceTypeEnum.Manpower)
+               .Select(c => new ResourceTypeGridDto
+               {
+                   Id = c.Id,
+                   ResourceType = c.ResourceType.ResourceTypes.GetDescription(),
+                   ResourceSubType = c.ResourceType.ResourceSubType.GetDescription(),
+                   Role = c.ResourceType.Role.RoleName ,
+                   User = c.ResourceType.User.UserName,
+                   UserId = c.ResourceType.UserId,
+                   SecurityRoleId = c.ResourceType.RoleId,
+                   NameOfMaterial = c.ResourceType.NameOfMaterial != "" ? c.ResourceType.NameOfMaterial : " - ",
+                   CreatedDate = c.CreatedDate,
+                   CreatedByUser = c.CreatedByUser.UserName,
+               }).ToList();
 
-            return true;
+            return gridResource;
 
         }
         public string Duplicate(StudyPlanResource objSave)
