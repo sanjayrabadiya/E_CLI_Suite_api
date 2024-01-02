@@ -84,35 +84,28 @@ namespace GSC.Api.Controllers.CTMS
         public ActionResult Delete(int id)
         {
             var record = _metricsRepository.Find(id);
+            if (record == null) return NotFound();
             var parenttask = _overTimeMetricsRepository.FindBy(x => x.PlanMetricsId == id);
             foreach (var task in parenttask)
             {
-                if (record == null)
-                    return NotFound();
                 _overTimeMetricsRepository.Delete(task);
+                _uow.Save();
             }
-            if (record == null)
-                return NotFound();
-
             _metricsRepository.Delete(record);
             _uow.Save();
-
             return Ok();
         }
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
             var record = _metricsRepository.Find(id);
+            if (record == null) return NotFound();
             var parenttask = _overTimeMetricsRepository.FindBy(x => x.PlanMetricsId == id);
             foreach (var task in parenttask)
             {
-                if (record == null)
-                    return NotFound();
                 _overTimeMetricsRepository.Active(task);
+                _uow.Save();
             }
-            if (record == null)
-                return NotFound();
-
             var validate = _metricsRepository.Duplicate(record);
             if (!string.IsNullOrEmpty(validate))
             {

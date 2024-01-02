@@ -636,6 +636,10 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "forecast", DisplayName = "Fore Cast" });
             _dictionaries.Add(new Dictionary { FieldName = "plnStartDate", DisplayName = "Pln Start Date" });
             _dictionaries.Add(new Dictionary { FieldName = "plnEndDate", DisplayName = "Pln End Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "planned", DisplayName = "Planned Subject No" });
+            _dictionaries.Add(new Dictionary { FieldName = "startDate", DisplayName = "Planned Start Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "endtDate", DisplayName = "Planned End Date" });
+            _dictionaries.Add(new Dictionary { FieldName = "planningType", DisplayName = "Planned Type" });
 
         }
 
