@@ -223,7 +223,7 @@ namespace GSC.Respository.Etmf
         }
 
 
-        public List<CommonArtifactDocumentDto> GetSubSecDocumentList(int Id)
+        public List<CommonArtifactDocumentModel> GetSubSecDocumentList(int Id)
         {
             var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == Id).Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
                 .ThenInclude(x => x.ProjectWorkPlace).FirstOrDefault();
@@ -232,7 +232,7 @@ namespace GSC.Respository.Etmf
                         && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
                         .OrderByDescending(x => x.Id).FirstOrDefault();
 
-            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+            List<CommonArtifactDocumentModel> dataList = new List<CommonArtifactDocumentModel>();
             //var _docService = new DocumentService();
             var reviewdocument = _context.ProjectSubSecArtificateDocumentReview.Where(c => c.DeletedDate == null
             && c.UserId == _jwtTokenAccesser.UserId).Select(x => x.ProjectWorkplaceSubSecArtificateDocumentId).ToList();
@@ -305,7 +305,7 @@ namespace GSC.Respository.Etmf
                 var currentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
                && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && (x.IsApproved == null || x.IsApproved == false)).FirstOrDefault();
 
-                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+                CommonArtifactDocumentModel obj = new CommonArtifactDocumentModel();
                 obj.Id = item.Id;
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceSubSectionArtifactId;
                 obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
@@ -322,7 +322,7 @@ namespace GSC.Respository.Etmf
                 obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
-                obj.Level = 5.2;
+                obj.ArtificateLevel = 5.2;
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
@@ -344,6 +344,8 @@ namespace GSC.Respository.Etmf
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
                 obj.IsApproveDoc = tempApprover.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;//ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 obj.ExpiryDate = item.ExpiryDate;
+                obj.ParentDocumentId = item.ParentDocumentId;
+                obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(q => q.CreatedDate).ToList();

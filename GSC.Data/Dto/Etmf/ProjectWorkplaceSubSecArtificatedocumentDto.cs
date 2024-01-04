@@ -3,6 +3,7 @@ using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace GSC.Data.Dto.Etmf
@@ -74,6 +75,49 @@ namespace GSC.Data.Dto.Etmf
         public DateTime? ExpiryDate { get; set; }
     }
 
+    public class CommonArtifactDocumentModel
+    {
+        public int Id { get; set; }
+        public int ProjectWorkplaceSubSectionArtifactId { get; set; }
+        public int EtmfArtificateMasterLbraryId { get; set; }
+        public int ProjectWorkplaceArtificateId { get; set; }
+        public string DocumentName { get; set; }
+        public string ExtendedName { get; set; }
+        public FileModel FileModel { get; set; }
+        public string DocPath { get; set; }
+        public string FullDocPath { get; set; }
+        public string Artificatename { get; set; }
+        public string SectionName { get; set; }
+        public string SubSectionName { get; set; }
+        public string ZoneName { get; set; }
+        public List<DocumentUsers> Reviewer { get; set; }
+        public int Status { get; set; }
+        public string StatusName { get; set; }
+        public string Version { get; set; }
+        public string CreatedByUser { get; set; }
+        public double ArtificateLevel { get; set; }
+        public int CreatedBy { get; set; }
+        public DateTime? CreatedDate { get; set; }
+        public bool SendBy { get; set; }
+        public bool SendAndSendBack { get; set; }
+        public bool AddedBy { get; set; }
+        public bool IsSendBack { get; set; }
+        public string ReviewStatus { get; set; }
+        public bool IsReview { get; set; }
+        public bool IsMoved { get; set; }
+        public bool? IsAccepted { get; set; }
+        public string ApprovedStatus { get; set; }
+        public List<DocumentUsers> Approver { get; set; }
+        public bool IsApproveDoc { get; set; }
+        public bool IsNotRequired { get; set; }
+        public bool? IsReplyAllComment { get; set; }
+        public int? SequenceNo { get; set; }
+        public int? ApproveSequenceNo { get; set; }
+        public DateTime? ExpiryDate { get; set; }
+        public int? ParentDocumentId { get; set; }
+        public bool HasChild { get; set; }
+    }
+
     public class DocumentUsers
     {
         public string UserName { get; set; }
@@ -100,5 +144,4 @@ namespace GSC.Data.Dto.Etmf
         public int id { get; set; }
         public DateTime? ExpiryDate { get; set; }
     }
-
 }

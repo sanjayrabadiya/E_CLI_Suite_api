@@ -11,7 +11,7 @@ namespace GSC.Respository.Etmf
     {
         string getArtifactSectionDetail(ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceSubSectionDto);
         int deleteSubsectionArtifactfile(int id);
-        List<CommonArtifactDocumentDto> GetSubSecDocumentList(int Id);
+        List<CommonArtifactDocumentModel> GetSubSecDocumentList(int Id);
         ProjectWorkplaceSubSecArtificatedocument AddDocument(ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceSubSecArtificatedocumentDto);
         string ImportData(int Id);
         void UpdateApproveDocument(int documentId, bool IsAccepted);

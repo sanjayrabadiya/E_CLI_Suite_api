@@ -187,9 +187,9 @@ namespace GSC.Respository.Etmf
             return dataList;
         }
 
-        public List<CommonArtifactDocumentDto> GetDocumentList(int id)
+        public List<CommonArtifactDocumentModel> GetDocumentList(int id)
         {
-            List<CommonArtifactDocumentDto> dataList = new List<CommonArtifactDocumentDto>();
+            List<CommonArtifactDocumentModel> dataList = new List<CommonArtifactDocumentModel>();
 
             //var _docuService = new DocumentService();
 
@@ -270,7 +270,7 @@ namespace GSC.Respository.Etmf
                 var currentApprover = _context.ProjectArtificateDocumentApprover.Where(x => x.ProjectWorkplaceArtificatedDocumentId == item.Id
                && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && (x.IsApproved == null || x.IsApproved == false)).FirstOrDefault();
 
-                CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
+                CommonArtifactDocumentModel obj = new CommonArtifactDocumentModel();
                 obj.Id = item.Id;
                 obj.ProjectWorkplaceSubSectionArtifactId = item.ProjectWorkplaceArtificateId;
                 obj.ProjectWorkplaceArtificateId = item.ProjectWorkplaceArtificateId;
@@ -295,7 +295,7 @@ namespace GSC.Respository.Etmf
                 obj.IsMoved = item.IsMoved;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
-                obj.Level = 6;
+                obj.ArtificateLevel = 6;
                 obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
                 var tempReview = Review.Where(x => x.UserId != x.CreatedBy);
@@ -313,9 +313,11 @@ namespace GSC.Respository.Etmf
                 obj.SequenceNo = currentReviewer?.SequenceNo;
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.ExpiryDate = item.ExpiryDate;
+                obj.ParentDocumentId = item.ParentDocumentId;
+                obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
                 dataList.Add(obj);
             }
-            return dataList.OrderByDescending(q => q.CreatedDate).ToList();
+            return dataList;
         }
 
         public CommonArtifactDocumentDto GetDocument(int id)
