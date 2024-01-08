@@ -313,11 +313,12 @@ namespace GSC.Respository.Etmf
                 obj.SequenceNo = currentReviewer?.SequenceNo;
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.ExpiryDate = item.ExpiryDate;
-                obj.ParentDocumentId = item.ParentDocumentId;
+                obj.ParentDocumentId = item.ParentDocumentId != null ?
+                    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
                 obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
                 dataList.Add(obj);
             }
-            return dataList;
+            return dataList.OrderByDescending(x => x.CreatedDate).ToList();
         }
 
         public CommonArtifactDocumentDto GetDocument(int id)
