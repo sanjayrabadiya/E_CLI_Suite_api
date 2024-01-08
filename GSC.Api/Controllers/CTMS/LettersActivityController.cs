@@ -37,8 +37,8 @@ namespace GSC.Api.Controllers.Master
             _context = context;
         }
 
-        [HttpGet("{isDeleted:bool?}/{projectId}")]
-        public IActionResult Get(bool isDeleted, int projectId)
+        [HttpGet("{isDeleted:bool?}/{projectId:int?}")]
+        public IActionResult Get(bool isDeleted, int? projectId)
         {
             var lettersActivity = _lettersActivityRepository.GetLettersActivityList(isDeleted, projectId);
             return Ok(lettersActivity);

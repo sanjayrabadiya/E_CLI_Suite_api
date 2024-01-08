@@ -96,7 +96,9 @@ namespace GSC.Respository.CTMS
                    ResourceType = c.ResourceTypes.GetDescription(),
                    CurrencyType= c.Currency.CurrencyName +" - " + c.Currency.CurrencySymbol,
                    GlobalCurrency= _context.Currency.Where(s=>s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy==null).Select(d=>d.CurrencyName +" - " + d.CurrencySymbol).FirstOrDefault(),
-                   LocalCurrencyRate= _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.LocalCurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
+                   LocalCurrencySymbol= c.Currency.CurrencySymbol,
+                   GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d=>d.CurrencySymbol).FirstOrDefault(),
+                   LocalCurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.LocalCurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
                }).FirstOrDefault();
 
             return ResourceType;

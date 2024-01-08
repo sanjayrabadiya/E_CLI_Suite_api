@@ -63,7 +63,7 @@ namespace GSC.Respository.Master
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.UserName, Code = c.UserName, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
-        List<LettersActivityGridDto> ILettersActivityRepository.GetLettersActivityList(bool isDeleted, int projectId)
+        List<LettersActivityGridDto> ILettersActivityRepository.GetLettersActivityList(bool isDeleted, int? projectId)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectId == projectId).
                    ProjectTo<LettersActivityGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();

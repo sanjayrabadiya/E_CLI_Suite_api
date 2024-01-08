@@ -516,6 +516,7 @@ namespace GSC.Domain.Context
         public DbSet<PharmacyBarcodeConfig> PharmacyBarcodeConfig { get; set; }
         public DbSet<PharmacyBarcodeDisplayInfo> PharmacyBarcodeDisplayInfo { get; set; }
         public DbSet<CurrencyRate> CurrencyRate { get; set; }
+        public DbSet<Procedure> Procedure { get; set; }
 
 
 

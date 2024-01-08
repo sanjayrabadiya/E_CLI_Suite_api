@@ -864,16 +864,18 @@ namespace GSC.Respository.CTMS
                        TotalCost = x.TotalCost,
                        ConvertTotalCost = x.ConvertTotalCost,
                        CurrencyType = x.ResourceType.Currency.CurrencySymbol+" - "+x.ResourceType.Currency.CurrencyName,
+                       GlobalCurrencySymbol=x.StudyPlanTask.StudyPlan.Currency.CurrencySymbol,
+                       LocalCurrencySymbol= x.ResourceType.Currency.CurrencySymbol,
                        CreatedDate = x.CreatedDate,
                        CreatedByUser = x.CreatedByUser.UserName,
-                       LocalCurrencyRate= _context.CurrencyRate.Where(s=>s.StudyPlanId==x.StudyPlanTask.StudyPlanId && s.LocalCurrencyId==x.ResourceType.CurrencyId && s.DeletedBy==null).Select(t=>t.LocalCurrencyRate).FirstOrDefault(),
-                   }).ToList();
+                       LocalCurrencyRate= _context.CurrencyRate.Where(s=>s.StudyPlanId==x.StudyPlanTask.StudyPlanId && s.LocalCurrencyId==x.ResourceType.CurrencyId && s.DeletedBy==null).Select(t=>t.LocalCurrencyRate).FirstOrDefault(),               
+                    }).ToList();
                     item.TaskResource = resourcelist;
                 }
 
             //Apply flitter display only Resource Added display
-            if (result != null)
-                result = result.Where(s => s.TaskResource.Count != 0).ToList();
+            //if (result != null)
+            //    result = result.Where(s => s.TaskResource.Count != 0).ToList();
 
             return result;
         }

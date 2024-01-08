@@ -834,6 +834,10 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.BarcodeModuleTypeName, x => x.MapFrom(a => a.BarcodeModuleType.GetDescription()))
                            .ForMember(x => x.BarcodeDisplayInfo, x => x.MapFrom(a => string.Join(",", a.BarcodeDisplayInfo.Where(x => x.DeletedDate == null).Select(s => s.TableFieldName.LabelName).ToList())))
                            .ReverseMap();
+            CreateMap<Procedure, ProcedureGridDto>()
+               .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
+               .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName + "-" + a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName : ""))
+               .ReverseMap();
         }
     }
 }

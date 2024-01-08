@@ -536,10 +536,7 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanResource, StudyPlanResourceDto>().ReverseMap();
             CreateMap<Currency, CurrencyDto>().ReverseMap();
             CreateMap<PharmacyBarcodeConfig, PharmacyBarcodeConfigDto>().ReverseMap();
-            //CreateMap<UserAccess, UserAccessDto>().ReverseMap();
-            //CreateMap<SiteUserAccess, UserAccess>()
-            //  .ForMember(x => x.Id, y => y.MapFrom(a => a.UserAccessId))
-            // .ReverseMap();
+            CreateMap<Procedure, ProcedureDto>().ReverseMap();
         }
     }
 }

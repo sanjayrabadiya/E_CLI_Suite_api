@@ -437,7 +437,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IUserAccessRepository, UserAccessRepository>();
             services.AddScoped<IPharmacyBarcodeConfigRepository, PharmacyBarcodeConfigRepository>();
             services.AddScoped<IPharmacyBarcodeDisplayInfoRepository, PharmacyBarcodeDisplayInfoRepository>();
-            
+            services.AddScoped<IProcedureRepository, ProcedureRepository>();
+
         }
     }
 }

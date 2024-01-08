@@ -13,7 +13,7 @@ namespace GSC.Respository.Master
         List<DropDownDto> GetLettersFormatTypeDropDown();
         List<DropDownDto> GetMedicalUserTypeDown(int siteId);
         List<LettersActivityDateDropDown> getSelectDateDrop(int projectId, int siteId);
-        List<LettersActivityGridDto> GetLettersActivityList(bool isDeleted, int projectId);
+        List<LettersActivityGridDto> GetLettersActivityList(bool isDeleted, int? projectId);
         void CreateLettersEmail(LettersFormate lettersFormate, LettersActivityDto lettersActivityDto);
         void updateLettersEmail(LettersActivityDto lettersActivityDto);
         List<LettersActivityDto> UserRoles(int ProjectId);
