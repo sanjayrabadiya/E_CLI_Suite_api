@@ -14,10 +14,14 @@ using GSC.Helper;
 using GSC.Respository.EmailSender;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
-using IronPdf;
 using GSC.Respository.Configuration;
 using System;
 using GSC.Respository.ProjectRight;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using DocumentFormat.OpenXml;
+using HtmlToOpenXml;
+
 
 namespace GSC.Respository.Master
 {
@@ -102,7 +106,7 @@ namespace GSC.Respository.Master
             var adress = "";
             string currentDate = DateTime.Now.ToString("dd MMMM yyyy");
 
-            var projectdata = _context.Project.Include(c => c.Country).Include(s => s.State).Include(c => c.City).Include(a => a.CityArea).Where(x => x.Id == lettersActivityDto.ProjectId).FirstOrDefault();
+            var projectdata = _context.Project.Include(c => c.Country).Include(s => s.State).Include(c => c.City).Include(a => a.CityArea).Include(m => m.ManageSite).Where(x => x.Id == lettersActivityDto.ProjectId).FirstOrDefault();
             var CtmsMonitoringdata = _context.CtmsMonitoring.Where(x => x.Id == lettersActivityDto.CtmsMonitoringId).FirstOrDefault();
             var CtmsActivity = _context.CtmsActivity.Where(x => x.Id == lettersActivityDto.ActivityId).FirstOrDefault();
             var studyCode = _context.Project.Where(p => p.Id == projectdata.ParentProjectId && p.ParentProjectId == null).FirstOrDefault();
@@ -125,8 +129,8 @@ namespace GSC.Respository.Master
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##ADDRESS##", adress, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>ADDRESS</strong>##", "<strong>" + adress + "</strong>", RegexOptions.IgnoreCase);
 
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SITENAME##", projectdata.ProjectCode, RegexOptions.IgnoreCase);
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SITENAME</strong>##", "<strong>" + projectdata.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
+            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SITENAME##", projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode, RegexOptions.IgnoreCase);
+            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SITENAME</strong>##", "<strong>" + projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
 
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SUDYCODE##", studyCode.ProjectCode, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SUDYCODE</strong>##", "<strong>" + studyCode.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
@@ -146,13 +150,7 @@ namespace GSC.Respository.Master
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##CRANAME##", _jwtTokenAccesser.UserName, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>CRANAME</strong>##", "<strong>" + _jwtTokenAccesser.UserName + "</strong>", RegexOptions.IgnoreCase);
 
-            var html = lettersFormate.LetterBody;
-            lettersActivityDto.LetterBody = html;
-
-            IronPdf.License.LicenseKey = "IRONSUITE.PROJECT.GSC.TECHNOLOGIES.COM.25591-9E0B467B32-AFJTVDQ-6WN6XNLZEYTP-32BSHFYDEP5E-HQSQGZLSNZXF-7BLGH6WO6OQ3-BRZW46YOOA6C-UFONLE5PVIJ2-WYUK6K-T75DD74MYVWKEA-DEPLOYMENT.TRIAL-66RKX3.TRIAL.EXPIRES.16.AUG.2023";
-
-            //var renderer = new ChromePdfRenderer();
-            //var pdf = renderer.RenderHtmlAsPdf(html);
+            lettersActivityDto.LetterBody = lettersFormate.LetterBody;
 
             if (!String.IsNullOrEmpty(lettersActivityDto.FilePath))
             {
@@ -163,37 +161,24 @@ namespace GSC.Respository.Master
                     File.Delete(Path.Combine(removeFullPath));
                 }
             }
-            var renderer = new ChromePdfRenderer
-            {
-                RenderingOptions =
-                    {
-                        MarginTop = 20, //millimeters
-                        MarginBottom = 20,
-                        CssMediaType = IronPdf.Rendering.PdfCssMediaType.Print,
-                        TextHeader = new TextHeaderFooter
-                        {
-                            CenterText = CtmsActivity.ActivityName.ToUpper()+" VISIT CONFIRMATION LETTER",
-                            DrawDividerLine = true,
-                            FontSize = 14,
-                        },
-                        TextFooter = new TextHeaderFooter
-                        {
-                            LeftText = "{date} {time}",
-                            RightText = "Page {page} of {total-pages}",
-                            DrawDividerLine = true,
-                            FontSize = 14
-                        }
-                    }
-            };
-            //PDF file save
-            var pdf = renderer.RenderHtmlAsPdf(html);
-            string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
+            string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".docx" };
             var fullPath = Path.Combine(paths);
-            pdf.SaveAs(fullPath);
             lettersActivityDto.AttachmentPath = fullPath;
 
-            //PDF filepath save in Table
-            string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
+            ////docx file save
+            using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(fullPath, WordprocessingDocumentType.Document))
+            {
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                Body body = new Body();
+                mainPart.Document.Append(body);
+                HtmlConverter converter = new HtmlConverter(mainPart);
+                converter.ParseHtml(lettersFormate.LetterBody);
+                wordDocument.Save();
+            }
+
+            //docx filepath save in Table
+            string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".docx" };
             var fullPath1 = Path.Combine(paths1);
             lettersActivityDto.FilePath = fullPath1;
         }
@@ -201,7 +186,6 @@ namespace GSC.Respository.Master
         {
             Guid obj = Guid.NewGuid();
             var CtmsActivity = _context.CtmsActivity.Where(x => x.Id == lettersActivityDto.ActivityId).FirstOrDefault();
-            IronPdf.License.LicenseKey = "IRONSUITE.PROJECT.GSC.TECHNOLOGIES.COM.25591-9E0B467B32-AFJTVDQ-6WN6XNLZEYTP-32BSHFYDEP5E-HQSQGZLSNZXF-7BLGH6WO6OQ3-BRZW46YOOA6C-UFONLE5PVIJ2-WYUK6K-T75DD74MYVWKEA-DEPLOYMENT.TRIAL-66RKX3.TRIAL.EXPIRES.16.AUG.2023";
             if (!String.IsNullOrEmpty(lettersActivityDto.FilePath))
             {
                 string[] removePaths = { lettersActivityDto.FilePath };
@@ -211,37 +195,24 @@ namespace GSC.Respository.Master
                     File.Delete(Path.Combine(removeFullPath));
                 }
             }
-            var renderer = new ChromePdfRenderer
-            {
-                RenderingOptions =
-                    {
-                        MarginTop = 20,
-                        MarginBottom = 20,
-                        CssMediaType = IronPdf.Rendering.PdfCssMediaType.Print,
-                        TextHeader = new TextHeaderFooter
-                        {
-                            CenterText = CtmsActivity.ActivityName.ToUpper()+" VISIT CONFIRMATION LETTER",
-                            DrawDividerLine = true,
-                            FontSize = 14,
-                        },
-                        TextFooter = new TextHeaderFooter
-                        {
-                            LeftText = "{date} {time}",
-                            RightText = "Page {page} of {total-pages}",
-                            DrawDividerLine = true,
-                            FontSize = 14
-                        }
-                    }
-            };
-            //PDF file save
-            var pdf = renderer.RenderHtmlAsPdf(lettersActivityDto.LetterBody);
-            string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
-            var fullPath = Path.Combine(paths);
-            pdf.SaveAs(fullPath);
-            lettersActivityDto.AttachmentPath = fullPath;
 
-            //PDF filepath save in table
-            string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".pdf" };
+            string[] paths = { _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".docx" };
+            var fullPath = Path.Combine(paths);
+            lettersActivityDto.AttachmentPath = fullPath;
+            //docx file save
+            using (WordprocessingDocument wordDocument = WordprocessingDocument.Create(fullPath, WordprocessingDocumentType.Document))
+            {
+                MainDocumentPart mainPart = wordDocument.AddMainDocumentPart();
+                mainPart.Document = new Document();
+                Body body = new Body();
+                mainPart.Document.Append(body);
+                HtmlConverter converter = new HtmlConverter(mainPart);
+                converter.ParseHtml(lettersActivityDto.LetterBody);
+                wordDocument.Save();
+            }
+
+            //docx filepath save in table
+            string[] paths1 = { _uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms.ToString(), "Letters-" + obj.ToString() + ".docx" };
             var fullPath1 = Path.Combine(paths1);
             lettersActivityDto.FilePath = fullPath1;
         }

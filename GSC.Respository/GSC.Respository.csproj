@@ -10,7 +10,7 @@
     <PackageReference Include="ClosedXML" Version="0.102.1" />
     <PackageReference Include="Crc32.NET" Version="1.2.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
-    <PackageReference Include="IronPdf" Version="2023.11.7" />
+    <PackageReference Include="HtmlToOpenXml.dll" Version="2.3.0" />
     <PackageReference Include="OpenTok" Version="3.12.2" />
     <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="23.1.43" />
     <PackageReference Include="Syncfusion.EJ2.PdfViewer.AspNet.Core.Windows" Version="23.1.43" />
