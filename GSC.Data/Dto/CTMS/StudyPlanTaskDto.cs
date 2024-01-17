@@ -13,7 +13,8 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? EndDate { get; set; }
         public DateTime? EndDateDay { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
-       
+        public List<StudyPlanTaskDto> StudyPlanTaskTemp { get; set; }
+
     }
 
     public class StudyPlanTaskDto : BaseAuditDto
@@ -51,7 +52,7 @@ namespace GSC.Data.Dto.CTMS
         public string SiteName { get; set; }
         public string CountryName { get; set; }
         public int? TotalCost { get; set; }
-
+        public List<StudyPlanTaskDto> Subtasks { get; set; }
         public List<ResourceTypeGridDto> TaskResource { get; set; }
     }
 
