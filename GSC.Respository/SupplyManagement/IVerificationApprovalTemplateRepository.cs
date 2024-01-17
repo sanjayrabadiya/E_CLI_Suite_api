@@ -3,6 +3,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -14,6 +15,7 @@ namespace GSC.Respository.SupplyManagement
 
         void SendTemplateApproveRejectEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt);
 
+        Task SendForApprovalVerificationTemplateScheduleEmail();
 
     }
 }

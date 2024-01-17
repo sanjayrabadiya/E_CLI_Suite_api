@@ -38,6 +38,8 @@ using GSC.Respository.SupplyManagement;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.Master;
+using BitMiracle.LibTiff.Classic;
+using JWT.Builder;
 
 namespace GSC.Respository.Attendance
 {
@@ -2394,13 +2396,274 @@ namespace GSC.Respository.Attendance
                                 SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
                                 history.SupplyManagementEmailConfigurationDetailId = item.Id;
                                 _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+
+                                SupplyManagementThresholdHistory thresoldhistory = new SupplyManagementThresholdHistory();
+                                thresoldhistory.ProjectId = obj.ParentProjectId;
+                                thresoldhistory.SiteId = obj.ProjectId;
+                                _context.SupplyManagementThresholdHistory.Add(thresoldhistory);
                                 _context.Save();
                             }
                         }
                     }
                 }
             }
+        }
+        public async Task SendRandomizationThresholdEmailSchedule()
+        {
+            int? projectId = 0;
+            int? recordId = 0;
+            string recurenceType = string.Empty;
+            try
+            {
+                var data = await _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null).ToListAsync();
+                if (data != null && data.Count > 0)
+                {
+                    foreach (var threshold in data)
+                    {
+                        var sitedata = await _context.Project.Where(s => s.ParentProjectId == threshold.ProjectId && s.DeletedDate == null && (s.Status == MonitoringSiteStatus.Active || s.Status == MonitoringSiteStatus.Approved)).ToListAsync();
+                        if (sitedata != null && sitedata.Count > 0)
+                        {
+                            foreach (var site in sitedata)
+                            {
+                                int KitCount = 0;
+                                bool Issuccess = false;
+                                SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
+                                IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                                SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
 
+                                if (threshold.KitCreationType == KitCreationType.SequenceWise)
+                                {
+
+                                    KitCount = _context.SupplyManagementKITSeriesDetail
+                                        .Include(x => x.SupplyManagementKITSeries)
+                                        .ThenInclude(x => x.SupplyManagementShipment)
+                                        .ThenInclude(x => x.SupplyManagementRequest)
+                                        .Where(x => x.DeletedDate == null
+                                                        && x.SupplyManagementKITSeries.ProjectId == threshold.ProjectId
+                                                        && !x.SupplyManagementKITSeries.IsRetension
+                                                        && x.SupplyManagementKITSeries.DeletedDate == null
+                                                        && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == site.Id
+                                                        && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
+                                                        && x.RandomizationId == null).Count();
+                                }
+
+                                if (threshold.KitCreationType == KitCreationType.KitWise)
+                                {
+                                    KitCount = _context.SupplyManagementKITDetail.
+                                                Include(x => x.SupplyManagementKIT).
+                                                ThenInclude(x => x.PharmacyStudyProductType).
+                                                ThenInclude(x => x.ProductType)
+                                                .Include(x => x.SupplyManagementShipment)
+                                                .ThenInclude(x => x.SupplyManagementRequest)
+                                                .Where(x =>x.DeletedDate == null
+                                                          && x.SupplyManagementKIT.DeletedDate == null
+                                                          && x.SupplyManagementKIT.ProjectId == threshold.ProjectId
+                                                          && !x.IsRetension
+                                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == site.Id
+                                                          && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                                                          && x.RandomizationId == null).Count();
+                                }
+
+                                var study = _context.Project.Where(x => x.Id == threshold.ProjectId).FirstOrDefault();
+                                if (study != null && KitCount < threshold.ThresholdValue)
+                                {
+                                    var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == threshold.ProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
+                                    if (emailconfiglist != null && emailconfiglist.Count > 0)
+                                    {
+                                        var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
+                                        if (siteconfig.Count > 0)
+                                        {
+                                            emailconfig = siteconfig.Where(x => x.SiteId == site.Id).FirstOrDefault();
+                                        }
+                                        else
+                                        {
+                                            emailconfig = emailconfiglist.FirstOrDefault();
+                                        }
+
+                                        projectId = threshold.ProjectId;
+                                        recurenceType = emailconfig.RecurrenceType.GetDescription();
+                                        recordId = site.Id;
+
+                                        var thresoldHistory = _context.SupplyManagementThresholdHistory.Where(s => s.ProjectId == threshold.ProjectId && s.SiteId == site.Id).OrderByDescending(s => s.Id).FirstOrDefault();
+                                        if (thresoldHistory != null)
+                                        {
+                                            supplyManagementEmailScheduleLog.ProjectId = threshold.ProjectId;
+                                            supplyManagementEmailScheduleLog.TriggerType = emailconfig.Triggers.GetDescription();
+                                            supplyManagementEmailScheduleLog.RecurrenceType = emailconfig.RecurrenceType.GetDescription();
+                                            supplyManagementEmailScheduleLog.Message = "Threshold Schedule Start " + DateTime.Now;
+                                            supplyManagementEmailScheduleLog.RecordId = site.Id;
+                                            _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog);
+                                            _context.Save();
+
+                                            if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Daily)
+                                            {
+                                                Issuccess = true;
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.AlternateDay)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now;
+                                                TimeSpan span = end.Date - start.Date;
+                                                double difference = span.TotalDays;
+                                                if (difference % 2 == 0)
+                                                    Issuccess = true;
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Weekly)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddDays(7);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.FifteenDays)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddDays(15);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Monthly)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddMonths(1);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.EveryTwoMonth)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddMonths(2);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Quarterly)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddMonths(3);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.EverySixMonth)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddMonths(6);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Yearly)
+                                            {
+                                                DateTime start = Convert.ToDateTime(thresoldHistory.CreatedDate);
+                                                DateTime end = DateTime.Now.Date;
+                                                while (start < end)
+                                                {
+                                                    start = start.AddYears(1);
+                                                    if (start.Date == end.Date)
+                                                    {
+                                                        Issuccess = true;
+                                                        start = end;
+                                                    }
+                                                }
+                                            }
+                                            if (Issuccess)
+                                            {
+                                                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                                                if (details.Count() > 0)
+                                                {
+                                                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == threshold.ProjectId).FirstOrDefault().ProjectCode;
+                                                    var project = _context.Project.Where(x => x.Id == site.Id).FirstOrDefault();
+                                                    if (project != null)
+                                                    {
+                                                        iWRSEmailModel.SiteCode = project.ProjectCode;
+                                                        var managesite = _context.ManageSite.Where(x => x.Id == project.ManageSiteId).FirstOrDefault();
+                                                        if (managesite != null)
+                                                        {
+                                                            iWRSEmailModel.SiteName = managesite.SiteName;
+                                                        }
+                                                    }
+                                                    iWRSEmailModel.ThresholdValue = (int)threshold.ThresholdValue;
+                                                    iWRSEmailModel.RemainingKit = KitCount;
+
+                                                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
+                                                    foreach (var item in details)
+                                                    {
+                                                        SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
+                                                        history.SupplyManagementEmailConfigurationDetailId = item.Id;
+                                                        _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+                                                        _context.Save();
+                                                    }
+                                                }
+                                            }
+
+                                            var supplyManagementEmailScheduleLog1 = new SupplyManagementEmailScheduleLog();
+                                            supplyManagementEmailScheduleLog1.ProjectId = threshold.ProjectId;
+                                            supplyManagementEmailScheduleLog1.TriggerType = emailconfig.Triggers.GetDescription();
+                                            supplyManagementEmailScheduleLog1.RecurrenceType = emailconfig.RecurrenceType.GetDescription();
+                                            supplyManagementEmailScheduleLog1.Message = "Threshold Schedule end " + DateTime.Now;
+                                            supplyManagementEmailScheduleLog1.RecordId = site.Id;
+                                            _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog1);
+                                            _context.Save();
+
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
+                supplyManagementEmailScheduleLog.Message = ex.Message.ToString();
+                supplyManagementEmailScheduleLog.TriggerType = SupplyManagementEmailTriggers.Threshold.GetDescription();
+                supplyManagementEmailScheduleLog.ProjectId = projectId;
+                supplyManagementEmailScheduleLog.RecurrenceType = recurenceType;
+                supplyManagementEmailScheduleLog.RecordId = recordId;
+                _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog);
+                _context.Save();
+            }
         }
         public bool CheckDUplicateRandomizationNumber(RandomizationDto obj)
         {

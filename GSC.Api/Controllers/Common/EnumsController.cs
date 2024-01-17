@@ -1198,6 +1198,18 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Value).ToList();
             return Ok(SubResourceType);
         }
-       
+        [HttpGet]
+        [Route("GetSupplyManagementEmailRecurrenceType")]
+        public IActionResult GetSupplyManagementEmailRecurrenceType()
+        {
+            var emailtrigger = Enum.GetValues(typeof(SupplyManagementEmailRecurrenceType))
+                .Cast<SupplyManagementEmailRecurrenceType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(emailtrigger);
+        }
     }
 }

@@ -1201,4 +1201,17 @@ namespace GSC.Helper
         [Description("Linear")] Linear = 1,
         [Description("QR")] QR = 2
     }
+
+    public enum SupplyManagementEmailRecurrenceType : short
+    {
+        [Description("Daily")] Daily = 1,
+        [Description("Alternate Day")] AlternateDay = 2,
+        [Description("Weekly")] Weekly = 3,
+        [Description("Every 15 days")] FifteenDays = 4,
+        [Description("Monthly")] Monthly = 5,
+        [Description("Every 2 months")] EveryTwoMonth = 6,
+        [Description("Quarterly")] Quarterly = 7,
+        [Description("Every 6 months")] EverySixMonth = 8,
+        [Description("Yearly")] Yearly = 9
+    }
 }

@@ -4,6 +4,7 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -23,6 +24,9 @@ namespace GSC.Respository.SupplyManagement
         void SendrequestApprovalEmail(int id);
 
         string CheckValidationShipmentRequest(SupplyManagementRequestDto supplyManagementRequestDto);
+
+
+        Task ShipmentRequestEmailSchedule();
 
     }
 }

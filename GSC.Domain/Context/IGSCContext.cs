@@ -454,17 +454,18 @@ namespace GSC.Domain.Context
         DbSet<SiteTypes> SiteTypes { get; set; }
         DbSet<IDVerification> IDVerification { get; set; }
         DbSet<IDVerificationFile> IDVerificationFile { get; set; }
-        public DbSet<Designation> Designation { get; set; }
-        public DbSet<StudyPlanResource> StudyPlanResource { get; set; }
-        public DbSet<Currency> Currency { get; set; }
-        public DbSet<UserAccess> UserAccess { get; set; }
-        public DbSet<Procedure> Procedure { get; set; }
-
+        DbSet<Designation> Designation { get; set; }
+        DbSet<StudyPlanResource> StudyPlanResource { get; set; }
+        DbSet<Currency> Currency { get; set; }
+        DbSet<UserAccess> UserAccess { get; set; }
+        DbSet<Procedure> Procedure { get; set; }
         DbSet<SupplyManagementKitNumberSettingsRole> SupplyManagementKitNumberSettingsRole { get; set; }
 
         DbSet<PharmacyBarcodeConfig> PharmacyBarcodeConfig { get; set; }
         DbSet<PharmacyBarcodeDisplayInfo> PharmacyBarcodeDisplayInfo { get; set; }
+        DbSet<SupplyManagementEmailScheduleLog> SupplyManagementEmailScheduleLog { get; set; }
 
-        
+        DbSet<SupplyManagementThresholdHistory> SupplyManagementThresholdHistory { get; set; }
+
     }
 }

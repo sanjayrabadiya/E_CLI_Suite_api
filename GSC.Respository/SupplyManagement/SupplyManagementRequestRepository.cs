@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
@@ -15,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Http.ModelBinding;
 
 namespace GSC.Respository.SupplyManagement
@@ -574,6 +576,246 @@ namespace GSC.Respository.SupplyManagement
                 }
             }
 
+        }
+        public async Task ShipmentRequestEmailSchedule()
+        {
+            int? projectId = 0;
+            int? recordId = 0;
+            string recurenceType = string.Empty;
+            try
+            {
+                var requestIds = await _context.SupplyManagementShipment.Where(x => x.SupplyManagementRequestId > 0).Select(s => s.SupplyManagementRequestId).ToListAsync();
+                var requestdata = await _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.DeletedDate == null && !requestIds.Contains(x.Id)).ToListAsync();
+                if (requestdata != null && requestdata.Count > 0)
+                {
+                    foreach (var request in requestdata)
+                    {
+                        SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
+                        SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
+                        IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                        SupplyManagementRequest supplyManagementRequest = new SupplyManagementRequest();
+                        var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).ToList();
+                        if (emailconfiglist != null && emailconfiglist.Count > 0)
+                        {
+
+                            var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
+                            if (siteconfig.Count > 0)
+                            {
+                                emailconfig = siteconfig.Where(x => x.SiteId == request.FromProjectId).FirstOrDefault();
+                            }
+                            else
+                            {
+                                emailconfig = emailconfiglist.FirstOrDefault();
+                            }
+                            supplyManagementEmailScheduleLog.ProjectId = request.FromProject.ParentProjectId;
+                            supplyManagementEmailScheduleLog.TriggerType = emailconfig.Triggers.GetDescription();
+                            supplyManagementEmailScheduleLog.RecurrenceType = emailconfig.RecurrenceType.GetDescription();
+                            supplyManagementEmailScheduleLog.Message = "Shipement Request Schedule Start " + DateTime.Now;
+                            supplyManagementEmailScheduleLog.RecordId = request.Id;
+                            _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog);
+                            _context.Save();
+
+                            projectId = request.FromProject.ParentProjectId;
+                            recurenceType = emailconfig.RecurrenceType.GetDescription();
+                            recordId = request.Id;
+
+                            if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Daily)
+                            {
+                                supplyManagementRequest = request;
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.AlternateDay)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now;
+                                TimeSpan span = end.Date - start.Date;
+                                double difference = span.TotalDays;
+                                if (difference % 2 == 0)
+                                    supplyManagementRequest = request;
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Weekly)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddDays(7);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.FifteenDays)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddDays(15);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Monthly)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddMonths(1);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.EveryTwoMonth)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddMonths(2);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Quarterly)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddMonths(3);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.EverySixMonth)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddMonths(6);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            else if (emailconfig.RecurrenceType == SupplyManagementEmailRecurrenceType.Yearly)
+                            {
+                                DateTime start = Convert.ToDateTime(request.CreatedDate);
+                                DateTime end = DateTime.Now.Date;
+                                while (start < end)
+                                {
+                                    start = start.AddYears(1);
+                                    if (start.Date == end.Date)
+                                    {
+                                        supplyManagementRequest = request;
+                                        start = end;
+                                    }
+                                }
+                            }
+                            if (supplyManagementRequest != null)
+                            {
+                                var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
+                                var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
+                                if (details.Count() > 0)
+                                {
+
+                                    if (request.PharmacyStudyProductType != null && request.PharmacyStudyProductType.ProductType != null)
+                                        iWRSEmailModel.ProductType = request.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                                    if (allocation != null && allocation.IsBlindedStudy == true)
+                                    {
+                                        iWRSEmailModel.ProductType = "Blinded study";
+                                    }
+                                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault().ProjectCode;
+                                    iWRSEmailModel.SiteCode = request.FromProject.ProjectCode;
+                                    var managesite = _context.ManageSite.Where(x => x.Id == request.FromProject.ManageSiteId).FirstOrDefault();
+                                    if (managesite != null)
+                                    {
+                                        iWRSEmailModel.SiteName = managesite.SiteName;
+                                    }
+                                    iWRSEmailModel.RequestedBy = _jwtTokenAccesser.UserName;
+                                    iWRSEmailModel.RequestedQty = request.RequestQty;
+                                    if (request.IsSiteRequest)
+                                    {
+                                        iWRSEmailModel.RequestType = "Site to Site Request";
+                                        if (request.ToProjectId > 0)
+                                        {
+                                            var toproject = _context.Project.Where(x => x.Id == request.ToProjectId).FirstOrDefault();
+                                            if (toproject != null)
+                                            {
+                                                iWRSEmailModel.RequestToSiteCode = toproject.ProjectCode;
+                                                var tomanagesite = _context.ManageSite.Where(x => x.Id == toproject.ManageSiteId).FirstOrDefault();
+                                                if (tomanagesite != null)
+                                                {
+                                                    iWRSEmailModel.RequestToSiteName = tomanagesite.SiteName;
+                                                }
+
+                                            }
+                                            var Projectrights = _context.ProjectRight.Where(x => x.DeletedDate == null && x.ProjectId == request.ToProjectId).ToList();
+                                            if (Projectrights.Count > 0)
+                                                details = details.Where(x => Projectrights.Select(z => z.UserId).Contains(x.UserId)).ToList();
+
+                                        }
+                                    }
+                                    else
+                                    {
+                                        iWRSEmailModel.RequestType = "Site to Study Request";
+                                    }
+                                    if (request.ProjectDesignVisit != null)
+                                        iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
+
+                                    _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
+                                    foreach (var item in details)
+                                    {
+                                        SupplyManagementEmailConfigurationDetailHistory history = new SupplyManagementEmailConfigurationDetailHistory();
+                                        history.SupplyManagementEmailConfigurationDetailId = item.Id;
+                                        _context.SupplyManagementEmailConfigurationDetailHistory.Add(history);
+                                        _context.Save();
+                                    }
+                                }
+                            }
+
+                            var supplyManagementEmailScheduleLog1 = new SupplyManagementEmailScheduleLog();
+                            supplyManagementEmailScheduleLog1.ProjectId = request.FromProject.ParentProjectId;
+                            supplyManagementEmailScheduleLog1.TriggerType = emailconfig.Triggers.GetDescription();
+                            supplyManagementEmailScheduleLog1.RecurrenceType = emailconfig.RecurrenceType.GetDescription();
+                            supplyManagementEmailScheduleLog1.Message = "Shipement Request Schedule end " + DateTime.Now;
+                            supplyManagementEmailScheduleLog1.RecordId = request.Id;
+                            _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog1);
+                            _context.Save();
+                        }
+                    }
+                   
+                }
+            }
+            catch(Exception ex)
+            {
+                SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
+                supplyManagementEmailScheduleLog.Message = ex.Message.ToString();
+                supplyManagementEmailScheduleLog.TriggerType = SupplyManagementEmailTriggers.ShipmentRequest.GetDescription();
+                supplyManagementEmailScheduleLog.ProjectId = projectId;
+                supplyManagementEmailScheduleLog.RecurrenceType = recurenceType;
+                supplyManagementEmailScheduleLog.RecordId = recordId;
+                _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog);
+                _context.Save();
+            }
         }
 
         public string CheckValidationShipmentRequest(SupplyManagementRequestDto supplyManagementRequestDto)

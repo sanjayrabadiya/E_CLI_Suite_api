@@ -17,6 +17,7 @@ namespace GSC.Data.Entities.SupplyManagement
 
         public string EmailBody { get; set; }
         public SupplyManagementEmailTriggers Triggers { get; set; }
+        public SupplyManagementEmailRecurrenceType? RecurrenceType { get; set; }
         public int Days { get; set; }
         public bool IsActive { get; set; }
         public int? AuditReasonId { get; set; }

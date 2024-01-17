@@ -15,6 +15,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
         public SupplyManagementEmailTriggers Triggers { get; set; }
+
+        public SupplyManagementEmailRecurrenceType? RecurrenceType { get; set; }
         public int Days { get; set; }
         public bool IsActive { get; set; }
         public int? AuditReasonId { get; set; }
@@ -46,6 +48,10 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string TimeZone { get; set; }
         public string IpAddress { get; set; }
+
+        public SupplyManagementEmailRecurrenceType? RecurrenceType { get; set; }
+
+        public string RecurrenceTypeName { get; set; }
         public IList<SupplyManagementEmailConfigurationDetail> SupplyManagementEmailConfigurationDetail { get; set; }
 
 

@@ -3,6 +3,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -21,5 +22,7 @@ namespace GSC.Respository.SupplyManagement
         void SendShipmentApproveRejecttEmail(int id, SupplyManagementShipment shipment);
 
         string ExpiryDateShipmentValidation(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto);
+
+        Task ShipmentShipmentEmailSchedule();
     }
 }

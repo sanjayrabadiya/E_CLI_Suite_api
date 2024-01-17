@@ -79,5 +79,7 @@ namespace GSC.Respository.Attendance
         RandomizationDto CheckDuplicateRandomizationNumberIWRS(RandomizationDto obj, RandomizationNumberSettings numerformate);
 
         List<ScreeningVisitForSubject> GetPatientVisitsForMobile();
+
+        Task SendRandomizationThresholdEmailSchedule();
     }
 }

@@ -58,9 +58,9 @@ namespace GSC.Respository.SupplyManagement
                 {
                     x.Reason = _context.AuditReason.Where(z => z.Id == x.AuditReasonId).FirstOrDefault().ReasonName;
                 }
-
-                //x.Roles = string.Join(", ", x.SupplyManagementEmailConfigurationDetail.Select(c => c.SecurityRole.RoleName).ToList().Distinct());
-                //x.Users = string.Join(", ", x.SupplyManagementEmailConfigurationDetail.Select(c => c.Users.UserName).ToList().Distinct());
+                if (x.RecurrenceType != null)
+                    x.RecurrenceTypeName = x.RecurrenceType.GetDescription();
+              
             });
             return data;
         }
