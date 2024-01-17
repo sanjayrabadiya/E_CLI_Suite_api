@@ -63,21 +63,21 @@ namespace GSC.Api
                     .WithCronSchedule("0 0 0 1/1 * ? *")
                     .WithDescription("Trigger configured for a job with single call"));
 
-                var jobKey = new JobKey("IWRS job", "IWRS group");
-                q.AddJob<IWRSEmailJob>(jobKey, j => j
-                    .WithDescription("my IWRS job"));
+                //var jobKey = new JobKey("IWRS job", "IWRS group");
+                //q.AddJob<IWRSEmailJob>(jobKey, j => j
+                //    .WithDescription("my IWRS job"));
 
-                q.AddTrigger(t => t
-                   .WithIdentity("Combined Configuration Trigger IWRS")
-                   .ForJob(jobKey)
-                   .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddMinutes(30)))
-                   .WithCronSchedule("0 0 2 ? ? ?")
-                   .WithDescription("IWRS Email Trigger"));
+                //q.AddTrigger(t => t
+                //   .WithIdentity("Combined Configuration Trigger IWRS")
+                //   .ForJob(jobKey)
+                //   .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddMinutes(30)))
+                //   .WithCronSchedule("0 0 2 ? ? ?")
+                //   .WithDescription("IWRS Email Trigger"));
             });
 
 
             services.AddTransient<ProjectJob>();
-            services.AddTransient<IWRSEmailJob>();
+            //services.AddTransient<IWRSEmailJob>();
             services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
             services.AddAuth(_configuration);
             services.AddConfig(_configuration);

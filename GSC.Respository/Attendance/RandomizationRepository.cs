@@ -38,8 +38,7 @@ using GSC.Respository.SupplyManagement;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.Master;
-using BitMiracle.LibTiff.Classic;
-using JWT.Builder;
+
 
 namespace GSC.Respository.Attendance
 {
