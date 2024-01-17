@@ -71,7 +71,7 @@ namespace GSC.Api
                    .WithIdentity("Combined Configuration Trigger IWRS")
                    .ForJob(jobKey)
                    .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddMinutes(30)))
-                   .WithCronSchedule("0 0 8 ? ? ?")
+                   .WithCronSchedule("0 0 2 ? ? ?")
                    .WithDescription("IWRS Email Trigger"));
             });
 
