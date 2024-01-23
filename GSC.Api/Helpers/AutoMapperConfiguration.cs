@@ -537,6 +537,7 @@ namespace GSC.Api.Helpers
             CreateMap<Currency, CurrencyDto>().ReverseMap();
             CreateMap<PharmacyBarcodeConfig, PharmacyBarcodeConfigDto>().ReverseMap();
             CreateMap<Procedure, ProcedureDto>().ReverseMap();
+            CreateMap<PatientCost, PatientCostGridDto>().ReverseMap();
         }
     }
 }

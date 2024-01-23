@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Dto.CTMS;
+using GSC.Data.Dto.Master;
 
 namespace GSC.Respository.CTMS
 {
@@ -9,5 +10,6 @@ namespace GSC.Respository.CTMS
     {
         string Duplicate(Procedure objSave);
         List<ProcedureGridDto> GetProcedureList(bool isDeleted);
+        //List<DropDownEnum> GetParentProjectDropDown();
     }
 }

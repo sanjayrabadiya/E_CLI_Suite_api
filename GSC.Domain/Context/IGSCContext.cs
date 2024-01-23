@@ -459,6 +459,7 @@ namespace GSC.Domain.Context
         DbSet<Currency> Currency { get; set; }
         DbSet<UserAccess> UserAccess { get; set; }
         DbSet<Procedure> Procedure { get; set; }
+        DbSet<PatientCost> PatientCost { get; set; }
         DbSet<SupplyManagementKitNumberSettingsRole> SupplyManagementKitNumberSettingsRole { get; set; }
 
         DbSet<PharmacyBarcodeConfig> PharmacyBarcodeConfig { get; set; }

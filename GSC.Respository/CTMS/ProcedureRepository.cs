@@ -7,7 +7,6 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.CTMS
 {
@@ -36,5 +35,15 @@ namespace GSC.Respository.CTMS
                   ProjectTo<ProcedureGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
         }
+
+        //public List<DropDownEnum> GetParentProjectDropDown()
+        //{
+        //    return All.Where(x => x.DeletedDate ==null )
+        //        .Select(c => new DropDownEnum
+        //        {
+        //            Id = (short)c.Id,
+        //            Value = c.Name,
+        //        }).ToList();
+        //}
     }
 }

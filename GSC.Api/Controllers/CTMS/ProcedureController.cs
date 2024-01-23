@@ -111,5 +111,13 @@ namespace GSC.Api.Controllers.CTMS
 
             return Ok();
         }
+
+
+        //[HttpGet]
+        //[Route("GetProcedureDropDown")]
+        //public IActionResult GetProcedureDropDown()
+        //{
+        //    return Ok(_procedureRepository.GetParentProjectDropDown());
+        //}
     }
 }
