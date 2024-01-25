@@ -497,20 +497,22 @@ namespace GSC.Api.Controllers.Project.Design
             variableValues.ForEach(s =>
             {
                 var copyVarialbeValues = _projectDesignVariableValueRepository.FindBy(a => a.ProjectDesignVariableId == copyVarialbeId && a.ValueCode == s.ValueCode && s.DeletedDate == null).FirstOrDefault();
-
-                var varialbeValueLanguages = _variableValueLanguageRepository.FindBy(q => q.ProjectDesignVariableValueId == copyVarialbeValues.Id && q.DeletedDate == null).ToList();
-
-                varialbeValueLanguages.ForEach(m =>
+                if (copyVarialbeValues != null)
                 {
-                    m.Id = 0;
-                    m.ProjectDesignVariableValueId = s.Id;
-                    m.ModifiedBy = null;
-                    m.ModifiedDate = null;
-                    m.DeletedBy = null;
-                    m.DeletedDate = null;
-                    _variableValueLanguageRepository.Add(m);
-                    _uow.Save();
-                });
+                    var varialbeValueLanguages = _variableValueLanguageRepository.FindBy(q => q.ProjectDesignVariableValueId == copyVarialbeValues.Id && q.DeletedDate == null).ToList();
+
+                    varialbeValueLanguages.ForEach(m =>
+                    {
+                        m.Id = 0;
+                        m.ProjectDesignVariableValueId = s.Id;
+                        m.ModifiedBy = null;
+                        m.ModifiedDate = null;
+                        m.DeletedBy = null;
+                        m.DeletedDate = null;
+                        _variableValueLanguageRepository.Add(m);
+                        _uow.Save();
+                    });
+                }
             });
 
 
