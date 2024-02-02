@@ -327,7 +327,10 @@ namespace GSC.Respository.Etmf
             var dueDate = All.Where(x => x.DeletedDate == null && (x.IsApproved == null || x.IsApproved == false) && x.ProjectWorkplaceArtificatedDocumentId == documentId && x.SequenceNo != null).OrderByDescending(o => o.SequenceNo).FirstOrDefault();
             if (dueDate != null)
             {
-                return dueDate.DueDate.Value.AddDays(1);
+                if (dueDate.DueDate == null)
+                    return DateTime.Now.Date;
+                else
+                    return dueDate.DueDate.Value.AddDays(1);
             }
             else
             {
