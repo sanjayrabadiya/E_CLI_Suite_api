@@ -41,44 +41,6 @@ namespace GSC.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<QuartzOptions>(options =>
-            {
-                options.Scheduling.IgnoreDuplicates = true; // default: false
-                options.Scheduling.OverWriteExistingData = true; // default: true
-            });
-
-            services.AddQuartz(q =>
-            {
-                q.SchedulerId = "Scheduler-Core";
-
-                q.UseSimpleTypeLoader();
-                q.UseInMemoryStore();
-                q.UseDefaultThreadPool(tp =>
-                {
-                    tp.MaxConcurrency = 10;
-                });
-
-                q.ScheduleJob<ProjectJob>(trigger => trigger.WithIdentity("Combined Configuration Trigger")
-                    .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddMinutes(30)))
-                    .WithCronSchedule("0 0 0 1/1 * ? *")
-                    .WithDescription("Trigger configured for a job with single call"));
-
-                //var jobKey = new JobKey("IWRS job", "IWRS group");
-                //q.AddJob<IWRSEmailJob>(jobKey, j => j
-                //    .WithDescription("my IWRS job"));
-
-                //q.AddTrigger(t => t
-                //   .WithIdentity("Combined Configuration Trigger IWRS")
-                //   .ForJob(jobKey)
-                //   .StartAt(DateBuilder.EvenSecondDate(DateTimeOffset.UtcNow.AddMinutes(30)))
-                //   .WithCronSchedule("0 0 2 ? ? ?")
-                //   .WithDescription("IWRS Email Trigger"));
-            });
-
-
-            services.AddTransient<ProjectJob>();
-            //services.AddTransient<IWRSEmailJob>();
-            services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
             services.AddAuth(_configuration);
             services.AddConfig(_configuration);
 
