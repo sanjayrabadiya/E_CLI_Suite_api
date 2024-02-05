@@ -371,12 +371,10 @@ namespace GSC.Respository.Etmf
 
         public async Task SendDueApproveEmail()
         {
-            var commonSettiongs = _appSettingRepository.Get<GeneralSettingsDto>(2);
-            var compareDate = DateTime.Now.Date.AddDays(Convert.ToDouble(commonSettiongs.EtmfScheduleDueDate));
             var dueDates = await All.Where(x => x.DeletedDate == null && x.DueDate != null
             && x.UserId != x.CreatedBy && (x.IsApproved == false || x.IsApproved == null)
             && x.ProjectWorkplaceArtificatedDocument.DeletedDate == null
-            && x.DueDate.Value.Date == compareDate).ToListAsync();
+            && x.DueDate.Value.Date >= DateTime.Now.Date).ToListAsync();
             foreach (var due in dueDates)
             {
                 var user = await _context.Users.FindAsync((int)due.UserId);
@@ -389,7 +387,7 @@ namespace GSC.Respository.Etmf
                     artificateName = EtfArtificate.ArtificateName;
                 }
                 var project = await _context.Project.FindAsync(artificate.ProjectId);
-                _emailSenderRespository.SendEmailOfApproveDue(user.Email, user.UserName, document.DocumentName, artificateName, project.ProjectCode);
+                _emailSenderRespository.SendEmailOfApproveDue(user.Email, user.UserName, document.DocumentName, artificateName, project.ProjectCode, due.DueDate);
             }
         }
     }
