@@ -8,6 +8,7 @@ using GSC.Data.Entities.Configuration;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Shared.Email;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -64,7 +65,7 @@ namespace GSC.Respository.EmailSender
 
         void SendDesignAuditGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
         EmailMessage ConfigureEmail(string keyName, string userName);
-        void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
-        void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
+        void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate);
+        void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate);
     }
 }

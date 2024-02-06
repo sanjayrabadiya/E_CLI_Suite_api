@@ -122,19 +122,21 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-        public void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
+        public void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate)
         {
             var emailMessage = ConfigureEmail("ArtificateReviewDue", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            emailMessage.MessageBody = ReplaceBodyForEtmfDueDate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName, dueDate);
             _emailService.SendMail(emailMessage);
         }
 
-        public void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName)
+
+
+        public void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate)
         {
             var emailMessage = ConfigureEmail("ArtificateApproverDue", userName);
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = ReplaceBodyForArtificate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName);
+            emailMessage.MessageBody = ReplaceBodyForEtmfDueDate(emailMessage.MessageBody, userName, documentName, ArtificateName, ProjectName, dueDate);
             _emailService.SendMail(emailMessage);
         }
 
@@ -365,7 +367,7 @@ namespace GSC.Respository.EmailSender
             smstemplate = smstemplate.Replace("<strong>", "");
             smstemplate = smstemplate.Replace("</strong>", "");
             smstemplate = Regex.Replace(smstemplate, "<.*?>", String.Empty);
-            
+
             var url = "https://api.msg91.com/api/sendhttp.php?authkey=##AuthKey##&mobiles=##Mobile##&country=91&message=##message##&sender=##senderid##&route=##route##&DLT_TE_ID=##DLTTemplateId##&dev_mode=1";
             url = url.Replace("##AuthKey##", "349610As7MvryDDp5fdb3d6bP1");
             url = url.Replace("##Mobile##", "91" + mobile);
@@ -377,7 +379,7 @@ namespace GSC.Respository.EmailSender
             else
                 url = url.Replace("&DLT_TE_ID=##DLTTemplateId##", "");
             await HttpService.Get(_httpClient, url, null);
-            
+
         }
 
         private string ReplaceBodyForPDF(string body, string userName, string project, string linkOfPdf)
@@ -410,7 +412,7 @@ namespace GSC.Respository.EmailSender
                 emailMessage.Cc = result.Bcc;
                 emailMessage.Bcc = result.Bcc;
                 emailMessage.IsBodyHtml = true;
-                emailMessage.Attachments =null;
+                emailMessage.Attachments = null;
                 emailMessage.EmailFrom = result.EmailSetting.EmailFrom;
                 emailMessage.PortName = result.EmailSetting.PortName;
                 emailMessage.DomainName = result.EmailSetting.DomainName;
@@ -421,7 +423,7 @@ namespace GSC.Respository.EmailSender
 
             return emailMessage;
         }
-        private EmailMessage ConfigureEmailLetters(string keyName, string userName,string fullPath)
+        private EmailMessage ConfigureEmailLetters(string keyName, string userName, string fullPath)
         {
             var result = All.Include(x => x.EmailSetting).FirstOrDefault(x =>
                x.DeletedDate == null && x.KeyName == keyName);
@@ -494,6 +496,16 @@ namespace GSC.Respository.EmailSender
             body = Regex.Replace(body, "##projectName##", projectName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>projectName</strong>##", "<strong>" + projectName + "</strong>",
                 RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceBodyForEtmfDueDate(string body, string userName, string documentName, string artificateName, string projectName, DateTime? dueDate)
+        {
+            body = Regex.Replace(body, "##StudyCode##", projectName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##TaskName##", "e-TMF Due", RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##DocumentName##", documentName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##Dueon##", dueDate?.ToString("dd-MMM-yyyy"), RegexOptions.IgnoreCase);
+
             return body;
         }
 
@@ -1100,17 +1112,17 @@ namespace GSC.Respository.EmailSender
         {
 
             var str = body;
-           
+
             if (!string.IsNullOrEmpty(email.TemplateName))
             {
                 str = Regex.Replace(str, "#TemplateName#", email.TemplateName, RegexOptions.IgnoreCase);
             }
-            
+
             if (!string.IsNullOrEmpty(email.ScreeningNo))
             {
                 str = Regex.Replace(str, "#ScreeningNo#", email.ScreeningNo, RegexOptions.IgnoreCase);
             }
-          
+
 
             return str;
         }
@@ -1144,10 +1156,10 @@ namespace GSC.Respository.EmailSender
 
             return str;
         }
-        public void SendALettersMailtoInvestigator(string fullPath, string email,string body ,string CtmsActivity,string ScheduleStartDate)
+        public void SendALettersMailtoInvestigator(string fullPath, string email, string body, string CtmsActivity, string ScheduleStartDate)
         {
             var userName = _jwtTokenAccesser.UserName;
-            var emailMessage = ConfigureEmailLetters("Letters", userName, fullPath) ;
+            var emailMessage = ConfigureEmailLetters("Letters", userName, fullPath);
             emailMessage.SendTo = email;
             emailMessage.MessageBody = body + ReplaceBodyForLetters(emailMessage.MessageBody, userName);
             emailMessage.Subject = ReplaceSubjectForLetters(emailMessage.Subject, CtmsActivity, ScheduleStartDate);
@@ -1156,13 +1168,13 @@ namespace GSC.Respository.EmailSender
         private string ReplaceBodyForLetters(string body, string userName)
         {
             body = Regex.Replace(body, "##UserName##", userName, RegexOptions.IgnoreCase);
-            body = Regex.Replace(body, "##<strong>UserName</strong>##", "<strong>" + userName + "</strong>",RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>UserName</strong>##", "<strong>" + userName + "</strong>", RegexOptions.IgnoreCase);
             return body;
         }
         private string ReplaceSubjectForLetters(string body, string CtmsActivity, string ScheduleStartDate)
         {
             body = Regex.Replace(body, "##CTMSACTVITY##", CtmsActivity, RegexOptions.IgnoreCase);
-            body = Regex.Replace(body, "##<strong>CTMSACTVITY</strong>##", "<strong>" + CtmsActivity + "</strong>",RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>CTMSACTVITY</strong>##", "<strong>" + CtmsActivity + "</strong>", RegexOptions.IgnoreCase);
 
             body = Regex.Replace(body, "##DATE##", ScheduleStartDate.ToString(), RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>DATE</strong>##", "<strong>" + ScheduleStartDate + "</strong>", RegexOptions.IgnoreCase);

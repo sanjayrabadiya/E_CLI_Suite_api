@@ -24,13 +24,25 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
+        private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
+        private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
+        private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
         public EtmfUserPermissionRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IProjectRightRepository projectRightRepository)
+           IJwtTokenAccesser jwtTokenAccesser, IProjectRightRepository projectRightRepository,
+           IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
+           IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
+           IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
+           IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository)
            : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
+            _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
+            _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
+            _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
+            _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
         }
 
         public List<EtmfUserPermissionDto> GetByUserId(int UserId, int RoleId, int ProjectId, int? ParentProject)
@@ -40,7 +52,7 @@ namespace GSC.Respository.Etmf
                             .Cast<WorkPlaceFolder>().Select(e => new EtmfUserPermissionDto
                             {
                                 UserId = UserId,
-                                RoleId=RoleId,
+                                RoleId = RoleId,
                                 ItemId = Convert.ToInt16(e),
                                 ItemName = e.GetDescription(),
                                 hasChild = true,
@@ -117,6 +129,7 @@ namespace GSC.Respository.Etmf
 
         public void updatePermission(List<EtmfUserPermissionDto> EtmfUserPermissionDto)
         {
+            var backupPermission = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
             var userId = EtmfUserPermissionDto.First().UserId;
 
             var DeleteAll = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0 && (!x.IsAdd && !x.IsEdit && !x.IsDelete && !x.IsView && !x.IsExport)).ToList();
@@ -141,6 +154,7 @@ namespace GSC.Respository.Etmf
             {
                 EtmfUserPermission obj = new EtmfUserPermission();
                 obj.UserId = userId;
+                obj.RoleId = item.RoleId;
                 obj.ProjectWorkplaceDetailId = item.ProjectWorkplaceDetailId;
                 obj.IsAdd = item.IsAdd;
                 obj.IsDelete = item.IsDelete;
@@ -168,6 +182,7 @@ namespace GSC.Respository.Etmf
                     var ToAddPermission = new EtmfUserPermission();
                     ToAddPermission.Id = 0;
                     ToAddPermission.UserId = existing.UserId;
+                    ToAddPermission.RoleId = existing.RoleId;
                     ToAddPermission.ProjectWorkplaceDetailId = existing.ProjectWorkplaceDetailId;
                     ToAddPermission.DeletedBy = null;
                     ToAddPermission.DeletedDate = null;
@@ -181,6 +196,65 @@ namespace GSC.Respository.Etmf
                     Add(ToAddPermission);
                     _context.Save();
                 }
+            }
+
+            DeleteEtmfAccessUsers(backupPermission);
+        }
+
+
+
+        private void DeleteEtmfAccessUsers(List<EtmfUserPermissionDto> EtmfUserPermissionDto)
+        {
+            foreach (var permission in EtmfUserPermissionDto)
+            {
+                if (!permission.IsAll)
+                {
+                    var reviewers = _projectWorkplaceArtificateDocumentReviewRepository.All
+                        .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                        .Where(x => x.UserId == permission.UserId && x.IsReviewed == false
+                        && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace
+                        .Id == permission.ProjectWorkplaceDetailId && x.DeletedDate == null).ToList();
+
+                    foreach (var user in reviewers)
+                    {
+                        _projectWorkplaceArtificateDocumentReviewRepository.Delete(user);
+                    }
+
+                    var subDocumentReviewers = _projectSubSecArtificateDocumentReviewRepository.All
+                       .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                       .Where(x => x.UserId == permission.UserId && x.IsReviewed == false
+                       && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace
+                       .Id == permission.ProjectWorkplaceDetailId && x.DeletedDate == null).ToList();
+
+                    foreach (var user in subDocumentReviewers)
+                    {
+                        _projectSubSecArtificateDocumentReviewRepository.Delete(user);
+                    }
+
+                    var approvers = _projectArtificateDocumentApproverRepository.All
+                      .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                      .Where(x => x.UserId == permission.UserId && (x.IsApproved == false || x.IsApproved == null)
+                      && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace
+                      .Id == permission.ProjectWorkplaceDetailId && x.DeletedDate == null).ToList();
+
+                    foreach (var user in approvers)
+                    {
+                        _projectArtificateDocumentApproverRepository.Delete(user);
+                    }
+
+                    var subDocumentApprovers = _projectSubSecArtificateDocumentApproverRepository.All
+                       .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
+                       .Where(x => x.UserId == permission.UserId && (x.IsApproved == false || x.IsApproved == null)
+                       && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace
+                       .Id == permission.ProjectWorkplaceDetailId && x.DeletedDate == null).ToList();
+
+                    foreach (var user in subDocumentApprovers)
+                    {
+                        _projectSubSecArtificateDocumentApproverRepository.Delete(user);
+                    }
+                }
+
+                _context.Save();
             }
         }
 
