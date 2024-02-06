@@ -313,9 +313,12 @@ namespace GSC.Respository.Etmf
                 obj.SequenceNo = currentReviewer?.SequenceNo;
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.ExpiryDate = item.ExpiryDate;
-                obj.ParentDocumentId = item.ParentDocumentId != null ?
-                    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
-                obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
+                //obj.ParentDocumentId = item.ParentDocumentId != null ?
+                //    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
+                //obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
+
+                obj.ParentDocumentId = documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id) == null ? null : documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id).Id;
+                obj.HasChild = item.ParentDocumentId == null ? false : true;
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(x => x.CreatedDate).ToList();

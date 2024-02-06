@@ -427,7 +427,10 @@ namespace GSC.Respository.Etmf
             var dueDate = All.Where(x => x.DeletedDate == null && x.IsReviewed == false && x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.SequenceNo != null).OrderByDescending(o => o.SequenceNo).FirstOrDefault();
             if (dueDate != null)
             {
-                return dueDate.DueDate.Value.AddDays(1);
+                if (dueDate.DueDate != null)
+                    return dueDate.DueDate.Value.AddDays(1);
+                else
+                    return DateTime.Now.Date;
             }
             else
             {
@@ -470,7 +473,7 @@ namespace GSC.Respository.Etmf
                     artificateName = EtfArtificate.ArtificateName;
                 }
                 var project = await _context.Project.FindAsync(artificate.ProjectId);
-                _emailSenderRespository.SendEmailOfReviewDue(user.Email, user.UserName, document.DocumentName, artificateName, project.ProjectCode,due.DueDate);
+                _emailSenderRespository.SendEmailOfReviewDue(user.Email, user.UserName, document.DocumentName, artificateName, project.ProjectCode, due.DueDate);
             }
         }
     }
