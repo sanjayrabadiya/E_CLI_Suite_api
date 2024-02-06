@@ -344,9 +344,12 @@ namespace GSC.Respository.Etmf
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
                 obj.IsApproveDoc = tempApprover.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;//ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 obj.ExpiryDate = item.ExpiryDate;
-                obj.ParentDocumentId = item.ParentDocumentId != null ?
-                    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
-                obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
+                //obj.ParentDocumentId = item.ParentDocumentId != null ?
+                //    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
+                //obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
+
+                obj.ParentDocumentId = documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id) == null ? null : documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id).Id;
+                obj.HasChild = item.ParentDocumentId == null ? false : true;
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(q => q.CreatedDate).ToList();
