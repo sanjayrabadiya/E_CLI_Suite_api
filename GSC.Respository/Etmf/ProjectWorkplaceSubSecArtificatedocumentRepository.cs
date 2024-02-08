@@ -39,6 +39,7 @@ namespace GSC.Respository.Etmf
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
         private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApprovalRepository;
@@ -50,7 +51,7 @@ namespace GSC.Respository.Etmf
            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
            IProjectSubSecArtificateDocumentApproverRepository projectSubSecArtificateDocumentApproverRepository,
            IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
-           IAppSettingRepository appSettingRepository
+           IAppSettingRepository appSettingRepository, IEtmfMasterLbraryRepository etmfMasterLibraryRepository
            )
            : base(context)
         {
@@ -63,6 +64,7 @@ namespace GSC.Respository.Etmf
             _appSettingRepository = appSettingRepository;
             _projectSubSecArtificateDocumentApprovalRepository = projectSubSecArtificateDocumentApproverRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
+            _etmfMasterLibraryRepository = etmfMasterLibraryRepository;
         }
 
         public string getArtifactSectionDetail(ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceSubSectionDto)
@@ -801,6 +803,109 @@ namespace GSC.Respository.Etmf
                 WordToPdf(Id);
                 _context.Save();
             }
+        }
+
+        public DownloadFile DownloadDocument(int id)
+        {
+            var document = Find(id);
+            if (document.Status == ArtifactDocStatusType.Final || document.Status == ArtifactDocStatusType.Supersede)
+            {
+                if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+                {
+                    var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                    FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                    Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                    DocIORenderer render = new DocIORenderer();
+                    render.Settings.PreserveFormFields = true;
+                    PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+
+                    pdfDocument.Template.Bottom = _etmfMasterLibraryRepository.AddFooter(pdfDocument, document.DocumentName, document.Version);
+
+                    render.Dispose();
+                    wordDocument.Dispose();
+                    MemoryStream outputStream = new MemoryStream();
+                    pdfDocument.Save(outputStream);
+                    pdfDocument.Close();
+
+                    var docBytes = outputStream.ToArray();
+
+                    docStream.Close();
+                    docStream.Dispose();
+                    outputStream.Close();
+                    outputStream.Dispose();
+
+                    var file = new DownloadFile()
+                    {
+                        DocumentName = document.DocumentName,
+                        FileBytes = docBytes,
+                        MIMEType = "application/pdf"
+                    };
+
+                    return file;
+                }
+            }
+            else
+            {
+                if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+                {
+                    var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                    FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                    Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                    MemoryStream outputStream = new MemoryStream();
+                    wordDocument.Save(outputStream, Syncfusion.DocIO.FormatType.Docx);
+                    wordDocument.Close();
+                    wordDocument.Dispose();
+
+                    var docBytes = outputStream.ToArray();
+                    docStream.Close();
+                    docStream.Dispose();
+                    outputStream.Close();
+                    outputStream.Dispose();
+
+                    var file = new DownloadFile()
+                    {
+                        DocumentName = document.DocumentName,
+                        FileBytes = docBytes,
+                        MIMEType = "application/pdf"
+                    };
+
+                    return file;
+                }
+            }
+
+            if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
+            {
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
+                PdfDocument pdfDocument = new PdfDocument();
+                pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
+                if (document.Status == ArtifactDocStatusType.Final || document.Status == ArtifactDocStatusType.Supersede)
+                {
+                    pdfDocument.Template.Bottom = _etmfMasterLibraryRepository.AddFooter(pdfDocument, document.DocumentName, document.Version);
+                }
+                MemoryStream outputStream = new MemoryStream();
+                pdfDocument.Save(outputStream);
+                pdfDocument.Close();
+
+                var docBytes = outputStream.ToArray();
+
+                docStream.Close();
+                docStream.Dispose();
+                outputStream.Close();
+                outputStream.Dispose();
+
+                var file = new DownloadFile()
+                {
+                    DocumentName = document.DocumentName,
+                    FileBytes = docBytes,
+                    MIMEType = "application/pdf"
+                };
+
+                return file;
+            }
+
+            return null;
         }
     }
 }
