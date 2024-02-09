@@ -10,6 +10,6 @@ namespace GSC.Respository.CTMS
     {
         string Duplicate(Procedure objSave);
         List<ProcedureGridDto> GetProcedureList(bool isDeleted);
-        //List<DropDownEnum> GetParentProjectDropDown();
+        List<DropDownProcedureDto> GetParentProjectDropDown();
     }
 }
