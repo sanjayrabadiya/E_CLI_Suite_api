@@ -1,36 +1,43 @@
-﻿using GSC.Data.Entities.Common;
-using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.Master;
-using GSC.Helper;
-using System;
+﻿
+using GSC.Data.Entities.Common;
 using System.Collections.Generic;
 
 namespace GSC.Data.Dto.CTMS
 {
+    public class ProcedureVisitdadaDto : BaseDto
+    {
+        public int Id { get; set; }
+        public int ProjectId { get; set; }
+        public int? ProcedureId { get; set; }
+        public string ProcedureName { get; set; }
+        public int?  ProjectDesignVisitId { get; set; }
+        public string VisitName { get; set; }
+        public string VisitDescription { get; set; }
+        public decimal? Rate { get; set; }
+        public decimal? Cost { get; set; }
+        public decimal? FinalCost { get; set; }
+        public decimal? CurrencyRate { get; set; }
+        public string CurrencySymbol { get; set; }
+        public string GlobleCurrencySymbol { get; set; }
+        public bool IfEdit { get; set; }
+        public bool IfPull { get; set; }
+    }
 
-    public class PatientCostGridDto : BaseDto
+    public class PatientCostGridData
     {
         public int? ProjectId { get; set; }
         public int? ProcedureId { get; set; }
-        public int? ProjectDesignVisitId { get; set; }
-        public int? Cost { get; set; }
-        public int? TotalProcedure { get; set; }
-        public int? TotalProjectDesignVisit { get; set; }
-        public int? Total { get; set; }
-
+        public string ProcedureName { get; set; }
+        public string CurrencyType { get; set; }
+        public decimal? Rate { get; set; }
+        public decimal? CurrencyRate { get; set; }
+        public string CurrencySymbol { get; set; }
+        public List<visitGridData> VisitGridDatas { get; set; }
     }
-    public class ProcedureVisitdadaDto : BaseAuditDto
+    public class visitGridData
     {
-        public string Name { get; set; }
-        public int? UnitId { get; set; }
-        public int? CostPerUnit { get; set; }
-        public List<VisitdadaDto> VisitdadaDto { get; set; }
-    }
-    public class VisitdadaDto
-    {
-        public int Id { get; set; }
+        public int?  VisitId { get; set; }
         public string VisitName { get; set; }
-        public int? Cost { get; set; }
-        public int?  Total { get; set; }
+        public decimal? FinalCost { get; set; }
     }
-}
+ }

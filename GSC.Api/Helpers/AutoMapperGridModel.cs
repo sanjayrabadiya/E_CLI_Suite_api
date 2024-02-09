@@ -301,6 +301,7 @@ namespace GSC.Api.Helpers
                    .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
                    .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                    .ForMember(x => x.GlobalCurrency, x => x.MapFrom(a => a.Currency.CurrencyName + " - " + a.Currency.CurrencySymbol))
+                   .ForMember(x => x.GlobalCurrencySymbol, x => x.MapFrom(a => a.Currency.CurrencySymbol))
                    .ForMember(x => x.TotalCost, x => x.MapFrom(a => a.TotalCost == null ? 0 : a.TotalCost))
                   .ReverseMap();
             CreateMap<Activity, ActivityGridDto>()

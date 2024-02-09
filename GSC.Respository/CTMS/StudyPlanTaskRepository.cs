@@ -106,6 +106,7 @@ namespace GSC.Respository.CTMS
                             tasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
                         result.StudyPlanTask = tasklist;
+                        result.StudyPlanTaskTemp = tasklistResource;
 
                         //sub task wise grid disply Add by mitul on 09-01-2024
                         result.StudyPlanTask.ForEach(s => {
@@ -191,6 +192,7 @@ namespace GSC.Respository.CTMS
                 }
             }
             //Add by mitul task was Resource Add
+            if(result.StudyPlanTaskTemp != null)
             foreach (var item in result.StudyPlanTaskTemp)
             {
                 var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId==item.Id)
@@ -843,7 +845,7 @@ namespace GSC.Respository.CTMS
                                                         && x.Id == siteId
                                                         && x.DeletedDate == null).ToList();
 
-                var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+                var studyplans = _context.StudyPlan.Include(s => s.Currency).Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
                 foreach (var item in studyplans)
                 {
                     if (studyplans != null)
@@ -852,6 +854,7 @@ namespace GSC.Respository.CTMS
                          ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                         tasklist.ForEach(task =>
                         {
+                            task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol :"$";
                             task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
                             task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
                             task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode ==null ? r.ManageSite.SiteName: r.ProjectCode).FirstOrDefault();
@@ -861,13 +864,14 @@ namespace GSC.Respository.CTMS
                 }
             }
             else if(siteId > 0){
-                var studyplan = _context.StudyPlan.Where(x => x.ProjectId == siteId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+                var studyplan = _context.StudyPlan.Include(s => s.Currency).Where(x => x.ProjectId == siteId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
                 if (studyplan != null)
                 {
                     var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                     tasklist.ForEach(task =>
                     {
+                        task.GlobalCurrencySymbol = studyplan.Currency.CurrencySymbol;
                         task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
                         task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
                         task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
@@ -878,13 +882,14 @@ namespace GSC.Respository.CTMS
             }
             else
             {
-                var studyplan = _context.StudyPlan.Where(x => x.ProjectId == studyId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
+                var studyplan = _context.StudyPlan.Include(s=>s.Currency).Where(x => x.ProjectId == studyId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
                 if (studyplan != null)
                 {
                     var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                     tasklist.ForEach(task =>
                     {
+                        task.GlobalCurrencySymbol = studyplan.Currency.CurrencySymbol;
                         task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
                         task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
                         task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
