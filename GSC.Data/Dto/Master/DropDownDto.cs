@@ -78,10 +78,4 @@ namespace GSC.Data.Dto.Master
         public string Value { get; set; }
        
     }
-    public class DropDownProcedureDto
-    {
-        public int Id { get; set; }
-        public string Value { get; set; }
-
-    }
 }

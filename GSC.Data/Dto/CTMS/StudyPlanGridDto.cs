@@ -11,6 +11,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
         public string GlobalCurrency { get; set; }
+        public string GlobalCurrencySymbol { get; set; }
         public int? TotalCost { get; set; }
     }
 }

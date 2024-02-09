@@ -36,14 +36,17 @@ namespace GSC.Respository.CTMS
 
         }
 
-        //public List<DropDownEnum> GetParentProjectDropDown()
-        //{
-        //    return All.Where(x => x.DeletedDate ==null )
-        //        .Select(c => new DropDownEnum
-        //        {
-        //            Id = (short)c.Id,
-        //            Value = c.Name,
-        //        }).ToList();
-        //}
+        public List<DropDownProcedureDto> GetParentProjectDropDown()
+        {
+            return All.Where(x => x.DeletedDate == null)
+                .Select(c => new DropDownProcedureDto
+                {
+                    Id = (short)c.Id,
+                    Value = c.Name,
+                    CurrencyType = c.Currency.CurrencyName +" - "+ c.Currency.CurrencySymbol,
+                    CurrencySymbol = c.Currency.CurrencySymbol,
+                    CostPerUnit = c.CostPerUnit,
+                }).ToList();
+        }
     }
 }
