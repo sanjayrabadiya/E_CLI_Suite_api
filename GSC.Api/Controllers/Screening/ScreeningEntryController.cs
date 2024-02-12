@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Screening
         {
             if (id <= 0) return BadRequest();
 
-            var screeningEntryDto = _screeningEntryRepository.GetDetails(id);
+            var screeningEntryDto = _screeningEntryRepository.GetDetails(id,null);
      
             return Ok(screeningEntryDto);
         }
@@ -297,6 +297,14 @@ namespace GSC.Api.Controllers.Screening
             return Ok(volunteerList);
         }
 
+        [HttpGet]
+        [Route("GetScreeningVisitsDataReview/{id}/{siteId}")]
+        public IActionResult GetScreeningVisitsDataReview(int id, int siteId)
+        {
+            var screeningEntryDto = _screeningEntryRepository.GetDetails(id, siteId);
+
+            return Ok(screeningEntryDto);
+        }
 
     }
 }

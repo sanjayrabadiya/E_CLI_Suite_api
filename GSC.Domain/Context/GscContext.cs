@@ -524,5 +524,7 @@ namespace GSC.Domain.Context
         public DbSet<SupplyManagementThresholdHistory> SupplyManagementThresholdHistory { get; set; }
 
 
+        public DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
+
     }
 }

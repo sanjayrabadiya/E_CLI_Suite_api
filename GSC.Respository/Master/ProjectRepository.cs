@@ -26,6 +26,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GSC.Shared.Extension;
 using GSC.Data.Entities.Project.Generalconfig;
+using GSC.Data.Entities.Attendance;
 
 namespace GSC.Respository.Master
 {
@@ -1602,7 +1603,48 @@ namespace GSC.Respository.Master
             data.Message = "";
             data.IsSuccess = true;
             return data;
-            
+
+        }
+
+        public IList<DropDownDto> GetSitesByTemplateId(int templateId)
+        {
+            var projectId = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
+                          .Where(x => x.DeletedDate == null && x.Id == templateId).Select(s => s.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId).FirstOrDefault();
+            if (projectId == 0)
+                return new List<DropDownDto>();
+
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && x.DeletedDate == null && x.ParentProjectId == projectId)
+                .Select(c => new DropDownDto
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                }).OrderBy(o => o.Value).ToList();
+        }
+
+        public void AddDefaultRandomizationEntry(Data.Entities.Master.Project project)
+        {
+            if (project.ParentProjectId > 0)
+            {
+                var randomization = _context.Randomization.Where(s => s.ProjectId == project.Id && s.IsGeneric).FirstOrDefault();
+                if (randomization == null)
+                {
+                    Randomization obj = new Randomization();
+                    obj.FirstName = "NA";
+                    obj.LastName = "NA";
+                    obj.LastName = "NA";
+                    obj.Initial = "NA";
+                    obj.Gender = Gender.Male;
+                    obj.PatientStatusId = ScreeningPatientStatus.Screening;
+                    obj.LanguageId = 1;
+                    obj.IsGeneric = true;
+                    obj.ProjectId = project.Id;
+                    _context.Randomization.Add(obj);
+                    _context.Save();
+                }
+            }
         }
 
     }

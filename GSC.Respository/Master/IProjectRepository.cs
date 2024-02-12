@@ -69,5 +69,9 @@ namespace GSC.Respository.Master
         List<ProjectDropDown> GetLiveProjectDropDownIWRS();
 
         CheckSiteStatusDto CheckSiteStatus(int siteId);
+
+        IList<DropDownDto> GetSitesByTemplateId(int templateId);
+
+        void AddDefaultRandomizationEntry(Data.Entities.Master.Project project);
     }
 }
