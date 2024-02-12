@@ -194,7 +194,7 @@ namespace GSC.Respository.CTMS
             var studyPlan = _context.StudyPlan.Where(s => s.ProjectId == ProcedureVisitdadaDto[0].ProjectId && s.DeletedDate == null).FirstOrDefault();
 
             //new Cost add time duplication check
-            if (All.Any(x => x.Id != ProcedureVisitdadaDto[0].Id && x.ProcedureId == ProcedureVisitdadaDto[0].ProcedureId && x.DeletedDate == null && ProcedureVisitdadaDto[0].IfEdit == false))
+            if (All.Any(x => x.Id != ProcedureVisitdadaDto[0].Id && x.ProcedureId == ProcedureVisitdadaDto[0].ProcedureId && x.DeletedDate == null && x.ProjectId == ProcedureVisitdadaDto[0].ProjectId && ProcedureVisitdadaDto[0].IfEdit == false))
             {
                 return "Duplicate Patient Cost";
             }
