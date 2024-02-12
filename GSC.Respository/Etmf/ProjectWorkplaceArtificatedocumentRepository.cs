@@ -16,7 +16,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using EJ2WordDocument = Syncfusion.EJ2.DocumentEditor.WordDocument;
-using System.Text;
 using Syncfusion.EJ2.DocumentEditor;
 using GSC.Respository.Audit;
 using GSC.Shared.Extension;
@@ -30,7 +29,6 @@ using Syncfusion.Pdf.Grid;
 using Syncfusion.Pdf.Parsing;
 using GSC.Data.Dto.Configuration;
 using GSC.Shared.Generic;
-using Syncfusion.Pdf.Interactive;
 
 namespace GSC.Respository.Etmf
 {
@@ -313,9 +311,12 @@ namespace GSC.Respository.Etmf
                 obj.SequenceNo = currentReviewer?.SequenceNo;
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.ExpiryDate = item.ExpiryDate;
-                obj.ParentDocumentId = item.ParentDocumentId != null ?
-                    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
-                obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
+                //obj.ParentDocumentId = item.ParentDocumentId != null ?
+                //    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
+                //obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
+
+                obj.ParentDocumentId = documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id) == null ? null : documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id).Id;
+                obj.HasChild = item.ParentDocumentId == null ? false : true;
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(x => x.CreatedDate).ToList();
@@ -1386,51 +1387,62 @@ namespace GSC.Respository.Etmf
 
         private PdfDocument CreateSignature(PdfDocument pdfDocument, int Id)
         {
-            PdfSection section = pdfDocument.Sections.Add();
-            PdfPage page = section.Pages.Add();
-            section.PageSettings.Margins.All = Convert.ToInt32(0.5 * 100);
+            var reviewHistory = ReviewDocumentHistory(Id);
+            var approvalHistory = DocumentApprovalhistory(Id);
+
+            if (reviewHistory.Rows.Count > 0 || approvalHistory.Rows.Count > 0)
+            {
+                PdfSection section = pdfDocument.Sections.Add();
+                PdfPage page = section.Pages.Add();
+                section.PageSettings.Margins.All = Convert.ToInt32(0.5 * 100);
 
 
-            RectangleF bounds = new RectangleF(page.GetClientSize().Width - 75, 0, 65f, 65f);
-            PdfLayoutResult layoutresult = null;
-            PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-            layoutFormat.Layout = PdfLayoutType.Paginate;
-            layoutFormat.Break = PdfLayoutBreakType.FitElement;
+                RectangleF bounds = new RectangleF(page.GetClientSize().Width - 75, 0, 65f, 65f);
+                PdfLayoutResult layoutresult = null;
+                PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
+                layoutFormat.Layout = PdfLayoutType.Paginate;
+                layoutFormat.Break = PdfLayoutBreakType.FitElement;
 
-            PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
-            PdfTextElement indexheader = new PdfTextElement();
-            layoutresult = new PdfLayoutResult(page, bounds);
-
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement("Review Document History", new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold), PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            layoutresult = indexheader.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height), layoutFormat);
-
-            PdfGridRow header;
-            PdfGridCellStyle headerStyle = new PdfGridCellStyle();
-            headerStyle.Borders.All = new PdfPen(Color.Black);
-            headerStyle.BackgroundBrush = new PdfSolidBrush(Color.Gray);
-            headerStyle.TextBrush = PdfBrushes.Black;
-            headerStyle.Font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12f, PdfFontStyle.Bold);
-
-            PdfGrid pdfGrid = new PdfGrid();
-            pdfGrid.DataSource = ReviewDocumentHistory(Id);
-            header = pdfGrid.Headers[0];
-            header.ApplyStyle(headerStyle);
-            layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
+                PdfStringFormat tocformat = new PdfStringFormat(PdfTextAlignment.Center, PdfVerticalAlignment.Top);
+                PdfTextElement indexheader = new PdfTextElement();
+                layoutresult = new PdfLayoutResult(page, bounds);
 
 
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-            indexheader = new PdfTextElement("Document Approval History", new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold), PdfBrushes.Black);
-            indexheader.StringFormat = tocformat;
-            layoutresult = indexheader.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height), layoutFormat);
+                PdfGridRow header;
+                PdfGridCellStyle headerStyle = new PdfGridCellStyle();
+                headerStyle.Borders.All = new PdfPen(Color.Black);
+                headerStyle.BackgroundBrush = new PdfSolidBrush(Color.Gray);
+                headerStyle.TextBrush = PdfBrushes.Black;
+                headerStyle.Font = new PdfStandardFont(PdfFontFamily.TimesRoman, 12f, PdfFontStyle.Bold);
 
-            pdfGrid = new PdfGrid();
-            pdfGrid.DataSource = DocumentApprovalhistory(Id);
-            header = pdfGrid.Headers[0];
-            header.ApplyStyle(headerStyle);
-            layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
+                if (reviewHistory.Rows.Count > 0)
+                {
+                    tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
+                    indexheader = new PdfTextElement("Document Review History", new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold), PdfBrushes.Black);
+                    indexheader.StringFormat = tocformat;
+                    layoutresult = indexheader.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height), layoutFormat);
 
+                    PdfGrid pdfGrid = new PdfGrid();
+                    pdfGrid.DataSource = reviewHistory;
+                    header = pdfGrid.Headers[0];
+                    header.ApplyStyle(headerStyle);
+                    layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
+                }
+
+                if (approvalHistory.Rows.Count > 0)
+                {
+                    tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
+                    indexheader = new PdfTextElement("Document Approval History", new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold), PdfBrushes.Black);
+                    indexheader.StringFormat = tocformat;
+                    layoutresult = indexheader.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height), layoutFormat);
+
+                    PdfGrid pdfGrid = new PdfGrid();
+                    pdfGrid.DataSource = approvalHistory;
+                    header = pdfGrid.Headers[0];
+                    header.ApplyStyle(headerStyle);
+                    layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
+                }
+            }
             return pdfDocument;
         }
 
@@ -1700,6 +1712,109 @@ namespace GSC.Respository.Etmf
                                   ExpiryDate = history.ExpiryDate
                               }).ToList();
             return docHistory;
+        }
+
+        public DownloadFile DownloadDocument(int id)
+        {
+            var document = Find(id);
+            if (document.Status == ArtifactDocStatusType.Final || document.Status == ArtifactDocStatusType.Supersede)
+            {
+                if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+                {
+                    var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                    FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                    Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                    DocIORenderer render = new DocIORenderer();
+                    render.Settings.PreserveFormFields = true;
+                    PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
+
+                    pdfDocument.Template.Bottom = _etmfMasterLibraryRepository.AddFooter(pdfDocument, document.DocumentName, document.Version);
+
+                    render.Dispose();
+                    wordDocument.Dispose();
+                    MemoryStream outputStream = new MemoryStream();
+                    pdfDocument.Save(outputStream);
+                    pdfDocument.Close();
+
+                    var docBytes = outputStream.ToArray();
+
+                    docStream.Close();
+                    docStream.Dispose();
+                    outputStream.Close();
+                    outputStream.Dispose();
+
+                    var file = new DownloadFile()
+                    {
+                        DocumentName = document.DocumentName,
+                        FileBytes = docBytes,
+                        MIMEType = "application/pdf"
+                    };
+
+                    return file;
+                }
+            }
+            else
+            {
+                if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+                {
+                    var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                    FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                    Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
+                    MemoryStream outputStream = new MemoryStream();
+                    wordDocument.Save(outputStream, Syncfusion.DocIO.FormatType.Docx);
+                    wordDocument.Close();
+                    wordDocument.Dispose();
+
+                    var docBytes = outputStream.ToArray();
+                    docStream.Close();
+                    docStream.Dispose();
+                    outputStream.Close();
+                    outputStream.Dispose();
+
+                    var file = new DownloadFile()
+                    {
+                        DocumentName = document.DocumentName,
+                        FileBytes = docBytes,
+                        MIMEType = "application/pdf"
+                    };
+
+                    return file;
+                }
+            }
+
+            if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
+            {
+                var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+                FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
+                PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
+                PdfDocument pdfDocument = new PdfDocument();
+                pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
+                if (document.Status == ArtifactDocStatusType.Final || document.Status == ArtifactDocStatusType.Supersede)
+                {
+                    pdfDocument.Template.Bottom = _etmfMasterLibraryRepository.AddFooter(pdfDocument, document.DocumentName, document.Version);
+                }
+                MemoryStream outputStream = new MemoryStream();
+                pdfDocument.Save(outputStream);
+                pdfDocument.Close();
+
+                var docBytes = outputStream.ToArray();
+
+                docStream.Close();
+                docStream.Dispose();
+                outputStream.Close();
+                outputStream.Dispose();
+
+                var file = new DownloadFile()
+                {
+                    DocumentName = document.DocumentName,
+                    FileBytes = docBytes,
+                    MIMEType = "application/pdf"
+                };
+
+                return file;
+            }
+
+            return null;
         }
     }
 }

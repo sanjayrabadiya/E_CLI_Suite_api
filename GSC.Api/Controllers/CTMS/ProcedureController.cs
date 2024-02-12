@@ -46,12 +46,12 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             procedureDtoDto.Id = 0;
             var procedure = _mapper.Map<Procedure>(procedureDtoDto);
-            var validate = _procedureRepository.Duplicate(procedure);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _procedureRepository.Duplicate(procedure);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
 
             _procedureRepository.Add(procedure);
             if (_uow.Save() <= 0) throw new Exception("Creating Procedure failed on save.");
@@ -66,12 +66,12 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var procedure = _mapper.Map<Procedure>(procedureDto);
-            var validate = _procedureRepository.Duplicate(procedure);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _procedureRepository.Duplicate(procedure);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
             _procedureRepository.Update(procedure);
             if (_uow.Save() <= 0) throw new Exception("Updating Procedure failed on save.");
             return Ok(procedure.Id);
@@ -99,12 +99,12 @@ namespace GSC.Api.Controllers.CTMS
             if (record == null)
                 return NotFound();
 
-            var validate = _procedureRepository.Duplicate(record);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
+            //var validate = _procedureRepository.Duplicate(record);
+            //if (!string.IsNullOrEmpty(validate))
+            //{
+            //    ModelState.AddModelError("Message", validate);
+            //    return BadRequest(ModelState);
+            //}
 
             _procedureRepository.Active(record);
             _uow.Save();
@@ -112,12 +112,11 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
-
-        //[HttpGet]
-        //[Route("GetProcedureDropDown")]
-        //public IActionResult GetProcedureDropDown()
-        //{
-        //    return Ok(_procedureRepository.GetParentProjectDropDown());
-        //}
+        [HttpGet]
+        [Route("GetProcedureDropDown")]
+        public IActionResult GetProcedureDropDown()
+        {
+            return Ok(_procedureRepository.GetParentProjectDropDown());
+        }
     }
 }

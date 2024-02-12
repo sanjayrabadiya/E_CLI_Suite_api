@@ -6,6 +6,9 @@ using GSC.Data.Entities.Etmf;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
+using Syncfusion.Drawing;
+using Syncfusion.Pdf;
+using Syncfusion.Pdf.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -99,6 +102,33 @@ namespace GSC.Respository.Etmf
         {
             return All.Where(x => x.Version == version && x.EtmfMasterLibraryId == 0)
                     .Select(c => new DropDownDto { Id = c.Id, Value = c.ZonName }).OrderBy(o => o.Value).ToList();
+        }
+
+
+        public PdfPageTemplateElement AddFooter(PdfDocument doc, string documentName, string version)
+        {
+            RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 10);
+            PdfPageTemplateElement footer = new PdfPageTemplateElement(rect);
+            PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 8, PdfFontStyle.Bold);
+            PdfSolidBrush brush = new PdfSolidBrush(Color.Black);
+
+            PdfPageNumberField pageNumber = new PdfPageNumberField(font, brush);
+            PdfPageCountField count = new PdfPageCountField(font, brush);
+
+            PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
+            compositeField.Bounds = footer.Bounds;
+
+            string strDocument = $"Document Name : {documentName} Version : {version} Printed By : {_jwtTokenAccesser.UserName} ({_jwtTokenAccesser.GetClientDate().ToString("dd-MMM-yyyy h:mm tt")})";
+            PdfCompositeField compositeFieldDocumentNmae = new PdfCompositeField(font, brush, strDocument);
+            compositeFieldDocumentNmae.Bounds = footer.Bounds;
+
+            compositeField.Draw(footer.Graphics, new PointF(footer.Width - 70, footer.Height - 10));
+            compositeFieldDocumentNmae.Draw(footer.Graphics, new PointF(10, footer.Height - 10));
+
+            PdfPen pen = new PdfPen(Color.Black, 1.0f);
+            footer.Graphics.DrawLine(pen, 0, 0, footer.Width, 0);
+
+            return footer;
         }
     }
 }
