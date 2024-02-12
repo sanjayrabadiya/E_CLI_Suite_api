@@ -726,5 +726,21 @@ namespace GSC.Api.Controllers.Project.Design
             if (_uow.Save() <= 0) throw new Exception("setting Failed.");
             return Ok();
         }
+
+        [HttpPost("SaveProjectDesignTemplateSiteAccess")]
+        public IActionResult SaveProjectDesignTemplateSiteAccess([FromBody] ProjectDesignTemplateSiteAccessDto projectDesignTemplateSiteAccessDto)
+        {
+            if (projectDesignTemplateSiteAccessDto == null) return BadRequest();
+
+            _projectDesignTemplateRepository.SaveProjectDesignTemplateSiteAccess(projectDesignTemplateSiteAccessDto);
+            return Ok(projectDesignTemplateSiteAccessDto);
+        }
+
+        [HttpGet]
+        [Route("GetSitesAccessByTemplateId/{templateId}")]
+        public IActionResult GetSitesAccessByTemplateId(int templateId)
+        {
+            return Ok(_projectDesignTemplateRepository.GetSitesAccessByTemplateId(templateId));
+        }
     }
 }

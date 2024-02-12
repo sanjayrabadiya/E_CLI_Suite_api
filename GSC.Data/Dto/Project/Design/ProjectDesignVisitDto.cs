@@ -24,6 +24,8 @@ namespace GSC.Data.Dto.Project.Design
         public string PreLabel { get; set; }
         public List<ProjectDesignTemplateDto> Templates { get; set; }
         public bool OffSite { get; set; }
+
+        public bool IsPatientLevel { get; set; }
     }
 
 

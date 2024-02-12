@@ -83,7 +83,7 @@ namespace GSC.Respository.Screening
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
         }
 
-        public ScreeningEntryDto GetDetails(int id)
+        public ScreeningEntryDto GetDetails(int id, int? siteId)
         {
 
             var screeningEntryDto = _context.ScreeningEntry.Where(t => t.Id == id)
@@ -118,7 +118,7 @@ namespace GSC.Respository.Screening
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);
 
             bool myReview = false;
-            screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview);
+            screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview, siteId);
 
             if (screeningEntryDto.AttendanceId != null)
             {
@@ -155,8 +155,9 @@ namespace GSC.Respository.Screening
             return screeningEntryDto;
         }
 
-        private List<ScreeningVisitTree> VisitTemplateProcess(int screeningEntryId, WorkFlowLevelDto workflowlevel, ref bool myReview)
+        private List<ScreeningVisitTree> VisitTemplateProcess(int screeningEntryId, WorkFlowLevelDto workflowlevel, ref bool myReview, int? siteId)
         {
+            var excludeTemplate = _context.ProjectDesignTemplateSiteAccess.Where(s => s.DeletedDate == null && s.ProjectId == siteId).Select(s => s.ProjectDesignTemplateId).ToList();
             var visits = _screeningVisitRepository.GetVisitTree(screeningEntryId);
             var templates = _screeningTemplateRepository.GetTemplateTree(screeningEntryId, workflowlevel);
 
@@ -167,7 +168,7 @@ namespace GSC.Respository.Screening
 
             visits.ForEach(x =>
             {
-                x.ScreeningTemplates = templates.Where(a => a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => Convert.ToDecimal(c.DesignOrderForOrderBy)).ToList();
+                x.ScreeningTemplates = templates.Where(a => !excludeTemplate.Contains(a.ProjectDesignTemplateId) && a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => Convert.ToDecimal(c.DesignOrderForOrderBy)).ToList();
                 x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).OrderBy(x => x.Id).ThenBy(c => c.DesignOrder).ToList());
 
                 x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :

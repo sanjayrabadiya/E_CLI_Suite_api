@@ -67,7 +67,7 @@ namespace GSC.Respository.Project.Design
                 .ThenInclude(d => d.VariableNoteLanguage.Where(x => x.DeletedBy == null))
                 .Include(d => d.Variables.Where(x => x.DeletedBy == null).OrderBy(c => c.DesignOrder))
                 .ThenInclude(d => d.Roles.Where(x => x.DeletedBy == null))
-                .Include(d=>d.WorkflowTemplate.Where(x=>x.DeletedBy==null))
+                .Include(d => d.WorkflowTemplate.Where(x => x.DeletedBy == null))
                 .AsNoTracking().FirstOrDefault();
 
             return template;
@@ -234,7 +234,7 @@ namespace GSC.Respository.Project.Design
             {
 
                 var variables = _context.ProjectDesignVariable.Where(t => t.ProjectDesignTemplateId == id && t.DeletedDate == null
-                && t.InActiveVersion == null 
+                && t.InActiveVersion == null
                  && (t.CollectionSource == CollectionSources.Date || t.CollectionSource == CollectionSources.DateTime
                  || t.CollectionSource == CollectionSources.MultilineTextBox || t.CollectionSource == CollectionSources.RadioButton))
                     .Select(x => new DesignScreeningVariableDto
@@ -325,7 +325,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDown(int projectDesignVisitId)
         {
             var templates = All.Where(x => x.DeletedDate == null
-                                           && x.ProjectDesignVisitId == projectDesignVisitId && x.InActiveVersion ==null).OrderBy(t => t.DesignOrder).Select(
+                                           && x.ProjectDesignVisitId == projectDesignVisitId && x.InActiveVersion == null).OrderBy(t => t.DesignOrder).Select(
                 t => new DropDownDto
                 {
                     Id = t.Id,
@@ -440,7 +440,7 @@ namespace GSC.Respository.Project.Design
         {
             var checkVersion = CheckStudyVersion(projectDesignVisitId);
             var vistInActiveVersion = _projectDesignVisitRepository.All.Where(x => x.Id == projectDesignVisitId).Select(t => t.InActiveVersion).FirstOrDefault();
-            var list = All.Include(x=>x.ProjectDesignVisit).Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ToList();
+            var list = All.Include(x => x.ProjectDesignVisit).Where(x => x.ProjectDesignVisitId == projectDesignVisitId && x.DeletedDate == null).ToList();
             var result = _mapper.Map<List<ProjectDesignTemplateDto>>(list).OrderBy(t => t.DesignOrder).ToList();
             result.ForEach(x =>
             {
@@ -484,9 +484,66 @@ namespace GSC.Respository.Project.Design
             {
                 return "Can't edit/delete record, Already used in Fector Mapping!";
             }
-           
+
             return "";
         }
+        public void SaveProjectDesignTemplateSiteAccess(ProjectDesignTemplateSiteAccessDto projectDesignTemplateSiteAccessDto)
+        {
+            var accesslist = _context.ProjectDesignTemplateSiteAccess.Where(s => s.DeletedDate == null && s.ProjectDesignTemplateId == projectDesignTemplateSiteAccessDto.TemplateId).ToList();
+            if (accesslist.Count > 0)
+            {
+                _context.ProjectDesignTemplateSiteAccess.RemoveRange(accesslist);
+                _context.Save();
+            }
 
+            var projectId = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
+                          .Where(x => x.DeletedDate == null && x.Id == projectDesignTemplateSiteAccessDto.TemplateId).Select(s => s.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId).FirstOrDefault();
+            if (projectId > 0)
+            {
+                var data = _context.Project.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                        && x.DeletedDate == null && x.ParentProjectId == projectId
+                        && !projectDesignTemplateSiteAccessDto.SiteIds.Contains(x.Id))
+                    .Select(c => new DropDownDto
+                    {
+                        Id = c.Id,
+                        Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                    }).OrderBy(o => o.Value).ToList();
+
+                foreach (var item in data)
+                {
+                    ProjectDesignTemplateSiteAccess obj = new ProjectDesignTemplateSiteAccess();
+                    obj.ProjectId = item.Id;
+                    obj.ProjectDesignTemplateId = projectDesignTemplateSiteAccessDto.TemplateId;
+                    _context.ProjectDesignTemplateSiteAccess.Add(obj);
+                    _context.Save();
+                }
+            }
+        }
+
+        public ProjectDesignTemplateSiteAccessDto GetSitesAccessByTemplateId(int templateId)
+        {
+            var data = new ProjectDesignTemplateSiteAccessDto();
+            var accesslist = _context.ProjectDesignTemplateSiteAccess.Where(s => s.DeletedDate == null && s.ProjectDesignTemplateId == templateId).Select(s => s.ProjectId).ToList();
+            var projectId = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign)
+                         .Where(x => x.DeletedDate == null && x.Id == templateId).Select(s => s.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId).FirstOrDefault();
+            if (projectId > 0)
+            {
+                var data1 = _context.Project.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                        && x.DeletedDate == null && x.ParentProjectId == projectId
+                        && !accesslist.Contains(x.Id))
+                    .Select(c => new DropDownDto
+                    {
+                        Id = c.Id,
+                        Value = c.ProjectCode == null ? c.ManageSite.SiteName : c.ProjectCode + " - " + c.ManageSite.SiteName,
+                    }).OrderBy(o => o.Value).ToList();
+
+                data.SiteIds = data1.Select(s => s.Id).ToList();
+
+            }
+
+            return data;
+        }
     }
 }

@@ -79,5 +79,7 @@ namespace GSC.Data.Entities.Attendance
         public string Weightfactor { get; set; }
 
         public string Dosefactor { get; set; }
+
+        public bool IsGeneric { get; set; }
     }
 }

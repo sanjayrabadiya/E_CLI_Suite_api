@@ -9,6 +9,7 @@ namespace GSC.Data.Entities.Project.Generalconfig
         public bool IsCtms { get; set; }
         public bool IsEicf { get; set; }
         public bool IsScreening { get; set; }
+        public bool IsPatientEngagement { get; set; }
         public Master.Project Project { get; set; }
     }
 }

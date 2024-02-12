@@ -69,7 +69,7 @@ namespace GSC.Respository.Screening
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
         }
 
-        public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
+        public async Task<DataCaptureGridDto> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId, bool IsPatientLevel)
         {
             var result = new DataCaptureGridDto();
 
@@ -83,7 +83,8 @@ namespace GSC.Respository.Screening
             result.IsStartTemplate = workflowlevel.IsStartTemplate;
 
             var projectDesignVisit = await _projectDesignVisitRepository.All.
-                Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesignId == projectDesignId && x.IsSchedule != true).
+                Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesignId == projectDesignId && x.IsSchedule != true
+                && (IsPatientLevel ? x.IsPatientLevel : !x.IsPatientLevel)).
                 OrderBy(a => a.DesignOrder).
             Select(t => new DataEntryVisitTemplateDto
             {
@@ -107,14 +108,14 @@ namespace GSC.Respository.Screening
             });
 
             var randomizationData = await _randomizationRepository.All.Where(x => x.ProjectId == projectId && x.DeletedDate == null
-             && x.PatientStatusId == ScreeningPatientStatus.Screening && x.ScreeningEntry == null).Select(t => new DataCaptureGridData
+             && x.PatientStatusId == ScreeningPatientStatus.Screening && x.ScreeningEntry == null && (IsPatientLevel ? !x.IsGeneric : x.IsGeneric)).Select(t => new DataCaptureGridData
              {
                  RandomizationId = t.Id,
                  VolunteerName = t.Initial,
                  IsRandomization = true,
                  SubjectNo = t.ScreeningNumber,
                  PatientStatusId = t.PatientStatusId,
-                 PatientStatusName = t.PatientStatusId.GetDescription(),
+                 PatientStatusName = !IsPatientLevel ? "NA" : t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  StudyVersion = t.StudyVersion ?? 1,
                  IsEconsentCompleted = true,
@@ -210,12 +211,21 @@ namespace GSC.Respository.Screening
                 SubjectNo = x.RandomizationId != null ? x.Randomization.ScreeningNumber : x.Attendance.Volunteer.VolunteerNo,
                 ScreeningPatientStatus = x.RandomizationId != null ? x.Randomization.PatientStatusId : ScreeningPatientStatus.Screening,
                 PatientStatusId = x.RandomizationId != null ? x.Randomization.PatientStatusId : 0,
-                PatientStatusName = x.RandomizationId != null ? x.Randomization.PatientStatusId.GetDescription() : "",
+                PatientStatusName = x.RandomizationId != null ? IsPatientLevel ? x.Randomization.PatientStatusId.GetDescription() : "NA" : "",
                 RandomizationNumber = x.RandomizationId != null ? x.Randomization.RandomizationNumber : "",
                 StudyVersion = x.Randomization.StudyVersion ?? 1,
-                IsEconsentCompleted = true
+                IsEconsentCompleted = true,
+                IsGeneric = x.Randomization.IsGeneric
             }).ToListAsync();
 
+            if (!IsPatientLevel && screeningData.Count > 0)
+            {
+                screeningData = screeningData.Where(s => s.IsGeneric).ToList();
+            }
+            if (IsPatientLevel && screeningData.Count > 0)
+            {
+                screeningData = screeningData.Where(s => !s.IsGeneric).ToList();
+            }
             var visits = await _screeningVisitRepository.All.
                Where(r => r.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).Select(a => new DataEntryVisitTemplateDto
                {
@@ -232,9 +242,18 @@ namespace GSC.Respository.Screening
                    DesignOrder = a.ProjectDesignVisit.DesignOrder,
                    StudyVersion = a.ProjectDesignVisit.StudyVersion,
                    IsScheduleTerminate = a.IsScheduleTerminate,
-                   ScreeningEntryId = a.ScreeningEntryId
+                   ScreeningEntryId = a.ScreeningEntryId,
+                   IsPatientLevel = a.ProjectDesignVisit.IsPatientLevel
                }).ToListAsync();
 
+            if (!IsPatientLevel && visits.Count > 0)
+            {
+                visits = visits.Where(s => !s.IsPatientLevel).ToList();
+            }
+            if (IsPatientLevel && visits.Count > 0)
+            {
+                visits = visits.Where(s => s.IsPatientLevel).ToList();
+            }
             randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
 
             screeningData.ForEach(r =>

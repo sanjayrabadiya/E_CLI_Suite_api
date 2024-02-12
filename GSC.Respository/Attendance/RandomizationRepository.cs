@@ -1308,7 +1308,7 @@ namespace GSC.Respository.Attendance
 
         public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
         {
-            var result = All.Where(x => x.ProjectId == projectId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+            var result = All.Where(x => x.ProjectId == projectId && !x.IsGeneric && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
                   ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
             var rolelist = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
