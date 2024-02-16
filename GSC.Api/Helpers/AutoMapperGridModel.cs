@@ -839,6 +839,17 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
                .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName + "-" + a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName : ""))
                .ReverseMap();
+            CreateMap<PassThroughCostActivity, PassThroughCostActivityGridDto>().ReverseMap();
+            CreateMap<PassThroughCost, PassThroughCostGridDto>()
+                .ForMember(x => x.PassThroughCostActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                .ForMember(x => x.BudgetFlgTypeName, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
+                .ForMember(x => x.UnitType, x => x.MapFrom(a => a.Unit.UnitName))
+                .ForMember(x => x.CurrencyRate, x => x.MapFrom(a => a.CurrencyRate.LocalCurrencyRate))
+                .ForMember(x => x.CurrencyName, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencyName+ " -" + a.CurrencyRate.Currency.CurrencySymbol))
+                .ForMember(x => x.GlobleCurrencyId, x => x.MapFrom(a => a.CurrencyRate.GlobalCurrencyId))
+                .ForMember(x => x.LocalCurrencySymbol, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencySymbol))
+                .ReverseMap();
         }
     }
 }

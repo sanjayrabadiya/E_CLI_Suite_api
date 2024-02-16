@@ -439,6 +439,8 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPharmacyBarcodeDisplayInfoRepository, PharmacyBarcodeDisplayInfoRepository>();
             services.AddScoped<IProcedureRepository, ProcedureRepository>();
             services.AddScoped<IPatientCostRepository, PatientCostRepository>();
+            services.AddScoped<IPassThroughCostActivityRepository, PassThroughCostActivityRepository>();
+            services.AddScoped<IPassThroughCostRepository, PassThroughCostRepository>();
 
         }
     }

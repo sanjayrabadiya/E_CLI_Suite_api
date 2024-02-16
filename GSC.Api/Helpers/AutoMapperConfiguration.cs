@@ -538,6 +538,9 @@ namespace GSC.Api.Helpers
             CreateMap<PharmacyBarcodeConfig, PharmacyBarcodeConfigDto>().ReverseMap();
             CreateMap<Procedure, ProcedureDto>().ReverseMap();
             CreateMap<PatientCost, ProcedureVisitdadaDto>().ReverseMap();
+            CreateMap<PassThroughCostActivity, PassThroughCostActivityDto>().ReverseMap();
+            CreateMap<PassThroughCost, PassThroughCostDto>().ReverseMap();
+            CreateMap<PassThroughCost, PassThroughCostGridDto>().ReverseMap();
         }
     }
 }

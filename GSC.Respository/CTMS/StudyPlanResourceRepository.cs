@@ -79,7 +79,7 @@ namespace GSC.Respository.CTMS
             var resourceCurrency = _context.ResourceType.Include(r=>r.Currency).Where(s => s.Id == resourceId && s.DeletedBy == null).FirstOrDefault();
             var globalCurrencyId = _context.StudyPlan.Where(s => s.Id == studyplanId && s.DeletedBy == null).Select(d=>d.CurrencyId).FirstOrDefault();
 
-            if (!_context.CurrencyRate.Where(s=>s.StudyPlanId== studyplanId && s.LocalCurrencyId == resourceCurrency.CurrencyId && s.DeletedBy==null).Any() && resourceCurrency.CurrencyId != globalCurrencyId)
+            if (!_context.CurrencyRate.Where(s=>s.StudyPlanId== studyplanId && s.CurrencyId == resourceCurrency.CurrencyId && s.DeletedBy==null).Any() && resourceCurrency.CurrencyId != globalCurrencyId)
                 return resourceCurrency.Currency.CurrencyName +" - "+ resourceCurrency.Currency.CurrencySymbol + " Is Currency And Rate Added in Study plan. ";
             return "";
         }
@@ -98,7 +98,7 @@ namespace GSC.Respository.CTMS
                    GlobalCurrency= _context.Currency.Where(s=>s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy==null).Select(d=>d.CurrencyName +" - " + d.CurrencySymbol).FirstOrDefault(),
                    LocalCurrencySymbol= c.Currency.CurrencySymbol,
                    GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d=>d.CurrencySymbol).FirstOrDefault(),
-                   LocalCurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.LocalCurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
+                   LocalCurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
                }).FirstOrDefault();
 
             return ResourceType;
