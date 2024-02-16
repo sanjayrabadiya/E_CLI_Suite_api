@@ -52,7 +52,7 @@ namespace GSC.Api.Controllers.CTMS
                 currencyRatedata.ForEach(s=>{
                     var CurrencyRateList = new CurrencyRateDTO()
                     {
-                        localCurrencyId = s.LocalCurrencyId,
+                        localCurrencyId = s.CurrencyId,
                         localCurrencyRate = s.LocalCurrencyRate
                     };
                     CurrencyRateList1.Add(CurrencyRateList);

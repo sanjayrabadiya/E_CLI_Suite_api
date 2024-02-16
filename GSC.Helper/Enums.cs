@@ -1214,4 +1214,10 @@ namespace GSC.Helper
         [Description("Every 6 months")] EverySixMonth = 8,
         [Description("Yearly")] Yearly = 9
     }
+    public enum BudgetFlgType : short
+    {
+        [Description("Staudy")] Staudy = 1,
+        [Description("Site")] Site = 2,
+        [Description("Patient")] Patient = 3,
+    }
 }
