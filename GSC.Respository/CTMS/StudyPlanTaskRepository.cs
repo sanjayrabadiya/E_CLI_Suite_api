@@ -925,7 +925,7 @@ namespace GSC.Respository.CTMS
                        LocalCurrencySymbol= x.ResourceType.Currency.CurrencySymbol,
                        CreatedDate = x.CreatedDate,
                        CreatedByUser = x.CreatedByUser.UserName,
-                       LocalCurrencyRate= _context.CurrencyRate.Where(s=>s.StudyPlanId==x.StudyPlanTask.StudyPlanId && s.LocalCurrencyId==x.ResourceType.CurrencyId && s.DeletedBy==null).Select(t=>t.LocalCurrencyRate).FirstOrDefault(),               
+                       LocalCurrencyRate= _context.CurrencyRate.Where(s=>s.StudyPlanId==x.StudyPlanTask.StudyPlanId && s.CurrencyId == x.ResourceType.CurrencyId && s.DeletedBy==null).Select(t=>t.LocalCurrencyRate).FirstOrDefault(),               
                     }).ToList();
                     item.TaskResource = resourcelist;
                 }

@@ -1211,5 +1211,17 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(emailtrigger);
         }
+        [HttpGet]
+        [Route("GetBudgetFlgType")]
+        public IActionResult GetBudgetFlgType()
+        {
+            var BudgetFlgType = Enum.GetValues(typeof(BudgetFlgType))
+                .Cast<BudgetFlgType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(BudgetFlgType);
+        }
     }
 }
