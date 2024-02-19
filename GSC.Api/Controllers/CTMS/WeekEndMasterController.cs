@@ -63,7 +63,7 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetWorkingDay(int studyPlanId)
         {
             if (studyPlanId <= 0) return BadRequest();
-            int project = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault();
+            var project = _context.StudyPlan.Where(x => x.Id == studyPlanId).FirstOrDefault();
             if (project != null)
             {
                 var workingDay = _weekEndMasterRepository.GetWorkingDayList(project.ProjectId);
