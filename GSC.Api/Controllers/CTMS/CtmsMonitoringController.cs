@@ -16,17 +16,14 @@ namespace GSC.Api.Controllers.CTMS
     public class CtmsMonitoringController : BaseController
     {
         private readonly ICtmsMonitoringRepository _ctmsMonitoringRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public CtmsMonitoringController(ICtmsMonitoringRepository ctmsMonitoringRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _ctmsMonitoringRepository = ctmsMonitoringRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -133,23 +130,7 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", "You can't able to clone the form as monitoring visit is not started!");
                 return BadRequest(ModelState);
             }
-            var CtmsMonitoringId = _ctmsMonitoringRepository.Find(ctmsMonitoringId).Id;
-
-            for (var i = 1; i <= noOfClones; i++)
-            {
-                var monitoring = _ctmsMonitoringRepository.FindBy(t => t.Id == CtmsMonitoringId && t.DeletedDate == null).FirstOrDefault();
-                monitoring.Id = 0;
-                monitoring.ScheduleStartDate = null;
-                monitoring.ScheduleEndDate = null;
-                monitoring.ActualStartDate = null;
-                monitoring.ActualEndDate = null;
-                monitoring.ParentId = ctmsMonitoringId;
-                monitoring.ModifiedBy = null;
-                monitoring.ModifiedDate = null;
-                _ctmsMonitoringRepository.Add(monitoring);
-            }
-
-            _uow.Save();
+            _ctmsMonitoringRepository.CloneForm(ctmsMonitoringId, noOfClones);
 
             return Ok();
         }
@@ -191,23 +172,8 @@ namespace GSC.Api.Controllers.CTMS
             ctmsMonitoring.IfReSchedule = true;
             _ctmsMonitoringRepository.Update(ctmsMonitoring);
             if (_uow.Save() <= 0) throw new Exception("Updating Missed Monitoring failed on save.");
-
             record.Id = 0;
-            var addCtmsMonitoring = _mapper.Map<CtmsMonitoring>(record);
-            addCtmsMonitoring.ScheduleStartDate = null;
-            addCtmsMonitoring.ScheduleEndDate = null;
-            addCtmsMonitoring.ActualStartDate = null;
-            addCtmsMonitoring.ActualEndDate = null;
-            addCtmsMonitoring.ModifiedByUser = null;
-            addCtmsMonitoring.ModifiedDate = null;
-            addCtmsMonitoring.DeletedBy = null;
-            addCtmsMonitoring.DeletedDate = null;
-            addCtmsMonitoring.IfMissed = false;
-            addCtmsMonitoring.IfReSchedule = false;
-
-            _ctmsMonitoringRepository.Add(addCtmsMonitoring);
-            if (_uow.Save() <= 0) throw new Exception("Creating Monitoring failed on save.");
-
+            _ctmsMonitoringRepository.AddReSchedule(record);
             return Ok();
         }
     }

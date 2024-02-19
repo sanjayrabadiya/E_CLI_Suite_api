@@ -17,5 +17,7 @@ namespace GSC.Respository.Master
         void CreateLettersEmail(LettersFormate lettersFormate, LettersActivityDto lettersActivityDto);
         void updateLettersEmail(LettersActivityDto lettersActivityDto);
         List<LettersActivityDto> UserRoles(int ProjectId);
+
+        string GetSendMail(SendMailModel sendMailModel);
     }
 }

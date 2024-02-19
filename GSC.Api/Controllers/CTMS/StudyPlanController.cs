@@ -106,7 +106,7 @@ namespace GSC.Api.Controllers.CTMS
                     ModelState.AddModelError("Message", validate);
                     return BadRequest(ModelState);
                 }
-                //_uow.Save();
+                
             }
 
             _studyPlanRepository.PlanUpdate(studyplanDto.ProjectId);
@@ -165,8 +165,6 @@ namespace GSC.Api.Controllers.CTMS
                     var validatecode = _studyPlanRepository.Duplicate(data);
                     if (string.IsNullOrEmpty(validatecode))
                     {
-                        //ModelState.AddModelError("Message", validatecode);
-                        //return BadRequest(ModelState);
                         data.DeletedBy = null;
                         data.DeletedDate = null;
                         _studyPlanRepository.Active(data);

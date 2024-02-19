@@ -30,10 +30,8 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-
             var phasemanagement = _phasemanagementRepository.GetPhaseManagementList(isDeleted);
             return Ok(phasemanagement);
-            //var  phasemanagement  = _phasemanagementRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
         }
 
 

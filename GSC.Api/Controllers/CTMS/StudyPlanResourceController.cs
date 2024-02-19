@@ -19,26 +19,17 @@ namespace GSC.Api.Controllers.Master
     {
 
         private readonly IStudyPlanResourceRepository _studyPlanTaskResourceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
+        
         public StudyPlanResourceController(IStudyPlanResourceRepository studyPlanTaskResourceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IGSCContext context)
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _studyPlanTaskResourceRepository = studyPlanTaskResourceRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
+         
         }
 
         // GET: api/<controller>

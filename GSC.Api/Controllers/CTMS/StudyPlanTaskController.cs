@@ -77,10 +77,13 @@ namespace GSC.Api.Controllers.CTMS
             _uow.Save();
 
             _studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.Id);
-
-            var ProjectId = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault().ProjectId;
-            var ParentProjectId = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
-            _studyPlanRepository.PlanUpdate((int)(ParentProjectId != null ? ParentProjectId : ProjectId));
+            var project = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
+            if (project != null)
+            {
+                var ParentProject = _context.Project.Where(x => x.Id == project.ProjectId).FirstOrDefault();
+                if (ParentProject != null)
+                    _studyPlanRepository.PlanUpdate((int)(ParentProject.ParentProjectId != null ? ParentProject.ParentProjectId : project.ProjectId));
+            }
             return Ok(tastMaster.Id);
         }
 
@@ -117,10 +120,14 @@ namespace GSC.Api.Controllers.CTMS
                 _uow.Save();
                 return BadRequest(ModelState);
             }
+            var project = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
+            if (project != null)
+            {
+                var ParentProject = _context.Project.Where(x => x.Id == project.ProjectId).FirstOrDefault();
+                if (ParentProject != null)
+                    _studyPlanRepository.PlanUpdate((int)(ParentProject.ParentProjectId != null ? ParentProject.ParentProjectId : project.ProjectId));
+            }
 
-            var ProjectId = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault().ProjectId;
-            var ParentProjectId = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
-            _studyPlanRepository.PlanUpdate((int)(ParentProjectId != null ? ParentProjectId : ProjectId));
             return Ok(tastMaster.Id);
         }
 
@@ -131,14 +138,14 @@ namespace GSC.Api.Controllers.CTMS
             var record = _studyPlanTaskRepository.Find(id);
 
             var parenttask = _studyPlanTaskRepository.FindBy(x => x.ParentId == id);
-            foreach (var task in parenttask)
+            foreach (var task in parenttask.Select(s => s.Id).ToList())
             {
                 if (record == null)
                     return NotFound();
-                var subtask = _studyPlanTaskRepository.FindBy(x => x.ParentId == task.Id).ToList();
+                var subtask = _studyPlanTaskRepository.FindBy(x => x.ParentId == task).ToList();
                 foreach (var sub in subtask)
                     _studyPlanTaskRepository.Delete(sub.Id);
-                _studyPlanTaskRepository.Delete(task.Id);
+                _studyPlanTaskRepository.Delete(task);
             }
             _studyPlanTaskRepository.Delete(record.Id);
             _uow.Save();
@@ -270,7 +277,7 @@ namespace GSC.Api.Controllers.CTMS
             DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), record.DocumentPath);
             if (data.FileModel?.Base64?.Length > 0)
             {
-                tastMaster.DocumentPath = _uploadSettingRepository.GetWebDocumentUrl()+DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+                tastMaster.DocumentPath = _uploadSettingRepository.GetWebDocumentUrl() + DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
             }
             tastMaster.ApprovalStatus = data.ApprovalStatus;
             tastMaster.FileName = data.FileName;
