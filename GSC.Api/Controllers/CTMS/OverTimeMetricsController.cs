@@ -107,12 +107,7 @@ namespace GSC.Api.Controllers.CTMS
             var record = _overTimeMetricsRepository.Find(id);
             if (record == null)
                 return NotFound();
-            //var validate = _overTimeMetricsRepository.Duplicate(record);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+           
             var PlanCheck = _overTimeMetricsRepository.PlannedCheck(record);
             if (!string.IsNullOrEmpty(PlanCheck))
             {

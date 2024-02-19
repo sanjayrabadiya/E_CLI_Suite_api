@@ -81,7 +81,7 @@ namespace GSC.Api
             app.UseCors(builder =>
             {
                 builder.WithOrigins(new[] { "http://localhost:4100", "http://localhost:4200", "http://localhost:63980", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com",
-                "https://dev.clinvigilant.com", "https://eclinical.clinvigilant.com"})
+                "https://dev.clinvigilant.com", "https://eclinical.clinvigilant.com","https://devapi.clinvigilant.com/"})
                 .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             });
             app.UseStaticFiles();

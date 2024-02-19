@@ -14,20 +14,11 @@ namespace GSC.Api.Controllers.CTMS
     [ApiController]
     public class BudgetPlanerController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
 
-        public BudgetPlanerController(IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, IGSCContext context, IStudyPlanTaskRepository studyPlanTaskRepository,
-            IUploadSettingRepository uploadSettingRepository)
+        public BudgetPlanerController(IStudyPlanTaskRepository studyPlanTaskRepository)
         {
-            _uow = uow;
-            _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
+        
             _studyPlanTaskRepository = studyPlanTaskRepository;
         }
 

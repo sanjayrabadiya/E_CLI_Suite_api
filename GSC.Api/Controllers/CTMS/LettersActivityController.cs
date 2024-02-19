@@ -18,23 +18,17 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly ILettersActivityRepository _lettersActivityRepository;
         private readonly ILettersFormateRepository _lettersFormateRepository;
-        private readonly IEmailSenderRespository _emailSenderRespository;
-        private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public LettersActivityController(ILettersActivityRepository lettersActivityRepository,
             ILettersFormateRepository lettersFormateRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IEmailSenderRespository emailSenderRespository, IGSCContext context
-            )
+            IUnitOfWork uow, IMapper mapper)
         {
             _lettersActivityRepository = lettersActivityRepository;
             _lettersFormateRepository = lettersFormateRepository;
             _uow = uow;
             _mapper = mapper;
-            _emailSenderRespository = emailSenderRespository;
-            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}/{projectId:int?}")]
@@ -142,30 +136,7 @@ namespace GSC.Api.Controllers.Master
         [Route("GetSendMail")]
         public IActionResult GetSendMail([FromBody] SendMailModel sendMailModel)
         {
-            var record = _lettersActivityRepository.Find(sendMailModel.Id);
-            var data = _context.LettersActivity.Include(c=> c.Activity).Include(m=> m.CtmsMonitoring).Where(x => x.Id == sendMailModel.Id).FirstOrDefault();
-            if (record == null) return NotFound();
-            var lettersActivityDto = _mapper.Map<LettersActivityDto>(record);
-
-            if (sendMailModel.Email != null && sendMailModel.Email != "")
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
-
-            foreach (var item in sendMailModel.OpstionLists)
-            {
-                lettersActivityDto.Email = item.Option;
-                if (item.Option != null && item.Option != "")
-                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
-            }
-
-            foreach (var item in sendMailModel.UserModel)
-            {
-                var email =_context.Users.Where(x => x.Id == item.userId && x.DeletedBy==null).Select(x => x.Email).FirstOrDefault();
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
-            }
-                
-            var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
-            _lettersActivityRepository.Update(lettersActivity);
-            if (_uow.Save() <= 0) throw new Exception("Updating letters Formate failed on save.");
+            _lettersActivityRepository.GetSendMail(sendMailModel);
             return Ok(true);
         }
 

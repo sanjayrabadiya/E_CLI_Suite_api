@@ -119,13 +119,7 @@ namespace GSC.Respository.CTMS
             return projectIds;
         }
 
-        //public string Duplicate(OverTimeMetrics objSave)
-        //{
-        //    if (All.Any(x => x.Id != objSave.Id && x.PlanMetricsId == objSave.PlanMetricsId && x.TaskName == objSave.TaskName && x.DeletedDate == null))
-        //        return "Duplicate Task";
-        //    return "";
-        //}
-        
+       
         // validation : not add morthen planned value as study lavel planned
         public string PlannedCheck(OverTimeMetrics objSave)
         {

@@ -10,7 +10,7 @@ namespace GSC.Data.Entities.CTMS
     {
         public string PhaseName { get; set; }
         public string PhaseCode { get; set; }
-        //public int? CompanyId { get; set; }
+     
       
     }
 }

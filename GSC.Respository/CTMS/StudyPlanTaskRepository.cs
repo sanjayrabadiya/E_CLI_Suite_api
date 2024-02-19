@@ -80,7 +80,7 @@ namespace GSC.Respository.CTMS
                     result.EndDate = item?.EndDate;
                     result.EndDateDay = item?.EndDate;
                     result.StudyPlanId = StudyPlanId;
-                    //var TodayDate = DateTime.Now;
+                    
 
                     if (studyplans != null)
                     {
@@ -439,7 +439,7 @@ namespace GSC.Respository.CTMS
             int ProjectId = _context.StudyPlan.Where(x => x.Id == maintask.StudyPlanId).FirstOrDefault().ProjectId;
             var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
-            //var weekendlist = new List<string>();
+            
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
             if (maintask.DependentTaskId > 0)
@@ -481,7 +481,7 @@ namespace GSC.Respository.CTMS
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
 
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
-            //var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).SingleOrDefault();
+            
             var maintask = reftasklist.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).FirstOrDefault();
             if (maintask.ActivityType == ActivityType.FF)
             {
@@ -571,7 +571,7 @@ namespace GSC.Respository.CTMS
                 result.StudyPlanId = studyplan.Id;
                 var tasklist = All.Where(x => x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.Id != StudyPlanTaskId).OrderBy(x => x.TaskOrder).
                ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-                //result.StudyPlanTask = tasklist.Where(x => x.DependentTaskId != StudyPlanTaskId).ToList();
+               
                 result.StudyPlanTask = tasklist;
             }
             else
@@ -915,7 +915,6 @@ namespace GSC.Respository.CTMS
                        YersOfExperience = x.ResourceType.Designation.YersOfExperience,
                        NameOfMaterial = x.ResourceType.NameOfMaterial,
                        Unit=x.ResourceType.Unit.UnitName,
-                       //NumberOfUnit =x.ResourceType.NumberOfUnit,
                        NumberOfUnit = x.NoOfUnit,
                        Cost =x.ResourceType.Cost,
                        TotalCost = x.TotalCost,
@@ -929,11 +928,6 @@ namespace GSC.Respository.CTMS
                     }).ToList();
                     item.TaskResource = resourcelist;
                 }
-
-            //Apply flitter display only Resource Added display
-            //if (result != null)
-            //    result = result.Where(s => s.TaskResource.Count != 0).ToList();
-
             return result;
         }
     }

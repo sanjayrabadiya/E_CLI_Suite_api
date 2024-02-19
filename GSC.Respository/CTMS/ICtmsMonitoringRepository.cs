@@ -13,5 +13,9 @@ namespace GSC.Respository.CTMS
         CtmsMonitoringGridDto GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId);
         string AddStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
         string UpdateStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
+
+        void CloneForm(int ctmsMonitoringId, int noOfClones);
+
+        void AddReSchedule(CtmsMonitoring record);
     }
 }

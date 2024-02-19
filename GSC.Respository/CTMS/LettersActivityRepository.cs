@@ -32,10 +32,10 @@ namespace GSC.Respository.Master
         private readonly IGSCContext _context;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IProjectRightRepository _projectRightRepository;
-
+        private readonly ILettersActivityRepository _lettersActivityRepository;
         public LettersActivityRepository(IGSCContext context, IEmailSenderRespository emailSenderRespository,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository, IProjectRightRepository projectRightRepository)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository, 
+            ILettersActivityRepository lettersActivityRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -43,7 +43,7 @@ namespace GSC.Respository.Master
             _context = context;
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
-            _projectRightRepository = projectRightRepository;
+            _lettersActivityRepository = lettersActivityRepository;
         }
         public List<DropDownDto> GetActivityTypeDropDown()
         {
@@ -108,30 +108,33 @@ namespace GSC.Respository.Master
 
             var projectdata = _context.Project.Include(c => c.Country).Include(s => s.State).Include(c => c.City).Include(a => a.CityArea).Include(m => m.ManageSite).Where(x => x.Id == lettersActivityDto.ProjectId).FirstOrDefault();
             var CtmsMonitoringdata = _context.CtmsMonitoring.Where(x => x.Id == lettersActivityDto.CtmsMonitoringId).FirstOrDefault();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.Id == lettersActivityDto.ActivityId).FirstOrDefault();
             var studyCode = _context.Project.Where(p => p.Id == projectdata.ParentProjectId && p.ParentProjectId == null).FirstOrDefault();
             var userIntigration = _context.Users.Where(p => p.Id == lettersActivityDto.UserIntigration && p.DeletedBy == null).FirstOrDefault();
 
-            if (projectdata.CityArea != null)
-                adress += projectdata.CityArea.AreaName + ", ";
-            if (projectdata.City != null)
-                adress += projectdata.City.CityName + ", ";
-            if (projectdata.State != null)
-                adress += projectdata.State.StateName + ", ";
-            if (projectdata.Country != null)
-                adress += projectdata.Country.CountryName + "-";
-            if (projectdata.PinCode != null)
-                adress += projectdata.PinCode;
+            if (projectdata != null)
+            {
+                if (projectdata.CityArea != null)
+                    adress += projectdata.CityArea.AreaName + ", ";
+                if (projectdata.City != null)
+                    adress += projectdata.City.CityName + ", ";
+                if (projectdata.State != null)
+                    adress += projectdata.State.StateName + ", ";
+                if (projectdata.Country != null)
+                    adress += projectdata.Country.CountryName + "-";
+                if (projectdata.PinCode != null)
+                    adress += projectdata.PinCode;
+            }
 
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##CURRENTDATE##", currentDate, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>CURRENTDATE</strong>##", "<strong>" + currentDate + "</strong>", RegexOptions.IgnoreCase);
 
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##ADDRESS##", adress, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>ADDRESS</strong>##", "<strong>" + adress + "</strong>", RegexOptions.IgnoreCase);
-
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SITENAME##", projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode, RegexOptions.IgnoreCase);
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SITENAME</strong>##", "<strong>" + projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
-
+            if (projectdata != null)
+            {
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SITENAME##", projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode, RegexOptions.IgnoreCase);
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SITENAME</strong>##", "<strong>" + projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
+            }
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SUDYCODE##", studyCode.ProjectCode, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SUDYCODE</strong>##", "<strong>" + studyCode.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
 
@@ -225,28 +228,44 @@ namespace GSC.Respository.Master
         public List<LettersActivityDto> UserRoles(int ProjectId)
         {
             //add by mitul on 30-11-2023 -> CTMS UserAccess wise user get
-            var users =_context.UserAccess.Include(x=>x.UserRole).ThenInclude(x=>x.User).Where(s=>s.ProjectId== ProjectId && s.DeletedDate == null && s.UserRole.UserId != _jwtTokenAccesser.UserId)
-                .OrderByDescending(s=>s.Id).Select(c => new LettersActivityDto
+            var users = _context.UserAccess.Include(x => x.UserRole).ThenInclude(x => x.User).Where(s => s.ProjectId == ProjectId && s.DeletedDate == null && s.UserRole.UserId != _jwtTokenAccesser.UserId)
+                .OrderByDescending(s => s.Id).Select(c => new LettersActivityDto
                 {
                     UserId = c.UserRole.UserId,
                     Name = c.UserRole.User.UserName,
                     IsSelected = true,
                 }).ToList();
 
-            //Commit by mitul on 30-11-2023 Remove user Access for projectRight
-            //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null && x.User.DeletedDate == null).ToList();
-            //var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
-            //    .GroupBy(c => new { c.UserId }, (key, group) => group.First());
-
-            //var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
-            //    .Select(c => new LettersActivityDto
-            //    {
-            //        UserId = c.UserId,
-            //        Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
-            //        IsSelected = true,
-            //    }).ToList();
 
             return users;
+        }
+        public string GetSendMail(SendMailModel sendMailModel)
+        {
+            var record = _lettersActivityRepository.Find(sendMailModel.Id);
+            var data = _context.LettersActivity.Include(c => c.Activity).Include(m => m.CtmsMonitoring).Where(x => x.Id == sendMailModel.Id).FirstOrDefault();
+            if (record == null) return "";
+            var lettersActivityDto = _mapper.Map<LettersActivityDto>(record);
+
+            if (sendMailModel.Email != null && sendMailModel.Email != "")
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+
+            foreach (var item in sendMailModel.OpstionLists)
+            {
+                lettersActivityDto.Email = item.Option;
+                if (item.Option != null && item.Option != "")
+                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+            }
+
+            foreach (var item in sendMailModel.UserModel)
+            {
+                var email = _context.Users.Where(x => x.Id == item.userId && x.DeletedBy == null).Select(x => x.Email).FirstOrDefault();
+                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+            }
+
+            var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
+            _lettersActivityRepository.Update(lettersActivity);
+            _context.Save();
+            return "";
         }
     }
 }

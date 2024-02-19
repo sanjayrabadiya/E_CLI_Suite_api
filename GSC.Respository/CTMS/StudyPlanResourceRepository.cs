@@ -15,16 +15,10 @@ namespace GSC.Respository.CTMS
 {
     public class StudyPlanResourceRepository : GenericRespository<StudyPlanResource>, IStudyPlanResourceRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public StudyPlanResourceRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper) : base(context)
+        public StudyPlanResourceRepository(IGSCContext context) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _context = context;
         }
         public dynamic GetTaskResourceList(bool isDeleted, int studyPlanTaskId)
@@ -108,18 +102,24 @@ namespace GSC.Respository.CTMS
         {
             var TotalCost = _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == StudyPlanResource.StudyPlanTaskId && s.DeletedBy==null).Sum(d => d.ConvertTotalCost);
             var StudyPlanTaskData = _context.StudyPlanTask.Where(s=>s.Id == StudyPlanResource.StudyPlanTaskId && s.DeletedBy==null).FirstOrDefault();
-            StudyPlanTaskData.TotalCost= TotalCost;
-            _context.StudyPlanTask.UpdateRange(StudyPlanTaskData);
-            _context.Save();
-            TotalCostStudyUpdate(StudyPlanTaskData);
+            if (StudyPlanTaskData != null)
+            {
+                StudyPlanTaskData.TotalCost = TotalCost;
+                _context.StudyPlanTask.UpdateRange(StudyPlanTaskData);
+                _context.Save();
+                TotalCostStudyUpdate(StudyPlanTaskData);
+            }
         }
         public void TotalCostStudyUpdate(StudyPlanTask StudyPlanTaskData)
         {
             var TotalCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == StudyPlanTaskData.StudyPlanId && s.DeletedBy == null).Sum(d => d.TotalCost);
             var StudyPlanData = _context.StudyPlan.Where(s => s.Id == StudyPlanTaskData.StudyPlanId && s.DeletedBy == null).FirstOrDefault();
-            StudyPlanData.TotalCost= TotalCost;
-            _context.StudyPlan.UpdateRange(StudyPlanData);
-            _context.Save();
+            if (StudyPlanData != null)
+            {
+                StudyPlanData.TotalCost = TotalCost;
+                _context.StudyPlan.UpdateRange(StudyPlanData);
+                _context.Save();
+            }
         }
     }
 }

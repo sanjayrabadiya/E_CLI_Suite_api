@@ -13,5 +13,7 @@ namespace GSC.Respository.CTMS
         void DeleteChild(int ctmsMonitoringReportVariableValueId);
         bool GetQueryStatusByReportId(int ctmsMonitoringReportId);
         void SaveVariableValue(CtmsMonitoringReportVariableValueSaveDto ctmsMonitoringReportVariableValueSaveDto);
+
+        void UploadDocument(CtmsMonitoringReportVariableValueDto ctmsMonitoringReportVariableValueSaveDto);
     }
 }
