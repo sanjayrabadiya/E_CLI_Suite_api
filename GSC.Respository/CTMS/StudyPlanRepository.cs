@@ -134,7 +134,7 @@ namespace GSC.Respository.CTMS
                 currencyRateData.Id = 0;
                 currencyRateData.StudyPlanId = objSave.Id;
                 currencyRateData.GlobalCurrencyId=objSave.CurrencyId;
-                currencyRateData.LocalCurrencyId=i.localCurrencyId;
+                currencyRateData.CurrencyId =i.localCurrencyId;
                 currencyRateData.LocalCurrencyRate=i.localCurrencyRate;
                 _context.CurrencyRate.Add(currencyRateData);
                 _context.Save();
@@ -159,7 +159,7 @@ namespace GSC.Respository.CTMS
                 currencyRateData.Id = 0;
                 currencyRateData.StudyPlanId = objSave.Id;
                 currencyRateData.GlobalCurrencyId = objSave.CurrencyId;
-                currencyRateData.LocalCurrencyId = i.localCurrencyId;
+                currencyRateData.CurrencyId = i.localCurrencyId;
                 currencyRateData.LocalCurrencyRate = i.localCurrencyRate;
                 _context.CurrencyRate.Add(currencyRateData);
                 _context.Save();
