@@ -108,8 +108,7 @@ namespace GSC.Respository.CTMS
                 _context.StudyPlanTask.UpdateRange(StudyPlanTaskData);
                 _context.Save();
             }
-        }
-              }
+        }   
     }
 }
 
