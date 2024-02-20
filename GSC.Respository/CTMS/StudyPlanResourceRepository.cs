@@ -95,7 +95,7 @@ namespace GSC.Respository.CTMS
                    LocalCurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
                }).FirstOrDefault();
 
-            return ResourceType;
+            return ResourceType; 
         }
 
         public void TotalCostUpdate(StudyPlanResource StudyPlanResource)
