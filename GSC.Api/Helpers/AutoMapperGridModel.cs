@@ -318,7 +318,7 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
                            .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
                            .ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId != 0 ? false : false))
-                           //.ForMember(x => x.IsManual, x => x.MapFrom(a => a.Duration == 0 ? false : true))
+                           .ForMember(x => x.RefrenceTypeName, x => x.MapFrom(a => a.RefrenceType.GetDescription()))
                            .ForMember(x => x.EndDateDay, x => x.MapFrom(a => a.EndDate))
                            .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
                            .ForMember(x => x.DurationDay, x => x.MapFrom(a => a.Duration))
