@@ -56,7 +56,16 @@ namespace GSC.Respository.Audit
             var query = All.AsQueryable();
 
             if (search.TableName?.Length > 0)
+            {
                 query = query.Where(x => x.TableName == search.TableName);
+                if (search.TableName == "Randomization" && search.ProjectId != null)
+                {
+                    var randomizationIds = _context.Randomization.Where(x => x.ProjectId == search.ProjectId && x.DeletedDate == null)
+                        .Select(s => s.Id).ToList();
+
+                    query = query.Where(x => randomizationIds.Contains(x.RecordId));
+                }
+            }
             if (search.RecordId > 0)
                 query = query.Where(x => x.RecordId == search.RecordId);
             if (!string.IsNullOrEmpty(search.ColumnName))
@@ -96,7 +105,7 @@ namespace GSC.Respository.Audit
             var periodIds = _context.ProjectDesignPeriod.Where(t => t.ProjectDesignId == designId)
                 .Select(s => s.Id).ToList();
 
-            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId)  && (search.VisitIds==null || search.VisitIds.Length == 0  || search.VisitIds.Contains(t.Id)))
+            var visitIds = _context.ProjectDesignVisit.Where(t => periodIds.Contains(t.ProjectDesignPeriodId) && (search.VisitIds == null || search.VisitIds.Length == 0 || search.VisitIds.Contains(t.Id)))
                 .Select(s => s.Id).ToList();
 
             var templateIds = _context.ProjectDesignTemplate.Where(t => visitIds.Contains(t.ProjectDesignVisitId) && (search.TemplateIds == null || search.TemplateIds.Length == 0 || search.TemplateIds.Contains(t.Id)))
@@ -139,7 +148,7 @@ namespace GSC.Respository.Audit
                     Period = t.DisplayName
                 }).ToList();
 
-                foreach(var x in Period)
+                foreach (var x in Period)
                 {
                     var nameDetail = displayLists.FirstOrDefault(t => t.Key == x.Key);
                     x.Period = nameDetail.Period;
@@ -150,7 +159,7 @@ namespace GSC.Respository.Audit
             }
 
             displayLists = new List<ProjectDesignAuditReportDto>();
-            var Visit = GetDesignItems("ProjectDesignVisit",visitIds, Project.ProjectCode);
+            var Visit = GetDesignItems("ProjectDesignVisit", visitIds, Project.ProjectCode);
             if (Visit != null || Visit.Count() > 0)
             {
                 var keys = Visit.Select(t => t.Key).Distinct().ToList();
@@ -172,7 +181,7 @@ namespace GSC.Respository.Audit
             }
 
             displayLists = new List<ProjectDesignAuditReportDto>();
-            var Template = GetDesignItems("ProjectDesignTemplate",templateIds, Project.ProjectCode);
+            var Template = GetDesignItems("ProjectDesignTemplate", templateIds, Project.ProjectCode);
             if (Template != null || Template.Count() > 0)
             {
                 var keys = Template.Select(t => t.Key).Distinct().ToList();
@@ -195,7 +204,7 @@ namespace GSC.Respository.Audit
             }
 
             displayLists = new List<ProjectDesignAuditReportDto>();
-            var Variable = GetDesignItems("ProjectDesignVariable",variableIds, Project.ProjectCode);
+            var Variable = GetDesignItems("ProjectDesignVariable", variableIds, Project.ProjectCode);
             if (Variable != null || Variable.Count() > 0)
             {
                 var keys = Variable.Select(t => t.Key).Distinct().ToList();
@@ -311,7 +320,7 @@ namespace GSC.Respository.Audit
             }
 
             displayLists = new List<ProjectDesignAuditReportDto>();
-            var TemplateNoteLanguageData = GetDesignItems("TemplateNoteLanguage", templateNoteLanguageIds,Project.ProjectCode);
+            var TemplateNoteLanguageData = GetDesignItems("TemplateNoteLanguage", templateNoteLanguageIds, Project.ProjectCode);
             if (TemplateNoteLanguageData != null || TemplateNoteLanguageData.Count() > 0)
             {
                 var keys = TemplateNoteLanguageData.Select(t => t.Key).Distinct().ToList();
@@ -358,7 +367,7 @@ namespace GSC.Respository.Audit
             }
 
             displayLists = new List<ProjectDesignAuditReportDto>();
-            var VariableNoteLanguageData = GetDesignItems("VariableNoteLanguage",variableNoteLanguageIds, Project.ProjectCode);
+            var VariableNoteLanguageData = GetDesignItems("VariableNoteLanguage", variableNoteLanguageIds, Project.ProjectCode);
             if (VariableNoteLanguageData != null || VariableNoteLanguageData.Count() > 0)
             {
                 var keys = VariableNoteLanguageData.Select(t => t.Key).Distinct().ToList();
@@ -415,7 +424,7 @@ namespace GSC.Respository.Audit
                     Key = t.Id,
                     Visit = t.ProjectDesignVisit.DisplayName,
                     Period = t.ProjectDesignVisit.ProjectDesignPeriod.DisplayName,
-                    Template = t.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode+"-"+ t.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
+                    Template = t.ProjectDesignVariable.ProjectDesignTemplate.TemplateCode + "-" + t.ProjectDesignVariable.ProjectDesignTemplate.TemplateName,
                     Variable = t.ProjectDesignVariable.VariableCode + "-" + t.ProjectDesignVariable.VariableName
                 }).ToList();
 
