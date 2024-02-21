@@ -23,15 +23,15 @@ namespace GSC.Respository.CTMS
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        private readonly ICtmsMonitoringRepository _ctmsMonitoringRepository;
+        
         public CtmsMonitoringRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, ICtmsMonitoringRepository ctmsMonitoringRepository)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
-            _ctmsMonitoringRepository = ctmsMonitoringRepository;
+            
         }
 
         public List<CtmsMonitoringGridDto> GetMonitoringForm(int projectId, int siteId, int activityId)
@@ -229,31 +229,33 @@ namespace GSC.Respository.CTMS
                 //Add CTMS Monitoring schedule after then Automatic Add Study plan
                 var ParentProjectId = _context.Project.Where(x => x.Id == ctmsMonitoringDto.ProjectId && x.DeletedBy == null).Select(s => s.ParentProjectId).FirstOrDefault();
                 var TaskMaster = _context.StudyPlan.Where(x => x.ProjectId == ParentProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
-                var data = new StudyPlan();
-                data.Id = 0;
-                data.StartDate = TaskMaster.StartDate;
-                data.EndDate = TaskMaster.EndDate;
-                data.ProjectId = ctmsMonitoringDto.ProjectId;
-                data.TaskTemplateId = TaskMaster.TaskTemplateId;
-                _context.StudyPlan.Add(data);
-                _context.Save();
+                if (TaskMaster != null)
+                {
+                    var data = new StudyPlan();
+                    data.Id = 0;
+                    data.StartDate = TaskMaster.StartDate;
+                    data.EndDate = TaskMaster.EndDate;
+                    data.ProjectId = ctmsMonitoringDto.ProjectId;
+                    data.TaskTemplateId = TaskMaster.TaskTemplateId;
+                    _context.StudyPlan.Add(data);
+                    _context.Save();
+                    //Add CTMS Monitoring schedule after then Automatic Study plan task
+                    lisatdata.Id = 0;
+                    lisatdata.StudyPlanId = data.Id;
+                    lisatdata.TaskName = taskname;
+                    lisatdata.DurationDay = Convert.ToInt16(duration.Days);
+                    lisatdata.RefrenceType = RefrenceType.Sites;//fix site
+                    var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
+                    studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
+                    studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
+                    if (ctmsMonitoringDto.ActualStartDate != null)
+                        studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
+                    if (ctmsMonitoringDto.ActualEndDate != null)
+                        studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
 
-                //Add CTMS Monitoring schedule after then Automatic Study plan task
-                lisatdata.Id = 0;
-                lisatdata.StudyPlanId = data.Id;
-                lisatdata.TaskName = taskname;
-                lisatdata.DurationDay = Convert.ToInt16(duration.Days);
-                lisatdata.RefrenceType = RefrenceType.Sites;//fix site
-                var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
-                studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
-                studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
-                if (ctmsMonitoringDto.ActualStartDate != null)
-                    studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
-                if (ctmsMonitoringDto.ActualEndDate != null)
-                    studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
-
-                _context.StudyPlanTask.Add(studyPlanTask);
-                _context.Save();
+                    _context.StudyPlanTask.Add(studyPlanTask);
+                    _context.Save();
+                }
             }
             return "";
         }
@@ -289,20 +291,23 @@ namespace GSC.Respository.CTMS
 
         public void CloneForm(int ctmsMonitoringId, int noOfClones)
         {
-            var CtmsMonitoringId = _ctmsMonitoringRepository.Find(ctmsMonitoringId).Id;
+            var CtmsMonitoringId = _context.CtmsMonitoring.Find(ctmsMonitoringId).Id;
 
             for (var i = 1; i <= noOfClones; i++)
             {
-                var monitoring = _ctmsMonitoringRepository.FindBy(t => t.Id == CtmsMonitoringId && t.DeletedDate == null).FirstOrDefault();
-                monitoring.Id = 0;
-                monitoring.ScheduleStartDate = null;
-                monitoring.ScheduleEndDate = null;
-                monitoring.ActualStartDate = null;
-                monitoring.ActualEndDate = null;
-                monitoring.ParentId = ctmsMonitoringId;
-                monitoring.ModifiedBy = null;
-                monitoring.ModifiedDate = null;
-                Add(monitoring);
+                var monitoring = _context.CtmsMonitoring.Where(t => t.Id == CtmsMonitoringId && t.DeletedDate == null).FirstOrDefault();
+                if (monitoring != null)
+                {
+                    monitoring.Id = 0;
+                    monitoring.ScheduleStartDate = null;
+                    monitoring.ScheduleEndDate = null;
+                    monitoring.ActualStartDate = null;
+                    monitoring.ActualEndDate = null;
+                    monitoring.ParentId = ctmsMonitoringId;
+                    monitoring.ModifiedBy = null;
+                    monitoring.ModifiedDate = null;
+                    Add(monitoring);
+                }
             }
             _context.Save();
         }
@@ -320,7 +325,7 @@ namespace GSC.Respository.CTMS
             addCtmsMonitoring.IfMissed = false;
             addCtmsMonitoring.IfReSchedule = false;
 
-            _ctmsMonitoringRepository.Add(addCtmsMonitoring);
+            Add(addCtmsMonitoring);
             _context.Save();
         }
     }

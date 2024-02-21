@@ -55,6 +55,8 @@ namespace GSC.Data.Dto.CTMS
         public decimal? TotalCost { get; set; }
         public List<StudyPlanTaskDto> Subtasks { get; set; }
         public List<ResourceTypeGridDto> TaskResource { get; set; }
+
+        public string RefrenceTypeName { get; set; }
     }
 
     public class StudyPlanTaskChartDto
