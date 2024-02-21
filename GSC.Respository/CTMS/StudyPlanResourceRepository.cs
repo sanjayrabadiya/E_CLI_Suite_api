@@ -95,7 +95,7 @@ namespace GSC.Respository.CTMS
                    LocalCurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
                }).FirstOrDefault();
 
-            return ResourceType;
+            return ResourceType; 
         }
 
         public void TotalCostUpdate(StudyPlanResource StudyPlanResource)
@@ -107,20 +107,8 @@ namespace GSC.Respository.CTMS
                 StudyPlanTaskData.TotalCost = TotalCost;
                 _context.StudyPlanTask.UpdateRange(StudyPlanTaskData);
                 _context.Save();
-                TotalCostStudyUpdate(StudyPlanTaskData);
             }
-        }
-        public void TotalCostStudyUpdate(StudyPlanTask StudyPlanTaskData)
-        {
-            var TotalCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == StudyPlanTaskData.StudyPlanId && s.DeletedBy == null).Sum(d => d.TotalCost);
-            var StudyPlanData = _context.StudyPlan.Where(s => s.Id == StudyPlanTaskData.StudyPlanId && s.DeletedBy == null).FirstOrDefault();
-            if (StudyPlanData != null)
-            {
-                StudyPlanData.TotalCost = TotalCost;
-                _context.StudyPlan.UpdateRange(StudyPlanData);
-                _context.Save();
-            }
-        }
+        }   
     }
-}
+} 
 
