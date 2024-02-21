@@ -1216,7 +1216,7 @@ namespace GSC.Helper
     }
     public enum BudgetFlgType : short
     {
-        [Description("Staudy")] Staudy = 1,
+        [Description("Study")] Study = 1,
         [Description("Site")] Site = 2,
         [Description("Patient")] Patient = 3,
     }
