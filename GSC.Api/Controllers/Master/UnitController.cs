@@ -140,5 +140,11 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_unitRepository.GetUnitDropDown());
         }
+        [HttpGet]
+        [Route("GetUnitAsModule/{screenCode}")]
+        public IActionResult GetUnitAsModule(string screenCode)
+        {
+            return Ok(_unitRepository.GetUnitAsModule(screenCode));
+        }
     }
 }

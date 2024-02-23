@@ -60,6 +60,7 @@ namespace GSC.Respository.CTMS
                    Cost =c.ResourceType.Cost,
                    NoOfUnit =c.NoOfUnit,
                    TotalCost=c.TotalCost,
+                   Unit=c.ResourceType.Unit.UnitName,
                    ConvertTotalCost = c.ConvertTotalCost,
                    ResourceUnit = c.ResourceType.Unit.UnitName,
                    GlobalCurrency = _context.Currency.Where(s=>s.Id == _context.StudyPlan.Where(s=>s.Id==c.StudyPlanTask.StudyPlanId && s.DeletedBy==null).Select(s=>s.CurrencyId).FirstOrDefault()).Select(r=>r.CurrencyName + " - " + r.CurrencySymbol).FirstOrDefault(),

@@ -59,6 +59,7 @@ namespace GSC.Data.Dto.CTMS
         public int? Cost { get; set; }
         public int? NoOfUnit { get; set; }
         public int? TotalCost { get; set; }
+        public string Unit { get; set; }
         public int? ConvertTotalCost { get; set; }
         public string ResourceUnit { get; set; }
         public string GlobalCurrency { get; set; }
