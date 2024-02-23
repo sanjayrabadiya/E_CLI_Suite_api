@@ -97,7 +97,9 @@ namespace GSC.Api.Helpers
             CreateMap<Religion, ReligionGridDto>().ReverseMap();
             CreateMap<TestGroup, TestGroupGridDto>().ReverseMap();
             CreateMap<Test, TestGridDto>().ReverseMap();
-            CreateMap<Unit, UnitGridDto>().ReverseMap();
+            CreateMap<Unit, UnitGridDto>()
+                .ForMember(x => x.AppScreenName, a => a.MapFrom(x => x.AppScreen.ScreenName))
+                .ReverseMap();
             CreateMap<State, StateGridDto>().ReverseMap();
             CreateMap<TrialType, TrialTypeGridDto>().ReverseMap();
             CreateMap<ScopeName, ScopeNameGridDto>().ForMember(x => x.ScopeName, y => y.MapFrom(a => a.Name)).ReverseMap();

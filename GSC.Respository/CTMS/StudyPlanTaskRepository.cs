@@ -207,6 +207,7 @@ namespace GSC.Respository.CTMS
                    Designation = x.ResourceType.Designation.NameOFDesignation,
                    YersOfExperience = x.ResourceType.Designation.YersOfExperience,
                    NameOfMaterial = x.ResourceType.NameOfMaterial,
+                   Unit=x.ResourceType.Unit.UnitName,
                    CreatedDate = x.CreatedDate,
                    CreatedByUser = x.CreatedByUser.UserName
                }).ToList();

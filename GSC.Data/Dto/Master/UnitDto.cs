@@ -9,10 +9,12 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Unit Name is required.")]
         public string UnitName { get; set; }
         public int? CompanyId { get; set; }
+        public int? AppScreenId { get; set; }
     }
 
     public class UnitGridDto : BaseAuditDto
     {
         public string UnitName { get; set; }
+        public string AppScreenName { get; set; }
     }
 }
