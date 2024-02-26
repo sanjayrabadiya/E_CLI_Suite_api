@@ -56,7 +56,16 @@ namespace GSC.Respository.Audit
             var query = All.AsQueryable();
 
             if (search.TableName?.Length > 0)
+            {
                 query = query.Where(x => x.TableName == search.TableName);
+                if (search.TableName == "Randomization" && search.ProjectId != null)
+                {
+                    var randomizationIds = _context.Randomization.Where(x => x.ProjectId == search.ProjectId && x.DeletedDate == null)
+                        .Select(s => s.Id).ToList();
+
+                    query = query.Where(x => randomizationIds.Contains(x.RecordId));
+                }
+            }
             if (search.RecordId > 0)
                 query = query.Where(x => x.RecordId == search.RecordId);
             if (!string.IsNullOrEmpty(search.ColumnName))

@@ -8,6 +8,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
@@ -15,6 +16,7 @@ namespace GSC.Respository.Master
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
+        private readonly IGSCContext _context;
 
         public UnitRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -23,6 +25,7 @@ namespace GSC.Respository.Master
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
+            _context = context;
         }
 
         public List<DropDownDto> GetUnitDropDown()
@@ -43,6 +46,11 @@ namespace GSC.Respository.Master
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<UnitGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        }
+        public List<DropDownDto> GetUnitAsModule(string screenCode)
+        { 
+           return _context.Unit.Include(s=>s.AppScreen).Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.AppScreen.ScreenCode == screenCode)
+                  .Select(c => new DropDownDto { Id = c.Id, Value = c.UnitName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }
