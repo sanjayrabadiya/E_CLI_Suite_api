@@ -852,6 +852,9 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.GlobleCurrencyId, x => x.MapFrom(a => a.CurrencyRate.GlobalCurrencyId))
                 .ForMember(x => x.LocalCurrencySymbol, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencySymbol))
                 .ReverseMap();
+            CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
+              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+              .ReverseMap();
         }
     }
 }
