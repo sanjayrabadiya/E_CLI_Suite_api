@@ -527,5 +527,7 @@ namespace GSC.Domain.Context
         public DbSet<PaymentMilestone> PaymentMilestone { get; set; }
         public DbSet<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetail { get; set; }
 
+        public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
+
     }
 }

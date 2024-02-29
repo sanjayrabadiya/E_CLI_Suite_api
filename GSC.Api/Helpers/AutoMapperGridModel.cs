@@ -853,12 +853,15 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.LocalCurrencySymbol, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencySymbol))
                 .ReverseMap();
             CreateMap<PaymentMilestone, PaymentMilestoneGridDto>()
-               .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
-                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-                .ForMember(x => x.MilestoneType, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
-                .ForMember(x => x.PaymentType, x => x.MapFrom(a => a.PaymentType.GetDescription()))
-                .ForMember(x => x.StudyPlanTasks, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneTaskDetails.Select(s => s.StudyPlanTask.TaskName).ToList())))
-               .ReverseMap();
+              .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+               .ForMember(x => x.MilestoneType, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
+               .ForMember(x => x.PaymentType, x => x.MapFrom(a => a.PaymentType.GetDescription()))
+               .ForMember(x => x.StudyPlanTasks, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneTaskDetails.Select(s => s.StudyPlanTask.TaskName).ToList())))
+              .ReverseMap();
+            CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
+            .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+            .ReverseMap();
         }
     }
 }
