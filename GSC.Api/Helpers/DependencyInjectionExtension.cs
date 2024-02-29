@@ -441,6 +441,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPatientCostRepository, PatientCostRepository>();
             services.AddScoped<IPassThroughCostActivityRepository, PassThroughCostActivityRepository>();
             services.AddScoped<IPassThroughCostRepository, PassThroughCostRepository>();
+            services.AddScoped<IBudgetPaymentFinalCostRepository, BudgetPaymentFinalCostRepository>();
 
         }
     }

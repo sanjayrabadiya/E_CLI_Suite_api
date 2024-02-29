@@ -527,5 +527,7 @@ namespace GSC.Domain.Context
 
         public DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
 
+        public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
+
     }
 }
