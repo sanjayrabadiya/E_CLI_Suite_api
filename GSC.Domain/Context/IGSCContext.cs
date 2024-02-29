@@ -472,5 +472,7 @@ namespace GSC.Domain.Context
 
         DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
 
+        DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
+
     }
 }
