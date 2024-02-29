@@ -1220,4 +1220,16 @@ namespace GSC.Helper
         [Description("Site")] Site = 2,
         [Description("Patient")] Patient = 3,
     }
+    public enum MilestoneType : short
+    {
+        [Description("Resource Cost")] ResourceCost = 1,
+        [Description("Patient Cost")] PatientCost = 2,
+        [Description("Pass Through Cost")] PassThroughCost = 3,
+    }
+    public enum PaymentType : short
+    {
+        [Description("Study")] Study = 1,
+        [Description("Site")] Site = 2,
+      
+    }
 }

@@ -81,6 +81,7 @@ namespace GSC.Api.Controllers.CTMS
                     data.EndDate = studyplanDto.EndDate;
                     data.ProjectId = s.Id;
                     data.TaskTemplateId = studyplanDto.TaskTemplateId;
+                    data.CurrencyId = studyplanDto.CurrencyId;
                     lstStudyPlan.Add(data);
                 });
             }

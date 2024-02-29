@@ -1223,5 +1223,17 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Value).ToList();
             return Ok(BudgetFlgType);
         }
+        [HttpGet]
+        [Route("GetPaymentMilestoneType")]
+        public IActionResult GetPaymentMilestoneType()
+        {
+            var MilestoneType = Enum.GetValues(typeof(MilestoneType))
+                .Cast<MilestoneType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Value).ToList();
+            return Ok(MilestoneType);
+        }
     }
 }
