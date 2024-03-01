@@ -542,6 +542,7 @@ namespace GSC.Api.Helpers
             CreateMap<PassThroughCost, PassThroughCostDto>().ReverseMap();
             CreateMap<PassThroughCost, PassThroughCostGridDto>().ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostDto>().ReverseMap();
+            CreateMap<PaymentMilestone, PaymentMilestoneDto>().ReverseMap();
         }
     }
 }
