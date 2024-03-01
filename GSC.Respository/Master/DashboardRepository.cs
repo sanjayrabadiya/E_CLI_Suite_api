@@ -1976,5 +1976,43 @@ namespace GSC.Respository.Master
 
             return data.Where(s => s.Count > 0).ToList();
         }
+
+
+        public dynamic GetSubjectStatusGraph(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var subjectStatusCount = _context.Randomization.Where(x => projectIds.Contains(x.ProjectId) && x.DeletedDate == null)
+                .GroupBy(g => g.PatientStatusId)
+                .Select(s => new
+                {
+                    PatientStatusId = s.Key,
+                    PatientStatusName = s.FirstOrDefault().PatientStatusId.GetDescription(),
+                    CountStatus = s.Count()
+                }).ToList();
+
+
+            return subjectStatusCount;
+        }
+
+        public dynamic GetDashboardSubjectList(int projectId, int countryId, int siteId)
+        {
+            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
+
+            var subjectList = _context.Randomization.Where(x => projectIds.Contains(x.ProjectId) && x.DeletedDate == null)
+                .Select(s => new
+                {
+                    Initial = s.Initial,
+                    Status = s.PatientStatusId.GetDescription(),
+                    ScreeningNo = s.ScreeningNumber,
+                    RandomizationNo = s.RandomizationNumber,
+                    ScreeningDate = s.DateOfScreening,
+                    RandomizationDate = s.DateOfRandomization,
+                    StudyCode = _context.Project.FirstOrDefault(o => o.Id == s.Project.ParentProjectId).ProjectCode,
+                    SiteCode = s.Project.ProjectCode
+                }).ToList();
+
+            return subjectList;
+        }
     }
 }
