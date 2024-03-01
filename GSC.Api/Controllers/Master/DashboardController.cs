@@ -447,5 +447,22 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetkitCreatedDataReport(projectId, countryId, siteId));
         }
+
+
+        [HttpGet]
+        [Route("GetSubjectStatusGraph/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetSubjectStatusCountGraph(int projectId, int countryId, int siteId)
+        {
+            var statusCount = _dashboardRepository.GetSubjectStatusGraph(projectId, countryId, siteId);
+            return Ok(statusCount);
+        }
+
+        [HttpGet]
+        [Route("GetDashboardSubjectList/{ProjectId}/{countryId}/{siteId}")]
+        public IActionResult GetDashboardSubjectList(int projectId, int countryId, int siteId)
+        {
+            var statusCount = _dashboardRepository.GetDashboardSubjectList(projectId, countryId, siteId);
+            return Ok(statusCount);
+        }
     }
 }
