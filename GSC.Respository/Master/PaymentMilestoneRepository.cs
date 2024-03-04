@@ -5,9 +5,11 @@ using System.Linq.Dynamic.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -35,10 +37,15 @@ namespace GSC.Respository.Master
 
         public IList<PaymentMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
         {
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == parentProjectId || x.SiteId == siteId || x.CountryId == countryId)).
+           var PaymentMilestoneData =  All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == parentProjectId || x.SiteId == siteId || x.CountryId == countryId)).
             ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-        }
 
+            PaymentMilestoneData.ForEach(x =>
+            {
+                x.SitedName = _context.Project.Include(s=>s.ManageSite).Where(w=>w.Id==x.SiteId).Select(d=>d.ProjectCode==null?d.ManageSite.SiteName:d.ProjectCode).FirstOrDefault();
+            });
+            return PaymentMilestoneData;
+        }
         public string DuplicatePaymentMilestone(PaymentMilestone objSave)
         {
             //if (All.Any(x => x.Id != objSave.Id && x.InvestigatorContactId == objSave.InvestigatorContactId && x.HolidayName == objSave.HolidayName.Trim() && x.DeletedDate == null))
@@ -85,31 +92,39 @@ namespace GSC.Respository.Master
         public decimal GetEstimatedMilestoneAmount(PaymentMilestoneDto paymentMilestoneDto)
         {
             decimal EstimatedTotal = 0;
-            for (int i = 0; i < paymentMilestoneDto.StudyPlanTaskIds.Length; i++)
+            if (paymentMilestoneDto.MilestoneType == MilestoneType.ResourceCost && paymentMilestoneDto.StudyPlanTaskIds != null)
             {
-                var studyPlanTaskData = _context.StudyPlanTask.Where(s => (s.Id == paymentMilestoneDto.StudyPlanTaskIds[i] || s.DependentTaskId == paymentMilestoneDto.StudyPlanTaskIds[i]) && s.DeletedBy == null).ToList();
-                foreach (var item in studyPlanTaskData)
+                foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
                 {
-                    EstimatedTotal += _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == item.Id && s.DeletedBy == null).Sum(d => d.ConvertTotalCost).GetValueOrDefault();
+                    var studyPlanTaskData = _context.StudyPlanTask.Where(s => (s.Id == item || s.DependentTaskId == item) && s.DeletedBy == null).ToList();
+                    foreach (var item2 in studyPlanTaskData)
+                    {
+                        EstimatedTotal += _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == item2.Id && s.DeletedBy == null).Sum(d => d.ConvertTotalCost).GetValueOrDefault();
+                    }
                 }
             }
+            else if (paymentMilestoneDto.MilestoneType == MilestoneType.PatientCost && paymentMilestoneDto.PatientCostIds != null)
+            {
+                foreach (var visit in paymentMilestoneDto.PatientCostIds)
+                {
+                    EstimatedTotal += _context.PatientCost.Where(s => s.Id == visit && s.DeletedBy == null).Sum(d => d.FinalCost).GetValueOrDefault();
+
+                }
+            }     
             return EstimatedTotal;
         }
+        //resourch
         public void AddPaymentMilestoneTaskDetail(PaymentMilestoneDto paymentMilestoneDto)
         {
-            if (paymentMilestoneDto.StudyPlanTaskIds != null)
+            foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
             {
-                for (int i = 0; i < paymentMilestoneDto.StudyPlanTaskIds.Length; i++)
-                {
-                    var paymentMilestoneTaskDetail = new PaymentMilestoneTaskDetail();
-                    paymentMilestoneTaskDetail.Id = 0;
-                    paymentMilestoneTaskDetail.PaymentMilestoneId = paymentMilestoneDto.Id;
-                    paymentMilestoneTaskDetail.StudyPlanTaskId = paymentMilestoneDto.StudyPlanTaskIds[i];
-                    _context.PaymentMilestoneTaskDetail.Add(paymentMilestoneTaskDetail);
-                    _context.Save();
-                }
+                var paymentMilestoneTaskDetail = new PaymentMilestoneTaskDetail();
+                paymentMilestoneTaskDetail.Id = 0;
+                paymentMilestoneTaskDetail.PaymentMilestoneId = paymentMilestoneDto.Id;
+                paymentMilestoneTaskDetail.StudyPlanTaskId = item;
+                _context.PaymentMilestoneTaskDetail.Add(paymentMilestoneTaskDetail);
+                _context.Save();
             }
-
         }
         public void DeletePaymentMilestoneTaskDetail(int Id)
         {
@@ -132,6 +147,59 @@ namespace GSC.Respository.Master
                 _context.PaymentMilestoneTaskDetail.Update(s);
                 _context.Save();
             });
+        }
+        //visit
+        public void AddPaymentMilestoneVisitDetail(PaymentMilestoneDto paymentMilestoneDto)
+        {
+            foreach (var item in paymentMilestoneDto.PatientCostIds)
+            {
+                var paymentMilestoneVisitDetail = new PaymentMilestoneVisitDetail();
+                paymentMilestoneVisitDetail.Id = 0;
+                paymentMilestoneVisitDetail.PaymentMilestoneId = paymentMilestoneDto.Id;
+                paymentMilestoneVisitDetail.PatientCostId = item;
+                _context.PaymentMilestoneVisitDetail.Add(paymentMilestoneVisitDetail);
+                _context.Save();
+            }
+        }
+        public void DeletePaymentMilestoneVisitDetail(int Id)
+        {
+            var paymentMilestoneVisitDetail = _context.PaymentMilestoneVisitDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy == null).ToList();
+            paymentMilestoneVisitDetail.ForEach(s =>
+            {
+                s.DeletedDate = DateTime.UtcNow;
+                s.DeletedBy = _jwtTokenAccesser.UserId;
+                _context.PaymentMilestoneVisitDetail.Update(s);
+                _context.Save();
+            });
+        }
+        public void ActivePaymentMilestoneVisitDetail(int Id)
+        {
+            var paymentMilestoneVisitDetail = _context.PaymentMilestoneVisitDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy != null).ToList();
+            paymentMilestoneVisitDetail.ForEach(s =>
+            {
+                s.DeletedDate = null;
+                s.DeletedBy = null;
+                _context.PaymentMilestoneVisitDetail.Update(s);
+                _context.Save();
+            });
+        }
+        public List<DropDownProcedureDto> GetParentProjectDropDown(int parentProjectId)
+        {
+            return _context.PatientCost.Include(s=>s.Procedure).Where(d=>d.ProjectId == parentProjectId && d.ProcedureId != null && d.DeletedBy==null)
+                 .Select(c => new DropDownProcedureDto
+                 {
+                     Id = c.Procedure.Id,
+                     Value = c.Procedure.Name,
+                 }).Distinct().ToList();
+        }
+        public List<DropDownDto> GetVisitDropDown(int parentProjectId, int procedureId)
+        {
+           var data = _context.PatientCost.Include(s => s.ProjectDesignVisit).Where(d => d.ProjectId == parentProjectId && d.ProcedureId == procedureId && d.ProcedureId != null  && d.DeletedBy == null)
+                 .Select(c => new DropDownDto{
+                     Id = c.Id,
+                     Value = c.ProjectDesignVisit.DisplayName,
+                 }).ToList();
+            return data;
         }
     }
 }

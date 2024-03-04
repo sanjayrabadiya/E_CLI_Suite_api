@@ -472,8 +472,8 @@ namespace GSC.Domain.Context
         DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
         DbSet<PaymentMilestone> PaymentMilestone { get; set; }
         DbSet<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetail { get; set; }
-
         DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
+        DbSet<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetail { get; set; }
 
     }
 }
