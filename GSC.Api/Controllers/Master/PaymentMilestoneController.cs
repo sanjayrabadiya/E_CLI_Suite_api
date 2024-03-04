@@ -47,7 +47,13 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository.Add(paymentMilestone);
             if (_uow.Save() <= 0) throw new Exception("Creating Investigator PaymentMilestone failed on save.");
             paymentMilestoneDto.Id = paymentMilestone.Id;
-            _paymentMilestoneRepository.AddPaymentMilestoneTaskDetail(paymentMilestoneDto);
+
+            if(paymentMilestoneDto.StudyPlanTaskIds != null)
+                _paymentMilestoneRepository.AddPaymentMilestoneTaskDetail(paymentMilestoneDto);
+
+            if (paymentMilestoneDto.PatientCostIds != null)
+                _paymentMilestoneRepository.AddPaymentMilestoneVisitDetail(paymentMilestoneDto);
+
             return Ok(paymentMilestone.Id);
         }
 
@@ -55,6 +61,8 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Delete(int id)
         {
             _paymentMilestoneRepository.DeletePaymentMilestoneTaskDetail(id);
+            _paymentMilestoneRepository.DeletePaymentMilestoneVisitDetail(id);
+
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -70,6 +78,7 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Active(int id)
         {
             _paymentMilestoneRepository.ActivePaymentMilestoneTaskDetail(id);
+            _paymentMilestoneRepository.ActivePaymentMilestoneVisitDetail(id);
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -94,5 +103,19 @@ namespace GSC.Api.Controllers.Master
             var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(paymentMilestoneDto);
             return Ok(studyplan);
         }
+
+        [HttpGet]
+        [Route("GetProcedureDropDown/{parentProjectId:int}")]
+        public IActionResult GetProcedureDropDown(int parentProjectId)
+        {
+            return Ok(_paymentMilestoneRepository.GetParentProjectDropDown(parentProjectId));
+        }
+
+        [HttpGet]
+        [Route("GetVisitDropDown/{parentProjectId:int}/{procedureId:int}")]
+        public IActionResult GetVisitDropDown(int parentProjectId, int procedureId)
+        {
+            return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId,procedureId));
+        }  
     }
 }

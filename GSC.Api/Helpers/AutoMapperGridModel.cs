@@ -858,6 +858,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.MilestoneType, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
                .ForMember(x => x.PaymentType, x => x.MapFrom(a => a.PaymentType.GetDescription()))
                .ForMember(x => x.StudyPlanTasks, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneTaskDetails.Select(s => s.StudyPlanTask.TaskName).ToList())))
+               .ForMember(x => x.PatientCostVisits, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneVisitDetails.Select(s => s.PatientCost.ProjectDesignVisit.DisplayName).ToList())))
               .ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
             .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
