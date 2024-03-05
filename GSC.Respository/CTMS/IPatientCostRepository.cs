@@ -13,6 +13,5 @@ namespace GSC.Respository.CTMS
         string Duplicate(List<ProcedureVisitdadaDto> ProcedureVisitdadaDto);
         void AddPatientCost(List<ProcedureVisitdadaDto> ProcedureVisitdadaDto);
         void DeletePatientCost(int projectId, int procedureId);
-
     }
 }

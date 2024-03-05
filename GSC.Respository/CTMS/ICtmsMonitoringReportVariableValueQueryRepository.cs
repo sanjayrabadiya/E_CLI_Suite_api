@@ -11,7 +11,6 @@ namespace GSC.Respository.CTMS
         void UpdateQuery(CtmsMonitoringReportVariableValueQueryDto ctmsMonitoringReportVariableValueQueryDto, CtmsMonitoringReportVariableValueQuery CtmsMonitoringReportVariableValueQuery, CtmsMonitoringReportVariableValue ctmsMonitoringReportVariableValue);
         void GenerateQuery(CtmsMonitoringReportVariableValueQueryDto ctmsMonitoringReportVariableValueQueryDto,
            CtmsMonitoringReportVariableValueQuery ctmsMonitoringReportVariableValueQuery, CtmsMonitoringReportVariableValue ctmsMonitoringReportVariableValue);
-
         void SaveCloseQuery(CtmsMonitoringReportVariableValueQuery ctmsMonitoringReportVariableValueQuery);
     }
 }

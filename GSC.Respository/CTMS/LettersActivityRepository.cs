@@ -16,7 +16,6 @@ using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using GSC.Respository.Configuration;
 using System;
-using GSC.Respository.ProjectRight;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml;
@@ -34,7 +33,7 @@ namespace GSC.Respository.Master
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly ILettersActivityRepository _lettersActivityRepository;
         public LettersActivityRepository(IGSCContext context, IEmailSenderRespository emailSenderRespository,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository, 
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
             ILettersActivityRepository lettersActivityRepository)
             : base(context)
         {
@@ -235,7 +234,6 @@ namespace GSC.Respository.Master
                     Name = c.UserRole.User.UserName,
                     IsSelected = true,
                 }).ToList();
-
 
             return users;
         }

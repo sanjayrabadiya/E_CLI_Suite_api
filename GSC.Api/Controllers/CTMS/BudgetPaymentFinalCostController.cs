@@ -39,7 +39,7 @@ namespace GSC.Api.Controllers.CTMS
 
         [HttpGet]
         [Route("GetBudgetPaymentFinalCostList/{projectId}/{isDeleted:bool?}")]
-        public IActionResult GetBudgetPaymentFinalCostList(int projectId,bool isDeleted)
+        public IActionResult GetBudgetPaymentFinalCostList(int projectId, bool isDeleted)
         {
             if (projectId <= 0) return BadRequest();
             var ctmsActionPoint = _budgetPaymentFinalCostRepository.GetBudgetPaymentFinalCostList(projectId, isDeleted);
@@ -69,7 +69,7 @@ namespace GSC.Api.Controllers.CTMS
 
             ctmsActionPointDto.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             ctmsActionPointDto.IpAddress = _jwtTokenAccesser.IpAddress;
-         
+
             var ctmsActionPoint = _mapper.Map<BudgetPaymentFinalCost>(ctmsActionPointDto);
 
             _budgetPaymentFinalCostRepository.Update(ctmsActionPoint);
@@ -91,7 +91,7 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
-       
+
         [HttpGet]
         [Route("GetFinalBudgetCost/{ProjectId}")]
         public IActionResult GetFinalBudgetCost(int ProjectId)

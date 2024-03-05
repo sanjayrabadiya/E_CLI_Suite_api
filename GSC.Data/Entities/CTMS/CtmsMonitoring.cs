@@ -1,10 +1,7 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
-using GSC.Shared.Extension;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Entities.CTMS
 {
@@ -17,11 +14,10 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? ActualStartDate { get; set; }
         public DateTime? ActualEndDate { get; set; }
         public StudyLevelForm StudyLevelForm { get; set; }
-        public Data.Entities.Master.Project Project { get; set; }
+        public Master.Project Project { get; set; }
         public int? ParentId { get; set; }
         public bool? IfMissed { get; set; }
         public bool? IfReSchedule { get; set; }
         public bool? IfApplicable { get; set; }
-
     }
 }

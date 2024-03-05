@@ -4,23 +4,20 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 
 namespace GSC.Respository.CTMS
 {
-   public  class ProcedureRepository : GenericRespository<Procedure>, IProcedureRepository
+    public class ProcedureRepository : GenericRespository<Procedure>, IProcedureRepository
     {
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
 
         public ProcedureRepository(IGSCContext context,
             IMapper mapper)
             : base(context)
         {
             _mapper = mapper;
-            _context=context;
         }
         public string Duplicate(Procedure objSave)
         {
@@ -33,9 +30,7 @@ namespace GSC.Respository.CTMS
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                   ProjectTo<ProcedureGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-
         }
-
         public List<DropDownProcedureDto> GetParentProjectDropDown()
         {
             return All.Where(x => x.DeletedDate == null)
@@ -43,7 +38,7 @@ namespace GSC.Respository.CTMS
                 {
                     Id = (short)c.Id,
                     Value = c.Name,
-                    CurrencyType = c.Currency.CurrencyName +" - "+ c.Currency.CurrencySymbol,
+                    CurrencyType = c.Currency.CurrencyName + " - " + c.Currency.CurrencySymbol,
                     CurrencySymbol = c.Currency.CurrencySymbol,
                     CostPerUnit = c.CostPerUnit,
                 }).ToList();

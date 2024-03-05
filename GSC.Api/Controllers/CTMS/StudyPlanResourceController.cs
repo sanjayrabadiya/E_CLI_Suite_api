@@ -4,10 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
-using GSC.Domain.Context;
-using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
-using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,8 +20,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         
         public StudyPlanResourceController(IStudyPlanResourceRepository studyPlanTaskResourceRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _studyPlanTaskResourceRepository = studyPlanTaskResourceRepository;
             _uow = uow;

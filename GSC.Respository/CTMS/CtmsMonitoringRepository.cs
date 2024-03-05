@@ -3,15 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.CTMS;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -212,7 +208,6 @@ namespace GSC.Respository.CTMS
                 lisatdata.TaskName = taskname;
                 lisatdata.DurationDay = Convert.ToInt16(duration.Days);
                 lisatdata.RefrenceType = RefrenceType.Sites;//fix site
-                //lisatdata.TaskOrder = 1;
                 var studyPlanTask = _mapper.Map<StudyPlanTask>(lisatdata);
                 studyPlanTask.StartDate = (DateTime)ctmsMonitoringDto.ScheduleStartDate;
                 studyPlanTask.EndDate = (DateTime)ctmsMonitoringDto.ScheduleEndDate;
@@ -324,7 +319,6 @@ namespace GSC.Respository.CTMS
             addCtmsMonitoring.DeletedDate = null;
             addCtmsMonitoring.IfMissed = false;
             addCtmsMonitoring.IfReSchedule = false;
-
             Add(addCtmsMonitoring);
             _context.Save();
         }

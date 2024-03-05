@@ -4,7 +4,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
-using GSC.Domain.Context;
 using GSC.Respository.CTMS;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,15 +16,13 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IPassThroughCostRepository _passThroughCostRepository;
-        private readonly IGSCContext _context;
 
         public PassThroughCostController(IUnitOfWork uow, IMapper mapper,
-            IPassThroughCostRepository passThroughCostRepository, IGSCContext context)
+            IPassThroughCostRepository passThroughCostRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _passThroughCostRepository = passThroughCostRepository;
-            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}/{studyId:int}")]

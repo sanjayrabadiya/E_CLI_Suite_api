@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace GSC.Respository.CTMS
 {
-   public interface IWorkingDayRepository : IGenericRepository<WorkingDay>
+    public interface IWorkingDayRepository : IGenericRepository<WorkingDay>
     {
         List<WorkingDayListDto> GetWorkingDayList(bool isDeleted);
         void AddSiteType(WorkingDayDto workingDayListDto);

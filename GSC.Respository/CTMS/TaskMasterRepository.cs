@@ -5,7 +5,6 @@ using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +13,12 @@ namespace GSC.Respository.CTMS
 {
     public class TaskMasterRepository : GenericRespository<TaskMaster>, ITaskMasterRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IStudyPlanRepository _studyPlanRepository;
         public TaskMasterRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper, IStudyPlanRepository studyPlanRepository) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _studyPlanRepository = studyPlanRepository;
@@ -147,7 +143,7 @@ namespace GSC.Respository.CTMS
                         });
                     }
                 }
-                
+
                 if (lstStudyPlan.Count > 0)
                 {
                     foreach (var item in lstStudyPlan)

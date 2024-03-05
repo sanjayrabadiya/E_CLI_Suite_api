@@ -5,7 +5,6 @@ using System.Collections.Generic;
 
 namespace GSC.Data.Dto.CTMS
 {
-
     public class StudyPlanTaskGridDto
     {
         public int StudyPlanId { get; set; }
@@ -14,7 +13,6 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? EndDateDay { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTask { get; set; }
         public List<StudyPlanTaskDto> StudyPlanTaskTemp { get; set; }
-
     }
 
     public class StudyPlanTaskDto : BaseAuditDto
@@ -55,7 +53,6 @@ namespace GSC.Data.Dto.CTMS
         public decimal? TotalCost { get; set; }
         public List<StudyPlanTaskDto> Subtasks { get; set; }
         public List<ResourceTypeGridDto> TaskResource { get; set; }
-
         public string RefrenceTypeName { get; set; }
     }
 
@@ -88,7 +85,7 @@ namespace GSC.Data.Dto.CTMS
         public int? countryId { get; set; }
         public int? ResourceId { get; set; }
         public int? ResourceSubId { get; set; }
-        public int?  RoleId { get; set; }
+        public int? RoleId { get; set; }
         public int? UserId { get; set; }
         public int? DesignationId { get; set; }
         public bool? ResourceNotAdded { get; set; }

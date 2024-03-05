@@ -8,7 +8,7 @@ namespace GSC.Data.Dto.CTMS
 {
     public class LettersActivityDto : BaseDto
     {
-        [Required (ErrorMessage = "Project is required")]
+        [Required(ErrorMessage = "Project is required")]
         public int ProjectId { get; set; }
 
         [Required(ErrorMessage = "Activity Type is Required")]
@@ -20,7 +20,7 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "Ctms Monitoring is Required")]
         public int CtmsMonitoringId { get; set; }
         public string Email { get; set; }
-        public int? UserIntigration { get; set; }  
+        public int? UserIntigration { get; set; }
         public string FilePath { get; set; }
         public string AttachmentPath { get; set; }
         public string LetterBody { get; set; }
@@ -29,7 +29,6 @@ namespace GSC.Data.Dto.CTMS
         public bool IsSelected { get; set; }
         public string Project { get; set; }
         public User User { get; set; }
-
     }
     public class LettersActivityGridDto : BaseAuditDto
     {
@@ -40,17 +39,16 @@ namespace GSC.Data.Dto.CTMS
         public string Email { get; set; }
         public string UserIntigration { get; set; }
         public string FilePath { get; set; }
-        
     }
     public class LettersActivityDateDropDown : BaseDto
     {
         public DateTime? Value { get; set; }
         public string Code { get; set; }
-        public int ActivityType { get; set; }    
+        public int ActivityType { get; set; }
     }
     public class SendMailModel
     {
-        public int Id { get; set; } 
+        public int Id { get; set; }
         public string Email { get; set; }
         public string Body { get; set; }
         public List<EmailModel> OpstionLists { get; set; }

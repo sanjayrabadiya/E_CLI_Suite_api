@@ -1,19 +1,13 @@
-﻿using GSC.Common.Base;
-using GSC.Common.Common;
-using GSC.Data.Entities.Master;
-using GSC.Data.Entities.Project.StudyLevelFormSetup;
-using GSC.Data.Entities.UserMgt;
+﻿using GSC.Data.Entities.Master;
 using GSC.Helper;
 using GSC.Shared.Extension;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace GSC.Data.Entities.CTMS
 {
-    public class CtmsMonitoringReportVariableValueQuery 
+    public class CtmsMonitoringReportVariableValueQuery
     {
         [Key]
         public int Id { get; set; }
@@ -26,7 +20,7 @@ namespace GSC.Data.Entities.CTMS
         public string Note { get; set; }
         public string OldValue { get; set; }
         public bool IsSystem { get; set; }
-        public string UserName { get; set; }    
+        public string UserName { get; set; }
         public string UserRole { get; set; }
         public string TimeZone { get; set; }
         public int? QueryParentId { get; set; }

@@ -22,6 +22,5 @@ namespace GSC.Data.Entities.CTMS
         public BudgetFlgType BudgetFlgType { get; set; }
         public Unit Unit { get; set; }
         public CurrencyRate CurrencyRate { get; set; }
-
     }
 }

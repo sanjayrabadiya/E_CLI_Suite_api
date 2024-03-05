@@ -11,7 +11,6 @@ namespace GSC.Respository.CTMS
         List<TaskMasterGridDto> GetTasklist(bool isDeleted, int templateId);
         int UpdateTaskOrder(TaskmasterDto taskmasterDto);
         List<AuditTrailDto> GetTaskHistory(int id);
-
         string AddTaskToSTudyPlan(TaskmasterDto taskmasterDto);
         void AddRefrenceTypes(TaskmasterDto taskmasterDto);
     }

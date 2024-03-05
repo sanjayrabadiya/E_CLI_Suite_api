@@ -39,7 +39,7 @@ namespace GSC.Api.Controllers.CTMS
 
         [HttpGet]
         [Route("GetPullPatientCost/{isDeleted:bool?}/{studyId:int}/{procedureId:int?}/{ispull:bool?}")]
-        public IActionResult GetPullPatientCost(bool isDeleted, int studyId, int? procedureId,bool ispull)
+        public IActionResult GetPullPatientCost(bool isDeleted, int studyId, int? procedureId, bool ispull)
         {
             var studyplan = _patientCostRepository.GetPullPatientCost(isDeleted, studyId, procedureId, ispull);
             return Ok(studyplan);
@@ -69,7 +69,7 @@ namespace GSC.Api.Controllers.CTMS
         [Route("DeletePatientCost/{projectId:int?}/{procedureId:int}")]
         public IActionResult DeletePatientCost(int projectId, int procedureId)
         {
-           _patientCostRepository.DeletePatientCost(projectId, procedureId);
+            _patientCostRepository.DeletePatientCost(projectId, procedureId);
             return Ok();
         }
 
@@ -81,16 +81,16 @@ namespace GSC.Api.Controllers.CTMS
             if (data.ProjectId <= 0) return BadRequest();
 
             //Duplicat vivit Check
-            if (_patientCostRepository.FindBy(x => x.ProjectId == data.ProjectId && x.DeletedBy == null && x.VisitName == data.VisitName).Count()>0)
+            if (_patientCostRepository.FindBy(x => x.ProjectId == data.ProjectId && x.DeletedBy == null && x.VisitName == data.VisitName).Count() > 0)
             {
-                ModelState.AddModelError("Message", "Duplicate "+ data.VisitName +" Visit Name");
+                ModelState.AddModelError("Message", "Duplicate " + data.VisitName + " Visit Name");
                 return BadRequest(ModelState);
             }
 
             //Add new visit
             var tastMaster = _mapper.Map<PatientCost>(data);
-                _patientCostRepository.Add(tastMaster);
-                _uow.Save();
+            _patientCostRepository.Add(tastMaster);
+            _uow.Save();
 
             //Add visit in allready added  pation cost
             var patientCost1 = _context.PatientCost.Where(s => s.ProjectId == data.ProjectId && s.ProcedureId != null && s.DeletedBy == null).
@@ -98,8 +98,8 @@ namespace GSC.Api.Controllers.CTMS
             {
                 ProjectId = data.ProjectId,
                 ProcedureId = t.ProcedureId,
-                VisitName=data.VisitName,
-                VisitDescription=data.VisitDescription,
+                VisitName = data.VisitName,
+                VisitDescription = data.VisitDescription,
                 Rate = t.Rate,
                 CurrencyRateId = t.CurrencyRateId,
                 CurrencyId = t.CurrencyId,
@@ -125,7 +125,7 @@ namespace GSC.Api.Controllers.CTMS
         [Route("DeleteVisit/{projectId:int?}/{visitName}")]
         public IActionResult DeleteVisit(int projectId, string visitName)
         {
-            var record = _patientCostRepository.FindByInclude(x => x.ProjectId == projectId && x.VisitName== visitName && x.DeletedBy == null).ToList();
+            var record = _patientCostRepository.FindByInclude(x => x.ProjectId == projectId && x.VisitName == visitName && x.DeletedBy == null).ToList();
             if (record == null) return NotFound();
 
             record.ForEach(x => _patientCostRepository.Delete(x));

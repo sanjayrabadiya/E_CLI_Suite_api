@@ -39,7 +39,7 @@ namespace GSC.Respository.CTMS
             _projectRightRepository = projectRightRepository;
             _metricsRepository = MetricsRepository;
         }
-       
+
         //Update All Actual Number as par 
         public List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
@@ -66,7 +66,7 @@ namespace GSC.Respository.CTMS
             if (projectList == null || projectList.Count == 0) return null;
 
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId== metricsId && projectList.Contains(x.ProjectId)).OrderBy(x => x.Id).
+            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId == metricsId && projectList.Contains(x.ProjectId)).OrderBy(x => x.Id).
                  ProjectTo<OverTimeMetricsGridDto>(_mapper.ConfigurationProvider).ToList();
         }
         private List<Data.Entities.Master.Project> GetProjectIds(int projectId, int countryId, int siteId)
@@ -119,22 +119,24 @@ namespace GSC.Respository.CTMS
             return projectIds;
         }
 
-       
+
         // validation : not add morthen planned value as study lavel planned
         public string PlannedCheck(OverTimeMetrics objSave)
         {
             var planMetrics = _metricsRepository.Find(objSave.PlanMetricsId).Forecast;
-            var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null && x.If_Active==true).ToList();
+            var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null && x.If_Active == true).ToList();
             int total = (int)project.Sum(item => item.Planned);
-            if (objSave.Id == 0) { 
+            if (objSave.Id == 0)
+            {
                 total += objSave.Planned;
             }
-            else { 
+            else
+            {
                 total -= Find(objSave.Id).Planned;
                 total += objSave.Planned;
             }
             if (planMetrics < total)
-            return "Planned Subjects are not Added Greater Than " + planMetrics;
+                return "Planned Subjects are not Added Greater Than " + planMetrics;
 
             return "";
         }
@@ -142,13 +144,13 @@ namespace GSC.Respository.CTMS
         //Update planning as par PlanningType (day,week,month and Year)
         public string UpdatePlanning(OverTimeMetrics overTimeMetricsDto)
         {
-            if (overTimeMetricsDto.PlanningType != null && overTimeMetricsDto.Planned != null && overTimeMetricsDto.Planned != 0)
+            if (overTimeMetricsDto.Planned != 0)
             {
                 TimeSpan tDay = (TimeSpan)(overTimeMetricsDto.EndDate - overTimeMetricsDto.StartDate);
                 decimal tplan = 0;
                 if (tDay.Days >= 0 && tDay.Days <= 6 && overTimeMetricsDto.PlanningType == PlanningType.Day)
                 {
-                    tplan = tDay.Days==0 ? 1 : tDay.Days / 1;
+                    tplan = tDay.Days == 0 ? 1 : tDay.Days / 1;
                 }
                 else if (tDay.Days >= 7 && tDay.Days <= 29 && (overTimeMetricsDto.PlanningType == PlanningType.Week || overTimeMetricsDto.PlanningType == PlanningType.Day))
                 {
@@ -206,7 +208,7 @@ namespace GSC.Respository.CTMS
                     IsStatic = c.IsStatic,
                     IsTestSite = c.IsTestSite,
                     ParentProjectId = c.ParentProjectId ?? 0,
-                    AttendanceLimit = c.AttendanceLimit ?? 0, 
+                    AttendanceLimit = c.AttendanceLimit ?? 0,
                 }).OrderBy(o => o.Value).ToList();
         }
     }

@@ -1,16 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
-using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
-using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,22 +15,18 @@ namespace GSC.Respository.CTMS
     public class CtmsMonitoringReportRepository : GenericRespository<CtmsMonitoringReport>, ICtmsMonitoringReportRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly ICtmsMonitoringReportVariableValueRepository _ctmsMonitoringReportVariableValueRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly ICtmsMonitoringReportVariableValueChildRepository _ctmsMonitoringReportVariableValueChildRepository;
         public CtmsMonitoringReportRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
             ICtmsMonitoringReportVariableValueRepository ctmsMonitoringReportVariableValueRepository,
             IUploadSettingRepository uploadSettingRepository,
             ICtmsMonitoringReportVariableValueChildRepository ctmsMonitoringReportVariableValueChildRepository)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _context = context;
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
             _ctmsMonitoringReportVariableValueRepository = ctmsMonitoringReportVariableValueRepository;
@@ -56,7 +48,6 @@ namespace GSC.Respository.CTMS
             designTemplateDto.ReportStatus = ctmsMonitoringReport.ReportStatus;
             //Changes made by Sachin
             designTemplateDto.VariableDisable =
-                 //ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.OnGoing
                  ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.ReviewInProgress
                 || ctmsMonitoringReport.ReportStatus == MonitoringReportStatus.Approved;
 
@@ -200,20 +191,20 @@ namespace GSC.Respository.CTMS
                                 .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
                                 && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
 
-            if(ActivityCode != "act_004" && ActivityCode != "act_001")
+            if (ActivityCode != "act_004" && ActivityCode != "act_001")
             {
-                    var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null).ToList();
-                    if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
-                        return "Please Approve " + CtmsActivity.ActivityName + " .";
+                var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null).ToList();
+                if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
+                    return "Please Approve " + CtmsActivity.ActivityName + " .";
 
-                    return "";
+                return "";
             }
-            else if(ActivityCode == "act_001")
+            else if (ActivityCode == "act_001")
             {
                 //Add by mitul on 04-10-2023 Is Not Applicable in feasibility
                 var CtmsMonitoringStatus = _context.CtmsMonitoringStatus.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId) && x.CtmsMonitoring.DeletedDate == null).ToList();
                 var applicable = _context.CtmsMonitoring.Where(x => x.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.StudyLevelFormId) && x.DeletedDate == null).ToList();
-                if(applicable.Count > 0 && applicable.OrderByDescending(c => c.Id).FirstOrDefault().IfApplicable != true)
+                if (applicable.Count > 0 && applicable.OrderByDescending(c => c.Id).FirstOrDefault().IfApplicable != true)
                 {
                     if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().Status == MonitoringSiteStatus.Approved))
                         return "Please Approve " + CtmsActivity.ActivityName + " .";
@@ -230,12 +221,12 @@ namespace GSC.Respository.CTMS
                 var CtmsMonitoringStatus = _context.CtmsMonitoringReport.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
                                       && x.CtmsMonitoring.DeletedDate == null).ToList();
 
-                var openQuerydata = _context.CtmsActionPoint.Include(s=>s.CtmsMonitoring).ThenInclude(d=>d.StudyLevelForm).ThenInclude(x=>x.Activity).ThenInclude(r=>r.CtmsActivity).
-                    Where(x=>x.CtmsMonitoring.ProjectId == siteId && x.Status == CtmsActionPointStatus.Open && x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity .ActivityCode != "act_005").Count() > 0;
+                var openQuerydata = _context.CtmsActionPoint.Include(s => s.CtmsMonitoring).ThenInclude(d => d.StudyLevelForm).ThenInclude(x => x.Activity).ThenInclude(r => r.CtmsActivity).
+                    Where(x => x.CtmsMonitoring.ProjectId == siteId && x.Status == CtmsActionPointStatus.Open && x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityCode != "act_005").Count() > 0;
 
                 if (!(CtmsMonitoringStatus.Count() != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).FirstOrDefault().ReportStatus == MonitoringReportStatus.Approved))
                     return "Please Approve " + CtmsActivity.ActivityName + " .";
-                else if(openQuerydata)
+                else if (openQuerydata)
                     return "Please Close All Open Query.";
 
                 return "";

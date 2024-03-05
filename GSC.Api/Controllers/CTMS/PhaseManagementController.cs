@@ -12,7 +12,7 @@ namespace GSC.Api.Controllers.CTMS
     [Route("api/[controller]")]
     public class PhaseManagementController : BaseController
     {
-        
+
         private readonly IPhaseManagementRepository _phasemanagementRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
@@ -25,8 +25,6 @@ namespace GSC.Api.Controllers.CTMS
             _mapper = mapper;
         }
 
-
-        // GET: api/<controller>
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
@@ -130,5 +128,5 @@ namespace GSC.Api.Controllers.CTMS
     }
 }
 
-    
+
 

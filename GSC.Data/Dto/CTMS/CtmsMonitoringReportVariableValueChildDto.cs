@@ -3,7 +3,7 @@ using GSC.Data.Entities.Project.StudyLevelFormSetup;
 
 namespace GSC.Data.Dto.CTMS
 {
-   public class CtmsMonitoringReportVariableValueChildDto : BaseDto
+    public class CtmsMonitoringReportVariableValueChildDto : BaseDto
     {
         public int CtmsMonitoringReportVariableValueId { get; set; }
         public int StudyLevelFormVariableValueId { get; set; }

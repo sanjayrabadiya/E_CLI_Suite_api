@@ -9,13 +9,10 @@ namespace GSC.Respository.CTMS
     {
         List<CtmsMonitoringGridDto> GetMonitoringForm(int projectId, int siteId, int activityId);
         string StudyLevelFormAlreadyUse(int StudyLevelFormId);
-
         CtmsMonitoringGridDto GetMonitoringFormforDashboard(int ctmsMonitoringId, int activityId);
         string AddStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
         string UpdateStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto);
-
         void CloneForm(int ctmsMonitoringId, int noOfClones);
-
         void AddReSchedule(CtmsMonitoring record);
     }
 }

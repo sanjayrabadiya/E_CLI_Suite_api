@@ -1,11 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.UserMgt;
-using GSC.Helper;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace GSC.Data.Entities.CTMS
 {

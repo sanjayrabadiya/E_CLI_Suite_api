@@ -1,5 +1,4 @@
-﻿using GSC.Data.Entities.CTMS;
-using GSC.Data.Entities.Master;
+﻿using GSC.Data.Entities.Master;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -20,7 +19,7 @@ namespace GSC.Data.Entities.CTMS
         public string UserName { get; set; }
         public string UserRole { get; set; }
         public string TimeZone { get; set; }
-        public DateTime? CreatedDate{get;set;}
+        public DateTime? CreatedDate { get; set; }
         public CtmsMonitoringReportVariableValue CtmsMonitoringReportVariableValue { get; set; }
         [ForeignKey("ReasonId")] public AuditReason AuditReason { get; set; }
     }

@@ -2,7 +2,6 @@
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.CTMS;
 
-
 namespace GSC.Respository.CTMS
 {
     public interface ICtmsMonitoringReportRepository : IGenericRepository<CtmsMonitoringReport>
