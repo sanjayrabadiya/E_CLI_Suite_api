@@ -9,7 +9,7 @@ namespace GSC.Data.Entities.CTMS
     {
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
-        public int? CountryId { get; set; } 
+        public int? CountryId { get; set; }
         public MilestoneType MilestoneType { get; set; }
         public PaymentType PaymentType { get; set; }
         public int? PatientCount { get; set; }
@@ -17,7 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public decimal? EstimatedRevenue { get; set; }
         public decimal? PaidRevenue { get; set; }
         public decimal? TotalRevenue { get; set; }
-        public decimal?  TotalPerPatient { get; set; }
+        public decimal? TotalPerPatient { get; set; }
         public bool IsApproved { get; set; }
         public bool IsSendBack { get; set; }
         public Master.Project Project { get; set; }

@@ -1,15 +1,11 @@
 ﻿using System;
-using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
-using GSC.Domain.Context;
-using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Master
 {

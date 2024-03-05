@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             procedureDtoDto.Id = 0;
             var procedure = _mapper.Map<Procedure>(procedureDtoDto);
-           
+
             _procedureRepository.Add(procedure);
             if (_uow.Save() <= 0) throw new Exception("Creating Procedure failed on save.");
             return Ok(procedure.Id);
@@ -60,7 +60,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var procedure = _mapper.Map<Procedure>(procedureDto);
-           
+
             _procedureRepository.Update(procedure);
             if (_uow.Save() <= 0) throw new Exception("Updating Procedure failed on save.");
             return Ok(procedure.Id);

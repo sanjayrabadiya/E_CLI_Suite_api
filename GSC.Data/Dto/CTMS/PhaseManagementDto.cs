@@ -11,7 +11,7 @@ namespace GSC.Data.Dto.CTMS
         public string PhaseCode { get; set; }
     }
 
-    public class PhaseManagementGridDto: BaseAuditDto
+    public class PhaseManagementGridDto : BaseAuditDto
     {
         public string PhaseName { get; set; }
         public string PhaseCode { get; set; }

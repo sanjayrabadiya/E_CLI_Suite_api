@@ -1,12 +1,8 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
-using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
-using GSC.Shared.Extension;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Entities.CTMS
 {
@@ -21,9 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
         public List<CtmsMonitoringReportVariableValueChild> Children { get; set; }
         public ICollection<CtmsMonitoringReportVariableValueQuery> Queryies { get; set; }
-
         public string DocPath { get; set; }
-
         public string MimeType { get; set; }
     }
 }

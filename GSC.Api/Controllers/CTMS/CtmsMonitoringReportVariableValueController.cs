@@ -5,13 +5,9 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
-using GSC.Respository.Master;
 using GSC.Respository.Project.StudyLevelFormSetup;
-using GSC.Shared.DocumentService;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

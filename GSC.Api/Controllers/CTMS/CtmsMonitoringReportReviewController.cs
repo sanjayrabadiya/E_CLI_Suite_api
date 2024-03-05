@@ -11,8 +11,6 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Helper;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace GSC.Api.Controllers.CTMS
 {
     [Route("api/[controller]")]

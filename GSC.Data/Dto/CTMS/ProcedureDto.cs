@@ -1,14 +1,12 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Helper;
-using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
-  public  class ProcedureDto : BaseDto
+    public class ProcedureDto : BaseDto
     {
         [Required(ErrorMessage = "Name is Required.")]
-        public string Name {  get; set; }
+        public string Name { get; set; }
         public int? UnitId { get; set; }
         public decimal? CostPerUnit { get; set; }
         public int? CurrencyId { get; set; }

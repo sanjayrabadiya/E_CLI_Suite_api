@@ -124,6 +124,5 @@ namespace GSC.Api.Controllers.CTMS
         {
             return Ok(_overTimeMetricsRepository.GetChildProjectWithParentProjectDropDown(parentProjectId));
         }
-
     }
 }

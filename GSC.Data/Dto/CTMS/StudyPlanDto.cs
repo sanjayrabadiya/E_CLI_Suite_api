@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-
 namespace GSC.Data.Dto.CTMS
 {
     public class StudyPlanDto: BaseDto

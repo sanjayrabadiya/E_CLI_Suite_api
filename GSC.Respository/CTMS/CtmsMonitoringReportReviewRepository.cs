@@ -46,24 +46,10 @@ namespace GSC.Respository.CTMS
             var users = _context.UserAccess.Include(x => x.UserRole).ThenInclude(x => x.User).Where(s => s.ProjectId == ProjectId && s.DeletedDate == null && s.UserRole.UserId != _jwtTokenAccesser.UserId)
             .OrderByDescending(s => s.Id).Select(c => new CtmsMonitoringReportReviewDto
             {
-                 UserId = c.UserRole.UserId,
-                 Name = c.UserRole.User.UserName,
-                 IsSelected = All.Any(b => b.CtmsMonitoringReportId == Id && b.UserId == c.UserRole.UserId && b.DeletedDate == null && b.IsSendBack == false),
+                UserId = c.UserRole.UserId,
+                Name = c.UserRole.User.UserName,
+                IsSelected = All.Any(b => b.CtmsMonitoringReportId == Id && b.UserId == c.UserRole.UserId && b.DeletedDate == null && b.IsSendBack == false),
             }).ToList();
-
-
-            //Commit by mitul on 30-11-2023 Remove user Access for projectRight
-            //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null && x.User.DeletedDate == null).ToList();
-            //var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
-            //    .GroupBy(c => new { c.UserId }, (key, group) => group.First());
-
-            //var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
-            //    .Select(c => new CtmsMonitoringReportReviewDto
-            //    {
-            //        UserId = c.UserId,
-            //        Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
-            //        IsSelected = All.Any(b => b.CtmsMonitoringReportId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == false),
-            //    }).Where(x => x.IsSelected == false).ToList();
 
             return users;
         }

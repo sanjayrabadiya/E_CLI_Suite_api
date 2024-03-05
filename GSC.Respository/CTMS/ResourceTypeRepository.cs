@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.CTMS
 {
-   public  class ResourceTypeRepository: GenericRespository<ResourceType>, IResourceTypeRepository
+    public class ResourceTypeRepository : GenericRespository<ResourceType>, IResourceTypeRepository
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
@@ -21,7 +21,7 @@ namespace GSC.Respository.CTMS
             : base(context)
         {
             _mapper = mapper;
-            _context=context;
+            _context = context;
         }
         public string Duplicate(ResourceType objSave)
         {
@@ -45,14 +45,14 @@ namespace GSC.Respository.CTMS
         public List<DropDownDto> GetDesignationDropDown()
         {
             return _context.Designation.Where(x => x.DeletedBy == null)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOFDesignation+" - "+ c.YersOfExperience + " years of Experience", IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOFDesignation + " - " + c.YersOfExperience + " years of Experience", IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
 
-        public List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID ,int projectId)
-        { 
-            if(projectId!=0)
+        public List<DropDownDto> GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID, int projectId)
+        {
+            if (projectId != 0)
             {
-                var userAccessData = _context.UserAccess.Include(x=>x.UserRole).Where(s=>s.ProjectId==projectId && s.DeletedBy==null).ToList();
+                var userAccessData = _context.UserAccess.Include(x => x.UserRole).Where(s => s.ProjectId == projectId && s.DeletedBy == null).ToList();
 
                 return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID && x.DesignationId != null
                                  && userAccessData.Select(y => (int?)y.UserRole.UserId).Contains(x.UserId))
@@ -67,12 +67,12 @@ namespace GSC.Respository.CTMS
                                 .Distinct()
                                 .OrderBy(o => o.Value).ToList();
             }
-                
+
         }
         public List<DropDownDto> GetNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID)
         {
             return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && ((int)x.ResourceTypes) == resourceTypeID && ((int)x.ResourceSubType) == resourceSubTypeID)
-                            .Select(c => new DropDownDto { Id =  c.Id, Value =  c.NameOfMaterial, IsDeleted = c.DeletedDate != null })
+                            .Select(c => new DropDownDto { Id = c.Id, Value = c.NameOfMaterial, IsDeleted = c.DeletedDate != null })
                             .OrderBy(o => o.Value).ToList();
         }
         public List<DropDownDto> GetRollUserDropDown(int designationID, int projectId)
@@ -81,7 +81,7 @@ namespace GSC.Respository.CTMS
             {
                 var userAccessData = _context.UserAccess.Include(x => x.UserRole).Where(s => s.ProjectId == projectId && s.DeletedBy == null).ToList();
 
-                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID && x.RoleId != null &&  userAccessData.Select(y => (int?) y.UserRole.UserId).Contains(x.UserId))
+                return _context.ResourceType.Include(s => s.Designation).Where(x => x.DeletedBy == null && x.DesignationId == designationID && x.RoleId != null && userAccessData.Select(y => (int?)y.UserRole.UserId).Contains(x.UserId))
                             .Select(c => new DropDownDto { Id = c.Id, Value = c.Role.RoleName + " - " + c.User.UserName, IsDeleted = c.DeletedDate != null })
                             .OrderBy(o => o.Value).ToList();
             }
@@ -95,7 +95,7 @@ namespace GSC.Respository.CTMS
         public List<DropDownDto> GetCurrencyDropDown()
         {
             return _context.Currency.Where(x => x.DeletedBy == null)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.CurrencyName + "- " + c.CurrencySymbol +"    - " + c.Country.CountryName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CurrencyName + "- " + c.CurrencySymbol + "    - " + c.Country.CountryName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }
 }

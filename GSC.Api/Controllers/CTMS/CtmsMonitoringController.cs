@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
@@ -64,8 +63,8 @@ namespace GSC.Api.Controllers.CTMS
             if (ctmsMonitoringDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            
-            if(ctmsMonitoringDto.IfApplicable != true)//if not Applicable so not add in StudyPlanTask
+
+            if (ctmsMonitoringDto.IfApplicable != true)//if not Applicable so not add in StudyPlanTask
             {
                 var validatemsg = _ctmsMonitoringRepository.UpdateStudyPlanTask(ctmsMonitoringDto);
                 if (!string.IsNullOrEmpty(validatemsg))

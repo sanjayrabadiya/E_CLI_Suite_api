@@ -6,7 +6,6 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.ProjectRight;
-using GSC.Shared.JWTAuth;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -36,7 +35,7 @@ namespace GSC.Respository.CTMS
             {
                 if (task != null)
                 {
-                    var planned = _context.OverTimeMetrics.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.PlanMetricsId == task.Id && x.If_Active == true).ToList(); 
+                    var planned = _context.OverTimeMetrics.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.PlanMetricsId == task.Id && x.If_Active == true).ToList();
                     task.Planned = (int)planned.Sum(item => item.Planned);
                     task.Actual = (int)planned.Sum(item => item.Actual);
                 }

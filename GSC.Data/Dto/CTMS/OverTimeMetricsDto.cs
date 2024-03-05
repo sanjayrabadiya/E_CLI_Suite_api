@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
-    public class OverTimeMetricsDto: BaseDto
+    public class OverTimeMetricsDto : BaseDto
     {
         [Required]
         public int PlanMetricsId { get; set; }
@@ -22,9 +22,8 @@ namespace GSC.Data.Dto.CTMS
     }
     public class OverTimeMetricsGridDto : BaseAuditDto
     {
-        public int Id { get; set; }
         public int ProjectId { get; set; }
-        public int PlanMetricsId { get; set; }   
+        public int PlanMetricsId { get; set; }
         public bool? If_Active { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }

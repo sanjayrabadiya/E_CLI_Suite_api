@@ -4,10 +4,9 @@ using GSC.Helper;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-
 namespace GSC.Data.Dto.CTMS
 {
-    public class TaskmasterDto: BaseDto
+    public class TaskmasterDto : BaseDto
     {
         [Required(ErrorMessage = "Task Name is required.")]
         public string TaskName { get; set; }

@@ -7,7 +7,7 @@ namespace GSC.Respository.CTMS
 {
     public interface IMetricsRepository : IGenericRepository<PlanMetrics>
     {
-        List<PlanMetricsGridDto> GetMetricsList(bool isDeleted,int typesId);
+        List<PlanMetricsGridDto> GetMetricsList(bool isDeleted, int typesId);
         string Duplicate(PlanMetrics objSave);
     }
 }
