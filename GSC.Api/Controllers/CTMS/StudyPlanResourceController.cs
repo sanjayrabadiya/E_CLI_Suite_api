@@ -59,7 +59,7 @@ namespace GSC.Api.Controllers.Master
                 }
                 _studyPlanTaskResourceRepository.Add(taskResource);        
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Resource failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Resource failed on save."));
             //Update TotalCost in Study level and task level
             _studyPlanTaskResourceRepository.TotalCostUpdate(taskResource);
 
@@ -82,7 +82,7 @@ namespace GSC.Api.Controllers.Master
             }
             _studyPlanTaskResourceRepository.Update(taskResource);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Resource failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Resource failed on save."));
             //Update TotalCost in Study level and task level
             _studyPlanTaskResourceRepository.TotalCostUpdate(taskResource);
             return Ok(taskResource.Id);

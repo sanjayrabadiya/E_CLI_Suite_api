@@ -98,7 +98,7 @@ namespace GSC.Api.Controllers.CTMS
                     return BadRequest(ModelState);
                 }
                 _studyPlanRepository.Add(studyplan);
-                if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+                if (_uow.Save() <= 0) return Ok(new Exception("Study plan is failed on save."));
                 studyplanDto.Id = studyplan.Id;
 
 
@@ -131,7 +131,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _studyPlanRepository.Update(studyplan);
-            if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Study plan is failed on save."));
             _studyPlanRepository.CurrencyRateUpdate(studyplanDto);
             return Ok(studyplan.Id);
         }

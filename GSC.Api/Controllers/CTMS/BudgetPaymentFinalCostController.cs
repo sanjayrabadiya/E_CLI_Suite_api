@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.CTMS
             ctmsActionPointDto.IpAddress = _jwtTokenAccesser.IpAddress;
             var ctmsActionPoint = _mapper.Map<BudgetPaymentFinalCost>(ctmsActionPointDto);
             _budgetPaymentFinalCostRepository.Add(ctmsActionPoint);
-            if (_uow.Save() <= 0) throw new Exception("Creating budget payment final cost failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating budget payment final cost failed on save."));
 
             return Ok(ctmsActionPoint.Id);
         }
@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsActionPoint = _mapper.Map<BudgetPaymentFinalCost>(ctmsActionPointDto);
 
             _budgetPaymentFinalCostRepository.Update(ctmsActionPoint);
-            if (_uow.Save() <= 0) throw new Exception("Updating action point failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating action point failed on save."));
             return Ok(ctmsActionPoint.Id);
         }
 

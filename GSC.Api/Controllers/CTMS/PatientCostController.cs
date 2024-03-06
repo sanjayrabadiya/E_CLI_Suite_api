@@ -53,15 +53,15 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] List<ProcedureVisitdadaDto> ProcedureVisitdadaDto)
+        public IActionResult Post([FromBody] List<ProcedureVisitdadaDto> procedureVisitdadaDto)
         {
-            var validate = _patientCostRepository.Duplicate(ProcedureVisitdadaDto);
+            var validate = _patientCostRepository.Duplicate(procedureVisitdadaDto);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            _patientCostRepository.AddPatientCost(ProcedureVisitdadaDto);
+            _patientCostRepository.AddPatientCost(procedureVisitdadaDto);
             return Ok(true);
         }
 

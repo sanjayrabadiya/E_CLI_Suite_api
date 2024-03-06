@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static SkiaSharp.HarfBuzz.SKShaper;
 
 
 namespace GSC.Respository.CTMS
@@ -52,7 +53,7 @@ namespace GSC.Respository.CTMS
                 metricsType == MetricsType.Enrolled ? x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate :
                 metricsType == MetricsType.Screened ? x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate :
                 x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate).ToList();
-                task.Actual = ProjectSettings.Count();
+                task.Actual = ProjectSettings.Count;
                 Update(task);
                 _uow.Save();
             }
@@ -125,7 +126,7 @@ namespace GSC.Respository.CTMS
         {
             var planMetrics = _metricsRepository.Find(objSave.PlanMetricsId).Forecast;
             var project = All.Where(x => x.PlanMetricsId == objSave.PlanMetricsId && x.DeletedDate == null && x.If_Active == true).ToList();
-            int total = (int)project.Sum(item => item.Planned);
+            int total = project.Sum(item => item.Planned);
             if (objSave.Id == 0)
             {
                 total += objSave.Planned;

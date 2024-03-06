@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.Master
             var ctmsMonitoringReport = _mapper.Map<CtmsMonitoringReport>(ctmsMonitoringReportDto);
 
             _ctmsMonitoringReportRepository.Add(ctmsMonitoringReport);
-            if (_uow.Save() <= 0) throw new Exception("Creating Report failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Report failed on save."));
             return Ok(ctmsMonitoringReport.Id);
         }
 

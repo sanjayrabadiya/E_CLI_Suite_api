@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var review = _ctmsMonitoringReportReviewRepository.FindByInclude(x => x.CtmsMonitoringReportId == ctmsMonitoringReportReviewDto[0].CtmsMonitoringReportId && x.DeletedDate == null && x.IsApproved == false, x => x.User).FirstOrDefault();
+            var review = _ctmsMonitoringReportReviewRepository.FindByInclude(x => x.CtmsMonitoringReportId == ctmsMonitoringReportReviewDto[0].CtmsMonitoringReportId && x.DeletedDate == null && x.IsApproved, x => x.User).FirstOrDefault();
             if (review != null)
             {
                 ModelState.AddModelError("Message", "Form is already sent for review to " + review.User.UserName);
@@ -70,7 +70,7 @@ namespace GSC.Api.Controllers.CTMS
             manageMonitoringReport.ReportStatus = MonitoringReportStatus.UnderReview;
             _ctmsMonitoringReportRepository.Update(manageMonitoringReport);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating status failed on save."));
             return Ok();
         }
 
@@ -98,7 +98,7 @@ namespace GSC.Api.Controllers.CTMS
             ctmsMonitoring.ActualEndDate = _jwtTokenAccesser.GetClientDate();
             _ctmsMonitoringRepository.Update(ctmsMonitoring);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Approve failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Approve failed on save."));
             _ctmsMonitoringReportReviewRepository.SendMailForApproved(ctmsMonitoringReportReview);
 
             return Ok();

@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.Master
         {
             _ctmsMonitoringReportVariableValueRepository.SaveVariableValue(ctmsMonitoringReportVariableValueSaveDto);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Variable failed on save."));
             return Ok(ctmsMonitoringReportVariableValueSaveDto.CtmsMonitoringReportVariableValueList);
         }
 

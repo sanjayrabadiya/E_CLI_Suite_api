@@ -63,7 +63,7 @@ namespace GSC.Api.Controllers.Master
                 _studyPlanTaskResourceRepository.Add(studyPlanTaskResource);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Resource failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Resource failed on save."));
             return Ok();
         }
 
@@ -85,7 +85,7 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _studyPlanTaskResourceRepository.Update(studyPlanTaskResource);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Resource failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Resource failed on save."));
             return Ok(studyPlanTaskResource.Id);
         }
 

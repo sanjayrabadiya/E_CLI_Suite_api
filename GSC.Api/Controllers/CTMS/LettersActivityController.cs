@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.Master
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
 
             _lettersActivityRepository.Add(lettersActivity);
-            if (_uow.Save() <= 0) throw new Exception("letters Formate failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("letters Formate failed on save."));
             return Ok(lettersActivity.Id);
         }
 
@@ -70,7 +70,7 @@ namespace GSC.Api.Controllers.Master
 
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
             _lettersActivityRepository.Update(lettersActivity);
-            if (_uow.Save() <= 0) throw new Exception("Updating letters Formate failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating letters Formate failed on save."));
             return Ok(lettersActivity.Id);
         }
 

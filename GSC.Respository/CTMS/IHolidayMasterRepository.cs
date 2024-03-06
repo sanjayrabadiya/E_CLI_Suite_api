@@ -10,7 +10,7 @@ namespace GSC.Respository.CTMS
     {
         List<HolidayMasterGridDto> GetHolidayList(bool isDeleted);
         List<DateTime> GetHolidayList(int projectId);
-        List<HolidayMasterListDto> GetProjectWiseHolidayList(int StudyPlanId);
+        List<HolidayMasterListDto> GetProjectWiseHolidayList(int ProjectId);
         string DuplicateHoliday(HolidayMaster objSave);
     }
 }

@@ -67,8 +67,10 @@ namespace GSC.Respository.CTMS
             var CurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlan.Id && Currency.Select(y => y.Id).Contains((int)s.CurrencyId) && s.DeletedDate == null).FirstOrDefault();
 
             if(CurrencyRate != null)
-            passThroughCost.Total = passThroughCost.Total * CurrencyRate.LocalCurrencyRate;
-            passThroughCost.CurrencyRateId = CurrencyRate.Id;
+            {
+                passThroughCost.Total = passThroughCost.Total * CurrencyRate.LocalCurrencyRate;
+                passThroughCost.CurrencyRateId = CurrencyRate.Id;
+            }
 
             return passThroughCost;
         }

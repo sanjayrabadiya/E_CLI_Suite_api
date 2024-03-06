@@ -57,7 +57,7 @@ namespace GSC.Api.Controllers.Screening
 
             _ctmsMonitoringReportVariableValueQueryRepository.Add(ctmsMonitoringReportVariableValueQuery);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating query failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating query failed on save."));
             return Ok(ctmsMonitoringReportVariableValueQuery.Id);
         }
 
@@ -128,7 +128,7 @@ namespace GSC.Api.Controllers.Screening
             ctmsMonitoringReportVariableValue.QueryStatus = CtmsCommentStatus.Closed;
             _ctmsMonitoringReportVariableValueRepository.Update(ctmsMonitoringReportVariableValue);
 
-            if (_uow.Save() <= 0) throw new Exception("Delete Query failed!");
+            if (_uow.Save() <= 0) return Ok(new Exception("Delete Query failed!"));
 
             return Ok();
         }

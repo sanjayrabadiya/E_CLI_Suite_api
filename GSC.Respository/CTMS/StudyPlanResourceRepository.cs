@@ -49,7 +49,7 @@ namespace GSC.Respository.CTMS
                .Select(c => new ResourceByEdit
                {
                    resourceId = (c.ResourceType.ResourceTypes.GetDescription() == "Manpower") ? 1 : 2,
-                   subresource = (c.ResourceType.ResourceSubType.GetDescription() == "Permanent") ? 1 : c.ResourceType.ResourceSubType.GetDescription() == "Contract" ? 2 : c.ResourceType.ResourceSubType.GetDescription() == "Consumable" ? 3 : 4,
+                   subresource = GetSubResource(c.ResourceType.ResourceSubType.GetDescription()),
                    designation = c.ResourceType.Designation.Id,
                    nameOfMaterial = c.ResourceType.Id,
                    rollUser = c.ResourceType.Id,
@@ -64,6 +64,17 @@ namespace GSC.Respository.CTMS
 
             return gridResource;
 
+        }
+        public int GetSubResource(string std)
+        {
+            if (std == "Permanent")
+                return 1;
+            else if (std == "Contract")
+                return 2;
+            else if (std == "Consumable")
+                return 3;
+            else
+                return 4;
         }
         public string ValidationCurrency(int resourceId, int studyplanId)
         {
@@ -95,10 +106,10 @@ namespace GSC.Respository.CTMS
             return ResourceType;
         }
 
-        public void TotalCostUpdate(StudyPlanResource StudyPlanResource)
+        public void TotalCostUpdate(StudyPlanResource studyPlanResource)
         {
-            var TotalCost = _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == StudyPlanResource.StudyPlanTaskId && s.DeletedBy == null).Sum(d => d.ConvertTotalCost);
-            var StudyPlanTaskData = _context.StudyPlanTask.Where(s => s.Id == StudyPlanResource.StudyPlanTaskId && s.DeletedBy == null).FirstOrDefault();
+            var TotalCost = _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == studyPlanResource.StudyPlanTaskId && s.DeletedBy == null).Sum(d => d.ConvertTotalCost);
+            var StudyPlanTaskData = _context.StudyPlanTask.Where(s => s.Id == studyPlanResource.StudyPlanTaskId && s.DeletedBy == null).FirstOrDefault();
             if (StudyPlanTaskData != null)
             {
                 StudyPlanTaskData.TotalCost = TotalCost;
