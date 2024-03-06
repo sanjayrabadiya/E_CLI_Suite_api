@@ -230,8 +230,7 @@ namespace GSC.Respository.CTMS
                 var siteslist = _context.Project.Where(x => x.ParentProjectId == ParentProjectId && x.DeletedDate == null).Select(x => x.Id).ToList();
                 foreach (var sitesId in siteslist)
                 {
-                    var data = new StudyPlanTask();
-                    data = _mapper.Map<StudyPlanTask>(taskData);
+                    var data = _mapper.Map<StudyPlanTask>(taskData);
                     data.ProjectId = sitesId;
                     tasklist.Add(data);
                 }
@@ -574,7 +573,6 @@ namespace GSC.Respository.CTMS
 
         public string ValidateweekEnd(NextWorkingDateParameterDto parameterDto)
         {
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == parameterDto.StudyPlanId).Select(s=>s.ProjectId).SingleOrDefault();
             return string.Empty;
         }
 
@@ -621,11 +619,14 @@ namespace GSC.Respository.CTMS
             {
                 var TaskMaster = _context.StudyPlan.Where(x => x.Id == StudyPlanTaskId && x.DeletedDate == null).OrderByDescending(x => x.Id).FirstOrDefault();
                 var data = new StudyPlan();
+                if (TaskMaster != null)
+                {
+                    data.StartDate = TaskMaster.StartDate;
+                    data.EndDate = TaskMaster.EndDate;
+                    data.TaskTemplateId = TaskMaster.TaskTemplateId;
+                }
                 data.Id = 0;
-                data.StartDate = TaskMaster.StartDate;
-                data.EndDate = TaskMaster.EndDate;
                 data.ProjectId = ProjectId;
-                data.TaskTemplateId = TaskMaster.TaskTemplateId;
                 _context.StudyPlan.Add(data);
                 _context.Save();
                 result.StudyPlanId = data.Id;
@@ -680,7 +681,6 @@ namespace GSC.Respository.CTMS
 
         public List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType)
         {
-            var result = new List<StudyPlanTaskChartReportDto>();
             var TodayDate = DateTime.Now;
             var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null).ToList();
 
@@ -718,11 +718,11 @@ namespace GSC.Respository.CTMS
 
                 if (TodayDate < item.StartDate && chartType == CtmsChartType.NotStarted)
                 {
-                        data.Add(item);
+                    data.Add(item);
                 }
             }
 
-            result = data.Select(x => new StudyPlanTaskChartReportDto
+            return data.Select(x => new StudyPlanTaskChartReportDto
             {
                 Id = x.Id,
                 Duration = x.Duration,
@@ -731,7 +731,6 @@ namespace GSC.Respository.CTMS
                 TaskName = x.TaskName,
                 NoOfDeviatedDay = chartType == CtmsChartType.DeviatedDate ? (x.ActualEndDate - x.EndDate).Value.Days : 0,
             }).ToList();
-            return result;
         }
 
         public List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search)
@@ -760,14 +759,11 @@ namespace GSC.Respository.CTMS
                                                         && x.DeletedDate == null).ToList();
 
                 var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-                if (studyplans != null )
+                foreach (var item in studyplans)
                 {
-                    foreach (var item in studyplans)
-                    {
-                        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
-                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-                        result = tasklist;
-                    }
+                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
+                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                    result = tasklist;
                 }
             }
             else
@@ -781,26 +777,25 @@ namespace GSC.Respository.CTMS
                 }
             }
 
-            if (result != null)
-                foreach (var item in result)
-                {
-                    var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
-                   .Select(x => new ResourceTypeGridDto
-                   {
-                       Id = x.Id,
-                       TaskId = item.Id,
-                       ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
-                       ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
-                       Role = x.ResourceType.Role.RoleName,
-                       User = x.ResourceType.User.UserName,
-                       Designation = x.ResourceType.Designation.NameOFDesignation,
-                       YersOfExperience = x.ResourceType.Designation.YersOfExperience,
-                       NameOfMaterial = x.ResourceType.NameOfMaterial,
-                       CreatedDate = x.CreatedDate,
-                       CreatedByUser = x.CreatedByUser.UserName
-                   }).ToList();
-                    item.TaskResource = resourcelist;
-                }
+            foreach (var item in result)
+            {
+                var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
+               .Select(x => new ResourceTypeGridDto
+               {
+                   Id = x.Id,
+                   TaskId = item.Id,
+                   ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+                   ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+                   Role = x.ResourceType.Role.RoleName,
+                   User = x.ResourceType.User.UserName,
+                   Designation = x.ResourceType.Designation.NameOFDesignation,
+                   YersOfExperience = x.ResourceType.Designation.YersOfExperience,
+                   NameOfMaterial = x.ResourceType.NameOfMaterial,
+                   CreatedDate = x.CreatedDate,
+                   CreatedByUser = x.CreatedByUser.UserName
+               }).ToList();
+                item.TaskResource = resourcelist;
+            }
 
             //Apply Filter
             if (search.ResourceId.HasValue)
@@ -809,11 +804,7 @@ namespace GSC.Respository.CTMS
 
             if (search.ResourceSubId.HasValue)
                 result = result.Where(s => s.TaskResource
-                .Exists(x => x.ResourceSubType == (
-                search.ResourceSubId == (int)SubResourceType.Permanent ? SubResourceType.Permanent.GetDescription() :
-                search.ResourceSubId == (int)SubResourceType.Contract ? SubResourceType.Contract.GetDescription() :
-                search.ResourceSubId == (int)SubResourceType.Consumable ? SubResourceType.Consumable.GetDescription() : SubResourceType.NonConsumable.GetDescription()
-                ))).ToList();
+                .Exists(x => x.ResourceSubType == GetResourceType(search.ResourceSubId))).ToList();
 
             if (search.RoleId.HasValue)
                 result = result.Where(s => s.TaskResource.Exists(x => x.Role == _context.SecurityRole.Where(s => s.Id == search.RoleId).Select(x => x.RoleName).FirstOrDefault())).ToList();
@@ -832,7 +823,17 @@ namespace GSC.Respository.CTMS
 
             return result;
         }
-
+        public string  GetResourceType(int? ResourceSubId)
+        {
+            if (ResourceSubId == (int)SubResourceType.Permanent)
+                return SubResourceType.Permanent.GetDescription();
+            else if (ResourceSubId == (int)SubResourceType.Contract)
+                return SubResourceType.Contract.GetDescription();
+            else if (ResourceSubId == (int)SubResourceType.Consumable)
+                return SubResourceType.Consumable.GetDescription();
+            else
+                return SubResourceType.NonConsumable.GetDescription();
+        }
         public List<DropDownDto> GetRollDropDown(int studyplanId)
         {
             var studyPlanTaskDada = _context.StudyPlanTask.Where(x => x.StudyPlanId == studyplanId && x.DeletedDate == null).ToList();
@@ -886,22 +887,21 @@ namespace GSC.Respository.CTMS
                                                         && x.DeletedDate == null).ToList();
 
                 var studyplans = _context.StudyPlan.Include(s => s.Currency).Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-                if (studyplans != null)
+
+                foreach (var item in studyplans)
                 {
-                    foreach (var item in studyplans)
+                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
+                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                    tasklist.ForEach(task =>
                     {
-                        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
-                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-                        tasklist.ForEach(task =>
-                        {
-                            task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";
-                            task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
-                            task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-                            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
-                        });
-                        result = tasklist;
-                    }
+                        task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";
+                        task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
+                        task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
+                        task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
+                    });
+                    result = tasklist;
                 }
+
             }
             else if (siteId > 0)
             {
@@ -940,7 +940,6 @@ namespace GSC.Respository.CTMS
                 }
             }
 
-            if (result != null)
                 foreach (var item in result)
                 {
                     var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Include(r => r.StudyPlanTask).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)

@@ -40,7 +40,7 @@ namespace GSC.Respository.CTMS
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return new List<StudyPlanGridDto>();
 
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             var ctmsProjectList = _context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();

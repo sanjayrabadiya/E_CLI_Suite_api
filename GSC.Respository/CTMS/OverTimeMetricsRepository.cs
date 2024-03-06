@@ -4,6 +4,7 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
+using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -14,7 +15,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static SkiaSharp.HarfBuzz.SKShaper;
 
 
 namespace GSC.Respository.CTMS
@@ -48,23 +48,30 @@ namespace GSC.Respository.CTMS
             var overTimeMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId == metricsId).ToList();
             foreach (var task in overTimeMetrics)
             {
-                var metricsType = _metricsRepository.Find(task.PlanMetricsId).MetricsType;
-                var ProjectSettings = _context.Randomization.Where(x => x.ProjectId == task.ProjectId && x.DeletedDate == null &&
-                metricsType == MetricsType.Enrolled ? x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate :
-                metricsType == MetricsType.Screened ? x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate :
-                x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate).ToList();
+                var ProjectSettings = _context.Randomization.Where(x => x.ProjectId == task.ProjectId && x.DeletedDate == null && GetValidation(x,task)).ToList();
                 task.Actual = ProjectSettings.Count;
                 Update(task);
                 _uow.Save();
             }
             return overTimeMetrics;
         }
+        public bool GetValidation(Randomization x, OverTimeMetrics task)
+        {
+            var metricsType = _metricsRepository.Find(task.PlanMetricsId).MetricsType;
+
+            if (metricsType == MetricsType.Enrolled)
+                return x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate;
+            else if (metricsType == MetricsType.Screened)
+                return x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate;
+            else
+                return x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate;
+        }
 
         public List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
             //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
             var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0)  return new List<OverTimeMetricsGridDto>();
 
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId == metricsId && projectList.Contains(x.ProjectId)).OrderBy(x => x.Id).
@@ -72,10 +79,9 @@ namespace GSC.Respository.CTMS
         }
         private List<Data.Entities.Master.Project> GetProjectIds(int projectId, int countryId, int siteId)
         {
-            var projectIds = new List<Data.Entities.Master.Project>();
             if (countryId == 0 && siteId == 0)
             {
-                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                return _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                            && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
                                                            && a.UserId == _jwtTokenAccesser.UserId
                                                            && a.RoleId == _jwtTokenAccesser.RoleId
@@ -85,7 +91,7 @@ namespace GSC.Respository.CTMS
             }
             else if (countryId > 0 && siteId == 0)
             {
-                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                return _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                           && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
                                                           && a.UserId == _jwtTokenAccesser.UserId
                                                           && a.RoleId == _jwtTokenAccesser.RoleId
@@ -96,7 +102,7 @@ namespace GSC.Respository.CTMS
             }
             else if (countryId == 0 && siteId > 0)
             {
-                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                return _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                           && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
                                                           && a.UserId == _jwtTokenAccesser.UserId
                                                           && a.RoleId == _jwtTokenAccesser.RoleId
@@ -107,7 +113,7 @@ namespace GSC.Respository.CTMS
             }
             else
             {
-                projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
+                return _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == projectId
                                                          && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
                                                          && a.UserId == _jwtTokenAccesser.UserId
                                                          && a.RoleId == _jwtTokenAccesser.RoleId
@@ -117,7 +123,6 @@ namespace GSC.Respository.CTMS
                                                          && x.Id == siteId
                                                          && x.DeletedDate == null).ToList();
             }
-            return projectIds;
         }
 
 
@@ -155,15 +160,15 @@ namespace GSC.Respository.CTMS
                 }
                 else if (tDay.Days >= 7 && tDay.Days <= 29 && (overTimeMetricsDto.PlanningType == PlanningType.Week || overTimeMetricsDto.PlanningType == PlanningType.Day))
                 {
-                    tplan = tDay.Days / (overTimeMetricsDto.PlanningType == PlanningType.Day ? 1 : 7);
+                    tplan = (decimal) tDay.Days / (overTimeMetricsDto.PlanningType == PlanningType.Day ? 1 : 7);
                 }
                 else if (tDay.Days >= 30 && tDay.Days <= 364 && (overTimeMetricsDto.PlanningType == PlanningType.Month || overTimeMetricsDto.PlanningType == PlanningType.Week || overTimeMetricsDto.PlanningType == PlanningType.Day))
                 {
-                    tplan = tDay.Days / (overTimeMetricsDto.PlanningType == PlanningType.Day ? 1 : overTimeMetricsDto.PlanningType == PlanningType.Week ? 7 : 30);
+                    tplan = (decimal) tDay.Days / GetUnitTypeNo(overTimeMetricsDto.PlanningType);
                 }
                 else if (tDay.Days >= 365 && (overTimeMetricsDto.PlanningType == PlanningType.Year || overTimeMetricsDto.PlanningType == PlanningType.Month || overTimeMetricsDto.PlanningType == PlanningType.Week || overTimeMetricsDto.PlanningType == PlanningType.Day))
                 {
-                    tplan = tDay.Days / (overTimeMetricsDto.PlanningType == PlanningType.Day ? 1 : overTimeMetricsDto.PlanningType == PlanningType.Week ? 7 : overTimeMetricsDto.PlanningType == PlanningType.Month ? 30 : 365);
+                    tplan = (decimal) tDay.Days / GetUnitTypeNo(overTimeMetricsDto.PlanningType);
                 }
                 else
                 {
@@ -176,12 +181,23 @@ namespace GSC.Respository.CTMS
             }
             return "";
         }
+        public int GetUnitTypeNo(PlanningType planningType)
+        {
+            if (planningType == PlanningType.Day)
+                return 1;
+            if (planningType == PlanningType.Week)
+                return 7;
+            if (planningType == PlanningType.Month)
+                return 30;
+            else
+                return 365;
+        }
 
         //select site only select Approved in CTMS Monitoring
         public List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId)
         {
             var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return new List<ProjectDropDown>();
 
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
 
