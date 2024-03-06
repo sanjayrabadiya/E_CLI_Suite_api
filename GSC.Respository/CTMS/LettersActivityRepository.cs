@@ -85,7 +85,7 @@ namespace GSC.Respository.Master
                        .Include(i => i.Project)
                        .ThenInclude(i => i.ManageSite)
                        .Where(z => z.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(z.StudyLevelFormId)
-                       && (siteId == 0 ? (!z.Project.IsTestSite) : true)
+                       && ((siteId != 0) || (!z.Project.IsTestSite))
                        && z.DeletedDate == null && z.ScheduleStartDate != null && z.ScheduleEndDate != null)
                        .Select
                        (b => new LettersActivityDateDropDown

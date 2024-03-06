@@ -86,7 +86,7 @@ namespace GSC.Respository.CTMS
         public string AddTaskToSTudyPlan(TaskmasterDto taskmasterDto)
         {
             var task = _context.StudyPlanTask.Where(x => x.TaskId == taskmasterDto.Id).ToList();
-            if (task != null)
+            if (task.Count>0)
             {
                 _context.StudyPlanTask.RemoveRange(task);
                 _context.Save();
