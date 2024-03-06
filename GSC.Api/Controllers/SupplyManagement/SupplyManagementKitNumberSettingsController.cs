@@ -5,13 +5,8 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Helper;
-using GSC.Respository.Configuration;
-using GSC.Respository.Master;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
-using GSC.Shared.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -74,7 +69,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementKitNumberSettings.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementKitNumberSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitNumberSettingsRepository.Add(supplyManagementKitNumberSettings);
-            if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Alloation failed on save."));
             supplyManagementKitNumberSettingsDto.Id = supplyManagementKitNumberSettings.Id;
             _supplyManagementKitNumberSettingsRepository.SaveRoleNumberSetting(supplyManagementKitNumberSettingsDto);
             return Ok(supplyManagementKitNumberSettings.Id);
@@ -99,7 +94,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", mesage);
                 return BadRequest(ModelState);
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Alloation failed on save."));
             if (supplyManagementKitNumberSettingsDto.IsBlindedStudy == true)
                 _supplyManagementKitNumberSettingsRepository.DeleteRoleNumberSetting(supplyManagementKitNumberSettingsDto.Id);
             _supplyManagementKitNumberSettingsRepository.SaveRoleNumberSetting(supplyManagementKitNumberSettingsDto);
@@ -173,7 +168,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         public IActionResult CheckKitMappingWithSheet(int projectId)
         {
             bool Isblined = false;
-            if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsUploadWithKit == true))
+            if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsUploadWithKit))
             {
                 Isblined = true;
             }

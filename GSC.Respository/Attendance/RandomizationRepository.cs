@@ -63,7 +63,7 @@ namespace GSC.Respository.Attendance
         private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly ISupplyManagementFectorRepository _supplyManagementFectorRepository;
-        private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
+        private readonly ISupplyManagementKitRepository _supplyManagementKITRepository;
         public RandomizationRepository(IGSCContext context,
             IUserRepository userRepository,
             ICompanyRepository companyRepository,
@@ -85,7 +85,7 @@ namespace GSC.Respository.Attendance
             IUnitOfWork uow, IUserRoleRepository userRoleRepository,
             IAppSettingRepository appSettingRepository, IUploadSettingRepository uploadSettingRepository, IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository,
             ISupplyManagementFectorRepository supplyManagementFectorRepository,
-            ISupplyManagementKITRepository supplyManagementKITRepository
+            ISupplyManagementKitRepository supplyManagementKITRepository
             )
             : base(context)
         {
@@ -2302,7 +2302,7 @@ namespace GSC.Respository.Attendance
         public void SendRandomizationIWRSEMail(RandomizationDto obj)
         {
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
             var study = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault();
             if (study != null)
             {
@@ -2355,7 +2355,7 @@ namespace GSC.Respository.Attendance
             if (threshold != null && obj.KitCount < threshold.ThresholdValue)
             {
                 SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-                IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
                 var study = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault();
                 if (study != null)
                 {
@@ -2427,7 +2427,7 @@ namespace GSC.Respository.Attendance
                                 int KitCount = 0;
                                 bool Issuccess = false;
                                 SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-                                IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                                IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
                                 SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
 
                                 if (threshold.KitCreationType == KitCreationType.SequenceWise)

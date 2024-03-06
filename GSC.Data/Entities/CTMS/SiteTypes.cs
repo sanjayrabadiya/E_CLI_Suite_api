@@ -9,11 +9,8 @@ namespace GSC.Data.Entities.CTMS
         public int ProjectId { get; set; }
         [ForeignKey("ProjectId")]
         public Master.Project Project { get; set; }
-
         public int WorkingDayId { get; set; }
         [ForeignKey("WorkingDayId")]
         public WorkingDay WorkingDay { get; set; }
-
-        
     }
 }

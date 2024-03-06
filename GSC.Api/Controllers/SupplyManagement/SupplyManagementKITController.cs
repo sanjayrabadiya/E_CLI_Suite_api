@@ -3,40 +3,33 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.Configuration;
-using GSC.Respository.Master;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.DocumentService;
-using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using GSC.Shared.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SupplyManagementKITController : BaseController
+    public class SupplyManagementKitController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
+        private readonly ISupplyManagementKitRepository _supplyManagementKITRepository;
         private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
-        private readonly ISupplyManagementKITSeriesRepository _supplyManagementKITSeriesRepository;
-        public SupplyManagementKITController(ISupplyManagementKITRepository supplyManagementKITRepository,
+       
+        public SupplyManagementKitController(ISupplyManagementKitRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKITSeriesRepository supplyManagementKITSeriesRepository)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;
@@ -44,7 +37,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
-            _supplyManagementKITSeriesRepository = supplyManagementKITSeriesRepository;
+            
         }
 
         [HttpGet("{id}")]
@@ -67,7 +60,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Post([FromBody] SupplyManagementKITDto supplyManagementUploadFileDto)
         {
-            List<SupplyManagementKITDetail> list = new List<SupplyManagementKITDetail>();
+           
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementUploadFileDto.Id = 0;
             var kitsettings = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == supplyManagementUploadFileDto.ProjectId).FirstOrDefault();
@@ -94,7 +87,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementUploadFile.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementUploadFile.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKITRepository.Add(supplyManagementUploadFile);
-            if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Creation failed on save."));
 
 
             for (int i = 0; i < supplyManagementUploadFile.NoofPatient; i++)
@@ -113,7 +106,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                     _supplyManagementKITDetailRepository.Add(obj);
                     if (!_supplyManagementKITDetailRepository.All.Any(x => x.KitNo == obj.KitNo))
                     {
-                        if (_uow.Save() <= 0) throw new Exception("Creating Kit Creation failed on save.");
+                        if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Creation failed on save."));
 
                         SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
                         history.SupplyManagementKITDetailId = obj.Id;
@@ -173,17 +166,14 @@ namespace GSC.Api.Controllers.SupplyManagement
             foreach (var item in deleteKitDto.list)
             {
                 var record = _supplyManagementKITDetailRepository.Find(item);
-
+                if (record == null)
+                    return NotFound();
 
                 if (record.Status != KitStatus.AllocationPending)
                 {
                     ModelState.AddModelError("Message", "Kit should not be deleted once the shipment/receipt has been generated!");
                     return BadRequest(ModelState);
                 }
-
-                if (record == null)
-                    return NotFound();
-
                 _supplyManagementKITDetailRepository.Delete(record);
                 _uow.Save();
 

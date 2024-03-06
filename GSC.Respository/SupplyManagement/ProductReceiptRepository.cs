@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml.Bibliography;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Barcode;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Barcode;
@@ -10,26 +8,23 @@ using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.SupplyManagement
 {
     public class ProductReceiptRepository : GenericRespository<ProductReceipt>, IProductReceiptRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public ProductReceiptRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper)
+        public ProductReceiptRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
+
             _mapper = mapper;
             _context = context;
         }
@@ -80,7 +75,7 @@ namespace GSC.Respository.SupplyManagement
 
             var sublst = new ProductRecieptBarcodeGenerateGridDto
             {
-                BarcodeString = productReciept.Barcode,
+                BarcodeString = productReciept != null ? productReciept.Barcode : "",
                 BarcodeType = pharmacyBarcodeConfig.BarcodeType.GetDescription(),
                 DisplayValue = pharmacyBarcodeConfig.DisplayValue,
                 DisplayInformationLength = pharmacyBarcodeConfig.DisplayInformationLength,
@@ -125,10 +120,9 @@ namespace GSC.Respository.SupplyManagement
             if (ColumnName == "ShipmentNo")
                 return tableRepository.ShipmentNo;
 
-            if (ColumnName == "BatchLotNumber")
+            if (ColumnName == "BatchLotNumber" && productVerification != null)
             {
-                if (productVerification != null)
-                    return productVerification.BatchLotNumber;
+                return productVerification.BatchLotNumber;
             }
             if (ColumnName == "ProductName")
                 return tableRepository.ProductName;
@@ -145,7 +139,7 @@ namespace GSC.Respository.SupplyManagement
             if (ColumnName == "ReceivedFromLocation")
                 return tableRepository.ReceivedFromLocation;
 
-            
+
             return "";
         }
 

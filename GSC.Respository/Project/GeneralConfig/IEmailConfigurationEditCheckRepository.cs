@@ -1,5 +1,4 @@
 ﻿using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Screening;
 using System.Collections.Generic;

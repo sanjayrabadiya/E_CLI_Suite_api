@@ -16,7 +16,6 @@ using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using GSC.Respository.Configuration;
 using System;
-using GSC.Respository.ProjectRight;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using DocumentFormat.OpenXml;
@@ -34,7 +33,7 @@ namespace GSC.Respository.Master
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly ILettersActivityRepository _lettersActivityRepository;
         public LettersActivityRepository(IGSCContext context, IEmailSenderRespository emailSenderRespository,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository, 
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
             ILettersActivityRepository lettersActivityRepository)
             : base(context)
         {
@@ -86,7 +85,7 @@ namespace GSC.Respository.Master
                        .Include(i => i.Project)
                        .ThenInclude(i => i.ManageSite)
                        .Where(z => z.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(z.StudyLevelFormId)
-                       && (siteId == 0 ? (!z.Project.IsTestSite) : true)
+                       && ((siteId != 0) || (!z.Project.IsTestSite))
                        && z.DeletedDate == null && z.ScheduleStartDate != null && z.ScheduleEndDate != null)
                        .Select
                        (b => new LettersActivityDateDropDown
@@ -135,21 +134,24 @@ namespace GSC.Respository.Master
                 lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SITENAME##", projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode, RegexOptions.IgnoreCase);
                 lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SITENAME</strong>##", "<strong>" + projectdata.ProjectCode == null ? projectdata.ManageSite.SiteName : projectdata.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
             }
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SUDYCODE##", studyCode.ProjectCode, RegexOptions.IgnoreCase);
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SUDYCODE</strong>##", "<strong>" + studyCode.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
+            if(studyCode!=null)
+            {    
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SUDYCODE##", studyCode.ProjectCode, RegexOptions.IgnoreCase);
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SUDYCODE</strong>##", "<strong>" + studyCode.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
 
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SUDYNAME##", studyCode.ProjectName, RegexOptions.IgnoreCase);
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SUDYNAME</strong>##", "<strong>" + studyCode.ProjectName + "</strong>", RegexOptions.IgnoreCase);
-
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##SUDYNAME##", studyCode.ProjectName, RegexOptions.IgnoreCase);
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>SUDYNAME</strong>##", "<strong>" + studyCode.ProjectName + "</strong>", RegexOptions.IgnoreCase);
+            }
             if (userIntigration != null)
             {
                 lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##USERNAME##", userIntigration.UserName, RegexOptions.IgnoreCase);
                 lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>USERNAME</strong>##", "<strong>" + userIntigration.UserName + "</strong>", RegexOptions.IgnoreCase);
             }
-
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##DATE##", CtmsMonitoringdata.ScheduleStartDate.ToString(), RegexOptions.IgnoreCase);
-            lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>DATE</strong>##", "<strong>" + CtmsMonitoringdata.ScheduleStartDate.ToString() + "</strong>", RegexOptions.IgnoreCase);
-
+            if (CtmsMonitoringdata != null)
+            {
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##DATE##", CtmsMonitoringdata.ScheduleStartDate.ToString(), RegexOptions.IgnoreCase);
+                lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>DATE</strong>##", "<strong>" + CtmsMonitoringdata.ScheduleStartDate.ToString() + "</strong>", RegexOptions.IgnoreCase);
+            }
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##CRANAME##", _jwtTokenAccesser.UserName, RegexOptions.IgnoreCase);
             lettersFormate.LetterBody = Regex.Replace(lettersFormate.LetterBody, "##<strong>CRANAME</strong>##", "<strong>" + _jwtTokenAccesser.UserName + "</strong>", RegexOptions.IgnoreCase);
 
@@ -188,7 +190,6 @@ namespace GSC.Respository.Master
         public void updateLettersEmail(LettersActivityDto lettersActivityDto)
         {
             Guid obj = Guid.NewGuid();
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.Id == lettersActivityDto.ActivityId).FirstOrDefault();
             if (!String.IsNullOrEmpty(lettersActivityDto.FilePath))
             {
                 string[] removePaths = { lettersActivityDto.FilePath };
@@ -236,7 +237,6 @@ namespace GSC.Respository.Master
                     IsSelected = true,
                 }).ToList();
 
-
             return users;
         }
         public string GetSendMail(SendMailModel sendMailModel)
@@ -246,20 +246,24 @@ namespace GSC.Respository.Master
             if (record == null) return "";
             var lettersActivityDto = _mapper.Map<LettersActivityDto>(record);
 
-            if (sendMailModel.Email != null && sendMailModel.Email != "")
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
-
-            foreach (var item in sendMailModel.OpstionLists)
+            if(data!=null)
             {
-                lettersActivityDto.Email = item.Option;
-                if (item.Option != null && item.Option != "")
-                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
-            }
+                if (sendMailModel.Email != null && sendMailModel.Email != "")
+                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, sendMailModel.Email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
 
-            foreach (var item in sendMailModel.UserModel)
-            {
-                var email = _context.Users.Where(x => x.Id == item.userId && x.DeletedBy == null).Select(x => x.Email).FirstOrDefault();
-                _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                for (int i = 0; i < sendMailModel.OpstionLists.Count; i++)
+                {
+                    EmailModel item = sendMailModel.OpstionLists[i];
+                    lettersActivityDto.Email = item.Option;
+                    if (item.Option != null && item.Option != "")
+                        _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, item.Option, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                }
+
+                foreach (var item in sendMailModel.UserModel)
+                {
+                    var email = _context.Users.Where(x => x.Id == item.userId && x.DeletedBy == null).Select(x => x.Email).FirstOrDefault();
+                    _emailSenderRespository.SendALettersMailtoInvestigator(lettersActivityDto.AttachmentPath, email, sendMailModel.Body, data.Activity.ActivityName, data.CtmsMonitoring.ScheduleStartDate.ToString());
+                }
             }
 
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);

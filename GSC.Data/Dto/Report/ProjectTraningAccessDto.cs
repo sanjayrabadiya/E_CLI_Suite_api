@@ -1,7 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Helper;
 using System;
-using System.Collections.Generic;
+
 
 namespace GSC.Data.Dto.Report
 {

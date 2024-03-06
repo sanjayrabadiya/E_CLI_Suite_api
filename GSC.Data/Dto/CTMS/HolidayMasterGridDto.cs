@@ -2,7 +2,7 @@
 using System;
 namespace GSC.Data.Dto.CTMS
 {
-    public class HolidayMasterGridDto: BaseAuditDto
+    public class HolidayMasterGridDto : BaseAuditDto
     {
         public string ProjectCode { get; set; }
         public string SiteCode { get; set; }
@@ -10,6 +10,5 @@ namespace GSC.Data.Dto.CTMS
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
         public bool IsSite { get; set; }
-
     }
 }

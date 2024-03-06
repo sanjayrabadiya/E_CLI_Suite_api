@@ -5,19 +5,16 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.Barcode;
 using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -35,7 +32,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IGSCContext _context;
         private readonly IProductVerificationRepository _productVerificationRepository;
         private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
-        private readonly IPharmacyBarcodeConfigRepository _barcodeConfigRepository;
+        
 
         public ProductReceiptController(IProductReceiptRepository productReceiptRepository,
             ICentralDepotRepository centralDepotRepository,
@@ -44,7 +41,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             IProductVerificationRepository productVerificationRepository,
             IGSCContext context,
         IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser, IPharmacyBarcodeConfigRepository barcodeConfigRepository)
+            IJwtTokenAccesser jwtTokenAccesser)
         {
             _productReceiptRepository = productReceiptRepository;
             _centralDepotRepository = centralDepotRepository;
@@ -55,7 +52,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _barcodeConfigRepository = barcodeConfigRepository;
+            
         }
 
         [HttpGet("GetProductReceiptList/{projectId}/{isDeleted:bool?}")]
@@ -71,11 +68,12 @@ namespace GSC.Api.Controllers.SupplyManagement
                 var verification = _context.ProductVerification.Where(x => x.ProductReceiptId == t.Id && x.DeletedDate == null).FirstOrDefault();
                 if (verification != null)
                 {
+                    var unit = _context.Unit.Where(s => s.Id == verification.UnitId).FirstOrDefault();
                     t.PacketTypeName = verification.PacketTypeId.GetDescription();
                     t.Dose = verification.Dose;
-                    t.UnitName = verification.UnitId > 0 ? _context.Unit.Where(s => s.Id == verification.UnitId).FirstOrDefault().UnitName : "";
+                    if (unit != null)
+                        t.UnitName = unit.UnitName;
                 }
-
             });
             return Ok(productReciept);
         }
@@ -98,7 +96,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             productReceipt.IpAddress = _jwtTokenAccesser.IpAddress;
             productReceipt.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productReceiptRepository.Add(productReceipt);
-            if (_uow.Save() <= 0) throw new Exception("Creating product receipt failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating product receipt failed on save."));
             _productReceiptRepository.GenerateProductRecieptBarcode(productReceipt);
             return Ok(productReceipt.Id);
         }
@@ -138,7 +136,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             productReceipt.IpAddress = _jwtTokenAccesser.IpAddress;
             productReceipt.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productReceiptRepository.AddOrUpdate(productReceipt);
-            if (_uow.Save() <= 0) throw new Exception("Updating product receipt failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating product receipt failed on save."));
             return Ok(productReceipt.Id);
         }
 

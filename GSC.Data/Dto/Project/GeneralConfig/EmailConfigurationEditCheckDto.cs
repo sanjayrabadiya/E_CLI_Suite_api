@@ -1,10 +1,5 @@
-﻿using GSC.Common.Base;
-using GSC.Common.Common;
-using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Project.Design;
-using System;
+﻿using GSC.Data.Entities.Common;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Entities.Project.Generalconfig
 {

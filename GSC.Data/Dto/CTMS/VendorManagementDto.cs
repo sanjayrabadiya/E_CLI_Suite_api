@@ -19,8 +19,6 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Registered Office Address is required.")]
         public string RegOfficeAddress { get; set; }
         public string BranchOfficeDetails { get; set; }
-
-        /*[Required(ErrorMessage = "Selecting Audit is required.")]*/
         public VendorManagementAudit VendorManagementAuditId { get; set; }
         public DateTime? VendorManagementAuditDate { get; set; }
     }

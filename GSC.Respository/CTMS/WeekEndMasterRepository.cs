@@ -26,7 +26,6 @@ namespace GSC.Respository.CTMS
             _context = context;
             _projectRightRepository = projectRightRepository;
         }
-
         public List<WeekEndGridDto> GetWeekendList(bool isDeleted)
         {
             //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
@@ -38,7 +37,7 @@ namespace GSC.Respository.CTMS
 
             var data = result.Select(r =>
             {
-                r.ProjectCode = r.IsSite == true ? _context.Project.Find(Convert.ToInt32(r.ProjectCode)).ProjectCode : r.ProjectCode;
+                r.ProjectCode = r.IsSite ? _context.Project.Find(Convert.ToInt32(r.ProjectCode)).ProjectCode : r.ProjectCode;
                 return r;
             }).ToList();
 

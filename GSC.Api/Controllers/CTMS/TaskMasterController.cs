@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.CTMS
 
             if (taskmaster != null && taskmaster.RefrenceTypes != null)
                 taskmaster.RefrenceTypes = taskmaster.RefrenceTypes.Where(x => x.DeletedDate == null).ToList();
-          
+
             var taskDto = _mapper.Map<TaskmasterDto>(taskmaster);
             return Ok(taskDto);
         }
@@ -68,7 +68,7 @@ namespace GSC.Api.Controllers.CTMS
             tastMaster.TaskOrder = _taskMasterRepository.UpdateTaskOrder(taskmasterDto);
             _taskMasterRepository.Add(tastMaster);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Task failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Task failed on save."));
             taskmasterDto.Id = tastMaster.Id;
             _taskMasterRepository.AddRefrenceTypes(taskmasterDto);
             _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
@@ -89,7 +89,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             UpdateRefrenceTypes(taskmaster);
             _taskMasterRepository.Update(taskmaster);
-            if (_uow.Save() <= 0) throw new Exception("Updating Task Master failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
             _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(taskmaster.Id);
         }
@@ -108,7 +108,7 @@ namespace GSC.Api.Controllers.CTMS
                     _context.RefrenceTypes.Update(t);
                 }
             });
-            
+
             taskmaster.RefrenceTypes.ForEach(z =>
             {
                 _context.RefrenceTypes.Add(z);

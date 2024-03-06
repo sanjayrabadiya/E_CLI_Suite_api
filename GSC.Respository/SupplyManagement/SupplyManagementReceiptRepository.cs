@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Configuration;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -14,7 +11,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -24,11 +20,11 @@ namespace GSC.Respository.SupplyManagement
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
-        private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
+        private readonly ISupplyManagementKitRepository _supplyManagementKITRepository;
 
         public SupplyManagementReceiptRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKITRepository supplyManagementKITRepository)
+            IMapper mapper, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKitRepository supplyManagementKITRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -54,13 +50,20 @@ namespace GSC.Respository.SupplyManagement
                 if (fromproject != null)
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                    t.StudyProjectCode = study != null ? study.ProjectCode : "";
-                    t.ProjectId = study.ParentProjectId;
+                    if (study != null)
+                    {
+                        t.StudyProjectCode = study.ProjectCode;
+                        t.ProjectId = study.ParentProjectId;
+                    }
                 }
                 t.WithIssueName = t.WithIssue == true ? "Yes" : "No";
                 t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
                 if (t.RoleId > 0)
-                    t.RoleName = _context.SecurityRole.Where(s => s.Id == t.RoleId).FirstOrDefault().RoleName;
+                {
+                    var role = _context.SecurityRole.Where(s => s.Id == t.RoleId).FirstOrDefault();
+                    if (role != null)
+                        t.RoleName = role.RoleName;
+                }
             });
 
 
@@ -71,25 +74,24 @@ namespace GSC.Respository.SupplyManagement
                  ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>
             {
-                SupplyManagementReceiptGridDto obj = new SupplyManagementReceiptGridDto();
-                obj = t;
-                obj.Id = 0;
-                obj.ApproveRejectDateTime = t.CreatedDate;
-                obj.WithIssueName = "";
-                obj.CreatedByUser = null;
-                obj.CreatedDate = null;
-                obj.WithIssue = null;
-                obj.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
+                t.Id = 0;
+                t.ApproveRejectDateTime = t.CreatedDate;
+                t.WithIssueName = "";
+                t.CreatedByUser = null;
+                t.CreatedDate = null;
+                t.WithIssue = null;
+                t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                    obj.StudyProjectCode = study != null ? study.ProjectCode : "";
-                    obj.ProjectId = study.Id;
+                    if (study != null)
+                    {
+                        t.StudyProjectCode = study.ProjectCode;
+                        t.ProjectId = study.Id;
+                    }
                 }
-                obj.IpAddress = t.IpAddress;
-                obj.TimeZone = t.TimeZone;
-                data.Add(obj);
+                data.Add(t);
             });
             return data.OrderByDescending(x => x.ApproveRejectDateTime).ToList();
         }
@@ -104,8 +106,11 @@ namespace GSC.Respository.SupplyManagement
             if (data == null)
             {
                 var data1 = _context.SupplyManagementShipment.Include(x => x.SupplyManagementRequest).Where(x => x.Id == id).FirstOrDefault();
-                requestid = data1.SupplyManagementRequestId;
-                shipmentid = data1.Id;
+                if (data1 != null)
+                {
+                    requestid = data1.SupplyManagementRequestId;
+                    shipmentid = data1.Id;
+                }
 
             }
             else
@@ -206,7 +211,7 @@ namespace GSC.Respository.SupplyManagement
                                         Id = x.Id,
                                         KitNo = x.KitNo,
                                         VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
+                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null && !x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode,
                                         Comments = x.Comments,
                                         Status = KitStatus.Shipped.ToString(),
                                         ProductTypeName = settings.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode
@@ -220,7 +225,7 @@ namespace GSC.Respository.SupplyManagement
                                     {
                                         Id = x.Id,
                                         KitNo = x.KitNo,
-                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null ? (x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest == false ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode) : "",
+                                        SiteCode = x.SupplyManagementShipment != null && x.SupplyManagementShipment.SupplyManagementRequest != null && !x.SupplyManagementShipment.SupplyManagementRequest.IsSiteRequest ? x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode : x.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode,
                                         Comments = x.Comments,
                                         Status = KitStatus.Shipped.ToString(),
                                         ProductTypeName = settings.IsBlindedStudy == true && isShow ? "" : x.TreatmentType
@@ -281,13 +286,6 @@ namespace GSC.Respository.SupplyManagement
                 Message = "Shipment not found";
                 return Message;
             }
-            //if (shipment.SupplyManagementRequest != null && shipment.SupplyManagementRequest.FromProject != null)
-            //{
-            //    if (shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.CloseOut || shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Terminated || shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.OnHold || shipment.SupplyManagementRequest.FromProject.Status == Helper.MonitoringSiteStatus.Rejected)
-            //    {
-            //        return "You can't receipt this shipment,Request from site is " + shipment.SupplyManagementRequest.FromProject.Status.GetDescription() + "!";
-            //    }
-            //}
 
             if (supplyManagementshipmentDto.Kits != null)
             {
@@ -299,13 +297,11 @@ namespace GSC.Respository.SupplyManagement
                         Message = "Please select kit type! at kit no " + item.KitNo;
                         return Message;
                     }
-                    if (item.Status != Helper.KitStatus.WithoutIssue)
+                    if (item.Status != Helper.KitStatus.WithoutIssue && string.IsNullOrEmpty(item.Comments))
                     {
-                        if (string.IsNullOrEmpty(item.Comments))
-                        {
-                            Message = "Please enter comments! " + item.KitNo;
-                            return Message;
-                        }
+                        Message = "Please enter comments! " + item.KitNo;
+                        return Message;
+
                     }
                     Message = CheckExpiryOnReceipt((int)shipment.SupplyManagementRequest.FromProject.ParentProjectId, item.Id);
                     if (!string.IsNullOrEmpty(Message))
@@ -322,7 +318,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var request = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementShipment.SupplyManagementRequestId).FirstOrDefault();
             var settings = _context.SupplyManagementKitNumberSettings.Where(x => x.ProjectId == supplyManagementShipment.SupplyManagementRequest.FromProject.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
-            if (settings.KitCreationType == KitCreationType.KitWise)
+            if (settings != null && settings.KitCreationType == KitCreationType.KitWise)
             {
                 if (supplyManagementshipmentDto.Kits != null)
                 {
@@ -359,7 +355,7 @@ namespace GSC.Respository.SupplyManagement
                     }
                 }
             }
-            if (settings.KitCreationType == KitCreationType.SequenceWise)
+            if (settings != null && settings.KitCreationType == KitCreationType.SequenceWise)
             {
                 if (supplyManagementshipmentDto.Kits != null)
                 {
@@ -372,7 +368,7 @@ namespace GSC.Respository.SupplyManagement
                             data.Status = item.Status;
                             data.Comments = item.Comments;
                             data.IsRetension = item.IsRetension;
-                            if (request.IsSiteRequest)
+                            if (request != null && request.IsSiteRequest)
                             {
                                 data.ToSiteId = request.FromProjectId;
                             }

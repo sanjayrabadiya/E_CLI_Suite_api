@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -14,8 +12,6 @@ using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.SupplyManagement
@@ -102,7 +98,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             productVerification.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productVerificationRepository.Add(productVerification);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating product verification failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating product verification failed on save."));
 
             return Ok(productVerification.Id);
         }
@@ -140,7 +136,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             productVerification.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _productVerificationRepository.AddOrUpdate(productVerification);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating product verification failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating product verification failed on save."));
             return Ok(productVerification.Id);
         }
 

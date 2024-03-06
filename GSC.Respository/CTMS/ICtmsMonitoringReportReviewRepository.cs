@@ -17,9 +17,7 @@ namespace GSC.Respository.CTMS
         CtmsMonitoringReportReviewDto GetCtmsMonitoringReportReview(int id);
         bool isAnyReportReviewer(int id);
         bool GetReviewSendToAnyone(int CtmsMonitoringReportId);
-
         List<DashboardDto> GetSendTemplateList(int ProjectId, int? siteId);
-
         List<DashboardDto> GetSendBackTemplateList(int ProjectId, int? siteId);
     }
 }

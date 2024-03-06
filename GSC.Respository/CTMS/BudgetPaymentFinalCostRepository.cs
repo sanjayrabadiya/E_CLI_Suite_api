@@ -1,9 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml.Wordprocessing;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
-using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using Microsoft.EntityFrameworkCore;
@@ -22,7 +20,7 @@ namespace GSC.Respository.CTMS
             _mapper = mapper;
             _context = context;
         }
-        public List<BudgetPaymentFinalCostGridDto> GetBudgetPaymentFinalCostList(int projectId,bool isdelete)
+        public List<BudgetPaymentFinalCostGridDto> GetBudgetPaymentFinalCostList(int projectId, bool isdelete)
         {
             return All.Where(x => (isdelete ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId).
                    ProjectTo<BudgetPaymentFinalCostGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();

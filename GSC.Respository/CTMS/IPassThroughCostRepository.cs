@@ -10,6 +10,6 @@ namespace GSC.Respository.CTMS
         IList<PassThroughCostGridDto> GetpassThroughCostGrid(bool isDeleted, int studyId);
         string Duplicate(PassThroughCostDto passThroughCostDto);
         List<DropDownPassThroughCostDto> GetCountriesDropDown(int projectId);
-        PassThroughCost  ConvertIntoGlobuleCurrency(PassThroughCost passThroughCost);
+        PassThroughCost ConvertIntoGlobuleCurrency(PassThroughCost passThroughCost);
     }
 }

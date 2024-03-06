@@ -66,12 +66,14 @@ namespace GSC.Api.Controllers.Configuration
         [HttpPost]
         public IActionResult Post([FromBody] PharmacyConfigDto pharmacyConfigDto)
         {
-            pharmacyConfigDto.FormName = Enum.GetValues(typeof(FormType))
+            var data = Enum.GetValues(typeof(FormType))
                 .Cast<FormType>().Select(e => new DropDownEnum
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
-                }).Where(x => x.Id == pharmacyConfigDto.FormId).FirstOrDefault().Value;
+                }).FirstOrDefault(x => x.Id == pharmacyConfigDto.FormId);
+            if (data != null)
+                pharmacyConfigDto.FormName = data.Value;
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             pharmacyConfigDto.Id = 0;
@@ -91,7 +93,7 @@ namespace GSC.Api.Controllers.Configuration
                     _pharmacyConfigRepository.Update(pharmacyConfigUpdate);
                 }
 
-                if (_uow.Save() <= 0) throw new Exception("Creating Pharmacy Config failed on save.");
+                if (_uow.Save() <= 0) return Ok(new Exception("Creating Pharmacy Config failed on save."));
             }
 
             return Ok(pharmacyConfig.Id);
@@ -100,12 +102,16 @@ namespace GSC.Api.Controllers.Configuration
         [HttpPut]
         public IActionResult Put([FromBody] PharmacyConfigDto pharmacyConfigDto)
         {
-            pharmacyConfigDto.FormName = Enum.GetValues(typeof(FormType))
+            var data = Enum.GetValues(typeof(FormType))
                 .Cast<FormType>().Select(e => new DropDownEnum
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()
-                }).Where(x => x.Id == pharmacyConfigDto.FormId).FirstOrDefault().Value;
+                }).FirstOrDefault(x => x.Id == pharmacyConfigDto.FormId);
+
+            if (data != null)
+                pharmacyConfigDto.FormName = data.Value;
+
             if (pharmacyConfigDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
@@ -113,7 +119,7 @@ namespace GSC.Api.Controllers.Configuration
             var pharmacyConfig = _mapper.Map<PharmacyConfig>(pharmacyConfigDto);
 
             _pharmacyConfigRepository.Update(pharmacyConfig);
-            if (_uow.Save() <= 0) throw new Exception("Updating Pharmacy Config failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Pharmacy Config failed on save."));
             return Ok(pharmacyConfig.Id);
         }
 

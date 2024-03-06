@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
-    public class WeekEndMasterDto: BaseDto
+    public class WeekEndMasterDto : BaseDto
     {
         [Required(ErrorMessage = "Study is required.")]
         public int ProjectId { get; set; }
@@ -14,7 +14,6 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "Frequency is required.")]
         public FrequencyType Frequency { get; set; }
         public bool? IsSite { get; set; }
-
     }
     public class WeekEndGridDto : BaseAuditDto
     {

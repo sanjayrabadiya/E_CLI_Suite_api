@@ -1,15 +1,12 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Entities.SupplyManagement
 {
     public class ProductVerificationDetail : BaseEntity, ICommonAduit
     {
-        public int ProductReceiptId { get; set; }
-        //public int ProductVerificationId { get; set; }
+        public int ProductReceiptId { get; set; }        
         public int? QuantityVerification { get; set; }
         public string Description { get; set; }
         public string Remarks { get; set; }
@@ -21,13 +18,11 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? NumberOfQty { get; set; }
         public int? ReceivedQty { get; set; }
         public bool? IsConditionProduct { get; set; }
-        public int? CompanyId { get; set; }
-       // public ProductVerification ProductVerification { get; set; }
+        public int? CompanyId { get; set; }     
         public int? RetentionSampleQty { get; set; }
         public int CentralDepotId { get; set; }
         public CentralDepot CentralDepot { get; set; }
         public int RemainingQuantity { get; set; }
-
         public ProductReceipt ProductReceipt { get; set; }
     }
 }

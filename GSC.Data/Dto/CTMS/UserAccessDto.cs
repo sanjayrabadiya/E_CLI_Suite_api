@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
-  public  class UserAccessDto : BaseDto
+    public class UserAccessDto : BaseDto
     {
         [Required(ErrorMessage = "Project is required.")]
         public int ParentProjectId { get; set; }
@@ -17,7 +17,7 @@ namespace GSC.Data.Dto.CTMS
         public int ProjectId { get; set; }
         public List<MultiUserAccessDTO> multiUserAccess { get; set; }
     }
-    public class MultiUserAccessDTO 
+    public class MultiUserAccessDTO
     {
         [Required(ErrorMessage = "User is required.")]
         public int UserRoleId { get; set; }
@@ -36,7 +36,6 @@ namespace GSC.Data.Dto.CTMS
         public string Role { get; set; }
         public string RoleUser { get; set; }
         public string InactiveSiteCode { get; set; }
-      
     }
 
     public class UserAccessHistoryDto : BaseDto

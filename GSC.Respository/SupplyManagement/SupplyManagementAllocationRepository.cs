@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -81,13 +81,14 @@ namespace GSC.Respository.SupplyManagement
                                             }).OrderBy(o => o.Value).Distinct().ToList();
             projectList.AddRange(childParentList);
 
-            if (projectList == null || projectList.Count == 0) return null;
+            if (!projectList.Any()) return new List<DropDownDto>();
+
             var data = projectList.GroupBy(d => d.Id).Select(c => new DropDownDto
             {
-                Id = c.FirstOrDefault().Id,
-                Value = c.FirstOrDefault().Value,
-                Code = c.FirstOrDefault().Code,
-                ExtraData = c.FirstOrDefault().ExtraData
+                Id = c.Select(s => s.Id).FirstOrDefault(),
+                Value = c.Select(s => s.Value).FirstOrDefault(),
+                Code = c.Select(s => s.Code).FirstOrDefault(),
+                ExtraData = c.Select(s => s.ExtraData).FirstOrDefault()
             }).OrderBy(o => o.Id).ToList();
 
 
@@ -205,7 +206,10 @@ namespace GSC.Respository.SupplyManagement
                 .Where(x => x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve && x.DeletedDate == null && x.SupplyManagementUploadFile.ProjectId == ProjectId
                 && x.TreatmentType == TreatmentType.Trim()).ToList();
 
-            if (uploaddata != null && uploaddata.Count > 0)
+            if (!uploaddata.Any())
+                return new List<DropDownDto>();
+
+            if (uploaddata.Count > 0)
             {
                 var visits = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == VisitId && uploaddata.Select(s => s.Id).Contains(x.SupplyManagementUploadFileDetailId)).FirstOrDefault();
 

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
@@ -46,24 +45,10 @@ namespace GSC.Respository.CTMS
             var users = _context.UserAccess.Include(x => x.UserRole).ThenInclude(x => x.User).Where(s => s.ProjectId == ProjectId && s.DeletedDate == null && s.UserRole.UserId != _jwtTokenAccesser.UserId)
             .OrderByDescending(s => s.Id).Select(c => new CtmsMonitoringReportReviewDto
             {
-                 UserId = c.UserRole.UserId,
-                 Name = c.UserRole.User.UserName,
-                 IsSelected = All.Any(b => b.CtmsMonitoringReportId == Id && b.UserId == c.UserRole.UserId && b.DeletedDate == null && b.IsSendBack == false),
+                UserId = c.UserRole.UserId,
+                Name = c.UserRole.User.UserName,
+                IsSelected = All.Any(b => b.CtmsMonitoringReportId == Id && b.UserId == c.UserRole.UserId && b.DeletedDate == null && b.IsSendBack),
             }).ToList();
-
-
-            //Commit by mitul on 30-11-2023 Remove user Access for projectRight
-            //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null && x.User.DeletedDate == null).ToList();
-            //var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
-            //    .GroupBy(c => new { c.UserId }, (key, group) => group.First());
-
-            //var users = latestProjectRight.Where(x => x.DeletedDate == null && x.UserId != _jwtTokenAccesser.UserId)
-            //    .Select(c => new CtmsMonitoringReportReviewDto
-            //    {
-            //        UserId = c.UserId,
-            //        Name = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
-            //        IsSelected = All.Any(b => b.CtmsMonitoringReportId == Id && b.UserId == c.UserId && b.DeletedDate == null && b.IsSendBack == false),
-            //    }).Where(x => x.IsSelected == false).ToList();
 
             return users;
         }
@@ -80,7 +65,7 @@ namespace GSC.Respository.CTMS
                         IsSendBack = false,
                         Message = ReviewDto.Message,
                     });
-                    if (_context.Save() < 0) throw new Exception("Review Send failed on save.");
+                    _context.Save();
 
                     SendMailToReviewer(ReviewDto);
                 }
@@ -95,13 +80,14 @@ namespace GSC.Respository.CTMS
                 .Include(x => x.CtmsMonitoringReport).ThenInclude(x => x.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.Activity).ThenInclude(x => x.CtmsActivity)
                 .Where(x => x.CtmsMonitoringReportId == ReviewDto.CtmsMonitoringReportId)
                 .FirstOrDefault();
-
-            var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectName;
-            var Activity = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName;
-            var Template = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName;
-            var User = _userRepository.Find(ReviewDto.UserId);
-
-            _emailSenderRespository.SendEmailOfTemplateReview(User.Email, User.UserName, Activity, Template, ProjectName);
+            if(Review!=null)
+            { 
+                var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectName;
+                var Activity = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName;
+                var Template = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName;
+                var User = _userRepository.Find(ReviewDto.UserId);
+                _emailSenderRespository.SendEmailOfTemplateReview(User.Email, User.UserName, Activity, Template, ProjectName);
+            }
         }
 
         // Send mail for Approve
@@ -114,19 +100,26 @@ namespace GSC.Respository.CTMS
                 .Where(x => x.CtmsMonitoringReportId == ReviewDto.CtmsMonitoringReportId)
                 .FirstOrDefault();
 
-            var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectName;
-            var Activity = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName;
-            var Template = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName;
-            var User = _userRepository.Find(ReviewDto.UserId);
+            if (Review != null)
+            {
+                var ProjectName = Review.CtmsMonitoringReport.CtmsMonitoring.Project.ProjectName;
+                var Activity = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName;
+                var Template = Review.CtmsMonitoringReport.CtmsMonitoring.StudyLevelForm.VariableTemplate.TemplateName;
+                var User = _userRepository.Find(ReviewDto.UserId);
 
-            _emailSenderRespository.SendEmailOfTemplateApprove(User.Email, User.UserName, Activity, Template, ProjectName);
+                _emailSenderRespository.SendEmailOfTemplateApprove(User.Email, User.UserName, Activity, Template, ProjectName);
+            }
         }
 
         public bool GetReview(int CtmsMonitoringReportId)
         {
             var result = All.Where(x => x.CtmsMonitoringReportId == CtmsMonitoringReportId && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
                          .OrderByDescending(x => x.Id).FirstOrDefault();
-            return result != null ? true : false;
+            if (result != null)
+                return true;
+            else
+                return false;
+            
         }
 
         public List<CtmsMonitoringReportReviewHistory> GetCtmsMonitoringReportReviewHistory(int id)
@@ -209,7 +202,7 @@ namespace GSC.Respository.CTMS
                         .Include(z => z.CtmsMonitoringReport).ThenInclude(c => c.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
 
                         .Where(t => t.DeletedDate == null && projectIds.Contains(t.CtmsMonitoringReport.CtmsMonitoring.ProjectId)
-                        && t.UserId == _jwtTokenAccesser.UserId && t.IsApproved == false && t.CtmsMonitoringReport.DeletedDate == null)
+                        && t.UserId == _jwtTokenAccesser.UserId && t.IsApproved && t.CtmsMonitoringReport.DeletedDate == null)
                         .Select(s => new DashboardDto
                         {
                             Id = s.Id,
@@ -260,7 +253,7 @@ namespace GSC.Respository.CTMS
                         .Include(z => z.CtmsMonitoringReport).ThenInclude(c => c.CtmsMonitoring).ThenInclude(x => x.StudyLevelForm).ThenInclude(x => x.VariableTemplate)
 
                         .Where(t => t.DeletedDate == null && projectIds.Contains(t.CtmsMonitoringReport.CtmsMonitoring.ProjectId)
-                        && t.UserId == _jwtTokenAccesser.UserId && t.IsSendBack == true && t.CtmsMonitoringReport.DeletedDate == null)
+                        && t.UserId == _jwtTokenAccesser.UserId && t.IsSendBack && t.CtmsMonitoringReport.DeletedDate == null)
                         .Select(s => new DashboardDto
                         {
                             Id = s.Id,

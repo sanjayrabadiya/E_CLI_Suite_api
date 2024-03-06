@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
@@ -15,15 +13,13 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Web.Http.ModelBinding;
+
 
 namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementRequestRepository : GenericRespository<SupplyManagementRequest>, ISupplyManagementRequestRepository
     {
-
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -72,7 +68,9 @@ namespace GSC.Respository.SupplyManagement
                     t.SupplyManagementShipmentId = shipmentdata.Id;
                     t.Status = shipmentdata.Status.GetDescription();
                     t.ApproveRejectDateTime = shipmentdata.CreatedDate;
-                    t.AuditReason = shipmentdata.AuditReasonId != null ? _context.AuditReason.Where(x => x.Id == shipmentdata.AuditReasonId).FirstOrDefault().ReasonName : "";
+                    var audit = _context.AuditReason.Where(x => x.Id == shipmentdata.AuditReasonId).FirstOrDefault();
+                    if (audit != null)
+                        t.AuditReason = audit.ReasonName;
                     t.ReasonOth = shipmentdata.ReasonOth;
                     t.ApproveRejectBy = shipmentdata.CreatedByUser != null ? shipmentdata.CreatedByUser.UserName : "";
                 }
@@ -140,7 +138,7 @@ namespace GSC.Respository.SupplyManagement
                 }
             }
 
-            if (supplyManagementKitNumberSettings.IsBlindedStudy == true)
+            if (supplyManagementKitNumberSettings != null && supplyManagementKitNumberSettings.IsBlindedStudy == true)
             {
                 if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                 {
@@ -196,7 +194,7 @@ namespace GSC.Respository.SupplyManagement
             }
             else
             {
-                if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
+                if (supplyManagementKitNumberSettings != null && supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                 {
                     if (obj.PharmacyStudyProductType != null && obj.PharmacyStudyProductType.ProductUnitType == Helper.ProductUnitType.Kit)
                     {
@@ -256,7 +254,7 @@ namespace GSC.Respository.SupplyManagement
                         }
                     }
                 }
-                if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.SequenceWise)
+                if (supplyManagementKitNumberSettings != null && supplyManagementKitNumberSettings.KitCreationType == KitCreationType.SequenceWise)
                 {
                     if (obj.IsSiteRequest)
                     {
@@ -290,7 +288,7 @@ namespace GSC.Respository.SupplyManagement
             var obj = All.Include(x => x.FromProject).Where(x => x.Id == SupplyManagementRequestId).FirstOrDefault();
             if (obj == null)
                 return new List<KitListApprove>();
-            var data = new List<KitListApprove>();
+
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.FromProject.ParentProjectId).FirstOrDefault();
             if (setting == null)
                 return new List<KitListApprove>();
@@ -299,25 +297,25 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (obj.IsSiteRequest)
                 {
-                    data = _context.SupplyManagementKITDetail.Where(x =>
-                            x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
-                            && x.SupplyManagementKIT.SiteId != null
-                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                            && x.SupplyManagementKIT.SiteId == obj.ToProjectId
-                            && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                            && x.DeletedDate == null).Select(x => new KitListApprove
-                            {
-                                Id = x.Id,
-                                KitNo = x.KitNo,
-                                VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                                SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                                ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
-                                RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
-                                LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-                                Dose = x.SupplyManagementKIT.Dose,
-                                Barcode = x.Barcode,
-                                Isdisable = setting.IsBarcodeScan
-                            }).OrderBy(x => x.KitNo).ToList();
+                    var data = _context.SupplyManagementKITDetail.Where(x =>
+                             x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
+                             && x.SupplyManagementKIT.SiteId != null
+                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                             && x.SupplyManagementKIT.SiteId == obj.ToProjectId
+                             && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                             && x.DeletedDate == null).Select(x => new KitListApprove
+                             {
+                                 Id = x.Id,
+                                 KitNo = x.KitNo,
+                                 VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                                 SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
+                                 ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                 RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                 LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                 Dose = x.SupplyManagementKIT.Dose,
+                                 Barcode = x.Barcode,
+                                 Isdisable = setting.IsBarcodeScan
+                             }).OrderBy(x => x.KitNo).ToList();
 
 
                     var data1 = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(x =>
@@ -341,28 +339,30 @@ namespace GSC.Respository.SupplyManagement
                                   }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
+                    return data;
                 }
                 else
                 {
-                    data = _context.SupplyManagementKITDetail.Where(x =>
-                                 x.SupplyManagementKIT.SiteId == null
-                                 && x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
-                                 && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                                 && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
-                                 && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
-                                 && x.DeletedDate == null).Select(x => new KitListApprove
-                                 {
-                                     Id = x.Id,
-                                     KitNo = x.KitNo,
-                                     VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
-                                     SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
-                                     ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
-                                     RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
-                                     LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
-                                     Dose = x.SupplyManagementKIT.Dose,
-                                     Barcode = x.Barcode,
-                                     Isdisable = setting.IsBarcodeScan
-                                 }).OrderBy(x => x.KitNo).ToList();
+                    var data = _context.SupplyManagementKITDetail.Where(x =>
+                                  x.SupplyManagementKIT.SiteId == null
+                                  && x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
+                                  && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                                  && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
+                                  && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                  && x.DeletedDate == null).Select(x => new KitListApprove
+                                  {
+                                      Id = x.Id,
+                                      KitNo = x.KitNo,
+                                      VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                                      SiteCode = x.SupplyManagementKIT.Site.ProjectCode,
+                                      ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                      RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                      LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                      Dose = x.SupplyManagementKIT.Dose,
+                                      Barcode = x.Barcode,
+                                      Isdisable = setting.IsBarcodeScan
+                                  }).OrderBy(x => x.KitNo).ToList();
+                    return data;
                 }
             }
             else
@@ -370,21 +370,21 @@ namespace GSC.Respository.SupplyManagement
 
                 if (obj.IsSiteRequest)
                 {
-                    data = _context.SupplyManagementKITSeries.Where(x =>
-                            x.SiteId != null
-                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                            && x.SiteId == obj.ToProjectId
-                            && x.DeletedDate == null).Select(x => new KitListApprove
-                            {
-                                Id = x.Id,
-                                KitNo = x.KitNo,
-                                ProjectCode = x.Project.ProjectCode,
-                                TreatmentType = x.TreatmentType,
-                                SiteCode = x.SiteId > 0 ? _context.Project.Where(s => s.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
-                                KitValidity = x.KitExpiryDate,
-                                Barcode = x.Barcode,
-                                Isdisable = setting.IsBarcodeScan
-                            }).OrderBy(x => x.KitNo).ToList();
+                    var data = _context.SupplyManagementKITSeries.Where(x =>
+                             x.SiteId != null
+                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                             && x.SiteId == obj.ToProjectId
+                             && x.DeletedDate == null).Select(x => new KitListApprove
+                             {
+                                 Id = x.Id,
+                                 KitNo = x.KitNo,
+                                 ProjectCode = x.Project.ProjectCode,
+                                 TreatmentType = x.TreatmentType,
+                                 SiteCode = x.SiteId > 0 ? _context.Project.Where(s => s.Id == x.SiteId).FirstOrDefault().ProjectCode : "",
+                                 KitValidity = x.KitExpiryDate,
+                                 Barcode = x.Barcode,
+                                 Isdisable = setting.IsBarcodeScan
+                             }).OrderBy(x => x.KitNo).ToList();
 
                     var data1 = _context.SupplyManagementKITSeries.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
                                    (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
@@ -402,42 +402,40 @@ namespace GSC.Respository.SupplyManagement
                                    }).OrderBy(x => x.KitNo).ToList();
 
                     data.AddRange(data1);
-
+                    return data;
 
                 }
                 else
                 {
 
-                    data = _context.SupplyManagementKITSeries.Where(x =>
-                            x.SiteId == null
-                            && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
-                            && x.ProjectId == obj.FromProject.ParentProjectId
-                            && x.DeletedDate == null).Select(x => new KitListApprove
-                            {
-                                Id = x.Id,
-                                KitNo = x.KitNo,
-                                ProjectCode = x.Project.ProjectCode,
-                                TreatmentType = x.TreatmentType,
-                                KitValidity = x.KitExpiryDate,
-                                Barcode = x.Barcode,
-                                Isdisable = setting.IsBarcodeScan
-                            }).OrderBy(x => x.KitNo).ToList();
-
+                    var data = _context.SupplyManagementKITSeries.Where(x =>
+                             x.SiteId == null
+                             && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
+                             && x.ProjectId == obj.FromProject.ParentProjectId
+                             && x.DeletedDate == null).Select(x => new KitListApprove
+                             {
+                                 Id = x.Id,
+                                 KitNo = x.KitNo,
+                                 ProjectCode = x.Project.ProjectCode,
+                                 TreatmentType = x.TreatmentType,
+                                 KitValidity = x.KitExpiryDate,
+                                 Barcode = x.Barcode,
+                                 Isdisable = setting.IsBarcodeScan
+                             }).OrderBy(x => x.KitNo).ToList();
+                    return data;
 
                 }
             }
-            return data;
         }
         public void SendrequestApprovalEmail(int id)
         {
-            SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == id).FirstOrDefault();
             if (request != null)
             {
                 var emailconfiglist = _context.SupplyManagementApprovalDetails.Include(s => s.Users).Include(s => s.SupplyManagementApproval).ThenInclude(s => s.Project).Where(x => x.DeletedDate == null && x.SupplyManagementApproval.ProjectId == request.FromProject.ParentProjectId
                 && x.SupplyManagementApproval.ApprovalType == Helper.SupplyManagementApprovalType.ShipmentApproval).ToList();
-                if (emailconfiglist != null && emailconfiglist.Count > 0)
+                if (emailconfiglist.Any())
                 {
                     var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
 
@@ -448,7 +446,9 @@ namespace GSC.Respository.SupplyManagement
                     {
                         iWRSEmailModel.ProductType = "Blinded study";
                     }
-                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault().ProjectCode;
+                    var project = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault();
+                    if (project != null)
+                        iWRSEmailModel.StudyCode = project.ProjectCode;
                     iWRSEmailModel.RequestFromSiteCode = request.FromProject.ProjectCode;
                     var managesite = _context.ManageSite.Where(x => x.Id == request.FromProject.ManageSiteId).FirstOrDefault();
                     if (managesite != null)
@@ -485,8 +485,9 @@ namespace GSC.Respository.SupplyManagement
                     }
                     if (request.ProjectDesignVisit != null)
                         iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
-
-                    _emailSenderRespository.SendforShipmentApprovalEmailIWRS(iWRSEmailModel, emailconfiglist.Select(x => x.Users.Email).Distinct().ToList(), emailconfiglist.FirstOrDefault().SupplyManagementApproval);
+                    var obj = emailconfiglist.FirstOrDefault();
+                    if (obj != null)
+                        _emailSenderRespository.SendforShipmentApprovalEmailIWRS(iWRSEmailModel, emailconfiglist.Select(x => x.Users.Email).Distinct().ToList(), obj.SupplyManagementApproval);
 
 
                 }
@@ -497,18 +498,18 @@ namespace GSC.Respository.SupplyManagement
         public void SendrequestEmail(int id)
         {
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == id).FirstOrDefault();
             if (request != null)
             {
-                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).ToList();
-                if (emailconfiglist != null && emailconfiglist.Count > 0)
+                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).ToList();
+                if (emailconfiglist.Any())
                 {
 
                     var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                     if (siteconfig.Count > 0)
                     {
-                        emailconfig = siteconfig.Where(x => x.SiteId == request.FromProjectId).FirstOrDefault();
+                        emailconfig = siteconfig.Find(x => x.SiteId == request.FromProjectId);
                     }
                     else
                     {
@@ -517,7 +518,7 @@ namespace GSC.Respository.SupplyManagement
 
                     var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
                     var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                    if (details.Count() > 0)
+                    if (details.Any())
                     {
 
                         if (request.PharmacyStudyProductType != null && request.PharmacyStudyProductType.ProductType != null)
@@ -526,7 +527,9 @@ namespace GSC.Respository.SupplyManagement
                         {
                             iWRSEmailModel.ProductType = "Blinded study";
                         }
-                        iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault().ProjectCode;
+                        var project = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault();
+                        if (project != null)
+                            iWRSEmailModel.StudyCode = project.ProjectCode;
                         iWRSEmailModel.SiteCode = request.FromProject.ProjectCode;
                         var managesite = _context.ManageSite.Where(x => x.Id == request.FromProject.ManageSiteId).FirstOrDefault();
                         if (managesite != null)
@@ -592,16 +595,16 @@ namespace GSC.Respository.SupplyManagement
                     {
                         SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
                         SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-                        IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                        IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
                         SupplyManagementRequest supplyManagementRequest = new SupplyManagementRequest();
-                        var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).ToList();
+                        var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentRequest).ToList();
                         if (emailconfiglist != null && emailconfiglist.Count > 0)
                         {
 
                             var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                             if (siteconfig.Count > 0)
                             {
-                                emailconfig = siteconfig.Where(x => x.SiteId == request.FromProjectId).FirstOrDefault();
+                                emailconfig = siteconfig.Find(x => x.SiteId == request.FromProjectId);
                             }
                             else
                             {
@@ -734,7 +737,7 @@ namespace GSC.Respository.SupplyManagement
                             {
                                 var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
                                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                                if (details.Count() > 0)
+                                if (details.Any())
                                 {
 
                                     if (request.PharmacyStudyProductType != null && request.PharmacyStudyProductType.ProductType != null)
@@ -802,10 +805,10 @@ namespace GSC.Respository.SupplyManagement
                             _context.Save();
                         }
                     }
-                   
+
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
                 supplyManagementEmailScheduleLog.Message = ex.Message.ToString();

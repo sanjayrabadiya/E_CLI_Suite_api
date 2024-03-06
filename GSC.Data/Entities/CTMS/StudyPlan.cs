@@ -8,8 +8,6 @@ namespace GSC.Data.Entities.CTMS
     public class StudyPlan : BaseEntity, ICommonAduit
     {
         private DateTime _EndDate;
-
-
         private DateTime _StartDate;
         public int ProjectId { get; set; }
         public int TaskTemplateId { get; set; }
@@ -18,7 +16,6 @@ namespace GSC.Data.Entities.CTMS
             get => _StartDate.UtcDate();
             set => _StartDate = value.UtcDate();
         }
-
         public DateTime EndDate
         {
             get => _EndDate.UtcDate();
@@ -29,8 +26,6 @@ namespace GSC.Data.Entities.CTMS
         public int? CurrencyId { get; set; } // Global Currency
         public decimal? TotalCost { get; set; }
         public Master.Project Project { get; set; }
-
         public Currency Currency { get; set; }
-
     }
 }

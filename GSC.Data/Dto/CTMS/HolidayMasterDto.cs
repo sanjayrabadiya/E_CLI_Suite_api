@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
-    public class HolidayMasterDto: BaseDto
+    public class HolidayMasterDto : BaseDto
     {
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
@@ -15,12 +15,10 @@ namespace GSC.Data.Dto.CTMS
         public DateTime ToDate { get; set; }
         public bool IsSite { get; set; }
     }
-
     public class HolidayMasterListDto
     {
         public string Label { get; set; }
         public DateTime From { get; set; }
         public DateTime To { get; set; }
-
     }
 }

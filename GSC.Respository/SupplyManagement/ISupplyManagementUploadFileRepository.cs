@@ -11,9 +11,7 @@ namespace GSC.Respository.SupplyManagement
         FileStreamResult DownloadFormat(SupplyManagementUploadFileDto supplyManagementUploadFile, SupplyManagementKitNumberSettings setting);
         List<SupplyManagementUploadFileGridDto> GetSupplyManagementUploadFileList(bool isDeleted, int ProjectId);
         string InsertExcelDataIntoDatabaseTable(SupplyManagementUploadFile supplyManagementUploadFile, SupplyManagementKitNumberSettings setting);
-
         bool CheckUploadApproalPending(int ProjectId, int SiteId, int CountryId);
-
         void SendRandomizationUploadSheetEmail(SupplyManagementUploadFile obj);
     }
 }

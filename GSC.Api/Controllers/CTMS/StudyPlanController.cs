@@ -47,9 +47,10 @@ namespace GSC.Api.Controllers.CTMS
             var studyplandetail = _mapper.Map<StudyPlanDto>(studyplan);
             if (studyplan != null)
             {
-                var currencyRatedata = _context.CurrencyRate.Where(s => s.StudyPlanId == studyplan.Id && s.DeletedBy==null).ToList();
+                var currencyRatedata = _context.CurrencyRate.Where(s => s.StudyPlanId == studyplan.Id && s.DeletedBy == null).ToList();
                 List<CurrencyRateDTO> CurrencyRateList1 = new List<CurrencyRateDTO>();
-                currencyRatedata.ForEach(s=>{
+                currencyRatedata.ForEach(s =>
+                {
                     var CurrencyRateList = new CurrencyRateDTO()
                     {
                         localCurrencyId = s.CurrencyId,
@@ -70,7 +71,7 @@ namespace GSC.Api.Controllers.CTMS
             var lstStudyPlan = new List<StudyPlanDto>();
             lstStudyPlan.Add(studyplanDto);
 
-            var TaskMaster = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.TaskMaster.TaskTemplateId == studyplanDto.TaskTemplateId && x.DeletedDate==null).Any(x => x.RefrenceType == Helper.RefrenceType.Sites);
+            var TaskMaster = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.TaskMaster.TaskTemplateId == studyplanDto.TaskTemplateId && x.DeletedDate == null).Any(x => x.RefrenceType == Helper.RefrenceType.Sites);
             if (TaskMaster)
             {
                 var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == studyplanDto.ProjectId).ToList();
@@ -97,7 +98,7 @@ namespace GSC.Api.Controllers.CTMS
                     return BadRequest(ModelState);
                 }
                 _studyPlanRepository.Add(studyplan);
-                if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+                if (_uow.Save() <= 0) return Ok(new Exception("Study plan is failed on save."));
                 studyplanDto.Id = studyplan.Id;
 
 
@@ -107,7 +108,7 @@ namespace GSC.Api.Controllers.CTMS
                     ModelState.AddModelError("Message", validate);
                     return BadRequest(ModelState);
                 }
-                
+
             }
 
             _studyPlanRepository.PlanUpdate(studyplanDto.ProjectId);
@@ -130,7 +131,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _studyPlanRepository.Update(studyplan);
-            if (_uow.Save() <= 0) throw new Exception("Study plan is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Study plan is failed on save."));
             _studyPlanRepository.CurrencyRateUpdate(studyplanDto);
             return Ok(studyplan.Id);
         }

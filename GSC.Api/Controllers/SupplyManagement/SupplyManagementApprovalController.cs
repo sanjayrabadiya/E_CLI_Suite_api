@@ -8,9 +8,8 @@ using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -67,7 +66,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementEmailConfiguration.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementEmailConfiguration.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementApprovalRepository.Add(supplyManagementEmailConfiguration);
-            if (_uow.Save() <= 0) throw new Exception("Creating shipment apporval failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating shipment apporval failed on save."));
 
             _supplyManagementApprovalRepository.ChildUserApprovalAdd(supplyManagementApprovalDto, supplyManagementEmailConfiguration.Id);
             return Ok(supplyManagementEmailConfiguration.Id);
@@ -95,7 +94,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementEmailConfiguration.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementApprovalRepository.Update(supplyManagementEmailConfiguration);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating shipment apporval study product type failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating shipment apporval study product type failed on save."));
             _supplyManagementApprovalRepository.DelectChildWorkflowEmailUser(supplyManagementEmailConfigurationDto, supplyManagementEmailConfiguration.Id);
             _supplyManagementApprovalRepository.ChildUserApprovalAdd(supplyManagementEmailConfigurationDto, supplyManagementEmailConfiguration.Id);
             return Ok(supplyManagementEmailConfiguration.Id);

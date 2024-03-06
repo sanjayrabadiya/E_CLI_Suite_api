@@ -22,32 +22,25 @@ namespace GSC.Api.Controllers.Barcode
     [ApiController]
     public class AttendanceBarcodeGenerateController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+
         private readonly IMapper _mapper;
         private readonly IAttendanceBarcodeGenerateRepository _attendanceBarcodeGenerateRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IVolunteerRepository _volunteerRepository;
-        private readonly IAttendanceRepository _attendanceRepository;
         private readonly IAppScreenRepository _appScreenRepository;
         private readonly IBarcodeConfigRepository _barcodeConfigRepository;
         private readonly IBarcodeAuditRepository _barcodeAuditRepository;
 
         public AttendanceBarcodeGenerateController(
             IMapper mapper
-            , IVolunteerRepository volunteerRepository
-            , IJwtTokenAccesser jwtTokenAccesser
             , IAttendanceBarcodeGenerateRepository attendanceBarcodeGenerateRepository
-            , IAttendanceRepository attendanceRepository
             , IAppScreenRepository appScreenRepository
             , IBarcodeConfigRepository barcodeConfigRepository
             , IBarcodeAuditRepository barcodeAuditRepository
             , IUnitOfWork uow)
         {
-            _volunteerRepository = volunteerRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
+
             _mapper = mapper;
             _attendanceBarcodeGenerateRepository = attendanceBarcodeGenerateRepository;
-            _attendanceRepository = attendanceRepository;
             _appScreenRepository = appScreenRepository;
             _barcodeConfigRepository = barcodeConfigRepository;
             _barcodeAuditRepository = barcodeAuditRepository;
@@ -72,14 +65,14 @@ namespace GSC.Api.Controllers.Barcode
                 return BadRequest(ModelState);
             }
 
-            int[] Ids = new int[attendanceBarcodeGenerateDto.Count()];
+            int[] Ids = new int[attendanceBarcodeGenerateDto.Count];
             int index = 0;
 
             foreach (var item in attendanceBarcodeGenerateDto)
             {
                 item.Id = 0;
                 item.BarcodeConfigId = barcodeConfig.Id;
-                item.BarcodeString = _attendanceBarcodeGenerateRepository.GetBarcodeString(item.AttendanceId); //(Convert.ToInt64(DateTime.Now.ToString("yyMMddHHmmssff")) + item.AttendanceId).ToString();
+                item.BarcodeString = _attendanceBarcodeGenerateRepository.GetBarcodeString(item.AttendanceId);
                 var attendanceBarcode = _mapper.Map<AttendanceBarcodeGenerate>(item);
                 _attendanceBarcodeGenerateRepository.Add(attendanceBarcode);
                 _uow.Save();
@@ -117,20 +110,23 @@ namespace GSC.Api.Controllers.Barcode
         public IActionResult RePrintBarcode([FromBody] List<AttendanceBarcodeGenerateDto> attendanceBarcodeGenerateDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            int[] Ids = new int[attendanceBarcodeGenerateDto.Count()];
+            int[] Ids = new int[attendanceBarcodeGenerateDto.Count];
             int index = 0;
             foreach (var item in attendanceBarcodeGenerateDto)
             {
                 var barcodeData = _attendanceBarcodeGenerateRepository.FindBy(x => x.Id == item.Id).FirstOrDefault();
-                item.BarcodeConfigId = barcodeData.BarcodeConfigId;
-                item.BarcodeString = barcodeData.BarcodeString;
-                item.AttendanceId = barcodeData.AttendanceId;
-                var attendanceBarcode = _mapper.Map<AttendanceBarcodeGenerate>(item);
-                Ids[index] = item.Id;
-                index++;
-                _attendanceBarcodeGenerateRepository.Update(attendanceBarcode);
-                _uow.Save();
-                _barcodeAuditRepository.Save("AttendanceBarcodeGenerate", AuditAction.RePrint, attendanceBarcode.Id);
+                if (barcodeData != null)
+                {
+                    item.BarcodeConfigId = barcodeData.BarcodeConfigId;
+                    item.BarcodeString = barcodeData.BarcodeString;
+                    item.AttendanceId = barcodeData.AttendanceId;
+                    var attendanceBarcode = _mapper.Map<AttendanceBarcodeGenerate>(item);
+                    Ids[index] = item.Id;
+                    index++;
+                    _attendanceBarcodeGenerateRepository.Update(attendanceBarcode);
+                    _uow.Save();
+                    _barcodeAuditRepository.Save("AttendanceBarcodeGenerate", AuditAction.RePrint, attendanceBarcode.Id);
+                }
             }
             return Ok(_attendanceBarcodeGenerateRepository.GetReprintBarcodeGenerateData(Ids));
         }
@@ -140,24 +136,20 @@ namespace GSC.Api.Controllers.Barcode
         public IActionResult DeleteBarcode([FromBody] List<AttendanceBarcodeGenerateDto> attendanceBarcodeGenerateDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            foreach (var item in attendanceBarcodeGenerateDto)
+            if (attendanceBarcodeGenerateDto != null && attendanceBarcodeGenerateDto.Count > 0)
             {
-                var record = _attendanceBarcodeGenerateRepository.FindByInclude(x => x.Id == item.Id).OrderByDescending(d => d.Id);
-
-                if (record == null)
-                    return NotFound();
-
-                if (record != null)
+                foreach (var item in attendanceBarcodeGenerateDto.Select(s => s.Id))
                 {
-                    _attendanceBarcodeGenerateRepository.Delete(record.FirstOrDefault());
+                    var record = _attendanceBarcodeGenerateRepository.FindByInclude(x => x.Id == item).OrderByDescending(d => d.Id).FirstOrDefault();
+
+                    if (record == null)
+                        return NotFound();
+                    _attendanceBarcodeGenerateRepository.Delete(record);
                     _uow.Save();
-                    _barcodeAuditRepository.Save("AttendanceBarcodeGenerate", AuditAction.Deleted, item.Id);
+                    _barcodeAuditRepository.Save("AttendanceBarcodeGenerate", AuditAction.Deleted, item);
+
                 }
             }
-
-            //if (_uow.Save() <= 0)
-            //    throw new Exception("Barcode failed on delete.");
 
             return Ok();
         }

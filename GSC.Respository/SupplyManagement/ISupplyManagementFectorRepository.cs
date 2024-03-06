@@ -1,5 +1,4 @@
 ﻿using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.SupplyManagement;
@@ -13,11 +12,8 @@ namespace GSC.Respository.SupplyManagement
         SupplyManagementFectorDto GetById(int id);
         void DeleteChild(int Id);
         SupplyManagementFector UpdateFactorFormula(int id);
-
         FactorCheckResult ValidateSubjecWithFactor(Randomization randomization);
-
         bool CheckfactorrandomizationStarted(int projectId);
-
         bool CheckUploadRandomizationsheet(int projectId);
     }
 }

@@ -1,26 +1,12 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Master;
-using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Project.Generalconfig;
-using GSC.Data.Entities.SupplyManagement;
-using GSC.Domain.Context;
-using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
 using GSC.Respository.Project.GeneralConfig;
-using GSC.Respository.Project.StudyLevelFormSetup;
-using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -31,13 +17,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
+        
         private readonly IEmailConfigurationEditCheckRepository _emailConfigurationEditCheckRepository;
         private readonly IEmailConfigurationEditCheckDetailRepository _emailConfigurationEditCheckDetailRepository;
         public EmailConfigurationEditCheckDetailController(
         IUnitOfWork uow, IMapper mapper,
         IJwtTokenAccesser jwtTokenAccesser,
-         IGSCContext context,
          IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository,
          IEmailConfigurationEditCheckDetailRepository emailConfigurationEditCheckDetailRepository
         )
@@ -46,7 +31,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _emailConfigurationEditCheckRepository = emailConfigurationEditCheckRepository;
             _emailConfigurationEditCheckDetailRepository = emailConfigurationEditCheckDetailRepository;
 
@@ -75,7 +59,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             var supplyManagementFectorDetail = _mapper.Map<EmailConfigurationEditCheckDetail>(emailConfigurationEditCheckDetailDto);
 
             _emailConfigurationEditCheckDetailRepository.Add(supplyManagementFectorDetail);
-            if (_uow.Save() <= 0) throw new Exception("Creating fector detail failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating fector detail failed on save."));
 
             _emailConfigurationEditCheckRepository.UpdateEditCheckEmailFormula(emailConfigurationEditCheckDetailDto.EmailConfigurationEditCheckId);
             return Ok(supplyManagementFectorDetail.Id);
@@ -88,7 +72,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             var supplyManagementFectorDetail = _mapper.Map<EmailConfigurationEditCheckDetail>(emailConfigurationEditCheckDetailDto);
 
             _emailConfigurationEditCheckDetailRepository.Update(supplyManagementFectorDetail);
-            if (_uow.Save() <= 0) throw new Exception("Updating fector detail failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating fector detail failed on save."));
             _emailConfigurationEditCheckRepository.UpdateEditCheckEmailFormula(emailConfigurationEditCheckDetailDto.EmailConfigurationEditCheckId);
             return Ok(supplyManagementFectorDetail.Id);
         }

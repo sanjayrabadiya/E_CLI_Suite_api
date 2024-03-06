@@ -1,14 +1,11 @@
-﻿using AutoMapper;
-using GSC.Common.GenericRespository;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using GSC.Shared.Extension;
 using GSC.Helper;
-
 
 
 namespace GSC.Respository.CTMS
@@ -29,7 +26,7 @@ namespace GSC.Respository.CTMS
                    Id = c.Id,
                    ResourceType = c.ResourceType.ResourceTypes.GetDescription(),
                    ResourceSubType = c.ResourceType.ResourceSubType.GetDescription(),
-                   Role = c.ResourceType.Role.RoleName ,
+                   Role = c.ResourceType.Role.RoleName,
                    User = c.ResourceType.User.UserName,
                    UserId = c.ResourceType.UserId,
                    SecurityRoleId = c.ResourceType.RoleId,
@@ -39,11 +36,10 @@ namespace GSC.Respository.CTMS
                }).ToList();
 
             return gridResource;
-
         }
         public string Duplicate(StudyPlanResource objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.StudyPlanTaskId == objSave.StudyPlanTaskId && x.ResourceTypeId== objSave.ResourceTypeId && x.DeletedDate == null))
+            if (All.Any(x => x.Id != objSave.Id && x.StudyPlanTaskId == objSave.StudyPlanTaskId && x.ResourceTypeId == objSave.ResourceTypeId && x.DeletedDate == null))
                 return "Duplicate Resource ";
             return "";
         }
@@ -53,34 +49,45 @@ namespace GSC.Respository.CTMS
                .Select(c => new ResourceByEdit
                {
                    resourceId = (c.ResourceType.ResourceTypes.GetDescription() == "Manpower") ? 1 : 2,
-                   subresource = (c.ResourceType.ResourceSubType.GetDescription() == "Permanent") ? 1 : c.ResourceType.ResourceSubType.GetDescription() == "Contract" ? 2: c.ResourceType.ResourceSubType.GetDescription() == "Consumable" ? 3 : 4,
+                   subresource = GetSubResource(c.ResourceType.ResourceSubType.GetDescription()),
                    designation = c.ResourceType.Designation.Id,
-                   nameOfMaterial=c.ResourceType.Id,
-                   rollUser =c.ResourceType.Id,
-                   Cost =c.ResourceType.Cost,
-                   NoOfUnit =c.NoOfUnit,
-                   TotalCost=c.TotalCost,
-                   Unit=c.ResourceType.Unit.UnitName,
+                   nameOfMaterial = c.ResourceType.Id,
+                   rollUser = c.ResourceType.Id,
+                   Cost = c.ResourceType.Cost,
+                   NoOfUnit = c.NoOfUnit,
+                   TotalCost = c.TotalCost,
+                   Unit = c.ResourceType.Unit.UnitName,
                    ConvertTotalCost = c.ConvertTotalCost,
                    ResourceUnit = c.ResourceType.Unit.UnitName,
-                   GlobalCurrency = _context.Currency.Where(s=>s.Id == _context.StudyPlan.Where(s=>s.Id==c.StudyPlanTask.StudyPlanId && s.DeletedBy==null).Select(s=>s.CurrencyId).FirstOrDefault()).Select(r=>r.CurrencyName + " - " + r.CurrencySymbol).FirstOrDefault(),
+                   GlobalCurrency = _context.Currency.Where(s => s.Id == _context.StudyPlan.Where(s => s.Id == c.StudyPlanTask.StudyPlanId && s.DeletedBy == null).Select(s => s.CurrencyId).FirstOrDefault()).Select(r => r.CurrencyName + " - " + r.CurrencySymbol).FirstOrDefault(),
                }).FirstOrDefault();
 
             return gridResource;
 
         }
+        public int GetSubResource(string std)
+        {
+            if (std == "Permanent")
+                return 1;
+            else if (std == "Contract")
+                return 2;
+            else if (std == "Consumable")
+                return 3;
+            else
+                return 4;
+        }
         public string ValidationCurrency(int resourceId, int studyplanId)
         {
-            var resourceCurrency = _context.ResourceType.Include(r=>r.Currency).Where(s => s.Id == resourceId && s.DeletedBy == null).FirstOrDefault();
-            var globalCurrencyId = _context.StudyPlan.Where(s => s.Id == studyplanId && s.DeletedBy == null).Select(d=>d.CurrencyId).FirstOrDefault();
+            var resourceCurrency = _context.ResourceType.Include(r => r.Currency).Where(s => s.Id == resourceId && s.DeletedBy == null).FirstOrDefault();
+            var globalCurrencyId = _context.StudyPlan.Where(s => s.Id == studyplanId && s.DeletedBy == null).Select(d => d.CurrencyId).FirstOrDefault();
 
-            if (!_context.CurrencyRate.Where(s=>s.StudyPlanId== studyplanId && s.CurrencyId == resourceCurrency.CurrencyId && s.DeletedBy==null).Any() && resourceCurrency.CurrencyId != globalCurrencyId)
-                return resourceCurrency.Currency.CurrencyName +" - "+ resourceCurrency.Currency.CurrencySymbol + " Is Currency And Rate Added in Study plan. ";
+            if (!_context.CurrencyRate.Where(s => s.StudyPlanId == studyplanId && s.CurrencyId == resourceCurrency.CurrencyId && s.DeletedBy == null).Any() && resourceCurrency.CurrencyId != globalCurrencyId)
+                return resourceCurrency.Currency.CurrencyName + " - " + resourceCurrency.Currency.CurrencySymbol + " Is Currency And Rate Added in Study plan. ";
             return "";
         }
-        public dynamic GetResourceInf(int studyPlantaskId,int resourceId)   
+        public dynamic GetResourceInf(int studyPlantaskId, int resourceId)
         {
-            var studyPlanData = _context.StudyPlanTask.Include(x=>x.StudyPlan).Where(s=>s.Id == studyPlantaskId && s.DeletedBy==null).FirstOrDefault();
+            var studyPlanData = _context.StudyPlanTask.Include(x => x.StudyPlan).Where(s => s.Id == studyPlantaskId && s.DeletedBy == null).FirstOrDefault();
             var ResourceType = _context.ResourceType.Include(s => s.Unit).Where(x => x.Id == resourceId && x.DeletedDate == null)
                .Select(c => new ResourceTypeGridDto
                {
@@ -89,27 +96,27 @@ namespace GSC.Respository.CTMS
                    Cost = c.Cost,
                    NumberOfUnit = c.NumberOfUnit,
                    ResourceType = c.ResourceTypes.GetDescription(),
-                   CurrencyType= c.Currency.CurrencyName +" - " + c.Currency.CurrencySymbol,
-                   GlobalCurrency= _context.Currency.Where(s=>s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy==null).Select(d=>d.CurrencyName +" - " + d.CurrencySymbol).FirstOrDefault(),
-                   LocalCurrencySymbol= c.Currency.CurrencySymbol,
-                   GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d=>d.CurrencySymbol).FirstOrDefault(),
-                   LocalCurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r=>r.LocalCurrencyRate).FirstOrDefault(),
+                   CurrencyType = c.Currency.CurrencyName + " - " + c.Currency.CurrencySymbol,
+                   GlobalCurrency = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencyName + " - " + d.CurrencySymbol).FirstOrDefault(),
+                   LocalCurrencySymbol = c.Currency.CurrencySymbol,
+                   GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencySymbol).FirstOrDefault(),
+                   LocalCurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r => r.LocalCurrencyRate).FirstOrDefault(),
                }).FirstOrDefault();
 
-            return ResourceType; 
+            return ResourceType;
         }
 
-        public void TotalCostUpdate(StudyPlanResource StudyPlanResource)
+        public void TotalCostUpdate(StudyPlanResource studyPlanResource)
         {
-            var TotalCost = _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == StudyPlanResource.StudyPlanTaskId && s.DeletedBy==null).Sum(d => d.ConvertTotalCost);
-            var StudyPlanTaskData = _context.StudyPlanTask.Where(s=>s.Id == StudyPlanResource.StudyPlanTaskId && s.DeletedBy==null).FirstOrDefault();
+            var TotalCost = _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == studyPlanResource.StudyPlanTaskId && s.DeletedBy == null).Sum(d => d.ConvertTotalCost);
+            var StudyPlanTaskData = _context.StudyPlanTask.Where(s => s.Id == studyPlanResource.StudyPlanTaskId && s.DeletedBy == null).FirstOrDefault();
             if (StudyPlanTaskData != null)
             {
                 StudyPlanTaskData.TotalCost = TotalCost;
                 _context.StudyPlanTask.UpdateRange(StudyPlanTaskData);
                 _context.Save();
             }
-        }   
+        }
     }
-} 
+}
 

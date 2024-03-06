@@ -27,9 +27,9 @@ namespace GSC.Respository.CTMS
         StudyPlanTaskChartDto GetDocChart(int projectId);
         List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType);
         List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search);
-        List<DropDownDto> GetRollDropDown(int designationID);
-        List<DropDownDto> GetUserDropDown(int designationID);
-        List<DropDownDto> GetDesignationStdDropDown(int designationID);
+        List<DropDownDto> GetRollDropDown(int studyplanId);
+        List<DropDownDto> GetUserDropDown(int studyplanId);
+        List<DropDownDto> GetDesignationStdDropDown(int studyplanId);
         List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId);
     }
 }

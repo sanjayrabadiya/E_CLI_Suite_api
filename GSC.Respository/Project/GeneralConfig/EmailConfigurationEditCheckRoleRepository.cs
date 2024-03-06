@@ -1,30 +1,25 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using GSC.Common.GenericRespository;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
-using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.Project.GeneralConfig
 {
     public class EmailConfigurationEditCheckRoleRepository : GenericRespository<EmailConfigurationEditCheckRole>, IEmailConfigurationEditCheckRoleRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IEmailConfigurationEditCheckRepository _emailConfigurationEditCheckRepository;
         public EmailConfigurationEditCheckRoleRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository) : base(context)
+            IJwtTokenAccesser jwtTokenAccesser, IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
+        
             _context = context;
             _emailConfigurationEditCheckRepository = emailConfigurationEditCheckRepository;
         }
@@ -101,7 +96,7 @@ namespace GSC.Respository.Project.GeneralConfig
                 }
             }
 
-            return projectrights; ;
+            return projectrights;
 
         }
 

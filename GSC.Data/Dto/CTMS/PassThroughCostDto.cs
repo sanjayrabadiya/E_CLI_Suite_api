@@ -30,7 +30,7 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "Frequency is required.")]
         public int Frequency { get; set; }
         public decimal? Total { get; set; }
-        public decimal?  CurrenRate { get; set; }
+        public decimal? CurrenRate { get; set; }
     }
     public class PassThroughCostGridDto
     {

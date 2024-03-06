@@ -1,6 +1,4 @@
 using GSC.Common.Base;
-using GSC.Common.Common;
-
 using GSC.Helper;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;

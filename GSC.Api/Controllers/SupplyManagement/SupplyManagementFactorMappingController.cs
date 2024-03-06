@@ -9,13 +9,12 @@ using GSC.Helper;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -74,7 +73,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
             centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFactorMappingRepository.Add(centralDepot);
-            if (_uow.Save() <= 0) throw new Exception("Creating factor mapping failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating factor mapping failed on save."));
             return Ok(centralDepot.Id);
         }
 
@@ -100,7 +99,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFactorMappingRepository.Update(centralDepot);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating factor mapping failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating factor mapping failed on save."));
             return Ok(centralDepot.Id);
         }
 
@@ -140,7 +139,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         {
             var setting = _context.SupplyManagementFectorDetail.Include(s => s.SupplyManagementFector).Where(s => s.SupplyManagementFector.ProjectId == projectId
                           && s.SupplyManagementFector.DeletedDate == null && s.DeletedDate == null).Select(s => (int)s.Fector).ToList();
-            if (setting == null)
+            if (!setting.Any())
                 return Ok(new List<DropDownEnum>());
 
             var fectore = Enum.GetValues(typeof(Fector))

@@ -1,9 +1,4 @@
-﻿using GSC.Data.Dto.Master;
-using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Location;
-using GSC.Helper;
-using GSC.Shared.DocumentService;
-using System.Collections.Generic;
+﻿using GSC.Data.Entities.Common;
 
 namespace GSC.Data.Dto.SupplyManagement
 {

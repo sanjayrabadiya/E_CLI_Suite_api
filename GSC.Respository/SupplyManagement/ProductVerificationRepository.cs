@@ -6,12 +6,10 @@ using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -119,7 +117,7 @@ namespace GSC.Respository.SupplyManagement
                                IpAddress = productverification.IpAddress,
                                TimeZone = productverification.TimeZone,
                                Barcode = productReceipt.Barcode
-                           }).ToList().OrderByDescending(x => x.Id).ToList();
+                           }).AsEnumerable().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;
         }
@@ -174,7 +172,7 @@ namespace GSC.Respository.SupplyManagement
                                PacketTypeName = productverification.PacketTypeId > 0 ? productverification.PacketTypeId.GetDescription() : "",
                                Dose = productverification.Dose > 0 ? productverification.Dose : 0,
                                UnitName = productverification.UnitId > 0 ? _context.Unit.Where(s => s.Id == productverification.UnitId).FirstOrDefault().UnitName : ""
-                           }).ToList().OrderByDescending(x => x.Id).ToList();
+                           }).AsEnumerable().OrderByDescending(x => x.Id).ToList();
 
             return dtolist;
         }

@@ -11,8 +11,6 @@ namespace GSC.Respository.Barcode
         List<PharmacyBarcodeConfigDto> GetBarcodeConfigById(int id);
         string GenerateBarcodeString(int barcodeTypeId);
         PharmacyBarcodeConfigDto GenerateBarcodeConfig(int barcodeTypeId);
-        PharmacyBarcodeConfig GetBarcodeConfig(int barcodeTypeId);
-
         string ValidateBarcodeConfig(PharmacyBarcodeConfig pharmacyBarcodeConfig);
     }
 }

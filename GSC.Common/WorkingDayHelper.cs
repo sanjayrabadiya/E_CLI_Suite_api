@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Common
 {
@@ -27,32 +25,19 @@ namespace GSC.Common
             if (WorkingDay.Any(x => x.Weekend == date.DayOfWeek.ToString()))
             {
                 var result = WorkingDay.Where(x => x.Weekend == date.DayOfWeek.ToString()).FirstOrDefault();
-                if (result.Frequency == "All")
+                if (result != null)
                 {
-                    return true;
+                    if (result.Frequency == "All")
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return Frequency(date, result.Frequency);
+                    }
                 }
-                else
-                {
-                    return Frequency(date, result.Frequency);
-                }
+
             }
-            //switch (date.DayOfWeek)
-            //{
-            //    case DayOfWeek.Sunday:
-            //        return !WorkingDay.Any(x => x.Weekend == DayOfWeek.Sunday.ToString());
-            //    case DayOfWeek.Monday:
-            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Monday));
-            //    case DayOfWeek.Tuesday:
-            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Tuesday));
-            //    case DayOfWeek.Wednesday:
-            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Wednesday));
-            //    case DayOfWeek.Thursday:
-            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Thursday));
-            //    case DayOfWeek.Friday:
-            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Friday));
-            //    default:
-            //        return !WorkingDay.Contains(Convert.ToString(DayOfWeek.Saturday));
-            //}
 
             return false;
         }
@@ -62,7 +47,6 @@ namespace GSC.Common
             {
                 date = date.AddDays(1);
             } while (IsHoliday(date) || IsWeekend(date));
-            //while (IsHoliday(date));
             return date;
         }
 
@@ -72,7 +56,6 @@ namespace GSC.Common
             {
                 date = date.AddDays(-1);
             } while (IsHoliday(date) || IsWeekend(date));
-            //while (IsHoliday(date));
             return date;
         }
 

@@ -12,7 +12,7 @@ namespace GSC.Api.Controllers.CTMS
     [Route("api/[controller]")]
     public class PhaseManagementController : BaseController
     {
-        
+
         private readonly IPhaseManagementRepository _phasemanagementRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
@@ -25,8 +25,6 @@ namespace GSC.Api.Controllers.CTMS
             _mapper = mapper;
         }
 
-
-        // GET: api/<controller>
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
@@ -59,7 +57,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _phasemanagementRepository.Add(PhaseManagement);
-            if (_uow.Save() <= 0) throw new Exception("Creating PhaseManagement failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating PhaseManagement failed on save."));
             return Ok(PhaseManagement.Id);
         }
 
@@ -81,7 +79,7 @@ namespace GSC.Api.Controllers.CTMS
             /* Added by swati for effective Date on 02-06-2019 */
             _phasemanagementRepository.AddOrUpdate(phasemanagement);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating PhaseManagement failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating PhaseManagement failed on save."));
             return Ok(phasemanagement.Id);
         }
 
@@ -130,5 +128,5 @@ namespace GSC.Api.Controllers.CTMS
     }
 }
 
-    
+
 

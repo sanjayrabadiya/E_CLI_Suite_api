@@ -1,11 +1,8 @@
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Report;
 using GSC.Domain.Context;
-using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -13,22 +10,19 @@ namespace GSC.Respository.Reports
 {
     public class JobMonitoringRepository : GenericRespository<JobMonitoring>, IJobMonitoringRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;       
         private readonly IGSCContext _context;
         public JobMonitoringRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IUploadSettingRepository uploadSettingRepository)
+            IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _uploadSettingRepository = uploadSettingRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;           
             _context = context;
         }
 
         public List<JobMonitoringDto> JobMonitoringList()
         {
-            //var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+           
             var result = All.Select(x => new JobMonitoringDto
             {
                 Id = x.Id,
@@ -49,7 +43,7 @@ namespace GSC.Respository.Reports
                 JobStatusstr = x.JobStatus.GetDescription(),
                 SubmittedBystr = _context.Users.Where(y => y.Id == x.SubmittedBy).FirstOrDefault().UserName,
                 JobDetailsstr = x.JobDetails.GetDescription(),
-                FullPath = !(string.IsNullOrEmpty(x.FolderName) && (string.IsNullOrEmpty(x.FolderName))) ? System.IO.Path.Combine(x.FolderPath, x.FolderName) : "",
+                FullPath = !string.IsNullOrEmpty(x.FolderName) ? System.IO.Path.Combine(x.FolderPath, x.FolderName) : "",
             }).Where(t=>t.SubmittedBy == _jwtTokenAccesser.UserId).OrderByDescending(t=>t.Id).ToList();
 
             return result;

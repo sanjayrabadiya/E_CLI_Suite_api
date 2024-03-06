@@ -94,7 +94,7 @@ namespace GSC.Data.Dto.Report
         public int PeriodId { get; set; }
         public string TemplateName { get; set; }
         public List<ProjectDatabaseTemplateDto> LstProjectDataBaseTemplate { get; set; }
-        //public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
+        
     }
 
     public class ProjectDatabaseTemplateDto

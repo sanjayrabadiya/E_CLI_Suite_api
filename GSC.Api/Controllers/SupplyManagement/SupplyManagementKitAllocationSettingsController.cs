@@ -3,20 +3,14 @@ using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.Configuration;
-using GSC.Respository.Master;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
-using GSC.Shared.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace GSC.Api.Controllers.SupplyManagement
@@ -68,7 +62,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementKitAllocationSettingsDto.Id = 0;
-            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.DeletedDate == null && x.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            if (_supplyManagementKitAllocationSettingsRepository.All.Any(x => x.DeletedDate == null && x.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
             {
                 ModelState.AddModelError("Message", "You already added visit!");
                 return BadRequest(ModelState);
@@ -78,7 +72,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementKitAllocationSettings.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementKitAllocationSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitAllocationSettingsRepository.Add(supplyManagementKitAllocationSettings);
-            if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Alloation failed on save."));
 
             return Ok(supplyManagementKitAllocationSettings.Id);
 
@@ -88,7 +82,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Put([FromBody] SupplyManagementKitAllocationSettingsDto supplyManagementKitAllocationSettingsDto)
         {
-            if (_supplyManagementKitAllocationSettingsRepository.All.ToList().Any(x => x.DeletedDate == null && x.Id != supplyManagementKitAllocationSettingsDto.Id && x.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
+            if (_supplyManagementKitAllocationSettingsRepository.All.Any(x => x.DeletedDate == null && x.Id != supplyManagementKitAllocationSettingsDto.Id && x.PharmacyStudyProductTypeId == supplyManagementKitAllocationSettingsDto.PharmacyStudyProductTypeId && x.ProjectDesignVisitId == supplyManagementKitAllocationSettingsDto.ProjectDesignVisitId))
             {
                 ModelState.AddModelError("Message", "You already added visit!");
                 return BadRequest(ModelState);
@@ -120,7 +114,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementKitAllocationSettings.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementKitAllocationSettings.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementKitAllocationSettingsRepository.Update(supplyManagementKitAllocationSettings);
-            if (_uow.Save() <= 0) throw new Exception("Creating Kit Alloation failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Alloation failed on save."));
 
             return Ok(supplyManagementKitAllocationSettings.Id);
 

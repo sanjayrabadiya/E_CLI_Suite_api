@@ -1,8 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Project.Generalconfig;
-using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -14,8 +12,9 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Globalization;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.Project.GeneralConfig
 {
@@ -45,11 +44,15 @@ namespace GSC.Respository.Project.GeneralConfig
             {
                 if (x.AuditReasonId > 0)
                 {
-                    x.ReasonName = _context.AuditReason.Where(a => a.Id == x.AuditReasonId).FirstOrDefault().ReasonName;
+                    var audit = _context.AuditReason.Where(a => a.Id == x.AuditReasonId).FirstOrDefault();
+                    if (audit != null)
+                        x.ReasonName = audit.ReasonName;
                 }
                 if (x.EditCheckRoleAuditReasonId > 0)
                 {
-                    x.EditCheckRoleAuditReasonName = _context.AuditReason.Where(a => a.Id == x.EditCheckRoleAuditReasonId).FirstOrDefault().ReasonName;
+                    var audit = _context.AuditReason.Where(a => a.Id == x.EditCheckRoleAuditReasonId).FirstOrDefault();
+                    if (audit != null)
+                        x.EditCheckRoleAuditReasonName = audit.ReasonName;
                 }
                 var roles = _context.EmailConfigurationEditCheckRole.Where(s => s.EmailConfigurationEditCheckId == x.Id).Select(a => a.Role.RoleName).ToList();
                 if (roles.Count > 0)
@@ -162,12 +165,10 @@ namespace GSC.Respository.Project.GeneralConfig
                    Replace(Operator.NotNull.GetDescription(), "<>").
                    Replace(Operator.Null.GetDescription(), "=");
 
-                if (r.EmailConfigurationEditCheckId > 0 && id > 0)
+                if (r.EmailConfigurationEditCheckId > 0 && id > 0 && r.EmailConfigurationEditCheckId != id)
                 {
-                    if (r.EmailConfigurationEditCheckId != id)
-                    {
-                        ruleStr = ruleStr + $" OR ";
-                    }
+                    ruleStr = ruleStr + $" OR ";
+
                 }
 
                 if (r.CollectionSource == CollectionSources.NumericScale)
@@ -197,7 +198,7 @@ namespace GSC.Respository.Project.GeneralConfig
                 var col = new DataColumn();
                 if (r.CollectionSource == CollectionSources.NumericScale)
                 {
-                    if(!string.IsNullOrEmpty(r.InputValue))
+                    if (!string.IsNullOrEmpty(r.InputValue))
                     {
                         col.DefaultValue = Convert.ToInt32(r.InputValue);
                     }
@@ -206,14 +207,14 @@ namespace GSC.Respository.Project.GeneralConfig
                 {
                     col.DefaultValue = r.InputValue ?? "";
                 }
-                
+
 
                 if (r.CollectionSource == CollectionSources.Date || r.CollectionSource == CollectionSources.DateTime || r.CollectionSource == CollectionSources.Time)
                 {
                     if (!string.IsNullOrEmpty(r.InputValue) && !(r.Operator == Operator.NotNull || r.Operator == Operator.Null))
                     {
                         DateTime createdDate;
-                        var isSucess = DateTime.TryParse(r.InputValue, out createdDate);
+                        var isSucess = DateTime.TryParse(r.InputValue, CultureInfo.InvariantCulture, out createdDate);
                         if (isSucess)
                             col.DataType = Type.GetType("System.DateTime");
                     }
@@ -257,7 +258,7 @@ namespace GSC.Respository.Project.GeneralConfig
                 var foundDt = dt.Select(ruleStr);
                 result.IsValid = true;
 
-                if (foundDt == null || foundDt.Count() == 0)
+                if (foundDt == null || !foundDt.Any())
                 {
                     result.Result = "Email Variable Configuration : Input value not verified!";
                     result.IsValid = false;
@@ -282,25 +283,16 @@ namespace GSC.Respository.Project.GeneralConfig
         }
         private string GetEditCheckEmailFormula(int id)
         {
-            var variableValues = _context.EmailConfigurationEditCheckDetail.
-                Where(x => x.EmailConfigurationEditCheckId == id
-                && x.DeletedDate == null).Select(r => r.CollectionValue).ToList();
 
             var result = _context.EmailConfigurationEditCheckDetail.Include(s => s.EmailConfigurationEditCheck).Where(x => x.EmailConfigurationEditCheckId == id && x.DeletedDate == null)
                 .Select(r => new EmailConfigurationEditCheckDetailDto
                 {
                     Id = r.Id,
                     ProjectId = r.EmailConfigurationEditCheck.ProjectId,
-                    PeriodName = r.ProjectDesignVariable != null
-                         ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
-                             .DisplayName
-                         : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
-                             .DisplayName : "",
+                    PeriodName = GetPeriodName(r),
                     TemplateName = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.TemplateName : "",
                     VariableName = string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation,
-                    VisitName = r.ProjectDesignVariable != null && r.ProjectDesignVariable.ProjectDesignTemplate != null && r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit != null
-                         ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
-                         : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
+                    VisitName = GetVisitName(r),
                     Operator = r.Operator,
                     LogicalOperator = r.LogicalOperator,
                     startParens = r.startParens,
@@ -309,7 +301,7 @@ namespace GSC.Respository.Project.GeneralConfig
                     CheckBy = r.CheckBy,
                     VariableAnnotation = r.VariableAnnotation
 
-                }).ToList().OrderBy(r => r.Id).ToList();
+                }).AsEnumerable().OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
             result.ForEach(x =>
@@ -333,7 +325,7 @@ namespace GSC.Respository.Project.GeneralConfig
                 var collectionValue = x.CollectionValue;
 
 
-                if (((Operator)x.Operator).CheckMathOperator())
+                if (x.Operator.CheckMathOperator())
                 {
                     if (x.Equals(last))
                         name = $"{x.startParens}{"{"}{name.Trim()}{"}"}{x.endParens ?? ""} {collectionValue}";
@@ -358,6 +350,45 @@ namespace GSC.Respository.Project.GeneralConfig
             return string.Join(" ", result.Select(r => r.QueryFormula));
         }
 
+        private string GetPeriodName(EmailConfigurationEditCheckDetail r)
+        {
+            if (r.ProjectDesignVariable != null)
+            {
+                return r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName;
+            }
+            if (r.ProjectDesignTemplate != null)
+            {
+                return r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.DisplayName;
+            }
+
+            return "";
+        }
+        private string GetVisitName(EmailConfigurationEditCheckDetail r)
+        {
+            if (r.ProjectDesignVariable != null && r.ProjectDesignVariable.ProjectDesignTemplate != null && r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit != null)
+            {
+                return r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName;
+            }
+            if (r.ProjectDesignTemplate != null)
+            {
+                return r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName;
+            }
+
+            return "";
+        }
+        private string GetVariableName(EmailConfigurationEditCheckDetail r)
+        {
+            if (r.ProjectDesignVariable != null && string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation))
+            {
+                return r.ProjectDesignVariable.VariableName;
+            }
+            else if (r.ProjectDesignVariable != null)
+            {
+                return r.ProjectDesignVariable.Annotation;
+            }
+            else return "";
+
+        }
         public EmailConfigurationEditCheckResult ValidatWithScreeningTemplate(ScreeningTemplate screeningTemplate)
         {
             var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign).Where(s => s.Id == screeningTemplate.ProjectDesignTemplateId).FirstOrDefault();
@@ -382,16 +413,10 @@ namespace GSC.Respository.Project.GeneralConfig
                     ProjectDesignVisitId = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.ProjectDesignVisitId : 0,
                     dataType = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.DataType : null,
                     CollectionSource = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.CollectionSource : CollectionSources.TextBox,
-                    PeriodName = r.ProjectDesignVariable != null
-                             ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
-                                 .DisplayName
-                             : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
-                                 .DisplayName : "",
+                    PeriodName = GetPeriodName(r),
                     TemplateName = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.TemplateName : "",
-                    VariableName = r.ProjectDesignVariable != null ? string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation : "",
-                    VisitName = r.ProjectDesignVariable != null
-                             ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
-                             : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
+                    VariableName = GetVariableName(r),
+                    VisitName = GetVisitName(r),
                     CheckBy = r.CheckBy,
                     VariableAnnotation = r.VariableAnnotation,
                     EmailConfigurationEditCheckId = r.EmailConfigurationEditCheckId
@@ -402,7 +427,7 @@ namespace GSC.Respository.Project.GeneralConfig
             {
                 if (screeningTemplate.ProjectDesignTemplateId == x.ProjectDesignTemplateId && x.CheckBy == EditCheckRuleBy.ByVariable)
                 {
-                    var data = screeningTemplate.ScreeningTemplateValues.Where(s => s.ProjectDesignVariableId == x.ProjectDesignVariableId && s.DeletedDate == null).FirstOrDefault();
+                    var data = screeningTemplate.ScreeningTemplateValues.FirstOrDefault(s => s.ProjectDesignVariableId == x.ProjectDesignVariableId && s.DeletedDate == null);
                     if (data != null && !string.IsNullOrEmpty(data.Value))
                     {
                         if (data.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || data.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox || data.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
@@ -421,33 +446,30 @@ namespace GSC.Respository.Project.GeneralConfig
                         }
                     }
                 }
-                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+                if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation && annotationlist.Count > 0 && annotationlist.Exists(s => s.Annotation == x.VariableAnnotation))
                 {
-                    if (annotationlist.Count > 0 && annotationlist.Any(s => s.Annotation == x.VariableAnnotation))
+                    var annotation = annotationlist.Find(s => s.Annotation == x.VariableAnnotation);
+                    if (annotation != null)
                     {
-                        var annotation = annotationlist.Where(s => s.Annotation == x.VariableAnnotation).FirstOrDefault();
-                        if (annotation != null)
+                        var data = screeningTemplate.ScreeningTemplateValues.FirstOrDefault(s => s.ProjectDesignVariableId == annotation.Id && s.DeletedDate == null);
+                        if (data != null && !string.IsNullOrEmpty(data.Value))
                         {
-                            var data = screeningTemplate.ScreeningTemplateValues.Where(s => s.ProjectDesignVariableId == annotation.Id && s.DeletedDate == null).FirstOrDefault();
-                            if (data != null && !string.IsNullOrEmpty(data.Value))
+                            if (data.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || data.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox || data.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
                             {
-                                if (data.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton || data.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox || data.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale)
+                                var child = _context.ProjectDesignVariableValue.Where(s => s.Id == Convert.ToInt32(data.Value)).FirstOrDefault();
+                                if (child != null)
                                 {
-                                    var child = _context.ProjectDesignVariableValue.Where(s => s.Id == Convert.ToInt32(data.Value)).FirstOrDefault();
-                                    if (child != null)
-                                    {
-                                        x.InputValue = child.ValueName.ToLower();
-
-                                    }
-                                }
-                                else
-                                {
-                                    x.InputValue = data.Value.ToLower();
+                                    x.InputValue = child.ValueName.ToLower();
 
                                 }
                             }
-                            x.CollectionSource = annotation.CollectionSource;
+                            else
+                            {
+                                x.InputValue = data.Value.ToLower();
+
+                            }
                         }
+                        x.CollectionSource = annotation.CollectionSource;
                     }
                 }
             });
@@ -459,7 +481,6 @@ namespace GSC.Respository.Project.GeneralConfig
         {
             EmailConfigurationEditCheckSendEmailResult finaldata = new EmailConfigurationEditCheckSendEmailResult();
             List<EmailList> emails = new List<EmailList>();
-            List<string> mobile = new List<string>();
             EmailConfigurationEditCheckSendEmail emaildata = new EmailConfigurationEditCheckSendEmail();
             var annotationlist = _context.ProjectDesignVariable.Where(s => s.ProjectDesignTemplateId == screeningTemplate.ProjectDesignTemplateId && s.Annotation != null).ToList();
             var projectDesignTemplate = _context.ProjectDesignTemplate.Include(s => s.ProjectDesignVisit).ThenInclude(s => s.ProjectDesignPeriod).ThenInclude(s => s.ProjectDesign).Where(s => s.Id == screeningTemplate.ProjectDesignTemplateId).FirstOrDefault();
@@ -476,26 +497,20 @@ namespace GSC.Respository.Project.GeneralConfig
                 var emmailrole = _context.EmailConfigurationEditCheckRole.Include(s => s.Role).Where(s => s.DeletedDate == null && s.EmailConfigurationEditCheckId == data.FirstOrDefault().EmailConfigurationEditCheckId).ToList();
                 if (emmailrole.Count > 0)
                 {
-                    var patient = emmailrole.Where(s => s.Role.RoleName == "Patient").FirstOrDefault();
-                    if (patient != null)
+                    var patient = emmailrole.Find(s => s.Role.RoleName == "Patient");
+                    if (patient != null && screeningTemplate.ScreeningVisit != null && screeningTemplate.ScreeningVisit.ScreeningEntry != null && screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization != null && screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User != null)
                     {
-                        if (screeningTemplate.ScreeningVisit != null && screeningTemplate.ScreeningVisit.ScreeningEntry != null && screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization != null)
-                        {
-                            if (screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User != null)
-                            {
-                                EmailList obj = new EmailList();
-                                obj.Email = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Email;
-                                obj.UserId = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId;
-                                obj.Phone = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Phone;
+                        EmailList obj = new EmailList();
+                        obj.Email = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Email;
+                        obj.UserId = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId;
+                        obj.Phone = screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.User.Phone;
 
-                                var patientRole = _context.UserRole.Where(s => s.UserId == screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId).FirstOrDefault();
-                                if (patientRole != null)
-                                    obj.RoleId = patientRole.UserRoleId;
+                        var patientRole = _context.UserRole.Where(s => s.UserId == screeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.UserId).FirstOrDefault();
+                        if (patientRole != null)
+                            obj.RoleId = patientRole.UserRoleId;
 
-                                emails.Add(obj);
+                        emails.Add(obj);
 
-                            }
-                        }
                     }
 
                     var roles = emmailrole.Where(s => s.Role.RoleName != "Patient").Select(s => s.RoleId).ToList();
@@ -545,8 +560,11 @@ namespace GSC.Respository.Project.GeneralConfig
                                 }
                             }
                         }
-                        emaildata.VisitName = projectDesignTemplate.ProjectDesignVisit.DisplayName;
-                        emaildata.TemplateName = projectDesignTemplate.TemplateName;
+                        if (projectDesignTemplate != null)
+                        {
+                            emaildata.VisitName = projectDesignTemplate.ProjectDesignVisit.DisplayName;
+                            emaildata.TemplateName = projectDesignTemplate.TemplateName;
+                        }
                         emaildata.CurrentDate = DateTime.Now.Date.ToString("dddd, dd MMMM yyyy");
                         if (_jwtTokenAccesser.CompanyId > 0)
                             emaildata.CompanyName = _context.Company.Where(s => s.Id == _jwtTokenAccesser.CompanyId).FirstOrDefault().CompanyName;

@@ -1,25 +1,21 @@
-﻿using GSC.Data.Entities.Master;
-using GSC.Data.Entities.SupplyManagement;
+﻿using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.Attendance;
-using GSC.Respository.Etmf;
 using GSC.Respository.SupplyManagement;
 using Quartz;
 using System;
-using System.IO;
 using System.Threading.Tasks;
 
 namespace GSC.Api.QuartzJob
 {
-    public class IWRSEmailJob : IJob
+    public class IwrsEmailJob : IJob
     {
         private readonly IGSCContext _context;
-        ISupplyManagementRequestRepository _supplyManagementRequestRepository;
-        ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
-        IVerificationApprovalTemplateRepository _verificationApprovalTemplateRepository;
-        IRandomizationRepository _randomizationRepository;
-        public IWRSEmailJob(ISupplyManagementRequestRepository supplyManagementRequestRepository,
+        private readonly ISupplyManagementRequestRepository _supplyManagementRequestRepository;
+        private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
+        private readonly IVerificationApprovalTemplateRepository _verificationApprovalTemplateRepository;
+        private readonly IRandomizationRepository _randomizationRepository;
+        public IwrsEmailJob(ISupplyManagementRequestRepository supplyManagementRequestRepository,
             ISupplyManagementShipmentRepository supplyManagementShipmentRepository,
             IGSCContext context,
             IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,

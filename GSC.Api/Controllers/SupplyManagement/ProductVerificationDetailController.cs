@@ -1,15 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.SupplyManagement
@@ -53,7 +48,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _productVerificationDetailRepository.Add(productVerificationDetail);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating product verification failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating product verification failed on save."));
 
             return Ok(productVerificationDetail.Id);
         }
@@ -69,7 +64,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _productVerificationDetailRepository.AddOrUpdate(productVerificationDetail);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating product verification failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating product verification failed on save."));
             return Ok(productVerificationDetail.Id);
         }
     }

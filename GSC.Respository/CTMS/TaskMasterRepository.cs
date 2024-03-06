@@ -5,7 +5,6 @@ using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,15 +13,12 @@ namespace GSC.Respository.CTMS
 {
     public class TaskMasterRepository : GenericRespository<TaskMaster>, ITaskMasterRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IStudyPlanRepository _studyPlanRepository;
         public TaskMasterRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper, IStudyPlanRepository studyPlanRepository) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
             _studyPlanRepository = studyPlanRepository;
@@ -58,7 +54,7 @@ namespace GSC.Respository.CTMS
             else
             {
                 var count = All.Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null).Count();
-                return ++count;
+                return count;
             }
 
         }
@@ -90,7 +86,7 @@ namespace GSC.Respository.CTMS
         public string AddTaskToSTudyPlan(TaskmasterDto taskmasterDto)
         {
             var task = _context.StudyPlanTask.Where(x => x.TaskId == taskmasterDto.Id).ToList();
-            if (task != null)
+            if (task.Count>0)
             {
                 _context.StudyPlanTask.RemoveRange(task);
                 _context.Save();
@@ -102,17 +98,18 @@ namespace GSC.Respository.CTMS
             if (TaskMaster.Count > 0)
             {
                 var projectid = TaskMaster.Where(x => x.Project.ParentProjectId == null).Select(x => x.Project.Id).FirstOrDefault();
-                var sitedata = TaskMaster.Where(x => x.Project.ParentProjectId != null).FirstOrDefault();
-                foreach (var item in taskmasterDto.RefrenceTypes)
+                var sitedata = TaskMaster.Find(x => x.Project.ParentProjectId != null);
+                for (int i = 0; i < taskmasterDto.RefrenceTypes.Count; i++)
                 {
+                    RefrenceTypes item = taskmasterDto.RefrenceTypes[i];
                     if (sitedata == null && (item.RefrenceType == Helper.RefrenceType.Sites || item.RefrenceType == Helper.RefrenceType.Country))
                     {
                         var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == projectid).ToList();
                         sites.ForEach(s =>
                         {
                             var data = new StudyPlanDto();
-                            data.StartDate = TaskMaster.FirstOrDefault().StartDate;
-                            data.EndDate = TaskMaster.FirstOrDefault().EndDate;
+                            data.StartDate = TaskMaster.Select(s=>s.StartDate).FirstOrDefault();
+                            data.EndDate = TaskMaster.Select(s => s.EndDate).FirstOrDefault();
                             data.ProjectId = s.Id;
                             data.TaskTemplateId = taskmasterDto.TaskTemplateId;
                             lstStudyPlan.Add(data);
@@ -147,7 +144,7 @@ namespace GSC.Respository.CTMS
                         });
                     }
                 }
-                
+
                 if (lstStudyPlan.Count > 0)
                 {
                     foreach (var item in lstStudyPlan)

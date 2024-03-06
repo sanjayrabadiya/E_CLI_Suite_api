@@ -2,7 +2,6 @@ using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
@@ -10,7 +9,6 @@ using GSC.Data.Entities.Report;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
@@ -67,7 +65,9 @@ namespace GSC.Respository.Reports
                         var Allocationdetail = _context.SupplyManagementVisitKITSequenceDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == s.VisitId && d.RandomizationId == s.RandomizationId).FirstOrDefault();
                         if (Allocationdetail != null)
                         {
-                            s.AllocatedBy = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault();
+                            if (user != null)
+                                s.AllocatedBy = user.UserName;
                             s.Allocatedate = Allocationdetail.CreatedDate;
                         }
                     });
@@ -86,7 +86,7 @@ namespace GSC.Respository.Reports
                            VisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
                            RandomizationId = x.RandomizationId
                        }).ToList();
-                if (list != null && list.Count > 0)
+                if (list.Any())
                 {
                     list.ForEach(x =>
                     {
@@ -113,19 +113,21 @@ namespace GSC.Respository.Reports
                         var Allocationdetail = _context.SupplyManagementVisitKITDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == x.VisitId && d.RandomizationId == x.RandomizationId).FirstOrDefault();
                         if (Allocationdetail != null)
                         {
-                            x.AllocatedBy = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault();
+                            if (user != null)
+                                x.AllocatedBy = user.UserName;
                             x.Allocatedate = Allocationdetail.CreatedDate;
                         }
 
                     });
                 }
             }
-            if (list != null && list.Count > 0 && randomizationIWRSReport.SiteId > 0)
+            if (list.Count > 0 && randomizationIWRSReport.SiteId > 0)
             {
                 list = list.Where(x => x.SiteId == randomizationIWRSReport.SiteId).ToList();
             }
 
-            if (list != null && list.Count > 0 && randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
+            if (list.Count > 0 && randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
             {
                 list = list.Where(x => randomizationIWRSReport.VisitIds.Contains((int)x.VisitId)).ToList();
             }
@@ -212,7 +214,9 @@ namespace GSC.Respository.Reports
                         var Allocationdetail = _context.SupplyManagementVisitKITSequenceDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == s.VisitId && d.RandomizationId == s.RandomizationId).FirstOrDefault();
                         if (Allocationdetail != null)
                         {
-                            s.AllocatedBy = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault();
+                            if (user != null)
+                                s.AllocatedBy = user.UserName;
                             s.Allocatedate = Allocationdetail.CreatedDate;
                         }
                     });
@@ -231,7 +235,7 @@ namespace GSC.Respository.Reports
                            VisitId = x.SupplyManagementKIT.ProjectDesignVisitId,
                            RandomizationId = x.RandomizationId
                        }).ToList();
-                if (list != null && list.Count > 0)
+                if (list.Any())
                 {
                     list.ForEach(x =>
                     {
@@ -258,24 +262,24 @@ namespace GSC.Respository.Reports
                         var Allocationdetail = _context.SupplyManagementVisitKITDetail.Where(d => d.DeletedDate == null && d.ProjectDesignVisitId == x.VisitId && d.RandomizationId == x.RandomizationId).FirstOrDefault();
                         if (Allocationdetail != null)
                         {
-                            x.AllocatedBy = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(a => a.Id == Allocationdetail.CreatedBy && a.DeletedDate == null).FirstOrDefault();
+                            if (user != null)
+                                x.AllocatedBy = user.UserName;
                             x.Allocatedate = Allocationdetail.CreatedDate;
                         }
 
                     });
                 }
             }
-            if (list != null && list.Count > 0 && randomizationIWRSReport.SiteId > 0)
+            if (list.Count > 0 && randomizationIWRSReport.SiteId > 0)
             {
                 list = list.Where(x => x.SiteId == randomizationIWRSReport.SiteId).ToList();
             }
 
-            if (list != null && list.Count > 0 && randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
+            if (list.Count > 0 && randomizationIWRSReport.VisitIds != null && randomizationIWRSReport.VisitIds.Length > 0)
             {
                 list = list.Where(x => randomizationIWRSReport.VisitIds.Contains((int)x.VisitId)).ToList();
             }
-
-
             return list;
         }
 
@@ -305,7 +309,9 @@ namespace GSC.Respository.Reports
                     if (x.CentralDepot.MaxTemp > 0)
                         productAccountabilityCentralReport.StorageConditionTemprature = x.CentralDepot.MaxTemp.ToString();
                     productAccountabilityCentralReport.ActionName = "Product Reciept";
-                    productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                    var user = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                    if (user != null)
+                        productAccountabilityCentralReport.ActionBy = user.UserName;
                     productAccountabilityCentralReport.ActionDate = x.CreatedDate;
                     productAccountabilityCentralReport.ProductTypeCode = x.PharmacyStudyProductType.ProductType.ProductTypeCode;
                     productAccountabilityCentralReport.ReceiptStatus = x.Status.ToString();
@@ -357,7 +363,9 @@ namespace GSC.Respository.Reports
                     if (x.CentralDepot.MaxTemp > 0)
                         productAccountabilityCentralReport.StorageConditionTemprature = x.CentralDepot.MaxTemp.ToString();
                     productAccountabilityCentralReport.ActionName = "Verification";
-                    productAccountabilityCentralReport.ActionBy = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
+                    var user = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                    if (user != null)
+                        productAccountabilityCentralReport.ActionBy = user.UserName;
                     productAccountabilityCentralReport.ActionDate = x.CreatedDate;
                     productAccountabilityCentralReport.ProductTypeCode = x.PharmacyStudyProductType.ProductType.ProductTypeCode;
                     productAccountabilityCentralReport.StudyProductTypeId = x.PharmacyStudyProductTypeId;
@@ -407,24 +415,16 @@ namespace GSC.Respository.Reports
 
             if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
-                List<SupplyManagementKITSeries> kitpack = new List<SupplyManagementKITSeries>();
                 var detailkit = _context.SupplyManagementKITSeriesDetail.Where(s => s.DeletedDate == null && productreciptIds.Contains(s.ProductReceiptId)).Select(s => s.SupplyManagementKITSeriesId).ToList();
+
+                var kitpack = _context.SupplyManagementKITSeries.
+                      Include(x => x.SupplyManagementShipment).
+                      ThenInclude(s => s.SupplyManagementRequest)
+                      .ThenInclude(x => x.FromProject)
+                      .Include(x => x.Project).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).ToList();
                 if (productreciptIds.Count > 0)
                 {
-                    kitpack = _context.SupplyManagementKITSeries.
-                        Include(x => x.SupplyManagementShipment).
-                        ThenInclude(s => s.SupplyManagementRequest)
-                        .ThenInclude(x => x.FromProject)
-                        .Include(x => x.Project).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId
-                         && detailkit.Contains(x.Id)).ToList();
-                }
-                else
-                {
-                    kitpack = _context.SupplyManagementKITSeries.
-                       Include(x => x.SupplyManagementShipment).
-                       ThenInclude(s => s.SupplyManagementRequest)
-                       .ThenInclude(x => x.FromProject)
-                       .Include(x => x.Project).Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).ToList();
+                    kitpack = kitpack.Where(s => detailkit.Contains(s.Id)).ToList();
                 }
 
                 if (randomizationIWRSReport.SiteId > 0)
@@ -444,16 +444,29 @@ namespace GSC.Respository.Reports
                         }
                         else if (x.SiteId > 0)
                         {
-                            productAccountabilityCentralReport.SiteCode = _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault().ProjectCode;
-                            productAccountabilityCentralReport.SiteId = (int)x.SiteId;
+                            var site = _context.Project.Where(z => z.Id == x.SiteId).FirstOrDefault();
+                            if (site != null)
+                            {
+                                productAccountabilityCentralReport.SiteCode = site.ProjectCode;
+                                productAccountabilityCentralReport.SiteId = (int)x.SiteId;
+                            }
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.TreatmentType;
                         productAccountabilityCentralReport.ActionName = "KitPack";
-
-
-                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
-
+                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                        {
+                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                            if (modify != null)
+                                productAccountabilityCentralReport.ActionBy = modify.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.ModifiedDate;
+                        }
+                        else
+                        {
+                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                            if (created != null)
+                                productAccountabilityCentralReport.ActionBy = created.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        }
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
 
@@ -530,36 +543,22 @@ namespace GSC.Respository.Reports
             }
             if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
             {
-                List<SupplyManagementKITDetail> detail = new List<SupplyManagementKITDetail>();
+                var detail = _context.SupplyManagementKITDetail.
+                 Include(x => x.SupplyManagementShipment).
+                 ThenInclude(s => s.SupplyManagementRequest)
+                 .ThenInclude(x => x.FromProject)
+                 .Include(x => x.SupplyManagementKIT).
+                 ThenInclude(x => x.ProjectDesignVisit).
+                 Include(x => x.SupplyManagementKIT).
+                 ThenInclude(x => x.Project).
+                 Include(x => x.SupplyManagementKIT).
+                 ThenInclude(x => x.PharmacyStudyProductType).
+                 ThenInclude(x => x.ProductType).Where(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).ToList();
+
+
                 if (productreciptIds.Count > 0)
                 {
-                    detail = _context.SupplyManagementKITDetail.
-                    Include(x => x.SupplyManagementShipment).
-                    ThenInclude(s => s.SupplyManagementRequest)
-                    .ThenInclude(x => x.FromProject)
-                    .Include(x => x.SupplyManagementKIT).
-                    ThenInclude(x => x.ProjectDesignVisit).
-                    Include(x => x.SupplyManagementKIT).
-                    ThenInclude(x => x.Project).
-                    Include(x => x.SupplyManagementKIT).
-                    ThenInclude(x => x.PharmacyStudyProductType).
-                    ThenInclude(x => x.ProductType).Where(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId
-                    && productreciptIds.Contains(x.SupplyManagementKIT.ProductReceiptId)).ToList();
-                }
-                else
-                {
-                    detail = _context.SupplyManagementKITDetail.
-                    Include(x => x.SupplyManagementShipment).
-                    ThenInclude(s => s.SupplyManagementRequest)
-                    .ThenInclude(x => x.FromProject)
-                    .Include(x => x.SupplyManagementKIT).
-                    ThenInclude(x => x.ProjectDesignVisit).
-                    Include(x => x.SupplyManagementKIT).
-                    ThenInclude(x => x.Project).
-                    Include(x => x.SupplyManagementKIT).
-                    ThenInclude(x => x.PharmacyStudyProductType).
-                    ThenInclude(x => x.ProductType).Where(x => x.DeletedDate == null && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).ToList();
-
+                    detail = detail.Where(x => productreciptIds.Contains(x.SupplyManagementKIT.ProductReceiptId)).ToList();
                 }
                 if (randomizationIWRSReport.productTypeId > 0)
                 {
@@ -582,13 +581,28 @@ namespace GSC.Respository.Reports
                         }
                         else if (x.SupplyManagementKIT.SiteId > 0)
                         {
-                            productAccountabilityCentralReport.SiteCode = _context.Project.Where(z => z.Id == x.SupplyManagementKIT.SiteId).FirstOrDefault().ProjectCode;
+                            var site = _context.Project.Where(z => z.Id == x.SupplyManagementKIT.SiteId).FirstOrDefault();
+                            if (site != null)
+                                productAccountabilityCentralReport.SiteCode = site.ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementKIT.SiteId;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                         productAccountabilityCentralReport.ActionName = "Kit";
-                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                        {
+                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                            if (modify != null)
+                                productAccountabilityCentralReport.ActionBy = modify.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.ModifiedDate;
+                        }
+                        else
+                        {
+                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                            if (created != null)
+                                productAccountabilityCentralReport.ActionBy = created.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        }
+
                         productAccountabilityCentralReport.VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
@@ -780,7 +794,9 @@ namespace GSC.Respository.Reports
                         }
                         if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                         {
-                            productAccountabilityCentralReport.RequestedTo = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault().ProjectCode;
+                            var project = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                            if (project != null)
+                                productAccountabilityCentralReport.RequestedTo = project.ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId;
                             if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                                 productAccountabilityCentralReport.ToSiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId;
@@ -790,8 +806,21 @@ namespace GSC.Respository.Reports
                             productAccountabilityCentralReport.RequestedTo = x.Project.ProjectCode;
                         }
                         productAccountabilityCentralReport.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.TreatmentType;
-                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                        {
+                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                            if (modify != null)
+                                productAccountabilityCentralReport.ActionBy = modify.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.ModifiedDate;
+                        }
+                        else
+                        {
+                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                            if (created != null)
+                                productAccountabilityCentralReport.ActionBy = created.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        }
+
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.PreStatus = x.PrevStatus;
@@ -876,7 +905,9 @@ namespace GSC.Respository.Reports
                         }
                         if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                         {
-                            productAccountabilityCentralReport.RequestedTo = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault().ProjectCode;
+                            var project = _context.Project.Where(z => z.Id == x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId).FirstOrDefault();
+                            if (project != null)
+                                productAccountabilityCentralReport.RequestedTo = project.ProjectCode;
                             productAccountabilityCentralReport.SiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId;
                             if (x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId > 0)
                                 productAccountabilityCentralReport.ToSiteId = (int)x.SupplyManagementShipment.SupplyManagementRequest.ToProjectId;
@@ -889,8 +920,20 @@ namespace GSC.Respository.Reports
                         productAccountabilityCentralReport.KitStatus = x.Status.GetDescription();
                         productAccountabilityCentralReport.Status = x.Status;
                         productAccountabilityCentralReport.PreStatus = x.PrevStatus;
-                        productAccountabilityCentralReport.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                        productAccountabilityCentralReport.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                        {
+                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                            if (modify != null)
+                                productAccountabilityCentralReport.ActionBy = modify.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.ModifiedDate;
+                        }
+                        else
+                        {
+                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                            if (created != null)
+                                productAccountabilityCentralReport.ActionBy = created.UserName;
+                            productAccountabilityCentralReport.ActionDate = x.CreatedDate;
+                        }
                         productAccountabilityCentralReport.VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                         productAccountabilityCentralReport.NoofBoxorBottle = 1;
                         productAccountabilityCentralReport.Noofimp = (int)x.NoOfImp;
@@ -1016,7 +1059,8 @@ namespace GSC.Respository.Reports
                     PharmacyStudyProductType type = new PharmacyStudyProductType();
                     var project = _context.Project.Where(z => z.Id == x.FromProject.ParentProjectId).FirstOrDefault();
                     var toproject = _context.Project.Where(z => z.Id == x.ToProjectId).FirstOrDefault();
-                    requestobj.ProjectCode = project.ProjectCode;
+                    if (project != null)
+                        requestobj.ProjectCode = project.ProjectCode;
                     requestobj.RequestedFrom = x.FromProject.ProjectCode;
                     if (x.IsSiteRequest)
                     {
@@ -1031,24 +1075,22 @@ namespace GSC.Respository.Reports
                     {
                         requestobj.Type = "Kit pack";
                     }
-                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                     {
-                        if (x.StudyProductTypeId > 0)
+                        type = _context.PharmacyStudyProductType.Include(k => k.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                        if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                         {
-                            type = _context.PharmacyStudyProductType.Include(k => k.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                            {
-                                requestobj.Type = "Kit";
-                            }
-                            else
-                            {
-                                requestobj.Type = "Individual";
-                            }
-                            if (type != null && type.ProductType != null)
-                            {
-                                requestobj.ProductTypeCode = type.ProductType.ProductTypeCode;
-                            }
+                            requestobj.Type = "Kit";
                         }
+                        else
+                        {
+                            requestobj.Type = "Individual";
+                        }
+                        if (type != null && type.ProductType != null)
+                        {
+                            requestobj.ProductTypeCode = type.ProductType.ProductTypeCode;
+                        }
+
                     }
                     requestobj.ActionName = "Request";
                     if (x.ProjectDesignVisit != null)
@@ -1057,19 +1099,18 @@ namespace GSC.Respository.Reports
                     }
                     requestobj.KitNo = x.RequestQty.ToString();
                     requestobj.ActionDate = x.CreatedDate;
-                    requestobj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                    var user = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault();
+                    if (user != null)
+                        requestobj.ActionBy = user.UserName;
 
                     var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).Where(s => s.SupplyManagementRequestId == x.Id).FirstOrDefault();
                     if (shipment != null)
                     {
                         requestobj.TrackingNumber = shipment.CourierTrackingNo;
                         requestobj.KitStatus = shipment.Status.GetDescription();
-
                     }
 
                     list.Add(requestobj);
-
-
                     if (shipment != null)
                     {
                         ProductAccountabilityCentralReport shipmentobj = new ProductAccountabilityCentralReport();
@@ -1088,24 +1129,22 @@ namespace GSC.Respository.Reports
                         {
                             shipmentobj.Type = "Kit pack";
                         }
-                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                         {
-                            if (x.StudyProductTypeId > 0)
+                            type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                             {
-                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                                {
-                                    shipmentobj.Type = "Kit";
-                                }
-                                else
-                                {
-                                    shipmentobj.Type = "Individual";
-                                }
-                                if (type != null && type.ProductType != null)
-                                {
-                                    shipmentobj.ProductTypeCode = type.ProductType.ProductTypeCode;
-                                }
+                                shipmentobj.Type = "Kit";
                             }
+                            else
+                            {
+                                shipmentobj.Type = "Individual";
+                            }
+                            if (type != null && type.ProductType != null)
+                            {
+                                shipmentobj.ProductTypeCode = type.ProductType.ProductTypeCode;
+                            }
+
                         }
 
                         if (x.ProjectDesignVisit != null)
@@ -1114,12 +1153,13 @@ namespace GSC.Respository.Reports
                         }
                         shipmentobj.KitNo = shipment.ApprovedQty.ToString();
                         shipmentobj.ActionDate = shipment.CreatedDate;
-                        shipmentobj.ActionBy = _context.Users.Where(s => s.Id == shipment.CreatedBy).FirstOrDefault().UserName;
+                        var user1 = _context.Users.Where(s => s.Id == shipment.CreatedBy).FirstOrDefault();
+                        if (user1 != null)
+                            shipmentobj.ActionBy = user1.UserName;
                         shipmentobj.ActionName = "Shipment";
                         shipmentobj.CourierName = shipment.CourierName;
                         shipmentobj.TrackingNumber = shipment.CourierTrackingNo;
                         shipmentobj.KitStatus = shipment.Status.GetDescription();
-
                         list.Add(shipmentobj);
 
                         var receipt = _context.SupplyManagementReceipt.Where(s => s.SupplyManagementShipmentId == shipment.Id).FirstOrDefault();
@@ -1150,25 +1190,32 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.Type = "Kit pack";
                                         }
-                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                                         {
-                                            if (x.StudyProductTypeId > 0)
+                                            type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                             {
-                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                                                {
-                                                    recieptobj.Type = "Kit";
-                                                }
-                                                else
-                                                {
-                                                    recieptobj.Type = "Individual";
-                                                }
+                                                recieptobj.Type = "Kit";
+                                            }
+                                            else
+                                            {
+                                                recieptobj.Type = "Individual";
                                             }
                                         }
-
-                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
-
+                                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                                        {
+                                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                                            if (modify != null)
+                                                recieptobj.ActionBy = modify.UserName;
+                                            recieptobj.ActionDate = x.ModifiedDate;
+                                        }
+                                        else
+                                        {
+                                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                                            if (created != null)
+                                                recieptobj.ActionBy = created.UserName;
+                                            recieptobj.ActionDate = x.CreatedDate;
+                                        }
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1187,8 +1234,6 @@ namespace GSC.Respository.Reports
                                          .Where(d => d.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
                                         if (visits.Count > 0)
                                             recieptobj.VisitName = string.Join(",", visits.Distinct());
-
-
 
                                         var productrecieptIds = _context.SupplyManagementKITSeriesDetail.Where(s => s.SupplyManagementKITSeriesId == x.Id && s.DeletedDate == null).Select(z => z.ProductReceiptId).ToList();
                                         if (productrecieptIds.Count > 0)
@@ -1236,27 +1281,37 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.Type = "Kit pack";
                                         }
-                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                                         {
-                                            if (x.StudyProductTypeId > 0)
+                                            type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                             {
-                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                                                {
-                                                    recieptobj.Type = "Kit";
-                                                }
-                                                else
-                                                {
-                                                    recieptobj.Type = "Individual";
-                                                }
+                                                recieptobj.Type = "Kit";
+                                            }
+                                            else
+                                            {
+                                                recieptobj.Type = "Individual";
                                             }
                                         }
                                         if (x.ProjectDesignVisit != null)
                                         {
                                             recieptobj.VisitName = x.ProjectDesignVisit.DisplayName;
                                         }
-                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+                                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                                        {
+                                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                                            if (modify != null)
+                                                recieptobj.ActionBy = modify.UserName;
+                                            recieptobj.ActionDate = x.ModifiedDate;
+                                        }
+                                        else
+                                        {
+                                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                                            if (created != null)
+                                                recieptobj.ActionBy = created.UserName;
+                                            recieptobj.ActionDate = x.CreatedDate;
+                                        }
+
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1374,7 +1429,8 @@ namespace GSC.Respository.Reports
                     PharmacyStudyProductType type = new PharmacyStudyProductType();
                     var project = _context.Project.Where(z => z.Id == x.FromProject.ParentProjectId).FirstOrDefault();
                     var toproject = _context.Project.Where(z => z.Id == x.ToProjectId).FirstOrDefault();
-                    requestobj.ProjectCode = project.ProjectCode;
+                    if (project != null)
+                        requestobj.ProjectCode = project.ProjectCode;
                     requestobj.RequestedFrom = x.FromProject.ProjectCode;
                     if (x.IsSiteRequest)
                     {
@@ -1389,24 +1445,22 @@ namespace GSC.Respository.Reports
                     {
                         requestobj.Type = "Kit pack";
                     }
-                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                    if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                     {
-                        if (x.StudyProductTypeId > 0)
+                        type = _context.PharmacyStudyProductType.Include(k => k.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                        if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                         {
-                            type = _context.PharmacyStudyProductType.Include(k => k.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                            {
-                                requestobj.Type = "Kit";
-                            }
-                            else
-                            {
-                                requestobj.Type = "Individual";
-                            }
-                            if (type != null && type.ProductType != null)
-                            {
-                                requestobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : type.ProductType.ProductTypeCode;
-                            }
+                            requestobj.Type = "Kit";
                         }
+                        else
+                        {
+                            requestobj.Type = "Individual";
+                        }
+                        if (type != null && type.ProductType != null)
+                        {
+                            requestobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : type.ProductType.ProductTypeCode;
+                        }
+
                     }
                     requestobj.ActionName = "Request";
                     if (x.ProjectDesignVisit != null)
@@ -1415,7 +1469,9 @@ namespace GSC.Respository.Reports
                     }
                     requestobj.KitNo = x.RequestQty.ToString();
                     requestobj.ActionDate = x.CreatedDate;
-                    requestobj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                    var user = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault();
+                    if (user != null)
+                        requestobj.ActionBy = user.UserName;
 
                     var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).Where(s => s.SupplyManagementRequestId == x.Id).FirstOrDefault();
                     if (shipment != null)
@@ -1425,7 +1481,6 @@ namespace GSC.Respository.Reports
                     }
 
                     list.Add(requestobj);
-
 
                     if (shipment != null)
                     {
@@ -1445,24 +1500,22 @@ namespace GSC.Respository.Reports
                         {
                             shipmentobj.Type = "Kit pack";
                         }
-                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                         {
-                            if (x.StudyProductTypeId > 0)
+                            type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                             {
-                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                                {
-                                    shipmentobj.Type = "Kit";
-                                }
-                                else
-                                {
-                                    shipmentobj.Type = "Individual";
-                                }
-                                if (type != null && type.ProductType != null)
-                                {
-                                    shipmentobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : type.ProductType.ProductTypeCode;
-                                }
+                                shipmentobj.Type = "Kit";
                             }
+                            else
+                            {
+                                shipmentobj.Type = "Individual";
+                            }
+                            if (type != null && type.ProductType != null)
+                            {
+                                shipmentobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : type.ProductType.ProductTypeCode;
+                            }
+
                         }
 
                         if (x.ProjectDesignVisit != null)
@@ -1471,7 +1524,9 @@ namespace GSC.Respository.Reports
                         }
                         shipmentobj.KitNo = shipment.ApprovedQty.ToString();
                         shipmentobj.ActionDate = shipment.CreatedDate;
-                        shipmentobj.ActionBy = _context.Users.Where(s => s.Id == shipment.CreatedBy).FirstOrDefault().UserName;
+                        var action = _context.Users.Where(s => s.Id == shipment.CreatedBy).FirstOrDefault();
+                        if (action != null)
+                            shipmentobj.ActionBy = action.UserName;
                         shipmentobj.ActionName = "Shipment";
                         shipmentobj.CourierName = shipment.CourierName;
                         shipmentobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1507,23 +1562,33 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.Type = "Kit pack";
                                         }
-                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                                         {
-                                            if (x.StudyProductTypeId > 0)
+                                            type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                             {
-                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                                                {
-                                                    recieptobj.Type = "Kit";
-                                                }
-                                                else
-                                                {
-                                                    recieptobj.Type = "Individual";
-                                                }
+                                                recieptobj.Type = "Kit";
+                                            }
+                                            else
+                                            {
+                                                recieptobj.Type = "Individual";
                                             }
                                         }
-                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+                                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                                        {
+                                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                                            if (modify != null)
+                                                recieptobj.ActionBy = modify.UserName;
+                                            recieptobj.ActionDate = x.ModifiedDate;
+                                        }
+                                        else
+                                        {
+                                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                                            if (created != null)
+                                                recieptobj.ActionBy = created.UserName;
+                                            recieptobj.ActionDate = x.CreatedDate;
+                                        }
+
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1536,7 +1601,7 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.KitStatus = s.Status.GetDescription();
                                         }
-                                        recieptobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : s.TreatmentType;
+                                        recieptobj.ProductTypeCode = setting != null && setting.IsBlindedStudy == true && isShow ? "" : s.TreatmentType;
                                         recieptobj.Comments = s.Comments;
                                         var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
                                          .Where(d => d.SupplyManagementKITSeriesId == s.Id && s.DeletedDate == null).Select(z => z.ProjectDesignVisit.DisplayName).ToList();
@@ -1587,27 +1652,38 @@ namespace GSC.Respository.Reports
                                         {
                                             recieptobj.Type = "Kit pack";
                                         }
-                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise)
+                                        if (setting != null && setting.KitCreationType == KitCreationType.KitWise && x.StudyProductTypeId > 0)
                                         {
-                                            if (x.StudyProductTypeId > 0)
+                                            type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
+                                            if (type != null && type.ProductUnitType == ProductUnitType.Kit)
                                             {
-                                                type = _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(s => s.Id == x.StudyProductTypeId).FirstOrDefault();
-                                                if (type != null && type.ProductUnitType == ProductUnitType.Kit)
-                                                {
-                                                    recieptobj.Type = "Kit";
-                                                }
-                                                else
-                                                {
-                                                    recieptobj.Type = "Individual";
-                                                }
+                                                recieptobj.Type = "Kit";
                                             }
+                                            else
+                                            {
+                                                recieptobj.Type = "Individual";
+                                            }
+
                                         }
                                         if (x.ProjectDesignVisit != null)
                                         {
                                             recieptobj.VisitName = x.ProjectDesignVisit.DisplayName;
                                         }
-                                        recieptobj.ActionBy = x.ModifiedDate != null && x.ModifiedBy > 0 ? _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault().UserName : _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault().UserName;
-                                        recieptobj.ActionDate = x.ModifiedDate != null && x.ModifiedBy > 0 ? x.ModifiedDate : x.CreatedDate;
+                                        if (x.ModifiedDate != null && x.ModifiedBy > 0)
+                                        {
+                                            var modify = _context.Users.Where(d => d.Id == x.ModifiedBy).FirstOrDefault();
+                                            if (modify != null)
+                                                recieptobj.ActionBy = modify.UserName;
+                                            recieptobj.ActionDate = x.ModifiedDate;
+                                        }
+                                        else
+                                        {
+                                            var created = _context.Users.Where(d => d.Id == x.CreatedBy).FirstOrDefault();
+                                            if (created != null)
+                                                recieptobj.ActionBy = created.UserName;
+                                            recieptobj.ActionDate = x.CreatedDate;
+                                        }
+
                                         recieptobj.ActionName = "Receipt";
                                         recieptobj.CourierName = shipment.CourierName;
                                         recieptobj.TrackingNumber = shipment.CourierTrackingNo;
@@ -1621,7 +1697,7 @@ namespace GSC.Respository.Reports
                                             recieptobj.KitStatus = s.Status.GetDescription();
                                         }
 
-                                        recieptobj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                                        recieptobj.ProductTypeCode = setting != null && setting.IsBlindedStudy == true && isShow ? "" : s.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
 
                                         if (s.SupplyManagementKIT.ProductReceiptId > 0)
                                         {
@@ -1664,7 +1740,7 @@ namespace GSC.Respository.Reports
             return _context.Randomization.Include(s => s.Project).Where(a => a.DeletedDate == null && a.Project.ParentProjectId == projectid && a.RandomizationNumber != null)
                 .Select(x => new DropDownDto
                 {
-                    Id = (int)x.Id,
+                    Id = x.Id,
                     Value = Convert.ToString(x.ScreeningNumber + " - " +
                                            x.Initial +
                                            (x.RandomizationNumber == null
@@ -1732,17 +1808,25 @@ namespace GSC.Respository.Reports
                             ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
                             if (randomizationIWRSReport.ProjectId > 0)
                             {
-                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                                var project = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault();
+                                if (project != null)
+                                    obj.ProjectCode = project.ProjectCode;
                             }
-                            obj.KitNo = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault().KitNo;
-                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            var kit = _context.SupplyManagementKITDetail.Where(z => z.Id == x.SupplyManagementKITDetailId).FirstOrDefault();
+                            if (kit != null)
+                                obj.KitNo = kit.KitNo;
+                            var role = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault();
+                            if (role != null)
+                                obj.RoleName = role.RoleName;
                             obj.KitStatus = x.Status.GetDescription();
                             obj.IsRetension = x.SupplyManagementKITDetail.IsRetension;
                             obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                             obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
-                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault();
+                            if (user != null)
+                                obj.ActionBy = user.UserName;
                             if (x.SupplyManagementShipmentId > 0)
                             {
                                 var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
@@ -1781,8 +1865,12 @@ namespace GSC.Respository.Reports
 
                             if (x.Status == KitStatus.Allocated)
                             {
-                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
-                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                                var randomizaton = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault();
+                                if (randomizaton != null)
+                                {
+                                    obj.RandomizationNo = randomizaton.RandomizationNumber;
+                                    obj.ScreeningNo = randomizaton.ScreeningNumber;
+                                }
                             }
 
                             list.Add(obj);
@@ -1811,7 +1899,8 @@ namespace GSC.Respository.Reports
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
-                            obj.IsRetension = kit.IsRetension;
+                            if (kit != null)
+                                obj.IsRetension = kit.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
@@ -1875,11 +1964,15 @@ namespace GSC.Respository.Reports
                             ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
                             if (randomizationIWRSReport.ProjectId > 0)
                             {
-                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                                var project = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault();
+                                if (project != null)
+                                    obj.ProjectCode = project.ProjectCode;
                             }
                             obj.KitNo = x.SupplyManagementKITSeries.KitNo;
                             obj.IsRetension = x.SupplyManagementKITSeries.IsRetension;
-                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            var role = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault();
+                            if (role != null)
+                                obj.RoleName = role.RoleName;
                             obj.KitStatus = x.Status.GetDescription();
 
                             var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
@@ -1887,10 +1980,11 @@ namespace GSC.Respository.Reports
                             if (visits.Count > 0)
                                 obj.VisitName = string.Join(",", visits.Distinct());
 
-
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITSeries.TreatmentType;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
-                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault();
+                            if (user != null)
+                                obj.ActionBy = user.UserName;
                             if (x.SupplyManagementShipmentId > 0)
                             {
                                 var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
@@ -1926,13 +2020,15 @@ namespace GSC.Respository.Reports
                                     }
                                 }
                             }
-
                             if (x.Status == KitStatus.Allocated)
                             {
-                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
-                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                                var randomization = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault();
+                                if (randomization != null)
+                                {
+                                    obj.RandomizationNo = randomization.RandomizationNumber;
+                                    obj.ScreeningNo = randomization.ScreeningNumber;
+                                }
                             }
-
                             list.Add(obj);
                         });
                     }
@@ -1955,13 +2051,14 @@ namespace GSC.Respository.Reports
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
-                            obj.IsRetension = kit.SupplyManagementKITSeries.IsRetension;
+                            if (kit != null)
+                                obj.IsRetension = kit.SupplyManagementKITSeries.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.ProductCode;
                             if (kit != null)
-                                obj.ImpPerKit = (int)kit.NoOfImp;
+                                obj.ImpPerKit = kit.NoOfImp;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
                             obj.ActionBy = x.CreatedByUser;
                             if (x.SupplyManagementShipmentId > 0)
@@ -2033,17 +2130,23 @@ namespace GSC.Respository.Reports
                             ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
                             if (randomizationIWRSReport.ProjectId > 0)
                             {
-                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                                var randomziation = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault();
+                                if (randomziation != null)
+                                    obj.ProjectCode = randomziation.ProjectCode;
                             }
                             obj.KitNo = x.SupplyManagementKITDetail.KitNo;
                             obj.IsRetension = x.SupplyManagementKITDetail.IsRetension;
-                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            var role = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault();
+                            if (role != null)
+                                obj.RoleName = role.RoleName;
                             obj.KitStatus = x.Status.GetDescription();
                             obj.VisitName = x.SupplyManagementKITDetail.SupplyManagementKIT.ProjectDesignVisit.DisplayName;
                             obj.ImpPerKit = (int)x.SupplyManagementKITDetail.NoOfImp;
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITDetail.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
-                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault();
+                            if (user != null)
+                                obj.ActionBy = user.UserName;
                             if (x.SupplyManagementShipmentId > 0)
                             {
                                 var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
@@ -2082,8 +2185,12 @@ namespace GSC.Respository.Reports
 
                             if (x.Status == KitStatus.Allocated)
                             {
-                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
-                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                                var randomization = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault();
+                                if (randomization != null)
+                                {
+                                    obj.RandomizationNo = randomization.RandomizationNumber;
+                                    obj.ScreeningNo = randomization.ScreeningNumber;
+                                }
                             }
 
                             list.Add(obj);
@@ -2112,7 +2219,8 @@ namespace GSC.Respository.Reports
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
-                            obj.IsRetension = kit.IsRetension;
+                            if (kit != null)
+                                obj.IsRetension = kit.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
@@ -2176,11 +2284,15 @@ namespace GSC.Respository.Reports
                             ProductAccountabilityCentralReport obj = new ProductAccountabilityCentralReport();
                             if (randomizationIWRSReport.ProjectId > 0)
                             {
-                                obj.ProjectCode = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault().ProjectCode;
+                                var project = _context.Project.Where(s => s.Id == randomizationIWRSReport.ProjectId).FirstOrDefault();
+                                if (project != null)
+                                    obj.ProjectCode = project.ProjectCode;
                             }
                             obj.KitNo = x.SupplyManagementKITSeries.KitNo;
                             obj.IsRetension = x.SupplyManagementKITSeries.IsRetension;
-                            obj.RoleName = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault().RoleName;
+                            var role = _context.SecurityRole.Where(z => z.Id == x.RoleId).FirstOrDefault();
+                            if (role != null)
+                                obj.RoleName = role.RoleName;
                             obj.KitStatus = x.Status.GetDescription();
 
                             var visits = _context.SupplyManagementKITSeriesDetail.Include(z => z.ProjectDesignVisit)
@@ -2191,7 +2303,9 @@ namespace GSC.Respository.Reports
 
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.SupplyManagementKITSeries.TreatmentType;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
-                            obj.ActionBy = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault().UserName;
+                            var user = _context.Users.Where(s => s.Id == x.CreatedBy).FirstOrDefault();
+                            if (user != null)
+                                obj.ActionBy = user.UserName;
                             if (x.SupplyManagementShipmentId > 0)
                             {
                                 var shipment = _context.SupplyManagementShipment.Include(a => a.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(s => s.Id == x.SupplyManagementShipmentId).FirstOrDefault();
@@ -2230,8 +2344,12 @@ namespace GSC.Respository.Reports
 
                             if (x.Status == KitStatus.Allocated)
                             {
-                                obj.RandomizationNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().RandomizationNumber;
-                                obj.ScreeningNo = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault().ScreeningNumber;
+                                var randomization = _context.Randomization.Where(a => a.Id == x.RandomizationId).FirstOrDefault();
+                                if (randomization != null)
+                                {
+                                    obj.RandomizationNo = randomization.RandomizationNumber;
+                                    obj.ScreeningNo = randomization.ScreeningNumber;
+                                }
                             }
 
                             list.Add(obj);
@@ -2256,13 +2374,14 @@ namespace GSC.Respository.Reports
                             obj.ProjectCode = x.ProjectCode;
                             obj.VisitName = x.VisitName;
                             obj.KitNo = x.KitNo;
-                            obj.IsRetension = kit.SupplyManagementKITSeries.IsRetension;
+                            if (kit != null)
+                                obj.IsRetension = kit.SupplyManagementKITSeries.IsRetension;
                             obj.ScreeningNo = x.ScreeningNo;
                             obj.RandomizationNo = x.RandomizationNo;
                             obj.SiteCode = x.SiteCode;
                             obj.ProductTypeCode = setting.IsBlindedStudy == true && isShow ? "" : x.ProductCode;
                             if (kit != null)
-                                obj.ImpPerKit = (int)kit.NoOfImp;
+                                obj.ImpPerKit = kit.NoOfImp;
                             obj.ActionDatestr = Convert.ToDateTime(x.CreatedDate).ToString("dddd, dd MMMM yyyy");
                             obj.ActionBy = x.CreatedByUser;
                             if (x.SupplyManagementShipmentId > 0)

@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
 {
-  public  class ResourceTypeDto: BaseDto
+    public class ResourceTypeDto : BaseDto
     {
         [Required(ErrorMessage = "Resource Code is required.")]
         public string ResourceCode { get; set; }
@@ -23,7 +23,7 @@ namespace GSC.Data.Dto.CTMS
         public string OwnerName { get; set; }
     }
 
-    public class ResourceTypeGridDto: BaseAuditDto
+    public class ResourceTypeGridDto : BaseAuditDto
     {
         public int? TaskId { get; set; }
         public string ResourceCode { get; set; }
@@ -46,16 +46,16 @@ namespace GSC.Data.Dto.CTMS
         public decimal? LocalCurrencyRate { get; set; }
         public string LocalCurrencySymbol { get; set; }
         public string GlobalCurrencySymbol { get; set; }
-        public int?  UserId { get; set; }
-        public int?  SecurityRoleId { get; set; }
+        public int? UserId { get; set; }
+        public int? SecurityRoleId { get; set; }
     }
-    public class ResourceByEdit 
+    public class ResourceByEdit
     {
         public int? resourceId { get; set; }
         public int? subresource { get; set; }
         public int? designation { get; set; }
         public int? nameOfMaterial { get; set; }
-        public int? rollUser {  get; set; }
+        public int? rollUser { get; set; }
         public int? Cost { get; set; }
         public int? NoOfUnit { get; set; }
         public int? TotalCost { get; set; }
