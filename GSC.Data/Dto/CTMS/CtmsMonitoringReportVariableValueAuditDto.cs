@@ -10,7 +10,7 @@ namespace GSC.Data.Dto.CTMS
         public string Value { get; set; }
         public string Note { get; set; }
         public string CreatedByName { get; set; }
-        public DateTime? CreatedDate{ get; set; }
+        public DateTime? CreatedDate { get; set; }
         public string OldValue { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }

@@ -54,7 +54,7 @@ namespace GSC.Api.Controllers.CTMS
             ctmsActionPointDto.Status = Helper.CtmsActionPointStatus.Open;
             var ctmsActionPoint = _mapper.Map<CtmsActionPoint>(ctmsActionPointDto);
             _ctmsActionPointRepository.Add(ctmsActionPoint);
-            if (_uow.Save() <= 0) throw new Exception("Creating action point failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating action point failed on save."));
 
             return Ok(ctmsActionPoint.Id);
         }
@@ -72,7 +72,7 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsActionPoint = _mapper.Map<CtmsActionPoint>(ctmsActionPointDto);
 
             _ctmsActionPointRepository.Update(ctmsActionPoint);
-            if (_uow.Save() <= 0) throw new Exception("Updating action point failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating action point failed on save."));
             return Ok(ctmsActionPoint.Id);
         }
 
@@ -100,7 +100,7 @@ namespace GSC.Api.Controllers.CTMS
             ctmsActionPoint.Status = Helper.CtmsActionPointStatus.Closed;
 
             _ctmsActionPointRepository.Update(ctmsActionPoint);
-            if (_uow.Save() <= 0) throw new Exception("Close action point failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Close action point failed on save."));
             return Ok(ctmsActionPoint.Id);
         }
 

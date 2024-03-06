@@ -11,6 +11,5 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetPhaseManagementDropDown();
         string Duplicate(PhaseManagement objSave);
         List<PhaseManagementGridDto> GetPhaseManagementList(bool isDeleted);
-
     }
 }

@@ -4,10 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
-using GSC.Domain.Context;
-using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
-using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,8 +20,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IUnitOfWork _uow;
         
         public StudyPlanResourceController(IStudyPlanResourceRepository studyPlanTaskResourceRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _studyPlanTaskResourceRepository = studyPlanTaskResourceRepository;
             _uow = uow;
@@ -63,7 +59,7 @@ namespace GSC.Api.Controllers.Master
                 }
                 _studyPlanTaskResourceRepository.Add(taskResource);        
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Resource failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Resource failed on save."));
             //Update TotalCost in Study level and task level
             _studyPlanTaskResourceRepository.TotalCostUpdate(taskResource);
 
@@ -86,7 +82,7 @@ namespace GSC.Api.Controllers.Master
             }
             _studyPlanTaskResourceRepository.Update(taskResource);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Resource failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Resource failed on save."));
             //Update TotalCost in Study level and task level
             _studyPlanTaskResourceRepository.TotalCostUpdate(taskResource);
             return Ok(taskResource.Id);

@@ -43,7 +43,7 @@ namespace GSC.Api.Controllers.CTMS
             if (id <= 0) return BadRequest();
             var weekend = _weekEndMasterRepository.Find(id);
             var weekendDto = _mapper.Map<WeekEndMasterDto>(weekend);
-            weekendDto.SiteId = weekendDto.IsSite == true ? weekendDto.ProjectId : (int?)null;
+            weekendDto.SiteId = weekendDto.IsSite == true ? weekendDto.ProjectId : null;
             weekendDto.ProjectId = weekendDto.IsSite == true ? (int)_context.Project.Find(weekendDto.ProjectId).ParentProjectId : weekendDto.ProjectId;
             return Ok(weekendDto);
         }
@@ -93,7 +93,7 @@ namespace GSC.Api.Controllers.CTMS
 
                 _weekEndMasterRepository.Add(weekend);
             }
-            if (_uow.Save() <= 0) throw new Exception("weekend is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("weekend is failed on save."));
             return Ok();
         }
 
@@ -109,7 +109,7 @@ namespace GSC.Api.Controllers.CTMS
 
                 _weekEndMasterRepository.Update(weekend);
             }
-            if (_uow.Save() <= 0) throw new Exception("Weekend is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Weekend is failed on save."));
             return Ok();
         }
 

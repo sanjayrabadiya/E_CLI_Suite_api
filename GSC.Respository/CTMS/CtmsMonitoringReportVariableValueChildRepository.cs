@@ -6,10 +6,9 @@ namespace GSC.Respository.CTMS
 {
     public class CtmsMonitoringReportVariableValueChildRepository : GenericRespository<CtmsMonitoringReportVariableValueChild>, ICtmsMonitoringReportVariableValueChildRepository
     {
-
         public CtmsMonitoringReportVariableValueChildRepository(IGSCContext context)
             : base(context)
-        {}
+        { }
         public void Save(CtmsMonitoringReportVariableValue ctmsMonitoringReportVariableValue)
         {
             if (ctmsMonitoringReportVariableValue.Children != null)

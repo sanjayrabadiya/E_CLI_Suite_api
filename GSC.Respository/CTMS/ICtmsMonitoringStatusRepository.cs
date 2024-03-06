@@ -10,7 +10,6 @@ namespace GSC.Respository.CTMS
         List<CtmsMonitoringStatusGridDto> GetCtmsMonitoringStatusList(int CtmsMonitoringId);
         CtmsMonitoringStatusGridDto GetSiteStatus(int ProjectId);
         string GetFormApprovedOrNot(int projectId, int siteId, int tabNumber);
-
         void UpdateSiteStatus(CtmsMonitoringStatusDto ctmsMonitoringDto);
     }
 }

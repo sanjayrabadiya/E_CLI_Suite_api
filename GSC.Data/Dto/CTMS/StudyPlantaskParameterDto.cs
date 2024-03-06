@@ -42,14 +42,12 @@ namespace GSC.Data.Dto.CTMS
         public int DependentTaskId { get; set; }
         public ActivityType ActivityType { get; set; }
         public int OffSet { get; set; }
-
     }
     public class NextWorkingDateParameterDto
     {
         public int StudyPlanId { get; set; }
         public int Duration { get; set; }
         public DateTime StartDate { get; set; }
-
     }
     public class PreApprovalStatusDto
     {

@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using GSC.Api.Controllers.Common;
+﻿using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Respository.CTMS;

@@ -12,21 +12,18 @@ namespace GSC.Respository.Master
     public class VendorManagementRepository : GenericRespository<VendorManagement>, IVendorManagementRepository
     {
         private readonly IMapper _mapper;
-
         public VendorManagementRepository(IGSCContext context,
             IMapper mapper)
             : base(context)
         {
             _mapper = mapper;
         }
-
         public List<DropDownDto> GetVendorDropDown()
         {
             return All.Where(x =>
                     x.VendorManagementAuditId == null)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.CompanyName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
-
         public string Duplicate(VendorManagement objSave)
         {
             if (All.Any(x => x.Id != objSave.Id && x.ServiceType == objSave.ServiceType.Trim() && x.DeletedDate == null))

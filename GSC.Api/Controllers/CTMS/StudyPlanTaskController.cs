@@ -111,7 +111,7 @@ namespace GSC.Api.Controllers.CTMS
             var revertdata = _studyPlanTaskRepository.Find(taskmasterDto.Id);
             _studyPlanTaskRepository.Update(tastMaster);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Task failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Task failed on save."));
             string mvalidate = _studyPlanTaskRepository.UpdateDependentTask(taskmasterDto.Id);
             if (!string.IsNullOrEmpty(mvalidate))
             {

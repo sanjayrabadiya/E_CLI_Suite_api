@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
@@ -53,7 +52,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(ctmsMonitoringDto);
             _ctmsMonitoringRepository.Add(ctmsMonitoring);
-            if (_uow.Save() <= 0) throw new Exception("Creating Monitoring failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Monitoring failed on save."));
 
             return Ok(ctmsMonitoring.Id);
         }
@@ -64,8 +63,8 @@ namespace GSC.Api.Controllers.CTMS
             if (ctmsMonitoringDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            
-            if(ctmsMonitoringDto.IfApplicable != true)//if not Applicable so not add in StudyPlanTask
+
+            if (ctmsMonitoringDto.IfApplicable != true)//if not Applicable so not add in StudyPlanTask
             {
                 var validatemsg = _ctmsMonitoringRepository.UpdateStudyPlanTask(ctmsMonitoringDto);
                 if (!string.IsNullOrEmpty(validatemsg))
@@ -76,7 +75,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(ctmsMonitoringDto);
             _ctmsMonitoringRepository.Update(ctmsMonitoring);
-            if (_uow.Save() <= 0) throw new Exception("Updating Monitoring failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Monitoring failed on save."));
             return Ok(ctmsMonitoring.Id);
         }
 
@@ -156,7 +155,7 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(record);
             ctmsMonitoring.IfMissed = true;
             _ctmsMonitoringRepository.Update(ctmsMonitoring);
-            if (_uow.Save() <= 0) throw new Exception("Updating Missed Monitoring failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Missed Monitoring failed on save."));
 
             return Ok();
         }
@@ -171,7 +170,7 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsMonitoring = _mapper.Map<CtmsMonitoring>(record);
             ctmsMonitoring.IfReSchedule = true;
             _ctmsMonitoringRepository.Update(ctmsMonitoring);
-            if (_uow.Save() <= 0) throw new Exception("Updating Missed Monitoring failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Missed Monitoring failed on save."));
             record.Id = 0;
             _ctmsMonitoringRepository.AddReSchedule(record);
             return Ok();

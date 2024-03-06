@@ -66,7 +66,7 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             _overTimeMetricsRepository.Add(taskMaster);
-            if (_uow.Save() <= 0) throw new Exception("Over Time failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Over Time failed on save."));
 
             return Ok(taskMaster.Id);
         }
@@ -84,7 +84,7 @@ namespace GSC.Api.Controllers.CTMS
                 var taskmaster = _mapper.Map<OverTimeMetrics>(task);
                 taskmaster.If_Active = false;
                 _overTimeMetricsRepository.Update(taskmaster);
-                if (_uow.Save() <= 0) throw new Exception("Updating Task Master failed on save.");
+                if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
                 return Ok(taskmaster.Id);
             }
             return Ok("");
@@ -124,6 +124,5 @@ namespace GSC.Api.Controllers.CTMS
         {
             return Ok(_overTimeMetricsRepository.GetChildProjectWithParentProjectDropDown(parentProjectId));
         }
-
     }
 }

@@ -10,17 +10,15 @@ using GSC.Domain.Context;
 
 namespace GSC.Respository.CTMS
 {
-   public  class PassThroughCostActivityRepository : GenericRespository<PassThroughCostActivity>, IPassThroughCostActivityRepository
+    public class PassThroughCostActivityRepository : GenericRespository<PassThroughCostActivity>, IPassThroughCostActivityRepository
     {
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
 
         public PassThroughCostActivityRepository(IGSCContext context,
             IMapper mapper)
             : base(context)
         {
             _mapper = mapper;
-            _context=context;
         }
         public string Duplicate(PassThroughCostActivity objSave)
         {

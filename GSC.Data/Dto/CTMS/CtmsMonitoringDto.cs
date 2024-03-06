@@ -1,9 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Helper;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
 
 namespace GSC.Data.Dto.CTMS
 {
@@ -17,7 +13,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? ActualEndDate { get; set; }
         public int? ParentId { get; set; }
         public bool? IfMissed { get; set; }
-        public bool?  IfReSchedule { get; set; }
+        public bool? IfReSchedule { get; set; }
         public bool? IfApplicable { get; set; }
     }
 

@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _taskTemplateRepository.Add(taskTemplate);
-            if (_uow.Save() <= 0) throw new Exception("Creating Study Tracker template failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Study Tracker template failed on save."));
             return Ok(taskTemplate.Id);
         }
 
@@ -66,7 +66,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             _taskTemplateRepository.Update(taskTemplate);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Study Tracker Template failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Study Tracker Template failed on save."));
             return Ok(taskTemplate.Id);
         }
 

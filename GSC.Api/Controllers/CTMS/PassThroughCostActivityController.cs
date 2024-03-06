@@ -54,7 +54,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _passThroughCostActivityRepository.Add(PassThroughCostActivity);
-            if (_uow.Save() <= 0) throw new Exception("Creating Pass Through Cost Activity failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Pass Through Cost Activity failed on save."));
             return Ok(PassThroughCostActivity.Id);
         }
 
@@ -73,7 +73,7 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             _passThroughCostActivityRepository.Update(PassThroughCostActivity);
-            if (_uow.Save() <= 0) throw new Exception("Updating Pass Through Cost Activity failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Pass Through Cost Activity failed on save."));
             return Ok(PassThroughCostActivity.Id);
         }
 

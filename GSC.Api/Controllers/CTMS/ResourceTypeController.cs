@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             _resourcetypeRepository.Add(ResourceType);
-            if (_uow.Save() <= 0) throw new Exception("Creating ResourceType failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating ResourceType failed on save."));
             return Ok(ResourceType.Id);
         }
 
@@ -78,7 +78,7 @@ namespace GSC.Api.Controllers.CTMS
             /* Added by swati for effective Date on 02-06-2019 */
             _resourcetypeRepository.AddOrUpdate(resourcetype);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating ResourceType failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating ResourceType failed on save."));
             return Ok(resourcetype.Id);
         }
 

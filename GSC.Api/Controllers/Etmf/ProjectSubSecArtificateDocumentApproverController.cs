@@ -100,7 +100,7 @@ namespace GSC.Api.Controllers.Etmf
             else
             {
                 var firstRecord = projectArtificateDocumentApproveDto.OrderBy(x => x.SequenceNo).FirstOrDefault();
-                if (firstRecord.IsApproved == null)
+                if (firstRecord != null && firstRecord.IsApproved == null)
                     _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(firstRecord);
             }
 

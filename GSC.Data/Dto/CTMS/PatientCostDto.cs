@@ -10,7 +10,7 @@ namespace GSC.Data.Dto.CTMS
         public int ProjectId { get; set; }
         public int? ProcedureId { get; set; }
         public string ProcedureName { get; set; }
-        public int?  ProjectDesignVisitId { get; set; }
+        public int? ProjectDesignVisitId { get; set; }
         public string VisitName { get; set; }
         public string VisitDescription { get; set; }
         public decimal? Rate { get; set; }
@@ -36,8 +36,8 @@ namespace GSC.Data.Dto.CTMS
     }
     public class visitGridData
     {
-        public int?  VisitId { get; set; }
+        public int? VisitId { get; set; }
         public string VisitName { get; set; }
         public decimal? FinalCost { get; set; }
     }
- }
+}

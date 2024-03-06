@@ -37,7 +37,6 @@ namespace GSC.Data.Dto.CTMS
         public bool IsNa { get; set; }
         public StudyLevelFormVariable StudyLevelFormVariable { get; set; }
         public ICollection<CtmsMonitoringReportVariableValueChild> Children { get; set; }
-
         public string DocPath { get; set; }
     }
 

@@ -4,7 +4,6 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -14,16 +13,12 @@ namespace GSC.Respository.CTMS
 {
     public class PassThroughCostRepository : GenericRespository<PassThroughCost>, IPassThroughCostRepository
     {
-
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
         public PassThroughCostRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }
@@ -72,8 +67,10 @@ namespace GSC.Respository.CTMS
             var CurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlan.Id && Currency.Select(y => y.Id).Contains((int)s.CurrencyId) && s.DeletedDate == null).FirstOrDefault();
 
             if(CurrencyRate != null)
-            passThroughCost.Total = passThroughCost.Total * CurrencyRate.LocalCurrencyRate;
-            passThroughCost.CurrencyRateId = CurrencyRate.Id;
+            {
+                passThroughCost.Total = passThroughCost.Total * CurrencyRate.LocalCurrencyRate;
+                passThroughCost.CurrencyRateId = CurrencyRate.Id;
+            }
 
             return passThroughCost;
         }

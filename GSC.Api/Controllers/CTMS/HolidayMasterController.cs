@@ -60,7 +60,7 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             _holidayMasterRepository.Add(holiDay);
-            if (_uow.Save() <= 0) throw new Exception("Creating Holiday failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Holiday failed on save."));
             return Ok(holiDay.Id);
         }
 
@@ -81,7 +81,7 @@ namespace GSC.Api.Controllers.CTMS
 
             _holidayMasterRepository.Update(holiDay);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating holiday failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating holiday failed on save."));
             return Ok(holiDay.Id);
         }
 

@@ -56,7 +56,7 @@ namespace GSC.Api.Controllers.CTMS
             WorkingDay.Id = 0;
             var WorkingDaydata = _mapper.Map<WorkingDay>(WorkingDay);
             _workingDayRepository.Add(WorkingDaydata);
-            if (_uow.Save() <= 0) throw new Exception("Creating Holiday failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Holiday failed on save."));
             WorkingDay.Id = WorkingDaydata.Id;
             _workingDayRepository.AddSiteType(WorkingDay);
             return Ok(WorkingDaydata.Id);
@@ -70,7 +70,7 @@ namespace GSC.Api.Controllers.CTMS
             var WorkingDaydata = _mapper.Map<WorkingDay>(WorkingDay);
             UpdateSiteType(WorkingDaydata);
             _workingDayRepository.Update(WorkingDaydata);
-            if (_uow.Save() <= 0) throw new Exception("Updating holiday failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating holiday failed on save."));
             return Ok(WorkingDaydata.Id);
         }
         private void UpdateSiteType(WorkingDay workingDay)
