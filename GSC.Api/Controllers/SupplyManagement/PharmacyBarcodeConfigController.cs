@@ -5,7 +5,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Barcode;
 using GSC.Data.Entities.Barcode;
-using GSC.Domain.Context;
 using GSC.Respository.Barcode;
 using Microsoft.AspNetCore.Mvc;
 
@@ -68,7 +67,7 @@ namespace GSC.Api.Controllers.Barcode
             }
 
 
-            if (_uow.Save() <= 0) throw new Exception("Creating barcode config failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating barcode config failed on save."));
             return Ok(barcodeConfig.Id);
         }
 
@@ -93,7 +92,7 @@ namespace GSC.Api.Controllers.Barcode
 
             UpdateBarcodeDisplayInformaition(barcodeConfig);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating barcode config failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating barcode config failed on save."));
             return Ok(barcodeConfig.Id);
         }
 

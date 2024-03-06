@@ -1,26 +1,20 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
-using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -90,7 +84,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementFector.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementFector.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFectorRepository.Add(supplyManagementFector);
-            if (_uow.Save() <= 0) throw new Exception("Creating fector failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating fector failed on save."));
             return Ok(supplyManagementFector.Id);
         }
         [HttpPut]
@@ -103,7 +97,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementFector.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementFector.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementFectorRepository.Update(supplyManagementFector);
-            if (_uow.Save() <= 0) throw new Exception("Updating fector failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating fector failed on save."));
 
             return Ok(supplyManagementFector.Id);
         }
@@ -126,7 +120,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             var verifyRecord = _supplyManagementFectorDetailRepository.All.Where(x => x.SupplyManagementFectorId == record.Id).ToList();
 
-            if (verifyRecord != null)
+            if (verifyRecord.Any())
             {
                 foreach (var item in verifyRecord)
                 {
@@ -152,7 +146,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _supplyManagementFectorRepository.Active(record);
             var list = _supplyManagementFectorDetailRepository.All.Where(x => x.SupplyManagementFectorId == id).ToList();
-            if (list != null)
+            if (list.Any())
             {
                 foreach (var item in list)
                 {

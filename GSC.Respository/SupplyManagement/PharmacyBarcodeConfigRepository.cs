@@ -3,29 +3,22 @@ using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Barcode;
 using GSC.Data.Entities.Barcode;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Barcode
 {
     public class PharmacyBarcodeConfigRepository : GenericRespository<PharmacyBarcodeConfig>, IPharmacyBarcodeConfigRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
+      
         private readonly IMapper _mapper;
 
-        public PharmacyBarcodeConfigRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public PharmacyBarcodeConfigRepository(IGSCContext context,IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _mapper = mapper;
         }
 
@@ -81,14 +74,6 @@ namespace GSC.Respository.Barcode
                     DisplayValue = c.DisplayValue,
                     FontSize = c.FontSize,
                 }).FirstOrDefault();
-        }
-
-        public PharmacyBarcodeConfig GetBarcodeConfig(int barcodeTypeId)
-        {
-            var barcode = _context.PharmacyBarcodeConfig.Where(t => (int)t.BarcodeType == barcodeTypeId)
-                .AsNoTracking().FirstOrDefault();
-
-            return barcode;
         }
 
         public string ValidateBarcodeConfig(PharmacyBarcodeConfig pharmacyBarcodeConfig)

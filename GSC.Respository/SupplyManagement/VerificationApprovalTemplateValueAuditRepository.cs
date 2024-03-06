@@ -3,21 +3,18 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.SupplyManagement
 {
     public class VerificationApprovalTemplateValueAuditRepository : GenericRespository<VerificationApprovalTemplateValueAudit>, IVerificationApprovalTemplateValueAuditRepository
     {
-        private readonly IGSCContext _context;
+
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public VerificationApprovalTemplateValueAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
-        {
-            _context = context;
+        {          
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 

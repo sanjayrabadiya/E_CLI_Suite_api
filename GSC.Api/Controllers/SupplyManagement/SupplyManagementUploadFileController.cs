@@ -84,8 +84,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            //if (_uow.Save() <= 0) throw new Exception("Creating updaload data failed on save.");
+           
             return Ok(supplyManagementUploadFile.Id);
         }
 
@@ -116,7 +115,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
             _supplyManagementUploadFileRepository.Update(supplyManagementUploadFile);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating lab management data failed on action.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating lab management data failed on action."));
             _supplyManagementUploadFileRepository.SendRandomizationUploadSheetEmail(supplyManagementUploadFile);
             return Ok(supplyManagementUploadFile.Id);
         }

@@ -1,24 +1,15 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
-using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -88,7 +79,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             var supplyManagementFectorDetail = _mapper.Map<SupplyManagementFectorDetail>(supplyManagementFectorDetailDto);
 
             _supplyManagementFectorDetailRepository.Add(supplyManagementFectorDetail);
-            if (_uow.Save() <= 0) throw new Exception("Creating fector detail failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating fector detail failed on save."));
 
             _supplyManagementFectorRepository.UpdateFactorFormula(supplyManagementFectorDetailDto.SupplyManagementFectorId);
             return Ok(supplyManagementFectorDetail.Id);
@@ -115,7 +106,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             var supplyManagementFectorDetail = _mapper.Map<SupplyManagementFectorDetail>(supplyManagementFectorDetailDto);
 
             _supplyManagementFectorDetailRepository.Update(supplyManagementFectorDetail);
-            if (_uow.Save() <= 0) throw new Exception("Updating fector detail failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating fector detail failed on save."));
             _supplyManagementFectorRepository.UpdateFactorFormula(supplyManagementFectorDetailDto.SupplyManagementFectorId);
             return Ok(supplyManagementFectorDetail.Id);
         }

@@ -2,7 +2,7 @@
 using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Dto.Report.Pdf
 {
@@ -44,8 +44,7 @@ namespace GSC.Data.Dto.Report.Pdf
         public string TemplateName { get; set; }
         public int DesignOrder { get; set; }
         public int? RepeatSeqNo { get; set; }
-        //public int ProjectDesignId { get; set; }
-
+       
         public string Label { get; set; }
 
         public string PreLabel { get; set; }

@@ -1,11 +1,9 @@
 ﻿using GSC.Api.Controllers.Common;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
-using GSC.Helper;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.Report
 {

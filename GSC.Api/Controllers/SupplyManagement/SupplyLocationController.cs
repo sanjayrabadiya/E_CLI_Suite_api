@@ -3,15 +3,11 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
-using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -62,7 +58,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             location.IpAddress = _jwtTokenAccesser.IpAddress;
             location.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyLocationRepository.Add(location);
-            if (_uow.Save() <= 0) throw new Exception("Creating Location failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Location failed on save."));
             return Ok(location.Id);
         }
 
@@ -84,7 +80,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             location.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyLocationRepository.AddOrUpdate(location);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Location failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Location failed on save."));
             return Ok(location.Id);
         }
 

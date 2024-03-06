@@ -1,26 +1,9 @@
-﻿using AutoMapper;
-using GSC.Api.Controllers.Common;
-using GSC.Api.Helpers;
-using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Master;
-using GSC.Data.Dto.SupplyManagement;
+﻿using GSC.Api.Controllers.Common;
 using GSC.Data.Entities.Project.Generalconfig;
-using GSC.Data.Entities.SupplyManagement;
-using GSC.Domain.Context;
-using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
 using GSC.Respository.Project.GeneralConfig;
-using GSC.Respository.Project.StudyLevelFormSetup;
-using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -31,9 +14,7 @@ namespace GSC.Api.Controllers.SupplyManagement
  
         private readonly IEmailConfigurationEditCheckRoleRepository _emailConfigurationEditCheckRoleRepository;
         private readonly IEmailConfigurationEditCheckRepository _emailConfigurationEditCheckRepository;
-
         public EmailConfigurationEditCheckRoleController(
-       
          IEmailConfigurationEditCheckRoleRepository emailConfigurationEditCheckRoleRepository,
          IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository
         )

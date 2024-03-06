@@ -6,12 +6,8 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.Configuration;
-using GSC.Respository.Master;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
-using GSC.Shared.Security;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -22,18 +18,18 @@ namespace GSC.Api.Controllers.SupplyManagement
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SupplyManagementKITSeriesController : BaseController
+    public class SupplyManagementKitSeriesController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly ISupplyManagementKITRepository _supplyManagementKITRepository;
+        private readonly ISupplyManagementKitRepository _supplyManagementKITRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
-        private readonly ISupplyManagementKITSeriesRepository _supplyManagementKITSeriesRepository;
-        public SupplyManagementKITSeriesController(ISupplyManagementKITRepository supplyManagementKITRepository,
+        private readonly ISupplyManagementKitSeriesRepository _supplyManagementKITSeriesRepository;
+        public SupplyManagementKitSeriesController(ISupplyManagementKitRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITSeriesRepository supplyManagementKITSeriesRepository)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKitSeriesRepository supplyManagementKITSeriesRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;
@@ -118,7 +114,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                     _supplyManagementKITSeriesRepository.Add(supplyManagementKitSeries);
                     if (!_supplyManagementKITSeriesRepository.All.Any(x => x.KitNo == supplyManagementKitSeries.KitNo && x.ProjectId == supplyManagementKITSeriesDto.ProjectId && x.DeletedDate == null))
                     {
-                        if (_uow.Save() <= 0) throw new Exception("Creating Kit Series Creation failed on save.");
+                        if (_uow.Save() <= 0) return Ok(new Exception("Creating Kit Series Creation failed on save."));
 
                         supplyManagementKITSeriesDto.Id = supplyManagementKitSeries.Id;
                         supplyManagementKITSeriesDto.KitNo = supplyManagementKitSeries.KitNo;
@@ -151,7 +147,7 @@ namespace GSC.Api.Controllers.SupplyManagement
 
 
             var visitdetails = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == record.Id).ToList();
-            if (visitdetails != null && visitdetails.Count > 0)
+            if (visitdetails.Any())
             {
                 foreach (var item1 in visitdetails)
                 {
@@ -191,7 +187,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 }
 
                 var visitdetails = _context.SupplyManagementKITSeriesDetail.Where(x => x.SupplyManagementKITSeriesId == record.Id).ToList();
-                if (visitdetails != null && visitdetails.Count > 0)
+                if (visitdetails.Any())
                 {
                     foreach (var item1 in visitdetails)
                     {
@@ -234,7 +230,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetLotBatchList/{projectId}/{pharmacyStudyProductTypeId}")]
         public IActionResult GetLotBatchList(int projectId, int pharmacyStudyProductTypeId)
         {
-            var data = _context.ProductVerification.Include(x => x.ProductReceipt).ToList()
+            var data = _context.ProductVerification.Include(x => x.ProductReceipt)
                 .Where(x => x.DeletedDate == null && x.ProductReceipt.Status == ProductVerificationStatus.Approved
                 && x.ProductReceipt.PharmacyStudyProductTypeId == pharmacyStudyProductTypeId
                 && x.ProductReceipt.ProjectId == projectId)

@@ -4,13 +4,9 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -64,7 +60,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             _supplyManagementConfigurationRepository.Add(configuration);
-            if (_uow.Save() <= 0) throw new Exception("Creating Supply Management Configuration failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Supply Management Configuration failed on save."));
             return Ok(configuration.Id);
         }
 
@@ -86,7 +82,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             /* Added by swati for effective Date on 02-06-2019 */
             _supplyManagementConfigurationRepository.AddOrUpdate(configuration);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Supply Management Configuration failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Supply Management Configuration failed on save."));
             return Ok(configuration.Id);
         }
 

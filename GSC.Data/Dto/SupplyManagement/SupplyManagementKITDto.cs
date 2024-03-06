@@ -1,9 +1,7 @@
 ﻿using GSC.Data.Dto.Master;
 using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Location;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
-using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 
@@ -17,8 +15,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public int? ProjectDesignVisitId { get; set; }
         public int NoOfImp { get; set; }
         public int NoofPatient { get; set; }
-        //public int NoOfKits { get; set; }
-        //public int TotalUnits { get; set; }
+     
         public int PharmacyStudyProductTypeId { get; set; }
         public int? AuditReasonId { get; set; }
         public string ReasonOth { get; set; }
@@ -40,8 +37,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string VisitName { get; set; }
         public int NoOfImp { get; set; }
         public int NoofPatient { get; set; }
-        //public int NoOfKits { get; set; }
-        //public int TotalUnits { get; set; }
+       
         public string ProductTypeName { get; set; }
         public int ProjectId { get; set; }
         public int? CountryId { get; set; }

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Etmf;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
@@ -67,10 +65,10 @@ namespace GSC.Respository.ProjectRight
                         UserId = r.UserId,
                         Name = r.User.UserName,
                         IsSelected = All.Any(b => b.ProjectId == projectId && b.RoleId == c.Id && b.UserId == r.UserId && b.DeletedDate == null)
-                    }).Where(x => x.IsSelected == false).ToList()
+                    }).Where(x => !x.IsSelected).ToList()
             }).ToList();
 
-            return roles.Where(x => x.users.Count() != 0).ToList();
+            return roles.Where(x => x.users.Count != 0).ToList();
         }
 
 
@@ -94,84 +92,103 @@ namespace GSC.Respository.ProjectRight
                                                                                  && x.UserId == itemDto.UserId &&
                                                                                  x.DeletedDate == null
                                                                                  && !x.IsReview);
-
-                    var checkparentTrainig = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId;
-                    var checkchildTrainig = _context.Project.Where(x => x.ParentProjectId == projectId).ToList();
-
-                    var isProjectRightFound = new Data.Entities.ProjectRight.ProjectRight();
-                    var isProjectRightUserFound = new Data.Entities.ProjectRight.ProjectRight();
-
-                    if (checkparentTrainig != null)
+                    var project = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();
+                    if (project != null)
                     {
-                        isProjectRightFound = All.Where(x =>
-                            x.ProjectId == checkparentTrainig && x.UserId == itemDto.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
-                        isProjectRightUserFound = All.Where(x => x.ProjectId == projectId && x.UserId == itemDto.UserId).OrderBy(x => x.Id).FirstOrDefault();
-                    }
-                    else
-                    {
-                        var lstIsProjectRightFound = new List<Data.Entities.ProjectRight.ProjectRight>();
-                        foreach (var childProject in checkchildTrainig)
+                        var checkparentTrainig = project.ParentProjectId;
+                        var checkchildTrainig = _context.Project.Where(x => x.ParentProjectId == projectId).ToList();
+
+
+
+                        if (checkparentTrainig != null)
                         {
-                            var projectright = All.Where(x =>
-                                x.ProjectId == childProject.Id && x.UserId == itemDto.UserId &&
-                                x.RoleId == itemDto.RoleId).OrderByDescending(x => x.Id).FirstOrDefault();
+                            var isProjectRightFound = All.Where(x =>
+                                 x.ProjectId == checkparentTrainig && x.UserId == itemDto.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+                            var isProjectRightUserFound = All.Where(x => x.ProjectId == projectId && x.UserId == itemDto.UserId).OrderBy(x => x.Id).FirstOrDefault();
 
-                            if (projectright != null) lstIsProjectRightFound.Add(projectright);
+                            if (isProjectRightFound != null)
+                                Add(new Data.Entities.ProjectRight.ProjectRight
+                                {
+                                    ProjectId = projectId,
+                                    UserId = itemDto.UserId,
+                                    RoleId = itemDto.RoleId,
+                                    IsReviewDone = isProjectRightFound.IsReviewDone
+                                });
+                            else if (isProjectRightUserFound != null)
+                                Add(new Data.Entities.ProjectRight.ProjectRight
+                                {
+                                    ProjectId = projectId,
+                                    UserId = itemDto.UserId,
+                                    RoleId = itemDto.RoleId,
+                                    IsReviewDone = isProjectRightUserFound.IsReviewDone
+                                });
+                            else
+                                Add(new Data.Entities.ProjectRight.ProjectRight
+                                {
+                                    ProjectId = projectId,
+                                    UserId = itemDto.UserId,
+                                    RoleId = itemDto.RoleId,
+                                    IsReviewDone = isDocumentFound
+                                });
                         }
-
-                        var isExist = lstIsProjectRightFound.Any(l => l.IsReviewDone == false);
-                        if (isExist)
-                            isProjectRightFound = null;
                         else
-                            isProjectRightFound = lstIsProjectRightFound.FirstOrDefault();
+                        {
+                            var lstIsProjectRightFound = new List<Data.Entities.ProjectRight.ProjectRight>();
+                            foreach (var childProject in checkchildTrainig)
+                            {
+                                var projectright = All.Where(x =>
+                                    x.ProjectId == childProject.Id && x.UserId == itemDto.UserId &&
+                                    x.RoleId == itemDto.RoleId).OrderByDescending(x => x.Id).FirstOrDefault();
 
-                        isProjectRightUserFound = All.Where(x => x.ProjectId == projectId && x.UserId == itemDto.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+                                if (projectright != null) lstIsProjectRightFound.Add(projectright);
+                            }
+
+                            var isExist = lstIsProjectRightFound.Exists(l => !l.IsReviewDone);
+
+                            var isProjectRightUserFound = All.Where(x => x.ProjectId == projectId && x.UserId == itemDto.UserId).OrderByDescending(x => x.Id).FirstOrDefault();
+                            var last = lstIsProjectRightFound.FirstOrDefault();
+                            if (!isExist && last != null)
+                            {
+                                Add(new Data.Entities.ProjectRight.ProjectRight
+                                {
+                                    ProjectId = projectId,
+                                    UserId = itemDto.UserId,
+                                    RoleId = itemDto.RoleId,
+                                    IsReviewDone = last.IsReviewDone
+                                });
+                            }
+                            else if (isProjectRightUserFound != null)
+                                Add(new Data.Entities.ProjectRight.ProjectRight
+                                {
+                                    ProjectId = projectId,
+                                    UserId = itemDto.UserId,
+                                    RoleId = itemDto.RoleId,
+                                    IsReviewDone = isProjectRightUserFound.IsReviewDone
+                                });
+                            else
+                                Add(new Data.Entities.ProjectRight.ProjectRight
+                                {
+                                    ProjectId = projectId,
+                                    UserId = itemDto.UserId,
+                                    RoleId = itemDto.RoleId,
+                                    IsReviewDone = isDocumentFound
+                                });
+                        }
                     }
-
-
-                    if (isProjectRightFound != null)
-                        Add(new Data.Entities.ProjectRight.ProjectRight
-                        {
-                            ProjectId = projectId,
-                            UserId = itemDto.UserId,
-                            RoleId = itemDto.RoleId,
-                            IsReviewDone = isProjectRightFound.IsReviewDone
-                        });
-                    else if (isProjectRightUserFound != null)
-                        Add(new Data.Entities.ProjectRight.ProjectRight
-                        {
-                            ProjectId = projectId,
-                            UserId = itemDto.UserId,
-                            RoleId = itemDto.RoleId,
-                            IsReviewDone = isProjectRightUserFound.IsReviewDone
-                        });
-                    else
-                        Add(new Data.Entities.ProjectRight.ProjectRight
-                        {
-                            ProjectId = projectId,
-                            UserId = itemDto.UserId,
-                            RoleId = itemDto.RoleId,
-                            IsReviewDone = isDocumentFound
-                        });
                 }
         }
 
         public void SaveProjectRollbackRight(List<ProjectRightDto> projectRightDto, int projectId, int[] ids)
         {
-            var rights = projectRightDto.SelectMany(x =>
-                x.users.Select(c => new ProjectRightDto
-                { UserId = c.UserId, RoleId = c.RoleId, IsSelected = c.IsSelected })).ToList();
 
-            rights = rights.Distinct().ToList();
 
             foreach (var id in ids)
             {
                 var projectRightuser = FindBy(x => x.Id == id).FirstOrDefault();
                 var userByproject = FindBy(x => x.UserId == projectRightuser.UserId).ToList()
-                    .Any(a => a.DeletedDate == null);
-                if (userByproject == false)
-                    if (projectRightuser != null)
-                        _documentReviewRepository.DeleteByUserId(projectId, projectRightuser.UserId);
+                    .Exists(a => a.DeletedDate == null);
+                if (!userByproject && projectRightuser != null)
+                    _documentReviewRepository.DeleteByUserId(projectId, projectRightuser.UserId);
             }
 
             foreach (var itemDto in ids)
@@ -211,7 +228,7 @@ namespace GSC.Respository.ProjectRight
                                                                                            _jwtTokenAccesser.UserId
                                                                                            && x.DeletedDate == null) &&
                                                                                    x.DeletedDate == null).ToList();
-                if (parentProjectExist.Count() > 0) allChild.AddRange(parentProjectExist);
+                if (parentProjectExist.Count > 0) allChild.AddRange(parentProjectExist);
             }
             else
             {
@@ -230,20 +247,19 @@ namespace GSC.Respository.ProjectRight
                                                                                            _jwtTokenAccesser.UserId
                                                                                            && x.DeletedDate == null) &&
                                                                                    x.DeletedDate == null).ToList();
-                if (parentProjectExist.Count() > 0) allChild.AddRange(parentProjectExist);
+                if (parentProjectExist.Count > 0) allChild.AddRange(parentProjectExist);
             }
 
             var isSave = false;
-            foreach (var allData in allChild)
+            foreach (var allData in allChild.Select(s => s.Id))
             {
-                var projectRights = All.AsNoTracking().Where(x => x.ProjectId == allData.Id && x.DeletedDate == null)
+                var projectRights = All.AsNoTracking().Where(x => x.ProjectId == allData && x.DeletedDate == null)
                     .ToList();
 
                 foreach (var projectRight in projectRights)
                 {
                     if (_context.ProjectDocumentReview.AsNoTracking().Any(x =>
-                        x.ProjectId == allData.Id && x.UserId == projectRight.UserId &&
-                        x.IsReview == false && x.DeletedDate == null))
+                        x.ProjectId == allData && x.UserId == projectRight.UserId && !x.IsReview && x.DeletedDate == null))
                     {
                         if (!projectRight.IsPrimary)
                             projectRight.IsReviewDone = false;
@@ -328,10 +344,7 @@ namespace GSC.Respository.ProjectRight
                 ProjectName = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectName).FirstOrDefault(),
                 //Add By vipul on 14092020 for get study and site display on grid project access
                 ProjectNumber = _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ParentProjectId).FirstOrDefault() == null ? "" : _context.Project.Where(p => p.Id == x.ProjectId).Select(r => r.ProjectCode).FirstOrDefault(),
-                ParentProjectCode = _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault().ParentProjectId == null
-                ? _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault().ProjectCode
-                : _context.Project.Where(p => p.Id == _context.Project.Where(p => p.Id == x.ProjectId).FirstOrDefault().ParentProjectId).FirstOrDefault().ProjectCode,
-
+                ParentProjectCode = GetProjectCode(x.ProjectId),
                 ProjectId = x.ProjectId,
                 UserId = x.UserId,
                 UserName = _context.Users.Where(p => p.Id == x.UserId).Select(r => r.UserName).FirstOrDefault(),
@@ -347,12 +360,12 @@ namespace GSC.Respository.ProjectRight
                                               TrainingDuration = b.TrainingDuration,
                                               TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
                                               TrainerName = _context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
-                                          }).ToList().OrderByDescending(k => k.AssignedDate).ToList(),
+                                          }).AsEnumerable().OrderByDescending(k => k.AssignedDate).ToList(),
                 PendingReview = _context.ProjectDocumentReview.Where(a => a.DeletedDate == null && a.ProjectId == x.ProjectId
                                           && a.UserId == x.UserId && !a.IsReview).Select(b => new ReviewDeteail
                                           {
                                               DocumentPath = b.ProjectDocument.FileName
-                                          }).ToList().OrderByDescending(y => y.AssignedDate).ToList(),
+                                          }).AsEnumerable().OrderByDescending(y => y.AssignedDate).ToList(),
                 ProjectCreatedBy = x.CreatedBy
             }).ToList();
 
@@ -366,7 +379,7 @@ namespace GSC.Respository.ProjectRight
 
             result.ForEach(r =>
             {
-                r.TotalReviewName = r.TotalReview == null ? "" : "Complete (" + r.TotalReview.Count() + ")";
+                r.TotalReviewName = r.TotalReview == null ? "" : "Complete (" + r.TotalReview.Count + ")";
                 if (r.AccessType == "Grant" && r.ProjectCreatedBy == r.UserId) r.TotalReviewName = "N/AP";
 
                 if (r.TotalReview != null)
@@ -387,7 +400,7 @@ namespace GSC.Respository.ProjectRight
 
             result.ForEach(r =>
             {
-                r.PendingReviewName = r.PendingReview == null ? "" : "Pending (" + r.PendingReview.Count() + ")";
+                r.PendingReviewName = r.PendingReview == null ? "" : "Pending (" + r.PendingReview.Count + ")";
                 if (r.AccessType == "Grant" && r.ProjectCreatedBy == r.UserId) r.PendingReviewName = "N/AP";
 
                 if (r.PendingReview != null)
@@ -408,7 +421,21 @@ namespace GSC.Respository.ProjectRight
 
             return result;
         }
-
+        private string GetProjectCode(int projectId)
+        {
+            var project = _context.Project.Where(p => p.Id == projectId).FirstOrDefault();
+            if (project != null && project.ParentProjectId == null)
+            {
+                return project.ProjectCode;
+            }
+            if (project != null && project.ParentProjectId != null)
+            {
+                var parentProject = _context.Project.Where(p => p.Id == project.ParentProjectId).FirstOrDefault();
+                if (parentProject != null)
+                    return parentProject.ProjectCode;
+            }
+            return "";
+        }
         public ProjectDocumentHistory GetProjectRightHistory(int projectId, int userId, int roleId)
         {
             var objdochistory = new ProjectDocumentHistory();
@@ -426,11 +453,8 @@ namespace GSC.Respository.ProjectRight
                 IsTraning = x.IsReviewDone ? "Yes" : "No",
                 RoleName = string.Join(", ", _context.ProjectRight.Where(c => c.ProjectId == x.ProjectId
                                                                              && c.UserId == x.UserId)
-                    .Select(a => a.role.RoleName).ToList().Distinct()),
+                    .Select(a => a.role.RoleName).AsEnumerable().Distinct()),
                 AuditReasonID = x.AuditReasonId,
-                AuditReason = x.AuditReasonId == null
-                    ? null
-                    : _context.AuditReason.Where(y => y.Id == x.AuditReasonId).FirstOrDefault().ReasonName,
                 RollbackReason = x.RollbackReason,
                 TrainerId = x.DeletedBy,
                 RollbackOn = x.DeletedDate,
@@ -445,6 +469,10 @@ namespace GSC.Respository.ProjectRight
                 r.CreatedBy = r.AccessType == "Revoke" ? null : r.CreatedBy;
                 var createdByUser = _context.Users.Where(user => user.Id == r.TrainerId).FirstOrDefault();
                 if (createdByUser != null) r.RollabackBy = createdByUser.UserName;
+                var audit = _context.AuditReason.Where(y => y.Id == r.AuditReasonID).FirstOrDefault();
+                if (audit != null)
+                    r.AuditReason = audit.ReasonName;
+
             });
 
             result.ForEach(r =>
@@ -484,7 +512,7 @@ namespace GSC.Respository.ProjectRight
                     TrainingDuration = b.TrainingDuration,
                     TrainingType = b.TrainingType == null ? "" : ((TrainigType)b.TrainingType).GetDescription(),
                     TrainerName = _context.Users.Where(c => c.Id == b.TrainerId).Select(a => a.UserName).FirstOrDefault()
-                }).ToList().OrderByDescending(k => k.AssignedDate).ToList();
+                }).AsEnumerable().OrderByDescending(k => k.AssignedDate).ToList();
 
             objdochistory.TotalReview.ForEach(collection =>
             {
@@ -505,7 +533,7 @@ namespace GSC.Respository.ProjectRight
                 {
                     DocumentPath = b.ProjectDocument.FileName,
                     IsDeleted = b.ProjectDocument.DeletedDate.HasValue ? "Yes" : "No"
-                }).ToList().OrderByDescending(y => y.AssignedDate).ToList();
+                }).OrderByDescending(y => y.AssignedDate).ToList();
 
             objdochistory.PendingReview.ForEach(collection =>
             {
@@ -552,16 +580,15 @@ namespace GSC.Respository.ProjectRight
 
         public IList<ProjectAccessDto> GetProjectAccessReportList(ProjectTrainigAccessSearchDto filters)
         {
-            //var parent = _context.Project.Where(x => x.Id == filters.ProjectId).FirstOrDefault().ParentProjectId;
 
             var sites = new List<int>();
             if (filters.SiteId != null)
             {
-                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
             }
             else
             {
-                sites = _context.Project.Where(x => x.Id == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.ProjectId && !x.IsTestSite).Select(x => x.Id).ToList();
             }
 
             var queryDtos = (from projectRight in _context.ProjectRight.Where(t =>
@@ -664,11 +691,11 @@ namespace GSC.Respository.ProjectRight
             var sites = new List<int>();
             if (filters.SiteId != null)
             {
-                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
             }
             else
             {
-                sites = _context.Project.Where(x => x.Id == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.ProjectId && !x.IsTestSite).Select(x => x.Id).ToList();
             }
 
             var queryDtos = (from projectRight in _context.ProjectRight.Where(t => (filters.SiteId != null ? t.ProjectId == filters.SiteId : sites.Contains(t.ProjectId))
@@ -762,26 +789,26 @@ namespace GSC.Respository.ProjectRight
             var etmf = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetail.ProjectWorkPlace.ProjectId == projectId).ToList();
             var etmfresult = etmf.OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
             {
-                Id = x.FirstOrDefault().Id,
+                Id = x.Select(s => s.Id).FirstOrDefault(),
                 UserId = x.Key,
-                IsRevoke = x.FirstOrDefault().DeletedDate == null ? false : true,
-                CreatedDate = x.FirstOrDefault().CreatedDate
+                IsRevoke = (x.Select(s => s.DeletedDate).FirstOrDefault() != null),
+                CreatedDate = x.Select(s => s.CreatedDate).FirstOrDefault()
             }).ToList();
 
             var result = latestProjectRight.GroupBy(x => x.UserId).Select(x => new ProjectDocumentReviewDto
             {
-                Id = x.FirstOrDefault().Id,
-                ProjectId = x.FirstOrDefault().ProjectId,
+                Id = x.Select(s => s.Id).FirstOrDefault(),
+                ProjectId = x.Select(s => s.ProjectId).FirstOrDefault(),
                 UserId = x.Key,
-                RoleId= x.FirstOrDefault().RoleId,
+                RoleId = x.Select(s => s.RoleId).FirstOrDefault(),
                 UserName = _context.Users.Where(p => p.Id == x.Key).Select(r => r.UserName).FirstOrDefault(),
                 RoleName = _context.ProjectRight.Where(c => c.ProjectId == x.FirstOrDefault().ProjectId && c.UserId == x.Key
                 && c.RoleId == x.FirstOrDefault().RoleId).Select(a => a.role.RoleName).FirstOrDefault(),
-                IsRevoke = etmfresult.Where(y => y.UserId == x.Key).Count() > 0 ? etmfresult.Where(y => y.UserId == x.Key).FirstOrDefault().IsRevoke : true
+                IsRevoke = etmfresult.Exists(y => y.UserId == x.Key) ? etmfresult.Find(y => y.UserId == x.Key).IsRevoke : !etmfresult.Exists(y => y.UserId == x.Key)
             }).ToList();
 
             if (userId <= 0)
-                result = result.Where(x => x.IsRevoke == true).ToList();
+                result = result.Where(x => x.IsRevoke).ToList();
 
             return result;
         }

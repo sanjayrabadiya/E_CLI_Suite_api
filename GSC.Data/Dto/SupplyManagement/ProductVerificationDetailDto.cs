@@ -8,8 +8,7 @@ namespace GSC.Data.Dto.SupplyManagement
 {
     public class ProductVerificationDetailDto : BaseDto
     {
-        public int ProductReceiptId { get; set; }
-        // public int ProductVerificationId { get; set; }
+        public int ProductReceiptId { get; set; }       
         public int? QuantityVerification { get; set; }
         public string Description { get; set; }
         public string Remarks { get; set; }

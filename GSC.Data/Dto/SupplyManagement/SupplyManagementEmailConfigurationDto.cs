@@ -1,9 +1,6 @@
-﻿using GSC.Data.Dto.Master;
-using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Location;
+﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Helper;
-using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -65,7 +62,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string RoleName { get; set; }
     }
 
-    public class IWRSEmailModel
+    public class IwrsEmailModel
     {
         public string StudyCode { get; set; }
         public string SiteCode { get; set; }

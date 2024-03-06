@@ -1,8 +1,7 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Master;
 using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Dto.SupplyManagement
 {
@@ -16,7 +15,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public AuditReason AuditReason { get; set; }
         public string ReasonOth { get; set; }
         public int SecurityRoleId { get; set; }
-        //public SecurityRole SecurityRole { get; set; }
+      
         public int? SendBySecurityRoleId { get; set; }
     }
 

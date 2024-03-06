@@ -1,9 +1,7 @@
 ﻿using GSC.Common.Base;
-using GSC.Data.Entities.Common;
 using GSC.Helper;
 using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Entities.Report
 {

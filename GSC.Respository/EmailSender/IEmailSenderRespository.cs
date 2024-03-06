@@ -18,7 +18,7 @@ namespace GSC.Respository.EmailSender
     {
         void SendRegisterEMail(string toMail, string password, string userName, string companyName);
         void SendChangePasswordEMail(string toMail, string password, string userName, string companyName);
-        //void SendForgotPasswordEMail(string toMail, string password, string userName);
+       
         Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName, string companyName);
 
         void SendPdfGeneratedEMail(string toMail, string userName, string projectName, string linkOfPdf);
@@ -42,18 +42,16 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfTemplateApprove(string toMail, string userName, string activity, string template, string project);
 
         void SendVariableValueEmail(ScreeningTemplateValueDto screeningTemplateValueDto, string toMail, string Template);
-        //void SendApproveVerificationEmail(string toMail);
-        //void ApproveByApproverVerificationEmail(string toMail);
-        //void RejectByApproverVerificationEmail(string toMail);
+      
         void SendEmailOfLARReviewedPDFtoInvestigator(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
         void SendWithDrawEmailLAR(string toMail, string userName, string documentName, string ProjectName, string patientName, string filepath);
         public void SendEmailOfReviewed(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
         public void SendApprovedEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
         public void SendRejectedEmailOfArtificate(string toMail, string userName, string documentName, string ArtificateName, string ProjectName);
 
-        void SendforApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration);
+        void SendforApprovalEmailIWRS(IwrsEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration);
 
-        void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration);
+        void SendforShipmentApprovalEmailIWRS(IwrsEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration);
 
         void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone);
 

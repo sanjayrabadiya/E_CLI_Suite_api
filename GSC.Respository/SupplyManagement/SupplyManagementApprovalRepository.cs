@@ -1,25 +1,16 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using ClosedXML.Excel;
-using ExcelDataReader;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
-using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
-using GSC.Respository.Project.Design;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 
 namespace GSC.Respository.SupplyManagement
@@ -28,9 +19,7 @@ namespace GSC.Respository.SupplyManagement
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-
         private readonly IGSCContext _context;
-
         private readonly IEmailSenderRespository _emailSenderRespository;
 
         public SupplyManagementApprovalRepository(IGSCContext context,
@@ -39,8 +28,6 @@ namespace GSC.Respository.SupplyManagement
         IMapper mapper)
             : base(context)
         {
-
-
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
@@ -54,7 +41,9 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (t.RoleId > 0)
                 {
-                    t.RoleName = _context.SecurityRole.Where(x => x.Id == t.RoleId).FirstOrDefault().RoleName;
+                    var role = _context.SecurityRole.FirstOrDefault(x => x.Id == t.RoleId);
+                    if (role != null)
+                        t.RoleName = role.RoleName;
                 }
                 var Users = _context.SupplyManagementApprovalDetails.Where(x => x.DeletedDate == null && x.SupplyManagementApprovalId == t.Id).Select(a => a.Users.UserName).ToList();
 
@@ -64,7 +53,9 @@ namespace GSC.Respository.SupplyManagement
                 }
                 if (t.AuditReasonId > 0)
                 {
-                    t.AuditReasonName = _context.AuditReason.Where(s => s.Id == t.AuditReasonId).FirstOrDefault().ReasonName;
+                    var audit = _context.AuditReason.Where(s => s.Id == t.AuditReasonId).FirstOrDefault();
+                    if (audit != null)
+                        t.AuditReasonName = audit.ReasonName;
                 }
             });
 
@@ -74,20 +65,20 @@ namespace GSC.Respository.SupplyManagement
         {
             if (obj.SupplyManagementApprovalDetails.Count > 0)
             {
-                foreach (var item in obj.SupplyManagementApprovalDetails)
+                foreach (var item in obj.SupplyManagementApprovalDetails.Select(s => s.UserId))
                 {
-                    var data = _context.SupplyManagementApprovalDetails.Where(x => x.SupplyManagementApprovalId == id && x.DeletedDate == null && x.UserId == item.UserId).FirstOrDefault();
+                    var data = _context.SupplyManagementApprovalDetails.Where(x => x.SupplyManagementApprovalId == id && x.DeletedDate == null && x.UserId == item).FirstOrDefault();
                     if (data == null)
                     {
                         SupplyManagementApprovalDetails detail = new SupplyManagementApprovalDetails();
-                        detail.UserId = item.UserId;
+                        detail.UserId = item;
                         detail.SupplyManagementApprovalId = id;
                         _context.SupplyManagementApprovalDetails.Add(detail);
                         _context.Save();
                     }
                     else
                     {
-                        var data1 = _context.SupplyManagementApprovalDetails.Where(x => x.SupplyManagementApprovalId == id && x.DeletedDate != null && x.UserId == item.UserId).FirstOrDefault();
+                        var data1 = _context.SupplyManagementApprovalDetails.Where(x => x.SupplyManagementApprovalId == id && x.DeletedDate != null && x.UserId == item).FirstOrDefault();
                         if (data1 != null)
                         {
                             data1.DeletedBy = null;
@@ -123,16 +114,12 @@ namespace GSC.Respository.SupplyManagement
             }
             else
             {
-
-                var data = _context.SupplyManagementApproval.Where(x => x.Id != obj.Id && x.ProjectId == obj.ProjectId && x.DeletedDate == null && x.RoleId == obj.RoleId).FirstOrDefault();
+                var data = _context.SupplyManagementApproval.Where(x => x.ProjectId == obj.ProjectId && x.DeletedDate == null && x.RoleId == obj.RoleId).FirstOrDefault();
                 if (data != null)
                 {
                     return "already assigned for this role!";
                 }
-
-
             }
-
             return "";
         }
 
@@ -142,7 +129,7 @@ namespace GSC.Respository.SupplyManagement
             var projectrights = _context.ProjectRight.Include(x => x.User).Where(x => x.ProjectId == projectId && x.DeletedDate == null)
                               .Select(x => new DropDownDto { Id = x.RoleId, Value = x.role.RoleName }).Distinct().ToList();
 
-            return projectrights; ;
+            return projectrights;
 
         }
         public List<DropDownDto> GetRoleUserShipmentApproval(int roleId, int projectId)
@@ -158,13 +145,17 @@ namespace GSC.Respository.SupplyManagement
         public void SendShipmentWorkflowApprovalEmail(SupplyManagementShipmentApproval supplyManagementShipmentApproval)
         {
 
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == supplyManagementShipmentApproval.SupplyManagementRequestId).FirstOrDefault();
             if (request != null)
             {
                 var emailconfiglist = _context.SupplyManagementApprovalDetails.Include(s => s.Users).Include(s => s.SupplyManagementApproval).ThenInclude(s => s.Project).Where(x => x.DeletedDate == null && x.SupplyManagementApproval.ProjectId == request.FromProject.ParentProjectId &&
                 x.SupplyManagementApproval.ApprovalType == Helper.SupplyManagementApprovalType.WorkflowApproval).ToList();
-                if (emailconfiglist != null && emailconfiglist.Count > 0)
+
+                if (!emailconfiglist.Any())
+                    return;
+
+                if (emailconfiglist.Count > 0)
                 {
                     var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
 
@@ -175,7 +166,9 @@ namespace GSC.Respository.SupplyManagement
                     {
                         iWRSEmailModel.ProductType = "Blinded study";
                     }
-                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault().ProjectCode;
+                    var project = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault();
+                    if (project != null)
+                        iWRSEmailModel.StudyCode = project.ProjectCode;
                     iWRSEmailModel.RequestFromSiteCode = request.FromProject.ProjectCode;
                     var managesite = _context.ManageSite.Where(x => x.Id == request.FromProject.ManageSiteId).FirstOrDefault();
                     if (managesite != null)
@@ -214,9 +207,12 @@ namespace GSC.Respository.SupplyManagement
                         iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
 
                     iWRSEmailModel.ApprovedOn = Convert.ToDateTime(supplyManagementShipmentApproval.CreatedDate).ToString("dddd, dd MMMM yyyy");
-                    iWRSEmailModel.ApprovedBy = supplyManagementShipmentApproval.CreatedBy > 0 ? _context.Users.Where(s => s.Id == supplyManagementShipmentApproval.CreatedBy).FirstOrDefault().UserName : "";
-
-                    _emailSenderRespository.SendforShipmentApprovalEmailIWRS(iWRSEmailModel, emailconfiglist.Select(x => x.Users.Email).Distinct().ToList(), emailconfiglist.FirstOrDefault().SupplyManagementApproval);
+                    var user = _context.Users.Where(s => s.Id == supplyManagementShipmentApproval.CreatedBy).FirstOrDefault();
+                    if (user != null)
+                        iWRSEmailModel.ApprovedBy = user.UserName;
+                    var data = emailconfiglist.FirstOrDefault();
+                    if (data != null)
+                        _emailSenderRespository.SendforShipmentApprovalEmailIWRS(iWRSEmailModel, emailconfiglist.Select(x => x.Users.Email).Distinct().ToList(), data.SupplyManagementApproval);
 
 
                 }

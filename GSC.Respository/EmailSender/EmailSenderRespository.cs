@@ -819,7 +819,7 @@ namespace GSC.Respository.EmailSender
 
             return emailMessage;
         }
-        public void SendforApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration)
+        public void SendforApprovalEmailIWRS(IwrsEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementEmailConfiguration supplyManagementEmailConfiguration)
         {
             var emailMessage = ConfigureEmailForVariable();
             emailMessage.Subject = GetSubjectIWRSEmail(supplyManagementEmailConfiguration, iWRSEmailModel);
@@ -835,7 +835,7 @@ namespace GSC.Respository.EmailSender
             }
         }
 
-        public void SendforShipmentApprovalEmailIWRS(IWRSEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration)
+        public void SendforShipmentApprovalEmailIWRS(IwrsEmailModel iWRSEmailModel, IList<string> toMails, SupplyManagementApproval supplyManagementEmailConfiguration)
         {
             var emailMessage = ConfigureEmailForVariable();
             if (supplyManagementEmailConfiguration.ApprovalType == Helper.SupplyManagementApprovalType.ShipmentApproval)
@@ -853,7 +853,7 @@ namespace GSC.Respository.EmailSender
                 }
             }
         }
-        private string ReplaceBodyForIWRSEmail(string body, IWRSEmailModel email)
+        private string ReplaceBodyForIWRSEmail(string body, IwrsEmailModel email)
         {
 
             var str = body;
@@ -988,7 +988,7 @@ namespace GSC.Respository.EmailSender
             return str;
         }
 
-        private string GetSubjectIWRSEmail(SupplyManagementEmailConfiguration supplyManagementEmailConfiguration, IWRSEmailModel iWRSEmailModel)
+        private string GetSubjectIWRSEmail(SupplyManagementEmailConfiguration supplyManagementEmailConfiguration, IwrsEmailModel iWRSEmailModel)
         {
             string str = string.Empty;
             if (supplyManagementEmailConfiguration.Triggers == Helper.SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate)

@@ -5,12 +5,9 @@ using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -72,7 +69,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             centralDepot.IpAddress = _jwtTokenAccesser.IpAddress;
             centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementAllocationRepository.Add(centralDepot);
-            if (_uow.Save() <= 0) throw new Exception("Creating central depot failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating central depot failed on save."));
             return Ok(centralDepot.Id);
         }
 
@@ -102,7 +99,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             centralDepot.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementAllocationRepository.AddOrUpdate(centralDepot);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating central depot failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating central depot failed on save."));
             return Ok(centralDepot.Id);
         }
 

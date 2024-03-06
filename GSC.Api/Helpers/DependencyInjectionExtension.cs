@@ -384,7 +384,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ITemplateVariableSequenceNoSettingRepository, TemplateVariableSequenceNoSettingRepository>();
             services.AddScoped<IDashboardRepository, DashboardRepository>();
             services.AddScoped<ISupplyManagementAllocationRepository, SupplyManagementAllocationRepository>();
-            services.AddScoped<ISupplyManagementKITRepository, SupplyManagementKITRepository>();
+            services.AddScoped<ISupplyManagementKitRepository, SupplyManagementKitRepository>();
             services.AddScoped<ISupplyManagementKITDetailRepository, SupplyManagementKITDetailRepository>();
 
             services.AddScoped<IEconsentGlossaryRepository, EconsentGlossaryRepository>();
@@ -395,7 +395,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementKitAllocationSettingsRepository, SupplyManagementKitAllocationSettingsRepository>();
             services.AddScoped<ISupplyManagementKitNumberSettingsRepository, SupplyManagementKitNumberSettingsRepository>();
             services.AddScoped<ISupplyManagementEmailConfigurationRepository, SupplyManagementEmailConfigurationRepository>();
-            services.AddScoped<ISupplyManagementKITSeriesRepository, SupplyManagementKITSeriesRepository>();
+            services.AddScoped<ISupplyManagementKitSeriesRepository, SupplyManagementKitSeriesRepository>();
             services.AddScoped<ISupplyManagementFactorMappingRepository, SupplyManagementFactorMappingRepository>();
             services.AddScoped<IPKBarcodeRepository, PKBarcodeRepository>();
             services.AddScoped<ISampleBarcodeRepository, SampleBarcodeRepository>();

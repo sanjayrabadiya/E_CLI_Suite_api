@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             pharmacyStudyProductType.IpAddress = _jwtTokenAccesser.IpAddress;
             pharmacyStudyProductType.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _pharmacyStudyProductTypeRepository.Add(pharmacyStudyProductType);
-            if (_uow.Save() <= 0) throw new Exception("Creating pharmacy study product type failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating pharmacy study product type failed on save."));
             return Ok(pharmacyStudyProductType.Id);
         }
 
@@ -93,7 +93,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             pharmacyStudyProductType.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _pharmacyStudyProductTypeRepository.AddOrUpdate(pharmacyStudyProductType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating pharmacy study product type failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating pharmacy study product type failed on save."));
             return Ok(pharmacyStudyProductType.Id);
         }
 
