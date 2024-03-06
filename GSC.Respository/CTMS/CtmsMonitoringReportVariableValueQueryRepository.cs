@@ -72,7 +72,7 @@ namespace GSC.Respository.CTMS
             ctmsMonitoringReportVariableValue.QueryStatus = updateQueryStatus;
             ctmsMonitoringReportVariableValue.Value = ctmsMonitoringReportVariableValueQueryDto.Value;
 
-            QueryAudit(ctmsMonitoringReportVariableValueQueryDto, ctmsMonitoringReportVariableValue, updateQueryStatus.ToString(), value, CtmsMonitoringReportVariableValueQuery);
+            QueryAudit(ctmsMonitoringReportVariableValueQueryDto, ctmsMonitoringReportVariableValue, updateQueryStatus.ToString(), CtmsMonitoringReportVariableValueQuery);
 
             Save(CtmsMonitoringReportVariableValueQuery);
 
@@ -82,7 +82,7 @@ namespace GSC.Respository.CTMS
         }
 
         private void QueryAudit(CtmsMonitoringReportVariableValueQueryDto ctmsMonitoringReportVariableValueQueryDto,
-            CtmsMonitoringReportVariableValue ctmsMonitoringReportVariableValue, string status, string value,
+            CtmsMonitoringReportVariableValue ctmsMonitoringReportVariableValue, string status,
             CtmsMonitoringReportVariableValueQuery ctmsMonitoringReportVariableValueQuery)
         {
             var queryOldValue = "";
@@ -167,8 +167,11 @@ namespace GSC.Respository.CTMS
             if (ctmsMonitoringReportVariableValueQuery.QueryStatus != CtmsCommentStatus.Open)
             {
                 var lastQuery = All.Where(x => x.CtmsMonitoringReportVariableValueId == ctmsMonitoringReportVariableValueQuery.CtmsMonitoringReportVariableValueId).OrderByDescending(t => t.Id).FirstOrDefault();
-                ctmsMonitoringReportVariableValueQuery.QueryParentId = lastQuery.Id;
-                ctmsMonitoringReportVariableValueQuery.PreviousQueryDate = lastQuery.CreatedDate;
+                if (lastQuery != null)
+                {
+                    ctmsMonitoringReportVariableValueQuery.QueryParentId = lastQuery.Id;
+                    ctmsMonitoringReportVariableValueQuery.PreviousQueryDate = lastQuery.CreatedDate;
+                }
             }
 
             ctmsMonitoringReportVariableValueQuery.CreatedDate = _jwtTokenAccesser.GetClientDate();

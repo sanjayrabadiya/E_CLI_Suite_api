@@ -58,7 +58,7 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             _metricsRepository.Add(planMetrics);
-            if (_uow.Save() <= 0) throw new Exception("Creating Plan Metrics failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Plan Metrics failed on save."));
             return Ok(planMetrics.Id);
         }
 
@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             _metricsRepository.Update(metricsPlan);
-            if (_uow.Save() <= 0) throw new Exception("Plan Metrics is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Plan Metrics is failed on save."));
             return Ok(metricsPlan.Id);
         }
 

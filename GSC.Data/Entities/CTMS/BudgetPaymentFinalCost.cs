@@ -28,6 +28,5 @@ namespace GSC.Data.Entities.CTMS
 
         public string TimeZone { get; set; }
         public Entities.Master.Project Project { get; set; }
-
     }
 }

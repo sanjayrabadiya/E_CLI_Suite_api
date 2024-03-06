@@ -48,8 +48,19 @@ namespace GSC.Respository.CTMS
         {
             var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
 
-            string ActivityCode = tabNumber == 0 ? "act_001" : tabNumber == 1 ? "act_002" : tabNumber == 2 ? "act_003" :
-                tabNumber == 3 ? "act_004" : tabNumber == 4 ? "act_005" : "act_006";
+            string ActivityCode = "";
+            if (tabNumber == 0)
+                ActivityCode = "act_001";
+            else if (tabNumber == 1)
+                ActivityCode = "act_002";
+            else if (tabNumber == 2)
+                ActivityCode = "act_003";
+            else if (tabNumber == 3)
+                ActivityCode = "act_004";
+            else if (tabNumber == 4)
+                ActivityCode = "act_005";
+            else
+                ActivityCode = "act_006";
 
             var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == ActivityCode && x.DeletedDate == null).FirstOrDefault();
 

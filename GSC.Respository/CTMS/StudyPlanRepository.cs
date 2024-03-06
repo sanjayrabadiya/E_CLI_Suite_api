@@ -42,7 +42,7 @@ namespace GSC.Respository.CTMS
             var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
             if (projectList == null || projectList.Count == 0) return null;
 
-            var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
+            var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             var ctmsProjectList = _context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
 
             //Update main Total from ResourceCost + PatientCost + PassThroughCost
@@ -75,7 +75,7 @@ namespace GSC.Respository.CTMS
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
-            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
+            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(d=>d.ParentProjectId).FirstOrDefault();
 
             var tasklist = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.DeletedDate == null && x.TaskMaster.TaskTemplateId == studyplan.TaskTemplateId
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
@@ -105,13 +105,13 @@ namespace GSC.Respository.CTMS
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
                     t.Parent = t;
-                    t.DependentTask = tasklist.FirstOrDefault(d => d.TaskId == t.DependentTaskId);
+                    t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
 
                 if (t.ParentId > 0)
                 {
-                    t.Parent = tasklist.FirstOrDefault(x => x.TaskId == t.ParentId);
+                    t.Parent = tasklist.Find(x => x.TaskId == t.ParentId);
                     t.ParentId = null;
                 }
             });
@@ -133,7 +133,7 @@ namespace GSC.Respository.CTMS
 
             studyPlanList.ForEach(i =>
             {
-                if (studyPlanTaskList.Count() > 0)
+                if (studyPlanTaskList.Count > 0)
                 {
                     i.StartDate = studyPlanTaskList.Min(x => x.StartDate);
                     i.EndDate = studyPlanTaskList.Max(x => x.EndDate);
@@ -190,7 +190,7 @@ namespace GSC.Respository.CTMS
             {
                 if (maintask.ActivityType == ActivityType.FF)
                 {
-                    var task = tasklist.Where(x => x.TaskId == maintask.DependentTaskId).FirstOrDefault();
+                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
                     if (task != null)
                     {
                         maintask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet);
@@ -199,7 +199,7 @@ namespace GSC.Respository.CTMS
                 }
                 else if (maintask.ActivityType == ActivityType.FS)
                 {
-                    var task = tasklist.Where(x => x.TaskId == maintask.DependentTaskId).FirstOrDefault();
+                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
                     if (task != null)
                     {
                         maintask.StartDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), maintask.OffSet);
@@ -208,7 +208,7 @@ namespace GSC.Respository.CTMS
                 }
                 else if (maintask.ActivityType == ActivityType.SF)
                 {
-                    var task = tasklist.Where(x => x.TaskId == maintask.DependentTaskId).FirstOrDefault();
+                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
                     if (task != null)
                     {
                         maintask.EndDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), maintask.OffSet);
@@ -217,7 +217,7 @@ namespace GSC.Respository.CTMS
                 }
                 else if (maintask.ActivityType == ActivityType.SS)
                 {
-                    var task = tasklist.Where(x => x.TaskId == maintask.DependentTaskId).FirstOrDefault();
+                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
                     if (task != null)
                     {
                         maintask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet);
@@ -236,7 +236,7 @@ namespace GSC.Respository.CTMS
             {
                 if (taskmasterDto.ParentId > 0)
                 {
-                    var parentdate = tasklist.Where(x => x.TaskId == taskmasterDto.ParentId).FirstOrDefault();
+                    var parentdate = tasklist.Find(x => x.TaskId == taskmasterDto.ParentId);
                     if (taskmasterDto.StartDate >= parentdate.StartDate && taskmasterDto.StartDate <= parentdate.EndDate
                         && taskmasterDto.EndDate <= parentdate.EndDate && taskmasterDto.EndDate >= parentdate.StartDate)
                         return "";
@@ -266,7 +266,7 @@ namespace GSC.Respository.CTMS
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
-            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).FirstOrDefault().ParentProjectId;
+            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(s=>s.ParentProjectId).FirstOrDefault();
 
             var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
@@ -316,13 +316,13 @@ namespace GSC.Respository.CTMS
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
                     t.Parent = t;
-                    t.DependentTask = tasklist1.FirstOrDefault(d => d.TaskId == t.DependentTaskId);
+                    t.DependentTask = tasklist1.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
 
                 if (t.ParentId > 0)
                 {
-                    t.Parent = tasklist1.FirstOrDefault(x => x.TaskId == t.ParentId);
+                    t.Parent = tasklist1.Find(x => x.TaskId == t.ParentId);
                     t.ParentId = null;
                 }
             });

@@ -31,13 +31,11 @@ namespace GSC.Respository.CTMS
 
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Contains(x.ParentProjectId)).OrderByDescending(x => x.Id).
             ProjectTo<WorkingDayListDto>(_mapper.ConfigurationProvider).ToList();
-            var data = result.Select(r =>
+            return result.Select(r =>
             {
                 r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
                 return r;
             }).ToList();
-
-            return result;
         }
         public void AddSiteType(WorkingDayDto workingDayListDto)
         {

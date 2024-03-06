@@ -11,7 +11,7 @@ namespace GSC.Respository.CTMS
         List<ProcedureVisitdadaDto> GetPullPatientCost(bool isDeleted, int studyId, int? procedureId, bool ispull);
         List<PatientCostGridData> GetPatientCostGrid(bool isDeleted, int studyId);
         string Duplicate(List<ProcedureVisitdadaDto> ProcedureVisitdadaDto);
-        void AddPatientCost(List<ProcedureVisitdadaDto> ProcedureVisitdadaDto);
+        void AddPatientCost(List<ProcedureVisitdadaDto> procedureVisitdadaDto);
         void DeletePatientCost(int projectId, int procedureId);
     }
 }

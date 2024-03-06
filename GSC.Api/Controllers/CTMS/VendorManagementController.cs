@@ -55,7 +55,7 @@ namespace GSC.Api.Controllers.Master
             }
 
             _vendormanagementRepository.Add(vendor);
-            if (_uow.Save() <= 0) throw new Exception("Creating Vendor failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Vendor failed on save."));
             return Ok(vendor.Id);
         }
 
@@ -75,7 +75,7 @@ namespace GSC.Api.Controllers.Master
             }
             _vendormanagementRepository.AddOrUpdate(vendor);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Vendor failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Vendor failed on save."));
             return Ok(vendor.Id);
         }
 

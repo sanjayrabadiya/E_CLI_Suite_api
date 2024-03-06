@@ -46,7 +46,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             _passThroughCostRepository.ConvertIntoGlobuleCurrency(passThroughCost);
             _passThroughCostRepository.Add(passThroughCost);
-            if (_uow.Save() <= 0) throw new Exception("Creating Pass Through Cost failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Pass Through Cost failed on save."));
             return Ok(passThroughCost.Id);
         }
 
@@ -65,7 +65,7 @@ namespace GSC.Api.Controllers.CTMS
             }
             _passThroughCostRepository.ConvertIntoGlobuleCurrency(passThroughCost);
             _passThroughCostRepository.AddOrUpdate(passThroughCost);
-            if (_uow.Save() <= 0) throw new Exception("Updating Pass Through Cost failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Pass Through Cost failed on save."));
             return Ok(passThroughCost.Id);
         }
 

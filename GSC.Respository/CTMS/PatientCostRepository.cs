@@ -209,14 +209,14 @@ namespace GSC.Respository.CTMS
                 return "";
             }
         }
-        public void AddPatientCost(List<ProcedureVisitdadaDto> procedureVisitdada)
+        public void AddPatientCost(List<ProcedureVisitdadaDto> procedureVisitdadaDto)
         {
             //get CurrencyRate And Globel Currency form studyPlan
-            var locCurrency = _context.Procedure.Where(s => s.Id == procedureVisitdada[0].ProcedureId && s.DeletedDate == null).FirstOrDefault();
-            var studyPlan = _context.StudyPlan.Where(s => s.ProjectId == procedureVisitdada[0].ProjectId && s.DeletedDate == null).FirstOrDefault();
+            var locCurrency = _context.Procedure.Where(s => s.Id == procedureVisitdadaDto[0].ProcedureId && s.DeletedDate == null).FirstOrDefault();
+            var studyPlan = _context.StudyPlan.Where(s => s.ProjectId == procedureVisitdadaDto[0].ProjectId && s.DeletedDate == null).FirstOrDefault();
             var CurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlan.Id && s.CurrencyId == locCurrency.CurrencyId && s.DeletedDate == null).FirstOrDefault();
 
-            procedureVisitdada.ForEach(d =>
+            procedureVisitdadaDto.ForEach(d =>
             {
                 var patientCost = _context.PatientCost.Where(s => s.Id == d.Id && s.DeletedBy == null).ToList();
                 patientCost.ForEach(t =>

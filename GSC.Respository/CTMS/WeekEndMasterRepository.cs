@@ -37,7 +37,7 @@ namespace GSC.Respository.CTMS
 
             var data = result.Select(r =>
             {
-                r.ProjectCode = r.IsSite == true ? _context.Project.Find(Convert.ToInt32(r.ProjectCode)).ProjectCode : r.ProjectCode;
+                r.ProjectCode = r.IsSite ? _context.Project.Find(Convert.ToInt32(r.ProjectCode)).ProjectCode : r.ProjectCode;
                 return r;
             }).ToList();
 

@@ -93,7 +93,7 @@ namespace GSC.Api.Controllers.CTMS
 
                 _weekEndMasterRepository.Add(weekend);
             }
-            if (_uow.Save() <= 0) throw new Exception("weekend is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("weekend is failed on save."));
             return Ok();
         }
 
@@ -109,7 +109,7 @@ namespace GSC.Api.Controllers.CTMS
 
                 _weekEndMasterRepository.Update(weekend);
             }
-            if (_uow.Save() <= 0) throw new Exception("Weekend is failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Weekend is failed on save."));
             return Ok();
         }
 

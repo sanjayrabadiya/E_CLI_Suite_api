@@ -49,7 +49,7 @@ namespace GSC.Api.Controllers.CTMS
             ctmsMonitoringStatusDto.Id = 0;
             var ctmsMonitoringStatus = _mapper.Map<CtmsMonitoringStatus>(ctmsMonitoringStatusDto);
             _ctmsMonitoringStatusRepository.Add(ctmsMonitoringStatus);
-            if (_uow.Save() <= 0) throw new Exception("Creating status failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating status failed on save."));
             _ctmsMonitoringStatusRepository.UpdateSiteStatus(ctmsMonitoringStatusDto);
             return Ok(ctmsMonitoringStatus.Id);
         }
@@ -64,7 +64,7 @@ namespace GSC.Api.Controllers.CTMS
             var ctmsMonitoringStatus = _mapper.Map<CtmsMonitoringStatus>(ctmsMonitoringStatusDto);
 
             _ctmsMonitoringStatusRepository.Update(ctmsMonitoringStatus);
-            if (_uow.Save() <= 0) throw new Exception("Updating status failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating status failed on save."));
             _ctmsMonitoringStatusRepository.UpdateSiteStatus(ctmsMonitoringStatusDto);
             return Ok(ctmsMonitoringStatus.Id);
         }

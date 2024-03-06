@@ -7,10 +7,10 @@ namespace GSC.Respository.CTMS
 {
     public interface IOverTimeMetricsRepository : IGenericRepository<OverTimeMetrics>
     {
-        List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int templateId, int projectId, int countryId, int siteId);
+        List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int metricsId, int projectId, int countryId, int siteId);
         string PlannedCheck(OverTimeMetrics objSave);
-        string UpdatePlanning(OverTimeMetrics objSave);
-        List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int templateId, int projectId, int countryId, int siteId);
+        string UpdatePlanning(OverTimeMetrics overTimeMetricsDto);
+        List<OverTimeMetrics> UpdateAllActualNo(bool isDeleted, int metricsId, int projectId, int countryId, int siteId);
         List<ProjectDropDown> GetChildProjectWithParentProjectDropDown(int parentProjectId);
     }
 }
