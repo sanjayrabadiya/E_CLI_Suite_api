@@ -56,7 +56,11 @@ namespace GSC.Api.Controllers.Master
             if (string.IsNullOrEmpty(duplicate))
             {
                 _pageConfigurationFieldsRepository.Add(pageConfig);
-                if (_uow.Save() <= 0) throw new Exception("Creating page configuration failed on save.");
+                if (_uow.Save() <= 0)
+                {
+                    ModelState.AddModelError("Message", "Creating page configuration failed on save.");
+                    return BadRequest(ModelState);
+                }
                 return Ok(pageConfig.Id);
             }
             else
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Master
             var pageConfiguration = _mapper.Map<PageConfigurationFields>(pageConfigDto);
             _pageConfigurationFieldsRepository.AddOrUpdate(pageConfiguration);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Page Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Page Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(pageConfiguration.Id);
         }
 

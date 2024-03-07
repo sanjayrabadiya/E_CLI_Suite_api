@@ -16,21 +16,15 @@ namespace GSC.Api.Controllers.Master
     public class SiteController : BaseController
     {
         private readonly ISiteRepository _siteRepository;
-        private readonly IManageSiteRepository _manageSiteRepository;
-        private readonly IIecirbRepository _iecirbRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public SiteController(ISiteRepository siteRepository,
-    IUnitOfWork uow, IMapper mapper,
-    IManageSiteRepository manageSiteRepository,
-    IIecirbRepository iecirbRepository)
+    IUnitOfWork uow, IMapper mapper)
         {
             _siteRepository = siteRepository;
             _uow = uow;
             _mapper = mapper;
-            _manageSiteRepository = manageSiteRepository;
-            _iecirbRepository = iecirbRepository;
         }
 
         // GET: api/<controller>
@@ -41,14 +35,6 @@ namespace GSC.Api.Controllers.Master
             return Ok(site);
         }
 
-        [HttpGet]
-        [Route("GetSiteById/{InvestigatorContactId}/{isDeleted:bool?}")]
-        public IActionResult GetSiteById(int InvestigatorContactId, bool isDeleted)
-        {
-            var site = _siteRepository.GetSiteById(InvestigatorContactId, isDeleted);
-            return Ok(site);
-        }
-
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -56,6 +42,14 @@ namespace GSC.Api.Controllers.Master
             var site = _siteRepository.Find(id);
             var siteDto = _mapper.Map<SiteDto>(site);
             return Ok(siteDto);
+        }
+
+        [HttpGet]
+        [Route("GetSiteById/{InvestigatorContactId}/{isDeleted:bool?}")]
+        public IActionResult GetSiteById(int InvestigatorContactId, bool isDeleted)
+        {
+            var site = _siteRepository.GetSiteById(InvestigatorContactId, isDeleted);
+            return Ok(site);
         }
 
         [HttpPost]
@@ -74,7 +68,11 @@ namespace GSC.Api.Controllers.Master
                 {
                     var site = _mapper.Map<Site>(siteDto);
                     _siteRepository.Add(site);
-                    if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
+                    if (_uow.Save() <= 0)
+                    {
+                        ModelState.AddModelError("Message", "Creating Site failed on save.");
+                        return BadRequest(ModelState);
+                    }
                 }
             }
             return Ok(siteDto.Id);
@@ -98,7 +96,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by darshil for effective Date on 26-10-2020 */
             _siteRepository.AddOrUpdate(site);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Site failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(site.Id);
         }
 

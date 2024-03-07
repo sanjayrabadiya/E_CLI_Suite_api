@@ -9,10 +9,9 @@ namespace GSC.Respository.AdverseEvent
 {
     public class AEReportingValueRepository : GenericRespository<AEReportingValue>, IAEReportingValueRepository
     {
-        private readonly IGSCContext _context;
         public AEReportingValueRepository(IGSCContext context) : base(context)
         {
-            _context = context;
+           
         }
     }
 }

@@ -19,19 +19,16 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IActivityRepository _activityRepository;
         private readonly ICtmsActivityRepository _ctmsActivityRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public ActivityController(IActivityRepository activityRepository,
             ICtmsActivityRepository ctmsActivityRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _activityRepository = activityRepository;
             _ctmsActivityRepository = ctmsActivityRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -68,7 +65,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _activityRepository.Add(activity);
-            if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(activity.Id);
         }
@@ -89,7 +90,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _activityRepository.Update(activity);
-            if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(activity.Id);
         }
 

@@ -68,7 +68,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _productFormRepository.Add(productForm);
-            if (_uow.Save() <= 0) throw new Exception("Creating Product Form failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Product Form failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(productForm.Id);
         }
 
@@ -92,7 +96,11 @@ namespace GSC.Api.Controllers.Master
             productForm.Id = 0;
             _productFormRepository.Add(productForm);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Product Form failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Product Form failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(productForm.Id);
         }
 

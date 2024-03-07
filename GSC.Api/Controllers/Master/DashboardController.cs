@@ -23,11 +23,8 @@ namespace GSC.Api.Controllers.Master
         private readonly IProjectSubSecArtificateDocumentReviewRepository _projectSubSecArtificateDocumentReviewRepository;
         private readonly ICtmsMonitoringReportReviewRepository _ctmsMonitoringReportReviewRepository;
         private readonly IAEReportingRepository _aEReportingRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IProjectDocumentReviewRepository _projectDocumentReviewRepository;
         private readonly IDashboardRepository _dashboardRepository;
-        private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
@@ -36,11 +33,8 @@ namespace GSC.Api.Controllers.Master
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
             IAEReportingRepository aEReportingRepository,
-            IProjectRepository projectRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
             IDashboardRepository dashboardRepository,
-            IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository
             )
         {
@@ -50,11 +44,8 @@ namespace GSC.Api.Controllers.Master
             _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
             _aEReportingRepository = aEReportingRepository;
-            _projectRepository = projectRepository;
             _projectDocumentReviewRepository = projectDocumentReviewRepository;
             _dashboardRepository = dashboardRepository;
-            _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
         }
 

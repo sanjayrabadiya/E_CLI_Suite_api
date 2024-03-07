@@ -6,6 +6,7 @@ using GSC.Data.Entities.Barcode;
 using GSC.Respository.Barcode;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 
 namespace GSC.Api.Controllers.Barcode
@@ -40,9 +41,13 @@ namespace GSC.Api.Controllers.Barcode
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             centrifugationDto.Id = 0;
             var centrifugation = _mapper.Map<Centrifugation>(centrifugationDto);
-           
+
             _centrifugationRepository.Add(centrifugation);
-            if (_uow.Save() <= 0) throw new Exception("Creating Centrifugation failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Centrifugation failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(centrifugation.Id);
         }
 
@@ -53,7 +58,11 @@ namespace GSC.Api.Controllers.Barcode
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var centrifugation = _mapper.Map<Centrifugation>(centrifugationDto);
             _centrifugationRepository.AddOrUpdate(centrifugation);
-            if (_uow.Save() <= 0) throw new Exception("Updating Centrifugation failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Centrifugation failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(centrifugation.Id);
         }
 

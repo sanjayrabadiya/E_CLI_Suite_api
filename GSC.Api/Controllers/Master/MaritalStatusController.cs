@@ -18,24 +18,15 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class MaritalStatusController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMaritalStatusRepository _maritalStatusRepository;
         private readonly IUnitOfWork _uow;
 
         public MaritalStatusController(IMaritalStatusRepository maritalStatusRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _maritalStatusRepository = maritalStatusRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -45,11 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var maritalStatuss = _maritalStatusRepository.GetMaritalStatusList(isDeleted);
             return Ok(maritalStatuss);
-            //var maritalStatuss = _maritalStatusRepository.All.Where(x =>
-            //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //    && isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(maritalStatussDto);
         }
 
 
@@ -77,7 +63,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _maritalStatusRepository.Add(maritalStatus);
-            if (_uow.Save() <= 0) throw new Exception("Creating Marital Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Marital Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(maritalStatus.Id);
         }
 
@@ -97,7 +87,11 @@ namespace GSC.Api.Controllers.Master
             }
             _maritalStatusRepository.AddOrUpdate(maritalStatus);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Marital Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Marital Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(maritalStatus.Id);
         }
 

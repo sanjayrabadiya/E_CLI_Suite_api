@@ -23,8 +23,6 @@ namespace GSC.Api.Controllers.Master
     public class VariableTemplateController : BaseController
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
@@ -35,8 +33,6 @@ namespace GSC.Api.Controllers.Master
 
         public VariableTemplateController(IVariableTemplateRepository variableTemplateRepository,
             IUnitOfWork uow, IMapper mapper,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IVariableTemplateDetailRepository variableTemplateDetailRepository,
             IVariableTemplateNoteRepository variableTemplateNoteRepository,
@@ -45,8 +41,6 @@ namespace GSC.Api.Controllers.Master
         {
             _variableTemplateRepository = variableTemplateRepository;
             _uow = uow;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
@@ -69,7 +63,7 @@ namespace GSC.Api.Controllers.Master
         {
             if (id <= 0) return BadRequest();
             var variableTemplate = _variableTemplateRepository
-                .FindByInclude(t => t.Id == id, t => t.Notes, d => d.VariableTemplateDetails).FirstOrDefault();
+                .FindByInclude(t => t.Id == id, t => t.Notes, d => d.VariableTemplateDetails).First();
             variableTemplate.Notes = variableTemplate.Notes.Where(t => t.DeletedDate == null).ToList();
 
             var variableTemplateDto = _mapper.Map<VariableTemplateDto>(variableTemplate);
@@ -119,7 +113,11 @@ namespace GSC.Api.Controllers.Master
             {
                 _variableTemplateNoteRepository.Add(item);
             });
-            if (_uow.Save() <= 0) throw new Exception("Creating Variable Template failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Variable Template failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variableTemplate.Id);
         }
 
@@ -186,7 +184,11 @@ namespace GSC.Api.Controllers.Master
                 _variableTemplateNoteRepository.Add(variableTemplate.Notes[i]);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Variable Template failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Variable Template failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variableTemplate.Id);
         }
 
@@ -232,7 +234,7 @@ namespace GSC.Api.Controllers.Master
             if (record == null)
                 return NotFound();
 
-            record.Domain = _domainRepository.Find((int)record.DomainId);
+            record.Domain = _domainRepository.Find(record.DomainId);
             if (record.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
                 ModelState.AddModelError("Message", "Can't delete record!");

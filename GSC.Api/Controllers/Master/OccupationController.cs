@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class OccupationController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IOccupationRepository _occupationRepository;
         private readonly IUnitOfWork _uow;
 
         public OccupationController(IOccupationRepository occupationRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _occupationRepository = occupationRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -45,10 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var occupations = _occupationRepository.GetOccupationList(isDeleted);
             return Ok(occupations);
-            //var occupations = _occupationRepository.All.Where(x =>
-            //     isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(occupationsDto);
         }
 
 
@@ -77,7 +64,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _occupationRepository.Add(occupation);
-            if (_uow.Save() <= 0) throw new Exception("Creating Occupation failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Occupation failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(occupation.Id);
         }
 
@@ -98,7 +89,11 @@ namespace GSC.Api.Controllers.Master
             }
             _occupationRepository.AddOrUpdate(occupation);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Occupation failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Occupation failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(occupation.Id);
         }
 

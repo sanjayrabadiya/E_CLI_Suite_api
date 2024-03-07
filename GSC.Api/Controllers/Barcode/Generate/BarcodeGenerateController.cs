@@ -20,7 +20,6 @@ namespace GSC.Api.Controllers.Barcode.Generate
     [Route("api/[controller]")]
     public class BarcodeGenerateController : BaseController
     {
-        private readonly IBarcodeConfigRepository _barcodeConfigRepository;
         private readonly IBarcodeGenerateRepository _barcodeGenerateRepository;
         private readonly IMapper _mapper;
         private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
@@ -32,8 +31,7 @@ namespace GSC.Api.Controllers.Barcode.Generate
             IProjectSubjectRepository projectSubjectRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IBarcodeConfigRepository barcodeConfigRepository)
+            IUnitOfWork uow, IMapper mapper)
         {
             _barcodeGenerateRepository = barcodeGenerateRepository;
             _projectSubjectRepository = projectSubjectRepository;
@@ -41,7 +39,6 @@ namespace GSC.Api.Controllers.Barcode.Generate
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _uow = uow;
             _mapper = mapper;
-            _barcodeConfigRepository = barcodeConfigRepository;
         }
 
         // GET: api/<controller>
@@ -76,7 +73,6 @@ namespace GSC.Api.Controllers.Barcode.Generate
 
                 var barcodeGenerate = _mapper.Map<BarcodeGenerate>(barcodeGenerateDto);
 
-                var barcodeConfigDto = _barcodeConfigRepository.GetBarcodeConfig(barcodeGenerateDto.BarcodeTypeId);
                 var subs = new BarcodeSubjectDetailDto();
                 subs.ProjectNo = barcodeGenerateDto.ProjectCode;
                 var period = _projectDesignPeriodRepository.GetPeriod(barcodeGenerateDto.ProjectDesignPeriodId);
@@ -95,12 +91,6 @@ namespace GSC.Api.Controllers.Barcode.Generate
                             _projectSubjectRepository.SaveSubjectForProject(barcodeGenerateDto.ProjectId,
                                 SubjectNumberType.Normal);
 
-                        //if (barcodeConfigDto.SubjectNo)
-                        //    barcodeDetail.BarcodeLabelString += barcodeDetail.ProjectSubject.Number;
-                        //if (barcodeConfigDto.ProjectNo) barcodeDetail.BarcodeLabelString += subs.ProjectNo;
-                        //if (barcodeConfigDto.Period) barcodeDetail.BarcodeLabelString += subs.PeriodNo;
-                        //if (barcodeConfigDto.RandomizationNo)
-                        //    barcodeDetail.BarcodeLabelString += subs.RandomizationNo;
                         barcodeDetail.BarcodeLabelString += subs.TemmplateNo;
                         barcodeGenerate.BarcodeSubjects.Add(barcodeDetail);
                     }
@@ -123,7 +113,11 @@ namespace GSC.Api.Controllers.Barcode.Generate
 
             _barcodeGenerateRepository.Update(barcodeGenerate);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating barcode generate failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating barcode generate failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeGenerate.Id);
         }
 

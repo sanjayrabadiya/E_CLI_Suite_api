@@ -29,10 +29,8 @@ namespace GSC.Api.Controllers.Master
     public class ProjectController : BaseController
     {
         private readonly IDesignTrialRepository _designTrialRepository;
-        private readonly IDrugRepository _drugRepository;
         private readonly IMapper _mapper;
         private readonly IProjectRepository _projectRepository;
-        private readonly ITrialTypeRepository _trialTypeRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
@@ -40,7 +38,6 @@ namespace GSC.Api.Controllers.Master
         private readonly ICentreUserService _centreUserService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly IRandomizationRepository _randomizationRepository;
         private readonly IRandomizationNumberSettingsRepository _randomizationNumberSettingsRepository;
         private readonly IScreeningNumberSettingsRepository _screeningNumberSettingsRepository;
         private readonly IUserAccessRepository _userAccessRepository;
@@ -48,8 +45,6 @@ namespace GSC.Api.Controllers.Master
 
         public ProjectController(IProjectRepository projectRepository,
             IDesignTrialRepository designTrialRepository,
-            ITrialTypeRepository trialTypeRepository,
-            IDrugRepository drugRepository,
             IProjectDesignRepository projectDesignRepository,
             IUnitOfWork uow, IMapper mapper,
             IUserRecentItemRepository userRecentItemRepository,
@@ -57,7 +52,6 @@ namespace GSC.Api.Controllers.Master
             ICentreUserService centreUserService,
             IJwtTokenAccesser jwtTokenAccesser,
             IOptions<EnvironmentSetting> environmentSetting,
-            IRandomizationRepository randomizationRepository,
             IRandomizationNumberSettingsRepository randomizationNumberSettingsRepository,
             IScreeningNumberSettingsRepository screeningNumberSettingsRepository,
             IUserAccessRepository userAccessRepository,
@@ -66,8 +60,6 @@ namespace GSC.Api.Controllers.Master
         {
             _projectRepository = projectRepository;
             _designTrialRepository = designTrialRepository;
-            _trialTypeRepository = trialTypeRepository;
-            _drugRepository = drugRepository;
             _uow = uow;
             _mapper = mapper;
             _userRecentItemRepository = userRecentItemRepository;
@@ -76,7 +68,6 @@ namespace GSC.Api.Controllers.Master
             _centreUserService = centreUserService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _environmentSetting = environmentSetting;
-            _randomizationRepository = randomizationRepository;
             _randomizationNumberSettingsRepository = randomizationNumberSettingsRepository;
             _screeningNumberSettingsRepository = screeningNumberSettingsRepository;
             _userAccessRepository = userAccessRepository;
@@ -127,7 +118,7 @@ namespace GSC.Api.Controllers.Master
 
             if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
-                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && x.IsTestSite == false).ToList().Count > 0)
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && x.IsTestSite).ToList().Count > 0)
                 {
                     ModelState.AddModelError("Message", "This site is already exist, please select other site.");
                     return BadRequest(ModelState);
@@ -148,7 +139,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _projectRepository.Save(project);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Project failed on save.");
+                return BadRequest(ModelState);
+            }
 
             //Add by Mitul on 28-11-2023 -> CTMS on Bydeful Add site add on CTMS Access table
             if (projectDto.ParentProjectId != null)
@@ -193,6 +188,93 @@ namespace GSC.Api.Controllers.Master
             return Ok(project);
         }
 
+
+        //Code for clone Study Tinku Mahato (01-04-2022)
+        [TransactionRequired]
+        [HttpPost("{cloneProjectId}")]
+        public IActionResult Post([FromRoute] int cloneProjectId, [FromBody] ProjectDto projectDto)
+        {
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            projectDto.Id = 0;
+            var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
+            project.IsSendEmail = true;
+            project.IsSendSMS = false;
+
+            if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
+            {
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && !x.IsTestSite).ToList().Count > 0)
+                {
+                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
+                    return BadRequest(ModelState);
+                }
+                var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
+                if (!string.IsNullOrEmpty(CheckAttendanceLimit))
+                {
+                    ModelState.AddModelError("Message", CheckAttendanceLimit);
+                    return BadRequest(ModelState);
+                }
+            }
+
+            var validate = _projectRepository.Duplicate(project);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
+            _projectRepository.Save(project);
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Project failed on save.");
+                return BadRequest(ModelState);
+            }
+
+            ScreeningNumberSettings screeningNumberSettings = new ScreeningNumberSettings();
+            screeningNumberSettings.Id = 0;
+            screeningNumberSettings.ProjectId = project.Id;
+            screeningNumberSettings.IsManualScreeningNo = false;
+            screeningNumberSettings.IsSiteDependentScreeningNo = false;
+            screeningNumberSettings.IsAlphaNumScreeningNo = false;
+            screeningNumberSettings.ScreeningLength = 0;
+            screeningNumberSettings.ScreeningNoStartsWith = 0;
+            screeningNumberSettings.ScreeningNoseries = 0;
+            screeningNumberSettings.PrefixScreeningNo = "";
+            _screeningNumberSettingsRepository.Add(screeningNumberSettings);
+
+            RandomizationNumberSettings randomizationNumberSettings = new RandomizationNumberSettings();
+            randomizationNumberSettings.Id = 0;
+            randomizationNumberSettings.ProjectId = project.Id;
+            randomizationNumberSettings.IsManualRandomNo = false;
+            randomizationNumberSettings.IsSiteDependentRandomNo = false;
+            randomizationNumberSettings.IsAlphaNumRandomNo = false;
+            randomizationNumberSettings.RandomNoLength = 0;
+            randomizationNumberSettings.RandomNoStartsWith = 0;
+            randomizationNumberSettings.RandomizationNoseries = 0;
+            randomizationNumberSettings.PrefixRandomNo = "";
+            _randomizationNumberSettingsRepository.Add(randomizationNumberSettings);
+
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Project failed on save.");
+                return BadRequest(ModelState);
+            }
+
+            if (cloneProjectId != 0)
+                projectDto.CloneProjectDto.CloneProjectId = cloneProjectId;
+            _projectRepository.CloneStudy(projectDto.CloneProjectDto, project);
+
+            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
+            {
+                KeyId = project.Id,
+                SubjectName = project.ProjectName,
+                SubjectName1 = project.ProjectName,
+                ScreenType = UserRecent.Project
+            });
+
+
+            return Ok(project);
+        }
+
         // PUT api/<controller>/5
         [HttpPut]
         public IActionResult Put([FromBody] ProjectDto projectDto)
@@ -210,7 +292,7 @@ namespace GSC.Api.Controllers.Master
 
             if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
-                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.Id != projectDto.Id && x.DeletedDate == null && x.IsTestSite == false).ToList().Count > 0)
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.Id != projectDto.Id && x.DeletedDate == null && !x.IsTestSite).ToList().Count > 0)
                 {
                     ModelState.AddModelError("Message", "This site is already exist, please select other site.");
                     return BadRequest(ModelState);
@@ -231,7 +313,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _projectRepository.Update(project);
-            if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Project failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(project.Id);
         }
 
@@ -248,7 +334,11 @@ namespace GSC.Api.Controllers.Master
             project.IsSendSMS = projectDto.IsSendSMS;
 
             _projectRepository.Update(project);
-            if (_uow.Save() <= 0) throw new Exception("Updating SMS/Email configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating SMS/Email configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(project.Id);
         }
 
@@ -499,14 +589,18 @@ namespace GSC.Api.Controllers.Master
             ProjectCode = ProjectCode.Replace("%2F", "/"); //GS1-I2746 : Add by mitul on 05/06/2023
             if (ProjectId <= 0) return BadRequest();
 
-            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).FirstOrDefault();
+            var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).First();
 
-            var project = _projectRepository.FindBy(x => x.Id == ProjectId).FirstOrDefault();
+            var project = _projectRepository.FindBy(x => x.Id == ProjectId).First();
 
             project.ProjectCode = numberFormat.IsManual ? ProjectCode : _projectRepository.GetProjectSitesCode(project);
 
             _projectRepository.Update(project);
-            if (_uow.Save() <= 0) throw new Exception("Update Project Code  failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update Project Code  failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(project.Id);
         }
 
@@ -516,92 +610,12 @@ namespace GSC.Api.Controllers.Master
         {
             if (ProjectId <= 0) return BadRequest();
 
-            var Project = _projectRepository.FindBy(x => x.Id == ProjectId).FirstOrDefault();
+            var Project = _projectRepository.FindBy(x => x.Id == ProjectId).First();
 
             var ProjectCode = _projectRepository.GetProjectSitesCode(Project);
             Project.ProjectCode = ProjectCode;
             return Ok(Project);
-        }
-
-
-
-        //Code for clone Study Tinku Mahato (01-04-2022)
-        [TransactionRequired]
-        [HttpPost("{cloneProjectId}")]
-        public IActionResult Post([FromRoute] int cloneProjectId, [FromBody] ProjectDto projectDto)
-        {
-            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            projectDto.Id = 0;
-            var project = _mapper.Map<Data.Entities.Master.Project>(projectDto);
-            project.IsSendEmail = true;
-            project.IsSendSMS = false;
-
-            if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
-            {
-                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && x.IsTestSite == false).ToList().Count > 0)
-                {
-                    ModelState.AddModelError("Message", "This site is already exist, please select other site.");
-                    return BadRequest(ModelState);
-                }
-                var CheckAttendanceLimit = _projectRepository.CheckAttendanceLimitPost(project);
-                if (!string.IsNullOrEmpty(CheckAttendanceLimit))
-                {
-                    ModelState.AddModelError("Message", CheckAttendanceLimit);
-                    return BadRequest(ModelState);
-                }
-            }
-
-            var validate = _projectRepository.Duplicate(project);
-            if (!string.IsNullOrEmpty(validate))
-            {
-                ModelState.AddModelError("Message", validate);
-                return BadRequest(ModelState);
-            }
-
-            _projectRepository.Save(project);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
-
-            ScreeningNumberSettings screeningNumberSettings = new ScreeningNumberSettings();
-            screeningNumberSettings.Id = 0;
-            screeningNumberSettings.ProjectId = project.Id;
-            screeningNumberSettings.IsManualScreeningNo = false;
-            screeningNumberSettings.IsSiteDependentScreeningNo = false;
-            screeningNumberSettings.IsAlphaNumScreeningNo = false;
-            screeningNumberSettings.ScreeningLength = 0;
-            screeningNumberSettings.ScreeningNoStartsWith = 0;
-            screeningNumberSettings.ScreeningNoseries = 0;
-            screeningNumberSettings.PrefixScreeningNo = "";
-            _screeningNumberSettingsRepository.Add(screeningNumberSettings);
-
-            RandomizationNumberSettings randomizationNumberSettings = new RandomizationNumberSettings();
-            randomizationNumberSettings.Id = 0;
-            randomizationNumberSettings.ProjectId = project.Id;
-            randomizationNumberSettings.IsManualRandomNo = false;
-            randomizationNumberSettings.IsSiteDependentRandomNo = false;
-            randomizationNumberSettings.IsAlphaNumRandomNo = false;
-            randomizationNumberSettings.RandomNoLength = 0;
-            randomizationNumberSettings.RandomNoStartsWith = 0;
-            randomizationNumberSettings.RandomizationNoseries = 0;
-            randomizationNumberSettings.PrefixRandomNo = "";
-            _randomizationNumberSettingsRepository.Add(randomizationNumberSettings);
-
-            if (_uow.Save() <= 0) throw new Exception("Creating Project failed on save.");
-
-            if (cloneProjectId != 0)
-                projectDto.CloneProjectDto.CloneProjectId = cloneProjectId;
-            _projectRepository.CloneStudy(projectDto.CloneProjectDto, project);
-
-            _userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            {
-                KeyId = project.Id,
-                SubjectName = project.ProjectName,
-                SubjectName1 = project.ProjectName,
-                ScreenType = UserRecent.Project
-            });
-
-
-            return Ok(project);
-        }
+        }      
         [HttpGet]
         [Route("GetParentProjectDropDownForAddProjectNo")]
         public IActionResult GetParentProjectDropDownForAddProjectNo()
@@ -660,7 +674,11 @@ namespace GSC.Api.Controllers.Master
                 _context.ProjectStatus.Update(project);
             else
                 _context.ProjectStatus.Add(project);
-            if (_uow.Save() <= 0) throw new Exception("Update project failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update project failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(project);
         }
         [HttpGet]
@@ -703,7 +721,11 @@ namespace GSC.Api.Controllers.Master
 
             project.Status = projectDto.Status;
             _context.Project.Update(project);
-            if (_uow.Save() <= 0) throw new Exception("Update project failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update project failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(project);
         }
 

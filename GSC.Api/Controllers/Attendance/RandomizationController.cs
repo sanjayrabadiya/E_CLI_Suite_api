@@ -37,32 +37,20 @@ namespace GSC.Api.Controllers.Attendance
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IUnitOfWork _uow;
-        private readonly ICityRepository _cityRepository;
-        private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
-        private readonly IConfiguration _configuration;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IUserRepository _userRepository;
-        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IGSCContext _context;
         private readonly ISupplyManagementFectorDetailRepository _supplyManagementFectorDetailRepository;
         public RandomizationController(IRandomizationRepository randomizationRepository,
             IUnitOfWork uow, IMapper mapper,
-            IProjectDesignRepository projectDesignRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            ICityRepository cityRepository,
-            IStateRepository stateRepository,
-            ICountryRepository countryRepository,
-            IConfiguration configuration,
             ICentreUserService centreUserService,
             IOptions<EnvironmentSetting> environmentSetting,
             IUserRepository userRepository,
-            IUserRoleRepository userRoleRepository,
             IProjectRepository projectRepository,
             IStudyVersionRepository studyVersionRepository,
             IGSCContext context,
@@ -73,15 +61,9 @@ namespace GSC.Api.Controllers.Attendance
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _projectDesignRepository = projectDesignRepository;
-            _cityRepository = cityRepository;
-            _stateRepository = stateRepository;
-            _countryRepository = countryRepository;
-            _configuration = configuration;
             _centreUserService = centreUserService;
             _environmentSetting = environmentSetting;
             _userRepository = userRepository;
-            _userRoleRepository = userRoleRepository;
             _projectRepository = projectRepository;
             _studyVersionRepository = studyVersionRepository;
             _context = context;
@@ -101,15 +83,6 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(RandomizationDto);
         }
 
-        [HttpGet("GetRandomizationList/{projectId}/{isDeleted:bool?}")]
-        public IActionResult GetRandomizationList(int projectId, bool isDeleted)
-        {
-            var randomizations = _randomizationRepository.GetRandomizationList(projectId, isDeleted);
-            return Ok(randomizations);
-
-            //return Ok();
-        }
-
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -127,6 +100,13 @@ namespace GSC.Api.Controllers.Attendance
             return Ok(randomizationDto);
         }
 
+        [HttpGet("GetRandomizationList/{projectId}/{isDeleted:bool?}")]
+        public IActionResult GetRandomizationList(int projectId, bool isDeleted)
+        {
+            var randomizations = _randomizationRepository.GetRandomizationList(projectId, isDeleted);
+            return Ok(randomizations);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] RandomizationDto randomizationDto)
         {
@@ -135,9 +115,9 @@ namespace GSC.Api.Controllers.Attendance
             var randomization = _mapper.Map<Randomization>(randomizationDto);
 
             var project = _projectRepository.All.Where(x => x.Id == randomization.ProjectId).Select(t => new { t.IsTestSite, t.ParentProjectId }).FirstOrDefault();
-            randomizationDto.ParentProjectId = project.ParentProjectId ?? 0;
+            randomizationDto.ParentProjectId = project?.ParentProjectId ?? 0;
 
-            if (!project.IsTestSite && !_studyVersionRepository.All.Any(x => x.ProjectId == randomizationDto.ParentProjectId && x.VersionStatus == VersionStatus.GoLive && x.DeletedDate == null))
+            if (!(project?.IsTestSite ?? false) && !_studyVersionRepository.All.Any(x => x.ProjectId == randomizationDto.ParentProjectId && x.VersionStatus == VersionStatus.GoLive && x.DeletedDate == null))
             {
                 ModelState.AddModelError("Message", "Design still not live for this site");
                 return BadRequest(ModelState);
@@ -162,7 +142,7 @@ namespace GSC.Api.Controllers.Attendance
 
             _randomizationRepository.AddRandomizationUser(userDto, userdetails);
 
-            if (randomization.LegalStatus == true)
+            if (randomization.LegalStatus)
             {
                 //for data save in central - prakash
                 var userLarDto = new UserDto();
@@ -190,14 +170,18 @@ namespace GSC.Api.Controllers.Attendance
             var Project = _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefault();
             var projectSetting = _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefault();
 
-            if (_uow.Save() <= 0) throw new Exception("Creating randomization failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating randomization failed on save.");
+                return BadRequest(ModelState);
+            }
 
             if (projectSetting != null && projectSetting.IsEicf)
             {
                 await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, 2);
                 _randomizationRepository.SendEmailOfStartEconsent(randomization);
 
-                if (randomization.LegalStatus == true)
+                if (randomization.LegalStatus)
                 {
                     await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, 2);
                     _randomizationRepository.SendEmailOfStartEconsentLAR(randomization);
@@ -218,7 +202,7 @@ namespace GSC.Api.Controllers.Attendance
             var randomization = _mapper.Map<Randomization>(RandomizationDto);
             randomization.PatientStatusId = details.PatientStatusId;
 
-            var userDetail = _userRepository.FindBy(x => x.Id == details.UserId).FirstOrDefault();
+            var userDetail = _userRepository.FindBy(x => x.Id == details.UserId).First();
             userDetail.FirstName = RandomizationDto.FirstName;
             userDetail.MiddleName = RandomizationDto.MiddleName;
             userDetail.LastName = RandomizationDto.LastName;
@@ -240,7 +224,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!String.IsNullOrEmpty(randomization.LegalFirstName))
             {
-                var userLARDetail = _userRepository.FindBy(x => x.Id == details.LARUserId).FirstOrDefault();
+                var userLARDetail = _userRepository.FindBy(x => x.Id == details.LARUserId).First();
                 userLARDetail.FirstName = RandomizationDto.LegalFirstName;
                 userLARDetail.MiddleName = RandomizationDto.LegalMiddleName;
                 userLARDetail.LastName = RandomizationDto.LegalLastName;
@@ -260,7 +244,11 @@ namespace GSC.Api.Controllers.Attendance
             }
 
             _randomizationRepository.Update(randomization);
-            if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating None register failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(randomization.Id);
         }
 
@@ -268,7 +256,7 @@ namespace GSC.Api.Controllers.Attendance
         public ActionResult Delete(int id)
         {
 
-            if (!_randomizationRepository.All.Any(x => x.Id == id && (x.PatientStatusId == ScreeningPatientStatus.PreScreening || x.PatientStatusId == null)))
+            if (!_randomizationRepository.All.Any(x => x.Id == id && (x.PatientStatusId == ScreeningPatientStatus.PreScreening)))
             {
                 ModelState.AddModelError("Message", "Can not delete , because this record is under process.");
                 return BadRequest(ModelState);
@@ -303,19 +291,13 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", "Email is not set for this patient");
                 return BadRequest(ModelState);
             }
-
-            var Project = await _context.Project.Where(x => x.Id == randomization.ProjectId).FirstOrDefaultAsync();
-            var projectSetting =await _context.ProjectSettings.Where(x => x.ProjectId == Project.ParentProjectId && x.DeletedBy == null).FirstOrDefaultAsync();
-
-
             if (randomization.UserId != null)
             {
                 var userdata = _userRepository.Find((int)randomization.UserId);
-                var user = new UserViewModel();
 
-                user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
+                var user = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userdata.UserName}");
 
-                if (user.IsFirstTime == true)
+                if (user.IsFirstTime)
                 {
                     await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
                 }
@@ -329,10 +311,8 @@ namespace GSC.Api.Controllers.Attendance
             if (randomization.LARUserId != null)
             {
                 var userLARdata = _userRepository.Find((int)randomization.LARUserId);
-                var userLAR = new UserViewModel();
-
-                userLAR = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userLARdata.UserName}");
-                if (userLAR.IsFirstTime == true)
+                var userLAR = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userLARdata.UserName}");
+                if (userLAR.IsFirstTime)
                 {
                     await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, type);
                 }
@@ -342,23 +322,6 @@ namespace GSC.Api.Controllers.Attendance
                     return BadRequest(ModelState);
                 }
             }
-
-            //if (user.IsFirstTime == true || userLAR.IsFirstTime == true)
-            //{
-            //    if (user.IsFirstTime == true)
-            //        await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, type);
-
-            //    if (userLAR.IsFirstTime == true)
-            //        await _randomizationRepository.SendEmailOfScreenedtoPatientLAR(randomization, type);
-            //    //if (projectSetting.IsEicf)
-            //    //    _randomizationRepository.SendEmailOfStartEconsent(randomization);
-            //}
-            //else
-            //{
-            //    ModelState.AddModelError("Message", "Patient or Lar already logged in");
-            //    return BadRequest(ModelState);
-            //}
-
             return Ok(id);
         }
 
@@ -397,7 +360,11 @@ namespace GSC.Api.Controllers.Attendance
 
             await _randomizationRepository.SendEmailOfScreenedtoPatient(randomization, 2);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating None register failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(randomization.Id);
         }
@@ -412,7 +379,7 @@ namespace GSC.Api.Controllers.Attendance
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId && x.DeletedDate == null).FirstOrDefault();
+            var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomizationDto.ParentProjectId && x.DeletedDate == null).First();
 
             var randomization = _randomizationRepository.Find(randomizationDto.Id);
             randno = randomization.RandomizationNumber;
@@ -432,42 +399,32 @@ namespace GSC.Api.Controllers.Attendance
 
             _randomizationRepository.SaveRandomizationNumber(randomization, randomizationDto);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating None register failed on save.");
-
-
-
-            if (string.IsNullOrEmpty(randno))
+            if (_uow.Save() <= 0)
             {
-                if (numerformate.IsIWRS || numerformate.IsIGT)
+                ModelState.AddModelError("Message", "Updating None register failed on save.");
+                return BadRequest(ModelState);
+            }
+
+            if (string.IsNullOrEmpty(randno) && (numerformate.IsIWRS || numerformate.IsIGT))
+            {
+                randomizationDto = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
+                if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
                 {
-                    randomizationDto = _randomizationRepository.CheckDuplicateRandomizationNumberIWRS(randomizationDto, numerformate);
-                    if (!string.IsNullOrEmpty(randomizationDto.ErrorMessage))
-                    {
-                        ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
-                        return BadRequest(ModelState);
-                    }
-                    _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
-                    _randomizationRepository.SendRandomizationThresholdEMail(randomizationDto);
+                    ModelState.AddModelError("Message", randomizationDto.ErrorMessage);
+                    return BadRequest(ModelState);
                 }
+                _randomizationRepository.SendRandomizationIWRSEMail(randomizationDto);
+                _randomizationRepository.SendRandomizationThresholdEMail(randomizationDto);
             }
             return Ok(randomizationDto);
         }
-
-        //[HttpPut]
-        //[Route("ChangeStatustoConsentInProgress")]
-        //public IActionResult ChangeStatustoConsentInProgress()
-        //{
-        //    _randomizationRepository.ChangeStatustoConsentInProgress();
-        //    _uow.Save();
-        //    return Ok();
-        //}
 
         [HttpPut]
         [Route("ConsentStart")]
         public IActionResult ConsentStart()
         {
-            var subjectDetail = _randomizationRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId, x => x.EconsentReviewDetails).SingleOrDefault();
-            if (subjectDetail.EconsentReviewDetails.Count() > 0)
+            var subjectDetail = _randomizationRepository.FindByInclude(x => x.UserId == _jwtTokenAccesser.UserId, x => x.EconsentReviewDetails).Single();
+            if (subjectDetail.EconsentReviewDetails.Any())
             {
                 subjectDetail.PatientStatusId = ScreeningPatientStatus.ConsentInProcess;
                 _randomizationRepository.Update(subjectDetail);
@@ -475,17 +432,6 @@ namespace GSC.Api.Controllers.Attendance
             }
             return Ok(subjectDetail.PatientStatusId);
         }
-
-        //[HttpPut]
-        //[Route("ChangeStatustoWithdrawal")]
-        //public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
-        ////public IActionResult ChangeStatustoWithdrawal()
-        //{
-        //    //public IActionResult ChangeStatustoWithdrawal([FromBody] FileModel fileModel)
-        //    _randomizationRepository.ChangeStatustoWithdrawal(fileModel);
-        //    _uow.Save();
-        //    return Ok();
-        //}
 
         [HttpGet("GetPatientVisits")]
         public IActionResult GetPatientVisits()
@@ -517,13 +463,13 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetRandomizationNumber/{id}")]
         public IActionResult GetRandomizationNumber(int id)
         {
-            var randdata = _randomizationRepository.All.Where(x => x.Id == id).FirstOrDefault();
+            var randdata = _randomizationRepository.All.Where(x => x.Id == id).First();
 
             if (randdata.DateOfScreening != null && randdata.RandomizationNumber == null)
                 _randomizationRepository.SetFactorMappingData(randdata);
 
             var isvalid = _randomizationRepository.IsRandomFormatSetInStudy(id);
-            if (isvalid == true)
+            if (isvalid)
             {
                 var data = _randomizationRepository.GetRandomizationNumber(id);
                 if (data.IsIGT && randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
@@ -566,7 +512,7 @@ namespace GSC.Api.Controllers.Attendance
         public IActionResult GetScreeningNumber(int id)
         {
             var isvalid = _randomizationRepository.IsScreeningFormatSetInStudy(id);
-            if (isvalid == true)
+            if (isvalid)
             {
                 var data = _randomizationRepository.GetScreeningNumber(id);
                 return Ok(data);
@@ -627,18 +573,18 @@ namespace GSC.Api.Controllers.Attendance
             RandomizationFactor randomizationDto = new RandomizationFactor();
             var factorData = _supplyManagementFectorDetailRepository.All.Where(x => x.DeletedDate == null && x.SupplyManagementFector.ProjectId == id).ToList();
             var randomizationdata = _context.RandomizationNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == id).ToList();
-            if (factorData != null && factorData.Count > 0)
+            if (factorData.Count > 0)
             {
-                randomizationDto.IsGenderFactor = factorData.Any(x => x.Fector == Fector.Gender);
-                randomizationDto.IsDaitoryFactor = factorData.Any(x => x.Fector == Fector.Diatory);
-                randomizationDto.IsAgeFactor = factorData.Any(x => x.Fector == Fector.Age);
-                randomizationDto.IsBMIFactor = factorData.Any(x => x.Fector == Fector.BMI);
-                randomizationDto.IsJointFactor = factorData.Any(x => x.Fector == Fector.Joint);
-                randomizationDto.IsEligibilityFactor = factorData.Any(x => x.Fector == Fector.Eligibility);
-                randomizationDto.isWeightFactor = factorData.Any(x => x.Fector == Fector.Weight);
-                randomizationDto.isDoseFactor = factorData.Any(x => x.Fector == Fector.Dose);
-                randomizationDto.IsIWRS = randomizationdata.Count > 0 ? randomizationdata.Any(x => x.IsIWRS == true || x.IsIGT == true) : false;
-                randomizationDto.IsDisable = _context.SupplyManagementFactorMapping.Any(x => x.DeletedDate == null && x.ProjectId == id) ? true : false;
+                randomizationDto.IsGenderFactor = factorData.Exists(x => x.Fector == Fector.Gender);
+                randomizationDto.IsDaitoryFactor = factorData.Exists(x => x.Fector == Fector.Diatory);
+                randomizationDto.IsAgeFactor = factorData.Exists(x => x.Fector == Fector.Age);
+                randomizationDto.IsBMIFactor = factorData.Exists(x => x.Fector == Fector.BMI);
+                randomizationDto.IsJointFactor = factorData.Exists(x => x.Fector == Fector.Joint);
+                randomizationDto.IsEligibilityFactor = factorData.Exists(x => x.Fector == Fector.Eligibility);
+                randomizationDto.isWeightFactor = factorData.Exists(x => x.Fector == Fector.Weight);
+                randomizationDto.isDoseFactor = factorData.Exists(x => x.Fector == Fector.Dose);
+                randomizationDto.IsIWRS = randomizationdata.Exists(x => x.IsIWRS || x.IsIGT);
+                randomizationDto.IsDisable = _context.SupplyManagementFactorMapping.Any(x => x.DeletedDate == null && x.ProjectId == id);
             }
             return Ok(randomizationDto);
         }

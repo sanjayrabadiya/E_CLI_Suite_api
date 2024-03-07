@@ -51,7 +51,11 @@ namespace GSC.Api.Controllers.Barcode.Generate
             var barcodeSubjectDetail = _mapper.Map<BarcodeSubjectDetail>(barcodeSubjectDetailDto);
 
             _barcodeSubjectDetailRepository.Add(barcodeSubjectDetail);
-            if (_uow.Save() <= 0) throw new Exception("Creating barcode Subject details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating barcode Subject details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeSubjectDetail.Id);
         }
 
@@ -67,7 +71,11 @@ namespace GSC.Api.Controllers.Barcode.Generate
 
             _barcodeSubjectDetailRepository.Update(barcodeSubjectDetail);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating barcode Subject details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating barcode Subject details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeSubjectDetail.Id);
         }
 

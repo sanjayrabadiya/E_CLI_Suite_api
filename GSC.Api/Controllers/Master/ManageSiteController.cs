@@ -18,29 +18,14 @@ namespace GSC.Api.Controllers.Master
     public class ManageSiteController : BaseController
     {
         private readonly IManageSiteRepository _manageSiteRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly ICityRepository _cityRepository;
-        private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
 
         public ManageSiteController(IManageSiteRepository manageSiteRepository,
-            IUserRepository userRepository,
-            ICityRepository cityRepository,
-            ICompanyRepository companyRepository,
-            IStateRepository stateRepository,
-            ICountryRepository countryRepository,
             IUnitOfWork uow, IMapper mapper, IGSCContext context)
         {
             _manageSiteRepository = manageSiteRepository;
-            _cityRepository = cityRepository;
-            _stateRepository = stateRepository;
-            _userRepository = userRepository;
-            _countryRepository = countryRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
             _context = context;
@@ -63,7 +48,7 @@ namespace GSC.Api.Controllers.Master
             if (manageSite == null)
                 return BadRequest();
 
-            if (manageSite != null && manageSite.ManageSiteRole != null)
+            if (manageSite.ManageSiteRole != null)
                 manageSite.ManageSiteRole = manageSite.ManageSiteRole.Where(x => x.DeletedDate == null).ToList();
 
             var manageSiteDto = _mapper.Map<ManageSiteDto>(manageSite);
@@ -94,7 +79,11 @@ namespace GSC.Api.Controllers.Master
             {
                 _context.ManageSiteRole.Add(x);
             });
-            if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Site failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(manageSite.Id);
         }
 
@@ -119,7 +108,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by Darshil for effective Date on 24-07-2020 */
             _manageSiteRepository.Update(manageSite);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Site failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(manageSite.Id);
         }
 
