@@ -162,7 +162,11 @@ namespace GSC.Api.Controllers.AdverseEvent
             {
                 await _emailSenderRespository.SendAdverseEventAlertEMailtoInvestigator(x.Email, x.Phone, x.UserName, studyname, randomization.Initial + " " + randomization.ScreeningNumber, DateTime.Now.ToString("dd-MMM-yyyy"));
             });
-            if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event Reporting.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Error to save Adverse Event Reporting.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }
@@ -180,7 +184,11 @@ namespace GSC.Api.Controllers.AdverseEvent
             data.ReviewedByRole = _jwtTokenAccesser.RoleId;
             _iAEReportingRepository.Update(data);
 
-            if (_uow.Save() <= 0) throw new Exception("Approve Failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Approve Failed.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
@@ -199,7 +207,11 @@ namespace GSC.Api.Controllers.AdverseEvent
             data.ReviewedByRole = _jwtTokenAccesser.RoleId;
             _iAEReportingRepository.Update(data);
 
-            if (_uow.Save() <= 0) throw new Exception("Approve Failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Approve Failed.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

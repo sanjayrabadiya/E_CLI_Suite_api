@@ -56,7 +56,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _fileSizeConfigurationRepository.Add(fileSize);
-            if (_uow.Save() <= 0) throw new Exception("Creating File Size Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating File Size Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(fileSize.Id);
         }
         [HttpPut]
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Master
             }
             _fileSizeConfigurationRepository.AddOrUpdate(fileSize);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating File Size Configuration failed on update.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating File Size Configuration failed on update.");
+                return BadRequest(ModelState);
+            }
             return Ok(fileSize.Id);
         }
         [HttpDelete("{id}")]

@@ -20,22 +20,9 @@ namespace GSC.Respository.Master
 {
     public class ProjectDataRemoveService : IProjectDataRemoveService
     {
-        private readonly ILoginPreferenceRepository _loginPreferenceRepository;
-        private readonly HttpClient _httpClient;
-        private readonly IGSCCaching _gSCCaching;
-        private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IGSCContext _context;
-        public ProjectDataRemoveService(ILoginPreferenceRepository loginPreferenceRepository,
-            HttpClient httpClient,
-            IGSCCaching gSCCaching, IUserLoginReportRespository userLoginReportRepository,
-            IOptions<EnvironmentSetting> environmentSetting, IGSCContext context)
+        public ProjectDataRemoveService(IGSCContext context)
         {
-            _loginPreferenceRepository = loginPreferenceRepository;
-            _httpClient = httpClient;
-            _gSCCaching = gSCCaching;
-            _userLoginReportRepository = userLoginReportRepository;
-            _environmentSetting = environmentSetting;
             _context = context;
         }
         public async Task<ProjectRemoveDataSuccess> AdverseEventRemove(ProjectRemoveDataDto obj)
@@ -53,18 +40,18 @@ namespace GSC.Respository.Master
                         {
 
                             var aeReportingValue = _context.AEReportingValue.Where(ae => ae.AEReportingId == z.Id).ToList();
-                            if (aeReportingValue != null)
+                            if (aeReportingValue.Any())
                                 _context.AEReportingValue.RemoveRange(aeReportingValue);
                         });
-                        if (aereporting != null)
+                        if (aereporting.Any())
                             _context.AEReporting.RemoveRange(aereporting);
 
                         var adversedetails = _context.AdverseEventSettingsDetails.Where(s => s.AdverseEventSettingsId == x.Id).ToList();
-                        if (adversedetails != null)
+                        if (adversedetails.Any())
                             _context.AdverseEventSettingsDetails.RemoveRange(adversedetails);
 
                     });
-                    if (data != null)
+                    if (data.Any())
                         _context.AdverseEventSettings.RemoveRange(data);
                     _context.Save();
                 }
@@ -146,7 +133,7 @@ namespace GSC.Respository.Master
                     _context.Attendance.RemoveRange(Attendance);
                 }
                 var childproject = _context.Project.Where(x => x.ParentProjectId == obj.ProjectId).ToList();
-                if (childproject != null)
+                if (childproject.Any())
                 {
                     childproject.ForEach(z =>
                     {
@@ -208,10 +195,10 @@ namespace GSC.Respository.Master
                                     _context.CtmsMonitoringReportVariableValueQuery.RemoveRange(CtmsMonitoringReportVariableValueQuery);
 
                             });
-                            if (CtmsMonitoringReportVariableValue != null)
+                            if (CtmsMonitoringReportVariableValue.Any())
                                 _context.CtmsMonitoringReportVariableValue.RemoveRange(CtmsMonitoringReportVariableValue);
                         });
-                        if (CtmsMonitoringReport != null)
+                        if (CtmsMonitoringReport.Any())
                             _context.CtmsMonitoringReport.RemoveRange(CtmsMonitoringReport);
                     });
                     _context.CtmsMonitoring.RemoveRange(CtmsMonitoring);
@@ -244,23 +231,23 @@ namespace GSC.Respository.Master
                     studylevelform.ForEach(slf =>
                     {
                         var StudyLevelFormVariable = _context.StudyLevelFormVariable.Where(x => x.StudyLevelFormId == slf.Id).ToList();
-                        if (StudyLevelFormVariable != null)
+                        if (StudyLevelFormVariable.Any())
                         {
                             StudyLevelFormVariable.ForEach(slfv =>
                             {
                                 var StudyLevelFormVariableRemarks = _context.StudyLevelFormVariableRemarks.Where(x => x.StudyLevelFormVariableId == slfv.Id).ToList();
-                                if (StudyLevelFormVariableRemarks != null)
+                                if (StudyLevelFormVariableRemarks.Any())
                                     _context.StudyLevelFormVariableRemarks.RemoveRange(StudyLevelFormVariableRemarks);
 
                                 var StudyLevelFormVariableValue = _context.StudyLevelFormVariableValue.Where(x => x.StudyLevelFormVariableId == slfv.Id).ToList();
-                                if (StudyLevelFormVariableValue != null)
+                                if (StudyLevelFormVariableValue.Any())
                                     _context.StudyLevelFormVariableValue.RemoveRange(StudyLevelFormVariableValue);
                             });
-                            if (StudyLevelFormVariable != null)
+                            if (StudyLevelFormVariable.Any())
                                 _context.StudyLevelFormVariable.RemoveRange(StudyLevelFormVariable);
                         }
                     });
-                    if (studylevelform != null)
+                    if (studylevelform.Any())
                         _context.StudyLevelForm.RemoveRange(studylevelform);
                 }
 
@@ -399,17 +386,17 @@ namespace GSC.Respository.Master
                                                  _context.ProjectArtificateDocumentApprover.RemoveRange(pwaart.ProjectArtificateDocumentApprover);
 
                                              var ProjectArtificateDocumentComment = _context.ProjectArtificateDocumentComment.Where(x => x.ProjectWorkplaceArtificatedDocumentId == pwaart.Id).ToList();
-                                             if (ProjectArtificateDocumentComment != null)
+                                             if (ProjectArtificateDocumentComment.Any())
                                                  _context.ProjectArtificateDocumentComment.RemoveRange(ProjectArtificateDocumentComment);
                                              var ProjectArtificateDocumentHistory = _context.ProjectArtificateDocumentHistory.Where(x => x.ProjectWorkplaceArtificateDocumentId == pwaart.Id).ToList();
-                                             if (ProjectArtificateDocumentHistory != null)
+                                             if (ProjectArtificateDocumentHistory.Any())
                                                  _context.ProjectArtificateDocumentHistory.RemoveRange(ProjectArtificateDocumentHistory);
                                              var ProjectArtificateDocumentReview = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == pwaart.Id).ToList();
-                                             if (ProjectArtificateDocumentReview != null)
+                                             if (ProjectArtificateDocumentReview.Any())
                                                  _context.ProjectArtificateDocumentReview.RemoveRange(ProjectArtificateDocumentReview);
 
                                          });
-                                         if (pwa.ProjectWorkplaceArtificatedocument != null)
+                                         if (pwa.ProjectWorkplaceArtificatedocument.Any())
                                              _context.ProjectWorkplaceArtificatedocument.RemoveRange(pwa.ProjectWorkplaceArtificatedocument);
                                      });
                                      if (pwsection.ProjectWorkplaceDetails != null)
@@ -421,7 +408,7 @@ namespace GSC.Respository.Master
                                      .ThenInclude(x => x.ProjectSubSecArtificateDocumentReview)
                                      .Where(a => a.EtmfProjectWorkPlaceId == pwsection.Id).ToList();
 
-                                     if (ProjectWorkplaceSubSection != null && ProjectWorkplaceSubSection.Count > 0)
+                                     if (ProjectWorkplaceSubSection.Any())
                                      {
                                          ProjectWorkplaceSubSection.ForEach(PWsubsection =>
                                          {
@@ -433,13 +420,13 @@ namespace GSC.Respository.Master
                                                          _context.ProjectSubSecArtificateDocumentReview.RemoveRange(PWsubsectionartDoc.ProjectSubSecArtificateDocumentReview);
 
                                                      var ProjectSubSecArtificateDocumentComment = _context.ProjectSubSecArtificateDocumentComment.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == PWsubsectionartDoc.Id).ToList();
-                                                     if (ProjectSubSecArtificateDocumentComment != null)
+                                                     if (ProjectSubSecArtificateDocumentComment.Any())
                                                          _context.ProjectSubSecArtificateDocumentComment.RemoveRange(ProjectSubSecArtificateDocumentComment);
                                                      var ProjectSubSecArtificateDocumentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == PWsubsectionartDoc.Id).ToList();
-                                                     if (ProjectSubSecArtificateDocumentApprover != null)
+                                                     if (ProjectSubSecArtificateDocumentApprover.Any())
                                                          _context.ProjectSubSecArtificateDocumentApprover.RemoveRange(ProjectSubSecArtificateDocumentApprover);
                                                      var ProjectSubSecArtificateDocumentHistory = _context.ProjectSubSecArtificateDocumentHistory.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == PWsubsectionartDoc.Id).ToList();
-                                                     if (ProjectSubSecArtificateDocumentHistory != null)
+                                                     if (ProjectSubSecArtificateDocumentHistory.Any())
                                                          _context.ProjectSubSecArtificateDocumentHistory.RemoveRange(ProjectSubSecArtificateDocumentHistory);
                                                  });
                                                  if (PWsubsectionart.ProjectWorkplaceSubSecArtificatedocument != null)
@@ -462,13 +449,13 @@ namespace GSC.Respository.Master
                                  _context.EtmfProjectWorkPlace.RemoveRange(pwd.ProjectWorkplaceDetails);
 
                              var EtmfUserPermission = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == pwd.Id).ToList();
-                             if (EtmfUserPermission != null)
+                             if (EtmfUserPermission.Any())
                                  _context.EtmfUserPermission.RemoveRange(EtmfUserPermission);
                          });
                         if (pw.ProjectWorkplaceDetails != null)
                             _context.EtmfProjectWorkPlace.RemoveRange(pw.ProjectWorkplaceDetails);
                     });
-                    if (EtmfProjectWorkPlace != null)
+                    if (EtmfProjectWorkPlace.Any())
                         _context.EtmfProjectWorkPlace.RemoveRange(EtmfProjectWorkPlace);
                 }
 
@@ -512,11 +499,11 @@ namespace GSC.Respository.Master
                                         svisit.ScreeningTemplates.ForEach(stemplate =>
                                         {
                                             var ScreeningTemplateReview = _context.ScreeningTemplateReview.Where(x => x.ScreeningTemplateId == stemplate.Id).ToList();
-                                            if (ScreeningTemplateReview != null && ScreeningTemplateReview.Count > 0)
+                                            if (ScreeningTemplateReview.Any() && ScreeningTemplateReview.Count > 0)
                                                 _context.ScreeningTemplateReview.RemoveRange(ScreeningTemplateReview);
 
                                             var ScreeningTemplateEditCheckValue = _context.ScreeningTemplateEditCheckValue.Where(x => x.ScreeningTemplateId == stemplate.Id).ToList();
-                                            if (ScreeningTemplateEditCheckValue != null && ScreeningTemplateEditCheckValue.Count > 0)
+                                            if (ScreeningTemplateEditCheckValue.Any() && ScreeningTemplateEditCheckValue.Count > 0)
                                                 _context.ScreeningTemplateEditCheckValue.RemoveRange(ScreeningTemplateEditCheckValue);
 
                                             stemplate.ScreeningTemplateValues.ToList().ForEach(stemplatevalue =>
@@ -525,19 +512,19 @@ namespace GSC.Respository.Master
                                                     _context.ScreeningTemplateValueAudit.RemoveRange(stemplatevalue.ScreeningTemplateValueAudits);
 
                                                 var ScreeningTemplateValueChild = _context.ScreeningTemplateValueChild.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
-                                                if (ScreeningTemplateValueChild != null && ScreeningTemplateValueChild.Count > 0)
+                                                if (ScreeningTemplateValueChild.Any() && ScreeningTemplateValueChild.Count > 0)
                                                     _context.ScreeningTemplateValueChild.RemoveRange(ScreeningTemplateValueChild);
 
                                                 var ScreeningTemplateValueQuerys = _context.ScreeningTemplateValueQuery.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
-                                                if (ScreeningTemplateValueQuerys != null && ScreeningTemplateValueQuerys.Count > 0)
+                                                if (ScreeningTemplateValueQuerys.Any() && ScreeningTemplateValueQuerys.Count > 0)
                                                     _context.ScreeningTemplateValueQuery.RemoveRange(ScreeningTemplateValueQuerys);
 
                                                 var ScreeningTemplateValueComment = _context.ScreeningTemplateValueComment.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
-                                                if (ScreeningTemplateValueComment != null && ScreeningTemplateValueComment.Count > 0)
+                                                if (ScreeningTemplateValueComment.Any() && ScreeningTemplateValueComment.Count > 0)
                                                     _context.ScreeningTemplateValueComment.RemoveRange(ScreeningTemplateValueComment);
 
                                                 var ScreeningTemplateRemarksChild = _context.ScreeningTemplateRemarksChild.Where(z => z.ScreeningTemplateValueId == stemplatevalue.Id).ToList();
-                                                if (ScreeningTemplateRemarksChild != null && ScreeningTemplateRemarksChild.Count > 0)
+                                                if (ScreeningTemplateRemarksChild.Any() && ScreeningTemplateRemarksChild.Count > 0)
                                                     _context.ScreeningTemplateRemarksChild.RemoveRange(ScreeningTemplateRemarksChild);
                                             });
                                             if (stemplate.ScreeningTemplateValues != null && stemplate.ScreeningTemplateValues.Count > 0)
@@ -547,7 +534,7 @@ namespace GSC.Respository.Master
                                             _context.ScreeningTemplate.RemoveRange(svisit.ScreeningTemplates);
 
                                         var ScreeningVisitHistory = _context.ScreeningVisitHistory.Where(x => x.ScreeningVisitId == svisit.Id).ToList();
-                                        if (ScreeningVisitHistory != null && ScreeningVisitHistory.Count > 0)
+                                        if (ScreeningVisitHistory.Any() && ScreeningVisitHistory.Count > 0)
                                             _context.ScreeningVisitHistory.RemoveRange(ScreeningVisitHistory);
 
                                     });
@@ -557,12 +544,12 @@ namespace GSC.Respository.Master
                                 if (sentry.ScreeningHistory != null)
                                     _context.ScreeningHistory.RemoveRange(sentry.ScreeningHistory);
                                 var ScreeningTemplateLockUnlockAudit = _context.ScreeningTemplateLockUnlockAudit.Where(x => x.ScreeningEntryId == sentry.Id).ToList();
-                                if (ScreeningTemplateLockUnlockAudit != null && ScreeningTemplateLockUnlockAudit.Count > 0)
+                                if (ScreeningTemplateLockUnlockAudit.Any() && ScreeningTemplateLockUnlockAudit.Count > 0)
                                 {
                                     _context.ScreeningTemplateLockUnlockAudit.RemoveRange(ScreeningTemplateLockUnlockAudit);
                                 }
                             });
-                            if (ScreeningEntry != null && ScreeningEntry.Count > 0)
+                            if (ScreeningEntry.Any())
                                 _context.ScreeningEntry.RemoveRange(ScreeningEntry);
 
                         }
@@ -624,42 +611,42 @@ namespace GSC.Respository.Master
                                                 _context.ProjectDesignVariableValue.RemoveRange(variables.Values);
 
                                             var ProjectDesignVariableEncryptRole = _context.ProjectDesignVariableEncryptRole.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
-                                            if (ProjectDesignVariableEncryptRole != null && ProjectDesignVariableEncryptRole.Count > 0)
+                                            if (ProjectDesignVariableEncryptRole.Any() && ProjectDesignVariableEncryptRole.Count > 0)
                                                 _context.ProjectDesignVariableEncryptRole.RemoveRange(ProjectDesignVariableEncryptRole);
 
                                             var VariableNoteLanguage = _context.VariableNoteLanguage.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
-                                            if (VariableNoteLanguage != null && VariableNoteLanguage.Count > 0)
+                                            if (VariableNoteLanguage.Any() && VariableNoteLanguage.Count > 0)
                                                 _context.VariableNoteLanguage.RemoveRange(VariableNoteLanguage);
 
                                             var VariableLanguage = _context.VariableLanguage.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
-                                            if (VariableLanguage != null && VariableLanguage.Count > 0)
+                                            if (VariableLanguage.Any() && VariableLanguage.Count > 0)
                                                 _context.VariableLanguage.RemoveRange(VariableLanguage);
 
                                             var remarks = _context.ProjectDesignVariableRemarks.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
-                                            if (remarks != null && remarks.Count > 0)
+                                            if (remarks.Any() && remarks.Count > 0)
                                                 _context.ProjectDesignVariableRemarks.RemoveRange(remarks);
 
                                             var ProjectDesignVisitStatus = _context.ProjectDesignVisitStatus.Where(z => z.ProjectDesignVariableId == variables.Id).ToList();
-                                            if (ProjectDesignVisitStatus != null && ProjectDesignVisitStatus.Count > 0)
+                                            if (ProjectDesignVisitStatus.Any() && ProjectDesignVisitStatus.Count > 0)
                                                 _context.ProjectDesignVisitStatus.RemoveRange(ProjectDesignVisitStatus);
                                         });
                                         if (templates.Variables != null && templates.Variables.Count > 0)
                                             _context.ProjectDesignVariable.RemoveRange(templates.Variables);
 
                                         var TemplateLanguage = _context.TemplateLanguage.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
-                                        if (TemplateLanguage != null && TemplateLanguage.Count > 0)
+                                        if (TemplateLanguage.Any() && TemplateLanguage.Count > 0)
                                             _context.TemplateLanguage.RemoveRange(TemplateLanguage);
 
                                         var TemplateNoteLanguage = _context.TemplateNoteLanguage.Where(x => x.ProjectDesignTemplateNote.ProjectDesignTemplateId == templates.Id).ToList();
-                                        if (TemplateNoteLanguage != null && TemplateNoteLanguage.Count > 0)
+                                        if (TemplateNoteLanguage.Any() && TemplateNoteLanguage.Count > 0)
                                             _context.TemplateNoteLanguage.RemoveRange(TemplateNoteLanguage);
 
                                         var ProjectDesignTemplateNote = _context.ProjectDesignTemplateNote.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
-                                        if (ProjectDesignTemplateNote != null && ProjectDesignTemplateNote.Count > 0)
+                                        if (ProjectDesignTemplateNote.Any() && ProjectDesignTemplateNote.Count > 0)
                                             _context.ProjectDesignTemplateNote.RemoveRange(ProjectDesignTemplateNote);
 
                                         var ProjectDesingTemplateRestriction = _context.ProjectDesingTemplateRestriction.Where(x => x.ProjectDesignTemplateId == templates.Id).ToList();
-                                        if (ProjectDesingTemplateRestriction != null && ProjectDesingTemplateRestriction.Count > 0)
+                                        if (ProjectDesingTemplateRestriction.Any() && ProjectDesingTemplateRestriction.Count > 0)
                                             _context.ProjectDesingTemplateRestriction.RemoveRange(ProjectDesingTemplateRestriction);
 
 
@@ -668,7 +655,7 @@ namespace GSC.Respository.Master
                                         _context.ProjectDesignTemplate.RemoveRange(visitList.Templates);
 
                                     var VisitLanguage = _context.VisitLanguage.Where(x => x.ProjectDesignVisitId == visitList.Id).ToList();
-                                    if (VisitLanguage != null && VisitLanguage.Count > 0)
+                                    if (VisitLanguage.Any() && VisitLanguage.Count > 0)
                                         _context.VisitLanguage.RemoveRange(VisitLanguage);
                                 });
                                 if (designperiod.VisitList != null && designperiod.VisitList.Count > 0)
@@ -679,7 +666,7 @@ namespace GSC.Respository.Master
                                 _context.ProjectDesignPeriod.RemoveRange(design.ProjectDesignPeriods);
 
                             var StudyVersions = _context.StudyVersion.Include(x => x.StudyVersionStatus).Where(x => x.ProjectDesignId == design.Id).ToList();
-                            if (StudyVersions != null && StudyVersions.Count > 0)
+                            if (StudyVersions.Any() && StudyVersions.Count > 0)
                             {
                                 StudyVersions.ForEach(version =>
                                 {
@@ -690,7 +677,7 @@ namespace GSC.Respository.Master
                             }
                             var ProjectSchedule = _context.ProjectSchedule.Include(x => x.Templates).Where(x => x.ProjectDesignId == design.Id).ToList();
 
-                            if (ProjectSchedule != null && ProjectSchedule.Count > 0)
+                            if (ProjectSchedule.Any() && ProjectSchedule.Count > 0)
                             {
                                 ProjectSchedule.ForEach(pschedule =>
                                 {
@@ -701,7 +688,7 @@ namespace GSC.Respository.Master
                             }
                             var editCheck = _context.EditCheck.Include(x => x.EditCheckDetails).Where(x => x.ProjectDesignId == design.Id).ToList();
 
-                            if (editCheck != null && editCheck.Count > 0)
+                            if (editCheck.Any() && editCheck.Count > 0)
                             {
                                 editCheck.ForEach(editcheck =>
                                 {
@@ -711,7 +698,7 @@ namespace GSC.Respository.Master
                                 _context.EditCheck.RemoveRange(editCheck);
                             }
                             var pworkflow = _context.ProjectWorkflow.Include(x => x.Levels).Include(x => x.Independents).Where(x => x.ProjectDesignId == design.Id).ToList();
-                            if (pworkflow != null && pworkflow.Count > 0)
+                            if (pworkflow.Any() && pworkflow.Count > 0)
                             {
                                 pworkflow.ForEach(pflow =>
                                 {
@@ -724,7 +711,7 @@ namespace GSC.Respository.Master
                             }
                             var pdreportsetting = _context.ProjectDesignReportSetting.Where(x => x.ProjectDesignId == design.Id).ToList();
 
-                            if (pdreportsetting != null && pdreportsetting.Count > 0)
+                            if (pdreportsetting.Any() && pdreportsetting.Count > 0)
                             {
                                 _context.ProjectDesignReportSetting.RemoveRange(pdreportsetting);
                             }
@@ -736,33 +723,33 @@ namespace GSC.Respository.Master
 
                     var randomizationNumberSettings = _context.RandomizationNumberSettings.Where(x => (x.Project.ParentProjectId == null && x.ProjectId == obj.ProjectId)
                     || (x.Project.ParentProjectId != null && x.Project.ParentProjectId == obj.ProjectId)).ToList();
-                    if (randomizationNumberSettings != null && randomizationNumberSettings.Count > 0)
+                    if (randomizationNumberSettings.Any() && randomizationNumberSettings.Count > 0)
                         _context.RandomizationNumberSettings.RemoveRange(randomizationNumberSettings);
 
                     var screeningNumberSettings = _context.ScreeningNumberSettings.Where(x => (x.Project.ParentProjectId == null && x.ProjectId == obj.ProjectId)
                    || (x.Project.ParentProjectId != null && x.Project.ParentProjectId == obj.ProjectId)).ToList();
-                    if (screeningNumberSettings != null && screeningNumberSettings.Count > 0)
+                    if (screeningNumberSettings.Any() && screeningNumberSettings.Count > 0)
                         _context.ScreeningNumberSettings.RemoveRange(screeningNumberSettings);
 
                     var uploadLimit = _context.UploadLimit.Where(x => x.ProjectId == obj.ProjectId).ToList();
-                    if (uploadLimit != null && uploadLimit.Count > 0)
+                    if (uploadLimit.Any() && uploadLimit.Count > 0)
                         _context.UploadLimit.RemoveRange(uploadLimit);
 
                     if (project.ProjectRight != null && project.ProjectRight.Count > 0)
                         _context.ProjectRight.RemoveRange(project.ProjectRight);
 
                     var SiteTeam = _context.SiteTeam.Where(x => project.ChildProject.Select(z => z.Id).Contains(x.ProjectId)).ToList();
-                    if (SiteTeam != null && SiteTeam.Count > 0)
+                    if (SiteTeam.Any() && SiteTeam.Count > 0)
                         _context.SiteTeam.RemoveRange(SiteTeam);
 
                     var ProjectDocument = _context.ProjectDocument.Where(x => (x.Project.ParentProjectId == null && x.ProjectId == obj.ProjectId)
                    || (x.Project.ParentProjectId != null && x.Project.ParentProjectId == obj.ProjectId)).ToList();
-                    if (ProjectDocument != null && ProjectDocument.Count > 0)
+                    if (ProjectDocument.Any() && ProjectDocument.Count > 0)
                     {
                         ProjectDocument.ForEach(projdata =>
                         {
                             var ProjectDocumentReview = _context.ProjectDocumentReview.Where(x => x.ProjectDocumentId == projdata.Id).ToList();
-                            if (ProjectDocumentReview != null && ProjectDocumentReview.Count > 0)
+                            if (ProjectDocumentReview.Any() && ProjectDocumentReview.Count > 0)
                                 _context.ProjectDocumentReview.RemoveRange(ProjectDocumentReview);
                         });
                         _context.ProjectDocument.RemoveRange(ProjectDocument);

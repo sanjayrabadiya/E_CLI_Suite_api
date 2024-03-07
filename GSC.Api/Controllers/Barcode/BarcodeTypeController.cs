@@ -70,7 +70,11 @@ namespace GSC.Api.Controllers.Barcode
             }
 
             _barcodeTypeRepository.Add(barcodeType);
-            if (_uow.Save() <= 0) throw new Exception("Creating barcode type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating barcode type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeType.Id);
         }
 
@@ -95,7 +99,11 @@ namespace GSC.Api.Controllers.Barcode
             barcodeType.Id = 0;
             _barcodeTypeRepository.Add(barcodeType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating barcode type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating barcode type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeType.Id);
         }
 
@@ -140,15 +148,5 @@ namespace GSC.Api.Controllers.Barcode
         {
             return Ok(_barcodeTypeRepository.GetBarcodeTypeDropDown());
         }
-
-        //[HttpGet]
-        //[Route("GetBarcodeSizeDropDown")]
-        //public List<DropDownDto> GetBarcodeSizeDropDown()
-        //{
-        //    return _gscContext.BarcodeSize.Where(x =>
-        //            (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null)
-        //        .Select(c => new DropDownDto { Id = c.Id, Value = c.Name }).OrderBy(o => o.Value).ToList();
-
-        //}
     }
 }

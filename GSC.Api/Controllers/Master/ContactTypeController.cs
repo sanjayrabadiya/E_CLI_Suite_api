@@ -19,26 +19,14 @@ namespace GSC.Api.Controllers.Master
     public class ContactTypeController : BaseController
     {
         private readonly IContactTypeRepository _contactTypeRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
         public ContactTypeController(IContactTypeRepository contactTypeRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
-             IGSCContext context)
+            IUnitOfWork uow, IMapper mapper)
         {
             _contactTypeRepository = contactTypeRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _context = context;
         }
 
         // GET: api/<controller>
@@ -47,9 +35,6 @@ namespace GSC.Api.Controllers.Master
         {
             var contacttypes = _contactTypeRepository.GetContactTypeList(isDeleted);
             return Ok(contacttypes);
-            //var contactTypes = _contactTypeRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(contactTypesDto);
         }
 
 
@@ -77,7 +62,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _contactTypeRepository.Add(contactType);
-            if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(contactType.Id);
         }
 
@@ -97,7 +86,11 @@ namespace GSC.Api.Controllers.Master
             }
             _contactTypeRepository.AddOrUpdate(contactType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(contactType.Id);
         }
 

@@ -19,33 +19,15 @@ namespace GSC.Api.Controllers.Master
     public class CityAreaController : BaseController
     {
         private readonly ICityAreaRepository _cityAreaRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly ICityRepository _cityRepository;
-        private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public CityAreaController(ICityAreaRepository cityAreaRepository,
-            IUserRepository userRepository,
-            ICityRepository cityRepository,
-            ICompanyRepository companyRepository,
-            IStateRepository stateRepository,
-            ICountryRepository countryRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _cityAreaRepository = cityAreaRepository;
-            _cityRepository = cityRepository;
-            _stateRepository = stateRepository;
-            _userRepository = userRepository;
-            _countryRepository = countryRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -85,7 +67,11 @@ namespace GSC.Api.Controllers.Master
             cityAreaDto.Id = 0;
             var cityArea = _mapper.Map<CityArea>(cityAreaDto);
             _cityAreaRepository.Add(cityArea);
-            if (_uow.Save() <= 0) throw new Exception("Creating city area failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating city area failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(cityArea.Id);
         }
 
@@ -99,7 +85,11 @@ namespace GSC.Api.Controllers.Master
             var cityArea = _mapper.Map<CityArea>(cityAreaDto);
             _cityAreaRepository.AddOrUpdate(cityArea);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating City Area failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating City Area failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(cityArea.Id);
         }
 

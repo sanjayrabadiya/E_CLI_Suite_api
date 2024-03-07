@@ -19,23 +19,14 @@ namespace GSC.Api.Controllers.Master
     public class DocumentTypeController : BaseController
     {
         private readonly IDocumentTypeRepository _documentRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public DocumentTypeController(IDocumentTypeRepository documentRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _documentRepository = documentRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -45,8 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var documents = _documentRepository.GetDocumentTypeList(isDeleted);
             return Ok(documents);
-            //var documents = _documentRepository.FindBy(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-            //return Ok(documentsDto);
         }
 
 
@@ -75,7 +64,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _documentRepository.Add(document);
-            if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(document.Id);
         }
 
@@ -97,7 +90,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _documentRepository.AddOrUpdate(document);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(document.Id);
         }
 

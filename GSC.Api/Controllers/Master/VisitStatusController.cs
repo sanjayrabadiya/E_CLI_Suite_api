@@ -16,18 +16,15 @@ namespace GSC.Api.Controllers.Master
         private readonly IVisitStatusRepository _visitStatusRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
 
         public VisitStatusController(IVisitStatusRepository visitStatusRepository,
     IUnitOfWork uow,
-    IMapper mapper,
-    IJwtTokenAccesser jwtTokenAccesser)
+    IMapper mapper)
         {
             _visitStatusRepository = visitStatusRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -62,7 +59,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _visitStatusRepository.Add(visitStatus);
-            if (_uow.Save() <= 0) throw new Exception("Creating Visit Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Visit Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(visitStatusDto.Id);
         }
 
@@ -83,7 +84,11 @@ namespace GSC.Api.Controllers.Master
 
             _visitStatusRepository.Update(visitStatus);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating visit Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating visit Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(visitStatus.Id);
         }
 

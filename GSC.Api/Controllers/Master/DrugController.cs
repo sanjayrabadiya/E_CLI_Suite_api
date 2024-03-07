@@ -20,25 +20,15 @@ namespace GSC.Api.Controllers.Master
     {
 
         private readonly IDrugRepository _drugRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public DrugController(IDrugRepository drugRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _drugRepository = drugRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -48,7 +38,6 @@ namespace GSC.Api.Controllers.Master
 
             var drug = _drugRepository.GetDrugList(isDeleted);
             return Ok(drug);
-            //var drugs = _drugRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
         }
 
 
@@ -76,7 +65,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _drugRepository.Add(drug);
-            if (_uow.Save() <= 0) throw new Exception("Creating Drug failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Drug failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(drug.Id);
         }
 
@@ -98,7 +91,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _drugRepository.AddOrUpdate(drug);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Drug failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(drug.Id);
         }
 

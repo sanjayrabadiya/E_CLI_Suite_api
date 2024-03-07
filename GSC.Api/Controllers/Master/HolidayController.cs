@@ -60,7 +60,11 @@ IUnitOfWork uow, IMapper mapper)
 
 
             _holidayRepository.Add(holiday);
-            if (_uow.Save() <= 0) throw new Exception("Creating Investigator holiday failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Investigator holiday failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(holiday.Id);
         }
 
@@ -86,7 +90,11 @@ IUnitOfWork uow, IMapper mapper)
             /* Added by Darshil for effective Date on 21-07-2020 */
             _holidayRepository.AddOrUpdate(holiday);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Investigator holiday failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Investigator holiday failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(holiday.Id);
         }
 

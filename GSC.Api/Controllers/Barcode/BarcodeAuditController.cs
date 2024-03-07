@@ -16,20 +16,10 @@ namespace GSC.Api.Controllers.Barcode
     [ApiController]
     public class BarcodeAuditController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IBarcodeAuditRepository _barcodeAuditRepository;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-
-        public BarcodeAuditController(IBarcodeAuditRepository barcodeAuditRepository,
-            IUnitOfWork uow,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public BarcodeAuditController(IBarcodeAuditRepository barcodeAuditRepository)
         {
             _barcodeAuditRepository = barcodeAuditRepository;
-            _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
         }
 
         [HttpGet]

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.AdverseEvent;
 using GSC.Data.Dto.Master;
@@ -15,15 +16,13 @@ namespace GSC.Respository.AdverseEvent
     public class AdverseEventSettingsRepository : GenericRespository<AdverseEventSettings>, IAdverseEventSettingsRepository
     {
         private readonly IGSCContext _context;
-        private readonly IMapper _mapper;
         private readonly IAdverseEventSettingsDetailRepository _adverseEventSettingsDetailRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
-        public AdverseEventSettingsRepository(IGSCContext context, IMapper mapper,
+        public AdverseEventSettingsRepository(IGSCContext context,
             IAdverseEventSettingsDetailRepository adverseEventSettingsDetailRepository,
             IStudyVersionRepository studyVersionRepository) : base(context)
         {
             _context = context;
-            _mapper = mapper;
             _adverseEventSettingsDetailRepository = adverseEventSettingsDetailRepository;
             _studyVersionRepository = studyVersionRepository;
 
@@ -31,7 +30,7 @@ namespace GSC.Respository.AdverseEvent
 
         public IList<DropDownDto> GetVisitDropDownforAEReportingInvestigatorForm(int projectId)
         {
-            var studyVersion = _studyVersionRepository.GetStudyVersionForLive(projectId); 
+            var studyVersion = _studyVersionRepository.GetStudyVersionForLive(projectId);
 
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
              && x.ProjectDesignPeriod.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
@@ -51,9 +50,9 @@ namespace GSC.Respository.AdverseEvent
             var templates = _context.ProjectDesignTemplate.Where(x =>
                             x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId
                             && x.VariableTemplate.AppScreenId == appscreen.Id
-                            && x.IsParticipantView == true
+                            && x.IsParticipantView
                             && x.ProjectDesignVisit.DeletedDate == null
-                            && x.ProjectDesignVisit.IsNonCRF == true
+                            && x.ProjectDesignVisit.IsNonCRF
                             && x.ProjectDesignVisit.ProjectDesignPeriod.DeletedDate == null
                             && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.DeletedDate == null
                             && x.DeletedDate == null)
@@ -90,11 +89,25 @@ namespace GSC.Respository.AdverseEvent
                         Value = x.ValueName,
                         SeqNo = x.SeqNo,
                         SeveritySeqNo = x.SeqNo,
-                        Severity = x.SeqNo == 1 ? "Low" : (x.SeqNo == 2 ? "Medium" : "High")
+                        Severity = GetSeverityByCode(x.SeqNo)
                     }).ToList();
                 return projectdesignvariablevalues;
             }
-            return null;
+            return new List<AdverseEventSettingsVariableValue>();
+        }
+
+        private string GetSeverityByCode(int code)
+        {
+            switch (code)
+            {
+                case 1:
+                    return "Low";
+                case 2:
+                    return "Medium";
+                default:
+                  return  "High";
+
+            }
         }
 
         public AdverseEventSettingsListDto GetData(int projectId)
@@ -126,10 +139,9 @@ namespace GSC.Respository.AdverseEvent
         public void RemoveExistingAdverseDetail(int id)
         {
             var data = _adverseEventSettingsDetailRepository.All.Where(x => x.AdverseEventSettingsId == id).ToList();
-            if (data != null)
+            if (data.Any())
             {
                 _context.AdverseEventSettingsDetails.RemoveRange(data);
-                //_context.Save();
             }
         }
 

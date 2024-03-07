@@ -11,21 +11,10 @@ namespace GSC.Api.Controllers.Configuration
     public class DashboardCompanyController : BaseController
     {
         private readonly IDashboardCompanyRepository _dashboardCompanyRepository;
-        private readonly ILocationRepository _locationRepository;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
 
-        public DashboardCompanyController(IDashboardCompanyRepository dashboardCompanyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            ILocationRepository locationRepository,
-            IUploadSettingRepository uploadSettingRepository)
+        public DashboardCompanyController(IDashboardCompanyRepository dashboardCompanyRepository)
         {
             _dashboardCompanyRepository = dashboardCompanyRepository;
-            _uow = uow;
-            _mapper = mapper;
-            _locationRepository = locationRepository;
-            _uploadSettingRepository = uploadSettingRepository;
         }
         [HttpGet]
         [Route("GetDashboardCompanyList")]

@@ -11,10 +11,9 @@ namespace GSC.Respository.AdverseEvent
 {
     public class AdverseEventSettingsLanguageRepository : GenericRespository<AdverseEventSettingsLanguage>, IAdverseEventSettingsLanguageRepository
     {
-        private readonly IGSCContext _context;
         public AdverseEventSettingsLanguageRepository(IGSCContext context) : base(context)
         {
-            _context = context;
+
         }
 
         public List<AdverseEventSettingsLanguageSaveDto> GetAdverseEventSettingsLanguage(int AdverseEventSettingsId, int SeqNo)
@@ -23,10 +22,12 @@ namespace GSC.Respository.AdverseEvent
             if (SeqNo == 1)
             {
                 data = data.Where(x => x.LowSeverityDisplay != null && x.LowSeverityDisplay != "").ToList();
-            } else if (SeqNo == 2)
+            }
+            else if (SeqNo == 2)
             {
                 data = data.Where(x => x.MediumSeverityDisplay != null && x.MediumSeverityDisplay != "").ToList();
-            } else if (SeqNo == 3)
+            }
+            else if (SeqNo == 3)
             {
                 data = data.Where(x => x.HighSeverityDisplay != null && x.HighSeverityDisplay != "").ToList();
             }
@@ -36,10 +37,11 @@ namespace GSC.Respository.AdverseEvent
                 AdverseEventSettingsLanguageSaveDto obj = new AdverseEventSettingsLanguageSaveDto();
                 obj.AdverseEventSettingsLanguageId = data[i].Id;
                 obj.LanguageId = data[i].LanguageId;
-                if (SeqNo ==1)
+                if (SeqNo == 1)
                 {
                     obj.Display = data[i].LowSeverityDisplay;
-                } else if (SeqNo == 2)
+                }
+                else if (SeqNo == 2)
                 {
                     obj.Display = data[i].MediumSeverityDisplay;
                 }

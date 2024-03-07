@@ -17,26 +17,21 @@ namespace GSC.Api.Controllers.Barcode
     [ApiController]
     public class SampleSeparationController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ISampleSeparationRepository _sampleSeparationRepository;
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public SampleSeparationController(ISampleSeparationRepository sampleSeparationRepository,
-            IJwtTokenAccesser jwtTokenAccesser,
-        IUnitOfWork uow, IMapper mapper)
+        IUnitOfWork uow)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _sampleSeparationRepository = sampleSeparationRepository;
             _uow = uow;
-            _mapper = mapper;
         }
 
         [HttpGet]
         [Route("GetSampleSaparation/{SiteId}/{TemplateId}")]
-        public IActionResult GetSampleSaparation(int SiteId,int TemplateId)
+        public IActionResult GetSampleSaparation(int SiteId, int TemplateId)
         {
-            var sampleSaparationDetails = _sampleSeparationRepository.GetSampleDetails(SiteId,TemplateId);
+            var sampleSaparationDetails = _sampleSeparationRepository.GetSampleDetails(SiteId, TemplateId);
             return Ok(sampleSaparationDetails);
         }
 
@@ -49,14 +44,18 @@ namespace GSC.Api.Controllers.Barcode
 
             _sampleSeparationRepository.StartSampleSaparation(sampleSaveSeparationDto);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Sample Separation Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Sample Separation Details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
 
         [HttpPut]
         [Route("MissedSampleSaparation/{pkId}/{samplebarcode}/{AuditReasonId}/{ReasonOth}")]
-        public ActionResult MissedSampleSaparation(int pkId,string samplebarcode, int AuditReasonId, string ReasonOth)
+        public ActionResult MissedSampleSaparation(int pkId, string samplebarcode, int AuditReasonId, string ReasonOth)
         {
             var record = _sampleSeparationRepository.All.Where(x => x.PKBarcodeId == pkId && x.SampleBarcodeString == samplebarcode).FirstOrDefault();
 
@@ -69,7 +68,11 @@ namespace GSC.Api.Controllers.Barcode
             record.Status = Helper.SampleSeparationFilter.Missed;
 
             _sampleSeparationRepository.Update(record);
-            if (_uow.Save() <= 0) throw new Exception("Sample Separation missed failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Sample Separation missed failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }
@@ -80,19 +83,22 @@ namespace GSC.Api.Controllers.Barcode
         {
             var item = _sampleSeparationRepository.All.Where(x => x.PKBarcodeId == pkId).ToList();
 
-            if (item == null)
+            if (!item.Any())
                 return NotFound();
 
             foreach (var record in item)
             {
                 if (ReasonOth != "null")
                     record.ReasonOth = ReasonOth;
-               // record.ReasonOth = ReasonOth;
                 record.AuditReasonId = AuditReasonId;
                 record.Status = Helper.SampleSeparationFilter.Hemolized;
 
                 _sampleSeparationRepository.Update(record);
-                if (_uow.Save() <= 0) throw new Exception("Sample Separation hemolized failed on save.");
+                if (_uow.Save() <= 0)
+                {
+                    ModelState.AddModelError("Message", "Sample Separation hemolized failed on save.");
+                    return BadRequest(ModelState);
+                }
             }
 
             return Ok();

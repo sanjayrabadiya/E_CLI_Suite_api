@@ -21,9 +21,6 @@ namespace GSC.Api.Controllers.Master
     public class DomainController : BaseController
     {
         private readonly IDomainRepository _domainRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IVariableRepository _variableRepository;
@@ -32,19 +29,14 @@ namespace GSC.Api.Controllers.Master
         private readonly IGSCContext _context;
 
         public DomainController(IDomainRepository domainRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IVariableTemplateRepository variableTemplateRepository,
             IUnitOfWork uow, IMapper mapper, IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IProjectDesignRepository projectDesignRepository,
+            IProjectDesignRepository projectDesignRepository,
             IVariableRepository variableRepository)
         {
             _domainRepository = domainRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _projectDesignRepository = projectDesignRepository;
             _variableRepository = variableRepository;
             _variableTemplateRepository = variableTemplateRepository;
@@ -87,7 +79,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _domainRepository.Add(domain);
-            if (_uow.Save() <= 0) throw new Exception("Creating Domain failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Domain failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(domain.Id);
         }
@@ -120,7 +116,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _domainRepository.AddOrUpdate(domain);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Domain failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Domain failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(domain.Id);
         }
@@ -209,7 +209,7 @@ namespace GSC.Api.Controllers.Master
         {
             var projectDesignId = _projectDesignRepository
                 .FindBy(x => x.ProjectId == projectId && x.DeletedDate == null).FirstOrDefault();
-            return Ok(_domainRepository.GetDomainByProjectDesignDropDown(projectDesignId.Id));
+            return Ok(_domainRepository.GetDomainByProjectDesignDropDown(projectDesignId?.Id ?? 0));
         }
 
         [HttpGet]

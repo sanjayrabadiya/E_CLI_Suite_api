@@ -18,26 +18,17 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class ScopeNameController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IScopeNameRepository _scopeNameRepository;
         private readonly IUnitOfWork _uow;
 
         public ScopeNameController(IScopeNameRepository scopeNameRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IMapper mapper)
         {
             _scopeNameRepository = scopeNameRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -45,9 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var scopeName = _scopeNameRepository.GetScopeNameList(isDeleted);
             return Ok(scopeName);
-            //var scopeName = _scopeNameRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).Select(x => _mapper.Map<ScopeNameDto>(x)).OrderByDescending(x => x.Id);
-            //return Ok(scopeNamesDto);
         }
 
         [HttpGet("{id}")]
@@ -89,7 +77,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _scopeNameRepository.AddOrUpdate(scopeName);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating scope failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating scope failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(scopeName.Id);
         }

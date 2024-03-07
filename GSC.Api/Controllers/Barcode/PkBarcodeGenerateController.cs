@@ -21,7 +21,6 @@ namespace GSC.Api.Controllers.Barcode
     [ApiController]
     public class PkBarcodeGenerateController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IPkBarcodeGenerateRepository _pkBarcodeGenerateRepository;
         private readonly IUnitOfWork _uow;
@@ -32,7 +31,6 @@ namespace GSC.Api.Controllers.Barcode
 
         public PkBarcodeGenerateController(
             IMapper mapper
-            , IJwtTokenAccesser jwtTokenAccesser
             , IPkBarcodeGenerateRepository pkBarcodeGenerateRepository
             , IPKBarcodeRepository pKBarcodeRepository
             , IAppScreenRepository appScreenRepository
@@ -40,7 +38,6 @@ namespace GSC.Api.Controllers.Barcode
             , IBarcodeAuditRepository barcodeAuditRepository
             , IUnitOfWork uow)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _pkBarcodeGenerateRepository = pkBarcodeGenerateRepository;
             _pKBarcodeRepository = pKBarcodeRepository;
@@ -155,17 +152,15 @@ namespace GSC.Api.Controllers.Barcode
             {
                 var record = _pkBarcodeGenerateRepository.FindByInclude(x => x.PKBarcodeId == item.PKBarcodeId && x.DeletedDate == null).OrderByDescending(d => d.Id);
 
-                if (record == null)
+                if (!record.Any())
                     return NotFound();
 
-                if (record != null)
+
+                foreach (var barcodeGenerate in record)
                 {
-                    foreach (var barcodeGenerate in record)
-                    {
-                        _pkBarcodeGenerateRepository.Delete(barcodeGenerate);
-                        _uow.Save();
-                        _barcodeAuditRepository.Save("PkBarcodeGenerate", AuditAction.Deleted, item.Id);
-                    }
+                    _pkBarcodeGenerateRepository.Delete(barcodeGenerate);
+                    _uow.Save();
+                    _barcodeAuditRepository.Save("PkBarcodeGenerate", AuditAction.Deleted, item.Id);
                 }
             }
 

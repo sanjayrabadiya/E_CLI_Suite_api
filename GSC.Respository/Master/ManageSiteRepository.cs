@@ -60,7 +60,7 @@ namespace GSC.Respository.Master
         public List<DropDownDto> GetManageSiteDropDown()
         {
             return All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.Status == true)
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.Status)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.SiteName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public void UpdateRole(ManageSite ManageSite)
@@ -71,7 +71,7 @@ namespace GSC.Respository.Master
 
             ManageSite.ManageSiteRole.ForEach(z =>
             {
-                var role = siterole.Where(x => x.ManageSiteId == z.ManageSiteId && x.TrialTypeId == z.TrialTypeId).FirstOrDefault();
+                var role = siterole.Find(x => x.ManageSiteId == z.ManageSiteId && x.TrialTypeId == z.TrialTypeId);
                 if (role == null)
                 {
                     _context.ManageSiteRole.Add(z);
@@ -83,10 +83,9 @@ namespace GSC.Respository.Master
 
             managesiteRole.ForEach(t =>
             {
-                var role = siterole.Where(x => x.ManageSiteId == t.ManageSiteId && x.TrialTypeId == t.TrialTypeId).FirstOrDefault();
+                var role = siterole.Find(x => x.ManageSiteId == t.ManageSiteId && x.TrialTypeId == t.TrialTypeId);
                 if (role == null)
                 {
-                    //delete
                     t.DeletedBy = _jwtTokenAccesser.UserId;
                     t.DeletedDate = DateTime.UtcNow;
                     _context.ManageSiteRole.Update(t);
@@ -98,13 +97,10 @@ namespace GSC.Respository.Master
         {
             foreach (var item in objSave.ManageSiteAddress)
             {
-                var orginalAddress = _context.ManageSiteAddress.Find(item.Id);
-                if (orginalAddress != null)
+                var originalAddress = _context.ManageSiteAddress.Find(item.Id);
+                if (originalAddress != null && originalAddress.SiteAddress != item.SiteAddress)
                 {
-                    if (orginalAddress.SiteAddress != item.SiteAddress)
-                    {
-                        _context.ManageSiteAddress.Update(item);
-                    }
+                    _context.ManageSiteAddress.Update(item);
                 }
 
                 if (item.DeletedDate != null)
@@ -114,105 +110,71 @@ namespace GSC.Respository.Master
                     _context.ManageSiteAddress.Update(item);
                 }
 
-                if (item.Id == 0 && orginalAddress == null)
+                if (item.Id == 0 && originalAddress == null)
                 {
                     _context.ManageSiteAddress.Add(item);
                 }
             }
         }
 
+
         public List<ExperienceModel> GetExperienceDetails(ExperienceFillter experienceFillter)
         {
-            var experiences = new List<ExperienceModel>();
-            var designIds = _context.DesignTrial.Where(x => x.TrialTypeId == experienceFillter.TrialTypeId && x.DeletedDate == null).Select(s => s.Id).ToList();
-
-            var data = (from p in _context.Project.Where(q => q.DeletedDate == null && q.ParentProjectId == null && _context.Users.Any(x => x.Id == q.CreatedBy)).Include(x => x.DesignTrial)
-                                                          .Include(x => x.Drug)
-                                                          .Include(x => x.RegulatoryType)
-                                                          .Include(x => x.DesignTrial.TrialType)
-                                                          .Include(x => x.Client)
-                                                          .Where(x => (experienceFillter.DesignTrialId != null ? x.DesignTrialId == experienceFillter.DesignTrialId : true)
-                                                          && (experienceFillter.TrialTypeId != null ? designIds.Contains(x.DesignTrialId) : true)
-                                                          && (experienceFillter.RegulatoryId != null ? x.RegulatoryTypeId == experienceFillter.RegulatoryId : true)
-                                                          && (experienceFillter.ClientId != null ? x.ClientId == experienceFillter.ClientId : true)
-                                                          && (experienceFillter.DrugId != null ? x.DrugId == experienceFillter.DrugId : true))
-                        join ps in _context.ProjectStatus.Where(q => q.DeletedDate == null) on p.Id equals ps.ProjectId into p_ps
-                        from subProjectStatus in p_ps.DefaultIfEmpty()
-                        join cp in _context.Project.Where(q => q.DeletedDate == null && q.ParentProjectId != null) on p.Id equals cp.ParentProjectId into p_cp
-                        from subChildProject in p_cp.DefaultIfEmpty()
-                        join ms in _context.ManageSite.Where(q => q.DeletedDate == null) on subChildProject.ManageSiteId equals ms.Id into p_ms
-                        from subMangeSite in p_ms.DefaultIfEmpty()
-                        join s in _context.Site.Where(q => q.DeletedDate == null) on subMangeSite.Id equals s.ManageSiteId into p_s
-                        from subSite in p_s.DefaultIfEmpty()
-                        join c in _context.InvestigatorContact.Where(q => q.DeletedDate == null) on subSite.InvestigatorContactId equals c.Id into p_c
-                        from subInvestiator in p_c.DefaultIfEmpty()
-                        join sp in _context.StudyPlan.Where(q => q.DeletedDate == null) on p.Id equals sp.ProjectId into p_sp
-                        from subStudyPlan in p_sp.DefaultIfEmpty()
-                        select new
-                        {
-                            Project = p,
-                            ChildProject = subChildProject,
-                            ManageSite = subMangeSite,
-                            Investigator = subInvestiator,
-                            StudyPlan = subStudyPlan,
-                            ProjectStatus = subProjectStatus,
-                        });
-
-            foreach (var pro in data)
-            {
-                var exp = new ExperienceModel();
-                exp.ProjectId = pro.Project.Id;
-                exp.InvestigatorId = pro.Investigator?.Id ?? 0;
-                exp.SiteId = pro.ChildProject?.Id ?? 0;
-                exp.DrugName = pro.Project.Drug.DrugName;
-                exp.InvestigatorName = pro.Investigator?.NameOfInvestigator ?? "";
-                exp.NumberOfPatients = pro.Project.AttendanceLimit;
-                exp.ProjectStatus = pro.ProjectStatus?.Status.GetDescription() ?? "";
-                exp.StudyName = pro.Project.ProjectName;
-                exp.StudyCode = pro.Project.ProjectCode;
-                exp.StudyDuration = "";
-                exp.StartDate = pro.StudyPlan?.StartDate ?? null;
-                exp.SiteName = pro.ManageSite?.SiteName ?? "";
-                exp.EndDate = pro.StudyPlan?.EndDate ?? null;
-                exp.Submission = pro.Project.RegulatoryType.RegulatoryTypeName;
-                exp.TherapeuticIndication = pro.Project.DesignTrial.TrialType.TrialTypeName;
-                exp.TypeOfTrial = pro.Project.DesignTrial.DesignTrialName;
-                exp.TargetedSubject = pro.ChildProject?.AttendanceLimit ?? 0;
-                exp.CountryId = pro.ChildProject?.CountryId ?? 0;
-                exp.ProjectStatusId = pro.ProjectStatus?.Status;
-                exp.ClientName = pro.Project.Client?.ClientName ?? "";
-                experiences.Add(exp);
-            }
-
-
-
-            var fillterData = experiences.Where(x => (experienceFillter.StartDate != null && experienceFillter.EndDate == null) ? x.StartDate > experienceFillter.StartDate : (experienceFillter.StartDate == null && experienceFillter.EndDate != null) ? x.EndDate < experienceFillter.EndDate : (experienceFillter.StartDate != null && experienceFillter.EndDate != null) ? x.StartDate > experienceFillter.StartDate && x.EndDate < experienceFillter.EndDate : true
-            && (experienceFillter.InvestigatorId != null ? x.InvestigatorId == experienceFillter.InvestigatorId : true)
-            && (experienceFillter.ProjectStatusId != null ? x.ProjectStatusId == experienceFillter.ProjectStatusId : true));
-
-            var groupData = fillterData.GroupBy(x => x.ProjectId)
-                .Select(s => new ExperienceModel()
+            var experiences = _context.Project
+                .Where(p => p.DeletedDate == null && p.ParentProjectId == null && _context.Users.Any(u => u.Id == p.CreatedBy))
+                .Include(p => p.DesignTrial)
+                .Include(p => p.Drug)
+                .Include(p => p.RegulatoryType)
+                .Include(p => p.DesignTrial.TrialType)
+                .Include(p => p.Client)
+                .Where(p => (experienceFillter.DesignTrialId == null || p.DesignTrialId == experienceFillter.DesignTrialId)
+                         && (experienceFillter.TrialTypeId == null || _context.DesignTrial
+                                .Where(dt => dt.TrialTypeId == experienceFillter.TrialTypeId && dt.DeletedDate == null)
+                                .Select(dt => dt.Id)
+                                .Contains(p.DesignTrialId))
+                         && (experienceFillter.RegulatoryId == null || p.RegulatoryTypeId == experienceFillter.RegulatoryId)
+                         && (experienceFillter.ClientId == null || p.ClientId == experienceFillter.ClientId)
+                         && (experienceFillter.DrugId == null || p.DrugId == experienceFillter.DrugId))
+                .Select(p => new
                 {
-                    ProjectId = s.Key,
-                    StudyName = s.FirstOrDefault().StudyName,
-                    InvestigatorNames = s.Select(s => s.InvestigatorName).Distinct().ToList(),
-                    StartDate = s.FirstOrDefault().StartDate,
-                    EndDate = s.FirstOrDefault().EndDate,
-                    ProjectStatus = s.FirstOrDefault().ProjectStatus,
-                    NoOfSite = s.Where(q => q.SiteId > 0).Select(s => s.SiteId).Distinct().Count(),
-                    TargetedSubjects = s.Select(q => q.TargetedSubject).Distinct().ToList(),
-                    SiteNames = s.Select(s => s.SiteName).Distinct().ToList(),
-                    NumberOfPatients = s.FirstOrDefault().NumberOfPatients,
-                    DrugName = s.FirstOrDefault().DrugName,
-                    Submission = s.FirstOrDefault().Submission,
-                    TypeOfTrial = s.FirstOrDefault().TypeOfTrial,
-                    TherapeuticIndication = s.FirstOrDefault().TherapeuticIndication,
-                    NoOfCountry = s.Where(q => q.CountryId > 0).Select(s => s.CountryId).Distinct().Count(),
-                    StudyCode = s.FirstOrDefault().StudyCode,
-                    ClientName = s.FirstOrDefault().ClientName
-                });
+                    Project = p,
+                    ChildProject = _context.Project.FirstOrDefault(cp => cp.ParentProjectId == p.Id && cp.DeletedDate == null),
+                    ManageSite = _context.ManageSite.FirstOrDefault(ms => ms.Id == _context.Project.FirstOrDefault(cp => cp.ParentProjectId == p.Id && cp.DeletedDate == null).ManageSiteId && ms.DeletedDate == null),
+                    Investigator = _context.InvestigatorContact.FirstOrDefault(ic => ic.Id == _context.Site.FirstOrDefault(s => s.ManageSiteId == _context.ManageSite.FirstOrDefault(ms => ms.Id == _context.Project.FirstOrDefault(cp => cp.ParentProjectId == p.Id && cp.DeletedDate == null).ManageSiteId && ms.DeletedDate == null).Id && s.DeletedDate == null).InvestigatorContactId && ic.DeletedDate == null),
+                    StudyPlan = _context.StudyPlan.FirstOrDefault(sp => sp.ProjectId == p.Id && sp.DeletedDate == null),
+                    ProjectStatus = _context.ProjectStatus.FirstOrDefault(ps => ps.ProjectId == p.Id && ps.DeletedDate == null)
+                })
+                .ToList();
 
-            return groupData.ToList();
+            var filteredData = experiences.Where(e => (experienceFillter.StartDate == null || e.StudyPlan?.StartDate > experienceFillter.StartDate)
+                                                   && (experienceFillter.EndDate == null || e.StudyPlan?.EndDate < experienceFillter.EndDate)
+                                                   && (experienceFillter.InvestigatorId == null || e.Investigator?.Id == experienceFillter.InvestigatorId)
+                                                   && (experienceFillter.ProjectStatusId == null || e.ProjectStatus?.Status == experienceFillter.ProjectStatusId));
+
+            var groupedData = filteredData.GroupBy(e => e.Project.Id)
+                .Select(g => new ExperienceModel
+                {
+                    ProjectId = g.Key,
+                    StudyName = g.First().Project.ProjectName,
+                    InvestigatorNames = g.Select(e => e.Investigator?.NameOfInvestigator).Distinct().ToList(),
+                    StartDate = g.First().StudyPlan?.StartDate,
+                    EndDate = g.First().StudyPlan?.EndDate,
+                    ProjectStatus = g.First().ProjectStatus?.Status.GetDescription(),
+                    NoOfSite = g.Select(e => e.ChildProject?.Id).Distinct().Count(),
+                    TargetedSubjects = g.Select(e => e.ChildProject?.AttendanceLimit).Distinct().ToList(),
+                    SiteNames = g.Select(e => e.ManageSite?.SiteName).Distinct().ToList(),
+                    NumberOfPatients = g.First().Project.AttendanceLimit,
+                    DrugName = g.First().Project.Drug.DrugName,
+                    Submission = g.First().Project.RegulatoryType.RegulatoryTypeName,
+                    TypeOfTrial = g.First().Project.DesignTrial.DesignTrialName,
+                    TherapeuticIndication = g.First().Project.DesignTrial.TrialType.TrialTypeName,
+                    NoOfCountry = g.Select(e => e.ChildProject?.CountryId).Distinct().Count(),
+                    StudyCode = g.First().Project.ProjectCode,
+                    ClientName = g.First().Project.Client?.ClientName
+                })
+                .ToList();
+
+            return groupedData;
         }
     }
 }

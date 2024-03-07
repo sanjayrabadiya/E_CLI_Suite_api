@@ -20,25 +20,16 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IDesignTrialRepository _designTrialRepository;
         private readonly ITrialTypeRepository _trialTypeRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public DesignTrialController(IDesignTrialRepository designTrialRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
             ITrialTypeRepository trialTypeRepository)
         {
             _designTrialRepository = designTrialRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _trialTypeRepository = trialTypeRepository;
         }
 
@@ -51,9 +42,6 @@ namespace GSC.Api.Controllers.Master
                 b.TrialType = _trialTypeRepository.Find(b.TrialTypeId);
             });
             return Ok(designTrials);
-            //var designTrials = _designTrialRepository.FindByInclude(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    , t => t.TrialType).OrderByDescending(x => x.Id).ToList();
-            //return Ok(designTrialsDto);
         }
 
         [HttpGet("{id}")]
@@ -79,7 +67,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _designTrialRepository.Add(designTrial);
-            if (_uow.Save() <= 0) throw new Exception("Creating Design Trial failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Design Trial failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(designTrial.Id);
         }
 
@@ -101,7 +93,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _designTrialRepository.AddOrUpdate(designTrial);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Design Trial failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Design Trial failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(designTrial.Id);
         }
 

@@ -27,7 +27,7 @@ namespace GSC.Respository.Master
         {
             var screen = FindByInclude(s => s.ScreenId == objSave.ScreenId, x => x.AppScreens).FirstOrDefault();
             if (All.Any(x => x.Id != objSave.Id && x.ScreenId == objSave.ScreenId && x.DeletedDate == null))
-                return "Duplicate File Size Configuration : " + screen.AppScreens.ScreenName;
+                return "Duplicate File Size Configuration : " + screen?.AppScreens.ScreenName;
             return "";
         }
 

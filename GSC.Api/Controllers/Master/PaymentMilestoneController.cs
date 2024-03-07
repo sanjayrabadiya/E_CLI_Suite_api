@@ -45,10 +45,14 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _paymentMilestoneRepository.Add(paymentMilestone);
-            if (_uow.Save() <= 0) throw new Exception("Creating Investigator PaymentMilestone failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Investigator PaymentMilestone failed on save.");
+                return BadRequest(ModelState);
+            }
             paymentMilestoneDto.Id = paymentMilestone.Id;
 
-            if(paymentMilestoneDto.StudyPlanTaskIds != null)
+            if (paymentMilestoneDto.StudyPlanTaskIds != null)
                 _paymentMilestoneRepository.AddPaymentMilestoneTaskDetail(paymentMilestoneDto);
 
             if (paymentMilestoneDto.PatientCostIds != null)
@@ -115,7 +119,7 @@ namespace GSC.Api.Controllers.Master
         [Route("GetVisitDropDown/{parentProjectId:int}/{procedureId:int}")]
         public IActionResult GetVisitDropDown(int parentProjectId, int procedureId)
         {
-            return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId,procedureId));
-        }  
+            return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId, procedureId));
+        }
     }
 }
