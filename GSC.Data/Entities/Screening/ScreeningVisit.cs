@@ -40,5 +40,6 @@ namespace GSC.Data.Entities.Screening
 
         public string ScreeningVisitName { get; set; }
         public HideDisableType HideDisableType { get; set; }
+        public bool IsNA { get; set; }
     }
 }

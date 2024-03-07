@@ -94,7 +94,7 @@ namespace GSC.Respository.Screening
                 //: s.ProjectDesignVisit.DisplayName) +
                                          Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),
                 VisitStatus = s.Status,
-                VisitStatusName = s.Status.GetDescription(),
+                VisitStatusName = !s.IsNA ? s.Status.GetDescription() : "Not Applicable",
                 ParentScreeningVisitId = s.ParentId,
                 IsVisitRepeated = s.ProjectDesignVisit.IsRepeated,
             }).OrderBy(o => o.DesignOrder).ThenBy(t => t.VisitSeqNo).ToList();
@@ -549,6 +549,26 @@ namespace GSC.Respository.Screening
         public List<int> GetScreeningVisitList(int screeningEntryId)
         {
             return All.Where(q => q.ScreeningEntryId == screeningEntryId && q.Status == ScreeningVisitStatus.NotStarted).Select(s => s.Id).ToList();
+        }
+
+        public List<NAReportDto> NAReport(NAReportSearchDto filters)
+        {
+            return All.Include(x => x.ScreeningEntry)
+                  .ThenInclude(x => x.Randomization)
+                  .Where(x => x.ScreeningEntry.ProjectId == filters.SiteId
+               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
+               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignVisitId))
+               && x.Status == ScreeningVisitStatus.NotStarted && !x.IsNA)
+                  .Select(x => new NAReportDto
+                  {
+                      ScreeningTemplateId = x.Id,
+                      Visit = x.ScreeningVisitName,
+                      VisitStatus = x.Status.GetDescription(),
+                      ScreeningNo = x.ScreeningEntry.Randomization.ScreeningNumber,
+                      RandomizationNumber = x.ScreeningEntry.Randomization.RandomizationNumber,
+                      Initial = x.ScreeningEntry.Randomization.Initial
+                  }).ToList();
+
         }
     }
 }

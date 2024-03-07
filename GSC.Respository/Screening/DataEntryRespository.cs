@@ -128,7 +128,7 @@ namespace GSC.Respository.Screening
             var hideTemplateIds = _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToList();
 
             var tempTemplates = await _screeningTemplateRepository.All.
-               Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).Select(c => new
+               Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null || (!r.IsNA && r.Status > ScreeningTemplateStatus.Pending)).Select(c => new
                {
                    c.ScreeningVisit.ScreeningEntryId,
                    c.ScreeningVisitId,
@@ -137,10 +137,11 @@ namespace GSC.Respository.Screening
                    c.IsDisable,
                    c.IsHide,
                    c.IsLocked,
-                   c.ProjectDesignTemplateId
+                   c.ProjectDesignTemplateId,
+                   c.IsNA
                }).ToListAsync();
 
-            tempTemplates = tempTemplates.Where(r => !hideTemplateIds.Contains(r.ProjectDesignTemplateId)).ToList();
+            tempTemplates = tempTemplates.Where(r => !hideTemplateIds.Contains(r.ProjectDesignTemplateId) && !r.IsNA).ToList();
 
             var templates = tempTemplates.
                 Where(r => !r.IsDisable && (r.IsHide == null || r.IsHide == false)).

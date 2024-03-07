@@ -154,7 +154,8 @@ namespace GSC.Respository.Project.Design
                         IsHide = x.IsHide,
                         IsLevelNo = x.IsLevelNo,
                         PreLabel = x.PreLabel == null ? "" : x.PreLabel,
-                        ScaleType = x.ScaleType
+                        ScaleType = x.ScaleType,
+                        DisplayValue = x.DisplayValue
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.
@@ -276,7 +277,8 @@ namespace GSC.Respository.Project.Design
                         IsHide = x.IsHide,
                         IsLevelNo = x.IsLevelNo,
                         PreLabel = x.PreLabel == null ? "" : x.PreLabel,
-                        ScaleType = x.ScaleType
+                        ScaleType = x.ScaleType,
+                        DisplayValue = x.DisplayValue
                     }).OrderBy(r => r.DesignOrderForOrderBy).ToList();
 
                 var values = _projectDesignVariableValueRepository.All.

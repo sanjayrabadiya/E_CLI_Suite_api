@@ -653,7 +653,8 @@ namespace GSC.Respository.Screening
                 IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
                 IsVariableSeqNo = sequenseDeatils.IsVariableSeqNo,
                 Label = t.ProjectDesignTemplate.Label,
-                PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
+                PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils),
+                IsNA = t.IsNA
             }).ToList();
 
             var templateValues = _screeningTemplateValueRepository.GetQueryStatusBySubject(screeningEntryId);
@@ -661,7 +662,10 @@ namespace GSC.Respository.Screening
 
             result.ForEach(a =>
             {
-                a.StatusName = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = a.ReviewLevel, Status = a.Status }, workFlowLevel.LevelNo == a.ReviewLevel, workFlowLevel);
+                if ((bool)a.IsNA)
+                    a.StatusName = "Not Applicable";
+                else
+                    a.StatusName = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = a.ReviewLevel, Status = a.Status }, workFlowLevel.LevelNo == a.ReviewLevel, workFlowLevel);
                 a.TotalQueries = templateValues.Where(t => t.ScreeningTemplateId == a.Id).Select(c => c.Total).FirstOrDefault();
             });
 
@@ -1742,6 +1746,30 @@ namespace GSC.Respository.Screening
                 _emailConfigurationEditCheckRepository.SendEmailonEmailvariableConfigurationSMS(finaldata);
 
             }
+        }
+
+        public List<NAReportDto> NAReport(NAReportSearchDto filters)
+        {
+            return All.Include(x => x.ScreeningVisit)
+                  .ThenInclude(x => x.ScreeningEntry)
+                  .ThenInclude(x => x.Randomization)
+                  .Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId
+               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
+               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
+               && (filters.TemplateIds == null || filters.TemplateIds.Contains(x.ProjectDesignTemplateId))
+               && x.Status == ScreeningTemplateStatus.Pending && !x.IsNA)
+                  .Select(x => new NAReportDto
+                  {
+                      ScreeningTemplateId = x.Id,
+                      Visit = x.ScreeningVisit.ScreeningVisitName,
+                      VisitStatus = x.ScreeningVisit.Status.GetDescription(),
+                      FormName = x.ScreeningTemplateName,
+                      FormStatus = x.Status.GetDescription(),
+                      ScreeningNo = x.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                      RandomizationNumber = x.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                      Initial = x.ScreeningVisit.ScreeningEntry.Randomization.Initial
+                  }).ToList();
+
         }
 
     }

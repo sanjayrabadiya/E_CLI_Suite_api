@@ -118,7 +118,7 @@ namespace GSC.Respository.Master
             var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var screeningVisits = _screeningVisitRepository.All
-                .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).ToList()
+                .Include(x => x.ProjectDesignVisit).Include(i => i.ScreeningEntry).Where(x => !x.IsNA && projectIds.Contains(x.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null).ToList()
                 .GroupBy(g => g.ProjectDesignVisitId).Select(s => new
                 {
                     Name = _projectDesignVisitRepository.All.FirstOrDefault(m => m.Id == s.Key).DisplayName,
@@ -282,7 +282,7 @@ namespace GSC.Respository.Master
             var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(projectDesign.Id);
 
             var screnningTemplates = _screeningTemplateRepository.All.Include(x => x.ScreeningVisit)
-                .Include(x => x.ScreeningVisit.ScreeningEntry).Where(x => projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null && x.ScreeningVisit.DeletedDate == null);
+                .Include(x => x.ScreeningVisit.ScreeningEntry).Where(x => !x.IsNA && projectIds.Contains(x.ScreeningVisit.ScreeningEntry.ProjectId) && (siteId == 0 ? (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true) && x.DeletedDate == null && x.ScreeningVisit.DeletedDate == null);
 
             var formGrpah = new List<FormsGraphModel>();
 
