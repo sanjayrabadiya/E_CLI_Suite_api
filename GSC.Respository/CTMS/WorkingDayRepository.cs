@@ -27,7 +27,7 @@ namespace GSC.Respository.CTMS
         {
             //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
             var projectList = _projectRightRepository.GetProjectCTMSRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return new List<WorkingDayListDto>();
 
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Contains(x.ParentProjectId)).OrderByDescending(x => x.Id).
             ProjectTo<WorkingDayListDto>(_mapper.ConfigurationProvider).ToList();

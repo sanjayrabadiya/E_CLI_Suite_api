@@ -81,7 +81,7 @@ namespace GSC.Api.Controllers.CTMS
             if (data.ProjectId <= 0) return BadRequest();
 
             //Duplicat vivit Check
-            if (_patientCostRepository.FindBy(x => x.ProjectId == data.ProjectId && x.DeletedBy == null && x.VisitName == data.VisitName).Count() > 0)
+            if (_patientCostRepository.FindBy(x => x.ProjectId == data.ProjectId && x.DeletedBy == null && x.VisitName == data.VisitName).Any())
             {
                 ModelState.AddModelError("Message", "Duplicate " + data.VisitName + " Visit Name");
                 return BadRequest(ModelState);
@@ -126,12 +126,17 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult DeleteVisit(int projectId, string visitName)
         {
             var record = _patientCostRepository.FindByInclude(x => x.ProjectId == projectId && x.VisitName == visitName && x.DeletedBy == null).ToList();
-            if (record == null) return NotFound();
-
-            record.ForEach(x => _patientCostRepository.Delete(x));
-            _uow.Save();
-
-            return Ok();
+            if (record.Count == 0)
+            {
+                return NotFound();
+            }      
+            else
+            {
+                record.ForEach(x => _patientCostRepository.Delete(x));
+                _uow.Save();
+                return Ok();
+            }
+               
         }
     }
 }

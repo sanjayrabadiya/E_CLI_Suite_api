@@ -30,7 +30,7 @@ namespace GSC.Respository.CTMS
         {
             //Add by Mitul On 09-11-2023 GS1-I3112 -> f CTMS On By default Add CTMS Access table.
             var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return new List<WeekEndGridDto>();
 
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectList.Contains(x.ProjectId)).
                    ProjectTo<WeekEndGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
@@ -56,12 +56,10 @@ namespace GSC.Respository.CTMS
         public List<string> GetWeekEndDay(int ProjectId)
         {
             var weekend = All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).ToList();
-            var weekendlis = new List<string>();
 
             var days = new List<string> { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
 
-            weekendlis = days.Where(x => !weekend.Select(y => y.AllWeekOff.ToString()).Contains(x)).ToList();
-            return weekendlis;
+            return days.Where(x => !weekend.Select(y => y.AllWeekOff.ToString()).Contains(x)).ToList();
         }
     }
 }

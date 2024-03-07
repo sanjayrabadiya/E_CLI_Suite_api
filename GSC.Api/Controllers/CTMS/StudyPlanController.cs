@@ -48,10 +48,10 @@ namespace GSC.Api.Controllers.CTMS
             if (studyplan != null)
             {
                 var currencyRatedata = _context.CurrencyRate.Where(s => s.StudyPlanId == studyplan.Id && s.DeletedBy == null).ToList();
-                List<CurrencyRateDTO> CurrencyRateList1 = new List<CurrencyRateDTO>();
+                List<CurrencyRateDto> CurrencyRateList1 = new List<CurrencyRateDto>();
                 currencyRatedata.ForEach(s =>
                 {
-                    var CurrencyRateList = new CurrencyRateDTO()
+                    var CurrencyRateList = new CurrencyRateDto()
                     {
                         localCurrencyId = s.CurrencyId,
                         localCurrencyRate = s.LocalCurrencyRate

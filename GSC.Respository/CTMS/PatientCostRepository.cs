@@ -179,7 +179,7 @@ namespace GSC.Respository.CTMS
             foreach (var item in PatientCostProced)
             {
                 var PatientCostVisit = _context.PatientCost.Include(s => s.ProjectDesignVisit).Where(x => x.ProcedureId == item.ProcedureId && x.ProjectId == studyId && x.DeletedBy == null)
-                .Select(t => new visitGridData
+                .Select(t => new VisitGridData
                 {
                     VisitId = t.ProjectDesignVisitId,
                     VisitName = t.ProjectDesignVisitId != null ? t.ProjectDesignVisit.DisplayName : t.VisitName,

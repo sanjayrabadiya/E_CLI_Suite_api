@@ -44,7 +44,7 @@ namespace GSC.Respository.CTMS
         //add by mitul on 03-10-2023 #GS1-I3054
         public string AlreadyUSed(int id)
         {
-            if (_context.StudyPlan.Where(x => x.TaskTemplateId == id && x.DeletedDate == null).Count() > 0)
+            if (_context.StudyPlan.Where(x => x.TaskTemplateId == id && x.DeletedDate == null).Any())
                 return "Tracker already in use - Should not be Deleted";
 
             return "";

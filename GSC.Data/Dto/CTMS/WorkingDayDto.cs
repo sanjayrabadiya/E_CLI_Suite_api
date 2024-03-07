@@ -38,7 +38,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? SatEndTime { get; set; }
         public string SatTotalHour { get; set; }
         public string TotalHour { get; set; }
-        public List<SiteTypes>? siteTypes { get; set; }
+        public List<SiteTypes> siteTypes { get; set; }
 
     }
     public class WorkingDayListDto : BaseAuditDto
