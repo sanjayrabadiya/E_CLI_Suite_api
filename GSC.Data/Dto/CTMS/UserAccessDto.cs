@@ -15,9 +15,9 @@ namespace GSC.Data.Dto.CTMS
     public class SiteUserAccessDto
     {
         public int ProjectId { get; set; }
-        public List<MultiUserAccessDTO> multiUserAccess { get; set; }
+        public List<MultiUserAccessDto> multiUserAccess { get; set; }
     }
-    public class MultiUserAccessDTO
+    public class MultiUserAccessDto
     {
         [Required(ErrorMessage = "User is required.")]
         public int UserRoleId { get; set; }

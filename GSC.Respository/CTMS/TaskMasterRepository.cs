@@ -85,12 +85,7 @@ namespace GSC.Respository.CTMS
         }
         public string AddTaskToSTudyPlan(TaskmasterDto taskmasterDto)
         {
-            var task = _context.StudyPlanTask.Where(x => x.TaskId == taskmasterDto.Id).ToList();
-            if (task.Count>0)
-            {
-                _context.StudyPlanTask.RemoveRange(task);
-                _context.Save();
-            }
+            RemoveStudyPlanTask(taskmasterDto);
 
             string str = string.Empty;
             var lstStudyPlan = new List<StudyPlanDto>();
@@ -171,6 +166,15 @@ namespace GSC.Respository.CTMS
 
             }
             return str;
+        }
+        public void RemoveStudyPlanTask(TaskmasterDto taskmasterDto)
+        {
+            var task = _context.StudyPlanTask.Where(x => x.TaskId == taskmasterDto.Id).ToList();
+            if (task.Count > 0)
+            {
+                _context.StudyPlanTask.RemoveRange(task);
+                _context.Save();
+            }
         }
 
         public void AddRefrenceTypes(TaskmasterDto taskmasterDto)

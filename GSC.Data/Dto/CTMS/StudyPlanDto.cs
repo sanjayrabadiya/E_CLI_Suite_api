@@ -16,9 +16,9 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "End Date is required.")]
         public DateTime EndDate { get; set; }
         public int? CurrencyId {  get; set; }  
-        public List<CurrencyRateDTO> CurrencyRateList { get; set; }
+        public List<CurrencyRateDto> CurrencyRateList { get; set; }
     }
-    public class CurrencyRateDTO
+    public class CurrencyRateDto
     {
         public int? localCurrencyId { get; set; }
         public decimal? localCurrencyRate { get; set; }
