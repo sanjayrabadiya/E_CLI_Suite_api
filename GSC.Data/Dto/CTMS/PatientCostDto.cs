@@ -6,7 +6,6 @@ namespace GSC.Data.Dto.CTMS
 {
     public class ProcedureVisitdadaDto : BaseDto
     {
-        public int Id { get; set; }
         public int ProjectId { get; set; }
         public int? ProcedureId { get; set; }
         public string ProcedureName { get; set; }
@@ -32,9 +31,9 @@ namespace GSC.Data.Dto.CTMS
         public decimal? Rate { get; set; }
         public decimal? CurrencyRate { get; set; }
         public string CurrencySymbol { get; set; }
-        public List<visitGridData> VisitGridDatas { get; set; }
+        public List<VisitGridData> VisitGridDatas { get; set; }
     }
-    public class visitGridData
+    public class VisitGridData
     {
         public int? VisitId { get; set; }
         public string VisitName { get; set; }

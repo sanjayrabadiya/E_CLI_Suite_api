@@ -17,5 +17,7 @@ namespace GSC.Data.Dto.Screening
         }
 
         public string ScreeningVisitName { get; set; }
+
+        public bool IsNA { get; set; }
     }
 }

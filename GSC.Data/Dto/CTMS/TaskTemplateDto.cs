@@ -12,7 +12,6 @@ namespace GSC.Data.Dto.CTMS
     }
     public class TaskTemplateGridDto : BaseAuditDto
     {
-        public int Id { get; set; }
         public string TemplateCode { get; set; }
         public string TemplateName { get; set; }
 

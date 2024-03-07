@@ -69,5 +69,6 @@ namespace GSC.Data.Entities.Project.Design
         public bool? IsLevelNo { get; set; }
         public string PreLabel { get; set; }
         public ScaleType? ScaleType { get; set; }
+        public bool? DisplayValue { get; set; }
     }
 }

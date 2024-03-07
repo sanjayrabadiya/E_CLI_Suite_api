@@ -240,7 +240,7 @@ namespace GSC.Respository.CTMS
                                       && x.CtmsMonitoring.DeletedDate == null).ToList();
 
                 var openQuerydata = _context.CtmsActionPoint.Include(s => s.CtmsMonitoring).ThenInclude(d => d.StudyLevelForm).ThenInclude(x => x.Activity).ThenInclude(r => r.CtmsActivity).
-                    Where(x => x.CtmsMonitoring.ProjectId == siteId && x.Status == CtmsActionPointStatus.Open && x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityCode != "act_005").Count() > 0;
+                    Where(x => x.CtmsMonitoring.ProjectId == siteId && x.Status == CtmsActionPointStatus.Open && x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityCode != "act_005").Any();
 
                 if (!(CtmsMonitoringStatus.Count != 0 && CtmsMonitoringStatus.OrderByDescending(c => c.Id).Select(s => s.ReportStatus).FirstOrDefault() == MonitoringReportStatus.Approved))
                     return "Please Approve " + CtmsActivity.ActivityName + " .";

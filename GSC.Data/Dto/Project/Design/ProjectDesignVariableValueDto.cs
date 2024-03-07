@@ -101,6 +101,7 @@ namespace GSC.Data.Dto.Project.Design
         public string CollectionValue { get; set; }
         public double? DisplayValue { get; set; }
         public string AnnotationType { get; set; }
+        public bool? DisplayValueToPatient { get; set; }
     }
 
     public class ProjectDesignLanguageReportDto : BaseAuditDto

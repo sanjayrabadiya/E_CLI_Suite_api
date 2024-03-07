@@ -46,33 +46,6 @@ namespace GSC.Respository.CTMS
 
         public string GetFormApprovedOrNot(int projectId, int siteId, int tabNumber)
         {
-            var appscreen = _context.AppScreen.Where(x => x.ScreenCode == "mnu_ctms").FirstOrDefault();
-
-            string ActivityCode = "";
-            if (tabNumber == 0)
-                ActivityCode = "act_001";
-            else if (tabNumber == 1)
-                ActivityCode = "act_002";
-            else if (tabNumber == 2)
-                ActivityCode = "act_003";
-            else if (tabNumber == 3)
-                ActivityCode = "act_004";
-            else if (tabNumber == 4)
-                ActivityCode = "act_005";
-            else
-                ActivityCode = "act_006";
-
-            var CtmsActivity = _context.CtmsActivity.Where(x => x.ActivityCode == ActivityCode && x.DeletedDate == null).FirstOrDefault();
-
-            var Activity = _context.Activity.Where(x => x.CtmsActivityId == CtmsActivity.Id && x.AppScreenId == appscreen.Id && x.DeletedDate == null).FirstOrDefault();
-
-            var StudyLevelForm = _context.StudyLevelForm.Include(x => x.Activity)
-                                .Where(x => x.ProjectId == projectId && x.ActivityId == Activity.Id
-                                && x.AppScreenId == appscreen.Id && x.DeletedDate == null).ToList();
-
-            var CtmsMonitoringReport = All.Where(x => x.CtmsMonitoring.ProjectId == siteId && StudyLevelForm.Select(y => y.Id).Contains(x.CtmsMonitoring.StudyLevelFormId)
-                                       && x.CtmsMonitoring.DeletedDate == null).ToList();
-
             return "";
         }
 

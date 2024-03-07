@@ -133,7 +133,7 @@ namespace GSC.Api.Controllers.CTMS
         }
         [HttpGet]
         [Route("GetDesignationDropDown/{resourceTypeID}/{resourceSubTypeID}/{projectId}")]
-        public IActionResult getSelectDateDrop(int resourceTypeID, int resourceSubTypeID, int projectId)
+        public IActionResult GetDesignationDropDown(int resourceTypeID, int resourceSubTypeID, int projectId)
         {
             return Ok(_resourcetypeRepository.GetDesignationDropDown(resourceTypeID, resourceSubTypeID, projectId));
         }
@@ -147,7 +147,7 @@ namespace GSC.Api.Controllers.CTMS
         }
         [HttpGet]
         [Route("GetRollUserDropDown/{designationID}/{projectId}")]
-        public IActionResult getSelectDateDrop(int designationID, int projectId)
+        public IActionResult GetRollUserDropDown(int designationID, int projectId)
         {
             return Ok(_resourcetypeRepository.GetRollUserDropDown(designationID, projectId));
         }

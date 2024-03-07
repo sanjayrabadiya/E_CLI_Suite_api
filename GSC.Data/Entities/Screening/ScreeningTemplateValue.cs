@@ -43,5 +43,7 @@ namespace GSC.Data.Entities.Screening
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
         public bool? IsScheduleTerminate { get; set; }
+
+
     }
 }

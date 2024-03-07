@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using ClosedXML.Excel;
+using DocumentFormat.OpenXml.InkML;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
@@ -11,6 +12,7 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Attendance;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
 using GSC.Data.Entities.Volunteer;
@@ -31,6 +33,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace GSC.Respository.Screening
 {
@@ -446,12 +449,11 @@ namespace GSC.Respository.Screening
 
         public void GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters)
         {
-
             var ProjectCode = _context.Project.Find(filters.ParentProjectId).ProjectCode;
             var sites = new List<int>();
             if (filters.SiteId != null)
             {
-                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
             }
             else
             {
@@ -479,101 +481,123 @@ namespace GSC.Respository.Screening
             jobMonitoring.SubmittedBy = _jwtTokenAccesser.UserId;
             jobMonitoring.SubmittedTime = _jwtTokenAccesser.GetClientDate();
             _jobMonitoringRepository.Add(jobMonitoring);
-
             _context.Save();
+
             #endregion
+
+            var variableValues = _context.ProjectDesignVariableValue.
+                Where(r => r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == filters.ParentProjectId).Select(r => new
+                {
+                    r.Id,
+                    r.ValueName
+                }).ToList();
 
             if (filters.FilterId == DBDSReportFilter.DBDS || filters.FilterId == null)
             {
 
                 #region Main Query
 
-                var queryDtos = (from screening in _context.ScreeningEntry.Where(t => sites.Contains(t.ProjectId)//filters.ProjectId.Contains(t.ProjectId)
-                                         && (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                                         && (filters.SubjectIds == null || filters.SubjectIds.Count() == 0 || filters.SubjectIds.Contains(t.Id))
-                                         && t.DeletedDate == null && t.ProjectDesignPeriod.DeletedDate == null && t.Randomization.DeletedDate == null)
-                                 join template in _context.ScreeningTemplate.Where(u => (filters.TemplateIds == null
-                                     || filters.TemplateIds.Contains(u.ProjectDesignTemplateId))
-                                     && (filters.VisitIds == null || filters.VisitIds.Contains(u.ProjectDesignTemplate.ProjectDesignVisitId))
-                                     && (filters.DomainIds == null || filters.DomainIds.Contains(u.ProjectDesignTemplate.DomainId))
-                                     && u.DeletedDate == null && u.ProjectDesignTemplate.DeletedDate == null && u.ScreeningVisit.ProjectDesignVisit.DeletedDate == null)
-                                 on screening.Id equals template.ScreeningVisit.ScreeningEntryId
-                                 join valueTemp in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null
-                                     && val.ProjectDesignVariable.DeletedDate == null)
-                                 on new { template.Id, template.ProjectDesignTemplateId } equals new { Id = valueTemp.ScreeningTemplateId, valueTemp.ProjectDesignVariable.ProjectDesignTemplateId }
-                                 into valueDto
-                                 from value in valueDto.DefaultIfEmpty()
-                                 join randomizationTemp in _context.Randomization on screening.RandomizationId equals randomizationTemp.Id into randomizationDto
-                                 from randomization in randomizationDto.DefaultIfEmpty()
-                                 select new ProjectDatabaseDto
-                                 {
-                                     ScreeningEntryId = screening.Id,
-                                     ScreeningTemplateId = template.Id,
-                                     RepeatSeqNo = template.RepeatSeqNo,
-                                     ScreeningTemplateParentId = template.ParentId,
-                                     ProjectId = screening.ProjectId,
-                                     ProjectCode = ProjectCode,
-                                     ParentProjectId = screening.Project.ParentProjectId,
-                                     //ProjectName = screening.Project.ProjectCode,
-                                     DesignOrder = template.ProjectDesignTemplate.DesignOrder,
-                                     DesignOrderOfVariable = value == null ? 0 : value.ProjectDesignVariable.DesignOrder,
-                                     TemplateId = template.ProjectDesignTemplateId,
-                                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
-                                     TemplateName = template.ScreeningTemplateName,
-                                     DomainName = template.ProjectDesignTemplate.Domain.DomainName,
-                                     DomainCode = template.ProjectDesignTemplate.Domain.DomainCode,
-                                     DomainId = template.ProjectDesignTemplate.DomainId,
-                                     VisitId = template.ScreeningVisit.ProjectDesignVisitId,
-                                     RepeatedVisit = template.ScreeningVisit.RepeatedVisitNumber,
-                                     // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
-                                     Visit = template.ScreeningVisit.ScreeningVisitName +
-                                          Convert.ToString(template.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + template.ScreeningVisit.RepeatedVisitNumber),
-                                     VariableName = value == null ? null : value.ProjectDesignVariable.VariableName,
-                                     VariableId = value == null ? 0 : value.ProjectDesignVariableId,
-                                     Annotation = value == null ? null : value.ProjectDesignVariable.Annotation,
-                                     UnitId = value == null ? 0 : value.ProjectDesignVariable.UnitId,
-                                     Unit = value == null ? null : value.ProjectDesignVariable.Unit.UnitName,
-                                     UnitAnnotation = value == null ? null : value.ProjectDesignVariable.UnitAnnotation,
-                                     VariableUnit = value == null ? null : value.ProjectDesignVariable.Unit.UnitName == null ? "" : value.ProjectDesignVariable.Unit.UnitName,
-                                     CollectionSource = value == null ? 0 : (int)value.ProjectDesignVariable.CollectionSource,
-                                     VariableNameValue = value == null ? null
-                                          : value.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox
-                                          ? string.Join(";", from stvc in _context.ScreeningTemplateValueChild.Where(x =>
-                                                  x.DeletedDate == null && x.ScreeningTemplateValueId == value.Id && x.Value == "true")
-                                                             join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null)
-                                                             on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into prpjectdesignvalueDto
-                                                             from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
-                                                             select prpjectdesignvalue.ValueName)
-                                          : value.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
-                                            !string.IsNullOrEmpty(value.Value)
-                                              ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                                                  b.ProjectDesignVariableId == value.ProjectDesignVariable.Id).ValueName
-                                          : value.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
-                                            value.IsNa && string.IsNullOrEmpty(value.Value)
-                                              ? "NA"
-                                           : value.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                                                value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
-                                                value.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
-                                                  ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                                                      b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
-                                                      b.Id == Convert.ToInt32(value.Value)).ValueName
-                                           : value.Value,
-                                     Initial = screening.RandomizationId != null ? randomization.Initial : screening.Attendance.Volunteer.AliasName,
-                                     SubjectNo = screening.RandomizationId != null ? randomization.ScreeningNumber : screening.Attendance.Volunteer.VolunteerNo,
-                                     RandomizationNumber = screening.RandomizationId != null ? randomization.RandomizationNumber : "",
-                                     ProjectName = screening.RandomizationId != null ? randomization.Project.ProjectCode : screening.Project.ProjectCode,
-                                     VisitDesignOrder = template.ScreeningVisit.ProjectDesignVisit.DesignOrder,
-                                     PeriodId = template.ScreeningVisit.ProjectDesignVisit.ProjectDesignPeriodId,
-                                     ScreeningTemplateValueId = value == null ? 0 : value.Id,
-                                 }).ToList();
+                var tempValue = _context.ScreeningTemplateValue.Where(r => r.DeletedDate == null && r.ScreeningTemplate.DeletedDate == null && r.ScreeningTemplate.ScreeningVisit.DeletedDate == null
+                 && r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.DeletedDate == null &&
+                 sites.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId));
 
-                var grpquery = queryDtos.OrderBy(d => d.VisitId).ThenBy(x => x.DesignOrder).GroupBy(x => new { x.DomainName, x.DomainId }).Select(y => new ProjectDatabaseDomainDto
+                if (filters.PeriodIds != null && filters.PeriodIds.Count() > 0)
+                {
+                    tempValue = tempValue.Where(r => filters.PeriodIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId));
+                }
+
+                if (filters.SubjectIds != null && filters.SubjectIds.Count() > 0)
+                {
+                    tempValue = tempValue.Where(r => filters.SubjectIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id));
+                }
+
+                if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+                {
+                    tempValue = tempValue.Where(r => filters.TemplateIds.Contains(r.ScreeningTemplate.ProjectDesignTemplateId));
+                }
+
+                if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+                {
+                    tempValue = tempValue.Where(r => filters.VisitIds.Contains(r.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId));
+                }
+
+                if (filters.DomainIds != null && filters.DomainIds.Count() > 0)
+                {
+                    tempValue = tempValue.Where(r => filters.DomainIds.Contains(r.ScreeningTemplate.ProjectDesignTemplate.DomainId));
+                }
+
+                var result = tempValue.Select(x => new ProjectDatabaseDto
+                {
+                    ScreeningEntryId = x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
+                    ScreeningTemplateId = x.ScreeningTemplate.Id,
+                    RepeatSeqNo = x.ScreeningTemplate.RepeatSeqNo,
+                    ScreeningTemplateParentId = x.ScreeningTemplate.ParentId,
+                    ProjectId = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId,
+                    ProjectCode = ProjectCode,
+                    ParentProjectId = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId,
+                    DesignOrder = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
+
+                    TemplateId = x.ScreeningTemplate.ProjectDesignTemplateId,
+                    TemplateName = x.ScreeningTemplate.ScreeningTemplateName,
+                    DomainName = x.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainName,
+                    DomainCode = x.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainCode,
+                    DomainId = x.ScreeningTemplate.ProjectDesignTemplate.DomainId,
+                    VisitId = x.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId,
+                    RepeatedVisit = x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber,
+                    Visit = x.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
+                                          Convert.ToString(x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + x.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+
+                    VariableName = x.ProjectDesignVariable.VariableName,
+                    VariableId = x.ProjectDesignVariableId,
+                    Annotation = x.ProjectDesignVariable.Annotation,
+                    UnitId = x.ProjectDesignVariable.UnitId,
+                    Unit = x.ProjectDesignVariable.Unit.UnitName,
+                    UnitAnnotation = x.ProjectDesignVariable.UnitAnnotation,
+                    VariableUnit = x.ProjectDesignVariable.Unit.UnitName,
+                    DesignOrderOfVariable = x.ProjectDesignVariable.DesignOrder,
+
+                    CollectionSource = (int)x.ProjectDesignVariable.CollectionSource,
+                    VariableNameValue = x.IsNa && string.IsNullOrEmpty(x.Value) ? "NA" : x.Value,
+                    VariableChildValue = string.Join(";", x.Children.Where(a => a.DeletedDate == null && a.Value == "true").Select(c => c.ProjectDesignVariableValue.ValueName).ToList()),
+                    Initial = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ?
+                    x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial :
+                    x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
+
+                    SubjectNo = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber :
+                    x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
+
+                    RandomizationNumber = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.RandomizationId != null ? x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber : "",
+                    ProjectName = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                    VisitDesignOrder = x.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.DesignOrder,
+                    PeriodId = x.ScreeningTemplate.ScreeningVisit.ProjectDesignVisit.ProjectDesignPeriodId,
+                    ScreeningTemplateValueId = x.Id,
+                }).ToList();
+
+                result.ForEach(r =>
+                {
+                    if (r.CollectionSource == (int)CollectionSources.ComboBox || r.CollectionSource == (int)CollectionSources.RadioButton ||
+                                                r.CollectionSource == (int)CollectionSources.NumericScale || r.CollectionSource == (int)CollectionSources.CheckBox)
+                    {
+                        int Id;
+                        bool isNumeric = int.TryParse(r.VariableNameValue, out Id);
+                        if (isNumeric)
+                            r.VariableNameValue = variableValues.FirstOrDefault(c => c.Id == Id).ValueName;
+                    }
+                    else if (r.CollectionSource == (int)CollectionSources.MultiCheckBox)
+                    {
+                        r.VariableNameValue = r.VariableChildValue;
+                    }
+                });
+
+                
+                var grpquery = result.OrderBy(d => d.VisitId).ThenBy(x => x.DesignOrder).GroupBy(x => new { x.DomainName, x.DomainId }).Select(y => new ProjectDatabaseDomainDto
                 {
                     DomainName = y.Key.DomainName,
                     DomainCode = y.FirstOrDefault().DomainCode,
                     TemplateId = y.FirstOrDefault().TemplateId,
                     DesignOrder = y.FirstOrDefault().DesignOrder,
-                    LstVariable = y.Where(v => v.VariableName != null).ToList().Count > 0 ? y.Where(q => q.DomainId == y.Key.DomainId && q.VariableName != null).GroupBy(vari => vari.VariableName).Select(v =>
+                    LstVariable = y.Where(q => q.DomainId == y.Key.DomainId && q.VariableName != null).
+                    GroupBy(vari => vari.VariableName).Select(v =>
                         new ProjectDatabaseVariableDto
                         {
                             DomainName = v.FirstOrDefault().DomainName,
@@ -584,19 +608,7 @@ namespace GSC.Respository.Screening
                             UnitAnnotation = v.FirstOrDefault().UnitAnnotation,
                             DesignOrderOfVariable = v.FirstOrDefault().DesignOrderOfVariable,
                             TemplateId = v.FirstOrDefault().TemplateId
-                        }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList()
-                          : _context.ProjectDesignVariable.Where(v => v.DeletedDate == null
-                          && v.ProjectDesignTemplateId == y.FirstOrDefault().TemplateId).Select(x => new ProjectDatabaseVariableDto
-                          {
-                              DomainName = x.Domain.DomainName,
-                              VariableName = x.VariableName,
-                              Annotation = x.Annotation,
-                              UnitId = x.UnitId,
-                              Unit = x.Unit.UnitName,
-                              UnitAnnotation = x.UnitAnnotation,
-                              DesignOrderOfVariable = x.DesignOrder,
-                              TemplateId = x.ProjectDesignTemplateId
-                          }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList(),
+                        }).OrderBy(o => o.TemplateId).ThenBy(d => d.DesignOrderOfVariable).ToList(),
 
                     LstProjectDataBase = y.Where(v => v.VariableName != null && v.SubjectNo != null).GroupBy(x => new { x.Initial, x.SubjectNo }).Select(s => new ProjectDatabaseInitialDto
                     {
@@ -705,25 +717,8 @@ namespace GSC.Respository.Screening
                                          // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                                          TemplateName = st.ScreeningTemplateName,
                                          VariableAnnotation = pdv.Annotation,
-                                         VariableTerm = stv.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
-                                           from stvc in _context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == stv.Id && x.Value == "true")
-                                           join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
-                                           prpjectdesignvalueDto
-                                           from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
-                                           select prpjectdesignvalue.ValueName)
-                                           : stv.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
-                                           !string.IsNullOrEmpty(stv.Value)
-                                           ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                                           b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id).ValueName
-                                           : stv.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
-                                           stv.IsNa && string.IsNullOrEmpty(stv.Value) ? "NA"
-                                           : stv.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                                           stv.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
-                                           stv.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
-                                           ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                                           b.ProjectDesignVariableId == stv.ProjectDesignVariable.Id &&
-                                           b.Id == Convert.ToInt32(stv.Value)).ValueName
-                                           : stv.Value,
+                                         CollectionSource = (int)stv.ProjectDesignVariable.CollectionSource,
+                                         VariableChildValue = string.Join(";", stv.Children.Where(a => a.DeletedDate == null && a.Value == "true").Select(c => c.ProjectDesignVariableValue.ValueName).ToList()),
                                          Version = mv.Version.ToString(),
                                          Language = ml.LanguageName,
                                          SocCode = meddraSoc.soc_code.ToString(),
@@ -746,119 +741,21 @@ namespace GSC.Respository.Screening
 
 
 
-
-                //var MeddraDetails = (from se in _context.ScreeningEntry.Where(t =>
-                ////filter from front
-                //           filters.ProjectId.Contains(t.ProjectId) &&
-                //           (filters.PeriodIds == null || filters.PeriodIds.Contains(t.ProjectDesignPeriodId))
-                //           && (filters.SubjectIds == null || filters.SubjectIds.Count() == 0 || filters.SubjectIds.Contains(t.Id)) &&
-                ////end filter
-                //           t.DeletedDate == null)
-                //                     join project in _context.Project.Where(x => filters.ProjectId.Contains(x.Id)) on se.ProjectId equals project.Id
-                //                     join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null &&
-                //                     //filter from report page
-                //                         (filters.TemplateIds == null || filters.TemplateIds.Contains(t.ProjectDesignTemplateId))
-                //                         && (filters.VisitIds == null ||
-                //                             filters.VisitIds.Contains(t.ProjectDesignTemplate.ProjectDesignVisitId)) &&
-                //                         (filters.DomainIds == null ||
-                //                          filters.DomainIds.Contains(t.ProjectDesignTemplate.DomainId))
-                //                     // end filter
-                //                     && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on se.Id equals st.ScreeningVisit.ScreeningEntryId
-                //                     join pt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
-                //                     join visit in _context.ProjectDesignVisit on pt.ProjectDesignVisitId equals visit.Id
-                //                     join pdv in _context.ProjectDesignVariable.Where(val => val.DeletedDate == null) on new { Id1 = pt.Id } equals new { Id1 = pdv.ProjectDesignTemplateId }
-                //                     join value in _context.ScreeningTemplateValue.Where(val => val.DeletedDate == null) on new
-                //                     { Id = st.Id, Id1 = pdv.Id } equals new
-                //                     { Id = value.ScreeningTemplateId, Id1 = value.ProjectDesignVariableId }
-                //                     join sc in _context.StudyScoping on pdv.Id equals sc.ProjectDesignVariableId
-                //                     //join attendance in _context.Attendance.Where(t => t.DeletedDate == null)
-                //                     //on se.AttendanceId equals attendance.Id
-                //                     //join volunteerTemp in _context.Volunteer on attendance.VolunteerId equals volunteerTemp.Id into volunteerDto
-                //                     //from volunteer in volunteerDto.DefaultIfEmpty()
-                //                     //join noneregisterTemp in _context.NoneRegister.Where(t => t.DeletedDate == null && t.RandomizationNumber != null) on attendance.Id equals noneregisterTemp.AttendanceId into noneregisterDto
-                //                     //from nonregister in noneregisterDto.DefaultIfEmpty()
-                //                     //join projectSubjectTemp in _context.ProjectSubject on attendance.ProjectSubjectId equals projectSubjectTemp.Id into projectsubjectDto
-                //                     //from projectsubject in projectsubjectDto.DefaultIfEmpty()
-                //                     join randomizationTemp in _context.Randomization on st.ScreeningVisit.ScreeningEntry.RandomizationId equals randomizationTemp.Id into randomizationDto
-                //                     from randomization in randomizationDto.DefaultIfEmpty()
-                //                     join medraCoding in _context.MeddraCoding.Where(t => t.DeletedDate == null) on value.Id equals medraCoding.ScreeningTemplateValueId into medraDto
-                //                     from meddraCoding in medraDto.DefaultIfEmpty()
-                //                     join medraConfig in _context.MedraConfig.Where(t => t.DeletedDate == null) on meddraCoding.MeddraConfigId equals medraConfig.Id into meddraConfigdto
-                //                     from medraConfig in meddraConfigdto.DefaultIfEmpty()
-                //                     join soc in _context.MeddraSocTerm on meddraCoding.MeddraSocTermId equals soc.Id into socDto
-                //                     from meddraSoc in socDto.DefaultIfEmpty()
-                //                     join mllt in _context.MeddraLowLevelTerm on meddraCoding.MeddraLowLevelTermId equals mllt.Id into mlltDto
-                //                     from meddraLLT in mlltDto.DefaultIfEmpty()
-                //                     join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null)
-                //                     on meddraSoc.soc_code equals md.soc_code into mdDto
-                //                     from meddraMD in mdDto.DefaultIfEmpty()
-                //                     join users in _context.Users on meddraCoding.ModifiedBy equals users.Id into userDto
-                //                     from user in userDto.DefaultIfEmpty()
-                //                     join roles in _context.SecurityRole on meddraCoding.CreatedRole equals roles.Id into roleDto
-                //                     from role in roleDto.DefaultIfEmpty()
-                //                     join version in _context.MedraVersion on medraConfig.MedraVersionId equals version.Id into versionDto
-                //                     from mv in versionDto.DefaultIfEmpty()
-                //                     join ln in _context.MedraLanguage on medraConfig.MedraVersionId equals ln.Id into lnDto
-                //                     from ml in lnDto.DefaultIfEmpty()
-                //                     where meddraLLT.pt_code == meddraMD.pt_code
-                //                        && meddraSoc.MedraConfigId == medraConfig.Id
-                //                        && meddraLLT.MedraConfigId == medraConfig.Id
-                //                        && meddraMD.MedraConfigId == medraConfig.Id
-                //                     // && randomization.RandomizationNumber != null
-                //                     select new MeddraDetails
-                //                     {
-                //                         ProjectCode = ProjectCode,
-                //                         SiteCode = se.Project.ParentProjectId != null ? se.Project.ProjectCode : "",
-                //                         DomainCode = pdv.Domain.DomainName,
-                //                         //ScreeningNumber = nonregister.ScreeningNumber,
-                //                         //RandomizationNumber = nonregister.RandomizationNumber,
-                //                         //Initial = volunteer.FullName == null ? nonregister.Initial : volunteer.AliasName,
-                //                         Initial = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? randomization.Initial : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
-                //                         ScreeningNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? randomization.ScreeningNumber : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
-                //                         RandomizationNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? randomization.RandomizationNumber : "",
-                //                         RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
-                //                         Visit = st.ScreeningVisit.ProjectDesignVisit.DisplayName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
-                //                         TemplateName = st.ProjectDesignTemplate.TemplateName,
-                //                         VariableAnnotation = pdv.Annotation,
-                //                         VariableTerm = value.ProjectDesignVariable.CollectionSource == CollectionSources.MultiCheckBox ? string.Join(";",
-                //                        from stvc in _context.ScreeningTemplateValueChild.Where(x => x.DeletedDate == null && x.ScreeningTemplateValueId == value.Id && x.Value == "true")
-                //                        join prpjectdesignvalueTemp in _context.ProjectDesignVariableValue.Where(val => val.DeletedDate == null) on stvc.ProjectDesignVariableValueId equals prpjectdesignvalueTemp.Id into
-                //                        prpjectdesignvalueDto
-                //                        from prpjectdesignvalue in prpjectdesignvalueDto.DefaultIfEmpty()
-                //                        select prpjectdesignvalue.ValueName)
-                //                        : value.ProjectDesignVariable.CollectionSource == CollectionSources.CheckBox &&
-                //                        !string.IsNullOrEmpty(value.Value)
-                //                        ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                //                        b.ProjectDesignVariableId == value.ProjectDesignVariable.Id).ValueName
-                //                        : value.ProjectDesignVariable.CollectionSource == CollectionSources.TextBox &&
-                //                        value.IsNa && string.IsNullOrEmpty(value.Value) ? "NA"
-                //                        : value.ProjectDesignVariable.CollectionSource == CollectionSources.ComboBox ||
-                //                        value.ProjectDesignVariable.CollectionSource == CollectionSources.RadioButton ||
-                //                        value.ProjectDesignVariable.CollectionSource == CollectionSources.NumericScale
-                //                        ? _context.ProjectDesignVariableValue.FirstOrDefault(b =>
-                //                        b.ProjectDesignVariableId == value.ProjectDesignVariable.Id &&
-                //                        b.Id == Convert.ToInt32(value.Value)).ValueName
-                //                        : value.Value,
-                //                         Version = mv.Version.ToString(),
-                //                         Language = ml.LanguageName,
-                //                         SocCode = meddraSoc.soc_code.ToString(),
-                //                         SocName = meddraSoc.soc_name,
-                //                         SocAbbrev = meddraSoc.soc_abbrev,
-                //                         PrimaryIndicator = meddraMD.primary_soc_fg,
-                //                         HlgtCode = meddraMD.hlgt_code.ToString(),
-                //                         HlgtName = meddraMD.hlgt_name,
-                //                         HltCode = meddraMD.hlt_code.ToString(),
-                //                         HltName = meddraMD.hlt_name,
-                //                         PtCode = meddraMD.pt_code.ToString(),
-                //                         PtName = meddraMD.pt_name,
-                //                         PtSocCode = meddraMD.pt_soc_code.ToString(),
-                //                         LltCode = meddraLLT.llt_code.ToString(),
-                //                         LltName = meddraLLT.llt_name,
-                //                         LltCurrency = meddraLLT.llt_currency,
-                //                         CodedBy = user.UserName,
-                //                         CodedOn = meddraCoding.ModifiedDate
-                //                     }).OrderBy(x => x.ScreeningNumber).ToList();
-
+                MeddraDetails.ForEach(r =>
+                {
+                    if (r.CollectionSource == (int)CollectionSources.ComboBox || r.CollectionSource == (int)CollectionSources.RadioButton ||
+                                                r.CollectionSource == (int)CollectionSources.NumericScale || r.CollectionSource == (int)CollectionSources.CheckBox)
+                    {
+                        int Id;
+                        bool isNumeric = int.TryParse(r.VariableTerm, out Id);
+                        if (isNumeric)
+                            r.VariableTerm = variableValues.FirstOrDefault(c => c.Id == Id).ValueName;
+                    }
+                    else if (r.CollectionSource == (int)CollectionSources.MultiCheckBox)
+                    {
+                        r.VariableTerm = r.VariableChildValue;
+                    }
+                });
 
                 #endregion
 

@@ -9,7 +9,7 @@ namespace GSC.Respository.CTMS
     {
         void UpdateChild(List<CtmsMonitoringReportVariableValueChild> children);
         List<CtmsMonitoringReportVariableValueBasic> GetVariableValues(int CtmsMonitoringReportId);
-        string GetValueForAudit(CtmsMonitoringReportVariableValueDto cstmsMonitoringReportVariableValueDto, CtmsMonitoringReportVariableValueChildDto? ctmsMonitoringReportVariableValueChildDto);
+        string GetValueForAudit(CtmsMonitoringReportVariableValueDto cstmsMonitoringReportVariableValueDto, CtmsMonitoringReportVariableValueChildDto ctmsMonitoringReportVariableValueChildDto);
         void DeleteChild(int ctmsMonitoringReportVariableValueId);
         bool GetQueryStatusByReportId(int ctmsMonitoringReportId);
         void SaveVariableValue(CtmsMonitoringReportVariableValueSaveDto ctmsMonitoringReportVariableValueSaveDto);
