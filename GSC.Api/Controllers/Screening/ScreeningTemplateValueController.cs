@@ -18,6 +18,7 @@ using System.Linq;
 using GSC.Respository.Project.Design;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -148,6 +149,7 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
                 screeningTemplate.IsDisable = false;
                 screeningTemplate.IsHide = false;
+                screeningTemplate.IsNA = false;
                 _screeningTemplateRepository.Update(screeningTemplate);
 
                 var screeningVisit = _screeningVisitRepository.Find(screeningTemplate.ScreeningVisitId);

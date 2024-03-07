@@ -78,6 +78,7 @@ namespace GSC.Data.Dto.Project.Design
         public bool? IsLevelNo { get; set; }
         public string PreLabel { get; set; }
         public ScaleType? ScaleType { get; set; }
+        public bool? DisplayValue { get; set; }
     }
 
     public class DesignScreeningVariableDto
@@ -143,6 +144,7 @@ namespace GSC.Data.Dto.Project.Design
         public string PreLabel { get; set; }
         public ScaleType? ScaleType { get; set; }
         public bool? IsDisabled { get; set; }
+        public bool? DisplayValue { get; set; }
 
     }
 

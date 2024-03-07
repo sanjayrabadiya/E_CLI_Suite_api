@@ -52,8 +52,7 @@ namespace GSC.Respository.Screening
         DesignScreeningTemplateDto GetTemplateForBarcode(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId, bool IsDosing, bool firstTime);
 
         void SendEmailOnVaribleConfiguration(int id);
-
-       
+        List<NAReportDto> NAReport(NAReportSearchDto filters);
 
     }
 }

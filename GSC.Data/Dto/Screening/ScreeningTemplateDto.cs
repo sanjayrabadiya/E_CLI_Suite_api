@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using GSC.Data.Entities.Common;
 using GSC.Helper;
 
 namespace GSC.Data.Dto.Screening
@@ -18,6 +19,8 @@ namespace GSC.Data.Dto.Screening
         public List<ScreeningTemplateTree> ScreeningTemplates { get; set; }
         public bool IsLocked { get; set; }
         public int? DesignOrder { get; set; }
+        //NA report
+        public bool IsNA { get; set; }
     }
 
     public class ScreeningTemplateTree
@@ -43,6 +46,8 @@ namespace GSC.Data.Dto.Screening
         public string Label { get; set; }
         public string PreLabel { get; set; }
         public bool? IsHide { get; set; }
+        //NA report
+        public bool? IsNA { get; set; }
     }
 
 
@@ -76,5 +81,27 @@ namespace GSC.Data.Dto.Screening
     {
         public int ScreeningTemplateId { get; set; }
         public string ScreeningTemplateName { get; set; }
+    }
+
+    //NA report
+    public class NAReportSearchDto : BaseDto
+    {
+        public int? SiteId { get; set; }
+        public int?[] SubjectIds { get; set; }
+        public int?[] VisitIds { get; set; }
+        public int?[] TemplateIds { get; set; }
+    }
+
+    public class NAReportDto
+    {
+        public int ScreeningTemplateId { get; set; }
+        public string Visit { get; set; }
+        public string VisitStatus { get; set; }
+        public string FormName { get; set; }
+        public string FormStatus { get; set; }
+        public string Initial { get; set; }
+        public string ScreeningNo { get; set; }
+        public string RandomizationNumber { get; set; }
+
     }
 }
