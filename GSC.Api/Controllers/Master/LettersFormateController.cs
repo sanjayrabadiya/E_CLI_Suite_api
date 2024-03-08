@@ -14,17 +14,14 @@ namespace GSC.Api.Controllers.Master
     public class LettersFormateController : BaseController
     {
         private readonly ILettersFormateRepository _lettersFormateRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public LettersFormateController(ILettersFormateRepository lettersFormateRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _lettersFormateRepository = lettersFormateRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -58,7 +55,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _lettersFormateRepository.Add(lettersFormate);
-            if (_uow.Save() <= 0) throw new Exception("letters Formate failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("letters Formate failed on save."));
             return Ok(lettersFormate.Id);
         }
 
@@ -77,7 +74,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _lettersFormateRepository.Update(lettersFormate);
-            if (_uow.Save() <= 0) throw new Exception("Updating letters Formatefailed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating letters Formatefailed on save."));
             return Ok(lettersFormate.Id);
         }
 

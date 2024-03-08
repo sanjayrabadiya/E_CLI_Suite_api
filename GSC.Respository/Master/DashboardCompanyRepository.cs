@@ -1,16 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Reflection.Metadata.Ecma335;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Configuration;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.Configuration;
-using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Configuration
@@ -82,7 +78,7 @@ namespace GSC.Respository.Configuration
                 .GroupBy(x => new { x.Status}).Select(s => new
                  {
                     Status = s.Key.Status.GetDescription(),
-                    Count = s.Where(b => b.Status == s.Key.Status).Count()
+                    Count = s.Count(b => b.Status == s.Key.Status)
                  }).ToList();
 
             //Grid disply data
@@ -138,15 +134,6 @@ namespace GSC.Respository.Configuration
                 CreatedDate = c.FirstOrDefault().CreatedDate
             }).OrderBy(o => o.ProjectId).ToList();
 
-            //chart disply data
-            /*var chartFinal1 = _context.Project.Where(x => projects.Select(x => x.ProjectId).Contains(x.Id) && x.DeletedDate == null)
-                .GroupBy(x => new { x.DesignTrialId, x.DesignTrial.TrialTypeId }).Select(s => new
-                {
-                    DesignTrialName = s.Key.DesignTrialId,
-                    TrialType = s.Key.TrialTypeId,
-                    Count = s.Count()
-                }).ToList()*/;
-
             var projectIdsList = projects.Select(p => p.ProjectId).ToList();
 
             var chartFinal1 = from p in _context.Project
@@ -166,9 +153,7 @@ namespace GSC.Respository.Configuration
                             
                         };
 
-            var result = chartFinal1.ToList();
-
-            //Grid disply data
+                    //Grid disply data
           
                        var gridFinal1 = from project in _context.Project
                              where projectIdsList.Contains(project.Id) && project.DeletedDate == null
@@ -182,9 +167,6 @@ namespace GSC.Respository.Configuration
                             trialType.TrialTypeName
                         };
                         
-
-            var result1 = gridFinal1.ToList();
-
 
             dynamic[] data = new dynamic[2];
             data[0] = chartFinal1;
