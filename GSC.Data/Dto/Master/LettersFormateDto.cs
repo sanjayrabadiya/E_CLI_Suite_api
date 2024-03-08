@@ -14,7 +14,6 @@ namespace GSC.Data.Dto.Master
     }
     public class LettersFormateGridDto : BaseAuditDto
     {
-        public int Id { get; set; }
         public string LetterCode { get; set; }
         public string LetterName { get; set; }
         public string Description { get; set; }
