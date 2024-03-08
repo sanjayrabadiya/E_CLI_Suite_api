@@ -718,6 +718,7 @@ namespace GSC.Respository.Screening
                                          TemplateName = st.ScreeningTemplateName,
                                          VariableAnnotation = pdv.Annotation,
                                          CollectionSource = (int)stv.ProjectDesignVariable.CollectionSource,
+                                         VariableTerm = stv.IsNa && string.IsNullOrEmpty(stv.Value) ? "NA" : stv.Value,
                                          VariableChildValue = string.Join(";", stv.Children.Where(a => a.DeletedDate == null && a.Value == "true").Select(c => c.ProjectDesignVariableValue.ValueName).ToList()),
                                          Version = mv.Version.ToString(),
                                          Language = ml.LanguageName,
