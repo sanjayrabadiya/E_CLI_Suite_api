@@ -26,7 +26,7 @@ namespace GSC.Data.Entities.SupplyManagement
         public GSC.Data.Entities.Master.Project ToProject { get; set; }
 
         [ForeignKey("StudyProductTypeId")]
-        public PharmacyStudyProductType? PharmacyStudyProductType { get; set; }
+        public PharmacyStudyProductType PharmacyStudyProductType { get; set; }
 
         [ForeignKey("VisitId")]
         public ProjectDesignVisit ProjectDesignVisit { get; set; }

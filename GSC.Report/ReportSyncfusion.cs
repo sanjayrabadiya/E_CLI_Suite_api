@@ -53,9 +53,7 @@ namespace GSC.Report
         private readonly PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
         private readonly PdfFont categoryfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
-        private readonly PdfFont regularfont;
         private readonly PdfFont italicfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 10, PdfFontStyle.Italic);
-        private readonly Stream fontStream;
         private readonly ISyncConfigurationMasterRepository _syncConfigurationMasterRepository;
         private PdfDocument document = null;
         private PdfLayoutResult tocresult = null;
@@ -79,8 +77,6 @@ namespace GSC.Report
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _emailSenderRespository = emailSenderRespository;
-            fontStream = FilePathConvert();
-            regularfont = new PdfTrueTypeFont(fontStream, 12);
             _syncConfigurationMasterRepository = syncConfigurationMasterRepository;
             _volunteerDocumentRepository = volunteerDocumentRepository;
         }
@@ -95,6 +91,7 @@ namespace GSC.Report
         //pdf header
         private PdfPageTemplateElement AddHeader(PdfDocument doc, string studyName, bool isClientLogo, bool isCompanyLogo, int ClientId)
         {
+
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
             Color activeColor = Color.FromArgb(44, 71, 120);
@@ -153,6 +150,7 @@ namespace GSC.Report
 
         private PdfPageTemplateElement AddFooter(PdfDocument doc)
         {
+
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 10);
             PdfPageTemplateElement footer = new PdfPageTemplateElement(rect);
             PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 8, PdfFontStyle.Bold);
@@ -178,8 +176,9 @@ namespace GSC.Report
             return footer;
         }
 
-        private PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        private static PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
         {
+
 
             PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
             PdfStringFormat stringFormat = new PdfStringFormat();
@@ -190,8 +189,9 @@ namespace GSC.Report
             return result;
         }
 
-        private PdfLayoutResult AddStringCategory(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        private static PdfLayoutResult AddStringCategory(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
         {
+
             PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
             //Draws String       
             PdfStringFormat stringFormat = new PdfStringFormat();
@@ -211,7 +211,7 @@ namespace GSC.Report
             PdfLayoutResult result = richTextElement.Draw(page, position, pdfLayoutFormat);
             return result;
         }
-        private PdfLayoutResult AddStringTemplateLable(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        private static PdfLayoutResult AddStringTemplateLable(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
         {
 
             PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
@@ -253,7 +253,7 @@ namespace GSC.Report
             return bookmarks;
         }
 
-        public PdfBookmark AddSection(PdfBookmark bookmark, PdfLayoutResult page, string title)
+        public static PdfBookmark AddSection(PdfBookmark bookmark, PdfLayoutResult page, string title)
         {
             PdfBookmark bookmarks = bookmark.Add(title);
             bookmarks.Destination = new PdfDestination(page.Page, new PointF(0, page.Bounds.Y));
@@ -261,32 +261,7 @@ namespace GSC.Report
             return bookmarks;
         }
 
-        public void AddTableOfcontents(PdfLayoutResult page, string title, bool isVisit)
-        {
-            PdfTextElement element;
-            if (isVisit)
-                element = new PdfTextElement($"{title}", headerfont, PdfBrushes.Black);
-            else
-                element = new PdfTextElement($"{title}", regularfont, PdfBrushes.Black);
-            //Set layout format for pagination of TOC
-            PdfLayoutFormat format = new PdfLayoutFormat();
-            format.Break = PdfLayoutBreakType.FitPage;
-            format.Layout = PdfLayoutType.Paginate;
-            tocresult = element.Draw(tocresult.Page, new PointF(isVisit ? 0 : 10, tocresult.Bounds.Y + 20), format);
-            //Draw page number in TOC
-            PdfTextElement pageNumber = new PdfTextElement(document.Pages.IndexOf(page.Page).ToString(), regularfont, PdfBrushes.Black);
-            pageNumber.Draw(tocresult.Page, new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y));
-
-            PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(tocresult.Bounds);
-            documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
-            documentLinkAnnotation.Text = title;
-            documentLinkAnnotation.Color = Color.Transparent;
-            //Sets the destination
-            documentLinkAnnotation.Destination = new PdfDestination(page.Page);
-            documentLinkAnnotation.Destination.Location = new PointF(0, tocresult.Bounds.Y);
-            //Adds this annotation to a new page
-            tocresult.Page.Annotations.Add(documentLinkAnnotation);
-        }
+       
         private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
             if (vistName.Length < 45)
@@ -333,6 +308,7 @@ namespace GSC.Report
 
         private PdfPageTemplateElement ScreeningVisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
+
             if (vistName.Length < 45)
             {
                 RectangleF rect = new RectangleF(0, 80, doc.Pages[0].GetClientSize().Width, 120);
@@ -428,6 +404,8 @@ namespace GSC.Report
 
         private void IndexCreate(PdfBookmark bookmark, bool isSubSection)
         {
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             PdfLayoutFormat layoutformat = new PdfLayoutFormat();
             layoutformat.Break = PdfLayoutBreakType.FitPage;
             layoutformat.Layout = PdfLayoutType.Paginate;
@@ -456,7 +434,8 @@ namespace GSC.Report
 
         private void SetPageNumber()
         {
-
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             for (int i = 0; i < document.Pages.Count; i++)
             {
                 PdfPageBase page = document.Pages[i] as PdfPageBase;
@@ -508,8 +487,11 @@ namespace GSC.Report
             string ParentProctCode = string.Empty;
             string ParentProjectName = string.Empty;
 
-            ParentProctCode = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode;
-            ParentProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+            if (projectDetails.Any() && projectDetails != null && projectDetails.FirstOrDefault() != null)
+            {
+                ParentProctCode = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode;
+                ParentProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+            }
 
 
             foreach (var item in projectDetails)
@@ -583,6 +565,7 @@ namespace GSC.Report
 
         private void DesignVisitReport(List<ProjectDesignVisitList> designvisit, ReportSettingNew reportSetting, DossierReportDto details)
         {
+
             PdfSection SectionTOC = document.Sections.Add();
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
@@ -623,7 +606,8 @@ namespace GSC.Report
 
         private void DesignTemplateReport(IList<ProjectDesignTemplatelist> designtemplate, ReportSettingNew reportSetting, string vistitName, PdfPage sectioncontent, int ProjectDesignId)
         {
-
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             var templateVariableSequenceNoSetting = _context.TemplateVariableSequenceNoSetting.Where(x => x.DeletedDate == null && x.ProjectDesignId == ProjectDesignId).FirstOrDefault();
 
             DateTime dDate;
@@ -2423,6 +2407,7 @@ namespace GSC.Report
 
         private void ScreeningVisitReport(List<ProjectDesignVisitList> designvisit, ScreeningReportSetting reportSetting, ScreeningPdfReportDto details)
         {
+
             PdfSection SectionTOC = document.Sections.Add();
             PdfPage pageTOC = SectionTOC.Pages.Add();
 
@@ -2463,6 +2448,8 @@ namespace GSC.Report
 
         private void ScreeningIndexCreate(PdfBookmark bookmark, bool isSubSection)
         {
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             PdfLayoutFormat layoutformat = new PdfLayoutFormat();
             layoutformat.Break = PdfLayoutBreakType.FitPage;
             layoutformat.Layout = PdfLayoutType.Paginate;
@@ -2492,7 +2479,8 @@ namespace GSC.Report
 
         private void ScreeningSetPageNumber()
         {
-
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             for (int i = 0; i < document.Pages.Count; i++)
             {
                 PdfPageBase page = document.Pages[i] as PdfPageBase;
@@ -2516,7 +2504,8 @@ namespace GSC.Report
 
         private void ScreeningTemplateReport(IList<ProjectDesignTemplatelist> designtemplate, ScreeningReportSetting reportSetting, string vistitName, PdfPage sectioncontent)
         {
-
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             DateTime dDate;
             RectangleF bounds = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
             PdfLayoutResult result = new PdfLayoutResult(sectioncontent, bounds);
@@ -3287,7 +3276,7 @@ namespace GSC.Report
 
         }
 
-        private void ScreeningSaveFile(ScreeningReportSetting reportSetting, FileSaveInfo fileInfo, MemoryStream memoryStream, ScreeningPdfReportDto item, string ParentProjectCode)
+        private static void ScreeningSaveFile(ScreeningReportSetting reportSetting, FileSaveInfo fileInfo, MemoryStream memoryStream, ScreeningPdfReportDto item, string ParentProjectCode)
         {
             string filePath = "";
             if (reportSetting.PdfStatus == DossierPdfStatus.Blank)

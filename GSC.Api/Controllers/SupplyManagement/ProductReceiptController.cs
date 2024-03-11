@@ -11,7 +11,6 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 
@@ -27,28 +26,22 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly IProductReceiptRepository _productReceiptRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly ICentralDepotRepository _centralDepotRepository;
-        private readonly IGSCContext _context;
+        private readonly IUploadSettingRepository _uploadSettingRepository;       
         private readonly IProductVerificationRepository _productVerificationRepository;
         private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
         
 
         public ProductReceiptController(IProductReceiptRepository productReceiptRepository,
-            ICentralDepotRepository centralDepotRepository,
             IUploadSettingRepository uploadSettingRepository,
             IProductVerificationDetailRepository productVerificationDetailRepository,
-            IProductVerificationRepository productVerificationRepository,
-            IGSCContext context,
-        IUnitOfWork uow, IMapper mapper,
+            IProductVerificationRepository productVerificationRepository,          
+            IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _productReceiptRepository = productReceiptRepository;
-            _centralDepotRepository = centralDepotRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _productVerificationRepository = productVerificationRepository;
-            _productVerificationDetailRepository = productVerificationDetailRepository;
-            _context = context;
+            _productVerificationDetailRepository = productVerificationDetailRepository;           
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -58,23 +51,8 @@ namespace GSC.Api.Controllers.SupplyManagement
         [HttpGet("GetProductReceiptList/{projectId}/{isDeleted:bool?}")]
         public IActionResult GetProductReceiptList(int projectId, bool isDeleted)
         {
-            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             var productReciept = _productReceiptRepository.GetProductReceiptList(projectId, isDeleted);
-            productReciept.ForEach(t =>
-            {
-                t.PathName = t.PathName == null ? "" : documentUrl + t.PathName;
-                t.ProductVerificationDetaild = _context.ProductVerificationDetail.Where(x => x.ProductReceiptId == t.Id).FirstOrDefault() != null ?
-                _context.ProductVerificationDetail.Where(x => x.ProductReceiptId == t.Id).Select(x => x.Id).FirstOrDefault() : 0;
-                var verification = _context.ProductVerification.Where(x => x.ProductReceiptId == t.Id && x.DeletedDate == null).FirstOrDefault();
-                if (verification != null)
-                {
-                    var unit = _context.Unit.Where(s => s.Id == verification.UnitId).FirstOrDefault();
-                    t.PacketTypeName = verification.PacketTypeId.GetDescription();
-                    t.Dose = verification.Dose;
-                    if (unit != null)
-                        t.UnitName = unit.UnitName;
-                }
-            });
+          
             return Ok(productReciept);
         }
 
@@ -107,7 +85,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (id <= 0) return BadRequest();
             var productReceipt = _productReceiptRepository.Find(id);
             var productReceiptDto = _mapper.Map<ProductReceiptDto>(productReceipt);
-            productReceiptDto.DepotType = _centralDepotRepository.Find(productReceiptDto.CentralDepotId).DepotType;
+            productReceiptDto.DepotType = _productReceiptRepository.GetDepotType(productReceiptDto.CentralDepotId);
             return Ok(productReceiptDto);
         }
 
@@ -196,7 +174,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("IsCentralExists/{projectId}")]
         public IActionResult IsCentralExists(int projectId)
         {
-            return Ok(_centralDepotRepository.IsCentralExists(projectId));
+            return Ok(_productReceiptRepository.IsCentralExists(projectId));
         }
         [HttpGet]
         [Route("GetLotBatchList/{projectId}")]
@@ -208,9 +186,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("ProductRecieptViewBarcode/{productReceiptId}")]
         public IActionResult ProductRecieptViewBarcode(int productReceiptId)
         {
-            var productReciept = _productReceiptRepository.Find(productReceiptId);
-
-            var barcodeConfig = _context.PharmacyBarcodeConfig.Include(s => s.BarcodeDisplayInfo).Where(x => x.ProjectId == productReciept.ProjectId && x.BarcodeModuleType == BarcodeModuleType.Verification && x.DeletedBy == null).FirstOrDefault();
+            var barcodeConfig = _productReceiptRepository.ProductRecieptViewBarcodeValidate(productReceiptId);
             if (barcodeConfig == null)
             {
                 ModelState.AddModelError("Message", "Barcode configuration not found.");

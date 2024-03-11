@@ -1,53 +1,39 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
-using GSC.Data.Dto.Custom;
 using GSC.Data.Dto.Report.Pdf;
-using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Report;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Reports;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+
 
 namespace GSC.Report.Common
 {
     public class ReportBaseRepository : IReportBaseRepository
     {
-        bool? IsCompanyLogo;
-        bool? IsClientLogo;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IHostingEnvironment _hostingEnvironment;
+
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
         private readonly IGSCContext _context;
 
-        public ReportBaseRepository(IHostingEnvironment hostingEnvironment,
-            IJwtTokenAccesser jwtTokenAccesser, IJobMonitoringRepository jobMonitoringRepository,
+        public ReportBaseRepository(IJobMonitoringRepository jobMonitoringRepository,
              IGSCContext context)
         {
-            _hostingEnvironment = hostingEnvironment;
-            _jwtTokenAccesser = jwtTokenAccesser;
+
             _jobMonitoringRepository = jobMonitoringRepository;
             _context = context;
         }
 
 
-        
-      
 
-      
-        public void WriteLog(string strLog, string FolderPath, JobMonitoring jobMonitoring)
+
+
+
+        public void WriteLog(string log1, string path, JobMonitoring jobMonitoring)
         {
-            string logFilePath = FolderPath;
+            string logFilePath = path;
             FileInfo logFileInfo = new FileInfo(logFilePath);
             DirectoryInfo logDirInfo = new DirectoryInfo(logFileInfo.DirectoryName);
             if (!logDirInfo.Exists) logDirInfo.Create();
@@ -55,7 +41,7 @@ namespace GSC.Report.Common
             {
                 using (StreamWriter log = new StreamWriter(fileStream))
                 {
-                    log.WriteLine(strLog);
+                    log.WriteLine(log1);
                 }
             }
             CompleteJobMonitoring(jobMonitoring);
@@ -65,99 +51,75 @@ namespace GSC.Report.Common
         {
             #region Update JobMonitoring            
             _jobMonitoringRepository.Update(jobMonitoring);
-            if (_context.Save() <= 0) throw new Exception("updating Job Monitoring failed on save.");
+            _context.Save();
             #endregion
             return "";
         }
 
-       
-        private string GetCompanyNew(bool? IsCompanyLogo, bool? IsClientLogo)
-        {
-            var assa =
-            @"SELECT   '" + IsCompanyLogo.ToString().ToLower() + "' AS IsComLogo,'" + IsClientLogo.ToString().ToLower() + "' AS IsClientLogo," +
-            "Company.CompanyName,Company.Phone1,Company.Phone2,Location.Address, " +
-            "State.StateName,City.CityName,Country.CountryName," +
-            "CASE WHEN ISNULL(Company.Logo,'')<>'' THEN + UploadSetting.ImageUrl + Company.Logo END Logo," +
-            "CASE WHEN ISNULL(Client.Logo,'')<>'' THEN + UploadSetting.ImageUrl + Client.Logo  END ClientLogo " +
-            "FROM Company " +
-            "LEFT OUTER JOIN Location ON Location.Id = Company.LocationId " +
-            "LEFT OUTER JOIN State ON State.Id = Location.StateId " +
-            "LEFT OUTER JOIN City ON City.Id = Location.CityId " +
-            "LEFT OUTER JOIN Country ON Country.Id = Location.CountryId " +
-            "LEFT OUTER JOIN UploadSetting ON UploadSetting.CompanyId = Company.Id " +
-            "LEFT OUTER JOIN Client ON Client.CompanyId = Company.Id " +
-            "WHERE Company.Id=" + Convert.ToString(_jwtTokenAccesser.CompanyId == 0 ? 1 : _jwtTokenAccesser.CompanyId);
-            return assa;
-        }
+
         //blank report query
         public List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting)
         {
-            try
+            var finaldata = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).Select(x => new DossierReportDto
             {
-                var finaldata = _context.ProjectDesign.Where(x => x.ProjectId == reportSetting.ProjectId).Select(x => new DossierReportDto
+                ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId, ProjectDesignId = x.Id },
+                Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
                 {
-                    ProjectDetails = new ProjectDetails { ProjectCode = x.Project.ProjectCode, ProjectName = x.Project.ProjectName, ClientId = x.Project.ClientId, ProjectDesignId = x.Id },
-                    Period = x.ProjectDesignPeriods.Where(a => a.DeletedDate == null).Select(a => new ProjectDesignPeriodReportDto
+                    DisplayName = a.DisplayName,
+                    Visit = a.VisitList.Where(b => b.DeletedDate == null
+                    && ((reportSetting.CRFType == CRFTypes.CRF && !b.IsNonCRF)
+                    || (reportSetting.CRFType == CRFTypes.NonCRF && b.IsNonCRF)
+                    || (reportSetting.CRFType == CRFTypes.Both && (b.IsNonCRF || !b.IsNonCRF))
+                    ) && (reportSetting.VisitIds == null || (reportSetting.VisitIds != null && reportSetting.VisitIds.Contains(b.Id)))
+                    ).Select(b => new ProjectDesignVisitList
                     {
-                        DisplayName = a.DisplayName,
-                        Visit = a.VisitList.Where(b => b.DeletedDate == null
-                        && ((reportSetting.CRFType == CRFTypes.CRF && !b.IsNonCRF)
-                        || (reportSetting.CRFType == CRFTypes.NonCRF && b.IsNonCRF)
-                        || (reportSetting.CRFType == CRFTypes.Both && (b.IsNonCRF || !b.IsNonCRF))
-                        ) && (reportSetting.VisitIds == null || (reportSetting.VisitIds != null && reportSetting.VisitIds.Contains(b.Id)))
-                        ).Select(b => new ProjectDesignVisitList
+                        DisplayName = b.DisplayName,
+                        DesignOrder = b.DesignOrder,
+                        ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null
+                        && (reportSetting.TemplateIds == null || (reportSetting.TemplateIds != null && reportSetting.TemplateIds.Contains(n.Id))
+                        )).Select(n => new ProjectDesignTemplatelist
                         {
-                            DisplayName = b.DisplayName,
-                            DesignOrder = b.DesignOrder,
-                            ProjectDesignTemplatelist = b.Templates.Where(n => n.DeletedDate == null
-                            && (reportSetting.TemplateIds == null || (reportSetting.TemplateIds != null && reportSetting.TemplateIds.Contains(n.Id))
-                            )).Select(n => new ProjectDesignTemplatelist
-                            {
-                                TemplateCode = n.TemplateCode,
-                                TemplateName = n.TemplateName,
-                                DesignOrder = n.DesignOrder,
-                                Label = n.Label,
-                                PreLabel = n.PreLabel,
-                                Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
-                                TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
-                                TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
+                            TemplateCode = n.TemplateCode,
+                            TemplateName = n.TemplateName,
+                            DesignOrder = n.DesignOrder,
+                            Label = n.Label,
+                            PreLabel = n.PreLabel,
+                            Domain = new DomainReportDto { DomainCode = n.Domain.DomainCode, DomainName = n.Domain.DomainName },
+                            TemplateNotes = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && (tn.IsBottom == false || tn.IsBottom == null)).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
+                            TemplateNotesBottom = n.ProjectDesignTemplateNote.Where(tn => tn.DeletedDate == null && tn.IsBottom == true).Select(tn => new ProjectDesignTemplateNoteReportDto { Notes = tn.Note, IsPreview = tn.IsPreview, IsBottom = tn.IsBottom }).ToList(),
 
-                                ProjectDesignVariable = n.Variables.Where(v => v.DeletedDate == null).Select(v => new ProjectDesignVariableReportDto
+                            ProjectDesignVariable = n.Variables.Where(v => v.DeletedDate == null).Select(v => new ProjectDesignVariableReportDto
+                            {
+                                Id = v.Id,
+                                VariableName = v.VariableName,
+                                VariableCode = v.VariableCode,
+                                DesignOrder = v.DesignOrder,
+                                IsNa = v.IsNa,
+                                CollectionSource = v.CollectionSource,
+                                Annotation = v.Annotation,
+                                CollectionAnnotation = v.CollectionAnnotation,
+                                Note = v.Note,
+                                DefaultValue = v.DefaultValue,
+                                LowRangeValue = v.LowRangeValue,
+                                HighRangeValue = v.HighRangeValue,
+                                LargeStep = v.LargeStep,
+                                Unit = new UnitReportDto
                                 {
-                                    Id = v.Id,
-                                    VariableName = v.VariableName,
-                                    VariableCode = v.VariableCode,
-                                    DesignOrder = v.DesignOrder,
-                                    IsNa = v.IsNa,
-                                    CollectionSource = v.CollectionSource,
-                                    Annotation = v.Annotation,
-                                    CollectionAnnotation = v.CollectionAnnotation,
-                                    Note = v.Note,
-                                    DefaultValue = v.DefaultValue,
-                                    LowRangeValue = v.LowRangeValue,
-                                    HighRangeValue = v.HighRangeValue,
-                                    LargeStep = v.LargeStep,
-                                    Unit = new UnitReportDto
-                                    {
-                                        UnitName = v.Unit.UnitName,
-                                        UnitAnnotation = v.UnitAnnotation
-                                    },
-                                    Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
-                                    VariableCategoryName = v.VariableCategory.CategoryName,
-                                    Label = v.Label,
-                                    PreLabel = v.PreLabel,
-                                    IsLevelNo = v.IsLevelNo
-                                }).ToList()
+                                    UnitName = v.Unit.UnitName,
+                                    UnitAnnotation = v.UnitAnnotation
+                                },
+                                Values = v.Values.Where(vd => vd.DeletedDate == null).Select(vd => new ProjectDesignVariableValueReportDto { Id = vd.Id, ValueName = vd.ValueName, SeqNo = vd.SeqNo, ValueCode = vd.ValueCode, Label = vd.Label }).OrderBy(vd => vd.SeqNo).ToList(),
+                                VariableCategoryName = v.VariableCategory.CategoryName,
+                                Label = v.Label,
+                                PreLabel = v.PreLabel,
+                                IsLevelNo = v.IsLevelNo
                             }).ToList()
-                        }).OrderBy(d => d.DesignOrder).ToList()
-                    }).ToList()
-                }).ToList();
-                return finaldata;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+                        }).ToList()
+                    }).OrderBy(d => d.DesignOrder).ToList()
+                }).ToList()
+            }).ToList();
+            return finaldata;
+
         }
         //data query
         public List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting)
@@ -277,12 +239,7 @@ namespace GSC.Report.Common
                     .Select(a => new ProjectDesignPeriodReportDto
                     {
                         DisplayName = a.DisplayName,
-                        Visit = a.VisitList.Where(b => b.DeletedDate == null
-                        //&& ((reportSetting.CRFType == CRFTypes.CRF && !b.IsNonCRF)
-                        //|| (reportSetting.CRFType == CRFTypes.NonCRF && b.IsNonCRF)
-                        //|| (reportSetting.CRFType == CRFTypes.Both && (b.IsNonCRF || !b.IsNonCRF))
-                        //)
-                        ).Select(b => new ProjectDesignVisitList
+                        Visit = a.VisitList.Where(b => b.DeletedDate == null).Select(b => new ProjectDesignVisitList
                         {
                             DisplayName = b.DisplayName,
                             DesignOrder = b.DesignOrder,
@@ -351,10 +308,7 @@ namespace GSC.Report.Common
                            new ProjectDesignPeriodReportDto {
                             DisplayName = x.ProjectDesignPeriod.DisplayName,
                             Visit = x.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate==null
-                                    // && ((reportSetting.CRFType == CRFTypes.CRF && !x.ProjectDesignVisit.IsNonCRF)
-                                    //|| (reportSetting.CRFType == CRFTypes.NonCRF && x.ProjectDesignVisit.IsNonCRF)
-                                    //|| (reportSetting.CRFType == CRFTypes.Both && (x.ProjectDesignVisit.IsNonCRF || !x.ProjectDesignVisit.IsNonCRF))
-                                    //)
+                                   
                                     ).Select(x => new ProjectDesignVisitList {
                                           DisplayName = x.RepeatedVisitNumber==null ?x.ProjectDesignVisit.DisplayName:x.ProjectDesignVisit.DisplayName+"_"+x.RepeatedVisitNumber,
                                           DesignOrder = x.ProjectDesignVisit.DesignOrder,
@@ -420,7 +374,7 @@ namespace GSC.Report.Common
                   }
               }).ToList();
 
-            return finaldata.Where(x => x.Period.All(y => y.Visit.Count != 0)).ToList();
+            return finaldata.Where(x => x.Period.TrueForAll(y => y.Visit.Count != 0)).ToList();
         }
     }
 }

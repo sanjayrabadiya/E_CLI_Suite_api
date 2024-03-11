@@ -33,7 +33,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using GSC.Respository.Project.Rights;
-using GSC.Shared;
 using GSC.Shared.Extension;
 using GSC.Shared.Email;
 using GSC.Shared.JWTAuth;
@@ -61,10 +60,6 @@ namespace GSC.Api.Helpers
             services.AddScoped<IGSCContext, GscContext>();
             services.AddScoped<IGSCContextExtension, GscContext>();
             services.AddScoped<ICommonSharedService, CommonSharedService>();
-
-            //services.AddScoped<IUnitOfWork, UnitOfWork<GscContext>>();
-            //services.AddScoped(typeof(IUnitOfWork<GscContext>), typeof(UnitOfWork<GscContext>));
-
             services.AddScoped<IUnitOfWork, UnitOfWork<TContext>>();
             services.AddScoped(typeof(IUnitOfWork<TContext>), typeof(UnitOfWork<TContext>));
 
@@ -237,9 +232,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IMeddraCodingCommentRepository, MeddraCodingCommentRepository>();
             services.AddScoped<IMeddraCodingAuditRepository, MeddraCodingAuditRepository>();
             services.AddScoped<IScreeningProgress, ScreeningProgress>();
-            services.AddScoped<IEditCheckFormulaRepository, EditCheckFormulaRepository>();
-            //services.AddScoped<IEtmfZoneMasterLibraryRepository, EtmfZoneMasterLibraryRepository>();
-            //services.AddScoped<IEtmfSectionMasterLibraryRepository, EtmfSectionMasterLibraryRepository>();
+            services.AddScoped<IEditCheckFormulaRepository, EditCheckFormulaRepository>();           
             services.AddScoped<IEtmfMasterLbraryRepository, EtmfMasterLbraryRepository>();
             services.AddScoped<IEtmfArtificateMasterLbraryRepository, EtmfArtificateMasterLbraryRepository>();
             services.AddScoped<IETMFWorkplaceRepository, ETMFWorkplaceRepository>();
@@ -268,12 +261,10 @@ namespace GSC.Api.Helpers
             services.AddScoped<IEconsentReviewDetailsRepository, EconsentReviewDetailsRepository>();
             services.AddScoped<IEconsentSetupRepository, EconsentSetupRepository>();
             services.AddScoped<IRegulatoryTypeRepository, RegulatoryTypeRepository>();
-            services.AddScoped<IProjectArtificateDocumentApproverRepository, ProjectArtificateDocumentApproverRepository>();
-            //services.AddScoped<IEconsentSetupPatientStatusRepository, EconsentSetupPatientStatusRepository>();
+            services.AddScoped<IProjectArtificateDocumentApproverRepository, ProjectArtificateDocumentApproverRepository>();            
             services.AddScoped<IEconsentSectionReferenceRepository, EconsentSectionReferenceRepository>();
             services.AddScoped<IEconsentReviewDetailsSectionsRepository, EconsentReviewDetailsSectionsRepository>();
-            services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();
-            //services.AddScoped<IEconsentSetupRolesRepository, EconsentSetupRolesRepository>();
+            services.AddScoped<IEconsentChatRepository, EconsentChatRepository>();            
             services.AddScoped<ISiteRepository, SiteRepository>();
             services.AddScoped<IProjectSubSecArtificateDocumentHistoryRepository, ProjectSubSecArtificateDocumentHistoryRepository>();
             services.AddScoped<IProjectSubSecArtificateDocumentReviewRepository, ProjectSubSecArtificateDocumentReviewRepository>();
@@ -375,17 +366,15 @@ namespace GSC.Api.Helpers
             services.AddScoped<ISupplyManagementUploadFileDetailRepository, SupplyManagementUploadFileDetailRepository>();
             services.AddScoped<IPageConfigurationRepository, PageConfigurationRepository>();
             services.AddScoped<IPageConfigurationFieldsRepository, PageConfigurationFieldsRepository>();
-            services.AddHttpClient<IProjectDataRemoveService, ProjectDataRemoveService>();
-            //   services.AddScoped<IKitManagementRepository, KitManagementRepository>();
-            services.AddScoped<ISendEmailOnVariableChangeSettingRepository, SendEmailOnVariableChangeSettingRepository>();
-            // services.AddScoped<IDisplayMessageandLableSettingRepository, DisplayMessageandLableSettingRepository>();
+            services.AddHttpClient<IProjectDataRemoveService, ProjectDataRemoveService>();            
+            services.AddScoped<ISendEmailOnVariableChangeSettingRepository, SendEmailOnVariableChangeSettingRepository>();           
             services.AddScoped<IScheduleTerminateDetailRepository, ScheduleTerminateDetailRepository>();
             services.AddScoped<IScheduleTerminate, ScheduleTerminateRepository>();
             services.AddScoped<ITemplateVariableSequenceNoSettingRepository, TemplateVariableSequenceNoSettingRepository>();
             services.AddScoped<IDashboardRepository, DashboardRepository>();
             services.AddScoped<ISupplyManagementAllocationRepository, SupplyManagementAllocationRepository>();
             services.AddScoped<ISupplyManagementKitRepository, SupplyManagementKitRepository>();
-            services.AddScoped<ISupplyManagementKITDetailRepository, SupplyManagementKITDetailRepository>();
+            services.AddScoped<ISupplyManagementKitDetailRepository, SupplyManagementKitDetailRepository>();
 
             services.AddScoped<IEconsentGlossaryRepository, EconsentGlossaryRepository>();
             services.AddScoped<IScreeningSettingRepository, ScreeningSettingRepository>();
@@ -403,8 +392,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPharmacyReportRepository, PharmacyReportRepository>();
             services.AddScoped<IVersionEffectWithEditCheck, VersionEffectWithEditCheck>();
             services.AddScoped<IManageSiteAddressRepository, ManageSiteAddressRepository>();
-            services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();
-            // services.AddScoped<ICustomReportRepository, CustomReportRepository>();
+            services.AddScoped<IProjectSiteAddressRepository, ProjectSiteAddressRepository>();            
             services.AddScoped<ICentrifugationRepository, CentrifugationRepository>();
             services.AddScoped<ICentrifugationDetailsRepository, CentrifugationDetailsRepository>();
             services.AddScoped<ISampleSeparationRepository, SampleSeparationRepository>();

@@ -19,13 +19,13 @@ namespace GSC.Api.Controllers.Report
         }
         [HttpPost]
         [Route("GetRandomizationKitReport")]
-        public IActionResult GetRandomizationKitReport([FromBody] RandomizationIWRSReport search)
+        public IActionResult GetRandomizationKitReport([FromBody] RandomizationIwrsReport search)
         {
             return _pharmacyReportRepository.GetRandomizationKitReport(search);
         }
         [HttpPost]
         [Route("GetRandomizationKitReportData")]
-        public IActionResult GetRandomizationKitReportData([FromBody] RandomizationIWRSReport search)
+        public IActionResult GetRandomizationKitReportData([FromBody] RandomizationIwrsReport search)
         {
             return Ok(_pharmacyReportRepository.GetRandomizationKitReportData(search));
         }

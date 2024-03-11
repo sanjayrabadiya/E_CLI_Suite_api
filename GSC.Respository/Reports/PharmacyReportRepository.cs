@@ -34,16 +34,16 @@ namespace GSC.Respository.Reports
             _mapper = mapper;
         }
 
-        public FileStreamResult GetRandomizationKitReport(RandomizationIWRSReport randomizationIWRSReport)
+        public FileStreamResult GetRandomizationKitReport(RandomizationIwrsReport randomizationIWRSReport)
         {
-            List<RandomizationIWRSReportData> list = new List<RandomizationIWRSReportData>();
+            List<RandomizationIwrsReportData> list = new List<RandomizationIwrsReportData>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
 
             if (setting != null && setting.KitCreationType == KitCreationType.SequenceWise)
             {
                 list = _context.SupplyManagementKITSeriesDetail.Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.ProjectDesignVisit).Include(x => x.SupplyManagementKITSeries).ThenInclude(x => x.Project).Include(x => x.Randomization).
                        Where(x => x.DeletedDate == null && !x.SupplyManagementKITSeries.IsRetension && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
-                       && x.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId && x.RandomizationId != null).Select(x => new RandomizationIWRSReportData
+                       && x.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId && x.RandomizationId != null).Select(x => new RandomizationIwrsReportData
                        {
                            ProjectCode = x.SupplyManagementKITSeries.Project.ProjectCode,
                            SiteCode = x.SupplyManagementKITSeries.Randomization.Project.ProjectCode,
@@ -77,7 +77,7 @@ namespace GSC.Respository.Reports
             {
                 list = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementKIT).ThenInclude(x => x.Project).
                        Where(x => x.DeletedDate == null && !x.IsRetension && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
-                       && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).Select(x => new RandomizationIWRSReportData
+                       && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).Select(x => new RandomizationIwrsReportData
                        {
                            ProjectCode = x.SupplyManagementKIT.Project.ProjectCode,
                            KitNo = x.KitNo,
@@ -180,9 +180,9 @@ namespace GSC.Respository.Reports
 
         }
 
-        public List<RandomizationIWRSReportData> GetRandomizationKitReportData(RandomizationIWRSReport randomizationIWRSReport)
+        public List<RandomizationIwrsReportData> GetRandomizationKitReportData(RandomizationIwrsReport randomizationIWRSReport)
         {
-            List<RandomizationIWRSReportData> list = new List<RandomizationIWRSReportData>();
+            List<RandomizationIwrsReportData> list = new List<RandomizationIwrsReportData>();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == randomizationIWRSReport.ProjectId).FirstOrDefault();
             var isShow = _context.SupplyManagementKitNumberSettingsRole.
                          Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == randomizationIWRSReport.ProjectId
@@ -192,7 +192,7 @@ namespace GSC.Respository.Reports
             {
                 list = _context.SupplyManagementKITSeriesDetail.Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.ProjectDesignVisit).Include(x => x.SupplyManagementKITSeries).ThenInclude(x => x.Project).Include(x => x.Randomization).
                        Where(x => x.DeletedDate == null && !x.SupplyManagementKITSeries.IsRetension && x.SupplyManagementKITSeries.DeletedDate == null && x.SupplyManagementKITSeries.RandomizationId != null && x.SupplyManagementKITSeries.Randomization != null
-                       && x.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId && x.RandomizationId != null).Select(x => new RandomizationIWRSReportData
+                       && x.SupplyManagementKITSeries.ProjectId == randomizationIWRSReport.ProjectId && x.RandomizationId != null).Select(x => new RandomizationIwrsReportData
                        {
                            ProjectCode = x.SupplyManagementKITSeries.Project.ProjectCode,
                            SiteCode = x.SupplyManagementKITSeries.Randomization.Project.ProjectCode,
@@ -226,7 +226,7 @@ namespace GSC.Respository.Reports
             {
                 list = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).ThenInclude(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Include(x => x.SupplyManagementKIT).ThenInclude(x => x.Project).
                        Where(x => x.DeletedDate == null && !x.IsRetension && x.SupplyManagementKIT.DeletedDate == null && x.RandomizationId != null
-                       && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).Select(x => new RandomizationIWRSReportData
+                       && x.SupplyManagementKIT.ProjectId == randomizationIWRSReport.ProjectId).Select(x => new RandomizationIwrsReportData
                        {
                            ProjectCode = x.SupplyManagementKIT.Project.ProjectCode,
                            KitNo = x.KitNo,

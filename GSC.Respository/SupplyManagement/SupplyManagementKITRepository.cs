@@ -183,7 +183,7 @@ namespace GSC.Respository.SupplyManagement
             return data;
         }
 
-        private string GetStatusString(KitStatus e)
+        private static string GetStatusString(KitStatus e)
         {
             if (e == KitStatus.WithIssue)
                 return KitStatus.WithIssue.GetDescription() + " (With issue)";
@@ -1867,7 +1867,7 @@ namespace GSC.Respository.SupplyManagement
                     DisplayInformationLength = pharmacyBarcodeConfig.DisplayInformationLength,
                     FontSize = pharmacyBarcodeConfig.FontSize,
                     FontSizeStr = pharmacyBarcodeConfig.FontSize + "px",
-                    BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count()]
+                    BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count]
                 };
                 int index = 0;
                 foreach (var subitem in pharmacyBarcodeConfig.BarcodeDisplayInfo)
@@ -1900,7 +1900,7 @@ namespace GSC.Respository.SupplyManagement
                     DisplayInformationLength = pharmacyBarcodeConfig.DisplayInformationLength,
                     FontSize = pharmacyBarcodeConfig.FontSize,
                     FontSizeStr = pharmacyBarcodeConfig.FontSize + "px",
-                    BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count()]
+                    BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count]
                 };
                 int index = 0;
                 foreach (var subitem in pharmacyBarcodeConfig.BarcodeDisplayInfo)

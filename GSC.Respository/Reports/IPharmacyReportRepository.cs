@@ -9,9 +9,9 @@ namespace GSC.Respository.Reports
 {
     public interface IPharmacyReportRepository : IGenericRepository<JobMonitoring>
     {
-        FileStreamResult GetRandomizationKitReport(RandomizationIWRSReport randomizationIWRSReport);
+        FileStreamResult GetRandomizationKitReport(RandomizationIwrsReport randomizationIWRSReport);
 
-        List<RandomizationIWRSReportData> GetRandomizationKitReportData(RandomizationIWRSReport randomizationIWRSReport);
+        List<RandomizationIwrsReportData> GetRandomizationKitReportData(RandomizationIwrsReport randomizationIWRSReport);
 
         FileStreamResult GetProductAccountabilityCentralReport(ProductAccountabilityCentralReportSearch randomizationIWRSReport);
 

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public interface ISupplyManagementKITDetailRepository : IGenericRepository<SupplyManagementKITDetail>
+    public interface ISupplyManagementKitDetailRepository : IGenericRepository<SupplyManagementKITDetail>
     {
         
     }
