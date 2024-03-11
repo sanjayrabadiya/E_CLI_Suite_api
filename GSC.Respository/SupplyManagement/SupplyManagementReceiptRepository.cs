@@ -19,12 +19,12 @@ namespace GSC.Respository.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
+        private readonly ISupplyManagementKitDetailRepository _supplyManagementKITDetailRepository;
         private readonly ISupplyManagementKitRepository _supplyManagementKITRepository;
 
         public SupplyManagementReceiptRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKitRepository supplyManagementKITRepository)
+            IMapper mapper, ISupplyManagementKitDetailRepository supplyManagementKITDetailRepository, ISupplyManagementKitRepository supplyManagementKITRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;

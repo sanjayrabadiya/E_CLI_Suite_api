@@ -22,14 +22,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISupplyManagementKitRepository _supplyManagementKITRepository;
-        private readonly ISupplyManagementKITDetailRepository _supplyManagementKITDetailRepository;
+        private readonly ISupplyManagementKitDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
        
         public SupplyManagementKitController(ISupplyManagementKitRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKITDetailRepository supplyManagementKITDetailRepository)
+            IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementKitDetailRepository supplyManagementKITDetailRepository)
         {
             _supplyManagementKITRepository = supplyManagementKITRepository;
             _uow = uow;

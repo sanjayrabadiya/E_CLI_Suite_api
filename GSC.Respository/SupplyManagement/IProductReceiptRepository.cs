@@ -3,6 +3,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Barcode;
 using GSC.Data.Entities.SupplyManagement;
+using GSC.Helper;
 using System.Collections.Generic;
 
 namespace GSC.Respository.SupplyManagement
@@ -19,5 +20,11 @@ namespace GSC.Respository.SupplyManagement
         void GenerateProductRecieptBarcode(ProductReceipt productReceipt);
 
         List<ProductRecieptBarcodeGenerateGridDto> GetProductReceiptBarcodeDetail(PharmacyBarcodeConfig pharmacyBarcodeConfig, int productReceiptId);
+
+        bool IsCentralExists(int ProjectId);
+
+        PharmacyBarcodeConfig ProductRecieptViewBarcodeValidate(int productReceiptId);
+
+        DepotType? GetDepotType(int centralDepotId);
     }
 }

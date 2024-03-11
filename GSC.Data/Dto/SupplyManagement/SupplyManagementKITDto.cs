@@ -67,7 +67,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string LotBatchNo { get; set; }
 
         public decimal? Dose { get; set; }
-        public SupplyManagementShipment? SupplyManagementShipment { get; set; }
+        public SupplyManagementShipment SupplyManagementShipment { get; set; }
 
         public string TimeZone { get; set; }
         public string IpAddress { get; set; }

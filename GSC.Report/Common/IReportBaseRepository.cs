@@ -12,7 +12,7 @@ namespace GSC.Report.Common
     public interface IReportBaseRepository
     {
          string CompleteJobMonitoring(JobMonitoring jobMonitoring);
-        void WriteLog(string log, string path, JobMonitoring jobMonitoring);
+        void WriteLog(string log1, string path, JobMonitoring jobMonitoring);
         List<DossierReportDto> GetBlankPdfData(ReportSettingNew reportSetting);
         List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting);
         List<ScreeningPdfReportDto> GetScreeningDataPdfReport(ScreeningReportSetting reportSetting);

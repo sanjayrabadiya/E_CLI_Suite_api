@@ -133,7 +133,7 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return EmailEditCheckValidateRule(data);
         }
-        string SingleQuote(Operator? _operator, DataType? dataType)
+        static string SingleQuote(Operator? _operator, DataType? dataType)
         {
             if (_operator == null && dataType == null)
                 return "";
@@ -248,7 +248,7 @@ namespace GSC.Respository.Project.GeneralConfig
             return result;
         }
 
-        EmailConfigurationEditCheckResult ValidateDataTableEmailEditCheck(DataTable dt, string ruleStr)
+       static EmailConfigurationEditCheckResult ValidateDataTableEmailEditCheck(DataTable dt, string ruleStr)
         {
             var result = new EmailConfigurationEditCheckResult();
             DataRow dr = dt.NewRow();
@@ -271,7 +271,7 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return result;
         }
-        bool IsNumeric(CollectionSources? collection, DataType? dataType)
+        static bool IsNumeric(CollectionSources? collection, DataType? dataType)
         {
             if (collection != null && collection == CollectionSources.TextBox && dataType != null && dataType != DataType.Character)
                 return true;
@@ -350,7 +350,7 @@ namespace GSC.Respository.Project.GeneralConfig
             return string.Join(" ", result.Select(r => r.QueryFormula));
         }
 
-        private string GetPeriodName(EmailConfigurationEditCheckDetail r)
+        private static string GetPeriodName(EmailConfigurationEditCheckDetail r)
         {
             if (r.ProjectDesignVariable != null)
             {
@@ -363,7 +363,7 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return "";
         }
-        private string GetVisitName(EmailConfigurationEditCheckDetail r)
+        private static  string GetVisitName(EmailConfigurationEditCheckDetail r)
         {
             if (r.ProjectDesignVariable != null && r.ProjectDesignVariable.ProjectDesignTemplate != null && r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit != null)
             {
@@ -376,7 +376,7 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return "";
         }
-        private string GetVariableName(EmailConfigurationEditCheckDetail r)
+        private static string GetVariableName(EmailConfigurationEditCheckDetail r)
         {
             if (r.ProjectDesignVariable != null && string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation))
             {
@@ -566,11 +566,12 @@ namespace GSC.Respository.Project.GeneralConfig
                             emaildata.TemplateName = projectDesignTemplate.TemplateName;
                         }
                         emaildata.CurrentDate = DateTime.Now.Date.ToString("dddd, dd MMMM yyyy");
-                        if (_jwtTokenAccesser.CompanyId > 0)
-                            emaildata.CompanyName = _context.Company.Where(s => s.Id == _jwtTokenAccesser.CompanyId).FirstOrDefault().CompanyName;
-                        if (data.Count == 1)
+                        var company = _context.Company.Where(s => s.Id == _jwtTokenAccesser.CompanyId).FirstOrDefault();
+                        if (_jwtTokenAccesser.CompanyId > 0 && company != null)
+                            emaildata.CompanyName = company.CompanyName;
+                        if (data.Count == 1 && data.FirstOrDefault() != null)
                         {
-                            emaildata.VariableName = data.FirstOrDefault().ProjectDesignVariable != null ? data.FirstOrDefault().ProjectDesignVariable.VariableName : "";
+                            emaildata.VariableName = data.FirstOrDefault().ProjectDesignVariable.VariableName;
                         }
                         if (emails.Count > 0)
                         {

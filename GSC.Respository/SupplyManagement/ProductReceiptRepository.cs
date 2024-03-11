@@ -4,9 +4,11 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Barcode;
+using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -18,15 +20,18 @@ namespace GSC.Respository.SupplyManagement
 {
     public class ProductReceiptRepository : GenericRespository<ProductReceipt>, IProductReceiptRepository
     {
-
+        private readonly ICentralDepotRepository _centralDepotRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public ProductReceiptRepository(IGSCContext context, IMapper mapper)
+        private readonly IUploadSettingRepository _uploadSettingRepository;
+        public ProductReceiptRepository(IGSCContext context, IMapper mapper, ICentralDepotRepository centralDepotRepository, IUploadSettingRepository uploadSettingRepository)
             : base(context)
         {
 
             _mapper = mapper;
             _context = context;
+            _centralDepotRepository = centralDepotRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public List<DropDownDto> GetProductReceipteDropDown(int ProjectId)
@@ -37,8 +42,26 @@ namespace GSC.Respository.SupplyManagement
 
         public List<ProductReceiptGridDto> GetProductReceiptList(int ProjectId, bool isDeleted)
         {
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
+            var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
+            var data = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == ProjectId).
                    ProjectTo<ProductReceiptGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            data.ForEach(t =>
+            {
+                t.PathName = t.PathName == null ? "" : documentUrl + t.PathName;
+                t.ProductVerificationDetaild = _context.ProductVerificationDetail.Where(x => x.ProductReceiptId == t.Id).FirstOrDefault() != null ?
+                _context.ProductVerificationDetail.Where(x => x.ProductReceiptId == t.Id).Select(x => x.Id).FirstOrDefault() : 0;
+                var verification = _context.ProductVerification.Where(x => x.ProductReceiptId == t.Id && x.DeletedDate == null).FirstOrDefault();
+                if (verification != null)
+                {
+                    var unit = _context.Unit.Where(s => s.Id == verification.UnitId).FirstOrDefault();
+                    t.PacketTypeName = verification.PacketTypeId.GetDescription();
+                    t.Dose = verification.Dose;
+                    if (unit != null)
+                        t.UnitName = unit.UnitName;
+                }
+            });
+
+            return data;
         }
 
         // If Study Product Type already use than not delete and Edit
@@ -70,7 +93,6 @@ namespace GSC.Respository.SupplyManagement
         public List<ProductRecieptBarcodeGenerateGridDto> GetProductReceiptBarcodeDetail(PharmacyBarcodeConfig pharmacyBarcodeConfig, int productReceiptId)
         {
             var productReciept = All.Where(s => s.Id == productReceiptId).FirstOrDefault();
-
             List<ProductRecieptBarcodeGenerateGridDto> lst = new List<ProductRecieptBarcodeGenerateGridDto>();
 
             var sublst = new ProductRecieptBarcodeGenerateGridDto
@@ -80,7 +102,7 @@ namespace GSC.Respository.SupplyManagement
                 DisplayValue = pharmacyBarcodeConfig.DisplayValue,
                 DisplayInformationLength = pharmacyBarcodeConfig.DisplayInformationLength,
                 FontSize = pharmacyBarcodeConfig.FontSize,
-                BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count()]
+                BarcodeDisplayInfo = new PharmacyBarcodeDisplayInfo[pharmacyBarcodeConfig.BarcodeDisplayInfo.Count]
             };
             int index = 0;
             foreach (var subitem in pharmacyBarcodeConfig.BarcodeDisplayInfo)
@@ -141,6 +163,33 @@ namespace GSC.Respository.SupplyManagement
 
 
             return "";
+        }
+
+        public bool IsCentralExists(int ProjectId)
+        {
+            return _centralDepotRepository.IsCentralExists(ProjectId);
+        }
+
+        public PharmacyBarcodeConfig ProductRecieptViewBarcodeValidate(int productReceiptId)
+        {
+            var productReciept = All.Where(x => x.Id == productReceiptId).FirstOrDefault();
+            if (productReciept != null)
+            {
+                var barcodeConfig = _context.PharmacyBarcodeConfig.Include(s => s.BarcodeDisplayInfo).Where(x => x.ProjectId == productReciept.ProjectId && x.BarcodeModuleType == BarcodeModuleType.Verification && x.DeletedBy == null).FirstOrDefault();
+                return barcodeConfig;
+            }
+            return new PharmacyBarcodeConfig();
+        }
+
+        public DepotType? GetDepotType(int centralDepotId)
+        {
+            var central = _context.CentralDepot.Where(s => s.Id == centralDepotId).FirstOrDefault();
+            if (central != null)
+            {
+                return central.DepotType;
+            }
+
+            return null;
         }
 
     }
