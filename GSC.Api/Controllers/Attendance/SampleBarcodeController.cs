@@ -58,9 +58,12 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            //barcode.BarcodeString = _sampleBarcodeRepository.GenerateBarcodeString(sampleBarcodeDto);
             _sampleBarcodeRepository.Add(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcode.Id);
         }
 
@@ -70,14 +73,12 @@ namespace GSC.Api.Controllers.Attendance
             if (sampleBarcodeDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var barcode = _mapper.Map<SampleBarcode>(sampleBarcodeDto);
-            //var validate = _pkBarcodeRepository.Duplicate(pkBarcodeDto);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
             _sampleBarcodeRepository.Update(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Updating Sample Barcode failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Sample Barcode failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcode.Id);
         }
 
@@ -156,7 +157,7 @@ namespace GSC.Api.Controllers.Attendance
         [HttpGet("GetVolunteerList/{siteId}")]
         public ActionResult GetVolunteerList(int siteId)
         {
-            var projectList = _sampleBarcodeRepository.GetVolunteerList( siteId);
+            var projectList = _sampleBarcodeRepository.GetVolunteerList(siteId);
             return Ok(projectList);
         }
     }

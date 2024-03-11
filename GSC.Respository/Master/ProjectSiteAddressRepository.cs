@@ -15,24 +15,15 @@ namespace GSC.Respository.Master
 {
     public class ProjectSiteAddressRepository : GenericRespository<ProjectSiteAddress>, IProjectSiteAddressRepository
     {
-        private readonly IProjectRepository _projectRepository;
-        private readonly IManageSiteAddressRepository _manageSiteAddressRepository;
-        private readonly IManageSiteRepository _manageSiteRepository;
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
-        public ProjectSiteAddressRepository(IGSCContext context, IProjectRepository projectRepository, IManageSiteAddressRepository manageSiteAddressRepository, IManageSiteRepository manageSiteRepository, IMapper mapper) : base(context)
+        public ProjectSiteAddressRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _projectRepository = projectRepository;
-            _manageSiteAddressRepository = manageSiteAddressRepository;
-            _manageSiteRepository = manageSiteRepository;
             _mapper = mapper;
-            _context = context;
         }
 
-        public List<ProjectSiteAddressGridDto> GetProjectSiteAddressList(bool isDeleted)
+        public List<ProjectSiteAddressGridDto> GetProjectSiteAddressList(bool isDelete)
         {
-            return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            return All.Where(x => isDelete ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<ProjectSiteAddressGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
@@ -43,9 +34,9 @@ namespace GSC.Respository.Master
             return data;
         }
 
-        public string Duplicate(ProjectSiteAddress objSave)
+        public string Duplicate(ProjectSiteAddress projectSite)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.ManageSiteAddressId == objSave.ManageSiteAddressId && x.ProjectId == objSave.ProjectId && x.DeletedDate == null))
+            if (All.Any(x => x.Id != projectSite.Id && x.ManageSiteAddressId == projectSite.ManageSiteAddressId && x.ProjectId == projectSite.ProjectId && x.DeletedDate == null))
                 return "Duplicate Project Site Address";
             return "";
         }

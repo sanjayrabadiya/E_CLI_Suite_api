@@ -20,7 +20,6 @@ namespace GSC.Api.Controllers.Barcode
     [ApiController]
     public class SampleBarcodeGenerateController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly ISampleBarcodeGenerateRepository _sampleBarcodeGenerateRepository;
         private readonly IUnitOfWork _uow;
@@ -31,7 +30,6 @@ namespace GSC.Api.Controllers.Barcode
 
         public SampleBarcodeGenerateController(
             IMapper mapper
-            , IJwtTokenAccesser jwtTokenAccesser
             , ISampleBarcodeGenerateRepository sampleBarcodeGenerateRepository
             , ISampleBarcodeRepository sampleBarcodeRepository
             , IAppScreenRepository appScreenRepository
@@ -39,7 +37,6 @@ namespace GSC.Api.Controllers.Barcode
             , IBarcodeAuditRepository barcodeAuditRepository
             , IUnitOfWork uow)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _sampleBarcodeGenerateRepository = sampleBarcodeGenerateRepository;
             _sampleBarcodeRepository = sampleBarcodeRepository;
@@ -154,17 +151,14 @@ namespace GSC.Api.Controllers.Barcode
             {
                 var record = _sampleBarcodeGenerateRepository.FindByInclude(x => x.SampleBarcodeId == item.SampleBarcodeId && x.DeletedDate == null).OrderByDescending(d => d.Id);
 
-                if (record == null)
+                if (!record.Any())
                     return NotFound();
 
-                if (record != null)
+                foreach (var barcodeGenerate in record)
                 {
-                    foreach (var barcodeGenerate in record)
-                    {
-                        _sampleBarcodeGenerateRepository.Delete(barcodeGenerate);
-                        _uow.Save();
-                        _barcodeAuditRepository.Save("SampleBarcodeGenerate", AuditAction.Deleted, item.Id);
-                    }
+                    _sampleBarcodeGenerateRepository.Delete(barcodeGenerate);
+                    _uow.Save();
+                    _barcodeAuditRepository.Save("SampleBarcodeGenerate", AuditAction.Deleted, item.Id);
                 }
             }
 

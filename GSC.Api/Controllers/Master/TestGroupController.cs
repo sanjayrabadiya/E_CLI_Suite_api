@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class TestGroupController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ITestGroupRepository _testGroupRepository;
         private readonly IUnitOfWork _uow;
 
         public TestGroupController(ITestGroupRepository testGroupRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _testGroupRepository = testGroupRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -44,10 +35,6 @@ namespace GSC.Api.Controllers.Master
         {
             var testGroups = _testGroupRepository.GetTestGroupList(isDeleted);
             return Ok(testGroups);
-            //var testGroups = _testGroupRepository
-            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    ).OrderByDescending(x => x.Id).ToList();
-            //return Ok(testGroupsDto);
         }
 
         [HttpGet("{id}")]
@@ -73,7 +60,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _testGroupRepository.Add(testGroup);
-            if (_uow.Save() <= 0) throw new Exception("Creating Test Group failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Test Group failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(testGroup.Id);
         }
 
@@ -97,7 +88,11 @@ namespace GSC.Api.Controllers.Master
             testGroup.Id = 0;
             _testGroupRepository.Add(testGroup);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Test Group failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Test Group failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(testGroup.Id);
         }
 

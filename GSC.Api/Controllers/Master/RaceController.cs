@@ -18,24 +18,15 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class RaceController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IRaceRepository _raceRepository;
         private readonly IUnitOfWork _uow;
 
         public RaceController(IRaceRepository raceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _raceRepository = raceRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -45,9 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var races = _raceRepository.GetRaceList(isDeleted);
             return Ok(races);
-            //var races = _raceRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(racesDto);
         }
 
 
@@ -76,7 +64,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _raceRepository.Add(race);
-            if (_uow.Save() <= 0) throw new Exception("Creating Race failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Race failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(race.Id);
         }
 
@@ -96,7 +88,11 @@ namespace GSC.Api.Controllers.Master
             }
             _raceRepository.AddOrUpdate(race);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Race failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Race failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(race.Id);
         }
 

@@ -19,32 +19,15 @@ namespace GSC.Api.Controllers.Master
     public class ManageSiteAddressController : BaseController
     {
         private readonly IManageSiteAddressRepository _manageSiteAddressRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly ICityRepository _cityRepository;
-        private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
 
         public ManageSiteAddressController(IManageSiteAddressRepository manageSiteAddressRepository,
-            IUserRepository userRepository,
-            ICityRepository cityRepository,
-            ICompanyRepository companyRepository,
-            IStateRepository stateRepository,
-            ICountryRepository countryRepository,
-            IUnitOfWork uow, IMapper mapper, IGSCContext context)
+            IUnitOfWork uow, IMapper mapper)
         {
             _manageSiteAddressRepository = manageSiteAddressRepository;
-            _cityRepository = cityRepository;
-            _stateRepository = stateRepository;
-            _userRepository = userRepository;
-            _countryRepository = countryRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
         }
 
 
@@ -61,9 +44,9 @@ namespace GSC.Api.Controllers.Master
         {
             var mangeSite = _manageSiteAddressRepository.FindByInclude(q => q.Id == id, x => x.City, x => x.City.State).FirstOrDefault();
             var manageSiteDto = _mapper.Map<ManageSiteAddressDto>(mangeSite);
-            manageSiteDto.StateId = mangeSite.City.StateId;
-            manageSiteDto.CountryId = mangeSite.City.State.CountryId;
-            manageSiteDto.Facilities = mangeSite.Facilities.Split(',').ToList();
+            manageSiteDto.StateId = mangeSite?.City?.StateId ?? 0;
+            manageSiteDto.CountryId = mangeSite?.City?.State?.CountryId ?? 0;
+            manageSiteDto.Facilities = mangeSite?.Facilities.Split(',').ToList();
             return Ok(manageSiteDto);
         }
 
@@ -82,7 +65,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _manageSiteAddressRepository.Add(manageSiteAddress);
-            if (_uow.Save() <= 0) throw new Exception("Creating Site failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Site failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(manageSiteAddress.Id);
         }
 
@@ -104,7 +91,11 @@ namespace GSC.Api.Controllers.Master
             }
             _manageSiteAddressRepository.Update(manageSiteAddress);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Site failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Site failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(manageSiteAddress.Id);
         }
 

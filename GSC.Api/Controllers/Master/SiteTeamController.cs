@@ -21,21 +21,18 @@ namespace GSC.Api.Controllers.Master
         private readonly ISiteTeamRepository _siteTeamRepository;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
 
         public SiteTeamController(ISiteTeamRepository siteTeamRepository,
             IUnitOfWork uow,
             IMapper mapper,
-            IGSCContext context,
             IUserRepository userRepository,
             IRoleRepository roleRepository)
         {
             _siteTeamRepository = siteTeamRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
 
@@ -51,7 +48,7 @@ namespace GSC.Api.Controllers.Master
                 item.ContactEmail = _userRepository.Find(item.UserId).Email;
                 item.ContactMobile = _userRepository.Find(item.UserId).Phone;
                 item.IsDeleted = isDeleted;
-                item.Role = _roleRepository.Find(item.RoleId).RoleName;                
+                item.Role = _roleRepository.Find(item.RoleId).RoleName;
             }
             return Ok(siteteams);
         }
@@ -97,7 +94,7 @@ namespace GSC.Api.Controllers.Master
             siteTeamDto.RoleId = record.RoleId;
             siteTeamDto.UserId = record.UserId;
             siteTeamDto.ProjectId = record.ProjectId;
-            
+
             var validate = _siteTeamRepository.Duplicate(siteTeamDto);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -119,7 +116,7 @@ namespace GSC.Api.Controllers.Master
             siteTeamDto.Id = 0;
             var siteTeam = _mapper.Map<SiteTeam>(siteTeamDto);
 
-            
+
             var validate = _siteTeamRepository.Duplicate(siteTeamDto);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -128,7 +125,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _siteTeamRepository.Add(siteTeam);
-            if (_uow.Save() <= 0) throw new Exception("Creating Site Team failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Site Team failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(siteTeam);
         }
@@ -151,7 +152,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _siteTeamRepository.Update(siteTeam);
-            if (_uow.Save() <= 0) throw new Exception("Updating Site Team failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Site Team failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(siteTeam.Id);
         }
 
@@ -165,7 +170,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("GetUserDropdownForSiteTeam/{projectid}/{roleId}")]
         public IActionResult GetUserDropdownForSiteTeam(int projectid, int roleId)
         {
-            var data = _siteTeamRepository.GetUserDropdownForSiteTeam(projectid,roleId);
+            var data = _siteTeamRepository.GetUserDropdownForSiteTeam(projectid, roleId);
             return Ok(data);
         }
 

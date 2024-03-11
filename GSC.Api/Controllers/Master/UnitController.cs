@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class UnitController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IUnitRepository _unitRepository;
         private readonly IUnitOfWork _uow;
 
         public UnitController(IUnitRepository unitRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _unitRepository = unitRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -45,9 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var units = _unitRepository.GetUnitList(isDeleted);
             return Ok(units);
-            //var units = _unitRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(unitsDto);
         }
 
 
@@ -75,7 +63,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _unitRepository.Add(unit);
-            if (_uow.Save() <= 0) throw new Exception("Creating Unit failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Unit failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(unit.Id);
         }
 
@@ -95,7 +87,11 @@ namespace GSC.Api.Controllers.Master
             }
             _unitRepository.AddOrUpdate(unit);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Unit failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Unit failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(unit.Id);
         }
 

@@ -42,7 +42,7 @@ namespace GSC.Api.Controllers.Attendance
         [HttpPost]
         [Route("GetAttendaceList")]
         public IActionResult GetAttendaceList([FromBody] ScreeningSearhParamDto attendanceSearch)
-       {
+        {
             var volunteers = _attendanceRepository.GetAttendaceList(attendanceSearch);
             return Ok(volunteers);
         }
@@ -86,7 +86,11 @@ namespace GSC.Api.Controllers.Attendance
             attendanceDto.StudyVersion = _studyVersionRepository.GetStudyVersionForLive(attendanceDto.ProjectId);
             var attendance = _mapper.Map<Data.Entities.Attendance.Attendance>(attendanceDto);
             _attendanceRepository.SaveAttendance(attendance);
-            if (_uow.Save() <= 0) throw new Exception("Creating attendance failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating attendance failed on save.");
+                return BadRequest(ModelState);
+            }
             _mapper.Map<AttendanceDto>(attendance);
             return Ok(attendanceDto.Id);
         }
@@ -153,7 +157,11 @@ namespace GSC.Api.Controllers.Attendance
 
             _projectSubjectRepository.ReplaceSubjectNumber(currentProjectSubjectId, attendanceId);
 
-            if (_uow.Save() <= 0) throw new Exception("Replace Volunteer failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Replace Volunteer failed.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }
@@ -170,7 +178,11 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Replace Volunteer failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Replace Volunteer failed.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }

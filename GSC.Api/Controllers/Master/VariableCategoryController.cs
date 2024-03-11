@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class VariableCategoryController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IVariableCategoryRepository _variableCategoryRepository;
 
         public VariableCategoryController(IVariableCategoryRepository variableCategoryRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _variableCategoryRepository = variableCategoryRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -45,9 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var variablecategories = _variableCategoryRepository.GetVariableCategoryList(isDeleted);
             return Ok(variablecategories);
-            //var variableCategorys = _variableCategoryRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(variableCategorysDto);
         }
 
 
@@ -75,7 +63,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _variableCategoryRepository.Add(variableCategory);
-            if (_uow.Save() <= 0) throw new Exception("Creating Variable Category failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Variable Category failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variableCategory.Id);
         }
 
@@ -97,7 +89,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _variableCategoryRepository.AddOrUpdate(variableCategory);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Variable Category failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Variable Category failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variableCategory.Id);
         }
 

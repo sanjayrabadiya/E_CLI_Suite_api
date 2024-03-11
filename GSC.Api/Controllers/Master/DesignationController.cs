@@ -14,17 +14,14 @@ namespace GSC.Api.Controllers.Master
     public class DesignationController : BaseController
     {
         private readonly IDesignationRepository _designationRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public DesignationController(IDesignationRepository designationRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _designationRepository = designationRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -58,7 +55,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _designationRepository.Add(designation);
-            if (_uow.Save() <= 0) throw new Exception("letters Formate failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "letters Formate failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(designation.Id);
         }
 
@@ -77,7 +78,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _designationRepository.Update(designation);
-            if (_uow.Save() <= 0) throw new Exception("Updating designation on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating designation on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(designation.Id);
         }
 

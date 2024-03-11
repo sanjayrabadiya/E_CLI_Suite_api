@@ -68,7 +68,11 @@ namespace GSC.Api.Controllers.Master
             _iecirbRepository.Add(iecirb);
 
 
-            if (_uow.Save() <= 0) throw new Exception("Creating IEC/IRB failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating IEC/IRB failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(iecirb.Id);
         }
 
@@ -94,7 +98,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by Darshil for effective Date on 24-07-2020 */
             _iecirbRepository.AddOrUpdate(iecirb);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating IEC/IRB failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating IEC/IRB failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(iecirb.Id);
         }
 

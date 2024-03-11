@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class ReligionController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IReligionRepository _religionRepository;
         private readonly IUnitOfWork _uow;
 
         public ReligionController(IReligionRepository religionRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _religionRepository = religionRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -45,9 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var religions = _religionRepository.GetReligionList(isDeleted);
             return Ok(religions);
-            //var religions = _religionRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(religionsDto);
         }
 
 
@@ -75,7 +63,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _religionRepository.Add(religion);
-            if (_uow.Save() <= 0) throw new Exception("Creating Religion failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Religion failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(religion.Id);
         }
 
@@ -96,7 +88,11 @@ namespace GSC.Api.Controllers.Master
             }
             _religionRepository.AddOrUpdate(religion);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Religion failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Religion failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(religion.Id);
         }
 

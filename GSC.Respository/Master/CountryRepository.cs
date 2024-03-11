@@ -18,17 +18,14 @@ namespace GSC.Respository.Master
     public class CountryRepository : GenericRespository<Country>, ICountryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         public CountryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IProjectRightRepository projectRightRepository,
             IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _projectRightRepository = projectRightRepository;
             _mapper = mapper;
             _context = context;
         }
@@ -57,10 +54,9 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.CountryName == objSave.CountryName.Trim() && x.DeletedDate == null))
                 return "Duplicate Country name : " + objSave.CountryName;
 
-            if (!string.IsNullOrEmpty(objSave.CountryCallingCode))
-                if (All.Any(x =>
-                    x.Id != objSave.Id && x.CountryCallingCode == objSave.CountryCallingCode.Trim() && x.DeletedDate == null))
-                    return "Duplicate Country calling code : " + objSave.CountryCallingCode;
+            if (All.Any(x =>
+                    x.Id != objSave.Id && x.CountryCallingCode == (string.IsNullOrEmpty(objSave.CountryCallingCode) ? "" : objSave.CountryCallingCode.Trim()) && x.DeletedDate == null))
+                return "Duplicate Country calling code : " + objSave.CountryCallingCode;
 
             return "";
         }
@@ -73,7 +69,7 @@ namespace GSC.Respository.Master
             var country = _context.Project
                 .Where(x => x.DeletedDate == null && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
                 {
-                    Id = (int)r.ManageSite.City.State.CountryId,
+                    Id = r.ManageSite.City.State.CountryId,
                     Value = r.ManageSite.City.State.Country.CountryName,
                     Code = r.ManageSite.City.State.Country.CountryCode
                 }).Distinct().OrderBy(o => o.Value).ToList();
@@ -85,19 +81,19 @@ namespace GSC.Respository.Master
             var country = _context.Project
                 .Where(x => x.DeletedDate == null && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
                 {
-                    Id = (int)r.ManageSite.City.State.CountryId,
+                    Id = r.ManageSite.City.State.CountryId,
                     Value = r.ManageSite.City.State.Country.CountryName,
                     Code = r.ManageSite.City.State.Country.CountryCode
                 }).Distinct().OrderBy(o => o.Value).ToList();
-            if (country != null && id > 0 && !country.Any(x => x.Id == id))
+            if (id > 0 && !country.Exists(x => x.Id == id))
             {
-               return _context.Project
-                .Where(x => x.Id == id && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
-                {
-                    Id = (int)r.ManageSite.City.State.CountryId,
-                    Value = r.ManageSite.City.State.Country.CountryName,
-                    Code = r.ManageSite.City.State.Country.CountryCode
-                }).Distinct().OrderBy(o => o.Value).ToList();
+                return _context.Project
+                 .Where(x => x.Id == id && x.ParentProjectId == ParentProjectId && x.ManageSite != null).Select(r => new DropDownDto
+                 {
+                     Id = r.ManageSite.City.State.CountryId,
+                     Value = r.ManageSite.City.State.Country.CountryName,
+                     Code = r.ManageSite.City.State.Country.CountryCode
+                 }).Distinct().OrderBy(o => o.Value).ToList();
             }
             return country;
         }

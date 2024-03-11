@@ -53,11 +53,13 @@ namespace GSC.Api.Controllers.AdverseEvent
             var existingdata = _adverseEventSettingsRepository.All.Where(x => x.ProjectId == adverseEventSettingsDto.ProjectId && x.DeletedDate == null).ToList();
             if (existingdata != null && existingdata.Count > 0)
             {
-                throw new Exception("Error to save Adverse Event settings.");
+                ModelState.AddModelError("Message", "Error to save Adverse Event settings.");
+                return BadRequest(ModelState);
             }
             if (adverseEventSettingsDto.adverseEventSettingsDetails == null)
             {
-                throw new Exception("Severity is mandatory to save!");
+                ModelState.AddModelError("Message", "Severity is mandatory to save!");
+                return BadRequest(ModelState);
             }
             var adverseEventSettings = _mapper.Map<AdverseEventSettings>(adverseEventSettingsDto);
             _adverseEventSettingsRepository.Add(adverseEventSettings);
@@ -67,7 +69,11 @@ namespace GSC.Api.Controllers.AdverseEvent
                 item.AdverseEventSettingsId = adverseEventSettings.Id;
                 _adverseEventSettingsDetailRepository.Add(item);
             }
-            if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event settings.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Error to save Adverse Event settings.");
+                return BadRequest(ModelState);
+            }
             return Ok(adverseEventSettings.Id);
         }
 
@@ -79,11 +85,13 @@ namespace GSC.Api.Controllers.AdverseEvent
             var existingdata = _aEReportingRepository.All.Where(x => x.AdverseEventSettingsId == adverseEventSettingsDto.Id && x.DeletedDate == null).FirstOrDefault();
             if (existingdata != null)
             {
-                throw new Exception("Patient already reported.You can not modify the data!");
+                ModelState.AddModelError("Message", "Patient already reported.You can not modify the data!");
+                return BadRequest(ModelState);
             }
             if (adverseEventSettingsDto.adverseEventSettingsDetails == null)
             {
-                throw new Exception("Severity is mandatory to save!");
+                ModelState.AddModelError("Message", "Severity is mandatory to save!");
+                return BadRequest(ModelState);
             }
             var adverseEventSettings = _mapper.Map<AdverseEventSettings>(adverseEventSettingsDto);
             _adverseEventSettingsRepository.Update(adverseEventSettings);
@@ -93,7 +101,11 @@ namespace GSC.Api.Controllers.AdverseEvent
                 item.AdverseEventSettingsId = adverseEventSettings.Id;
                 _adverseEventSettingsDetailRepository.Add(item);
             }
-            if (_uow.Save() <= 0) throw new Exception("Error to save Adverse Event settings.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Error to save Adverse Event settings.");
+                return BadRequest(ModelState);
+            }
             return Ok(adverseEventSettings.Id);
         }
 

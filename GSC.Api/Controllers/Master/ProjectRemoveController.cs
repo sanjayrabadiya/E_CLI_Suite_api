@@ -27,27 +27,15 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class ProjectRemoveController : BaseController
     {
-
-        private readonly IMapper _mapper;
         private readonly IProjectRepository _projectRepository;
-        private readonly IUnitOfWork _uow;
-        private readonly ICentreUserService _centreUserService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IProjectDataRemoveService _projectDataRemoveService;
         public ProjectRemoveController(IProjectRepository projectRepository,
-            IUnitOfWork uow, IMapper mapper,
-            ICentreUserService centreUserService,
-            IJwtTokenAccesser jwtTokenAccesser,
             IUserLoginReportRespository userLoginReportRepository,
             IProjectDataRemoveService projectDataRemoveService
             )
         {
             _projectRepository = projectRepository;
-            _uow = uow;
-            _mapper = mapper;
-            _centreUserService = centreUserService;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _userLoginReportRepository = userLoginReportRepository;
             _projectDataRemoveService = projectDataRemoveService;
         }

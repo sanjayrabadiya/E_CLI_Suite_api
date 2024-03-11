@@ -58,9 +58,12 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            //barcode.BarcodeString = _dossingBarcodeRepository.GenerateBarcodeString(dossingBarcodeDto);
             _dossingBarcodeRepository.Add(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Creating dossing barcode failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating dossing barcode failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcode.Id);
         }
 
@@ -70,14 +73,12 @@ namespace GSC.Api.Controllers.Attendance
             if (DossingBarcodeDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var barcode = _mapper.Map<DossingBarcode>(DossingBarcodeDto);
-            //var validate = _dossingBarcodeRepository.Duplicate(DossingBarcodeDto);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
             _dossingBarcodeRepository.Update(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcode.Id);
         }
 

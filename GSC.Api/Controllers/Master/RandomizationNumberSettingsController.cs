@@ -47,7 +47,7 @@ namespace GSC.Api.Controllers.Master
             sitesdataDto.ForEach(x =>
             {
                 var data = _context.Randomization.Where(t => t.ProjectId == x.ProjectId && t.RandomizationNumber != null && t.RandomizationNumber != "").ToList();
-                if (data != null && data.Count > 0)
+                if (data.Count > 0)
                     x.DisableRow = true;
                 else
                     x.DisableRow = false;
@@ -62,23 +62,20 @@ namespace GSC.Api.Controllers.Master
         {
             if (randomizationNumberSettingsDto.Id <= 0) return BadRequest();
 
-            var sites = _context.Project.Where(x => x.ParentProjectId == randomizationNumberSettingsDto.ProjectId && x.IsTestSite == false).Select(y => y.Id).ToList();
+            var sites = _context.Project.Where(x => x.ParentProjectId == randomizationNumberSettingsDto.ProjectId && !x.IsTestSite).Select(y => y.Id).ToList();
             var randomizations = _context.Randomization.Where(x => sites.Contains(x.ProjectId) && x.RandomizationNumber != null && x.RandomizationNumber != "").ToList();
 
             var randomizationNumberSettings = _randomizationNumberSettingsRepository.Find(randomizationNumberSettingsDto.Id);
 
-            if (randomizations != null && randomizations.Count > 0)
+            if (randomizations.Count > 0)
             {
-                if (randomizationNumberSettings.RandomNoLength != randomizationNumberSettingsDto.RandomNoLength ||
+                if ((randomizationNumberSettings.RandomNoLength != randomizationNumberSettingsDto.RandomNoLength ||
                     randomizationNumberSettings.IsManualRandomNo != randomizationNumberSettingsDto.IsManualRandomNo ||
-                    randomizationNumberSettings.IsSiteDependentRandomNo != randomizationNumberSettingsDto.IsSiteDependentRandomNo)
+                    randomizationNumberSettings.IsSiteDependentRandomNo != randomizationNumberSettingsDto.IsSiteDependentRandomNo) && (!randomizationNumberSettingsDto.IsSiteDependentRandomNo &&
+                        randomizationNumberSettings.RandomNoStartsWith != randomizationNumberSettingsDto.RandomNoStartsWith))
                 {
-                    if (randomizationNumberSettingsDto.IsSiteDependentRandomNo == false &&
-                        randomizationNumberSettings.RandomNoStartsWith != randomizationNumberSettingsDto.RandomNoStartsWith)
-                    {
-                        ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
-                        return BadRequest(ModelState);
-                    }
+                    ModelState.AddModelError("Message", "You can't change format, Randomization entry is started in subject management");
+                    return BadRequest(ModelState);
                 }
                 if (randomizationNumberSettingsDto.IsIGT || randomizationNumberSettingsDto.IsIWRS)
                 {
@@ -86,20 +83,12 @@ namespace GSC.Api.Controllers.Master
                     return BadRequest(ModelState);
                 }
             }
-            if (randomizationNumberSettingsDto.IsIGT == false)
+            if (!randomizationNumberSettingsDto.IsIGT && (!randomizationNumberSettingsDto.IsManualRandomNo && !randomizationNumberSettingsDto.IsSiteDependentRandomNo && randomizationNumberSettingsDto.RandomNoStartsWith == null))
             {
-                if (randomizationNumberSettingsDto.IsManualRandomNo == false && randomizationNumberSettingsDto.IsSiteDependentRandomNo == false)
-                {
-                    if (randomizationNumberSettingsDto.RandomNoStartsWith == null)
-                    {
-                        ModelState.AddModelError("Message", "Please add valid Starts with number");
-                        return BadRequest(ModelState);
-                    }
-                }
+                ModelState.AddModelError("Message", "Please add valid Starts with number");
+                return BadRequest(ModelState);
             }
 
-
-            //var randomizationNumberSettings = _randomizationNumberSettingsRepository.Find(randomizationNumberSettingsDto.Id);
             randomizationNumberSettings.RandomNoLength = randomizationNumberSettingsDto.RandomNoLength;
             randomizationNumberSettings.IsManualRandomNo = randomizationNumberSettingsDto.IsManualRandomNo;
             randomizationNumberSettings.IsAlphaNumRandomNo = randomizationNumberSettingsDto.IsAlphaNumRandomNo;
@@ -108,13 +97,13 @@ namespace GSC.Api.Controllers.Master
             randomizationNumberSettings.IsIGT = randomizationNumberSettingsDto.IsIGT;
             randomizationNumberSettings.IsIWRS = randomizationNumberSettingsDto.IsIWRS;
             randomizationNumberSettings.PrefixRandomNo = randomizationNumberSettingsDto.PrefixRandomNo;
-            if (randomizationNumberSettings.IsManualRandomNo == false && randomizationNumberSettingsDto.IsIGT == false)
+            if (!randomizationNumberSettings.IsManualRandomNo && !randomizationNumberSettingsDto.IsIGT)
             {
-                if (randomizationNumberSettings.IsSiteDependentRandomNo == true)
+                if (randomizationNumberSettings.IsSiteDependentRandomNo)
                 {
                     for (int i = 0; i < randomizationNumberSettingsDto.RandomizationNumberSettingsSites.Count; i++)
                     {
-                        if (randomizationNumberSettingsDto.RandomizationNumberSettingsSites[i].DisableRow == false)
+                        if (!randomizationNumberSettingsDto.RandomizationNumberSettingsSites[i].DisableRow)
                         {
                             var data = _randomizationNumberSettingsRepository.Find(randomizationNumberSettingsDto.RandomizationNumberSettingsSites[i].Id);
                             data.PrefixRandomNo = randomizationNumberSettingsDto.RandomizationNumberSettingsSites[i].PrefixRandomNo;
@@ -123,12 +112,6 @@ namespace GSC.Api.Controllers.Master
                             _randomizationNumberSettingsRepository.Update(data);
                         }
                     }
-                    //var randomizationNumberSettingssites = _randomizationNumberSettingsRepository.FindBy(x => sites.Contains(x.ProjectId)).ToList();
-                    //for (int i = 0; i < randomizationNumberSettingssites.Count; i++)
-                    //{
-                    //    randomizationNumberSettingssites[i].RandomizationNoseries = (int)randomizationNumberSettings.RandomNoStartsWith;
-                    //    _randomizationNumberSettingsRepository.Update(randomizationNumberSettingssites[i]);
-                    //}
                 }
                 else
                 {
@@ -136,7 +119,11 @@ namespace GSC.Api.Controllers.Master
                 }
             }
             _randomizationNumberSettingsRepository.Update(randomizationNumberSettings);
-            if (_uow.Save() <= 0) throw new Exception("Updating Randomization Number failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Randomization Number failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(randomizationNumberSettings.Id);
         }
 

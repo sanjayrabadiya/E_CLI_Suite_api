@@ -30,7 +30,7 @@ namespace GSC.Respository.Configuration
             var projectList = _context.Company.Include(x => x.Location).Where(x => x.DeletedDate == null)
                 .Select(c => new DashboardCompanyGridDto
                 {
-                    Id= c.Id,
+                    Id = c.Id,
                     CompanyCode = c.CompanyCode,
                     CompanyName = c.CompanyName,
                     Phone1 = c.Phone1,
@@ -69,30 +69,30 @@ namespace GSC.Respository.Configuration
              CreatedDate = c.CreatedDate.Value
          }).ToList();
 
-         projectList.AddRange(childParentList);
+            projectList.AddRange(childParentList);
 
             var projects = projectList.GroupBy(d => d.ProjectId).Select(c => new DashboardProject
             {
-                ProjectId = c.FirstOrDefault().ProjectId,
-                CreatedDate = c.FirstOrDefault().CreatedDate
+                ProjectId = c.First().ProjectId,
+                CreatedDate = c.First().CreatedDate
             }).OrderBy(o => o.ProjectId).ToList();
 
             //chart disply data
             var chartFinal = _context.ProjectStatus.Where(x => projects.Select(x => x.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null)
-                .GroupBy(x => new { x.Status}).Select(s => new
-                 {
+                .GroupBy(x => new { x.Status }).Select(s => new
+                {
                     Status = s.Key.Status.GetDescription(),
-                    Count = s.Where(b => b.Status == s.Key.Status).Count()
-                 }).ToList();
+                    Count = s.Count(b => b.Status == s.Key.Status)
+                }).ToList();
 
             //Grid disply data
             var gridFinal = _context.ProjectStatus.Where(x => projects.Select(x => x.ProjectId).Contains(x.ProjectId) && x.DeletedDate == null)
                 .Select(c => new DashboardStudyGridDto
                 {
-                    projectName = _context.Project.Where(x=>x.Id==c.ProjectId && x.DeletedBy == null).Select(p=>p.ProjectCode).FirstOrDefault(),
-                    Status =  c.Status.GetDescription(),
-                    Country = _context.Project.Include(x=>x.Country).Where(x => x.Id == c.ProjectId && x.DeletedBy == null).Select(p => p.Country.CountryName).FirstOrDefault(),
-                    CreatedDate= c.CreatedDate.Value
+                    projectName = _context.Project.Where(x => x.Id == c.ProjectId && x.DeletedBy == null).Select(p => p.ProjectCode).FirstOrDefault(),
+                    Status = c.Status.GetDescription(),
+                    Country = _context.Project.Include(x => x.Country).Where(x => x.Id == c.ProjectId && x.DeletedBy == null).Select(p => p.Country.CountryName).FirstOrDefault(),
+                    CreatedDate = c.CreatedDate.Value
                 }).ToList();
 
             dynamic[] data = new dynamic[2];
@@ -134,62 +134,48 @@ namespace GSC.Respository.Configuration
 
             var projects = projectList.GroupBy(d => d.ProjectId).Select(c => new DashboardProject
             {
-                ProjectId = c.FirstOrDefault().ProjectId,
-                CreatedDate = c.FirstOrDefault().CreatedDate
+                ProjectId = c.First().ProjectId,
+                CreatedDate = c.First().CreatedDate
             }).OrderBy(o => o.ProjectId).ToList();
-
-            //chart disply data
-            /*var chartFinal1 = _context.Project.Where(x => projects.Select(x => x.ProjectId).Contains(x.Id) && x.DeletedDate == null)
-                .GroupBy(x => new { x.DesignTrialId, x.DesignTrial.TrialTypeId }).Select(s => new
-                {
-                    DesignTrialName = s.Key.DesignTrialId,
-                    TrialType = s.Key.TrialTypeId,
-                    Count = s.Count()
-                }).ToList()*/;
 
             var projectIdsList = projects.Select(p => p.ProjectId).ToList();
 
-            var chartFinal1 = from p in _context.Project
-                        join d in _context.DesignTrial on p.DesignTrialId equals d.Id
-                        join t in _context.TrialType on d.TrialTypeId equals t.Id
-                        where projectIdsList.Contains(p.Id) && p.DeletedDate == null
-                        group new { t, d } by new { t.Id, t.TrialTypeName, d.DesignTrialName } into grouped
-                        orderby grouped.Key.Id
-                        select new
-                        {
-                            Id = grouped.Key.Id,
-                            firstDD = grouped.Select(g => g.t.TrialTypeName).Distinct().Count(),
-                            TrialTypeName = grouped.Key.TrialTypeName,
-                            secondDD = grouped.Select(g => g.d.DesignTrialName).Count(),
-                            DesignTrialName = grouped.Key.DesignTrialName,
-                            Count = grouped.Count(),
-                            
-                        };
+            var chartFinal1 = (from p in _context.Project
+                               join d in _context.DesignTrial on p.DesignTrialId equals d.Id
+                               join t in _context.TrialType on d.TrialTypeId equals t.Id
+                               where projectIdsList.Contains(p.Id) && p.DeletedDate == null
+                               group new { t, d } by new { t.Id, t.TrialTypeName, d.DesignTrialName } into grouped
+                               orderby grouped.Key.Id
+                               select new
+                               {
+                                   Id = grouped.Key.Id,
+                                   firstDD = grouped.Select(g => g.t.TrialTypeName).Distinct().Count(),
+                                   TrialTypeName = grouped.Key.TrialTypeName,
+                                   secondDD = grouped.Select(g => g.d.DesignTrialName).Count(),
+                                   DesignTrialName = grouped.Key.DesignTrialName,
+                                   Count = grouped.Count(),
 
-            var result = chartFinal1.ToList();
+                               }).ToList();
 
             //Grid disply data
-          
-                       var gridFinal1 = from project in _context.Project
-                             where projectIdsList.Contains(project.Id) && project.DeletedDate == null
-                             join designTrial in _context.DesignTrial on project.DesignTrialId equals designTrial.Id
-                             join trialType in _context.TrialType on designTrial.TrialTypeId equals trialType.Id
-                        select new
-                        {
-                            project.ProjectCode,
-                            project.ProjectName,
-                            designTrial.DesignTrialName,
-                            trialType.TrialTypeName
-                        };
-                        
 
-            var result1 = gridFinal1.ToList();
+            var gridFinal1 = (from project in _context.Project
+                              where projectIdsList.Contains(project.Id) && project.DeletedDate == null
+                              join designTrial in _context.DesignTrial on project.DesignTrialId equals designTrial.Id
+                              join trialType in _context.TrialType on designTrial.TrialTypeId equals trialType.Id
+                              select new
+                              {
+                                  project.ProjectCode,
+                                  project.ProjectName,
+                                  designTrial.DesignTrialName,
+                                  trialType.TrialTypeName
+                              }).ToList();
 
 
             dynamic[] data = new dynamic[2];
             data[0] = chartFinal1;
             data[1] = gridFinal1;
-                     
+
             return data;
         }
 

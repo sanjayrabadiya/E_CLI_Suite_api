@@ -20,26 +20,17 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IDocumentNameRepository _documentNameRepository;
         private readonly IDocumentTypeRepository _documentTypeRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public DocumentNameController(IDocumentNameRepository documentNameRepository,
-            IUserRepository userRepository,
             IDocumentTypeRepository documentTypeRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _documentNameRepository = documentNameRepository;
             _documentTypeRepository = documentTypeRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -48,12 +39,9 @@ namespace GSC.Api.Controllers.Master
             var documents = _documentNameRepository.GetDocumentNameList(isDeleted);
             documents.ForEach(b =>
             {
-                b.DocumentType = _documentTypeRepository.Find((int)b.DocumentTypeId);
+                b.DocumentType = _documentTypeRepository.Find(b.DocumentTypeId);
             });
             return Ok(documents);
-            //var documents = _documentNameRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    , t => t.DocumentType).OrderByDescending(x => x.Id).ToList();
-            //return Ok(documentsDto);
         }
 
         [HttpGet("{id}")]
@@ -79,7 +67,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _documentNameRepository.Add(document);
-            if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(document.Id);
         }
 
@@ -99,7 +91,11 @@ namespace GSC.Api.Controllers.Master
             }
             _documentNameRepository.AddOrUpdate(document);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(document.Id);
         }
 

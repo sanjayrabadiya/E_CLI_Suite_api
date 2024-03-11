@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.Master
             sitesdataDto.ForEach(x =>
             {
                 var data = _context.Randomization.Where(t => t.ProjectId == x.ProjectId && t.ScreeningNumber != null && t.ScreeningNumber != "").ToList();
-                if (data != null && data.Count > 0)
+                if (data.Count > 0)
                     x.DisableRow = true;
                 else
                     x.DisableRow = false;
@@ -60,47 +60,38 @@ namespace GSC.Api.Controllers.Master
         {
             if (screeningNumberSettingsDto.Id <= 0) return BadRequest();
 
-            var sites = _context.Project.Where(x => x.ParentProjectId == screeningNumberSettingsDto.ProjectId && x.IsTestSite == false).Select(y => y.Id).ToList();
+            var sites = _context.Project.Where(x => x.ParentProjectId == screeningNumberSettingsDto.ProjectId && !x.IsTestSite).Select(y => y.Id).ToList();
             var randomizations = _context.Randomization.Where(x => sites.Contains(x.ProjectId) && x.ScreeningNumber != null && x.ScreeningNumber != "").ToList();
             var screeningNumberSettings = _screeningNumberSettingsRepository.Find(screeningNumberSettingsDto.Id);
-            if (randomizations != null && randomizations.Count > 0)
-            {
-                if (screeningNumberSettings.ScreeningLength != screeningNumberSettingsDto.ScreeningLength ||
+            if (randomizations.Count > 0 && (screeningNumberSettings.ScreeningLength != screeningNumberSettingsDto.ScreeningLength ||
                     screeningNumberSettings.IsManualScreeningNo != screeningNumberSettingsDto.IsManualScreeningNo ||
-                    screeningNumberSettings.IsSiteDependentScreeningNo != screeningNumberSettingsDto.IsSiteDependentScreeningNo)
-                {
-                    if (screeningNumberSettingsDto.IsSiteDependentScreeningNo == false &&
-                        screeningNumberSettings.ScreeningNoStartsWith != screeningNumberSettingsDto.ScreeningNoStartsWith)
-                    {
-                        ModelState.AddModelError("Message", "You can't change format, Screening entry is started in subject management");
-                        return BadRequest(ModelState);
-                    }
-                }  
-            }
-
-            if (screeningNumberSettingsDto.IsManualScreeningNo == false && screeningNumberSettingsDto.IsSiteDependentScreeningNo == false)
+                    screeningNumberSettings.IsSiteDependentScreeningNo != screeningNumberSettingsDto.IsSiteDependentScreeningNo &&
+                    !screeningNumberSettingsDto.IsSiteDependentScreeningNo &&
+                        screeningNumberSettings.ScreeningNoStartsWith != screeningNumberSettingsDto.ScreeningNoStartsWith))
             {
-                if (screeningNumberSettingsDto.ScreeningNoStartsWith == null)
-                {
-                    ModelState.AddModelError("Message", "Please add valid Starts with number");
-                    return BadRequest(ModelState);
-                }
+                ModelState.AddModelError("Message", "You can't change format, Screening entry is started in subject management");
+                return BadRequest(ModelState);
             }
 
-            //var screeningNumberSettings = _screeningNumberSettingsRepository.Find(screeningNumberSettingsDto.Id);
+            if (!screeningNumberSettingsDto.IsManualScreeningNo && !screeningNumberSettingsDto.IsSiteDependentScreeningNo && screeningNumberSettingsDto.ScreeningNoStartsWith == null)
+            {
+
+                ModelState.AddModelError("Message", "Please add valid Starts with number");
+                return BadRequest(ModelState);
+            }
             screeningNumberSettings.ScreeningLength = screeningNumberSettingsDto.ScreeningLength;
             screeningNumberSettings.IsManualScreeningNo = screeningNumberSettingsDto.IsManualScreeningNo;
             screeningNumberSettings.IsAlphaNumScreeningNo = screeningNumberSettingsDto.IsAlphaNumScreeningNo;
             screeningNumberSettings.ScreeningNoStartsWith = screeningNumberSettingsDto.ScreeningNoStartsWith;
             screeningNumberSettings.IsSiteDependentScreeningNo = screeningNumberSettingsDto.IsSiteDependentScreeningNo;
 
-            if (screeningNumberSettings.IsManualScreeningNo == false)
+            if (!screeningNumberSettings.IsManualScreeningNo)
             {
-                if (screeningNumberSettings.IsSiteDependentScreeningNo == true)
+                if (screeningNumberSettings.IsSiteDependentScreeningNo)
                 {
                     for (int i = 0; i < screeningNumberSettingsDto.ScreeningNumberSettingsSites.Count; i++)
                     {
-                        if (screeningNumberSettingsDto.ScreeningNumberSettingsSites[i].DisableRow == false)
+                        if (!screeningNumberSettingsDto.ScreeningNumberSettingsSites[i].DisableRow)
                         {
                             var data = _screeningNumberSettingsRepository.Find(screeningNumberSettingsDto.ScreeningNumberSettingsSites[i].Id);
                             data.PrefixScreeningNo = screeningNumberSettingsDto.ScreeningNumberSettingsSites[i].PrefixScreeningNo;
@@ -109,12 +100,7 @@ namespace GSC.Api.Controllers.Master
                             _screeningNumberSettingsRepository.Update(data);
                         }
                     }
-                    //var screeningNumberSettingssites = _screeningNumberSettingsRepository.FindBy(x => sites.Contains(x.ProjectId)).ToList();
-                    //for (int i = 0; i < screeningNumberSettingssites.Count; i++)
-                    //{
-                    //    screeningNumberSettingssites[i].ScreeningNoseries = (int)screeningNumberSettings.ScreeningNoStartsWith;
-                    //    _screeningNumberSettingsRepository.Update(screeningNumberSettingssites[i]);
-                    //}
+
                 }
                 else
                 {
@@ -122,7 +108,11 @@ namespace GSC.Api.Controllers.Master
                 }
             }
             _screeningNumberSettingsRepository.Update(screeningNumberSettings);
-            if (_uow.Save() <= 0) throw new Exception("Updating Project failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Project failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(screeningNumberSettings.Id);
         }
     }

@@ -22,14 +22,10 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class VariableController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableValueRepository _variableValueRepository;
-        //  private readonly IVariableRemarksRepository _variableRemarksRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IVariableTemplateDetailRepository _variableTemplateDetailRepository;
         private readonly IGSCContext _context;
@@ -37,24 +33,16 @@ namespace GSC.Api.Controllers.Master
 
         public VariableController(IVariableRepository variableRepository,
             IVariableValueRepository variableValueRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper, IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            //  IVariableRemarksRepository variableRemarksRepository,
             IVariableTemplateRepository variableTemplateRepository,
             IDomainRepository domainRepository,
             IVariableTemplateDetailRepository variableTemplateDetailRepository)
         {
             _variableTemplateRepository = variableTemplateRepository;
             _variableRepository = variableRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _variableValueRepository = variableValueRepository;
-            //     _variableRemarksRepository = variableRemarksRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateDetailRepository = variableTemplateDetailRepository;
             _context = context;
             _domainRepository = domainRepository;
@@ -74,10 +62,6 @@ namespace GSC.Api.Controllers.Master
         {
             if (id <= 0) return BadRequest();
             var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values.Where(x => x.DeletedDate == null)).FirstOrDefault();
-            // var variable = _variableRepository.FindByInclude(t => t.Id == id, t => t.Values, t => t.Remarks).FirstOrDefault();
-
-            //if (variable.Values != null)
-            //    variable.Values = variable.Values.Where(x => x.DeletedDate == null).ToList();
 
             var variableDto = _mapper.Map<VariableDto>(variable);
             if (variableDto != null && variableDto.Values != null)
@@ -111,11 +95,11 @@ namespace GSC.Api.Controllers.Master
             {
                 _variableValueRepository.Add(item);
             }
-            //foreach (var item in variable.Remarks)
-            //{
-            //    _variableRemarksRepository.Add(item);
-            //}
-            if (_uow.Save() <= 0) throw new Exception("Creating Variable failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Variable failed on save.");
+                return BadRequest(ModelState);
+            }
 
             if (variableDto.CoreVariableType == Helper.CoreVariableType.Required)
             {
@@ -147,14 +131,16 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            variableDto.Values.Where(s => s.VariableId == 0)
-                .Select(s =>
-                {
-                    s.VariableId = variableDto.Id;
-                    s.Id = 0;
-                    return s;
-                }).ToList();
-            var variable = _mapper.Map<Variable>(variableDto);
+            var filteredValues = variableDto.Values
+                 .Where(s => s.VariableId == 0)
+                 .Select(s =>
+                 {
+                     s.VariableId = variableDto.Id;
+                     s.Id = 0;
+                     return s;
+                 }).ToList();
+
+            var variable = _mapper.Map<Variable>(filteredValues);
             var validate = _variableRepository.Duplicate(variable);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -163,16 +149,19 @@ namespace GSC.Api.Controllers.Master
             }
 
             UpdateVariableValues(variable, variableDto.CollectionValueDisable);
-            //  UpdateVariableRemarks(variable);
             _variableRepository.Update(variable);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Variable failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variable.Id);
         }
 
         private void UpdateVariableValues(Variable variable, bool CollectionValueDisable)
         {
-            if (CollectionValueDisable == true)
+            if (CollectionValueDisable)
             {
                 var deletedisableValues = variable.Values.ToList();
 
@@ -187,9 +176,6 @@ namespace GSC.Api.Controllers.Master
                 var deleteValues = data.Where(t => variable.Values.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
                 var addvariables = variable.Values.Where(x => x.Id == 0).ToList();
                 var updatevariables = variable.Values.Where(x => x.Id > 0).ToList();
-                //var deleteValues = _variableValueRepository.FindBy(x => x.VariableId == variable.Id
-                //                                                        && !variable.Values.Any(c => c.Id == x.Id))
-                //.ToList();
                 foreach (var value in deleteValues)
                     _variableValueRepository.Remove(value);
 
@@ -202,21 +188,6 @@ namespace GSC.Api.Controllers.Master
             }
         }
 
-        //private void UpdateVariableRemarks(Variable variable)
-        //{
-        //    var data = _variableRemarksRepository.FindBy(x => x.VariableId == variable.Id).ToList();
-        //    var deleteRemarks = data.Where(t => variable.Remarks.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
-        //    var addremarks = variable.Remarks.Where(x => x.Id == 0).ToList();
-        //    var updateremarks = variable.Remarks.Where(x => x.Id > 0).ToList();
-        //    foreach (var value in deleteRemarks)
-        //        _variableRemarksRepository.Remove(value);
-        //    foreach (var value in updateremarks)
-        //        _variableRemarksRepository.Update(value);
-        //    foreach (var item in addremarks)
-        //    {
-        //        _variableRemarksRepository.Add(item);
-        //    }
-        //}
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
@@ -245,9 +216,6 @@ namespace GSC.Api.Controllers.Master
 
             variableTemplateDetails.ForEach(temp =>
             {
-                //var template = _variableTemplateRepository.Find(temp.VariableTemplateId);
-                //_variableTemplateRepository.Delete(template);
-
                 _variableTemplateDetailRepository.Delete(temp);
             });
             _uow.Save();

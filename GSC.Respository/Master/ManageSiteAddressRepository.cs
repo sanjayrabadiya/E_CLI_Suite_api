@@ -16,13 +16,10 @@ namespace GSC.Respository.Master
 {
     public class ManageSiteAddressRepository : GenericRespository<ManageSiteAddress>, IManageSiteAddressRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public ManageSiteAddressRepository(IGSCContext context,
-        IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public ManageSiteAddressRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }

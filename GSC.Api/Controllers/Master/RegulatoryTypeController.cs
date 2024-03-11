@@ -15,18 +15,15 @@ namespace GSC.Api.Controllers.Master
     public class RegulatoryTypeController : BaseController
     {
         private readonly IRegulatoryTypeRepository _regulatoryTypeRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public RegulatoryTypeController(IRegulatoryTypeRepository regulatoryTypeRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _regulatoryTypeRepository = regulatoryTypeRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -61,7 +58,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _regulatoryTypeRepository.Add(regulatoryType);
-            if (_uow.Save() <= 0) throw new Exception("Creating Regulatory failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Regulatory failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(regulatoryType.Id);
         }
 
@@ -84,7 +85,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by darshil for effective Date on 09-09-2020 */
             _regulatoryTypeRepository.AddOrUpdate(regulatoryType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Regulatory failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Regulatory failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(regulatoryType.Id);
         }
 

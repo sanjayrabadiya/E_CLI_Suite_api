@@ -18,27 +18,18 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class TestController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ITestRepository _testRepository;
         private readonly ITestGroupRepository _testGroupRepository;
         private readonly IUnitOfWork _uow;
 
         public TestController(ITestRepository testRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
             ITestGroupRepository testGroupRepository)
         {
             _testRepository = testRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _testGroupRepository = testGroupRepository;
         }
 
@@ -49,13 +40,9 @@ namespace GSC.Api.Controllers.Master
             var tests = _testRepository.GetTestList(isDeleted);
             tests.ForEach(b =>
             {
-                b.TestGroup = _testGroupRepository.Find((int)b.TestGroupId);
+                b.TestGroup = _testGroupRepository.Find(b.TestGroupId);
             });
             return Ok(tests);
-            
-            //var tests = _testRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.TestGroup)
-            //    .OrderByDescending(x => x.Id).ToList();
-            //return Ok(testsDto);
         }
 
         [HttpGet("{id}")]
@@ -81,7 +68,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _testRepository.Add(test);
-            if (_uow.Save() <= 0) throw new Exception("Creating Test failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Test failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(test.Id);
         }
 
@@ -101,7 +92,11 @@ namespace GSC.Api.Controllers.Master
             }
             _testRepository.AddOrUpdate(test);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Test failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Test failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(test.Id);
         }
 

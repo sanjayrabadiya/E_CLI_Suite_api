@@ -9,10 +9,9 @@ namespace GSC.Respository.AdverseEvent
 {
     public class AdverseEventSettingsDetailRepository : GenericRespository<AdverseEventSettingsDetails>, IAdverseEventSettingsDetailRepository
     {
-        private readonly IGSCContext _context;
         public AdverseEventSettingsDetailRepository(IGSCContext context) : base(context)
         {
-            _context = context;
+
         }
     }
 }

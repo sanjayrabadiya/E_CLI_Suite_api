@@ -71,7 +71,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _productRepository.Add(product);
-            if (_uow.Save() <= 0) throw new Exception("Creating product type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating product type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(product.Id);
         }
 
@@ -92,7 +96,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _productRepository.Update(product);
-            if (_uow.Save() <= 0) throw new Exception("Updating product type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating product type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(product.Id);
         }
 

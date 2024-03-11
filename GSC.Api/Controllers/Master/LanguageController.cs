@@ -20,9 +20,6 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class LanguageController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly ILanguageRepository _languageRepository;
         private readonly IVisitLanguageRepository _visitLanguageRepository;
         private readonly ITemplateLanguageRepository _templateLanguageRepository;
@@ -37,8 +34,6 @@ namespace GSC.Api.Controllers.Master
 
         public LanguageController(ILanguageRepository languageRepository,
             IUnitOfWork uow,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IVisitLanguageRepository visitLanguageRepository,
             ITemplateLanguageRepository templateLanguageRepository,
             IVariableCategoryLanguageRepository variabeCategoryLanguageRepository,
@@ -46,12 +41,9 @@ namespace GSC.Api.Controllers.Master
             IVariabeNoteLanguageRepository variabeNoteLanguageRepository,
             IVariabeValueLanguageRepository variabeValueLanguageRepository,
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IMapper mapper)
         {
             _languageRepository = languageRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _visitLanguageRepository = visitLanguageRepository;
             _templateLanguageRepository = templateLanguageRepository;
             _variabeCategoryLanguageRepository = variabeCategoryLanguageRepository;
@@ -60,7 +52,6 @@ namespace GSC.Api.Controllers.Master
             _variabeValueLanguageRepository = variabeValueLanguageRepository;
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -83,11 +74,7 @@ namespace GSC.Api.Controllers.Master
         {
             var languages = _languageRepository.GetLanguageList(isDeleted);
             return Ok(languages);
-            //var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
 
-            //var languages = _languageRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-
-            //return Ok(languagesDto);
         }
 
         [HttpGet("{id}")]
@@ -112,7 +99,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _languageRepository.Add(language);
-            if (_uow.Save() <= 0) throw new Exception("Creating Marital Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Marital Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(language.Id);
         }
 
@@ -130,7 +121,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _languageRepository.Update(language);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Language failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(language.Id);
         }
@@ -170,7 +165,7 @@ namespace GSC.Api.Controllers.Master
 
             //check language use in Variable
             var LangExistsInVariable = _variabeLanguageRepository.IsLanguageExist(id);
-            if (!LangExistsInVisit)
+            if (!LangExistsInVariable)
             {
                 ModelState.AddModelError("Message", "Language use in variable");
                 return BadRequest(ModelState);

@@ -19,23 +19,14 @@ namespace GSC.Api.Controllers.Master
     public class FoodTypeController : BaseController
     {
         private readonly IFoodTypeRepository _foodTypeRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public FoodTypeController(IFoodTypeRepository foodTypeRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _foodTypeRepository = foodTypeRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -43,11 +34,8 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            //var foodTypes = _foodTypeRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
             var foodtype = _foodTypeRepository.GetFoodTypeList(isDeleted);
             return Ok(foodtype);
-            //return Ok(foodTypesDto);
         }
 
 
@@ -75,7 +63,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _foodTypeRepository.Add(foodType);
-            if (_uow.Save() <= 0) throw new Exception("Creating Food Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Food Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(foodType.Id);
         }
 
@@ -96,7 +88,11 @@ namespace GSC.Api.Controllers.Master
             }
             _foodTypeRepository.AddOrUpdate(foodType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Food Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Food Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(foodType.Id);
         }
 

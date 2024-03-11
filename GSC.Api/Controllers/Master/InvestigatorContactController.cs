@@ -68,7 +68,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _investigatorContactRepository.Add(investigatorContact);
-            if (_uow.Save() <= 0) throw new Exception("Creating Investigator Contact failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Investigator Contact failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(investigatorContact.Id);
         }
 
@@ -92,7 +96,11 @@ namespace GSC.Api.Controllers.Master
             var investigatorSite = _siteRepository.FindByInclude(x => x.InvestigatorContactId == investigatorContactDto.Id, x => x.ManageSite).ToList();
 
             _investigatorContactRepository.AddOrUpdate(investigatorContact);
-            if (_uow.Save() <= 0) throw new Exception("Updating Investigator Contact failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Investigator Contact failed on save.");
+                return BadRequest(ModelState);
+            }
 
             foreach (var item in investigatorContactDetail)
             {

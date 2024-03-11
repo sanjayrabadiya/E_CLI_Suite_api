@@ -35,7 +35,11 @@ namespace GSC.Api.Controllers.Master
 
             _variableTemplateNoteRepository.Add(variableTemplateNote);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Variable Template Note failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Variable Template Note failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variableTemplateNote.Id);
         }
 
@@ -49,7 +53,11 @@ namespace GSC.Api.Controllers.Master
             var variableTemplateNote = _mapper.Map<VariableTemplateNote>(variableTemplateNoteDto);
 
             _variableTemplateNoteRepository.Update(variableTemplateNote);
-            if (_uow.Save() <= 0) throw new Exception("Updating Variable Template Note failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Variable Template Note failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(variableTemplateNote.Id);
         }
 

@@ -37,20 +37,17 @@ namespace GSC.Respository.Master
 
         public IList<PaymentMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
         {
-           var PaymentMilestoneData =  All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == parentProjectId || x.SiteId == siteId || x.CountryId == countryId)).
-            ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == parentProjectId || x.SiteId == siteId || x.CountryId == countryId)).
+             ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             PaymentMilestoneData.ForEach(x =>
             {
-                x.SitedName = _context.Project.Include(s=>s.ManageSite).Where(w=>w.Id==x.SiteId).Select(d=>d.ProjectCode==null?d.ManageSite.SiteName:d.ProjectCode).FirstOrDefault();
+                x.SitedName = _context.Project.Include(s => s.ManageSite).Where(w => w.Id == x.SiteId).Select(d => d.ProjectCode == null ? d.ManageSite.SiteName : d.ProjectCode).FirstOrDefault();
             });
             return PaymentMilestoneData;
         }
-        public string DuplicatePaymentMilestone(PaymentMilestone objSave)
+        public string DuplicatePaymentMilestone(PaymentMilestone paymentMilestone)
         {
-            //if (All.Any(x => x.Id != objSave.Id && x.InvestigatorContactId == objSave.InvestigatorContactId && x.HolidayName == objSave.HolidayName.Trim() && x.DeletedDate == null))
-            //    return "Duplicate Holiday : " + objSave.HolidayName;
-
             return "";
         }
         public List<DropDownDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
@@ -86,7 +83,7 @@ namespace GSC.Respository.Master
                 studyPlan = _context.StudyPlan.Where(x => x.ProjectId == parentProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
             }
 
-            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone == true || x.DependentTaskId == null)).OrderByDescending(x => x.Id)
+            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null)).OrderByDescending(x => x.Id)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public decimal GetEstimatedMilestoneAmount(PaymentMilestoneDto paymentMilestoneDto)
@@ -110,7 +107,7 @@ namespace GSC.Respository.Master
                     EstimatedTotal += _context.PatientCost.Where(s => s.Id == visit && s.DeletedBy == null).Sum(d => d.FinalCost).GetValueOrDefault();
 
                 }
-            }     
+            }
             return EstimatedTotal;
         }
         //resourch
@@ -185,7 +182,7 @@ namespace GSC.Respository.Master
         }
         public List<DropDownProcedureDto> GetParentProjectDropDown(int parentProjectId)
         {
-            return _context.PatientCost.Include(s=>s.Procedure).Where(d=>d.ProjectId == parentProjectId && d.ProcedureId != null && d.DeletedBy==null)
+            return _context.PatientCost.Include(s => s.Procedure).Where(d => d.ProjectId == parentProjectId && d.ProcedureId != null && d.DeletedBy == null)
                  .Select(c => new DropDownProcedureDto
                  {
                      Id = c.Procedure.Id,
@@ -194,11 +191,12 @@ namespace GSC.Respository.Master
         }
         public List<DropDownDto> GetVisitDropDown(int parentProjectId, int procedureId)
         {
-           var data = _context.PatientCost.Include(s => s.ProjectDesignVisit).Where(d => d.ProjectId == parentProjectId && d.ProcedureId == procedureId && d.ProcedureId != null  && d.DeletedBy == null)
-                 .Select(c => new DropDownDto{
-                     Id = c.Id,
-                     Value = c.ProjectDesignVisit.DisplayName,
-                 }).ToList();
+            var data = _context.PatientCost.Include(s => s.ProjectDesignVisit).Where(d => d.ProjectId == parentProjectId && d.ProcedureId == procedureId && d.ProcedureId != null && d.DeletedBy == null)
+                  .Select(c => new DropDownDto
+                  {
+                      Id = c.Id,
+                      Value = c.ProjectDesignVisit.DisplayName,
+                  }).ToList();
             return data;
         }
     }

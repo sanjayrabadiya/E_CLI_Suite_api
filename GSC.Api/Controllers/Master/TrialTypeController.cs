@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class TrialTypeController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly ITrialTypeRepository _trialTypeRepository;
         private readonly IUnitOfWork _uow;
 
         public TrialTypeController(ITrialTypeRepository trialTypeRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _trialTypeRepository = trialTypeRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -44,9 +35,6 @@ namespace GSC.Api.Controllers.Master
         {
             var trialTypes = _trialTypeRepository.GetTrialTypeList(isDeleted);
             return Ok(trialTypes);
-            //var trialTypes = _trialTypeRepository.All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //return Ok(trialTypesDto);
         }
 
         [HttpGet("{id}")]
@@ -72,7 +60,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _trialTypeRepository.Add(trialType);
-            if (_uow.Save() <= 0) throw new Exception("Creating Trial Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Trial Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(trialType.Id);
         }
 
@@ -94,7 +86,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _trialTypeRepository.AddOrUpdate(trialType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Trail Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Trail Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(trialType.Id);
         }
 
