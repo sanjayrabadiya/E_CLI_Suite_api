@@ -1,10 +1,6 @@
-﻿using GSC.Data.Dto.Common;
-using GSC.Data.Dto.Configuration;
-using GSC.Data.Dto.Custom;
+﻿using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Report.Pdf;
-using GSC.Data.Entities.Custom;
 using GSC.Data.Entities.Report;
-using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
 namespace GSC.Report.Common
@@ -17,5 +13,9 @@ namespace GSC.Report.Common
         List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting);
         List<ScreeningPdfReportDto> GetScreeningDataPdfReport(ScreeningReportSetting reportSetting);
         List<ScreeningPdfReportDto> GetScreeningBlankPdfData(ScreeningReportSetting reportSetting);
+
+        List<ScreeningPdfReportDto> GetScreeningPdfData(ScreeningReportSetting reportSetting);
+
+        List<DossierReportDto> GetDossierPdfData(ReportSettingNew reportSetting);
     }
 }

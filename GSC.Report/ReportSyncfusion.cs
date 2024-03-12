@@ -261,7 +261,7 @@ namespace GSC.Report
             return bookmarks;
         }
 
-       
+
         private PdfPageTemplateElement VisitTemplateHeader(PdfDocument doc, string projectcode, string vistName, string screeningNO, string subjectNo, string Initial, bool Isscreeningno, bool isSubjectNo, bool IsInitial, bool isSiteCode)
         {
             if (vistName.Length < 45)
@@ -462,17 +462,10 @@ namespace GSC.Report
         public async Task<string> DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
         {
 
-            var projectDetails = new List<DossierReportDto>();
-            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-            {
-                projectDetails = _reportBaseRepository.GetBlankPdfData(reportSetting);
-            }
-            else
-            {
-                projectDetails = _reportBaseRepository.GetDataPdfReport(reportSetting);
-                if (projectDetails.Count == 0)
-                    return "Data Entery is pending.";
-            }
+            var projectDetails = _reportBaseRepository.GetDossierPdfData(reportSetting);
+
+            if (reportSetting.PdfStatus != DossierPdfStatus.Blank && projectDetails.Count == 0)
+                return "Data Entery is pending.";
 
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             FileSaveInfo fileInfo = new FileSaveInfo();
@@ -486,13 +479,12 @@ namespace GSC.Report
                 fileInfo.ParentFolderName = parent.ProjectCode + "_" + DateTime.Now.Ticks;
             string ParentProctCode = string.Empty;
             string ParentProjectName = string.Empty;
-
-            if (projectDetails.Any() && projectDetails != null && projectDetails.FirstOrDefault() != null)
+            var projectdesign = _context.ProjectDesign.Include(s => s.Project).Where(s => s.Id == reportSetting.ProjectId).FirstOrDefault();
+            if (projectdesign != null && projectdesign.Project != null)
             {
-                ParentProctCode = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode;
-                ParentProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+                ParentProctCode = projectdesign.Project.ProjectCode;
+                ParentProjectName = projectdesign.Project.ProjectName;
             }
-
 
             foreach (var item in projectDetails)
             {
@@ -2313,19 +2305,10 @@ namespace GSC.Report
         public async Task<string> ScreeningPdfReportGenerate(ScreeningReportSetting reportSetting, JobMonitoring jobMonitoring)
         {
 
-            var projectDetails = new List<ScreeningPdfReportDto>();
-            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-            {
-                projectDetails = _reportBaseRepository.GetScreeningBlankPdfData(reportSetting);
-            }
-            else
-            {
-                projectDetails = _reportBaseRepository.GetScreeningDataPdfReport(reportSetting);
-                if (projectDetails.Count == 0)
-                    return "Data Entery is pending.";
-            }
-            if (projectDetails == null)
-                return "";
+            var projectDetails = _reportBaseRepository.GetScreeningPdfData(reportSetting);
+
+            if (reportSetting.PdfStatus != DossierPdfStatus.Blank && projectDetails.Count == 0)
+                return "Data Entery is pending.";
 
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             FileSaveInfo fileInfo = new FileSaveInfo();
@@ -2339,8 +2322,14 @@ namespace GSC.Report
             if (parent != null)
                 fileInfo.ParentFolderName = parent.ProjectCode + "_" + DateTime.Now.Ticks;
 
-            string ParentProctCode = projectDetails.FirstOrDefault().ProjectDetails.ProjectCode;
-            string ParentProjectName = projectDetails.FirstOrDefault().ProjectDetails.ProjectName;
+            string ParentProctCode = string.Empty;
+            string ParentProjectName = string.Empty;
+            var projectdesign = _context.ProjectDesign.Include(s => s.Project).Where(s => s.Id == reportSetting.ProjectId).FirstOrDefault();
+            if (projectdesign != null && projectdesign.Project != null)
+            {
+                ParentProctCode = projectdesign.Project.ProjectCode;
+                ParentProjectName = projectdesign.Project.ProjectName;
+            }
 
             foreach (var item in projectDetails)
             {
@@ -2399,7 +2388,6 @@ namespace GSC.Report
                 ScreeningSaveFile(reportSetting, fileInfo, memoryStream, item, ParentProctCode);
             }
 
-            //if ((bool)!reportSetting.IsSync)
             UpdateJobStatus(jobMonitoring, fileInfo, ParentProctCode, ParentProjectName, documentUrl);
 
             return "";
