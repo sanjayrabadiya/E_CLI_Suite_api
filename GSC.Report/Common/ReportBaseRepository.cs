@@ -308,7 +308,7 @@ namespace GSC.Report.Common
                            new ProjectDesignPeriodReportDto {
                             DisplayName = x.ProjectDesignPeriod.DisplayName,
                             Visit = x.ScreeningVisit.Where(x => x.Status != ScreeningVisitStatus.NotStarted && x.DeletedDate == null && x.ProjectDesignVisit.DeletedDate==null
-                                   
+
                                     ).Select(x => new ProjectDesignVisitList {
                                           DisplayName = x.RepeatedVisitNumber==null ?x.ProjectDesignVisit.DisplayName:x.ProjectDesignVisit.DisplayName+"_"+x.RepeatedVisitNumber,
                                           DesignOrder = x.ProjectDesignVisit.DesignOrder,
@@ -375,6 +375,31 @@ namespace GSC.Report.Common
               }).ToList();
 
             return finaldata.Where(x => x.Period.TrueForAll(y => y.Visit.Count != 0)).ToList();
+        }
+
+        public List<ScreeningPdfReportDto> GetScreeningPdfData(ScreeningReportSetting reportSetting)
+        {
+            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+            {
+                return GetScreeningBlankPdfData(reportSetting);
+            }
+            else
+            {
+                return GetScreeningDataPdfReport(reportSetting);
+
+            }
+        }
+
+        public List<DossierReportDto> GetDossierPdfData(ReportSettingNew reportSetting)
+        {
+            if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
+            {
+                return GetBlankPdfData(reportSetting);
+            }
+            else
+            {
+                return GetDataPdfReport(reportSetting);
+            }
         }
     }
 }
