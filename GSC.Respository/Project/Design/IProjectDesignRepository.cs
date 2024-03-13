@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
-using GSC.Data.Dto.Project.Design;
+
 using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Respository.Project.Design
