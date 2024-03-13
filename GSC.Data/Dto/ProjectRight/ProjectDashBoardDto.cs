@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Workflow;
-using GSC.Data.Entities.Attendance;
 using GSC.Helper;
 using GSC.Shared.Extension;
 
@@ -39,7 +38,6 @@ namespace GSC.Data.Dto.ProjectRight
         public string ProjectNumber { get; set; }
         public string DocumentPath { get; set; }
         public string FileName { get; set; }
-
         public string MimeType { get; set; }
         public string UserName { get; set; }
         public string RoleName { get; set; }
@@ -64,7 +62,6 @@ namespace GSC.Data.Dto.ProjectRight
         public DateTime? CreatedDate { get; set; }
         public string CreatedByName { get; set; }
         public int? ProjectCreatedBy { get; set; }
-
         public string TrainingTypeName { get; set; }
         public string TrainerName { get; set; }
     }
@@ -87,7 +84,6 @@ namespace GSC.Data.Dto.ProjectRight
             get => _reviewDate?.UtcDateTime();
             set => _reviewDate = value?.UtcDateTime();
         }
-
         public string ReviewNote { get; set; }
         public string AssignedBy { get; set; }
         public string IsDeleted { get; set; }
@@ -233,7 +229,7 @@ namespace GSC.Data.Dto.ProjectRight
         public int Count { get; set; }
         public string Lable { get; set; }
 
-       
+
     }
     public class CtmsMonitoringStatusChartDto
     {
@@ -347,7 +343,7 @@ namespace GSC.Data.Dto.ProjectRight
     public class KitCountReport
     {
         public string SiteName { get; set; }
-        public string Treatment{ get; set; }
+        public string Treatment { get; set; }
         public int Available { get; set; }
         public int Allocated { get; set; }
 

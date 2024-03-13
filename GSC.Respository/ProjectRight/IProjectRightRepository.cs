@@ -10,7 +10,6 @@ namespace GSC.Respository.ProjectRight
         List<ProjectRightListDto> GetProjectRights();
         List<ProjectRightDto> GetProjectRightByProjectId(int projectId);
         void UpdateIsReviewDone(int projectId);
-       
         void SaveProjectAccessRight(List<ProjectRightDto> projectRightDto, int projectId);
         void SaveProjectRollbackRight(List<ProjectRightDto> projectRightDto, int projectId, int[] ids);
         List<int> GetProjectRightIdList();

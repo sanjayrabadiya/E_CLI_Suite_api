@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -7,12 +6,10 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Entities.ProjectRight;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using GSC.Respository.Configuration;
 using GSC.Respository.Master;
-using GSC.Respository.Project.Design;
 using GSC.Respository.ProjectRight;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Shared.JWTAuth;
@@ -25,7 +22,6 @@ namespace GSC.Api.Controllers.ProjectRight
         private readonly IProjectDocumentReviewRepository _documentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IProjectDocumentRepository _projectDocumentRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
@@ -40,8 +36,7 @@ namespace GSC.Api.Controllers.ProjectRight
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectDocumentReviewRepository documentReviewRepository,
             IProjectRightRepository projectRightRepository,
-            IProjectRepository projectRepository,
-            IProjectDesignRepository projectDesignRepository
+            IProjectRepository projectRepository
         )
         {
             _projectDocumentRepository = projectDocumentRepository;
@@ -52,7 +47,6 @@ namespace GSC.Api.Controllers.ProjectRight
             _documentReviewRepository = documentReviewRepository;
             _projectRightRepository = projectRightRepository;
             _projectRepository = projectRepository;
-            _projectDesignRepository = projectDesignRepository;
         }
 
         [HttpGet("{id}")]
@@ -64,12 +58,12 @@ namespace GSC.Api.Controllers.ProjectRight
             var projectDocuments = _projectDocumentRepository.GetDocument(id);
             projectDocuments.ForEach(t => t.PathName = documentUrl + t.PathName);
 
-            if (projectDocuments.Count() > 0)
+            if (projectDocuments.Count > 0)
                 foreach (var item in projectDocuments)
                 {
                     var projectCreatedBy = _projectRepository.FindByInclude(project => project.Id == item.ProjectId).FirstOrDefault();
                     var isExists = _documentReviewRepository.FindByInclude(t => t.ProjectDocumentId == item.Id && t.IsReview && t.UserId != projectCreatedBy.CreatedBy);
-                    if (isExists.Count() > 0) item.IsReview = true; else item.IsReview = false;
+                    if (isExists.Any()) item.IsReview = true; else item.IsReview = false;
 
                     //Add study code in access training grid *Create Date : 14092020 *Create By: Vipul
                     item.SiteCode = projectCreatedBy.ParentProjectId != null ? projectCreatedBy.ProjectCode : "";
@@ -84,14 +78,7 @@ namespace GSC.Api.Controllers.ProjectRight
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            //Check for project design complete or not
-            var projectDesign = new GSC.Data.Entities.Project.Design.ProjectDesign();
-            var parentProject = _projectRepository.GetParentProjectId(projectDocumentDto.ProjectId);
-            if (parentProject != null)
-                projectDesign = _projectDesignRepository.FindBy(t => t.ProjectId == parentProject && t.DeletedDate == null).FirstOrDefault();
-            else
-                projectDesign = _projectDesignRepository.FindBy(t => t.ProjectId == projectDocumentDto.ProjectId && t.DeletedDate == null).FirstOrDefault();
-         
+              
             projectDocumentDto.Id = 0;
             //set file path and extension
             if (projectDocumentDto.FileModel?.Base64?.Length > 0)
@@ -119,7 +106,7 @@ namespace GSC.Api.Controllers.ProjectRight
             projectDocument.ModifiedDate = _jwtTokenAccesser.GetClientDate();
             _projectDocumentRepository.Add(projectDocument);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating project document failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating project document failed on save."));
 
             _documentReviewRepository.SaveByDocumentId(projectDocument.Id, projectDocument.ProjectId);
             _projectRightRepository.UpdateIsReviewDone(projectDocumentDto.ProjectId);

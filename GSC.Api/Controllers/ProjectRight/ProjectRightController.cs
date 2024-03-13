@@ -2,9 +2,7 @@
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.ProjectRight;
-using GSC.Domain.Context;
 using GSC.Respository.ProjectRight;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.ProjectRight
@@ -36,24 +34,6 @@ namespace GSC.Api.Controllers.ProjectRight
             return Ok(_projectRightRepository.GetProjectRightByProjectId(projectId));
         }
 
-        //[HttpPost]
-        //public IActionResult Post([FromBody]ProjectRightSaveDto projectRightSaveDto)
-        //{
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return new UnprocessableEntityObjectResult(ModelState);
-        //    }
-
-        //    _ProjectRightRepository.SaveProjectRight(projectRightSaveDto.projectRightDto, projectRightSaveDto.projectId);
-
-        //    if (_uow.Save() < 0)
-        //    {
-        //        throw new Exception($"Project rights failed on save.");
-        //    }
-
-        //    return Ok(projectRightSaveDto.projectId);
-        //}
-
         [HttpPost]
         [Route("AccessRight")]
         public IActionResult AccessRight([FromBody] ProjectRightSaveDto projectRightSaveDto)
@@ -77,7 +57,7 @@ namespace GSC.Api.Controllers.ProjectRight
             _projectRightRepository.SaveProjectRollbackRight(projectRightSaveDto.projectRightDto,
                 projectRightSaveDto.projectId, projectRightSaveDto.Ids);
 
-            if (_uow.Save() < 0) throw new Exception("Project Revoke rights failed on save.");
+            if (_uow.Save() < 0) return Ok(new Exception("Project Revoke rights failed on save."));
 
             return Ok(projectRightSaveDto.projectId);
         }
