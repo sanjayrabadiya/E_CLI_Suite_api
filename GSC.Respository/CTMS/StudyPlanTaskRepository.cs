@@ -80,60 +80,55 @@ namespace GSC.Respository.CTMS
                     result.StudyPlanId = StudyPlanId;
 
 
+                        var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
+                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
-                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                        var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == 0).OrderBy(x => x.TaskOrder).
+                        ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == 0).OrderBy(x => x.TaskOrder).
-                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                        if (tasklist.Exists(x => TodayDate < x.StartDate))
+                            tasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => TodayDate < x.StartDate))
-                        tasklist = tasklist.Where(x => TodayDate < x.StartDate).
-                            Select(c => new StudyPlanTaskDto
-                            {
-                                Status = CtmsChartType.NotStarted.GetDescription()
-                            }).ToList();
+                        if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
+                            tasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                        tasklist = tasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.OnGoingDate.GetDescription() }).ToList();
+                        if (tasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
+                            tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
-                        tasklist = tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DueDate.GetDescription() }).ToList();
+                        if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
+                            tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
-                        tasklist = tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.Completed.GetDescription() }).ToList();
+                        if (tasklist.Exists(x => x.EndDate < x.ActualEndDate))
+                            tasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => x.EndDate < x.ActualEndDate))
-                        tasklist = tasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DeviatedDate.GetDescription() }).ToList();
+                        result.StudyPlanTask = tasklist;
+                        result.StudyPlanTaskTemp = tasklistResource;
 
-                    result.StudyPlanTask = tasklist;
-                    result.StudyPlanTaskTemp = tasklistResource;
+                        //sub task wise grid disply Add by mitul on 09-01-2024
+                        result.StudyPlanTask.ForEach(s =>
+                        {
+                            var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == s.Id).OrderBy(x => x.TaskOrder).
+                                ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    //sub task wise grid disply Add by mitul on 09-01-2024
-                    result.StudyPlanTask.ForEach(s =>
-                    {
-                        var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == s.Id).OrderBy(x => x.TaskOrder).
-                            ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
+                            if (subtasklist.Exists(x => TodayDate < x.StartDate))
+                                subtasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
-                        if (subtasklist.Exists(x => TodayDate < x.StartDate))
-                            subtasklist = subtasklist.Where(x => TodayDate < x.StartDate).Select(c => new StudyPlanTaskDto {Status = CtmsChartType.NotStarted.GetDescription() }).ToList();
+                            if (subtasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
+                                subtasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
-                        if (subtasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                            subtasklist = subtasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.OnGoingDate.GetDescription() }).ToList();
+                            if (subtasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
+                                subtasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
 
-                        if (subtasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
-                            subtasklist = subtasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DueDate.GetDescription() }).ToList();
+                            if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
+                                subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
 
-                        if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
-                            subtasklist = subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.Completed.GetDescription() }).ToList();
+                            if (subtasklist.Exists(x => x.EndDate < x.ActualEndDate))
+                                subtasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
-                        if (subtasklist.Exists(x => x.EndDate < x.ActualEndDate))
-                            subtasklist = subtasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DeviatedDate.GetDescription() }).ToList();
-
-                        s.Subtasks = subtasklist;
-                    });
+                            s.Subtasks = subtasklist;
+                        });
+                    
                 }
-
             }
             else
             {
@@ -152,19 +147,19 @@ namespace GSC.Respository.CTMS
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                     if (tasklist.Exists(x => TodayDate < x.StartDate))
-                        tasklist = tasklist.Where(x => TodayDate < x.StartDate).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.NotStarted.GetDescription() }).ToList();
+                        tasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                        tasklist = tasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.OnGoingDate.GetDescription() }).ToList();
+                        tasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
-                        tasklist = tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DueDate.GetDescription() }).ToList();
+                        tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
-                        tasklist = tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.Completed.GetDescription() }).ToList();
+                        tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => x.EndDate < x.ActualEndDate))
-                        tasklist = tasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DeviatedDate.GetDescription() }).ToList();
+                        tasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
                     result.StudyPlanTask = tasklist;
                     result.StudyPlanTaskTemp = tasklistResource;
@@ -176,19 +171,19 @@ namespace GSC.Respository.CTMS
                             ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                         if (subtasklist.Exists(x => TodayDate < x.StartDate))
-                            subtasklist = subtasklist.Where(x => TodayDate < x.StartDate).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.NotStarted.GetDescription() }).ToList();
+                            subtasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
                         if (subtasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                            subtasklist = subtasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.OnGoingDate.GetDescription() }).ToList();
+                            subtasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
                         if (subtasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
-                            subtasklist = subtasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DueDate.GetDescription() }).ToList();
+                            subtasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
 
                         if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
-                            subtasklist = subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.Completed.GetDescription() }).ToList();
+                            subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
 
                         if (subtasklist.Exists(x => x.EndDate < x.ActualEndDate))
-                            subtasklist = subtasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => new StudyPlanTaskDto { Status = CtmsChartType.DeviatedDate.GetDescription() }).ToList();
+                            subtasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
                         s.Subtasks = subtasklist;
                     });
