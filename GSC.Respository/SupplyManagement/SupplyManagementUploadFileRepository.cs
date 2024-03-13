@@ -13,7 +13,6 @@ using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
 using GSC.Respository.Project.Design;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -21,6 +20,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -38,14 +38,14 @@ namespace GSC.Respository.SupplyManagement
         private readonly IGSCContext _context;
         private readonly IEmailSenderRespository _emailSenderRespository;
         public SupplyManagementUploadFileRepository(IGSCContext context,
-            IUploadSettingRepository uploadSettingRepository,
-            ISupplyManagementUploadFileVisitRepository supplyManagementUploadFileVisitRepository,
-            ISupplyManagementUploadFileDetailRepository supplyManagementUploadFileDetailRepository,
-            IPharmacyStudyProductTypeRepository pharmacyStudyProductTypeRepository,
-        IProjectDesignVisitRepository projectDesignVisitRepository,
+                IUploadSettingRepository uploadSettingRepository,
+                ISupplyManagementUploadFileVisitRepository supplyManagementUploadFileVisitRepository,
+                ISupplyManagementUploadFileDetailRepository supplyManagementUploadFileDetailRepository,
+                IPharmacyStudyProductTypeRepository pharmacyStudyProductTypeRepository,
+             IProjectDesignVisitRepository projectDesignVisitRepository,
              IProjectRepository projectRepository,
-         ICountryRepository countryRepository,
-        IMapper mapper, IEmailSenderRespository emailSenderRespository)
+             ICountryRepository countryRepository,
+             IMapper mapper, IEmailSenderRespository emailSenderRespository)
             : base(context)
         {
             _uploadSettingRepository = uploadSettingRepository;
@@ -72,9 +72,8 @@ namespace GSC.Respository.SupplyManagement
         {
             // check level for the upload file
             var validate = All.Where(x => x.ProjectId == supplyManagementUploadFile.ProjectId && x.Status != Helper.LabManagementUploadStatus.Reject && x.DeletedDate == null).FirstOrDefault();
-            if (validate != null)
-                if (validate.SupplyManagementUploadFileLevel != supplyManagementUploadFile.SupplyManagementUploadFileLevel)
-                    return "Please Select Appropriate Level.";
+            if (validate != null && validate.SupplyManagementUploadFileLevel != supplyManagementUploadFile.SupplyManagementUploadFileLevel)
+                return "Please Select Appropriate Level.";
 
             if (supplyManagementUploadFile.SiteId > 0)
             {
@@ -96,7 +95,9 @@ namespace GSC.Respository.SupplyManagement
 
             // convert excel to dataset
             DataSet results = reader.AsDataSet();
-            if (results != null && results.Tables.Count > 0 && results.Tables[0].Rows.Count == 0)
+            if (results == null)
+                return "File is not Compatible";
+            if (results.Tables.Count > 0 && results.Tables[0].Rows.Count == 0)
             {
                 return "File is not Compatible";
             }
@@ -248,7 +249,7 @@ namespace GSC.Respository.SupplyManagement
                     return "Please enter country name";
             }
 
-            string selectQuery = "";
+            StringBuilder selectQuery = new StringBuilder();
             var projectDesignVisits = GetProjectDesignVisit(supplyManagementUploadFile.ProjectId);
             var j = 0;
             var visitcheck = results;
@@ -264,45 +265,42 @@ namespace GSC.Respository.SupplyManagement
             {
                 if (setting.IsUploadWithKit)
                 {
-                    selectQuery += "Column" + j + " is null or ";
+                    selectQuery.Append("Column" + j + " is null or ");
                     if (j > 2)
                     {
-                        var r = projectDesignVisits.Any(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                        var r = projectDesignVisits.Exists(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
                         if (!r)
                             return "Visit name not match with design visit.";
                     }
                     else
                     {
-                        if (j == 0)
-                            if (item.ToString().Trim().ToLower() != "randomization no")
-                                return "File is not Compatible!";
-                        if (j == 1)
-                            if (item.ToString().Trim().ToLower() != "product code")
-                                return "File is not Compatible!";
-                        if (j == 2)
-                            if (item.ToString().Trim().ToLower() != "kit no")
-                                return "File is not Compatible!";
+                        if (j == 0 && item.ToString().Trim().ToLower() != "randomization no")
+                            return "File is not Compatible!";
 
+                        if (j == 1 && item.ToString().Trim().ToLower() != "product code")
+                            return "File is not Compatible!";
+
+                        if (j == 2 && item.ToString().Trim().ToLower() != "kit no")
+                            return "File is not Compatible!";
                     }
                     j++;
                 }
                 else
                 {
-                    selectQuery += "Column" + j + " is null or ";
+                    selectQuery.Append("Column" + j + " is null or ");
                     if (j >= 2)
                     {
-                        var r = projectDesignVisits.Any(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                        var r = projectDesignVisits.Exists(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
                         if (!r)
                             return "Visit name not match with design visit.";
                     }
                     else
                     {
-                        if (j == 0)
-                            if (item.ToString().Trim().ToLower() != "randomization no")
-                                return "File is not Compatible!";
-                        if (j == 1)
-                            if (item.ToString().Trim().ToLower() != "product code")
-                                return "File is not Compatible!";
+                        if (j == 0 && item.ToString().Trim().ToLower() != "randomization no")
+                            return "File is not Compatible!";
+
+                        if (j == 1 && item.ToString().Trim().ToLower() != "product code")
+                            return "File is not Compatible!";
 
                     }
                     j++;
@@ -313,7 +311,7 @@ namespace GSC.Respository.SupplyManagement
 
             if (results.Tables[0].AsEnumerable().Where((row, index) => index > 4).ToList().Count > 0)
             {
-                DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.Substring(0, selectQuery.Length - 3));
+                DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.ToString().Substring(0, selectQuery.Length - 3));
                 if (dr.Length != 0)
                     return "Please fill required randomization details!";
                 else
@@ -345,15 +343,11 @@ namespace GSC.Respository.SupplyManagement
                     }
                     return "";
                 }
-
-
             }
             else
             {
                 return "Please fill required randomization details.";
             }
-
-
         }
 
         public string InserFileData(DataSet results, SupplyManagementUploadFile supplyManagementUploadFile, SupplyManagementKitNumberSettings setting)
@@ -402,9 +396,6 @@ namespace GSC.Respository.SupplyManagement
                     _context.Save();
                 }
             }
-
-            //Add supply Management Upload file Data
-
             return "";
         }
 
@@ -522,14 +513,13 @@ namespace GSC.Respository.SupplyManagement
                         list.Add(t3);
                     }
                     str1 = list.ToArray();
-                    var result = str1.All(m => productTypes.Select(x => x.ProductTypeCode).Contains(m));
-                    var columns = dt.Columns.Count;
+                    var result = str1.ToList().TrueForAll(m => productTypes.Select(x => x.ProductTypeCode).Contains(m));
 
                     if (!result)
                         return "Product code not match.";
 
                     string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).ToArray();
-                    var cellResult = dataRow.All(m => str1.Contains(m.Trim()));
+                    var cellResult = dataRow.ToList().TrueForAll(m => str1.Contains(m.Trim()));
 
                     if (!cellResult)
                         return "Product code not match in cell.";
@@ -555,18 +545,22 @@ namespace GSC.Respository.SupplyManagement
         public void SendRandomizationUploadSheetEmail(SupplyManagementUploadFile obj)
         {
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
 
-            var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected).ToList();
-            if (emailconfiglist != null && emailconfiglist.Count > 0)
+            var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == obj.ProjectId && x.Triggers == SupplyManagementEmailTriggers.RandomizationSheetApprovedRejected).ToList();
+            if (!emailconfiglist.Any())
+                return;
+            if (emailconfiglist.Count > 0)
             {
 
                 emailconfig = emailconfiglist.FirstOrDefault();
 
                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                if (details.Count() > 0)
+                if (details.Any())
                 {
-                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault().ProjectCode;
+                    var project = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
+                    if (project != null)
+                        iWRSEmailModel.StudyCode = project.ProjectCode;
 
                     var site = _context.Project.Where(x => x.Id == obj.SiteId).FirstOrDefault();
                     if (site != null)
@@ -581,7 +575,9 @@ namespace GSC.Respository.SupplyManagement
                     iWRSEmailModel.Status = obj.Status == LabManagementUploadStatus.Approve ? "Approved" : "Rejected";
                     if (obj.CountryId > 0)
                     {
-                        iWRSEmailModel.Country = _context.Country.Where(x => x.Id == obj.CountryId).FirstOrDefault().CountryName;
+                        var country = _context.Country.Where(x => x.Id == obj.CountryId).FirstOrDefault();
+                        if (country != null)
+                            iWRSEmailModel.Country = country.CountryName;
                     }
 
                     _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);

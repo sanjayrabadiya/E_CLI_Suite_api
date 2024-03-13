@@ -20,7 +20,6 @@ namespace GSC.Api.Controllers.Barcode
     [ApiController]
     public class DossingBarcodeGenerateController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IDossingBarcodeGenerateRepository _dossingBarcodeGenerateRepository;
         private readonly IUnitOfWork _uow;
@@ -31,7 +30,6 @@ namespace GSC.Api.Controllers.Barcode
 
         public DossingBarcodeGenerateController(
             IMapper mapper
-            , IJwtTokenAccesser jwtTokenAccesser
             , IDossingBarcodeGenerateRepository dossingBarcodeGenerateRepository
             , IDossingBarcodeRepository sampleBarcodeRepository
             , IAppScreenRepository appScreenRepository
@@ -39,7 +37,6 @@ namespace GSC.Api.Controllers.Barcode
             , IBarcodeAuditRepository barcodeAuditRepository
             , IUnitOfWork uow)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _dossingBarcodeGenerateRepository = dossingBarcodeGenerateRepository;
             _dossingBarcodeRepository = sampleBarcodeRepository;
@@ -141,17 +138,14 @@ namespace GSC.Api.Controllers.Barcode
             {
                 var record = _dossingBarcodeGenerateRepository.FindByInclude(x => x.DossingBarcodeId == item.DossingBarcodeId && x.DeletedDate == null).OrderByDescending(d => d.Id);
 
-                if (record == null)
+                if (!record.Any())
                     return NotFound();
 
-                if (record != null)
+                foreach (var barcodeGenerate in record)
                 {
-                    foreach (var barcodeGenerate in record)
-                    {
-                        _dossingBarcodeGenerateRepository.Delete(barcodeGenerate);
-                        _uow.Save();
-                        _barcodeAuditRepository.Save("DossingBarcodeGenerate", AuditAction.Deleted, item.Id);
-                    }
+                    _dossingBarcodeGenerateRepository.Delete(barcodeGenerate);
+                    _uow.Save();
+                    _barcodeAuditRepository.Save("DossingBarcodeGenerate", AuditAction.Deleted, item.Id);
                 }
             }
 

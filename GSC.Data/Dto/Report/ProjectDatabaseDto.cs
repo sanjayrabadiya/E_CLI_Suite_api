@@ -47,6 +47,7 @@ namespace GSC.Data.Dto.Report
         public List<ProjectDatabaseDto> LstProjectDataBase { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseVisit { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseitems { get; set; }
+        public string VariableChildValue { get; set; }
     }
 
     public class ProjectDatabaseDomainDto
@@ -94,7 +95,7 @@ namespace GSC.Data.Dto.Report
         public int PeriodId { get; set; }
         public string TemplateName { get; set; }
         public List<ProjectDatabaseTemplateDto> LstProjectDataBaseTemplate { get; set; }
-        //public List<ProjectDatabaseItemDto> LstProjectDataBaseitems { get; set; }
+        
     }
 
     public class ProjectDatabaseTemplateDto
@@ -188,6 +189,8 @@ namespace GSC.Data.Dto.Report
             get => _codedOn?.UtcDate();
             set => _codedOn = value?.UtcDate();
         }
+        public int CollectionSource { get; set; }
+        public string VariableChildValue { get; set; }
     }
 
     public class CommonDto

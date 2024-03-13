@@ -18,25 +18,16 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class PopulationTypeController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IPopulationTypeRepository _populationTypeRepository;
         private readonly IUnitOfWork _uow;
 
         public PopulationTypeController(IPopulationTypeRepository populationTypeRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _populationTypeRepository = populationTypeRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -45,10 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var populationTypes = _populationTypeRepository.GetPopulationTypeList(isDeleted);
             return Ok(populationTypes);
-            //var populationTypes = _populationTypeRepository
-            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    ).OrderByDescending(x => x.Id).ToList();
-            //return Ok(populationTypesDto);
         }
 
 
@@ -77,7 +64,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _populationTypeRepository.Add(populationType);
-            if (_uow.Save() <= 0) throw new Exception("Creating population type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating population type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(populationType.Id);
         }
 
@@ -100,7 +91,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _populationTypeRepository.AddOrUpdate(populationType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating population type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating population type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(populationType.Id);
         }
 

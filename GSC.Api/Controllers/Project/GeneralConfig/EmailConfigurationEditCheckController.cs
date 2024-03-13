@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Project.Generalconfig;
 using GSC.Data.Entities.Project.Generalconfig;
-using GSC.Domain.Context;
 using GSC.Respository.Project.GeneralConfig;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
@@ -22,16 +19,15 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IEmailConfigurationEditCheckDetailRepository _emailConfigurationEditCheckDetailRepository;
         private readonly IEmailConfigurationEditCheckRoleRepository _emailConfigurationEditCheckRoleRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
+       
         public EmailConfigurationEditCheckController(
             IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser, IEmailConfigurationEditCheckRepository emailConfigurationEditCheckRepository,
-            IGSCContext context, IEmailConfigurationEditCheckDetailRepository emailConfigurationEditCheckDetailRepository, IEmailConfigurationEditCheckRoleRepository emailConfigurationEditCheckRoleRepository)
+            IEmailConfigurationEditCheckDetailRepository emailConfigurationEditCheckDetailRepository, IEmailConfigurationEditCheckRoleRepository emailConfigurationEditCheckRoleRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _emailConfigurationEditCheckRepository = emailConfigurationEditCheckRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _emailConfigurationEditCheckDetailRepository = emailConfigurationEditCheckDetailRepository;
             _emailConfigurationEditCheckRoleRepository = emailConfigurationEditCheckRoleRepository;
         }
@@ -53,7 +49,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var emailConfigurationEditCheck = _mapper.Map<EmailConfigurationEditCheck>(emailConfigurationEditCheckDto);
 
             _emailConfigurationEditCheckRepository.Add(emailConfigurationEditCheck);
-            if (_uow.Save() <= 0) throw new Exception("Creating fector failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating fector failed on save."));
             return Ok(emailConfigurationEditCheck.Id);
         }
         [HttpPut]
@@ -64,7 +60,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var supplyManagementFector = _mapper.Map<EmailConfigurationEditCheck>(emailConfigurationEditCheckDto);
             _emailConfigurationEditCheckRepository.DeleteEmailConfigEditCheckChild(emailConfigurationEditCheckDto.Id);
             _emailConfigurationEditCheckRepository.Update(supplyManagementFector);
-            if (_uow.Save() <= 0) throw new Exception("Updating fector failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating fector failed on save."));
 
             return Ok(supplyManagementFector.Id);
         }
@@ -80,7 +76,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             var verifyRecord = _emailConfigurationEditCheckDetailRepository.All.Where(x => x.EmailConfigurationEditCheckId == record.Id).ToList();
 
-            if (verifyRecord != null)
+            if (verifyRecord.Any())
             {
                 foreach (var item in verifyRecord)
                 {
@@ -90,7 +86,7 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             var emailrole = _emailConfigurationEditCheckRoleRepository.All.Where(x => x.EmailConfigurationEditCheckId == record.Id).ToList();
 
-            if (emailrole != null)
+            if (emailrole.Any())
             {
                 foreach (var item in emailrole)
                 {

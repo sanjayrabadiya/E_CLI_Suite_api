@@ -1,13 +1,9 @@
-﻿using AutoMapper;
-using GSC.Data.Dto.Configuration;
-using GSC.Domain.Context;
+﻿using GSC.Data.Dto.Configuration;
 using GSC.Respository.Client;
 using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Syncfusion.Drawing;
 using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
@@ -20,54 +16,34 @@ namespace GSC.Report
 {
     public class ProductVerificationReport : IProductVerificationReport
     {
-        private IHostingEnvironment _hostingEnvironment;
-        private readonly IGSCContext _context;
-        private readonly IAppSettingRepository _appSettingRepository;
+        private readonly Microsoft.AspNetCore.Hosting.IWebHostEnvironment _hostingEnvironment;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly ICompanyRepository _companyRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IProductVerificationRepository _productVerificationRepository;
-        private readonly IProductVerificationDetailRepository _productVerificationDetailRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-
-        private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
-        private readonly PdfFont extralargeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 20, PdfFontStyle.Bold);
-        private readonly PdfFont largeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
-        private readonly PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
-        private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
-        private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
-        private readonly Stream fontStream;
-
         private PdfDocument document = null;
         private PdfLayoutResult tocresult = null;
-        Dictionary<PdfPageBase, int> pages = new Dictionary<PdfPageBase, int>();
-        private List<TocIndexCreate> _pagenumberset = new List<TocIndexCreate>();
+        private readonly Dictionary<PdfPageBase, int> pages = new Dictionary<PdfPageBase, int>();
+        private readonly List<TocIndexCreate> _pagenumberset = new List<TocIndexCreate>();
 
-        public ProductVerificationReport(IHostingEnvironment hostingEnvironment,
-            IGSCContext context,
-            IAppSettingRepository appSettingRepository,
+        public ProductVerificationReport(Microsoft.AspNetCore.Hosting.IWebHostEnvironment hostingEnvironment,
+
             IJwtTokenAccesser jwtTokenAccesser,
             IUploadSettingRepository uploadSettingRepository,
             ICompanyRepository companyRepository,
             IClientRepository clientRepository,
-            IMapper mapper,
-            IProductVerificationRepository productVerificationRepository,
-            IProductVerificationDetailRepository productVerificationDetailRepository
+            IProductVerificationRepository productVerificationRepository
+
         )
         {
             _hostingEnvironment = hostingEnvironment;
-            _context = context;
-            _appSettingRepository = appSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _companyRepository = companyRepository;
             _clientRepository = clientRepository;
-            _mapper = mapper;
             _productVerificationRepository = productVerificationRepository;
-            _productVerificationDetailRepository = productVerificationDetailRepository;
             _uploadSettingRepository = uploadSettingRepository;
-            fontStream = FilePathConvert();
-            regularfont = new PdfTrueTypeFont(fontStream, 12);
+           
         }
 
         private Stream FilePathConvert()
@@ -99,6 +75,9 @@ namespace GSC.Report
 
         private void GetProductVerification(PdfDocument document, int ProductReceiptId, ReportSettingNew reportSetting)
         {
+            PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             var VerififcationData = _productVerificationRepository.GetProductVerificationSummary(ProductReceiptId);
 
             PdfSection SectionTOC = document.Sections.Add();
@@ -108,7 +87,6 @@ namespace GSC.Report
             document.Template.Bottom = AddFooter(document);
 
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
-            //layoutFormat.Break = PdfLayoutBreakType.FitPage;
             layoutFormat.Layout = PdfLayoutType.Paginate;
             //not fit page then next page
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
@@ -123,17 +101,6 @@ namespace GSC.Report
             PdfTextElement indexheader = new PdfTextElement("Product Verification", headerfont, PdfBrushes.Black);
             indexheader.StringFormat = tocformat;
             tocresult = indexheader.Draw(tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), layoutFormat);
-
-            PdfSolidBrush brush = new PdfSolidBrush(new PdfColor(0, 0, 0));
-            PdfPen pens = new PdfPen(Color.Black);
-            //Draw Rectangle For Profile Details
-            brush = new PdfSolidBrush(new PdfColor(255, 255, 255));
-
-            // Draw Line
-            //pageTOC.Graphics.DrawLine(PdfPens.Black, 0, tocresult.Bounds.Bottom + 5, tocresult.Page.GetClientSize().Width, tocresult.Bounds.Bottom + 5);
-
-            tocformat = new PdfStringFormat(PdfTextAlignment.Left, PdfVerticalAlignment.Top);
-
             float drectangleStarWith = 40;
 
             tocresult = AddString("Product Type", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -186,13 +153,7 @@ namespace GSC.Report
 
             tocresult = AddString("Re-Test/Expiry", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].RetestExpiryDate.ToString() == "" ? "" : Convert.ToDateTime(VerififcationData[0].RetestExpiryDate).ToString("dd-MM-yyyy"), tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, true);
-
-            //pageTOC.Graphics.Save();
-            //pageTOC.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
-
-            //bounds = new RectangleF(0, 40, pageTOC.GetClientSize().Width, tocresult.Bounds.Y);
-            //pageTOC.Graphics.DrawRectangle(PdfPens.Black, brush, bounds);
+            DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, true);
 
             tocresult = AddString("Product Verification Detail", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Bottom + 50, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
 
@@ -203,19 +164,49 @@ namespace GSC.Report
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Assay Difference Verified & Meet Requirements", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsAssayRequirement.ToString() == "" ? "" : VerififcationData[0].IsAssayRequirement.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (VerififcationData.Any() && VerififcationData[0].IsAssayRequirement.ToString() == "False")
+            {
+                tocresult = AddString("No", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+            else
+            {
+                tocresult = AddString("YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
+
             tocresult = AddString("Verification of IMP Done Under Sodium Vapor Lamp", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsSodiumVaporLamp.ToString() == "" ? "" : VerififcationData[0].IsSodiumVaporLamp.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (VerififcationData.Any() && VerififcationData[0].IsSodiumVaporLamp.ToString() == "False")
+            {
+                tocresult = AddString("NO", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+            else
+            {
+                tocresult = AddString("YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Product Description Checked With COA/SPC/PACKAGE", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsProductDescription.ToString() == "" ? "" : VerififcationData[0].IsProductDescription.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (VerififcationData.Any() && VerififcationData[0].IsProductDescription.ToString() == "False")
+            {
+                tocresult = AddString("NO", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+            else
+            {
+                tocresult = AddString("YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Condition of Products Packs", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsConditionProduct.ToString() == "" ? "" : VerififcationData[0].IsConditionProduct.ToString() == "False" ? "Not Appropriate" : "Appropriate", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (VerififcationData.Any() && VerififcationData[0].IsConditionProduct.ToString() == "False")
+            {
+                tocresult = AddString("Not Appropriate", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+            else
+            {
+                tocresult = AddString("Appropriate", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, true);
 
             tocresult = AddString("No. of Boxes", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -235,7 +226,15 @@ namespace GSC.Report
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Quantity for Retention Samples Confirmed", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            tocresult = AddString(VerififcationData[0].IsRetentionConfirm.ToString() == "" ? "" : VerififcationData[0].IsRetentionConfirm.ToString() == "False" ? "NO" : "YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            if (VerififcationData.Any() && VerififcationData[0].IsRetentionConfirm.ToString() == "False")
+            {
+                tocresult = AddString("NO", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+            else
+            {
+                tocresult = AddString("YES", tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
+            }
+
             drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
             tocresult = AddString("Quantity of retention sample", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
@@ -252,10 +251,8 @@ namespace GSC.Report
 
             tocresult = AddString("Additional Remarks", tocresult.Page, new Syncfusion.Drawing.RectangleF(10, tocresult.Bounds.Bottom + 10, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
             tocresult = AddString(VerififcationData[0].Remarks, tocresult.Page, new Syncfusion.Drawing.RectangleF(310, tocresult.Bounds.Y, tocresult.Page.GetClientSize().Width - 310, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, regularfont, layoutFormat);
-            drectangleStarWith = DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
+            DrawRectangle(tocresult, tocresult.Page, drectangleStarWith, false);
 
-            //pageTOC.Graphics.Save();
-            //pageTOC.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
 
             PdfStringFormat format = new PdfStringFormat();
             format.Alignment = PdfTextAlignment.Left;
@@ -264,10 +261,8 @@ namespace GSC.Report
 
         private float DrawRectangle(PdfLayoutResult position, PdfPage page, float startposition, bool isDraw)
         {
-            PdfSolidBrush brush = new PdfSolidBrush(new PdfColor(0, 0, 0));
-            PdfPen pens = new PdfPen(Color.Black);
             //Draw Rectangle For Profile Details
-            brush = new PdfSolidBrush(new PdfColor(255, 255, 255));
+            PdfSolidBrush brush = new PdfSolidBrush(new PdfColor(255, 255, 255));
             page.Graphics.Save();
             page.Graphics.SetTransparency(1, 1, PdfBlendMode.Multiply);
 
@@ -275,7 +270,7 @@ namespace GSC.Report
             {
                 RectangleF bound = new RectangleF(0, startposition + 5, page.GetClientSize().Width, page.GetClientSize().Height + position.Bounds.Bottom);
                 page.Graphics.DrawRectangle(PdfPens.Black, brush, bound);
-                return startposition = 0;
+                return startposition;
             }
             if (isDraw)
             {
@@ -286,7 +281,7 @@ namespace GSC.Report
             return startposition;
         }
 
-        private PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
+        private static PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
         {
             PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
             //Draws String       
@@ -303,21 +298,18 @@ namespace GSC.Report
         {
             RectangleF rect = new RectangleF(0, 0, doc.Pages[0].GetClientSize().Width, 70);
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
-            PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 24);
             Color activeColor = Color.FromArgb(44, 71, 120);
             SizeF imageSize = new SizeF(50f, 50f);
 
             var imagePath = _uploadSettingRepository.GetImagePath();
             var companydetail = _companyRepository.All.Select(x => new { x.Logo, x.CompanyName }).FirstOrDefault();
-            if (isCompanyLogo)
+            if (isCompanyLogo && companydetail != null && File.Exists($"{imagePath}/{companydetail.Logo}") && !String.IsNullOrEmpty(companydetail.Logo))
             {
-                if (File.Exists($"{imagePath}/{companydetail.Logo}") && !String.IsNullOrEmpty(companydetail.Logo))
-                {
-                    FileStream logoinputstream = new FileStream($"{imagePath}/{companydetail.Logo}", FileMode.Open, FileAccess.Read);
-                    PdfImage img = new PdfBitmap(logoinputstream);
-                    var companylogo = new PointF(20, 0);
-                    header.Graphics.DrawImage(img, companylogo, imageSize);
-                }
+                FileStream logoinputstream = new FileStream($"{imagePath}/{companydetail.Logo}", FileMode.Open, FileAccess.Read);
+                PdfImage img = new PdfBitmap(logoinputstream);
+                var companylogo = new PointF(20, 0);
+                header.Graphics.DrawImage(img, companylogo, imageSize);
+
             }
             if (isClientLogo)
             {
@@ -332,15 +324,16 @@ namespace GSC.Report
             }
 
             PdfSolidBrush brush = new PdfSolidBrush(activeColor);
-            PdfPen pen = new PdfPen(Color.DarkBlue, 3f);
-            font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
+            PdfFont font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
 
             PdfStringFormat format = new PdfStringFormat();
             format.Alignment = PdfTextAlignment.Center;
             format.LineAlignment = PdfVerticalAlignment.Top;
 
-
-            header.Graphics.DrawString($"{companydetail.CompanyName}", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
+            if (companydetail != null)
+                header.Graphics.DrawString($"{companydetail.CompanyName}", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
+            else
+                header.Graphics.DrawString($"", font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
             brush = new PdfSolidBrush(Color.Gray);
             font = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
 
@@ -354,7 +347,7 @@ namespace GSC.Report
             format.Alignment = PdfTextAlignment.Left;
             format.LineAlignment = PdfVerticalAlignment.Bottom;
 
-            pen = new PdfPen(Color.Black, 2f);
+            PdfPen pen = new PdfPen(Color.Black, 2f);
             header.Graphics.DrawLine(pen, 0, header.Height, header.Width, header.Height);
 
             return header;
@@ -388,7 +381,8 @@ namespace GSC.Report
 
         private void SetPageNumber()
         {
-
+            Stream fontStream = FilePathConvert();
+            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
             for (int i = 0; i < document.Pages.Count; i++)
             {
                 PdfPageBase page = document.Pages[i] as PdfPageBase;

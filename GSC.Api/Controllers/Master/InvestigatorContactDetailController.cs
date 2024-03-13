@@ -55,7 +55,11 @@ namespace GSC.Api.Controllers.Master
 
 
             _investigatorContactDetailRepository.Add(investigatorContactDetail);
-            if (_uow.Save() <= 0) throw new Exception("Creating Investigator contact failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Investigator contact failed on save.");
+                return BadRequest(ModelState);
+            }
             var returnInvestigatorContactDetailDto = _mapper.Map<InvestigatorContactDetailDto>(investigatorContactDetail);
             return CreatedAtAction("Get", new { id = investigatorContactDetail.Id }, returnInvestigatorContactDetailDto);
         }
@@ -82,7 +86,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by Darshil for effective Date on 16-07-2020 */
             _investigatorContactDetailRepository.AddOrUpdate(investigatorContactDetail);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Investigator contact failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Investigator contact failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(investigatorContactDetail.Id);
         }
 

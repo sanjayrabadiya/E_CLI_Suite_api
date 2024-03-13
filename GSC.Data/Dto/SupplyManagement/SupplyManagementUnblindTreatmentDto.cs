@@ -1,8 +1,5 @@
-﻿using GSC.Data.Dto.Master;
-using GSC.Data.Entities.Common;
-using GSC.Data.Entities.Location;
+﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
-using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 

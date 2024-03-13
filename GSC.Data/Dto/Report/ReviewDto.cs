@@ -1,5 +1,4 @@
 ﻿using System;
-using GSC.Data.Dto.Attendance;
 using System.Collections.Generic;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
@@ -51,7 +50,7 @@ namespace GSC.Data.Dto.Report
         public string ReviewerName { get; set; }
         public DateTime? ReviewedDate { get; set; }
     }
-    //
+    
     public class ReviewSearchDto : BaseDto
     {
         public int ProjectId { get; set; }

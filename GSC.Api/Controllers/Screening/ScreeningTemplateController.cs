@@ -473,5 +473,34 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateRepository.GetTemplateForBarcode(designTemplate, id, isDosing, firstTime));
         }
 
+
+        //Na report for template
+        [HttpGet]
+        [Route("GetNAReportData")]
+        public IActionResult GetNAReportData([FromQuery] NAReportSearchDto filters)
+        {
+            if (filters.SiteId <= 0) return BadRequest();
+
+            var reportDto = _screeningTemplateRepository.NAReport(filters);
+
+            return Ok(reportDto);
+        }
+
+        [HttpPost("SetStatusNA")]
+        public ActionResult SetStatusNA([FromBody] List<int> screeningTemplateId)
+        {
+            foreach (var item in screeningTemplateId)
+            {
+                var record = _screeningTemplateRepository.Find(item);
+                if (record == null)
+                    return NotFound();
+                record.IsNA = true;
+                _screeningTemplateRepository.Update(record);
+                _uow.Save();
+            }
+            return Ok(true);
+        }
+        // Na report
+
     }
 }

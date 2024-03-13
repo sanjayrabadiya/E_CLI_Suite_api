@@ -20,23 +20,14 @@ namespace GSC.Api.Controllers.Master
     public class FreezerController : BaseController
     {
         private readonly IFreezerRepository _freezerRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public FreezerController(IFreezerRepository freezerRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _freezerRepository = freezerRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -47,11 +38,6 @@ namespace GSC.Api.Controllers.Master
             var freezer = _freezerRepository.GetFreezerList(isDeleted);
             freezer.ForEach(t => t.FreezerTypeName = t.FreezerType.GetDescription());
             return Ok(freezer);
-            //var freezers = _freezerRepository.All.Where(x => isDeleted ? x.DeletedDate == null : x.DeletedDate !=null
-            //).OrderByDescending(x => x.Id).ToList();
-            //var freezersDto = _mapper.Map<IEnumerable<FreezerDto>>(freezers);
-            //freezersDto.ForEach(t => t.FreezerTypeName = t.FreezerType.GetDescription());
-            //return Ok(freezersDto);
         }
 
         [HttpGet("{id}")]
@@ -78,7 +64,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _freezerRepository.Add(freezer);
-            if (_uow.Save() <= 0) throw new Exception("Creating Freezer failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Freezer failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(freezer.Id);
         }
 
@@ -101,7 +91,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _freezerRepository.AddOrUpdate(freezer);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Freezer failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Freezer failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(freezer.Id);
         }
 

@@ -1,8 +1,7 @@
-﻿using GSC.Common.Base;
-using GSC.Common.Common;
+﻿
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Project.Design;
-using System.Collections.Generic;
+
 
 namespace GSC.Data.Dto.Project.Generalconfig
 {

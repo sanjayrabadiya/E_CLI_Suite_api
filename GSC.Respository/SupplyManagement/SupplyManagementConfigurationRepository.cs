@@ -4,7 +4,6 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,18 +11,14 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementConfigurationRepository : GenericRespository<SupplyManagementConfiguration>, ISupplyManagementConfigurationRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
-
-        public SupplyManagementConfigurationRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper)
+        public SupplyManagementConfigurationRepository(IGSCContext context,IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
+            
             _mapper = mapper;
-            _context = context;
+            
         }
 
         public List<SupplyManagementConfigurationGridDto> GetSupplyManagementTemplateList(bool isDeleted)

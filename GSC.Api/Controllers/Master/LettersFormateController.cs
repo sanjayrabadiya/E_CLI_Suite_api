@@ -55,7 +55,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _lettersFormateRepository.Add(lettersFormate);
-            if (_uow.Save() <= 0) return Ok(new Exception("letters Formate failed on save."));
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "letters Formate failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(lettersFormate.Id);
         }
 
@@ -74,7 +78,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _lettersFormateRepository.Update(lettersFormate);
-            if (_uow.Save() <= 0) return Ok(new Exception("Updating letters Formatefailed on save."));
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating letters Formatefailed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(lettersFormate.Id);
         }
 

@@ -8,9 +8,7 @@ using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -66,7 +64,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementEmailConfiguration.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementEmailConfiguration.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementEmailConfigurationRepository.Add(supplyManagementEmailConfiguration);
-            if (_uow.Save() <= 0) throw new Exception("Creating email configuration failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating email configuration failed on save."));
 
             
             return Ok(supplyManagementEmailConfiguration.Id);
@@ -96,7 +94,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementEmailConfiguration.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementEmailConfigurationRepository.Update(supplyManagementEmailConfiguration);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating email configuration study product type failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating email configuration study product type failed on save."));
             
             return Ok(supplyManagementEmailConfiguration.Id);
         }

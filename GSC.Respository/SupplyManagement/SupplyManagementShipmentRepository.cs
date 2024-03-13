@@ -2,10 +2,7 @@
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Configuration;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -16,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GSC.Respository.SupplyManagement
@@ -54,8 +50,8 @@ namespace GSC.Respository.SupplyManagement
 
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).FirstOrDefault();
 
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && ((x.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementRequest.ToProjectId == SiteId)
-            || (x.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementRequest.FromProjectId == SiteId))).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && ((x.SupplyManagementRequest.IsSiteRequest && x.SupplyManagementRequest.ToProjectId == SiteId)
+            || (!x.SupplyManagementRequest.IsSiteRequest && x.SupplyManagementRequest.FromProjectId == SiteId))).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             data.ForEach(t =>
@@ -64,39 +60,42 @@ namespace GSC.Respository.SupplyManagement
             });
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                       && ((x.IsSiteRequest == true && x.ToProjectId == SiteId)
-            || (x.IsSiteRequest == false && x.FromProjectId == SiteId)) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
+                       && ((x.IsSiteRequest && x.ToProjectId == SiteId)
+            || (!x.IsSiteRequest && x.FromProjectId == SiteId)) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
                      ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {
-                SupplyManagementShipmentGridDto obj = new SupplyManagementShipmentGridDto();
-                obj = t;
-                obj.Id = 0;
-                obj.RequestDate = t.CreatedDate;
-                obj.CreatedByUser = null;
-                obj.CreatedDate = null;
-                obj.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
+
+
+                t.Id = 0;
+                t.RequestDate = t.CreatedDate;
+                t.CreatedByUser = null;
+                t.CreatedDate = null;
+                t.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
                 var product = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductType.ProductTypeName).FirstOrDefault() : "";
-                obj.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : product;
+                t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : product;
                 if (t.StudyProductTypeId > 0)
                 {
                     var ptype = _context.PharmacyStudyProductType.Where(x => x.Id == t.StudyProductTypeId).FirstOrDefault();
                     if (ptype != null)
                     {
-                        obj.StudyProductTypeUnitName = ptype.ProductUnitType.GetDescription();
+                        t.StudyProductTypeUnitName = ptype.ProductUnitType.GetDescription();
                     }
                 }
                 else
                 {
-                    obj.StudyProductTypeUnitName = "Kit";
+                    t.StudyProductTypeUnitName = "Kit";
                 }
 
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
-                    obj.StudyProjectCode = study != null ? study.ProjectCode : "";
-                    obj.ProjectId = study.Id;
+                    if (study != null)
+                    {
+                        t.StudyProjectCode = study.ProjectCode;
+                        t.ProjectId = study.Id;
+                    }
                 }
                 t.SiteRequest = t.IsSiteRequest ? "Site to Site" : "Site to Study";
 
@@ -104,32 +103,33 @@ namespace GSC.Respository.SupplyManagement
                .Where(s => s.DeletedDate == null && s.SupplyManagementApproval.ProjectId == parentProjectId && s.SupplyManagementApproval.ApprovalType == SupplyManagementApprovalType.ShipmentApproval).ToList();
                 if (workflowdetail.Count > 0)
                 {
-                    var workflow = workflowdetail.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.SupplyManagementApproval.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+                    var workflow = workflowdetail.Find(s => s.UserId == _jwtTokenAccesser.UserId && s.SupplyManagementApproval.RoleId == _jwtTokenAccesser.RoleId);
 
                     var supplyManagementShipmentApproval = _context.SupplyManagementShipmentApproval.Include(a => a.Users).Where(z => z.SupplyManagementRequestId == t.SupplyManagementRequestId).FirstOrDefault();
 
                     if (workflow != null && supplyManagementShipmentApproval == null)
                     {
-                        obj.IsWorkflowApproval = true;
+                        t.IsWorkflowApproval = true;
                     }
                     if (supplyManagementShipmentApproval != null)
                     {
-                        obj.WorkflowApprovalName = supplyManagementShipmentApproval.Users.UserName;
-                        obj.WorkflowApprovalRoleName = _context.SecurityRole.Where(a => a.Id == supplyManagementShipmentApproval.RoleId).FirstOrDefault().RoleName;
-                        obj.WorkflowDate = supplyManagementShipmentApproval.CreatedDate;
-                        obj.WorkflowId = supplyManagementShipmentApproval.Id;
-                        obj.WorkflowComments = supplyManagementShipmentApproval.Comments;
-                        obj.WorkflowStatus = supplyManagementShipmentApproval.Status;
-                        obj.IsWorkflowApproval = false;
+                        t.WorkflowApprovalName = supplyManagementShipmentApproval.Users.UserName;
+                        var role = _context.SecurityRole.Where(a => a.Id == supplyManagementShipmentApproval.RoleId).FirstOrDefault();
+                        if (role != null)
+                            t.WorkflowApprovalRoleName = role.RoleName;
+                        t.WorkflowDate = supplyManagementShipmentApproval.CreatedDate;
+                        t.WorkflowId = supplyManagementShipmentApproval.Id;
+                        t.WorkflowComments = supplyManagementShipmentApproval.Comments;
+                        t.WorkflowStatus = supplyManagementShipmentApproval.Status;
+                        t.IsWorkflowApproval = false;
                     }
                 }
                 else
                 {
-                    obj.WorkflowStatus = SupplyManagementApprovalStatus.Approved;
+                    t.WorkflowStatus = SupplyManagementApprovalStatus.Approved;
                 }
-                obj.IpAddress = t.IpAddress;
-                obj.TimeZone = t.TimeZone;
-                FinalData.Add(obj);
+
+                FinalData.Add(t);
 
             });
             return FinalData.OrderByDescending(x => x.RequestDate).ToList();
@@ -180,7 +180,7 @@ namespace GSC.Respository.SupplyManagement
             }
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                if (settings != null && settings.IsBlindedStudy == true)
+                if (settings.IsBlindedStudy == true)
                 {
                     if (supplyManagementshipmentDto.Kits != null)
                     {
@@ -220,12 +220,10 @@ namespace GSC.Respository.SupplyManagement
                 }
                 else
                 {
-                    if (shipmentData.StudyProductTypeId != null)
+                    if (shipmentData.StudyProductTypeId != null && !_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, (int)shipmentData.StudyProductTypeId))
                     {
-                        if (!_supplyManagementRequestRepository.CheckAvailableRemainingQty(supplyManagementshipmentDto.ApprovedQty, (int)project.ParentProjectId, (int)shipmentData.StudyProductTypeId))
-                        {
-                            return "Approve qty should not greater than remaining qty!";
-                        }
+                        return "Approve qty should not greater than remaining qty!";
+
                     }
                 }
             }
@@ -234,8 +232,8 @@ namespace GSC.Respository.SupplyManagement
         public string GetShipmentNo()
         {
             string no = string.Empty;
-            bool isnotexist = false;
-            while (!isnotexist)
+
+            while (string.IsNullOrEmpty(no))
             {
                 var str = GenerateShipmentNo();
                 if (!string.IsNullOrEmpty(str))
@@ -243,10 +241,8 @@ namespace GSC.Respository.SupplyManagement
                     var data = All.Where(x => x.ShipmentNo == str).FirstOrDefault();
                     if (data == null)
                     {
-                        isnotexist = true;
                         no = str;
                         break;
-
                     }
                 }
             }
@@ -256,26 +252,27 @@ namespace GSC.Respository.SupplyManagement
         {
             var request = _context.SupplyManagementRequest.Where(x => x.Id == supplyManagementshipmentDto.SupplyManagementRequestId).FirstOrDefault();
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentdata.FromProject.ParentProjectId).FirstOrDefault();
+            if (setting == null)
+                return;
             if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
                 if (setting.KitCreationType == KitCreationType.KitWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {
-
-                    foreach (var item in supplyManagementshipmentDto.Kits)
+                    foreach (var item in supplyManagementshipmentDto.Kits.Select(s => s.Id))
                     {
-                        var kit = _context.SupplyManagementKITDetail.Where(x => x.Id == item.Id).FirstOrDefault();
+                        var kit = _context.SupplyManagementKITDetail.Where(x => x.Id == item).FirstOrDefault();
                         if (kit != null && supplyManagementshipmentDto.Id > 0)
                         {
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
-                            if (request.IsSiteRequest)
+                            if (request != null && request.IsSiteRequest)
                             {
                                 kit.ToSiteId = request.FromProjectId;
                             }
                             _context.SupplyManagementKITDetail.Update(kit);
 
                             SupplyManagementKITDetailHistory history = new SupplyManagementKITDetailHistory();
-                            history.SupplyManagementKITDetailId = item.Id;
+                            history.SupplyManagementKITDetailId = item;
                             history.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
                             history.Status = KitStatus.Shipped;
                             history.RoleId = _jwtTokenAccesser.RoleId;
@@ -286,22 +283,22 @@ namespace GSC.Respository.SupplyManagement
                 }
                 if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {
-                    foreach (var item in supplyManagementshipmentDto.Kits)
+                    foreach (var item in supplyManagementshipmentDto.Kits.Select(s => s.Id))
                     {
-                        var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
+                        var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item).FirstOrDefault();
                         if (kit != null && supplyManagementshipmentDto.Id > 0)
                         {
 
                             kit.Status = Helper.KitStatus.Shipped;
                             kit.SupplyManagementShipmentId = supplyManagementshipmentDto.Id;
-                            if (request.IsSiteRequest)
+                            if (request != null && request.IsSiteRequest)
                             {
                                 kit.ToSiteId = request.FromProjectId;
                             }
                             _context.SupplyManagementKITSeries.Update(kit);
 
                             SupplyManagementKITSeriesDetailHistory history = new SupplyManagementKITSeriesDetailHistory();
-                            history.SupplyManagementKITSeriesId = item.Id;
+                            history.SupplyManagementKITSeriesId = item;
                             history.SupplyManagementShipmentId = kit.SupplyManagementShipmentId;
                             history.Status = KitStatus.Shipped;
                             history.RoleId = _jwtTokenAccesser.RoleId;
@@ -314,18 +311,18 @@ namespace GSC.Respository.SupplyManagement
         }
         public void SendShipmentApproveRejecttEmail(int id, SupplyManagementShipment shipment)
         {
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
             SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
             var request = _context.SupplyManagementRequest.Include(x => x.ProjectDesignVisit).Include(x => x.FromProject).Include(x => x.PharmacyStudyProductType).ThenInclude(x => x.ProductType).Where(x => x.Id == id).FirstOrDefault();
             if (request != null)
             {
-                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentApproveReject).ToList();
-                if (emailconfiglist != null && emailconfiglist.Count > 0)
+                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == request.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentApproveReject).ToList();
+                if (emailconfiglist.Any())
                 {
                     var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                     if (siteconfig.Count > 0)
                     {
-                        emailconfig = siteconfig.Where(x => x.SiteId == request.FromProjectId).FirstOrDefault();
+                        emailconfig = siteconfig.Find(x => x.SiteId == request.FromProjectId);
                     }
                     else
                     {
@@ -334,7 +331,7 @@ namespace GSC.Respository.SupplyManagement
 
                     var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.FromProject.ParentProjectId).FirstOrDefault();
                     var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                    if (details.Count() > 0)
+                    if (details.Any())
                     {
 
                         if (request.PharmacyStudyProductType != null && request.PharmacyStudyProductType.ProductType != null)
@@ -343,7 +340,9 @@ namespace GSC.Respository.SupplyManagement
                         {
                             iWRSEmailModel.ProductType = "Blinded study";
                         }
-                        iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault().ProjectCode;
+                        var project = _context.Project.Where(x => x.Id == request.FromProject.ParentProjectId).FirstOrDefault();
+                        if (project != null)
+                            iWRSEmailModel.StudyCode = project.ProjectCode;
                         iWRSEmailModel.SiteCode = request.FromProject.ProjectCode;
                         var managesite = _context.ManageSite.Where(x => x.Id == request.FromProject.ManageSiteId).FirstOrDefault();
                         if (managesite != null)
@@ -381,7 +380,9 @@ namespace GSC.Respository.SupplyManagement
                         iWRSEmailModel.Visit = request.ProjectDesignVisit.DisplayName;
                         iWRSEmailModel.Status = shipment.Status == SupplyMangementShipmentStatus.Approved ? "Approved" : "Rejected";
                         iWRSEmailModel.ApprovedQty = shipment.ApprovedQty;
-                        iWRSEmailModel.RequestedBy = _context.Users.Where(x => x.Id == request.CreatedBy).FirstOrDefault().UserName;
+                        var user = _context.Users.Where(x => x.Id == request.CreatedBy).FirstOrDefault();
+                        if (user != null)
+                            iWRSEmailModel.RequestedBy = user.UserName;
 
                         _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
                         foreach (var item in details)
@@ -413,16 +414,16 @@ namespace GSC.Respository.SupplyManagement
                     {
                         SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
                         SupplyManagementEmailConfiguration emailconfig = new SupplyManagementEmailConfiguration();
-                        IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                        IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
                         SupplyManagementShipment supplyManagementRequest = new SupplyManagementShipment();
-                        var emailconfiglist = await _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == request.SupplyManagementRequest.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentApproveReject).ToListAsync();
+                        var emailconfiglist = await _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == request.SupplyManagementRequest.FromProject.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.ShipmentApproveReject).ToListAsync();
                         if (emailconfiglist != null && emailconfiglist.Count > 0)
                         {
-                           
+
                             var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                             if (siteconfig.Count > 0)
                             {
-                                emailconfig = siteconfig.Where(x => x.SiteId == request.SupplyManagementRequest.FromProjectId).FirstOrDefault();
+                                emailconfig = siteconfig.Find(x => x.SiteId == request.SupplyManagementRequest.FromProjectId);
                             }
                             else
                             {
@@ -555,7 +556,7 @@ namespace GSC.Respository.SupplyManagement
                             {
                                 var allocation = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == request.SupplyManagementRequest.FromProject.ParentProjectId).FirstOrDefault();
                                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                                if (details.Count() > 0)
+                                if (details.Any())
                                 {
 
                                     if (request.SupplyManagementRequest.PharmacyStudyProductType != null && request.SupplyManagementRequest.PharmacyStudyProductType.ProductType != null)
@@ -625,7 +626,6 @@ namespace GSC.Respository.SupplyManagement
                             _context.Save();
                         }
                     }
-                    
                 }
             }
             catch (Exception ex)
@@ -643,53 +643,48 @@ namespace GSC.Respository.SupplyManagement
 
         public string ExpiryDateShipmentValidation(SupplyManagementRequest shipmentdata, SupplyManagementShipmentDto supplyManagementshipmentDto)
         {
-
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == shipmentdata.FromProject.ParentProjectId).FirstOrDefault();
-            if (setting != null)
+            if (setting != null && supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
             {
-                if (supplyManagementshipmentDto.Status == Helper.SupplyMangementShipmentStatus.Approved)
+                if (setting.KitCreationType == KitCreationType.KitWise && supplyManagementshipmentDto.Kits.Count > 0)
                 {
-                    if (setting.KitCreationType == KitCreationType.KitWise && supplyManagementshipmentDto.Kits.Count > 0)
-                    {
 
-                        foreach (var item in supplyManagementshipmentDto.Kits)
+                    foreach (var item in supplyManagementshipmentDto.Kits)
+                    {
+                        var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (kit != null)
                         {
-                            var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.Id == item.Id).FirstOrDefault();
-                            if (kit != null)
+                            var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
+                            if (productreciept == null)
+                                return "Product receipt not found";
+                            var currentdate = DateTime.Now.Date;
+                            var date = currentdate.AddDays(-(int)kit.SupplyManagementKIT.Days);
+                            if (currentdate.Date < date.Date)
                             {
-                                var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
-                                if (productreciept == null)
-                                    return "Product receipt not found";
-                                var currentdate = DateTime.Now.Date;
-                                var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
-                                var date = currentdate.AddDays(-(int)kit.SupplyManagementKIT.Days);
-                                if (currentdate.Date < date.Date)
-                                {
-                                    return "Product is expired";
-                                }
-                                if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < Convert.ToDateTime(supplyManagementshipmentDto.EstimatedCourierDate).Date)
-                                {
-                                    return "Product is expired before estimated courier date";
-                                }
+                                return "Product is expired";
+                            }
+                            if (Convert.ToDateTime(productreciept.RetestExpiryDate).Date < Convert.ToDateTime(supplyManagementshipmentDto.EstimatedCourierDate).Date)
+                            {
+                                return "Product is expired before estimated courier date";
                             }
                         }
                     }
-                    if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
+                }
+                if (setting.KitCreationType == KitCreationType.SequenceWise && supplyManagementshipmentDto.Kits.Count > 0)
+                {
+                    foreach (var item in supplyManagementshipmentDto.Kits)
                     {
-                        foreach (var item in supplyManagementshipmentDto.Kits)
+                        var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
+                        if (kit != null)
                         {
-                            var kit = _context.SupplyManagementKITSeries.Where(x => x.Id == item.Id).FirstOrDefault();
-                            if (kit != null)
+                            var currentdate = DateTime.Now.Date;
+                            if (Convert.ToDateTime(kit.KitExpiryDate).Date < currentdate.Date)
                             {
-                                var currentdate = DateTime.Now.Date;
-                                if (Convert.ToDateTime(kit.KitExpiryDate).Date < currentdate.Date)
-                                {
-                                    return "Product is expired";
-                                }
-                                if (Convert.ToDateTime(kit.KitExpiryDate).Date < Convert.ToDateTime(supplyManagementshipmentDto.EstimatedCourierDate).Date)
-                                {
-                                    return "Product is expired before estimated courier date";
-                                }
+                                return "Product is expired";
+                            }
+                            if (Convert.ToDateTime(kit.KitExpiryDate).Date < Convert.ToDateTime(supplyManagementshipmentDto.EstimatedCourierDate).Date)
+                            {
+                                return "Product is expired before estimated courier date";
                             }
                         }
                     }

@@ -7,10 +7,9 @@ using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.SupplyManagement
 {
@@ -44,7 +43,7 @@ namespace GSC.Respository.SupplyManagement
                    ProjectTo<CentralDepotGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
-        public List<DropDownDto> GetStorageAreaByProjectDropDown(int ProjectId)
+        public List<DropDownDto> GetStorageAreaByProjectDropDownByProjectId(int ProjectId)
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectId == ProjectId)
@@ -91,9 +90,7 @@ namespace GSC.Respository.SupplyManagement
         public string StudyUseInReceipt(CentralDepot objSave)
         {
             var receipt = _context.ProductReceipt.Where(x => x.ProjectId == objSave.ProjectId && x.DeletedDate == null).FirstOrDefault();
-            if (receipt != null)
-                if (Find(receipt.CentralDepotId).DepotType == DepotType.Local)
-                    if (objSave.DepotType == DepotType.Central)
+            if (receipt != null && (Find(receipt.CentralDepotId).DepotType == DepotType.Local) && objSave.DepotType == DepotType.Central)
                         return "Can't add central depot for this study, due to already use in reciept as local depot.";
             return "";
         }
@@ -102,7 +99,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var central = Find(Id);
             if (central.ProjectId != null)
-                return GetStorageAreaByProjectDropDown((int)central.ProjectId);
+                return GetStorageAreaByProjectDropDownByProjectId((int)central.ProjectId);
             else
                 return GetStorageAreaByDepoDropDown();
         }

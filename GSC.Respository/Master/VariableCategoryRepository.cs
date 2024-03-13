@@ -30,7 +30,7 @@ namespace GSC.Respository.Master
         {
             return All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
-                .Select(c => new DropDownDto {Id = c.Id, Value = c.CategoryName, Code = c.CategoryCode, IsDeleted = c.DeletedDate != null })
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.CategoryName, Code = c.CategoryCode, IsDeleted = c.DeletedDate != null })
                 .OrderBy(o => o.Value).ToList();
         }
 
@@ -39,9 +39,10 @@ namespace GSC.Respository.Master
             if (All.Any(x => x.Id != objSave.Id && x.CategoryCode == objSave.CategoryCode.Trim() && x.DeletedDate == null))
                 return "Duplicate Variable Category code : " + objSave.CategoryCode;
 
-            if (!string.IsNullOrEmpty(objSave.CategoryName))
-                if (All.Any(x => x.Id != objSave.Id && x.CategoryName == objSave.CategoryName.Trim() && x.DeletedDate == null))
+            if (!string.IsNullOrEmpty(objSave.CategoryName) && All.Any(x => x.Id != objSave.Id && x.CategoryName == objSave.CategoryName.Trim() && x.DeletedDate == null))
+            {
                 return "Duplicate Variable Category name : " + objSave.CategoryName;
+            }
             return "";
         }
 

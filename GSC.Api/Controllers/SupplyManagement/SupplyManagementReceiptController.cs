@@ -1,17 +1,12 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -23,14 +18,12 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly ISupplyManagementReceiptRepository _supplyManagementReceiptRepository;
         private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
-        private readonly IUnitOfWork _uow;
 
         public SupplyManagementReceiptController(ISupplyManagementReceiptRepository supplyManagementReceiptRepository,
-            IUnitOfWork uow, IMapper mapper,
+            IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser, ISupplyManagementShipmentRepository supplyManagementShipmentRepository)
         {
             _supplyManagementReceiptRepository = supplyManagementReceiptRepository;
-            _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _supplyManagementShipmentRepository = supplyManagementShipmentRepository;

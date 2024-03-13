@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -12,6 +13,7 @@ using GSC.Respository.Common;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.Volunteer;
+using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -306,5 +308,32 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningEntryDto);
         }
 
+        // NA Report for visit
+        [HttpGet]
+        [Route("GetNAReportData")]
+        public IActionResult GetNAReportData([FromQuery] NAReportSearchDto filters)
+        {
+            if (filters.SiteId <= 0) return BadRequest();
+
+            var reportDto = _screeningVisitRepository.NAReport(filters);
+
+            return Ok(reportDto);
+        }
+
+        [HttpPost("SetStatusNA")]
+        public ActionResult SetStatusNA([FromBody] List<int> screeningTemplateId)
+        {
+            foreach (var item in screeningTemplateId)
+            {
+                var record = _screeningVisitRepository.Find(item);
+                if (record == null)
+                    return NotFound();
+                record.IsNA = true;
+                _screeningVisitRepository.Update(record);
+                _uow.Save();
+            }
+            return Ok(true);
+        }
+        // NA Report
     }
 }

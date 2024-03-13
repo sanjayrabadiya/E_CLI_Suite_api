@@ -26,23 +26,10 @@ namespace GSC.Respository.Master
         }
 
 
-        public IList<HolidayGridDto> GetHolidayList(int InvestigatorContactId, bool isDeleted)
+        public IList<HolidayGridDto> GetHolidayList(int Id, bool isDeleted)
         {
-            return All.Where(x => x.InvestigatorContactId == InvestigatorContactId && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
-ProjectTo<HolidayGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            //return FindByInclude(t => t.InvestigatorContactId == InvestigatorContactId && (isDeleted ? t.DeletedDate != null : t.DeletedDate == null)).Select(c =>
-            //    new HolidayDto
-            //    {
-            //        Id = c.Id,
-            //        InvestigatorContactId = c.InvestigatorContactId,
-            //        HolidayType = c.HolidayType,
-            //        HolidayTypeName = ((HolidayType)c.HolidayType).GetDescription(),
-            //        HolidayName = c.HolidayName,
-            //        HolidayDate = c.HolidayDate,
-            //        Description = c.Description,
-            //        CompanyId = c.CompanyId,
-            //        IsDeleted = c.DeletedDate != null
-            //    }).OrderByDescending(t => t.Id).ToList();
+            return All.Where(x => x.InvestigatorContactId == Id && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+                      ProjectTo<HolidayGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
         public string DuplicateHoliday(Holiday objSave)

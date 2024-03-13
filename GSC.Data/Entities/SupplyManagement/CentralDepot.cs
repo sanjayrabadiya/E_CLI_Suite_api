@@ -2,15 +2,12 @@
 using GSC.Common.Common;
 using GSC.Data.Entities.Location;
 using GSC.Helper;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Entities.SupplyManagement
 {
     public class CentralDepot : BaseEntity, ICommonAduit
     {
-        // public bool IsCompanyLevel { get; set; }
         public DepotType DepotType { get; set; }
         public int? SupplyLocationId { get; set; }
         public int? CountryId { get; set; }

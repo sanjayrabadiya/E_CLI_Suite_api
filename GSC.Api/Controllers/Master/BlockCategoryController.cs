@@ -19,23 +19,14 @@ namespace GSC.Api.Controllers.Master
     public class BlockCategoryController : BaseController
     {
         private readonly IBlockCategoryRepository _blockCategoryRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public BlockCategoryController(IBlockCategoryRepository blockCategoryRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _blockCategoryRepository = blockCategoryRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -45,11 +36,6 @@ namespace GSC.Api.Controllers.Master
         {
             var blockcategory = _blockCategoryRepository.GetBlockCategoryList(isDeleted);
             return Ok(blockcategory);
-
-            //var blockCategorys = _blockCategoryRepository.All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //).OrderByDescending(x => x.Id).ToList();
-            //var blockCategorysDto = _mapper.Map<IEnumerable<BlockCategoryDto>>(blockCategorys);
-            //return Ok(blockCategorysDto);
         }
 
 
@@ -77,7 +63,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _blockCategoryRepository.Add(blockCategory);
-            if (_uow.Save() <= 0) throw new Exception("Creating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(blockCategory.Id);
         }
 
@@ -97,7 +87,11 @@ namespace GSC.Api.Controllers.Master
             }
             _blockCategoryRepository.AddOrUpdate(blockCategory);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Block Category failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Block Category failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(blockCategory.Id);
         }
 

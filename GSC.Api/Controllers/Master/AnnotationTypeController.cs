@@ -61,7 +61,11 @@ namespace GSC.Api.Controllers.Master
             annotationTypeDto.Id = 0;
             var annotationType = _mapper.Map<AnnotationType>(annotationTypeDto);
             _annotationTypeRepository.Add(annotationType);
-            if (_uow.Save() <= 0) throw new Exception("Creating Annotation Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Annotation Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(annotationType.Id);
         }
 
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Master
             var annotationType = _mapper.Map<AnnotationType>(annotationTypeDto);
 
             _annotationTypeRepository.Update(annotationType);
-            if (_uow.Save() <= 0) throw new Exception("Updating Annotation Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Annotation Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(annotationType.Id);
         }
 

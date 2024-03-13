@@ -39,12 +39,6 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            //var templaterights = _templateRightsRepository.All.Where(x =>
-            //    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-            //    && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)
-            //).ToList();
-
-
             var templaterights = _templateRightsRepository.FindByInclude(x => (x.CompanyId == null
                                                                                || x.CompanyId ==
                                                                                _jwtTokenAccesser.CompanyId) &&
@@ -82,10 +76,9 @@ namespace GSC.Api.Controllers.Master
 
 
             _templateRightsRepository.Add(templaterights);
+            _uow.Save();
 
-            var returnValue = _uow.Save();
-
-            returnValue = _templateRightsRepository.All.OrderByDescending(x => x.Id).FirstOrDefault().Id;
+            var returnValue = _templateRightsRepository.All.OrderByDescending(x => x.Id).First().Id;
             if (returnValue > 0)
             {
                 var rolesplit = templaterights.RoleId.Split(",");
@@ -99,7 +92,11 @@ namespace GSC.Api.Controllers.Master
                 }
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Templalte right failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Templalte right failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(templaterights.Id);
         }
 
@@ -119,7 +116,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _templateRightsRepository.Update(templateRights);
-            if (_uow.Save() <= 0) throw new Exception("Updating Templalte right failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Templalte right failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(templateRights.Id);
         }
 

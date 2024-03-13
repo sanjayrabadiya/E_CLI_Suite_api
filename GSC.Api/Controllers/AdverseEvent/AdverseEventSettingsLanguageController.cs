@@ -26,9 +26,9 @@ namespace GSC.Api.Controllers.AdverseEvent
 
         [HttpGet]
         [Route("GetAdverseEventSettingsLanguage/{AdverseEventSettingsId}/{SeqNo}")]
-        public IActionResult GetAdverseEventSettingsLanguage(int AdverseEventSettingsId,int SeqNo)
+        public IActionResult GetAdverseEventSettingsLanguage(int AdverseEventSettingsId, int SeqNo)
         {
-            var templateLanguage = _adverseEventSettingsLanguageRepository.GetAdverseEventSettingsLanguage(AdverseEventSettingsId,SeqNo);
+            var templateLanguage = _adverseEventSettingsLanguageRepository.GetAdverseEventSettingsLanguage(AdverseEventSettingsId, SeqNo);
             return Ok(templateLanguage);
         }
 
@@ -45,7 +45,7 @@ namespace GSC.Api.Controllers.AdverseEvent
                                             x.LanguageId == item.LanguageId).ToList();
                 if (data != null && data.Count > 0)
                 {
-                    obj.Id = data.FirstOrDefault().Id;
+                    obj.Id = data.First().Id;
                     obj = _adverseEventSettingsLanguageRepository.Find(obj.Id);
                 }
                 obj.AdverseEventSettingsId = adverseEventSettingsLanguageDto.AdverseEventSettingsId;
@@ -53,23 +53,30 @@ namespace GSC.Api.Controllers.AdverseEvent
                 if (item.SeqNo == 1)
                 {
                     obj.LowSeverityDisplay = item.Display;
-                } else if (item.SeqNo == 2)
+                }
+                else if (item.SeqNo == 2)
                 {
                     obj.MediumSeverityDisplay = item.Display;
-                } else if (item.SeqNo == 3)
+                }
+                else if (item.SeqNo == 3)
                 {
                     obj.HighSeverityDisplay = item.Display;
                 }
                 if (data != null && data.Count > 0)
                 {
-                    obj.Id = data.FirstOrDefault().Id;
+                    obj.Id = data.First().Id;
                     _adverseEventSettingsLanguageRepository.Update(obj);
-                } else
+                }
+                else
                 {
                     _adverseEventSettingsLanguageRepository.Add(obj);
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating Adverse Event language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Adverse Event language failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
@@ -85,7 +92,11 @@ namespace GSC.Api.Controllers.AdverseEvent
             else if (SeqNo == 3)
                 data.HighSeverityDisplay = null;
             _adverseEventSettingsLanguageRepository.Update(data);
-            if (_uow.Save() <= 0) throw new Exception("Error occured on remove language");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Error occured on remove language");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
     }

@@ -52,7 +52,11 @@ namespace GSC.Api.Controllers.Barcode
             var centrifugationDetails = _mapper.Map<CentrifugationDetails>(centrifugationDetailsDto);
 
             _centrifugationDetailsRepository.Add(centrifugationDetails);
-            if (_uow.Save() <= 0) throw new Exception("Creating Centrifugation Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Centrifugation Details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(centrifugationDetails.Id);
         }
 
@@ -63,11 +67,15 @@ namespace GSC.Api.Controllers.Barcode
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var centrifugationDetails = _mapper.Map<CentrifugationDetails>(centrifugationDetailsDto);
             _centrifugationDetailsRepository.AddOrUpdate(centrifugationDetails);
-            if (_uow.Save() <= 0) throw new Exception("Updating Centrifugation Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Centrifugation Details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(centrifugationDetails.Id);
         }
 
-       
+
 
         [HttpGet]
         [Route("GetCentrifugationDetailsByPKBarcode/{PkBarcodeString}")]
@@ -83,11 +91,15 @@ namespace GSC.Api.Controllers.Barcode
         [Route("InsertCentrifugationData")]
         public ActionResult InsertCentrifugationData([FromBody] int[] ids)
         {
-            if (ids==null) return new UnprocessableEntityObjectResult(ModelState);
+            if (ids == null) return new UnprocessableEntityObjectResult(ModelState);
 
             _centrifugationDetailsRepository.StartCentrifugation(ids.ToList());
-         
-            if (_uow.Save() <= 0) throw new Exception("Creating Centrifugation Details failed on save.");
+
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Centrifugation Details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
@@ -100,7 +112,11 @@ namespace GSC.Api.Controllers.Barcode
 
             _centrifugationDetailsRepository.StartReCentrifugation(dto);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Re-Centrifugation Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Re-Centrifugation Details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
@@ -109,21 +125,24 @@ namespace GSC.Api.Controllers.Barcode
         [Route("MissedCentrifugation/{pkId}/{AuditReasonId}/{ReasonOth}")]
         public ActionResult MissedCentrifugation(int pkId, int AuditReasonId, string ReasonOth)
         {
-            var record = _centrifugationDetailsRepository.All.Where(x=>x.PKBarcodeId==pkId).FirstOrDefault();
+            var record = _centrifugationDetailsRepository.All.Where(x => x.PKBarcodeId == pkId).FirstOrDefault();
 
             if (record == null)
                 return NotFound();
 
             if (ReasonOth != "null")
                 record.ReasonOth = ReasonOth;
-          //  record.ReasonOth = ReasonOth;
             record.AuditReasonId = AuditReasonId;
             record.Status = Helper.CentrifugationFilter.Missed;
             record.MissedOn = _jwtTokenAccesser.GetClientDate();
             record.MissedBy = _jwtTokenAccesser.UserId;
 
             _centrifugationDetailsRepository.Update(record);
-            if (_uow.Save() <= 0) throw new Exception("Centrifugation missed failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Centrifugation missed failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }

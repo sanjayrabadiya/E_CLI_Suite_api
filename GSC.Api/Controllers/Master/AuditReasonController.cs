@@ -21,21 +21,15 @@ namespace GSC.Api.Controllers.Master
     public class AuditReasonController : BaseController
     {
         private readonly IAuditReasonRepository _auditReasonRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public AuditReasonController(IAuditReasonRepository auditReasonRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser)
         {
             _auditReasonRepository = auditReasonRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -44,16 +38,9 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-
             var auditreason = _auditReasonRepository.GetAuditReasonList(isDeleted);
             auditreason.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
             return Ok(auditreason);
-            //var auditReasons = _auditReasonRepository
-            //    .All.Where(x =>isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //    ).OrderByDescending(x => x.Id).ToList();
-            //var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
-            //auditReasonsDto.ForEach(t => t.ModuleName = t.ModuleId.GetDescription());
-            //return Ok(auditReasonsDto);
         }
 
         [HttpGet("{id}")]
@@ -79,7 +66,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _auditReasonRepository.Add(auditReason);
-            if (_uow.Save() <= 0) throw new Exception("Creating Audit Reason failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Audit Reason failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(auditReason.Id);
         }
 
@@ -99,7 +90,11 @@ namespace GSC.Api.Controllers.Master
             }
             _auditReasonRepository.AddOrUpdate(auditReason);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Audit Reason failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Audit Reason failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(auditReason.Id);
         }
 
@@ -151,8 +146,8 @@ namespace GSC.Api.Controllers.Master
         {
             var auditReasons = _auditReasonRepository
                 .All.Where(x =>
-                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate==null &&
-                    ((int) x.ModuleId == modulelId || x.ModuleId == AuditModule.Common)
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null &&
+                    ((int)x.ModuleId == modulelId || x.ModuleId == AuditModule.Common)
                 ).OrderBy(o => o.ReasonName).ToList();
             var auditReasonsDto = _mapper.Map<IEnumerable<AuditReasonDto>>(auditReasons);
             auditReasonsDto.ToList().ForEach(t => t.ModuleName = t.ModuleId.GetDescription());

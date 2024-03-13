@@ -57,9 +57,12 @@ namespace GSC.Api.Controllers.Attendance
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            //barcode.BarcodeString = _pkBarcodeRepository.GenerateBarcodeString(pkBarcodeDto);
             _pkBarcodeRepository.Add(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Creating PK barcode failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating PK barcode failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcode.Id);
         }
 
@@ -69,14 +72,12 @@ namespace GSC.Api.Controllers.Attendance
             if (pkBarcodeDto.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var barcode = _mapper.Map<PKBarcode>(pkBarcodeDto);
-            //var validate = _pkBarcodeRepository.Duplicate(pkBarcodeDto);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
             _pkBarcodeRepository.Update(barcode);
-            if (_uow.Save() <= 0) throw new Exception("Updating Contact Type failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Contact Type failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcode.Id);
         }
 

@@ -9,10 +9,9 @@ using GSC.Helper;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+
 
 namespace GSC.Respository.Project.StudyLevelFormSetup
 {
@@ -38,7 +37,7 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         public List<StudyLevelFormGridDto> GetStudyLevelFormList(bool isDeleted)
         {
             var projectList = _projectRightRepository.GetParentProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return new List<StudyLevelFormGridDto>();
 
             return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && projectList.Any(c => c == x.ProjectId)).
                    ProjectTo<StudyLevelFormGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
@@ -48,8 +47,10 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
         {
             var VariableTemplate = _context.VariableTemplate.Where(x => x.Id == objSave.VariableTemplateId).FirstOrDefault();
             if (All.Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.AppScreenId == objSave.AppScreenId
-            && x.ActivityId == objSave.ActivityId && x.DeletedDate == null))
+            && x.ActivityId == objSave.ActivityId && x.DeletedDate == null) && VariableTemplate != null)
+            {
                 return "Duplicate Form  : " + VariableTemplate.TemplateName;
+            }
 
             return "";
         }

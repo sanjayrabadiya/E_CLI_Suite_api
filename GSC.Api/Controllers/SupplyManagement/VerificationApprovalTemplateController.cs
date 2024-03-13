@@ -5,19 +5,13 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
 using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -29,18 +23,14 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly IMapper _mapper;
         private readonly IVerificationApprovalTemplateRepository _verificationApprovalTemplateRepository;
         private readonly IVerificationApprovalTemplateHistoryRepository _verificationApprovalTemplateHistoryRepository;
-        private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IProductVerificationDetailRepository _productVerificationDetail;
         private readonly IProductReceiptRepository _productReceiptRepository;
         private readonly IVerificationApprovalTemplateValueChildRepository _verificationApprovalTemplateValueChildRepository;
         private readonly IVerificationApprovalTemplateValueRepository _verificationApprovalTemplateValueRepository;
         private readonly IVerificationApprovalTemplateValueAuditRepository _verificationApprovalTemplateValueAuditRepository;
-        private readonly ISupplyManagementConfigurationRepository _supplyManagementConfigurationRepository;
-        private readonly IEmailSenderRespository _emailSenderRespository;
-        private readonly IUserRoleRepository _userRoleRepository;
         private readonly IStudyLevelFormRepository _studyLevelFormRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
+        
 
         public VerificationApprovalTemplateController(IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,
             IVerificationApprovalTemplateHistoryRepository verificationApprovalTemplateHistoryRepository,
@@ -48,14 +38,10 @@ namespace GSC.Api.Controllers.SupplyManagement
             IProductReceiptRepository productReceiptRepository,
         IVerificationApprovalTemplateValueAuditRepository verificationApprovalTemplateValueAuditRepository,
         IUnitOfWork uow, IMapper mapper,
-            IVariableTemplateRepository variableTemplateRepository,
             IVerificationApprovalTemplateValueChildRepository verificationApprovalTemplateValueChildRepository,
         IVerificationApprovalTemplateValueRepository verificationApprovalTemplateValueRepository,
-        ISupplyManagementConfigurationRepository supplyManagementConfigurationRepository,
-        IEmailSenderRespository emailSenderRespository,
-        IUserRoleRepository userRoleRepository,
         IJwtTokenAccesser jwtTokenAccesser,
-         IGSCContext context,
+         
          IStudyLevelFormRepository studyLevelFormRepository)
         {
             _verificationApprovalTemplateRepository = verificationApprovalTemplateRepository;
@@ -65,14 +51,9 @@ namespace GSC.Api.Controllers.SupplyManagement
             _verificationApprovalTemplateValueChildRepository = verificationApprovalTemplateValueChildRepository;
             _verificationApprovalTemplateValueRepository = verificationApprovalTemplateValueRepository;
             _productReceiptRepository = productReceiptRepository;
-            _supplyManagementConfigurationRepository = supplyManagementConfigurationRepository;
-            _userRoleRepository = userRoleRepository;
             _uow = uow;
             _mapper = mapper;
-            _variableTemplateRepository = variableTemplateRepository;
-            _emailSenderRespository = emailSenderRespository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _studyLevelFormRepository = studyLevelFormRepository;
         }
 
@@ -80,9 +61,13 @@ namespace GSC.Api.Controllers.SupplyManagement
         [Route("GetTemplate/{id}")]
         public IActionResult GetTemplate([FromRoute] int id)
         {
-            var TemplateId = _verificationApprovalTemplateRepository.All.Where(x => x.ProductVerificationDetailId == id).FirstOrDefault().StudyLevelFormId;
-            var designTemplate = _studyLevelFormRepository.GetReportFormVariableForVerification(TemplateId);
-            return Ok(_verificationApprovalTemplateRepository.GetVerificationApprovalTemplate(designTemplate, id));
+            var template = _verificationApprovalTemplateRepository.All.Where(x => x.ProductVerificationDetailId == id).FirstOrDefault();
+            if (template != null)
+            {
+                var designTemplate = _studyLevelFormRepository.GetReportFormVariableForVerification(template.StudyLevelFormId);
+                return Ok(_verificationApprovalTemplateRepository.GetVerificationApprovalTemplate(designTemplate, id));
+            }
+            return Ok();
         }
 
         [HttpPost]
@@ -119,7 +104,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 _productReceiptRepository.Update(receipt);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Verification Approval Template failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Verification Approval Template failed on save."));
             if (receipt != null)
                 _verificationApprovalTemplateRepository.SendForApprovalEmail(verificationApprovalTemplateDto, receipt);
 
@@ -144,7 +129,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (!verificationApprovalTemplateDto.IsApprove)
             {
                 var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
-                history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
+                if (detail != null)
+                    history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
                 history.IsSendBack = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.IsSendBack;
                 history.SendBy = _jwtTokenAccesser.UserId;
                 history.SendOn = _jwtTokenAccesser.GetClientDate();
@@ -152,7 +138,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             _verificationApprovalTemplateRepository.Update(verificationApprovalTemplate);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Verification Approval Template failed on save."));
             return Ok(verificationApprovalTemplate.Id);
         }
 
@@ -194,7 +180,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             verificationApprovalTemplate.IpAddress = _jwtTokenAccesser.IpAddress;
             verificationApprovalTemplate.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _verificationApprovalTemplateHistoryRepository.Add(verificationApprovalTemplate);
-            if (_uow.Save() <= 0) throw new Exception("Updating Verification Approval Template failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Verification Approval Template failed on save."));
             return Ok(verificationApprovalTemplate.Id);
         }
 
@@ -221,7 +207,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             if (!verificationApprovalTemplateDto.IsApprove)
             {
                 var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
-                history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
+                if (detail != null)
+                    history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
                 history.IsSendBack = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.IsSendBack;
                 history.AuditReasonId = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId;
                 history.ReasonOth = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.ReasonOth;
@@ -236,7 +223,8 @@ namespace GSC.Api.Controllers.SupplyManagement
             else
             {
                 var detail = _verificationApprovalTemplateHistoryRepository.All.Where(x => x.VerificationApprovalTemplateId == verificationApprovalTemplateDto.Id).OrderByDescending(x => x.Id).LastOrDefault();
-                history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
+                if (detail != null)
+                    history.VerificationApprovalTemplateId = detail.VerificationApprovalTemplateId;
                 history.IsSendBack = false;
                 history.AuditReasonId = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.AuditReasonId;
                 history.ReasonOth = verificationApprovalTemplateDto.VerificationApprovalTemplateHistory.ReasonOth;
@@ -255,7 +243,6 @@ namespace GSC.Api.Controllers.SupplyManagement
             var receipt = _productReceiptRepository.Find(verificationDetail.ProductReceiptId);
             if (receipt != null)
             {
-                var email = _context.Users.Find(verification.CreatedBy).Email;
                 if (verificationApprovalTemplateDto.IsApprove)
                 {
                     receipt.Status = Helper.ProductVerificationStatus.Approved;
@@ -312,7 +299,7 @@ namespace GSC.Api.Controllers.SupplyManagement
                 }
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Variable failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Variable failed on save."));
             _verificationApprovalTemplateRepository.SendTemplateApproveRejectEmail(verificationApprovalTemplateDto, receipt);
             return Ok(verificationApprovalTemplateDto.VerificationApprovalTemplateValueList[0].Id);
         }

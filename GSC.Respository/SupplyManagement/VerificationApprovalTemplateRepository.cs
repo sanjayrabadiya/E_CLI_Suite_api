@@ -1,9 +1,6 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using Azure.Core;
-using DocumentFormat.OpenXml.Office2016.Excel;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
@@ -16,7 +13,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GSC.Respository.SupplyManagement
@@ -45,41 +41,44 @@ namespace GSC.Respository.SupplyManagement
 
         public DesignVerificationApprovalTemplateDto GetVerificationApprovalTemplate(DesignVerificationApprovalTemplateDto designTemplateDto, int ProductVerificationDetailId)
         {
-            int verificationApprovalTemplateId = All.Where(x => x.ProductVerificationDetailId == ProductVerificationDetailId && x.DeletedDate == null).FirstOrDefault().Id;
-
-            var verificationApprovalTemplateBasic = GetScreeningTemplateBasic(verificationApprovalTemplateId);
-
-            designTemplateDto.VerificationApprovalTemplateId = verificationApprovalTemplateId;
-            //        designTemplateDto.VerificationApprovalTemplateId = verificationApprovalTemplateBasic.Id;
-            var values = GetVerificationValues(verificationApprovalTemplateBasic.Id);
-
-            values.ForEach(t =>
+            var verificationApprovalTemplate = All.FirstOrDefault(x => x.ProductVerificationDetailId == ProductVerificationDetailId && x.DeletedDate == null);
+            if (verificationApprovalTemplate != null)
             {
-                var variable = designTemplateDto.Variables.FirstOrDefault(v => v.StudyLevelFormVariableId == t.StudyLevelFormVariableId);
-                if (variable != null)
-                {
-                    variable.VariableValue = t.Value;
-                    variable.VariableValueOld = t.IsNa ? "N/A" : t.Value;
-                    variable.VerificationApprovalTemplateValueId = t.Id;
-                    variable.IsNaValue = t.IsNa;
-                    if (!string.IsNullOrWhiteSpace(variable.VariableValue) || variable.IsNaValue)
-                        variable.IsValid = true;
-                    if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
-                        variable.Values.ToList().ForEach(val =>
-                        {
-                            var childValue = t.Children.FirstOrDefault(v => v.StudyLevelFormVariableValueId == val.Id);
-                            if (childValue != null)
-                            {
-                                variable.IsValid = true;
-                                val.VariableValue = childValue.Value;
-                                val.VariableValueOld = childValue.Value;
-                                val.VerificationApprovalTemplateValueChildId = childValue.Id;
-                            }
-                        });
-                }
-            });
+                var verificationApprovalTemplateBasic = GetScreeningTemplateBasic(verificationApprovalTemplate.Id);
 
-            return designTemplateDto;
+                designTemplateDto.VerificationApprovalTemplateId = verificationApprovalTemplate.Id;
+
+                var values = GetVerificationValues(verificationApprovalTemplateBasic.Id);
+
+                values.ForEach(t =>
+                {
+                    var variable = designTemplateDto.Variables.FirstOrDefault(v => v.StudyLevelFormVariableId == t.StudyLevelFormVariableId);
+                    if (variable != null)
+                    {
+                        variable.VariableValue = t.Value;
+                        variable.VariableValueOld = t.IsNa ? "N/A" : t.Value;
+                        variable.VerificationApprovalTemplateValueId = t.Id;
+                        variable.IsNaValue = t.IsNa;
+                        if (!string.IsNullOrWhiteSpace(variable.VariableValue) || variable.IsNaValue)
+                            variable.IsValid = true;
+                        if (variable.Values != null && (variable.CollectionSource == CollectionSources.CheckBox || variable.CollectionSource == CollectionSources.MultiCheckBox))
+                            variable.Values.ToList().ForEach(val =>
+                            {
+                                var childValue = t.Children.FirstOrDefault(v => v.StudyLevelFormVariableValueId == val.Id);
+                                if (childValue != null)
+                                {
+                                    variable.IsValid = true;
+                                    val.VariableValue = childValue.Value;
+                                    val.VariableValueOld = childValue.Value;
+                                    val.VerificationApprovalTemplateValueChildId = childValue.Id;
+                                }
+                            });
+                    }
+                });
+
+                return designTemplateDto;
+            }
+            return new DesignVerificationApprovalTemplateDto();
         }
 
         private VerificationApprovalTemplateBasic GetScreeningTemplateBasic(int verificationApprovalTemplateId)
@@ -100,12 +99,12 @@ namespace GSC.Respository.SupplyManagement
         }
         public void SendForApprovalEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt)
         {
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
-            var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == verificationApprovalTemplateDto.ProjectId && x.Triggers == SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate).FirstOrDefault();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
+            var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == verificationApprovalTemplateDto.ProjectId && x.Triggers == SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate).FirstOrDefault();
             if (emailconfig != null)
             {
                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                if (details.Count() > 0)
+                if (details.Any())
                 {
                     if (productReceipt != null)
                     {
@@ -117,7 +116,9 @@ namespace GSC.Respository.SupplyManagement
                                 iWRSEmailModel.ProductType = product.ProductTypeCode;
                         }
                     }
-                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == verificationApprovalTemplateDto.ProjectId).FirstOrDefault().ProjectCode;
+                    var project = _context.Project.Where(x => x.Id == verificationApprovalTemplateDto.ProjectId).FirstOrDefault();
+                    if (project != null)
+                        iWRSEmailModel.StudyCode = project.ProjectCode;
                     iWRSEmailModel.ActionBy = _jwtTokenAccesser.UserName;
                     _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
                     foreach (var item in details)
@@ -145,9 +146,9 @@ namespace GSC.Respository.SupplyManagement
                     foreach (var item in templatedata)
                     {
                         VerificationApprovalTemplate supplyManagementRequest = new VerificationApprovalTemplate();
-                        IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+                        IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
                         SupplyManagementEmailScheduleLog supplyManagementEmailScheduleLog = new SupplyManagementEmailScheduleLog();
-                        var emailconfig = await _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == item.ProductVerificationDetail.ProductReceipt.ProjectId && x.Triggers == SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate).FirstOrDefaultAsync();
+                        var emailconfig = await _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == item.ProductVerificationDetail.ProductReceipt.ProjectId && x.Triggers == SupplyManagementEmailTriggers.SendforApprovalVerificationTemplate).FirstOrDefaultAsync();
                         if (emailconfig != null)
                         {
                             supplyManagementEmailScheduleLog.ProjectId = item.ProductVerificationDetail.ProductReceipt.ProjectId;
@@ -276,7 +277,7 @@ namespace GSC.Respository.SupplyManagement
                             if (supplyManagementRequest != null)
                             {
                                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                                if (details.Count() > 0)
+                                if (details.Any())
                                 {
                                     if (item.ProductVerificationDetail.ProductReceipt != null)
                                     {
@@ -288,7 +289,9 @@ namespace GSC.Respository.SupplyManagement
                                                 iWRSEmailModel.ProductType = product.ProductTypeCode;
                                         }
                                     }
-                                    iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == item.ProductVerificationDetail.ProductReceipt.ProjectId).FirstOrDefault().ProjectCode;
+                                    var project = _context.Project.Where(x => x.Id == item.ProductVerificationDetail.ProductReceipt.ProjectId).FirstOrDefault();
+                                    if (project != null)
+                                        iWRSEmailModel.StudyCode = project.ProjectCode;
                                     iWRSEmailModel.ActionBy = _jwtTokenAccesser.UserName;
                                     _emailSenderRespository.SendforApprovalEmailIWRS(iWRSEmailModel, details.Select(x => x.Users.Email).Distinct().ToList(), emailconfig);
                                     foreach (var item1 in details)
@@ -327,15 +330,15 @@ namespace GSC.Respository.SupplyManagement
         }
         public void SendTemplateApproveRejectEmail(VerificationApprovalTemplateDto verificationApprovalTemplateDto, ProductReceipt productReceipt)
         {
-            IWRSEmailModel iWRSEmailModel = new IWRSEmailModel();
+            IwrsEmailModel iWRSEmailModel = new IwrsEmailModel();
 
             if (productReceipt != null)
             {
-                var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == productReceipt.ProjectId && x.Triggers == SupplyManagementEmailTriggers.VerificationTemplateApproveReject).FirstOrDefault();
+                var emailconfig = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == productReceipt.ProjectId && x.Triggers == SupplyManagementEmailTriggers.VerificationTemplateApproveReject).FirstOrDefault();
                 if (emailconfig != null)
                 {
                     var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                    if (details.Count() > 0)
+                    if (details.Any())
                     {
                         if (productReceipt != null)
                         {
@@ -347,8 +350,9 @@ namespace GSC.Respository.SupplyManagement
                                     iWRSEmailModel.ProductType = product.ProductTypeCode;
                             }
                         }
-
-                        iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == productReceipt.ProjectId).FirstOrDefault().ProjectCode;
+                        var project = _context.Project.Where(x => x.Id == productReceipt.ProjectId).FirstOrDefault();
+                        if (project != null)
+                            iWRSEmailModel.StudyCode = project.ProjectCode;
                         iWRSEmailModel.ActionBy = _jwtTokenAccesser.UserName;
                         iWRSEmailModel.Status = verificationApprovalTemplateDto.IsApprove ? "Approved" : "Rejected";
                         if (verificationApprovalTemplateDto.VerificationApprovalTemplateHistory != null)

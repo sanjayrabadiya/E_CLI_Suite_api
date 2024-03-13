@@ -1,5 +1,4 @@
 ﻿using GSC.Common.Base;
-using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.SupplyManagement

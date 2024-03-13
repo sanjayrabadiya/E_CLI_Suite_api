@@ -14,17 +14,14 @@ namespace GSC.Api.Controllers.Master
     public class CurrencyController : BaseController
     {
         private readonly ICurrencyRepository _currencyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public CurrencyController(ICurrencyRepository currencyRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _currencyRepository = currencyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -58,7 +55,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _currencyRepository.Add(currency);
-            if (_uow.Save() <= 0) throw new Exception("letters Formate failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "letters Formate failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(currency.Id);
         }
 
@@ -77,7 +78,11 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             _currencyRepository.Update(currency);
-            if (_uow.Save() <= 0) throw new Exception("Updating currency on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating currency on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(currency.Id);
         }
 

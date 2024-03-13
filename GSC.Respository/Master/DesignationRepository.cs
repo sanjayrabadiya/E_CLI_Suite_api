@@ -12,15 +12,12 @@ namespace GSC.Respository.Master
 {
     public class DesignationRepository : GenericRespository<Designation>, IDesignationRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public DesignationRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public DesignationRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }

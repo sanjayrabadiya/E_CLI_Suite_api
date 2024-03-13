@@ -12,17 +12,12 @@ namespace GSC.Respository.Master
 {
     public class LettersFormateRepository : GenericRespository<LettersFormate>, ILettersFormateRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
 
-        public LettersFormateRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public LettersFormateRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _context = context;
         }
 
         List<LettersFormateGridDto> ILettersFormateRepository.GetlettersFormateList(bool isDeleted)

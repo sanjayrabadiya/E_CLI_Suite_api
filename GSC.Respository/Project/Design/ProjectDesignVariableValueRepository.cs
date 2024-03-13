@@ -100,7 +100,8 @@ namespace GSC.Respository.Project.Design
                 IsEncrypt = r.IsEncrypt,
                 EncryptRole = string.Join(", ", r.Roles.Where(x => x.DeletedDate == null).Select(s => s.SecurityRole.RoleShortName).ToList()),
                 CollectionValue = string.Join(", ", r.Values.Where(x => x.DeletedDate == null).Select(s => s.ValueCode + (s.ValueCode == null ? "" : "-") + s.ValueName + (s.Label == null ? "" : "-") + s.Label).ToList()),
-                DisplayValue = r.LargeStep
+                DisplayValue = r.LargeStep,
+                DisplayValueToPatient = r.DisplayValue
             }).ToList().OrderBy(x => x.VisitOrderId).ToList();
 
 
@@ -158,6 +159,7 @@ namespace GSC.Respository.Project.Design
                 worksheet.Cell(1, 33).Value = "Encrypted Role";
                 worksheet.Cell(1, 34).Value = "Collection Value";
                 worksheet.Cell(1, 35).Value = "Display Value";
+                worksheet.Cell(1, 36).Value = "Display Value To Patient";
                 var j = 2;
 
                 MainData.ForEach(d =>
@@ -197,6 +199,7 @@ namespace GSC.Respository.Project.Design
                                 worksheet.Row(j).Cell(33).SetValue(d.EncryptRole);
                                 worksheet.Row(j).Cell(34).SetValue(d.CollectionValue);
                                 worksheet.Row(j).Cell(35).SetValue(d.DisplayValue);
+                                worksheet.Row(j).Cell(36).SetValue(d.DisplayValueToPatient == true ? "Yes" : "No");
                                 j++;
                             });
 

@@ -1,26 +1,14 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using ClosedXML.Excel;
-using ExcelDataReader;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
-using GSC.Helper;
-using GSC.Respository.Configuration;
-using GSC.Respository.Master;
-using GSC.Respository.Project.Design;
-using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 
 namespace GSC.Respository.SupplyManagement
@@ -67,7 +55,7 @@ namespace GSC.Respository.SupplyManagement
                                                                x.DeletedDate == null
                                                                && x.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == projectId).Select(s => s.ProjectDesignVisitId).ToList();
 
-            if (othervisits == null)
+            if (!othervisits.Any())
                 return new List<DropDownDto>();
 
             var visits = _context.ProjectDesignVisit.Where(x => x.ProjectDesignPeriod.ProjectDesign.Project.Id == projectId

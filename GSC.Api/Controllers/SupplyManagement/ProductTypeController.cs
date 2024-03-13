@@ -4,10 +4,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
-using GSC.Respository.Configuration;
 using GSC.Respository.SupplyManagement;
-using GSC.Respository.UserMgt;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.SupplyManagement
@@ -63,7 +60,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
 
             _productTypeRepository.Add(productType);
-            if (_uow.Save() <= 0) throw new Exception("Creating product type failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating product type failed on save."));
             return Ok(productType.Id);
         }
 
@@ -86,7 +83,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             /* Added by swati for effective Date on 02-06-2019 */
             _productTypeRepository.AddOrUpdate(productType);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating product type failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating product type failed on save."));
             return Ok(productType.Id);
         }
 

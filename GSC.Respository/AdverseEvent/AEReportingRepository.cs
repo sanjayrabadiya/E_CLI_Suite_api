@@ -115,15 +115,51 @@ namespace GSC.Respository.AdverseEvent
                 CreatedDate = c.CreatedDate,
                 EventEffectName = GetEventEffectName(c.Id, c.AdverseEventSettingsId),
                 IsReviewedDone = c.IsReviewedDone,
-                ReviewStatus = c.IsReviewedDone == false ? "" : (c.IsApproved == true ? "Approved" : "Rejected"),
+                ReviewStatus = c.IsReviewedDone ? "" : GetReviewStatus(c.IsApproved),
                 ApproveRejectDateTime = c.ApproveRejectDateTime,
                 RejectReasonOth = c.RejectReasonOth,
-                RejectReason = c.RejectReasonId == null ? "" : _context.AuditReason.Where(x => x.Id == c.RejectReasonId).ToList().FirstOrDefault().ReasonName,
+                RejectReason = c.RejectReasonId == null ? "" : GetRejectReason(c.RejectReasonId),
                 Status = c.IsReviewedDone ? "Review Done" : "Review Pending",
-                ReviewBy = c.ReviewedByUser != null ? _context.Users.Where(x => x.Id == c.ReviewedByUser).FirstOrDefault().UserName : "",
+                ReviewBy = GetReviewBy(c.ReviewedByUser),
                 IsApproved = c.IsApproved
             }).OrderByDescending(x => x.CreatedDate).ToList();
             return aEGridData;
+        }
+
+        private string GetReviewStatus(bool? isApprove)
+        {
+            if (isApprove == true)
+            {
+                return "Approved";
+            }
+            else
+            {
+                return "Rejected";
+            }
+        }
+
+        private string GetRejectReason(int? RejectReasonId)
+        {
+            if (RejectReasonId == null)
+            {
+                return "";
+            }
+            else
+            {
+                return _context.AuditReason.Where(x => x.Id == RejectReasonId).First().ReasonName;
+            }
+        }
+
+        private string GetReviewBy(int? ReviewedByUser)
+        {
+            if (ReviewedByUser == null)
+            {
+                return "";
+            }
+            else
+            {
+                return _context.Users.Where(x => x.Id == ReviewedByUser).First().UserName;
+            }
         }
 
         public List<DashboardDto> GetAEReportingMyTaskList(int ProjectId, int SiteId)
@@ -140,7 +176,7 @@ namespace GSC.Respository.AdverseEvent
                         TaskInformation = $"{x.Randomization.FirstName} {x.Randomization.LastName} - {x.Randomization.ScreeningNumber}",
                         ExtraData = new { Approved = x.IsApproved, ReviewDone = x.IsReviewedDone, createdByUser = x.CreatedByUser.UserName, CreatedDate = x.CreatedDate, Data = x.AEReportingValueValues },
                         Module = MyTaskModule.AdverseEvent.GetDescription(),
-                        ControlType=DashboardMyTaskType.EAdverseEvent
+                        ControlType = DashboardMyTaskType.EAdverseEvent
                     }).ToList();
                     return result;
                 }
@@ -165,7 +201,7 @@ namespace GSC.Respository.AdverseEvent
 
         public List<AEReportingDto> GetAEReportingList()
         {
-            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = _randomizationRepository.FindBy(x => x.UserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             if (randomization == null) return new List<AEReportingDto>();
             var data = FindBy(x => x.RandomizationId == randomization.Id).ToList();
             var datadtos = _mapper.Map<List<AEReportingDto>>(data);
@@ -183,39 +219,39 @@ namespace GSC.Respository.AdverseEvent
             var randomization = _randomizationRepository.Find(aereportingdata.RandomizationId);
             if (randomization == null) return new ScreeningDetailsforAE();
             var projectid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            var projectDesignTemplateId = adversesettingdata.ProjectDesignTemplateIdInvestigator;
-            var projectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == projectDesignTemplateId).ToList().FirstOrDefault().ProjectDesignVisitId;
+            var projectDesignTemplateId = adversesettingdata?.ProjectDesignTemplateIdInvestigator ?? 0;
+            var projectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == projectDesignTemplateId).AsEnumerable().FirstOrDefault()?.ProjectDesignVisitId ?? 0;
             var data = new ScreeningDetailsforAE();
             data.ProjectId = randomization.ProjectId;
             data.ParentProjectId = (int)projectid;
-            data.ProjectDesignTemplateId = (int)projectDesignTemplateId;
+            data.ProjectDesignTemplateId = projectDesignTemplateId;
             var entry = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList();
-            if (entry == null || entry.Count <= 0)
+            if (!entry.Any())
             {
                 data.RandomizationId = randomization.Id;
                 data.ProjectDesignVisitId = projectDesignVisitId;
                 return data;
             }
-            data.ScreeningEntryId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList().FirstOrDefault().Id;
-            data.ProjectDesignPeriodId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).ToList().FirstOrDefault().ProjectDesignPeriodId;
-            data.ScreeningVisitId = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == data.ScreeningEntryId && x.ProjectDesignVisitId == projectDesignVisitId).ToList().FirstOrDefault().Id;
+            data.ScreeningEntryId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).First().Id;
+            data.ProjectDesignPeriodId = _context.ScreeningEntry.Where(x => x.RandomizationId == randomization.Id).First().ProjectDesignPeriodId;
+            data.ScreeningVisitId = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == data.ScreeningEntryId && x.ProjectDesignVisitId == projectDesignVisitId).First().Id;
             if (aereportingdata.ScreeningTemplateId == null)
             {
                 var screeningtemplates = _context.ScreeningTemplate.Where(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.Status == Helper.ScreeningTemplateStatus.Pending).ToList();
                 if (screeningtemplates.Count > 0)
                 {
-                    data.ScreeningTemplateId = screeningtemplates.FirstOrDefault().Id;
-                    data.Status = screeningtemplates.FirstOrDefault().Status;
+                    data.ScreeningTemplateId = screeningtemplates[0].Id;
+                    data.Status = screeningtemplates[0].Status;
                     aereportingdata.ScreeningTemplateId = data.ScreeningTemplateId;
                     Update(aereportingdata);
                 }
                 else
                 {
-                    var parentscreeningTemplate = _screeningTemplateRepository.FindBy(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.ParentId == null).ToList().FirstOrDefault();
+                    var parentscreeningTemplate = _screeningTemplateRepository.FindBy(x => x.ScreeningVisitId == data.ScreeningVisitId && x.ProjectDesignTemplateId == data.ProjectDesignTemplateId && x.ParentId == null).FirstOrDefault();
                     // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                     ScreeningTemplateRepeat screeningTemplate = new ScreeningTemplateRepeat();
-                    screeningTemplate.ScreeningTemplateId = parentscreeningTemplate.Id;
-                    screeningTemplate.ScreeningTemplateName = parentscreeningTemplate.ScreeningTemplateName;
+                    screeningTemplate.ScreeningTemplateId = parentscreeningTemplate?.Id ?? 0;
+                    screeningTemplate.ScreeningTemplateName = parentscreeningTemplate?.ScreeningTemplateName ?? "";
                     var repeatScreeningTemplate = _screeningTemplateRepository.TemplateRepeat(screeningTemplate);
                     _uow.Save();
                     data.ScreeningTemplateId = repeatScreeningTemplate.Id;
@@ -226,8 +262,8 @@ namespace GSC.Respository.AdverseEvent
             }
             else
             {
-                data.ScreeningTemplateId = _context.ScreeningTemplate.Where(x => x.Id == (int)aereportingdata.ScreeningTemplateId).ToList().FirstOrDefault().Id;
-                data.Status = _context.ScreeningTemplate.Where(x => x.Id == (int)aereportingdata.ScreeningTemplateId).ToList().FirstOrDefault().Status;
+                data.ScreeningTemplateId = _context.ScreeningTemplate.Where(x => x.Id == (int)aereportingdata.ScreeningTemplateId).First().Id;
+                data.Status = _context.ScreeningTemplate.Where(x => x.Id == (int)aereportingdata.ScreeningTemplateId).First().Status;
             }
             return data;
         }

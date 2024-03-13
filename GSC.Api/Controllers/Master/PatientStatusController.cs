@@ -16,18 +16,15 @@ namespace GSC.Api.Controllers.Master
         private readonly IPatientStatusRepository _patientStatusRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
 
         public PatientStatusController(IPatientStatusRepository patientStatusRepository,
     IUnitOfWork uow,
-    IMapper mapper,
-    IJwtTokenAccesser jwtTokenAccesser)
+    IMapper mapper)
         {
             _patientStatusRepository = patientStatusRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         // GET: api/<controller>
@@ -62,7 +59,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _patientStatusRepository.Add(patientStatus);
-            if (_uow.Save() <= 0) throw new Exception("Creating Patient Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Patient Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(patientStatusDto.Id);
         }
 
@@ -83,8 +84,12 @@ namespace GSC.Api.Controllers.Master
 
             /* Added by darshil for effective Date on 17-08-2020 */
             _patientStatusRepository.AddOrUpdate(patientStatus);
-            
-            if (_uow.Save() <= 0) throw new Exception("Updating Patient Status failed on save.");
+
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Patient Status failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(patientStatus.Id);
         }
 

@@ -15,22 +15,14 @@ namespace GSC.Api.Controllers.Master
     public class ProjectSiteAddressController : BaseController
     {
         private readonly IProjectSiteAddressRepository _projectSiteAddressRepository;
-        private readonly IProjectRepository _projectRepository;
-        private readonly IManageSiteAddressRepository _manageSiteAddressRepository;
-        private readonly IManageSiteRepository _manageSiteRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
 
         public ProjectSiteAddressController(IProjectSiteAddressRepository projectSiteAddressRepository, IProjectRepository projectRepository, IManageSiteAddressRepository manageSiteAddressRepository, IManageSiteRepository manageSiteRepository, IMapper mapper, IUnitOfWork uow, IGSCContext context)
         {
             _projectSiteAddressRepository = projectSiteAddressRepository;
-            _projectRepository = projectRepository;
-            _manageSiteAddressRepository = manageSiteAddressRepository;
-            _manageSiteRepository = manageSiteRepository;
             _mapper = mapper;
             _uow = uow;
-            _context = context;
         }
 
         // GET: api/<controller>
@@ -63,16 +55,12 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            //var projectSiteAddress = _projectSiteAddressRepository.All.Where(q => q.ProjectId == ProjectSiteAddressDto.ProjectId && q.ManageSiteId == ProjectSiteAddressDto.ManageSiteId && q.DeletedDate == null).Select(q => q.Id).ToList();
-            //projectSiteAddress.ForEach(x =>
-            //{
-            //    Delete(x);
-            //});
-
-
             _projectSiteAddressRepository.Add(ProjectSiteAddress);
-            if (_uow.Save() <= 0) throw new Exception("Creating Project Site Address failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Project Site Address failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(ProjectSiteAddress.Id);
         }
 
@@ -94,7 +82,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _projectSiteAddressRepository.AddOrUpdate(ProjectSiteAddress);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Site Address failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Project Site Address failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(ProjectSiteAddress.Id);
         }
 

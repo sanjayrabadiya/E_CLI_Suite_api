@@ -1,14 +1,12 @@
 ﻿using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -20,16 +18,12 @@ namespace GSC.Respository.SupplyManagement
 {
     public class SupplyManagementFectorRepository : GenericRespository<SupplyManagementFector>, ISupplyManagementFectorRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public SupplyManagementFectorRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper)
+        public SupplyManagementFectorRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }
@@ -99,10 +93,6 @@ namespace GSC.Respository.SupplyManagement
         }
         private string GetfactorFormula(int id)
         {
-            var variableValues = _context.SupplyManagementFectorDetail.
-                Where(x => x.SupplyManagementFectorId == id
-                && x.DeletedDate == null).Select(r => r.CollectionValue).ToList();
-
             var result = _context.SupplyManagementFectorDetail.Where(x => x.SupplyManagementFectorId == id
                                                             && x.DeletedDate == null)
                 .Select(z => new SupplyManagementFectorDetailDto
@@ -122,7 +112,7 @@ namespace GSC.Respository.SupplyManagement
                     TypeName = z.Type.GetDescription(),
                     StartParens = z.StartParens,
                     EndParens = z.EndParens
-                }).ToList().OrderBy(r => r.Id).ToList();
+                }).OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
             result.ForEach(x =>
@@ -146,61 +136,52 @@ namespace GSC.Respository.SupplyManagement
 
         public static string GetCollectionValue(Fector fector, string Collectionavalue)
         {
-            if (fector == Fector.Gender)
+            if (fector == Fector.Gender && !string.IsNullOrEmpty(Collectionavalue))
             {
-                if (Collectionavalue != null)
+                if (Collectionavalue == "1")
                 {
-                    if (Collectionavalue == "1")
-                    {
-                        return "Male";
-                    }
-                    if (Collectionavalue == "2")
-                    {
-                        return "Female";
-                    }
+                    return "Male";
+                }
+                if (Collectionavalue == "2")
+                {
+                    return "Female";
+                }
+
+            }
+            if (fector == Fector.Joint && !string.IsNullOrEmpty(Collectionavalue))
+            {
+                if (Collectionavalue == "1")
+                {
+                    return "Knee";
+                }
+                if (Collectionavalue == "2")
+                {
+                    return "Low back";
                 }
             }
-            if (fector == Fector.Joint)
+            if (fector == Fector.Eligibility && !string.IsNullOrEmpty(Collectionavalue))
             {
-                if (Collectionavalue != null)
+                if (Collectionavalue == "1")
                 {
-                    if (Collectionavalue == "1")
-                    {
-                        return "Knee";
-                    }
-                    if (Collectionavalue == "2")
-                    {
-                        return "Low back";
-                    }
+                    return "Yes";
                 }
+                if (Collectionavalue == "2")
+                {
+                    return "No";
+                }
+
             }
-            if (fector == Fector.Eligibility)
+            if (fector == Fector.Diatory && !string.IsNullOrEmpty(Collectionavalue))
             {
-                if (Collectionavalue != null)
+                if (Collectionavalue == "1")
                 {
-                    if (Collectionavalue == "1")
-                    {
-                        return "Yes";
-                    }
-                    if (Collectionavalue == "2")
-                    {
-                        return "No";
-                    }
+                    return "Veg";
                 }
-            }
-            if (fector == Fector.Diatory)
-            {
-                if (Collectionavalue != null)
+                if (Collectionavalue == "2")
                 {
-                    if (Collectionavalue == "1")
-                    {
-                        return "Veg";
-                    }
-                    if (Collectionavalue == "2")
-                    {
-                        return "Non-veg";
-                    }
+                    return "Non-veg";
                 }
+
             }
             if (fector == Fector.BMI || fector == Fector.Age || fector == Fector.Dose || fector == Fector.Weight)
             {
@@ -230,7 +211,7 @@ namespace GSC.Respository.SupplyManagement
                     collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
                     Type = z.Type,
                     TypeName = z.Type.GetDescription(),
-                    IsDeleted = z.DeletedDate != null ? true : false,
+                    IsDeleted = z.DeletedDate != null,
                     ProjectCode = z.SupplyManagementFector.Project.ProjectCode,
                     InputValue = z.CollectionValue,
                     StartParens = z.StartParens,
@@ -298,7 +279,7 @@ namespace GSC.Respository.SupplyManagement
 
 
 
-        FactorCheckResult ValidateDataTableFactor(DataTable dt, string ruleStr)
+       static FactorCheckResult ValidateDataTableFactor(DataTable dt, string ruleStr)
         {
             var result = new FactorCheckResult();
             DataRow dr = dt.NewRow();
@@ -308,7 +289,7 @@ namespace GSC.Respository.SupplyManagement
                 var foundDt = dt.Select(ruleStr);
                 result.IsValid = true;
 
-                if (foundDt == null || foundDt.Count() == 0)
+                if (foundDt == null || !foundDt.Any())
                 {
                     result.Result = "Factor Configuration : Input value not verified!";
                     result.IsValid = false;
@@ -356,7 +337,7 @@ namespace GSC.Respository.SupplyManagement
                     collectionValueName = GetCollectionValue(z.Fector, z.CollectionValue),
                     Type = z.Type,
                     TypeName = z.Type.GetDescription(),
-                    IsDeleted = z.DeletedDate != null ? true : false,
+                    IsDeleted = z.DeletedDate != null,
                     ProjectCode = z.SupplyManagementFector.Project.ProjectCode,
                     InputValue = z.CollectionValue
                 }).ToList();
@@ -407,7 +388,7 @@ namespace GSC.Respository.SupplyManagement
 
 
 
-            result = ValidateFactorSubject(data, (int)projectid, siteId, manageSiteId);
+            result = ValidateFactorSubject(data, projectid, siteId, manageSiteId);
             return result;
         }
         public FactorCheckResult ValidateFactorSubject(List<SupplyManagementFectorDetailDto> editCheck, int projectid, int siteId, int manageSiteId)
@@ -561,7 +542,7 @@ namespace GSC.Respository.SupplyManagement
         public FactorCheckResult CheckRatio(FactorCheckResult result, string ratiostr, string ratios, string producttype, int? index, int projectid, int siteId, int manageSiteId)
         {
             var isRationOver = false;
-            var products = "";
+            StringBuilder products = new StringBuilder();
             var uploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == projectid && x.DeletedDate == null && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
             if (uploadFile == null)
                 return result;
@@ -614,16 +595,11 @@ namespace GSC.Respository.SupplyManagement
                                         }
 
                                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country && finaldata.Count > 0 && managesite.Count > 0)
                                         {
-                                            if (finaldata.Count > 0)
-                                            {
-                                                if (managesite.Count > 0)
-                                                {
-                                                    var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
-                                                    finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
-                                                }
-                                            }
+                                            var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                            finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+
                                         }
                                         if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                         {
@@ -633,9 +609,9 @@ namespace GSC.Respository.SupplyManagement
                                         {
 
                                             if (count == splitproduct.Count - 1)
-                                                products = products + item;
+                                                products.Append(item);
                                             else
-                                                products = products + item + ",";
+                                                products.Append(item + ",");
 
                                         }
                                         count++;
@@ -682,16 +658,11 @@ namespace GSC.Respository.SupplyManagement
                                 }
 
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country && finaldata.Count > 0 && managesite.Count > 0)
                                 {
-                                    if (finaldata.Count > 0)
-                                    {
-                                        if (managesite.Count > 0)
-                                        {
-                                            var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
-                                            finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
-                                        }
-                                    }
+                                    var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                    finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+
                                 }
                                 if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
@@ -700,9 +671,9 @@ namespace GSC.Respository.SupplyManagement
                                 else
                                 {
                                     if (count == splitproduct.Count - 1)
-                                        products = products + item;
+                                        products.Append(item);
                                     else
-                                        products = products + item + ",";
+                                        products.Append(item + ",");
 
                                 }
                                 count++;
@@ -749,16 +720,11 @@ namespace GSC.Respository.SupplyManagement
 
                                 }
                                 var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                                if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country && finaldata.Count > 0 && managesite.Count > 0)
                                 {
-                                    if (finaldata.Count > 0)
-                                    {
-                                        if (managesite.Count > 0)
-                                        {
-                                            var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
-                                            finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
-                                        }
-                                    }
+                                    var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                    finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+
                                 }
                                 if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                                 {
@@ -767,7 +733,7 @@ namespace GSC.Respository.SupplyManagement
                                 else
                                 {
                                     isRationOver = false;
-                                    products = producttype;
+                                    products.Append(producttype);
                                 }
 
                             }
@@ -798,18 +764,13 @@ namespace GSC.Respository.SupplyManagement
                                       WHERE  projectId IN(select Id from project where ParentProjectId=" + projectid + ") AND ProductCode = " + product + " AND " + rule + "";
 
                         }
-                        
+
                         var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                        if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country && finaldata.Count > 0 && managesite.Count > 0)
                         {
-                            if (finaldata.Count > 0)
-                            {
-                                if (managesite.Count > 0)
-                                {
-                                    var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
-                                    finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
-                                }
-                            }
+                            var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                            finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+
                         }
                         if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                         {
@@ -818,7 +779,7 @@ namespace GSC.Respository.SupplyManagement
                         else
                         {
                             isRationOver = false;
-                            products = producttype;
+                            products.Append(producttype);
                         }
 
 
@@ -839,7 +800,7 @@ namespace GSC.Respository.SupplyManagement
                             var rule = splitRules[(int)index].Trim();
                             var ratio = splitRatio[(int)index].Trim();
 
-                            
+
                             string sqlqry = String.Empty;
                             if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                             {
@@ -862,16 +823,11 @@ namespace GSC.Respository.SupplyManagement
                             }
 
                             var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                            if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                            if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country && finaldata.Count > 0 && managesite.Count > 0)
                             {
-                                if (finaldata.Count > 0)
-                                {
-                                    if (managesite.Count > 0)
-                                    {
-                                        var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
-                                        finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
-                                    }
-                                }
+                                var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                                finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+
                             }
                             if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                             {
@@ -912,16 +868,11 @@ namespace GSC.Respository.SupplyManagement
 
                     }
                     var finaldata = _context.FromSql<Randomization>(sqlqry).ToList();
-                    if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+                    if (uploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country && finaldata.Count > 0 && managesite.Count > 0)
                     {
-                        if (finaldata.Count > 0)
-                        {
-                            if (managesite.Count > 0)
-                            {
-                                var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
-                                finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
-                            }
-                        }
+                        var projectids = _context.Project.Where(x => x.ParentProjectId == projectid && managesite.Contains((int)x.ManageSiteId) && x.DeletedDate == null).Select(x => x.Id).ToList();
+                        finaldata = finaldata.Where(x => projectids.Contains(x.ProjectId)).ToList();
+
                     }
                     if (!string.IsNullOrEmpty(ratio) && finaldata.Count >= Convert.ToInt32(ratio))
                     {
@@ -940,11 +891,11 @@ namespace GSC.Respository.SupplyManagement
             {
                 result.ErrorMessage = "Factor Randomization limit is completed. You can not randomize!";
             }
-            result.ProductType = products;
+            result.ProductType = products.ToString();
 
             return result;
         }
-        string SingleQuote(FectorOperator? _operator, DataType? dataType)
+       static string SingleQuote(FectorOperator? _operator, DataType? dataType)
         {
             if (_operator == null && dataType == null)
                 return "";
@@ -957,19 +908,13 @@ namespace GSC.Respository.SupplyManagement
 
             return "'";
         }
-        bool IsNumeric(Fector? collection1, DataType? dataType)
+        static bool IsNumeric(Fector? collection1, DataType? dataType)
         {
-            var collection = new CollectionSources();
-            if (collection1 == Fector.Gender || collection1 == Fector.Diatory || collection1 == Fector.Joint || collection1 == Fector.Eligibility)
+            if (!(collection1 == Fector.Gender || collection1 == Fector.Diatory || collection1 == Fector.Joint || collection1 == Fector.Eligibility)
+                 && dataType != null && dataType != DataType.Character)
             {
-                collection = CollectionSources.ComboBox;
+                    return true;
             }
-            else
-            {
-                collection = CollectionSources.TextBox;
-            }
-            if (collection == CollectionSources.TextBox && dataType != null && dataType != DataType.Character)
-                return true;
 
             return false;
         }

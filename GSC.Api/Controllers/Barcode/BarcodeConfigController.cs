@@ -70,7 +70,11 @@ namespace GSC.Api.Controllers.Barcode
                 _barcodeCombinationRepository.Add(item);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating barcode config failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating barcode config failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeConfig.Id);
         }
 
@@ -89,7 +93,11 @@ namespace GSC.Api.Controllers.Barcode
             UpdateBarcodeDisplayInformaition(barcodeConfig);
             UpdateBarcodeCombinationInformation(barcodeConfig);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating barcode config failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating barcode config failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(barcodeConfig.Id);
         }
 

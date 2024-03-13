@@ -1,44 +1,26 @@
-﻿using AutoMapper;
-using AutoMapper.QueryableExtensions;
-using ClosedXML.Excel;
-using ExcelDataReader;
-using GSC.Common.GenericRespository;
-using GSC.Data.Dto.Master;
+﻿using GSC.Common.GenericRespository;
 using GSC.Data.Dto.SupplyManagement;
-using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Helper;
-using GSC.Respository.Configuration;
-using GSC.Respository.EmailSender;
-using GSC.Respository.Master;
-using GSC.Respository.Project.Design;
-using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.IO;
 using System.Linq;
 
 namespace GSC.Respository.SupplyManagement
 {
-    public class SupplyManagementKITSeriesRepository : GenericRespository<SupplyManagementKITSeries>, ISupplyManagementKITSeriesRepository
+    public class SupplyManagementKitSeriesRepository : GenericRespository<SupplyManagementKITSeries>, ISupplyManagementKitSeriesRepository
     {
-
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public SupplyManagementKITSeriesRepository(IGSCContext context,
-        IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
+        public SupplyManagementKitSeriesRepository(IGSCContext context,
+        IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
-
-
-            _mapper = mapper;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
 
@@ -46,7 +28,7 @@ namespace GSC.Respository.SupplyManagement
 
         public void AddKitSeriesVisitDetail(SupplyManagementKITSeriesDto data)
         {
-            if (data.SupplyManagementKITSeriesDetail != null && data.SupplyManagementKITSeriesDetail.Count() > 0)
+            if (data.SupplyManagementKITSeriesDetail != null && data.SupplyManagementKITSeriesDetail.Count > 0)
             {
                 foreach (var item in data.SupplyManagementKITSeriesDetail)
                 {
@@ -77,13 +59,11 @@ namespace GSC.Respository.SupplyManagement
 
                 }
 
-                //_context.Save();
             }
         }
 
         public string GenerateKitSequenceNo(SupplyManagementKitNumberSettings kitsettings, int noseriese, SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
         {
-            var isnotexist = false;
             if (kitsettings.IsUploadWithKit)
             {
                 var uploadedkits = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(s => s.SupplyManagementUploadFile.ProjectId == supplyManagementKITSeriesDto.ProjectId
@@ -97,9 +77,9 @@ namespace GSC.Respository.SupplyManagement
             else
             {
                 string kitno1 = string.Empty;
-                while (!isnotexist)
+                while (string.IsNullOrEmpty(kitno1))
                 {
-                    var kitno = kitsettings.Prefix + kitsettings.KitNoseries.ToString().PadLeft((int)kitsettings.KitNumberLength, '0');
+                    var kitno = kitsettings.Prefix + kitsettings.KitNoseries.ToString().PadLeft(kitsettings.KitNumberLength, '0');
                     if (!string.IsNullOrEmpty(kitno))
                     {
                         ++kitsettings.KitNoseries;
@@ -108,10 +88,8 @@ namespace GSC.Respository.SupplyManagement
                         var data = _context.SupplyManagementKITSeries.Where(x => x.KitNo == kitno && x.DeletedDate == null).FirstOrDefault();
                         if (data == null)
                         {
-                            isnotexist = true;
                             kitno1 = kitno;
                             break;
-
                         }
                     }
                 }
@@ -122,10 +100,10 @@ namespace GSC.Respository.SupplyManagement
         }
         public string CheckExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
         {
-            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count() > 0)
+            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count > 0)
             {
                 var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
-                    .ToList().Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
                 if (productreciept == null)
                     return "Product receipt not found";
 
@@ -139,25 +117,23 @@ namespace GSC.Respository.SupplyManagement
             }
             return "";
         }
-        public DateTime GetExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
+        public DateTime? GetExpiryDateSequenceWise(SupplyManagementKITSeriesDto supplyManagementKITSeriesDto)
         {
-            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count() > 0)
+            if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count > 0)
             {
                 var days = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Sum(x => x.Days);
-                var currentdate = DateTime.Now.Date;
-
-
+               
                 var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
-                   .ToList().Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
                 if (productreciept != null)
                 {
                     var date = productreciept.RetestExpiryDate.Value.AddDays(-days);
                     return date;
                 }
-                return new DateTime();
+                return null;
 
             }
-            return new DateTime();
+            return null;
         }
 
         public string GenerateKitPackBarcode(SupplyManagementKITSeriesDto supplyManagementKitSeries)

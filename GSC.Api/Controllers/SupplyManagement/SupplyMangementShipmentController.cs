@@ -6,13 +6,11 @@ using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.SupplyManagement;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace GSC.Api.Controllers.SupplyManagement
 {
@@ -72,7 +70,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             supplyManagementRequest.IpAddress = _jwtTokenAccesser.IpAddress;
             supplyManagementRequest.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _supplyManagementShipmentRepository.Add(supplyManagementRequest);
-            if (_uow.Save() <= 0) throw new Exception("Creating shipment failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating shipment failed on save."));
 
             //assign kit
             supplyManagementshipmentDto.Id = supplyManagementRequest.Id;

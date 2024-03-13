@@ -22,18 +22,13 @@ namespace GSC.Api.Controllers.Master
     {
         private readonly IDomainClassRepository _domainClassRepository;
         private readonly IDomainRepository _domainRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IVariableRepository _variableRepository;
         private readonly IVariableTemplateRepository _variableTemplateRepository;
 
         public DomainClassController(IDomainClassRepository domainClassRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
             IDomainRepository domainRepository,
             IVariableRepository variableRepository,
             IVariableTemplateRepository variableTemplateRepository)
@@ -42,9 +37,7 @@ namespace GSC.Api.Controllers.Master
             _uow = uow;
             _domainRepository = domainRepository;
             _variableRepository = variableRepository;
-            _companyRepository = companyRepository;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _variableTemplateRepository = variableTemplateRepository;
         }
 
@@ -82,7 +75,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _domainClassRepository.Add(domainClass);
-            if (_uow.Save() <= 0) throw new Exception("Creating Domain Class failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Domain Class failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(domainClass.Id);
         }
 
@@ -114,7 +111,11 @@ namespace GSC.Api.Controllers.Master
             /* Added by swati for effective Date on 02-06-2019 */
             _domainClassRepository.AddOrUpdate(domainClass);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Domain Class failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Domain Class failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(domainClass.Id);
         }
 

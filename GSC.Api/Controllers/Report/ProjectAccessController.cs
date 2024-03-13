@@ -1,13 +1,8 @@
-﻿using AutoMapper;
-using GSC.Common.UnitOfWork;
-using GSC.Domain.Context;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using GSC.Api.Controllers.Common;
 using GSC.Data.Dto.Report;
-using GSC.Respository.Screening;
-using Microsoft.AspNetCore.Authorization;
 using GSC.Respository.ProjectRight;
-using GSC.Shared.JWTAuth;
+
 
 namespace GSC.Api.Controllers.Report
 {
@@ -15,18 +10,10 @@ namespace GSC.Api.Controllers.Report
     public class ProjectAccessController : BaseController
     {
         private readonly IProjectRightRepository _ProjectRightRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUnitOfWork _uow;
-        private readonly IMapper _mapper;
-        public ProjectAccessController(IProjectRightRepository projectRightRepository,
-           
-            IJwtTokenAccesser jwtTokenAccesser,
-            IUnitOfWork uow, IMapper mapper)
+        
+        public ProjectAccessController(IProjectRightRepository projectRightRepository)
         {
-            _ProjectRightRepository = projectRightRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _uow = uow;
-            _mapper = mapper;
+            _ProjectRightRepository = projectRightRepository;          
         }
 
         [HttpGet]

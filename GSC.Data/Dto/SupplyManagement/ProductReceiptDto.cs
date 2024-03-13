@@ -4,7 +4,7 @@ using GSC.Helper;
 using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
-using System.Text;
+
 
 namespace GSC.Data.Dto.SupplyManagement
 {
@@ -21,7 +21,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ConditionOfPackReceived { get; set; }
         public string TransporterName { get; set; }
         public FileModel FileModel { get; set; }
-        // public string FileName { get; set; }
+        
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public DepotType? DepotType { get; set; }
@@ -42,7 +42,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ShipmentNo { get; set; }
         public string ConditionOfPackReceived { get; set; }
         public string TransporterName { get; set; }
-        // public string FileName { get; set; }
+       
         public string PathName { get; set; }
         public string MimeType { get; set; }
         public int CentralDepotId { get; set; }

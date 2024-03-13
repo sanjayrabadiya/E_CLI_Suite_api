@@ -1,15 +1,7 @@
-﻿using AutoMapper;
+﻿
 using GSC.Api.Controllers.Common;
-using GSC.Common.UnitOfWork;
 using GSC.Respository.SupplyManagement;
-using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
 namespace GSC.Api.Controllers.SupplyManagement
 {
     [Route("api/[controller]")]
