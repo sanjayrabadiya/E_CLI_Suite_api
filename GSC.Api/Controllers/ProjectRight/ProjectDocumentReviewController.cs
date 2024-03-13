@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -87,7 +86,6 @@ namespace GSC.Api.Controllers.ProjectRight
 
                 foreach (var review in resultList)
                 {
-                    //Projectid = review.ProjectId;
                     review.IsReview = true;
                     review.ReviewNote = projectDocumentReviewDto.ReviewNote;
                     review.ReviewDate = _jwtTokenAccesser.GetClientDate();

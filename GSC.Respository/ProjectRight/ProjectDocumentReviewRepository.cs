@@ -3,18 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml.Office2010.Excel;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.ProjectRight;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace GSC.Respository.ProjectRight
 {
@@ -37,15 +35,14 @@ namespace GSC.Respository.ProjectRight
         public void SaveByUserId(int projectId, int userId)
         {
             var projectdetails = _context.Project.AsNoTracking().Where(x => x.Id == projectId).SingleOrDefault();
-            var childprojectdetails =
-                _context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectId).ToList();
-            if (projectdetails.ParentProjectId != null)
+            var childprojectdetails = _context.Project.AsNoTracking().Where(x => x.ParentProjectId == projectId).ToList();
+            if (projectdetails != null && projectdetails.ParentProjectId != null)
             {
-                var documents = _context.ProjectDocument
-                    .Where(x => x.ProjectId == projectdetails.ParentProjectId || x.ProjectId == projectId && x.DeletedDate == null).ToList();
+                var documents = _context.ProjectDocument.Where(x => x.ProjectId == projectdetails.ParentProjectId || x.ProjectId == projectId && x.DeletedDate == null).ToList();
 
-                foreach (var item in documents)
+                for (int i = 0; i < documents.Count; i++)
                 {
+                    ProjectDocument item = documents[i];
                     var documentReview = FindBy(x =>
                             x.ProjectDocumentId == item.Id && x.UserId == userId && x.ProjectId == projectId)
                         .FirstOrDefault();
@@ -59,7 +56,7 @@ namespace GSC.Respository.ProjectRight
                             ProjectDocumentId = item.Id,
                             UserId = userId,
                             ProjectId = projectId,
-                            IsReview = parentdocumentReview == null ? false : parentdocumentReview.IsReview,
+                            IsReview = (parentdocumentReview != null) && parentdocumentReview.IsReview,
                             TrainerId = parentdocumentReview == null ? null : parentdocumentReview.TrainerId,
                             TrainingType = parentdocumentReview == null ? null : parentdocumentReview.TrainingType,
                             TrainingDuration = parentdocumentReview == null
@@ -79,11 +76,11 @@ namespace GSC.Respository.ProjectRight
             }
             else
             {
-                var documents = _context.ProjectDocument.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
-                    .ToList();
+                var documents = _context.ProjectDocument.Where(x => x.ProjectId == projectId && x.DeletedDate == null).ToList();
 
-                foreach (var item in documents)
+                for (int i = 0; i < documents.Count; i++)
                 {
+                    ProjectDocument item = documents[i];
                     var documentReview = FindBy(x =>
                             x.ProjectDocumentId == item.Id && x.UserId == userId && x.ProjectId == projectId)
                         .FirstOrDefault();
@@ -99,7 +96,7 @@ namespace GSC.Respository.ProjectRight
                             ProjectDocumentId = item.Id,
                             UserId = userId,
                             ProjectId = projectId,
-                            IsReview = childdocumentReview == null ? false : childdocumentReview.IsReview,
+                            IsReview = (childdocumentReview != null) && childdocumentReview.IsReview,
                             TrainerId = childdocumentReview == null ? null : childdocumentReview.TrainerId,
                             TrainingType = childdocumentReview == null ? null : childdocumentReview.TrainingType,
                             TrainingDuration =
@@ -120,16 +117,13 @@ namespace GSC.Respository.ProjectRight
 
         public void SaveByDocumentId(int documnetId, int projectId)
         {
-            var allChild = new List<Data.Entities.Master.Project>();
             var projectParent = _context.Project.Where(x => x.Id == projectId).SingleOrDefault();
-            allChild = _context.Project.Where(x => x.ParentProjectId == projectId
-                                                  && x.DeletedDate == null).ToList();
+            var allChild = _context.Project.Where(x => x.ParentProjectId == projectId && x.DeletedDate == null).ToList();
             if (projectParent != null) allChild.Add(projectParent);
 
             foreach (var item in allChild)
             {
-                var users = _context.ProjectRight.Where(x => x.ProjectId == item.Id && x.DeletedDate == null)
-                    .Select(c => c.UserId).ToList().Distinct();
+                var users = _context.ProjectRight.Where(x => x.ProjectId == item.Id && x.DeletedDate == null).Select(c => c.UserId).Distinct().ToList();
 
                 foreach (var userId in users)
                 {
@@ -313,8 +307,10 @@ namespace GSC.Respository.ProjectRight
                                                  ExtraData = c.Project.ParentProjectId
                                              }).OrderBy(o => o.Value).Distinct().ToList();
 
-            if (projectList == null || projectList.Count == 0) return null;
-            return projectList;
+            if ( projectList.Count == 0)
+                return new List<DropDownDto>();
+            else
+                return projectList;
         }
 
         public List<DropDownDto> GetParentProjectDropDownProjectRight()
@@ -335,6 +331,8 @@ namespace GSC.Respository.ProjectRight
                     ExtraData = c.Project.ParentProjectId
                 }).OrderBy(o => o.Value).Distinct().ToList();
 
+            if (projectList.Count == 0) return new List<DropDownDto>();
+
             var childParentList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId != null
                                             && _context.ProjectRight.Any(a => (a.project.ParentProjectId == x.ProjectId || a.ProjectId == x.ProjectId)
                                                                              && a.UserId == _jwtTokenAccesser.UserId &&
@@ -349,13 +347,12 @@ namespace GSC.Respository.ProjectRight
                                             }).OrderBy(o => o.Value).Distinct().ToList();
             projectList.AddRange(childParentList);
 
-            if (projectList == null || projectList.Count == 0) return null;
             return projectList.GroupBy(d => d.Id).Select(c => new DropDownDto
             {
-                Id = c.FirstOrDefault().Id,
-                Value = c.FirstOrDefault().Value,
-                Code = c.FirstOrDefault().Code,
-                ExtraData = c.FirstOrDefault().ExtraData
+                Id = c.First().Id,
+                Value = c.First().Value,
+                Code = c.First().Code,
+                ExtraData = c.First().ExtraData
             }).OrderBy(o => o.Id).ToList();
         }
 
@@ -378,31 +375,10 @@ namespace GSC.Respository.ProjectRight
                                                    CountryId = c.ManageSite.City.State.CountryId
                                                }).OrderBy(o => o.Value).Distinct().ToList();
 
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList.Count == 0)  return new List<ProjectDropDown>();
             return projectList;
         }
 
-        //public List<ProjectDropDown> GetChildProjectDropDownProjectRight(int ParentProjectId)
-        //{
-        //    // changes by swati for child project
-        //    var projectList = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.Project.ParentProjectId == ParentProjectId
-        //                                     && _context.ProjectRight.Any(a => a.ProjectId == x.ProjectId
-        //                                                                      && a.UserId == _jwtTokenAccesser.UserId &&
-        //                                                                      a.RoleId == _jwtTokenAccesser.RoleId
-        //                                                                      && a.DeletedDate == null &&
-        //                                                                      a.RollbackReason == null) &&
-        //                                     x.DeletedDate == null).Select(c => new ProjectDropDown
-        //                                     {
-        //                                         Id = c.ProjectId,
-        //                                         Value = c.Project.ProjectCode,
-        //                                         Code = c.Project.ProjectCode,
-        //                                         ParentProjectId = (int)c.Project.ParentProjectId,
-        //                                         CountryId = c.Project.ManageSite.City.State.CountryId
-        //                                     }).OrderBy(o => o.Value).Distinct().ToList();
-
-        //    if (projectList == null || projectList.Count == 0) return null;
-        //    return projectList;
-        //}
 
         public ProjectDashBoardDto GetCompleteTrainingDashboard(int id)
         {
@@ -509,8 +485,8 @@ namespace GSC.Respository.ProjectRight
 
             var projects = projectList.GroupBy(d => d.ProjectId).Select(c => new DashboardProject
             {
-                ProjectId = c.FirstOrDefault().ProjectId,
-                CreatedDate = c.FirstOrDefault().CreatedDate
+                ProjectId = c.First().ProjectId,
+                CreatedDate = c.First().CreatedDate
             }).OrderBy(o => o.ProjectId).ToList();
 
 
@@ -521,14 +497,12 @@ namespace GSC.Respository.ProjectRight
                 var countries = _context.Project
               .Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null).Select(r => new
               {
-                  Id = (int)r.ManageSite.City.State.CountryId,
-                  CountryName = r.ManageSite.City.State.Country.CountryName,
-                  CountryCode = r.ManageSite.City.State.Country.CountryCode
+                  Id = r.ManageSite.City.State.CountryId,
+                  r.ManageSite.City.State.Country.CountryName,
+                  r.ManageSite.City.State.Country.CountryCode
               }).Distinct().OrderBy(o => o.CountryCode).ToList();
 
 
-
-                //var countries = _context.Project.Include(i => i.Country).Where(x => x.DeletedDate == null && x.ParentProjectId == item.ProjectId && x.ManageSite != null);
 
                 var project = _context.Project.Where(x => x.ParentProjectId == null && x.Id == item.ProjectId).
                     ProjectTo<ProjectGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).FirstOrDefault();
@@ -536,11 +510,13 @@ namespace GSC.Respository.ProjectRight
                 {
                     temCountries.Add(country.CountryName);
                 }
-
-                item.CountriesName = temCountries.Distinct().ToList();
-                item.CountCountry = temCountries.Distinct().Count();
-                item.projectCode = project.ProjectCode;
-                item.Project = project;
+                if(project != null)
+                {
+                    item.CountriesName = temCountries.Distinct().ToList();
+                    item.CountCountry = temCountries.Distinct().Count();
+                    item.projectCode = project.ProjectCode;
+                    item.Project = project;
+                }
             });
 
             return projects;
@@ -573,7 +549,7 @@ namespace GSC.Respository.ProjectRight
                                                                     && a.UserId == _jwtTokenAccesser.UserId
                                                                     && x.DeletedDate == null) &&
                                                                     (siteId > 0 ? x.ProjectId == siteId : projectIds.Contains(x.ProjectId)) &&
-                                                                    (countryId > 0 ? x.Project.ManageSite.City.State.CountryId == countryId : true) &&
+                                                                    (countryId <= 0 || x.Project.ManageSite.City.State.CountryId == countryId) &&
                                                                 x.DeletedDate == null).Select(c =>
 
                    new ProjectDocumentReviewDto
@@ -590,7 +566,7 @@ namespace GSC.Respository.ProjectRight
                        MimeType = c.ProjectDocument.MimeType,
                        ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
                        ReviewDate = c.ReviewDate,
-                       TrainingTypeName = c.TrainingType == null ? !c.IsReview ? "" : "Not Applicable" : c.TrainingType.GetDescription(),
+                       TrainingTypeName = GetTrainingType(c),
                        TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
                    }).Distinct().ToList();
 
@@ -607,16 +583,19 @@ namespace GSC.Respository.ProjectRight
                     if (createdByUser != null) projectDocumentReview.AssignedBy = createdByUser.UserName;
                 }
 
-                //if (!projectDocumentReview.IsReview)
-                //{
                 var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
                 projectDocumentReview.DocumentPath = documentUrl + projectDocumentReview.DocumentPath;
-                //}
             });
 
             return projectDashBoardDto;
         }
-
+        public string GetTrainingType(ProjectDocumentReview c)
+        {
+            if (c.TrainingType == null && !c.IsReview)
+                return "Not Applicable";
+            else
+                return c.TrainingType.GetDescription();
+        }
 
         public int CountTranningNotification()
         {
