@@ -9,13 +9,9 @@ namespace GSC.Api.Controllers.UserMgt
     [Route("api/[controller]")]
     public class UserRoleController : BaseController
     {
-        private readonly IUserRoleRepository _userRoleRepository;
-
-        public UserRoleController(IUserRoleRepository userRoleRepository)
+        public UserRoleController()
         {
-            _userRoleRepository = userRoleRepository;
-        }
-
-      
+            
+        }   
     }
 }

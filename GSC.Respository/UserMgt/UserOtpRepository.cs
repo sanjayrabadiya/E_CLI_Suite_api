@@ -63,7 +63,7 @@ namespace GSC.Respository.UserMgt
                 if (userOtp.CreatedDate != null)
                     userOtp.CreatedDate = userOtp.CreatedDate.Value.AddHours(-1);
             var startDate = userOtp.CreatedDate;
-            var endDate = _jwtTokenAccesser.GetClientDate();// DateTime.Now.ToUniversalTime();
+            var endDate = _jwtTokenAccesser.GetClientDate();
             var totalMinutes = (Convert.ToDateTime(endDate) - Convert.ToDateTime(startDate)).TotalMinutes;
             if (totalMinutes >= 60)
                 return "OTP you have entered is expire!";
@@ -89,7 +89,7 @@ namespace GSC.Respository.UserMgt
                 if (userOtp.CreatedDate != null)
                     userOtp.CreatedDate = userOtp.CreatedDate.Value.AddHours(-1);
             var startDate = userOtp.CreatedDate;
-            var endDate = _jwtTokenAccesser.GetClientDate();//DateTime.Now.ToUniversalTime();
+            var endDate = _jwtTokenAccesser.GetClientDate();
             var totalMinutes = (Convert.ToDateTime(endDate) - Convert.ToDateTime(startDate)).TotalMinutes;
             if (totalMinutes >= 60)
                 return "OTP you have entered is expire!";

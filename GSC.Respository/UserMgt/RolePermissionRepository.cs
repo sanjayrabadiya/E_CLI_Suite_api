@@ -23,7 +23,7 @@ namespace GSC.Respository.UserMgt
 
         public void Save(List<RolePermission> rolePermissions)
         {
-            var userRoleId = rolePermissions.First().UserRoleId;
+            var userRoleId = rolePermissions[0].UserRoleId;
 
             var existing = _context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
             if (existing.Any())
@@ -41,7 +41,7 @@ namespace GSC.Respository.UserMgt
 
         public void updatePermission(List<RolePermission> rolePermissions)
         {
-            var userRoleId = rolePermissions.First().UserRoleId;
+            var userRoleId = rolePermissions[0].UserRoleId;
 
             var existing = _context.RolePermission.Where(t => t.UserRoleId == userRoleId).ToList();
             if (existing.Any())
@@ -72,8 +72,7 @@ namespace GSC.Respository.UserMgt
                     ScreenCode = t.ScreenCode,
                     ScreenName = t.ScreenName,
                     ParentAppScreenId = t.ParentAppScreenId,
-                    //hasChild = t.ParentAppScreenId != null ? false : true
-                    hasChild = _context.AppScreen.Any(x=>x.ParentAppScreenId == t.Id) ? true : false
+                    hasChild = _context.AppScreen.Any(x=>x.ParentAppScreenId == t.Id)
                 }).ToList();
 
             permissions.ForEach(t =>
@@ -112,14 +111,14 @@ namespace GSC.Respository.UserMgt
             screens.ForEach(t =>
             {
                 var p = permissions.Where(s => s.ScreenCode == t.ScreenCode).ToList();
-                t.IsAdd = isPowerAdmin || p.Any(s => s.IsAdd);
-                t.IsDelete = isPowerAdmin || p.Any(s => s.IsDelete);
-                t.IsEdit = isPowerAdmin || p.Any(s => s.IsEdit);
-                t.IsExport = isPowerAdmin || p.Any(s => s.IsExport);
-                t.IsView = isPowerAdmin || p.Any(s => s.IsView);
-                t.IsView = isPowerAdmin || p.Any(s => s.IsView);
-                t.IsSync = isPowerAdmin || p.Any(s => s.IsSync);
-                t.IsFavorited = favorites.Any(f => f.AppScreenId == t.Id);
+                t.IsAdd = isPowerAdmin || p.Exists(s => s.IsAdd);
+                t.IsDelete = isPowerAdmin || p.Exists(s => s.IsDelete);
+                t.IsEdit = isPowerAdmin || p.Exists(s => s.IsEdit);
+                t.IsExport = isPowerAdmin || p.Exists(s => s.IsExport);
+                t.IsView = isPowerAdmin || p.Exists(s => s.IsView);
+                t.IsView = isPowerAdmin || p.Exists(s => s.IsView);
+                t.IsSync = isPowerAdmin || p.Exists(s => s.IsSync);
+                t.IsFavorited = favorites.Exists(f => f.AppScreenId == t.Id);
             });
             screens = screens.Where(t => !t.IsPermission || t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport ||t.IsSync)
                 .ToList();
@@ -135,14 +134,12 @@ namespace GSC.Respository.UserMgt
 
             if (usertype == Shared.Generic.UserMasterUserType.Patient)
             {
-                var siteId = _context.Randomization.Where(x => x.UserId == userId).ToList().FirstOrDefault().ProjectId;
-                var studyId = _context.Project.Where(x => x.Id == siteId).ToList().FirstOrDefault().ParentProjectId;
+                var siteId = _context.Randomization.FirstOrDefault(x => x.UserId == userId)?.ProjectId;
+                var studyId = _context.Project.FirstOrDefault(x => x.Id == siteId)?.ParentProjectId;
 
-                var accessRights = _context.AppScreenPatientRights.Where(x => x.ProjectId == studyId).ToList().Select(x => x.AppScreenPatientId);
+                var accessRights = _context.AppScreenPatientRights.Where(x => x.ProjectId == studyId).AsEnumerable().Select(x => x.AppScreenPatientId);
                 screens = screens.Where(x => accessRights.Contains(x.Id)).ToList();
             }
-            else new List<AppScreenPatient>();
-
             return screens;
         }
 
@@ -170,7 +167,7 @@ namespace GSC.Respository.UserMgt
                      ScreenCode = t.ScreenCode,
                      ScreenName = t.ScreenName,
                      ParentAppScreenId = t.ParentAppScreenId,
-                     hasChild = _context.AppScreen.Any(x => x.ParentAppScreenId == t.Id && x.DeletedDate == null && (x.IsTab == null || x.IsTab == false)) ? true : false
+                     hasChild = _context.AppScreen.Any(x => x.ParentAppScreenId == t.Id && x.DeletedDate == null && (x.IsTab == null || x.IsTab == false))
                  }).OrderBy(x => x.ScreenName).ToList();
 
             return permissions;

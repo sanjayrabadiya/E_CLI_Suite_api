@@ -23,38 +23,23 @@ namespace GSC.Api.Controllers.UserMgt
     [Route("api/[controller]")]
     public class LoginController : BaseController
     {
-        private readonly IUnitOfWork _uow;
-        private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
-        private readonly IConfiguration _configuration;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
-        private readonly IMapper _mapper;
-        private readonly ILoginPreferenceRepository _loginPreferenceRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public LoginController(
             IUserRoleRepository userRoleRepository,
             IUserRepository userRepository,
-            IUserLoginReportRespository userLoginReportRepository,
-            IUnitOfWork uow,
-            IConfiguration configuration,
             IOptions<EnvironmentSetting> environmentSetting,
-            ICentreUserService centreUserService, IMapper mapper,
-            ILoginPreferenceRepository loginPreferenceRepository,
+            ICentreUserService centreUserService,
             IJwtTokenAccesser jwtTokenAccesser
             )
         {
             _userRoleRepository = userRoleRepository;
             _userRepository = userRepository;
-            _uow = uow;
-            _userLoginReportRepository = userLoginReportRepository;
-            // _hubContext = hubContext;
-            _configuration = configuration;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
-            _mapper = mapper;
-            _loginPreferenceRepository = loginPreferenceRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
@@ -84,8 +69,8 @@ namespace GSC.Api.Controllers.UserMgt
 
             if (roles.Count == 1)
             {
-                dto.RoleId = roles.First().Id;
-                dto.RoleName = roles.First().Value;
+                dto.RoleId = roles[0].Id;
+                dto.RoleName = roles[0].Value;
             }
             if (roles.Count > 1)
             {

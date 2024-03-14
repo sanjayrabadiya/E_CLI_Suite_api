@@ -14,17 +14,15 @@ namespace GSC.Api.Controllers.UserMgt
     [ApiController]
     public class UserSettingController : BaseController
     {
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUserSettingRepository _userSettingRepository;
         public UserSettingController(
             IUserSettingRepository userSettingRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-        IUnitOfWork uow, IMapper mapper)
+        IUnitOfWork uow)
         {
             _uow = uow;
-            _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userSettingRepository = userSettingRepository;
         }
@@ -57,7 +55,11 @@ namespace GSC.Api.Controllers.UserMgt
                 exists.ProjectId = projectId;
                 _userSettingRepository.Update(exists);
             }
-            if (_uow.Save() <= 0) throw new Exception("Set default project failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Set default project failed.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
     }

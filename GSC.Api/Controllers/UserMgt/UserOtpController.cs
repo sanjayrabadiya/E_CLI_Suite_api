@@ -24,23 +24,9 @@ namespace GSC.Api.Controllers.UserMgt
     [Route("api/[controller]")]
     public class UserOtpController : BaseController
     {
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-        private readonly IUserOtpRepository _userOtpRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly ICentreUserService _centreUserService;
-        public UserOtpController(IUserOtpRepository userOtpRepository,
-            IUnitOfWork uow,
-            IUserRepository userRepository,
-            IMapper mapper, IOptions<EnvironmentSetting> environmentSetting, ICentreUserService centreUserService)
+        public UserOtpController()
         {
-            _userOtpRepository = userOtpRepository;
-            _uow = uow;
-            _mapper = mapper;
-            _userRepository = userRepository;
-            _environmentSetting = environmentSetting;
-            _centreUserService = centreUserService;
+           
         }
         
     }

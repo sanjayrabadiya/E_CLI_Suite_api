@@ -34,20 +34,15 @@ namespace GSC.Api.Controllers.UserMgt
     [Route("api/[controller]")]
     public class UserController : BaseController
     {
-        private readonly IEmailSenderRespository _emailSenderRespository;
-        private readonly ILocationRepository _locationRepository;
-        private readonly IProjectRepository _projectRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IUserPasswordRepository _userPasswordRepository;
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectArtificateDocumentApproverRepository _projectArtificateDocumentApproverRepository;
 
@@ -56,15 +51,11 @@ namespace GSC.Api.Controllers.UserMgt
         public UserController(IUserRepository userRepository,
             IUnitOfWork uow,
             IMapper mapper,
-            ILocationRepository locationRepository, IUserPasswordRepository userPasswordRepository,
-            IEmailSenderRespository emailSenderRespository,
             IUploadSettingRepository uploadSettingRepository,
             IUserRoleRepository userRoleRepository,
-            IProjectRepository projectRepository,
             IOptions<EnvironmentSetting> environmentSetting,
             ICentreUserService centreUserService,
             IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IUserLoginReportRespository userLoginReportRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
@@ -74,17 +65,12 @@ namespace GSC.Api.Controllers.UserMgt
             _userRepository = userRepository;
             _uow = uow;
             _mapper = mapper;
-            _locationRepository = locationRepository;
-            _userPasswordRepository = userPasswordRepository;
-            _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
             _userRoleRepository = userRoleRepository;
-            _projectRepository = projectRepository;
             _environmentSetting = environmentSetting;
             _centreUserService = centreUserService;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _userLoginReportRepository = userLoginReportRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
             _projectSubSecArtificateDocumentApproverRepository = projectSubSecArtificateDocumentApproverRepository;
@@ -191,7 +177,11 @@ namespace GSC.Api.Controllers.UserMgt
             {
                 _userRoleRepository.Add(x);
             });
-            if (_uow.Save() <= 0) throw new Exception("Creating a User  failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating a User  failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(user.Id);
         }
