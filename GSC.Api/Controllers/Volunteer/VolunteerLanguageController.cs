@@ -4,7 +4,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Audit;
 using GSC.Respository.Volunteer;
@@ -45,8 +44,6 @@ namespace GSC.Api.Controllers.Volunteer
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            //_volunteerLanguageRepository.RemoveExisting(0, volunteerLanguageDto.VolunteerId,
-            //    volunteerLanguageDto.LanguageId);
 
             var validate = _volunteerLanguageRepository.DuplicateRecord(volunteerLanguageDto);
             if (!string.IsNullOrEmpty(validate))
@@ -58,7 +55,7 @@ namespace GSC.Api.Controllers.Volunteer
             volunteerLanguageDto.Id = 0;
             var volunteerLanguage = _mapper.Map<VolunteerLanguage>(volunteerLanguageDto);
             _volunteerLanguageRepository.Add(volunteerLanguage);
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer language failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer language failed on save."));
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Inserted,
                 volunteerLanguage.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);
@@ -80,12 +77,10 @@ namespace GSC.Api.Controllers.Volunteer
                 return BadRequest(ModelState);
             }
 
-            //_volunteerLanguageRepository.RemoveExisting(volunteerLanguageDto.Id, volunteerLanguageDto.VolunteerId,
-            //    volunteerLanguageDto.LanguageId);
 
             var volunteerLanguage = _mapper.Map<VolunteerLanguage>(volunteerLanguageDto);
             _volunteerLanguageRepository.Update(volunteerLanguage);
-            if (_uow.Save() <= 0) throw new Exception("Updating volunteer language failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating volunteer language failed on save."));
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerLanguage, AuditAction.Updated,
                 volunteerLanguageDto.Id, volunteerLanguage.VolunteerId, volunteerLanguageDto.Changes);

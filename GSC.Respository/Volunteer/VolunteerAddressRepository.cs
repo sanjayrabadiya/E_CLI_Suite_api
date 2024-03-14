@@ -1,10 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
-using GSC.Shared;
 
 namespace GSC.Respository.Volunteer
 {
@@ -22,8 +20,9 @@ namespace GSC.Respository.Volunteer
             var addresses = FindByInclude(t => t.VolunteerId == volunteerId && t.DeletedDate == null, t => t.Location)
                 .OrderByDescending(t => t.Id).ToList();
 
-            foreach (var address in addresses)
+            for (int i = 0; i < addresses.Count; i++)
             {
+                VolunteerAddress address = addresses[i];
                 if (address.Location == null)
                     continue;
 

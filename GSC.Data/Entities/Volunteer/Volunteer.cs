@@ -4,7 +4,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Data.Entities.Master;
 using GSC.Helper;
-using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Volunteer
 {
@@ -60,14 +59,9 @@ namespace GSC.Data.Entities.Volunteer
         public string ProfilePic { get; set; }
 
         public IList<VolunteerAddress> Addresses { get; set; } = null;
-        //public IList<VolunteerContact> Contacts { get; set; } = null;
-        //public IList<VolunteerFood> Foods { get; set; } = null;
-        //public IList<VolunteerLanguage> Languages { get; set; } = null;
-        //public IList<VolunteerDocument> Documents { get; set; } = null;
 
         [DatabaseGenerated(DatabaseGeneratedOption.Computed)]
         public string FullName { get; set; }
-        //public string FullName => FirstName + " " + MiddleName + " " + LastName;
         public bool? IsBlocked { get; set; }
         public bool IsScreening { get; set; }
         public VolunteerStatus Status { get; set; }

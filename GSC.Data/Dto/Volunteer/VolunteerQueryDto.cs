@@ -4,7 +4,6 @@ using GSC.Helper;
 using GSC.Shared.Extension;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Dto.Volunteer
 {
@@ -45,7 +44,6 @@ namespace GSC.Data.Dto.Volunteer
     {
         public bool? ShowEditButton { get; set; }
         public bool? ShowRespondButton { get; set; }
-
     }
 
     public class VolunteerQuerySearchDto

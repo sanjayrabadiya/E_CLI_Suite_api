@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using GSC.Data.Entities.Audit;
 using GSC.Data.Entities.Common;

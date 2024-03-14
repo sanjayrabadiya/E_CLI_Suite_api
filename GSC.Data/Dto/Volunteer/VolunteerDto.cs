@@ -90,7 +90,6 @@ namespace GSC.Data.Dto.Volunteer
         public string VolunteerNo { get; set; }
         public bool IsNew { get; set; }
         public VolunteerStatus Status { get; set; }
-
         public string StatusName { get; set; }
     }
 }

@@ -6,7 +6,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
 
@@ -55,7 +54,7 @@ namespace GSC.Api.Controllers.Volunteer
             var volunteerBiometric = _mapper.Map<VolunteerBiometric>(volunteerBiometricDto);
 
             _volunteerBiometricRepository.Add(volunteerBiometric);
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer biometric failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer biometric failed on save."));
             return Ok(volunteerBiometric.Id);
         }
 
@@ -70,7 +69,7 @@ namespace GSC.Api.Controllers.Volunteer
             var volunteerBiometric = _mapper.Map<VolunteerBiometric>(volunteerBiometricDto);
             volunteerBiometric.Id = volunteerBiometricDto.Id;
             _volunteerBiometricRepository.Update(volunteerBiometric);
-            if (_uow.Save() <= 0) throw new Exception("Updating volunteer biometric failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating volunteer biometric failed on save."));
             return Ok(volunteerBiometric.Id);
         }
 

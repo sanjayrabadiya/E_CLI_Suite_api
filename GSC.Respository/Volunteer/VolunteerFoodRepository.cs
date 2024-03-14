@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
@@ -12,8 +11,7 @@ namespace GSC.Respository.Volunteer
     public class VolunteerFoodRepository : GenericRespository<VolunteerFood>, IVolunteerFoodRepository
     {
         private readonly IGSCContext _context;
-        public VolunteerFoodRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public VolunteerFoodRepository(IGSCContext context)
             : base(context)
         {
             _context = context;

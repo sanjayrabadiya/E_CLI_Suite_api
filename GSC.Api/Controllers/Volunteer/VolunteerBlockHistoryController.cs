@@ -4,7 +4,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
 
@@ -45,11 +44,11 @@ namespace GSC.Api.Controllers.Volunteer
             var volunteerBlockHistory = _mapper.Map<VolunteerBlockHistory>(volunteerBlockHistoryDto);
 
             _volunteerBlockHistoryRepository.Add(volunteerBlockHistory);
-            if (_uow.Save() <= 0) throw new Exception("Creating Volunteer Block History failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating Volunteer Block History failed on save."));
             var voluntterRecord = _volunteerRepository.Find(volunteerBlockHistoryDto.VolunteerId);
             voluntterRecord.IsBlocked = volunteerBlockHistory.IsBlock;
             _volunteerRepository.Update(voluntterRecord);
-            if (_uow.Save() <= 0) throw new Exception("Volunteer Block failed on update.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Volunteer Block failed on update."));
 
             return Ok(volunteerBlockHistory.Id);
         }

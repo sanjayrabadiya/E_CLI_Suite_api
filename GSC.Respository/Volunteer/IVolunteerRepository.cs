@@ -15,8 +15,6 @@ namespace GSC.Respository.Volunteer
         List<VolunteerGridDto> GetVolunteerDetail(bool isDeleted, int volunteerid);
         IList<DropDownDto> QueryAutoCompleteSearch(string searchText, bool isAutoSearch = false);
         string DuplicateOldReference(VolunteerDto objSave);
-
-        //IList<DropDownDto> getVolunteersForDataEntryByPeriodIdLocked(int? projectDesignPeriodId, int projectId, bool isLock);
         List<DropDownDto> GetPopulationTypeDropDownList(); //Add function to get used population type dropdown by Tinku Mahato (07/07/2022)
         List<DropDownDto> GetVolunteerDropDown();
         string DuplicateRandomizationNumber(Data.Entities.Volunteer.Volunteer objSave);

@@ -4,7 +4,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
 
@@ -44,7 +43,7 @@ namespace GSC.Api.Controllers.Volunteer
             volunteerHistoryDto.Id = 0;
             var volunteerHistory = _mapper.Map<VolunteerHistory>(volunteerHistoryDto);
             _volunteerHistoryRepository.Add(volunteerHistory);
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer history failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer history failed on save."));
             return Ok(volunteerHistory.Id);
         }
 
@@ -57,7 +56,7 @@ namespace GSC.Api.Controllers.Volunteer
 
             var volunteerHistory = _mapper.Map<VolunteerHistory>(volunteerHistoryDto);
             _volunteerHistoryRepository.Update(volunteerHistory);
-            if (_uow.Save() <= 0) throw new Exception("Updating volunteer history failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating volunteer history failed on save."));
             return Ok(volunteerHistory.Id);
         }
     }

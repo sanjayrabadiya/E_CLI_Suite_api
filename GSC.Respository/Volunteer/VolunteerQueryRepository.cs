@@ -10,18 +10,15 @@ using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.Volunteer
 {
-    public class VolunteerQueryRepository : GenericRespository<Data.Entities.Volunteer.VolunteerQuery>, IVolunteerQueryRepository
+    public class VolunteerQueryRepository : GenericRespository<VolunteerQuery>, IVolunteerQueryRepository
     {
 
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        private readonly IMapper _mapper;
 
         public VolunteerQueryRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
@@ -31,7 +28,6 @@ namespace GSC.Respository.Volunteer
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            _mapper = mapper;
         }
 
         public VolunteerQuery GetLatest(int VolunteerId, string FiledName)
@@ -95,12 +91,7 @@ namespace GSC.Respository.Volunteer
                         {
                             var commentLatestQuery = All.Where(t => t.VolunteerId == volunteerid && t.FieldName == item.FieldName && t.QueryStatus == CommentStatus.Open).OrderByDescending(o => o.Id).FirstOrDefault();
 
-                            if (commentLatestQuery == null)
-                            {
-                                button.ShowEditButton = false;
-                                button.ShowRespondButton = false;
-                            }
-                            else if (_jwtTokenAccesser.RoleId == commentLatestQuery.UserRole)
+                           if (commentLatestQuery !=null && _jwtTokenAccesser.RoleId == commentLatestQuery.UserRole)
                             {
                                 button.ShowEditButton = false;
                                 button.ShowRespondButton = true;
@@ -110,16 +101,6 @@ namespace GSC.Respository.Volunteer
                                 button.ShowEditButton = false;
                                 button.ShowRespondButton = false;
                             }
-                        }
-                        else if (commentLatest.QueryStatus == CommentStatus.Open && _jwtTokenAccesser.RoleId != commentLatest.UserRole)
-                        {
-                            button.ShowEditButton = false;
-                            button.ShowRespondButton = false;
-                        }
-                        else if (commentLatest.QueryStatus == CommentStatus.SelfCorrection || commentLatest.QueryStatus == CommentStatus.Closed)
-                        {
-                            button.ShowEditButton = false;
-                            button.ShowRespondButton = false;
                         }
                         else
                         {
@@ -136,7 +117,11 @@ namespace GSC.Respository.Volunteer
                 }
 
                 item.ShowButton = button;
-                item.LatestFieldName = commentLatest.FieldName;
+                if (commentLatest != null)
+                {
+                    item.LatestFieldName = commentLatest.FieldName;
+                }
+                    
             }
 
             return queryDtos;
@@ -221,7 +206,7 @@ namespace GSC.Respository.Volunteer
             }
 
             if (search.StudyId.HasValue)
-                query1 = query1.Where(x => x.ScreeningHistory.Any(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
+                query1 = query1.Where(x => x.ScreeningHistory.Exists(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
 
             return query1;
         }

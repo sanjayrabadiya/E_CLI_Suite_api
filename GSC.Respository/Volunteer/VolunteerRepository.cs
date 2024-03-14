@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
-using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.Volunteer;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -31,9 +29,6 @@ namespace GSC.Respository.Volunteer
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IProjectDesignPeriodRepository _projectDesignPeriodRepository;
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
 
@@ -57,9 +52,6 @@ namespace GSC.Respository.Volunteer
             _cityRepository = cityRepository;
             _companyRepository = companyRepository;
             _rolePermissionRepository = rolePermissionRepository;
-            _projectDesignPeriodRepository = projectDesignPeriodRepository;
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
-            _screeningTemplateRepository = screeningTemplateRepository;
             _context = context;
             _mapper = mapper;
         }
@@ -107,7 +99,6 @@ namespace GSC.Respository.Volunteer
                     var volunterIds = AutoCompleteSearch(search.TextSearch.Trim());
                     IEnumerable<int> ids = volunterIds.Select(x => x.Id).Distinct();
                     query = query.Where(x => ids.Contains(x.Id));
-                    //query = query.Where(x => volunterIds.Any(a => a.Id == x.Id));
                 }
 
                 if (!string.IsNullOrEmpty(search.AliasName))
@@ -168,10 +159,10 @@ namespace GSC.Respository.Volunteer
                 }
             }
 
-            var result = GetItems(query, true);
+            var result = GetItems(query);
 
             if (search.StudyId.HasValue)
-                result = result.Where(x => x.ScreeningHistory.Any(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
+                result = result.Where(x => x.ScreeningHistory.Exists(y => y.ScreeningEntry.StudyId == search.StudyId)).ToList();
 
             return result;
         }
@@ -183,37 +174,9 @@ namespace GSC.Respository.Volunteer
                 return new VolunteerStatusCheck
                 { Id = id, VolunteerNo = volunteer.VolunteerNo, Status = VolunteerStatus.Completed, IsNew = false };
 
-            var propsToCheck = new List<string>
-            {
-                "RegisterDate",
-                "FirstName",
-                "LastName",
-                "DateOfBirth",
-                "ReligionId",
-                "OccupationId",
-                "Education",
-                "RaceId",
-                "MaritalStatusId",
-                "PopulationTypeId",
-                "GenderId",
-                "AnnualIncome",
-                "FoodTypeId"
-            };
 
             var inComplete = false;
             var message = "";
-            //foreach (var propName in propsToCheck)
-            //{
-            //    var prop = volunteer.GetType().GetProperty(propName);
-            //    var value = Convert.ToString(prop?.GetValue(volunteer));
-            //    if (value.Trim().Length == 0)
-            //    {
-            //        //return new VolunteerStatusCheck { Id = id, Status = VolunteerStatus.InCompleted, isNew = true };
-            //        message = "#Profile ";
-            //        inComplete = true;
-            //        break;
-            //    }
-            //}
             if (!_context.VolunteerAddress.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Address ";
@@ -226,23 +189,12 @@ namespace GSC.Respository.Volunteer
                 inComplete = true;
             }
 
-            //if (!_context.VolunteerFood.Where(t => t.VolunteerId == id).Any())
-            //{
-            //    message += "#Food ";
-            //    inComplete = true;
-            //}
-
             if (!_context.VolunteerLanguage.Where(t => t.VolunteerId == id).Any())
             {
                 message += "#Language";
                 inComplete = true;
             }
 
-            //if (!_context.VolunteerDocument.Where(t => t.VolunteerId == id).Any())
-            //{
-            //    message += "#Document";
-            //    inComplete = true;
-            //}
 
             if (!inComplete)
             {
@@ -318,7 +270,6 @@ namespace GSC.Respository.Volunteer
 
             var query = All.Where(x => x.DeletedDate == null).AsQueryable();
 
-            //query = query.Where(x => x.FullName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
             query = query.Where(x => x.FirstName.Contains(searchText) || x.MiddleName.Contains(searchText) || x.LastName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
 
             if (isAutoSearch)
@@ -327,13 +278,11 @@ namespace GSC.Respository.Volunteer
             return query.Select(t => new DropDownDto
             {
                 Id = t.Id,
-                //Value = t.VolunteerNo + " " + t.FullName
                 Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
             }).ToList();
         }
 
-        private IList<VolunteerGridDto> GetItems(IQueryable<Data.Entities.Volunteer.Volunteer> query,
-            bool isSummary = false)
+        private IList<VolunteerGridDto> GetItems(IQueryable<Data.Entities.Volunteer.Volunteer> query)
         {
             var imageUrl = _uploadSettingRepository.GetWebImageUrl();
             var roleBlock = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerdetail");
@@ -361,7 +310,7 @@ namespace GSC.Respository.Volunteer
                 PopulationType = x.PopulationType.PopulationName,
                 FoodType = x.FoodType.TypeName,
                 Relationship = x.Relationship,
-                Address = "",//x.Addresses.FirstOrDefault(a => a.IsCurrent).Location.FullAddress,
+                Address = "",
                 ProfilePicPath = imageUrl + (x.ProfilePic ?? DocumentService.DefulatProfilePic),
                 Foods = "",
                 RegisterDate = x.RegisterDate,
@@ -380,7 +329,7 @@ namespace GSC.Respository.Volunteer
                 CreatedByUser = x.CreatedByUser.UserName,
                 ModifiedByUser = x.ModifiedByUser.UserName,
                 DeletedByUser = x.DeletedByUser.UserName,
-                ContactNo = _context.VolunteerContact.Where(c => c.VolunteerId == x.Id && c.IsDefault == true).FirstOrDefault().ContactNo,
+                ContactNo = _context.VolunteerContact.Where(c => c.VolunteerId == x.Id && c.IsDefault).FirstOrDefault().ContactNo,
                 ScreeningHistory = _context.ScreeningHistory.Include(b => b.ScreeningEntry).Where(c => c.ScreeningEntry.Attendance.VolunteerId == x.Id
                                           && c.ScreeningEntry.EntryType == DataEntryType.Screening
                                           && c.DeletedDate == null).ToList()
@@ -410,7 +359,6 @@ namespace GSC.Respository.Volunteer
 
             var query = All.Where(x => x.DeletedDate == null && x.Status == VolunteerStatus.Completed).AsQueryable();
 
-            //query = query.Where(x => x.FullName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
             query = query.Where(x => x.FirstName.Contains(searchText) || x.MiddleName.Contains(searchText) || x.LastName.Contains(searchText) || x.VolunteerNo.Contains(searchText));
 
             if (isAutoSearch)
@@ -419,7 +367,6 @@ namespace GSC.Respository.Volunteer
             return query.Select(t => new DropDownDto
             {
                 Id = t.Id,
-                //Value = t.VolunteerNo + " " + t.FullName
                 Value = t.VolunteerNo + " " + t.FirstName + " " + t.MiddleName + " " + t.LastName
             }).ToList();
         }
