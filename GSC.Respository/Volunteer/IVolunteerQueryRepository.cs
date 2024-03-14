@@ -2,9 +2,7 @@
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Respository.Volunteer
 {

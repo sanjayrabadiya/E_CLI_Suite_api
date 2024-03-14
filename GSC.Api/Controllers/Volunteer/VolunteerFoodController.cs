@@ -2,7 +2,6 @@ using System;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
-using GSC.Domain.Context;
 using GSC.Respository.Volunteer;
 using Microsoft.AspNetCore.Mvc;
 
@@ -35,7 +34,7 @@ namespace GSC.Api.Controllers.Volunteer
         {
             _volunteerFoodRepository.SaveFoods(volunteerFoodDto);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer food failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer food failed on save."));
             return NoContent();
         }
     }

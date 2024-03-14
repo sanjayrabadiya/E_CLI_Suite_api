@@ -4,7 +4,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Audit;
 using GSC.Respository.Common;
@@ -51,7 +50,6 @@ namespace GSC.Api.Controllers.Volunteer
             volunteerAddressDto.Id = 0;
             var volunteerAddress = _mapper.Map<VolunteerAddress>(volunteerAddressDto);
             volunteerAddress.Location = _locationRepository.SaveLocation(volunteerAddress.Location);
-            //_locationRepository.Add(volunteerAddress.Location);
 
             if (volunteerAddress.Location.Id > 0)
                 _locationRepository.Update(volunteerAddress.Location);
@@ -59,7 +57,7 @@ namespace GSC.Api.Controllers.Volunteer
                 _locationRepository.Add(volunteerAddress.Location);
 
             _volunteerAddressRepository.Add(volunteerAddress);
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer address failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer address failed on save."));
 
             if (volunteerAddressDto.Changes != null)
                 _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Inserted,
@@ -84,7 +82,7 @@ namespace GSC.Api.Controllers.Volunteer
                 _locationRepository.Add(volunteerAddress.Location);
 
             _volunteerAddressRepository.Update(volunteerAddress);
-            if (_uow.Save() <= 0) throw new Exception("Updating volunteer address failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating volunteer address failed on save."));
 
             if (volunteerAddressDto.Changes != null)
                 _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerAddress, AuditAction.Updated,

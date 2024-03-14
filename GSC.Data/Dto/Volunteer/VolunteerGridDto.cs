@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using GSC.Data.Entities.Common;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
-using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Volunteer
 {

@@ -1,7 +1,6 @@
 using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Master;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Volunteer
 {

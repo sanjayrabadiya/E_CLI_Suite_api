@@ -3,11 +3,9 @@ using System.Linq;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Volunteer
 {
@@ -15,13 +13,10 @@ namespace GSC.Respository.Volunteer
         IVolunteerBlockHistoryRepository
     {
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
-        public VolunteerBlockHistoryRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public VolunteerBlockHistoryRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
             _mapper = mapper;
-            _context = context;
         }
 
         public IList<VolunteerBlockHistoryGridDto> GetVolunteerBlockHistoryById(int volunteerId)

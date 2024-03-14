@@ -11,7 +11,6 @@ namespace GSC.Data.Dto.Volunteer
     {
         public int VolunteerId { get; set; }
 
-
         public string FileName { get; set; }
 
         public string PathName { get; set; }
