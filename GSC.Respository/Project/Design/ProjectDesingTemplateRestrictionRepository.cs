@@ -14,17 +14,15 @@ namespace GSC.Respository.Project.Design
     public class ProjectDesingTemplateRestrictionRepository : GenericRespository<Data.Entities.Project.Design.ProjectDesingTemplateRestriction>, IProjectDesingTemplateRestrictionRepository
     {
         private readonly IGSCContext _context;
-        private readonly IRoleRepository _roleRepository;
 
-        public ProjectDesingTemplateRestrictionRepository(IGSCContext context, IRoleRepository roleRepository, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public ProjectDesingTemplateRestrictionRepository(IGSCContext context, IRoleRepository roleRepository) : base(context)
         {
             _context = context;
-            _roleRepository = roleRepository;
         }
 
         public List<Data.Dto.Project.Design.ProjectDesingTemplateRestrictionDto> GetProjectDesingTemplateRestrictionDetails(int ProjectDesignTemplateId)
         {
-           // Get security role
+            // Get security role
             var SecurityRole = _context.SecurityRole.Where(t => t.DeletedDate == null && t.Id != 2)
                 .Select(t => new ProjectDesingTemplateRestrictionDto
                 {
@@ -41,7 +39,6 @@ namespace GSC.Respository.Project.Design
                 t.ProjectDesignTemplateId = p.ProjectDesignTemplateId;
                 t.IsAdd = p.IsAdd;
                 t.IsHide = p.IsHide;
-               // t.IsEdit = p.IsEdit;
             });
 
             return SecurityRole.ToList();
@@ -70,13 +67,14 @@ namespace GSC.Respository.Project.Design
                 else
                 {
                     // if exists in table and not any changes than not perform any action on that row
-                    if (permission.IsAdd == item.IsAdd && permission.IsHide == item.IsHide) { }
-                    else
+                    if (permission.IsAdd != item.IsAdd || permission.IsHide != item.IsHide)
                     {
-                        // if exists in table and than delete first and if any changes than add new row for that record.
+                        // If exists in table, delete first, and if any changes, add a new row for that record.
                         Delete(permission);
                         if (item.IsAdd || item.IsHide)
+                        {
                             Add(item);
+                        }
                     }
                 }
             }

@@ -23,14 +23,12 @@ namespace GSC.Respository.Project.Design
 {
     public class VisitEmailConfigurationRepository : GenericRespository<VisitEmailConfiguration>, IVisitEmailConfigurationRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IEmailSenderRespository _emailSenderRespository;
-        public VisitEmailConfigurationRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
+        public VisitEmailConfigurationRepository(IGSCContext context, IMapper mapper,
             IEmailSenderRespository emailSenderRespository) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
             _emailSenderRespository = emailSenderRespository;

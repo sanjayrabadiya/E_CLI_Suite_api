@@ -34,7 +34,6 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
         private readonly IStudyVersionRepository _studyVersionRepository;
 
         public ProjectScheduleController(IProjectScheduleRepository projectScheduleRepository,
@@ -48,8 +47,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             IProjectRightRepository projectRightRepository,
             INumberFormatRepository numberFormatRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
-            IStudyVersionRepository studyVersionRepository,
-            IGSCContext context)
+            IStudyVersionRepository studyVersionRepository)
         {
             _projectScheduleRepository = projectScheduleRepository;
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
@@ -59,7 +57,6 @@ namespace GSC.Api.Controllers.Project.Schedule
             _projectDesignPeriodRepository = projectDesignPeriodRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRightRepository = projectRightRepository;
             _projectDesignVisitRepository = projectDesignVisitRepository;
@@ -207,7 +204,7 @@ namespace GSC.Api.Controllers.Project.Schedule
 
             var recordTemplate = _projectScheduleTemplateRepository.FindByInclude(x => x.ProjectScheduleId == id && x.DeletedDate == null).ToList();
 
-            if (record == null && recordTemplate == null)
+            if (record == null && !recordTemplate.Any())
                 return NotFound();
 
             if (!_studyVersionRepository.IsOnTrialByProjectDesing(record.ProjectDesign.Id))
@@ -260,7 +257,6 @@ namespace GSC.Api.Controllers.Project.Schedule
         public IActionResult GetRefVariableValuefromTargetVariable(int projectDesignVariableId)
         {
             if (projectDesignVariableId <= 0) return BadRequest();
-            //var projectSchedule = _projectScheduleTemplateRepository.FindByInclude(t => t.ProjectDesignVariableId == projectDesignVariableId).FirstOrDefault();
 
             var data = _projectScheduleRepository.GetRefVariableValuefromTargetVariable(projectDesignVariableId);
             return Ok(data);

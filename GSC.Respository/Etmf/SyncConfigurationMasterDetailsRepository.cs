@@ -10,17 +10,10 @@ using System.Text;
 namespace GSC.Respository.Etmf
 {
    public class SyncConfigurationMasterDetailsRepository : GenericRespository<SyncConfigurationMasterDetails>, ISyncConfigurationMasterDetailsRepository
-    {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
-        private readonly IMapper _mapper;     
-        public SyncConfigurationMasterDetailsRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+    {    
+        public SyncConfigurationMasterDetailsRepository(IGSCContext context)
            : base(context)
-        {
-            _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;            
+        {           
         }
     }
 }

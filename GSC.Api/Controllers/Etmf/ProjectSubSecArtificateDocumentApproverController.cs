@@ -57,7 +57,11 @@ namespace GSC.Api.Controllers.Etmf
             var ProjectSubSecArtificateDocumentApprover = _mapper.Map<ProjectSubSecArtificateDocumentApprover>(ProjectSubSecArtificateDocumentApproverDto);
 
             _projectSubSecArtificateDocumentApproverRepository.Add(ProjectSubSecArtificateDocumentApprover);
-            if (_uow.Save() <= 0) throw new Exception("Creating Approver failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Approver failed on save.");
+                return BadRequest(ModelState);
+            }
 
             _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto);
             _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId, false);
@@ -81,8 +85,12 @@ namespace GSC.Api.Controllers.Etmf
                 _projectSubSecArtificateDocumentApproverRepository.Add(ProjectSubSecArtificateDocumentApprover);
 
 
-                if (_uow.Save() <= 0) throw new Exception("Creating Approver failed on save.");
-                // _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto);
+                if (_uow.Save() <= 0)
+                {
+                    ModelState.AddModelError("Message", "Creating Approver failed on save.");
+                    return BadRequest(ModelState);
+                }
+
                 _projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId, false);
 
                 var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.Find(ProjectSubSecArtificateDocumentApprover.ProjectWorkplaceSubSecArtificateDocumentId);
@@ -90,7 +98,7 @@ namespace GSC.Api.Controllers.Etmf
 
             }
 
-            if (projectArtificateDocumentApproveDto.Where(x => x.SequenceNo == null).Count() == projectArtificateDocumentApproveDto.Count())
+            if (projectArtificateDocumentApproveDto.Count(x => x.SequenceNo == null) == projectArtificateDocumentApproveDto.Count)
             {
                 foreach (var ReviewDto in projectArtificateDocumentApproveDto)
                 {
@@ -104,7 +112,7 @@ namespace GSC.Api.Controllers.Etmf
                     _projectSubSecArtificateDocumentApproverRepository.SendMailForApprover(firstRecord);
             }
 
-            _projectSubSecArtificateDocumentApproverRepository.SkipDocumentApproval(projectArtificateDocumentApproveDto.FirstOrDefault().ProjectWorkplaceSubSecArtificateDocumentId, false);
+            _projectSubSecArtificateDocumentApproverRepository.SkipDocumentApproval(projectArtificateDocumentApproveDto[0].ProjectWorkplaceSubSecArtificateDocumentId, false);
 
             return Ok(1);
         }
@@ -125,9 +133,13 @@ namespace GSC.Api.Controllers.Etmf
             && x.ProjectWorkplaceSubSecArtificateDocumentId == Id && x.IsApproved == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             var ProjectSubSecArtificateDocumentApprover = _mapper.Map<ProjectSubSecArtificateDocumentApprover>(ProjectSubSecArtificateDocumentApproverDto);
-            ProjectSubSecArtificateDocumentApprover.IsApproved = DocApprover ? true : false;
+            ProjectSubSecArtificateDocumentApprover.IsApproved = DocApprover;
             _projectSubSecArtificateDocumentApproverRepository.Update(ProjectSubSecArtificateDocumentApprover);
-            if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Approver failed on save.");
+                return BadRequest(ModelState);
+            }
             _projectSubSecArtificateDocumentApproverRepository.SendMailForApprovedRejected(ProjectSubSecArtificateDocumentApprover);
 
             _projectWorkplaceSubSecArtificatedocumentRepository.IsApproveDocument(Id);
@@ -161,7 +173,7 @@ namespace GSC.Api.Controllers.Etmf
 
                 var allRecords = _projectSubSecArtificateDocumentApproverRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceSubSecArtificateDocumentId == record.ProjectWorkplaceSubSecArtificateDocumentId && q.IsApproved != true && q.DeletedDate == null);
 
-                if (allRecords == null)
+                if (!allRecords.Any())
                     return NotFound();
 
                 foreach (var resultRecord in allRecords)
@@ -178,7 +190,7 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var document = _projectWorkplaceSubSecArtificatedocumentRepository.Find(item);
                 var allRecords = _projectSubSecArtificateDocumentApproverRepository.All.Where(q => q.ProjectWorkplaceSubSecArtificateDocumentId == item && q.DeletedDate == null).ToList();
-                if (allRecords.All(x => x.IsApproved == true) && allRecords.Count > 0)
+                if (allRecords.TrueForAll(x => x.IsApproved == true) && allRecords.Count > 0)
                 {
                     document.IsAccepted = true;
                 }

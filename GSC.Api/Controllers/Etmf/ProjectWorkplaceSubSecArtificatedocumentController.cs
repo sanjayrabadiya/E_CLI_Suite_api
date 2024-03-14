@@ -65,7 +65,11 @@ namespace GSC.Api.Controllers.Etmf
         {
             var projectWorkplaceArtificatedocument = _projectWorkplaceSubSecArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
             _projectWorkplaceSubSecArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
-            if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Document failed on save.");
+                return BadRequest(ModelState);
+            }
 
             _projectSubSecArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
             _projectSubSecArtificateDocumentApproverRepository.SaveByDocumentIdInApprove(projectWorkplaceArtificatedocument.Id);
@@ -96,7 +100,11 @@ namespace GSC.Api.Controllers.Etmf
             var ProjectSubSecArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectSubSecArtificatedocumentDto);
             _projectWorkplaceSubSecArtificatedocumentRepository.Update(ProjectSubSecArtificatedocument);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(ProjectSubSecArtificatedocument.Id);
         }
 
@@ -133,7 +141,11 @@ namespace GSC.Api.Controllers.Etmf
 
             projectWorkplaceArtificatedocument.DocumentName = docName;
             _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
 
             if (!param.AddHistory)
                 _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
@@ -148,7 +160,11 @@ namespace GSC.Api.Controllers.Etmf
             var document = _projectWorkplaceSubSecArtificatedocumentRepository.WordToPdf(id);
 
             _projectWorkplaceSubSecArtificatedocumentRepository.Update(document);
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
@@ -169,7 +185,11 @@ namespace GSC.Api.Controllers.Etmf
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(obj);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectWorkplaceSubSecArtificatedocument.Id);
         }
 

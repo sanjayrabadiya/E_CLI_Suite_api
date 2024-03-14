@@ -13,21 +13,15 @@ namespace GSC.Api.Controllers.Etmf
     [ApiController]
     public class EtmfMasterLibraryController : BaseController
     {
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
-        private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLibraryRepository;
         public EtmfMasterLibraryController(
             IUnitOfWork uow,
-            IMapper mapper,
-            IEtmfMasterLbraryRepository etmfMasterLibraryRepository,
-            IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLibraryRepository
+            IEtmfMasterLbraryRepository etmfMasterLibraryRepository
             )
         {
             _uow = uow;
-            _mapper = mapper;
             _etmfMasterLibraryRepository = etmfMasterLibraryRepository;
-            _etmfArtificateMasterLibraryRepository = etmfArtificateMasterLibraryRepository;
 
         }
 
@@ -49,7 +43,11 @@ namespace GSC.Api.Controllers.Etmf
             /* Added by swati for effective Date on 02-06-2019 */
             _etmfMasterLibraryRepository.Update(data);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Drug failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(data.Id);
         }
 

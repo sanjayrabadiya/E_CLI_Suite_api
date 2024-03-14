@@ -28,6 +28,7 @@ using Syncfusion.Pdf.Grid;
 using Syncfusion.Drawing;
 using GSC.Data.Dto.Configuration;
 using System.Data;
+using GSC.Data.Entities.Location;
 
 namespace GSC.Respository.Etmf
 {
@@ -100,17 +101,16 @@ namespace GSC.Respository.Etmf
             string filePath = string.Empty;
             string path = string.Empty;
 
-            if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
+            if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
 
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.SubSectionArtifactName.Trim());
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                 data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.SubSectionArtifactName.Trim());
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.SubSectionArtifactName.Trim());
-            //filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
             filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
             bool projectPathExists = Directory.Exists(filePath);
             if (!projectPathExists)
@@ -118,6 +118,7 @@ namespace GSC.Respository.Etmf
 
             return path;
         }
+
 
         public int deleteSubsectionArtifactfile(int id)
         {
@@ -154,17 +155,17 @@ namespace GSC.Respository.Etmf
             string filePath = string.Empty;
             string path = string.Empty;
 
-            if (data.FolderType == (int)WorkPlaceFolder.Country)
+            if (data?.FolderType == (int)WorkPlaceFolder.Country)
 
                 path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.Sitename.Trim(), data.Zonename.Trim(), data.Sectionname.Trim(), data.SubsectionName.Trim(), data.Artificatename.Trim());
-            else if (data.FolderType == (int)WorkPlaceFolder.Site)
+            else if (data?.FolderType == (int)WorkPlaceFolder.Site)
                 path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                 data.Sitename.Trim(), data.Zonename.Trim(), data.Sectionname.Trim(), data.SubsectionName.Trim(), data.Artificatename.Trim());
-            else if (data.FolderType == (int)WorkPlaceFolder.Trial)
+            else if (data?.FolderType == (int)WorkPlaceFolder.Trial)
                 path = System.IO.Path.Combine(data.Projectname, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.Zonename.Trim(), data.Sectionname.Trim(), data.SubsectionName.Trim(), data.Artificatename.Trim());
-            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path, data.DocumentName);
+            filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path, data?.DocumentName);
 
             System.IO.File.Delete(Path.Combine(filePath));
 
@@ -181,7 +182,7 @@ namespace GSC.Respository.Etmf
                 .Where(x => x.DeletedDate == null && x.ExpiryDate != null && x.Status == ArtifactDocStatusType.Expired && x.ProjectWorkplaceSubSectionArtifact.ProjectId == projectId && (x.CreatedBy == _jwtTokenAccesser.UserId ||
               _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
               || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)))
-              .ToList().OrderByDescending(x => x.Id);
+              .AsEnumerable().OrderByDescending(x => x.Id);
 
             foreach (var item in documentList)
             {
@@ -193,7 +194,7 @@ namespace GSC.Respository.Etmf
                 obj.DocumentName = item.DocumentName;
                 obj.SubSectionName = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.SubSectionName;
                 obj.ZoneName = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary.ZonName;
-                //obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
+
                 obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
@@ -202,21 +203,14 @@ namespace GSC.Respository.Etmf
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
-                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
+                obj.SendBy = item.CreatedBy != _jwtTokenAccesser.UserId;
+                obj.SendAndSendBack = item.CreatedBy != _jwtTokenAccesser.UserId;
                 obj.IsAccepted = item.IsAccepted;
-                //obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceSubSectionArtifact.EtmfArtificateMasterLbraryId;
-                //obj.Reviewer = users.OrderBy(x => x.SequenceNo).ToList();
-                //obj.ReviewStatus = Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
-                //obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
+
                 obj.IsSendBack = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
-                //obj.ApprovedStatus = ApproveList.Count() == 0 ? "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";
-                //obj.Approver = ApproverName.OrderBy(x => x.SequenceNo).OrderBy(x => x.CreatedDate).ToList();
+
                 obj.IsReplyAllComment = item.IsReplyAllComment;
-                //obj.SequenceNo = currentReviewer?.SequenceNo;
-                //obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
-                //obj.IsApproveDoc = ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 obj.ExpiryDate = item.ExpiryDate;
                 dataList.Add(obj);
             }
@@ -227,15 +221,7 @@ namespace GSC.Respository.Etmf
 
         public List<CommonArtifactDocumentModel> GetSubSecDocumentList(int Id)
         {
-            var artificate = _context.EtmfProjectWorkPlace.Where(x => x.Id == Id).Include(x => x.ProjectWorkPlace).ThenInclude(x => x.ProjectWorkPlace)
-                .ThenInclude(x => x.ProjectWorkPlace).FirstOrDefault();
-
-            var rights = _context.EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId == artificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfProjectWorkPlaceId
-                        && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null)
-                        .OrderByDescending(x => x.Id).FirstOrDefault();
-
             List<CommonArtifactDocumentModel> dataList = new List<CommonArtifactDocumentModel>();
-            //var _docService = new DocumentService();
             var reviewdocument = _context.ProjectSubSecArtificateDocumentReview.Where(c => c.DeletedDate == null
             && c.UserId == _jwtTokenAccesser.UserId).Select(x => x.ProjectWorkplaceSubSecArtificateDocumentId).ToList();
 
@@ -243,7 +229,7 @@ namespace GSC.Respository.Etmf
             var documentList = FindByInclude(x => x.ProjectWorkplaceSubSectionArtifactId == Id && x.DeletedDate == null && (x.CreatedBy == _jwtTokenAccesser.UserId ||
                 _context.ProjectSubSecArtificateDocumentReview.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)
                 || _context.ProjectSubSecArtificateDocumentApprover.Any(m => m.ProjectWorkplaceSubSecArtificateDocumentId == x.Id && m.UserId == _jwtTokenAccesser.UserId && m.DeletedDate == null)), x => x.ProjectWorkplaceSubSectionArtifact, m => m.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission)
-                .ToList().OrderByDescending(x => x.Id);
+                .AsEnumerable().OrderByDescending(x => x.Id);
 
             foreach (var item in documentList)
             {
@@ -251,7 +237,7 @@ namespace GSC.Respository.Etmf
                 var users = new List<DocumentUsers>();
                 reviewerList.ForEach(r =>
                 {
-                    var role = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
+                    var role = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.First(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
                     DocumentUsers obj = new DocumentUsers();
                     obj.UserName = _userRepository.Find(r.UserId).UserName;
                     obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
@@ -262,13 +248,12 @@ namespace GSC.Respository.Etmf
                     obj.CreatedDate = r.CreatedDate;
                     obj.SendBackDate = r.SendBackDate;
                     obj.DueDate = r.DueDate;
-                    obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && r.IsReview == false;
                     users.Add(obj);
                 });
                 var Review = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
                  && x.DeletedDate == null).ToList();
 
-                var ApproveList = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList()
+                var ApproveList = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.DeletedDate == null).OrderByDescending(x => x.Id).AsEnumerable()
                     .Select(y => new ProjectSubSecArtificateDocumentApprover
                     {
                         Id = y.Id,
@@ -286,7 +271,7 @@ namespace GSC.Respository.Etmf
                 {
                     if (r.UserId != item.CreatedBy)
                     {
-                        var role = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.FirstOrDefault(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
+                        var role = item.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.First(q => q.UserId == r.UserId && q.DeletedDate == null && q.RoleId != null);
                         DocumentUsers obj = new DocumentUsers();
                         obj.UserName = _userRepository.Find(r.UserId).UserName;
                         obj.RoleName = role != null ? _context.SecurityRole.Find(role.RoleId.Value).RoleName : "";
@@ -295,13 +280,13 @@ namespace GSC.Respository.Etmf
                         obj.CreatedDate = r.CreatedDate;
                         obj.SendBackDate = r.ModifiedDate;
                         obj.DueDate = r.DueDate;
-                        obj.IsDueDateExpired = r.DueDate == null ? false : r.DueDate.Value.Date < DateTime.Now.Date && (r.IsApproved == null || r.IsApproved == false);
+                        obj.IsDueDateExpired = r.DueDate?.Date < DateTime.Now.Date && (r.IsApproved == null || r.IsApproved == false);
                         ApproverName.Add(obj);
                     }
                 });
 
                 var currentReviewer = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
-              && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.IsSendBack == false && x.IsReviewed == false).FirstOrDefault();
+              && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && !x.IsSendBack && !x.IsReviewed).FirstOrDefault();
 
 
                 var currentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id
@@ -313,14 +298,7 @@ namespace GSC.Respository.Etmf
                 obj.Artificatename = item.ProjectWorkplaceSubSectionArtifact.ArtifactName;
                 obj.DocumentName = item.DocumentName;
                 obj.ExtendedName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);
-                //if (item.Status == ArtifactDocStatusType.Final)
-                //{
-                //    var changeDocumentName = _docService.GetEtmfOldFileName(obj.FullDocPath, obj.ExtendedName);
-                //    obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, changeDocumentName);
-                //    obj.DocumentName = changeDocumentName;
-                //}
-                //else
+                obj.FullDocPath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath);            
                 obj.DocPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), item.DocPath, item.DocumentName);
                 obj.CreatedByUser = _userRepository.Find((int)item.CreatedBy).UserName;
                 obj.CreatedDate = item.CreatedDate;
@@ -328,42 +306,69 @@ namespace GSC.Respository.Etmf
                 obj.Version = item.Version;
                 obj.StatusName = item.Status.GetDescription();
                 obj.Status = (int)item.Status;
-                obj.SendBy = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.SendAndSendBack = !(item.CreatedBy == _jwtTokenAccesser.UserId);
-                obj.IsAccepted = item.IsAccepted;
-                //obj.EtmfArtificateMasterLbraryId = item.ProjectWorkplaceSubSectionArtifact.EtmfArtificateMasterLbraryId;
+                obj.SendBy = item.CreatedBy != _jwtTokenAccesser.UserId;
+                obj.SendAndSendBack = item.CreatedBy != _jwtTokenAccesser.UserId;
+                obj.IsAccepted = item.IsAccepted;                
                 obj.Reviewer = users.OrderBy(x => x.SequenceNo).ToList();
-                var tempReview = Review.Where(x => x.UserId != x.CreatedBy);
-                obj.ReviewStatus = tempReview.Count() == 0 ? Review.FirstOrDefault(x => x.UserId == item.CreatedBy).IsReviewed ? "Reviewed" : "" : tempReview.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : tempReview.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";//Review.Count() == 0 ? "" : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Reviewed" : Review.GroupBy(u => u.UserId).All(z => z.All(x => x.IsReviewed == false) && z.Any(x => x.IsSendBack == true)) ? "Send Back" : "Send";
-                obj.IsReview = Review.Count() == 0 ? false : Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
+                var filteredReviews = Review.Where(x => x.UserId != x.CreatedBy);
+                if (!filteredReviews.Any())
+                {
+                    obj.ReviewStatus = "";
+                    obj.IsReview = false;
+                }
+                else
+                {
+                    bool hasReviewed = filteredReviews.Any(x => x.IsReviewed);
+                    bool hasSendBack = filteredReviews.Any(x => x.IsSendBack);
+
+                    if (hasReviewed)
+                        obj.ReviewStatus = "Reviewed";
+                    else if (!hasReviewed && hasSendBack)
+                        obj.ReviewStatus = "Send Back";
+                    else
+                        obj.ReviewStatus = "Send";
+
+                    obj.IsReview = hasReviewed;
+                }
+                obj.IsReview = Review.Any() && Review.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed));              
                 obj.IsSendBack = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == item.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
                 var tempApprover = ApproveList.Where(x => x.UserId != item.CreatedBy);
-                obj.ApprovedStatus = tempApprover.Count() == 0 ? ApproveList.FirstOrDefault(x => x.UserId == item.CreatedBy).IsApproved.GetValueOrDefault() ? "Approved" : "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";//ApproveList.Count() == 0 ? "" : ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)) ? "Reject" : ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)) ? "Approved" : "Send For Approval";              
-                obj.Approver = ApproverName.OrderBy(x => x.SequenceNo).OrderBy(x => x.CreatedDate).ToList();
+                if (!tempApprover.Any())
+                {
+                    obj.ApprovedStatus = ApproveList.Find(x => x.UserId == item.CreatedBy)?.IsApproved.GetValueOrDefault() == true ? "Approved" : "";
+                }
+                else if (ApproveList.GroupBy(u => u.UserId).All(z => z.All(x => x.IsApproved == false)))
+                {
+                    obj.ApprovedStatus = "Reject";
+                }
+                else if (ApproveList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsApproved == true)))
+                {
+                    obj.ApprovedStatus = "Approved";
+                }
+                else
+                {
+                    obj.ApprovedStatus = "Send For Approval";
+                }
+                obj.IsApproveDoc = tempApprover.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null);
+                obj.Approver = ApproverName.OrderBy(x => x.SequenceNo).ThenBy(x => x.CreatedDate).ToList();
                 obj.IsReplyAllComment = item.IsReplyAllComment;
                 obj.SequenceNo = currentReviewer?.SequenceNo;
                 obj.ApproveSequenceNo = currentApprover?.SequenceNo;
                 obj.AddedBy = item.CreatedBy == _jwtTokenAccesser.UserId;
-                obj.IsApproveDoc = tempApprover.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;//ApproveList.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsApproved == null) ? true : false;
                 obj.ExpiryDate = item.ExpiryDate;
-                //obj.ParentDocumentId = item.ParentDocumentId != null ?
-                //    (documentList.Select(x => x.Id).Contains(item.ParentDocumentId.Value) ? item.ParentDocumentId : null) : null;
-                //obj.HasChild = documentList.Select(x => x.ParentDocumentId).Contains(item.Id);
-
-                obj.ParentDocumentId = documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id) == null ? null : documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id).Id;
-                obj.HasChild = item.ParentDocumentId == null ? false : true;
+                obj.ParentDocumentId = documentList.FirstOrDefault(x => x.ParentDocumentId == item.Id)?.Id;
+                obj.HasChild = item.ParentDocumentId != null;
                 dataList.Add(obj);
             }
             return dataList.OrderByDescending(q => q.CreatedDate).ToList();
         }
-
         public CommonArtifactDocumentDto GetDocument(int id)
         {
             var document = All.Include(x => x.ProjectWorkplaceSubSectionArtifact).Where(x => x.Id == id && x.DeletedDate == null).FirstOrDefault();
 
 
             var currentReviewer = _context.ProjectSubSecArtificateDocumentReview.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == id
-              && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.IsSendBack == false && x.IsReviewed == false).FirstOrDefault();
+              && x.UserId == _jwtTokenAccesser.UserId && x.DeletedDate == null && !x.IsSendBack && !x.IsReviewed).FirstOrDefault();
 
 
             var currentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == id
@@ -374,7 +379,7 @@ namespace GSC.Respository.Etmf
 
 
             CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
-            obj.Id = document.Id;
+            obj.Id = document?.Id ?? 0;
             obj.ProjectWorkplaceSubSectionArtifactId = document.ProjectWorkplaceSubSectionArtifactId;
             obj.DocumentName = document.DocumentName;
             obj.ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
@@ -386,26 +391,38 @@ namespace GSC.Respository.Etmf
             obj.StatusName = document.Status.GetDescription();
             obj.Status = (int)document.Status;
             obj.Level = 5.2;
-            obj.SendBy = !(document.CreatedBy == _jwtTokenAccesser.UserId);
+            obj.SendBy = document.CreatedBy != _jwtTokenAccesser.UserId;
             obj.AddedBy = (document.CreatedBy == _jwtTokenAccesser.UserId);
             obj.IsSendBack = _context.ProjectArtificateDocumentReview.Where(x => x.ProjectWorkplaceArtificatedDocumentId == document.Id && x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(x => x.Id).Select(z => z.IsSendBack).FirstOrDefault();
             obj.IsAccepted = document.IsAccepted;
-            obj.ApprovedStatus = document.IsAccepted == null ? "" : document.IsAccepted == true ? "Approved" : "Rejected";
+            obj.ApprovedStatus = document.IsAccepted switch
+            {
+                true => "Approved",
+                false => "Rejected",
+                _ => ""
+            };
             obj.IsReplyAllComment = document.IsReplyAllComment;
             obj.SequenceNo = currentReviewer?.SequenceNo;
             obj.ApproveSequenceNo = currentApprover?.SequenceNo;
-            obj.ReviewStatus = reviewerList.Count() == 0 ? "" : reviewerList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? "Send Back" : "Send";
-            obj.IsReview = reviewerList.Count() == 0 ? false : reviewerList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed == true)) ? true : false;
+            obj.ReviewStatus = GetReviewStatus(reviewerList);
+            obj.IsReview = reviewerList.Any() && reviewerList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed));
             return obj;
+        }
+
+        public string GetReviewStatus(IEnumerable<ProjectSubSecArtificateDocumentReview> reviewerList)
+        {
+            if (!reviewerList.Any())
+                return "";
+
+            bool allReviewed = reviewerList.GroupBy(u => u.UserId).All(z => z.Any(x => x.IsReviewed));
+            return allReviewed ? "Send Back" : "Send";
         }
 
         public ProjectWorkplaceSubSecArtificatedocument AddDocument(ProjectWorkplaceSubSecArtificatedocumentDto projectWorkplaceSubSecArtificatedocumentDto)
         {
             string path = getArtifactSectionDetail(projectWorkplaceSubSecArtificatedocumentDto);
-            // string filePath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ProjectWorksplace.GetDescription(), path);
             string filePath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
             string FileName = DocumentService.SaveWorkplaceDocument(projectWorkplaceSubSecArtificatedocumentDto.FileModel, filePath, projectWorkplaceSubSecArtificatedocumentDto.FileName);
-
             projectWorkplaceSubSecArtificatedocumentDto.Id = 0;
             var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceSubSecArtificatedocument>(projectWorkplaceSubSecArtificatedocumentDto);
             projectWorkplaceArtificatedocument.DocumentName = FileName;
@@ -420,7 +437,7 @@ namespace GSC.Respository.Etmf
         {
             var document = Find(Id);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = System.IO.Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
+            var FullPath = System.IO.Path.Combine(upload?.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
             string path = FullPath;
             if (!File.Exists(path))
                 return null;
@@ -465,7 +482,7 @@ namespace GSC.Respository.Etmf
         }
         public void UpdateApproveDocument(int documentId, bool IsAccepted)
         {
-            var document = All.Where(x => x.Id == documentId).FirstOrDefault();
+            var document = All.First(x => x.Id == documentId);
             document.IsAccepted = IsAccepted;
             Update(document);
             _context.Save();
@@ -477,7 +494,7 @@ namespace GSC.Respository.Etmf
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             var fileName = projectWorkplaceSubSecArtificatedocument.DocumentName.Contains('_') ? projectWorkplaceSubSecArtificatedocument.DocumentName.Substring(0, projectWorkplaceSubSecArtificatedocument.DocumentName.LastIndexOf('_')) : projectWorkplaceSubSecArtificatedocument.DocumentName;
             var docName = fileName + "_" + DateTime.Now.Ticks + ".docx";
-            filePath = Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), projectWorkplaceSubSecArtificatedocument.DocPath, docName);
+            filePath = Path.Combine(upload?.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), projectWorkplaceSubSecArtificatedocument.DocPath, docName);
 
             Byte[] byteArray = Convert.FromBase64String(param.documentData);
             Stream stream = new MemoryStream(byteArray);
@@ -556,10 +573,8 @@ namespace GSC.Respository.Etmf
             var ExtendedName = document.DocumentName.Contains('_') ? document.DocumentName.Substring(0, document.DocumentName.LastIndexOf('_')) : document.DocumentName;
             var changeDocumentName = _docuService.GetEtmfOldFileName(FullDocPath, ExtendedName);
             var outputname = "";
-            if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+            if (document.DocumentName.Split('.').LastOrDefault() == "docx" || document.DocumentName.Split('.').LastOrDefault() == "doc")
             {
-                var parent = document.ParentDocumentId != null ? Find((int)document.ParentDocumentId) : null;
-
                 var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, changeDocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(docStream, Syncfusion.DocIO.FormatType.Automatic);
@@ -587,7 +602,7 @@ namespace GSC.Respository.Etmf
                 outputStream.Close();
                 outputStream.Dispose();
             }
-            else if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
+            else if (document.DocumentName.Split('.').LastOrDefault() == "pdf")
             {
                 var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, changeDocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
@@ -614,8 +629,7 @@ namespace GSC.Respository.Etmf
             }
             document.DocumentName = string.IsNullOrEmpty(outputname) ? document.DocumentName : outputname;
             document.Status = ArtifactDocStatusType.Final;
-            //document.Version = document.ParentDocumentId != null ? (double.Parse(parent.Version) + 1).ToString("0.0") : (double.Parse(document.Version) + 1).ToString("0.0");
-            //document.Version = "1.0";
+
             _context.ProjectWorkplaceSubSecArtificatedocument.Update(document);
             return document;
         }
@@ -666,8 +680,7 @@ namespace GSC.Respository.Etmf
             pdfGrid.DataSource = DocumentApprovalhistory(Id);
             header = pdfGrid.Headers[0];
             header.ApplyStyle(headerStyle);
-            layoutresult = pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
-
+            pdfGrid.Draw(layoutresult.Page, new Syncfusion.Drawing.RectangleF(0, layoutresult.Bounds.Bottom + 10, layoutresult.Page.GetClientSize().Width, layoutresult.Page.GetClientSize().Height));
             return pdfDocument;
         }
 
@@ -692,6 +705,7 @@ namespace GSC.Respository.Etmf
                 var CreatedDate = item.CreatedDate != null ? Convert.ToDateTime(item.CreatedDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
                 var SendBackDate = item.SendBackDate != null ? Convert.ToDateTime(item.SendBackDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
                 dataTable.Rows.Add(new object[] { item.Id, item.DocumentName, item.CreatedByUser, CreatedDate, item.Message, item.UserName, item.IsSendBack, SendBackDate, item.Reason, item.ReasonOth });
+
             }
             return dataTable;
         }
@@ -716,6 +730,7 @@ namespace GSC.Respository.Etmf
                 var CreatedDate = item.CreatedDate != null ? Convert.ToDateTime(item.CreatedDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
                 var ModifiedDate = item.ModifiedDate != null ? Convert.ToDateTime(item.ModifiedDate).UtcDateTime().ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : "";
                 dataTable.Rows.Add(new object[] { item.Id, item.DocumentName, item.CreatedByUser, CreatedDate, item.Comment, item.IsApproved, item.UserName, ModifiedDate, item.Reason, item.ReasonOth });
+
             }
             return dataTable;
         }
@@ -725,7 +740,7 @@ namespace GSC.Respository.Etmf
             var history = _projectSubSecArtificateDocumentHistoryRepository.Find(Id);
             var document = Find(history.ProjectWorkplaceSubSecArtificateDocumentId);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
+            var FullPath = Path.Combine(upload?.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             string path = FullPath;
             if (!File.Exists(path))
                 return null;
@@ -741,14 +756,15 @@ namespace GSC.Respository.Etmf
             var history = _projectSubSecArtificateDocumentHistoryRepository.Find(Id);
             var document = Find(history.ProjectWorkplaceSubSecArtificateDocumentId);
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var FullPath = Path.Combine(upload.DocumentUrl, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
+            var FullPath = Path.Combine(upload?.DocumentUrl, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             obj.FullDocPath = FullPath;
             return obj;
         }
 
         public void UpdateDocumentExpiryStatus()
         {
-            var allDocuments = All.Where(q => q.DeletedDate == null && q.ExpiryDate != null && (q.ExpiryDate.HasValue ? q.ExpiryDate.Value.Date <= DateTime.Now.Date : false));
+            var allDocuments = All.Where(q => q.DeletedDate == null && q.ExpiryDate != null && q.ExpiryDate.Value.Date <= DateTime.Now.Date);
+
             foreach (var document in allDocuments)
             {
                 document.Status = ArtifactDocStatusType.Expired;
@@ -759,7 +775,7 @@ namespace GSC.Respository.Etmf
 
         public void UpdateSubDocumentComment(int documentId, bool? isComment)
         {
-            var doc = All.FirstOrDefault(x => x.Id == documentId);
+            var doc = All.First(x => x.Id == documentId);
             doc.IsReplyAllComment = isComment;
             Update(doc);
             _context.Save();
@@ -787,17 +803,16 @@ namespace GSC.Respository.Etmf
         public void IsApproveDocument(int Id)
         {
             var DocumentApprover = _context.ProjectSubSecArtificateDocumentApprover.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id
-            && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList().GroupBy(x => x.UserId).Select(x => new ProjectSubSecArtificateDocumentApprover
+            && x.DeletedDate == null).OrderByDescending(x => x.Id).AsEnumerable().GroupBy(x => x.UserId).Select(x => new ProjectSubSecArtificateDocumentApprover
             {
-                Id = x.FirstOrDefault().Id,
-                IsApproved = x.FirstOrDefault().IsApproved,
-                ProjectWorkplaceSubSecArtificateDocumentId = x.FirstOrDefault().ProjectWorkplaceSubSecArtificateDocumentId
+                Id = x.First().Id,
+                IsApproved = x.First().IsApproved,
+                ProjectWorkplaceSubSecArtificateDocumentId = x.First().ProjectWorkplaceSubSecArtificateDocumentId
             }).ToList();
 
-            if (DocumentApprover.All(x => x.IsApproved == true))
+            if (DocumentApprover.TrueForAll(x => x.IsApproved == true))
             {
-                //UpdateApproveDocument(Id, true);
-                var document = All.Where(x => x.Id == Id).FirstOrDefault();
+                var document = All.First(x => x.Id == Id);
                 document.IsAccepted = true;
                 Update(document);
                 WordToPdf(Id);
@@ -810,7 +825,7 @@ namespace GSC.Respository.Etmf
             var document = Find(id);
             if (document.Status == ArtifactDocStatusType.Final || document.Status == ArtifactDocStatusType.Supersede)
             {
-                if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+                if (document.DocumentName.Split('.').LastOrDefault() == "docx" || document.DocumentName.Split('.').LastOrDefault() == "doc")
                 {
                     var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
                     FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
@@ -846,7 +861,7 @@ namespace GSC.Respository.Etmf
             }
             else
             {
-                if (document?.DocumentName.Split('.').LastOrDefault() == "docx" || document?.DocumentName.Split('.').LastOrDefault() == "doc")
+                if (document.DocumentName.Split('.').LastOrDefault() == "docx" || document.DocumentName.Split('.').LastOrDefault() == "doc")
                 {
                     var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
                     FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
@@ -873,7 +888,7 @@ namespace GSC.Respository.Etmf
                 }
             }
 
-            if (document?.DocumentName.Split('.').LastOrDefault() == "pdf")
+            if (document.DocumentName.Split('.').LastOrDefault() == "pdf")
             {
                 var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, document.DocumentName);
                 FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);

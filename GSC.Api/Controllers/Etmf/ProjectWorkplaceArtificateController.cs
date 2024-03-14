@@ -26,7 +26,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
-      
+
         public ProjectWorkplaceArtificateController(IProjectRepository projectRepository,
             IUnitOfWork uow,
             IMapper mapper,
@@ -78,7 +78,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectWorkplaceArtificate = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceArtificateDto);
             _projectWorkplaceArtificateRepository.Update(projectWorkplaceArtificate);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Artificate failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Artificate failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectWorkplaceArtificate.Id);
         }
     }

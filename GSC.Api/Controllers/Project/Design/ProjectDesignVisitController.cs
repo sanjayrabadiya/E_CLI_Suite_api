@@ -33,7 +33,6 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
-        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly IProjectDesingTemplateRestrictionRepository _templatePermissioRepository;
         private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
@@ -47,7 +46,6 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
-            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             IVisitLanguageRepository visitLanguageRepository,
             ITemplateLanguageRepository templateLanguageRepository,
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
@@ -70,7 +68,6 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _visitLanguageRepository = visitLanguageRepository;
             _templateLanguageRepository = templateLanguageRepository;
-            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
             _variableLanguageRepository = variableLanguageRepository;
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
@@ -300,7 +297,7 @@ namespace GSC.Api.Controllers.Project.Design
                 visit.ProjectDesignPeriodId = data.projectDesignPeriodId;
                 visit.DesignOrder = ++designOrder;
 
-                visit.Templates.Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
+                visit.Templates.Where(z => (!data.noOfTemplate.Any() || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
                 {
                     CloneTemplate(visit, template, checkVersion, designOrder, visitStatus);
                 });
@@ -344,7 +341,7 @@ namespace GSC.Api.Controllers.Project.Design
                     foreach (var id in data.visitIds)
                     {
                         var OtherVisit = _projectDesignVisitRepository.GetVisit(id);
-                        OtherVisit.Templates.ToList().Where(z => (data.noOfTemplate.Count() == 0 || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
+                        OtherVisit.Templates.AsEnumerable().Where(z => (!data.noOfTemplate.Any() || data.noOfTemplate.Contains(z.Id))).ToList().ForEach(template =>
                         {
                             CloneTemplate(visit, template, checkVersion, designOrder, visitStatus);
                         });
@@ -364,13 +361,11 @@ namespace GSC.Api.Controllers.Project.Design
             var temp = _projectDesignTemplateRepository.GetTemplateClone(template.Id);
             var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(temp);
             projectDesignTemplate.Id = 0;
-            //projectDesignTemplate.ParentId = template.Id;
             projectDesignTemplate.DesignOrder = ++designOrder;
             projectDesignTemplate.VariableTemplate = null;
             projectDesignTemplate.Domain = null;
             projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
             projectDesignTemplate.InActiveVersion = null;
-            projectDesignTemplate.TemplateName = projectDesignTemplate.TemplateName;
 
             foreach (var variable in projectDesignTemplate.Variables)
             {
@@ -454,7 +449,6 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             projectDesignTemplate.ProjectDesignVisit = visit;
-            //projectDesignTemplate.ProjectDesignVisitId = visit.Id;
 
             _projectDesignTemplateRepository.Add(projectDesignTemplate);
 

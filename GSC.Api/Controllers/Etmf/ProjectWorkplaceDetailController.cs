@@ -22,17 +22,10 @@ namespace GSC.Api.Controllers.Etmf
     [Route("api/[controller]")]
     public class ProjectWorkplaceDetailController : BaseController
     {
-
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IProjectWorkplaceDetailRepository _projectWorkplaceDetailRepository;
 
-        public ProjectWorkplaceDetailController(IUnitOfWork uow,
-            IMapper mapper,
-            IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository)
+        public ProjectWorkplaceDetailController(IProjectWorkplaceDetailRepository projectWorkplaceDetailRepository)
         {
-            _uow = uow;
-            _mapper = mapper;
             _projectWorkplaceDetailRepository = projectWorkplaceDetailRepository;
         }
 

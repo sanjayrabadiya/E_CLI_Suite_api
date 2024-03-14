@@ -17,14 +17,12 @@ namespace GSC.Respository.Project.Design
     public class StudyVersionRepository : GenericRespository<StudyVersion>, IStudyVersionRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IStudyVersionStatusRepository _studyVersionVisitStatusRepository;
         public StudyVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper,
             IStudyVersionStatusRepository studyVersionVisitStatusRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _mapper = mapper;
             _studyVersionVisitStatusRepository = studyVersionVisitStatusRepository;
         }

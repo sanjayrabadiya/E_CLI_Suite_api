@@ -14,10 +14,10 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Project.GeneralConfig
 {
-    [Route("api/[controller]")]   
+    [Route("api/[controller]")]
     public class UploadLimitController : BaseController
     {
-      
+
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadlimitRepository _uploadlimitRepository;
@@ -26,14 +26,14 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         {
             _uow = uow;
             _mapper = mapper;
-            _uploadlimitRepository = uploadlimitRepository;         
+            _uploadlimitRepository = uploadlimitRepository;
         }
 
         //UploadlimitDto
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var uploadLimit = _uploadlimitRepository.FindBy(x=>x.ProjectId==id).FirstOrDefault();
+            var uploadLimit = _uploadlimitRepository.FindBy(x => x.ProjectId == id).FirstOrDefault();
             var uploadLimitDto = _mapper.Map<UploadlimitDto>(uploadLimit);
             return Ok(uploadLimitDto);
         }
@@ -47,7 +47,11 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var uploadLimit = _mapper.Map<UploadLimit>(uploadlimitDto);
 
             _uploadlimitRepository.Add(uploadLimit);
-            if (_uow.Save() <= 0) throw new Exception("Creating Upload limit failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Upload limit failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(uploadLimit.Id);
         }
         [HttpPut]
@@ -61,7 +65,11 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             _uploadlimitRepository.Update(uploadlimit);
 
-            if (_uow.Save() <= 0) throw new Exception("Update upload limit failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update upload limit failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(uploadlimit.Id);
         }
     }

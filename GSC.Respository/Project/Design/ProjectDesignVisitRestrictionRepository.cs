@@ -14,12 +14,10 @@ namespace GSC.Respository.Project.Design
     public class ProjectDesignVisitRestrictionRepository : GenericRespository<ProjectDesignVisitRestriction>, IProjectDesignVisitRestrictionRepository
     {
         private readonly IGSCContext _context;
-        private readonly IRoleRepository _roleRepository;
 
-        public ProjectDesignVisitRestrictionRepository(IGSCContext context, IRoleRepository roleRepository, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public ProjectDesignVisitRestrictionRepository(IGSCContext context, IRoleRepository roleRepository) : base(context)
         {
             _context = context;
-            _roleRepository = roleRepository;
         }
 
         public List<ProjectDesignVisitRestrictionDto> GetProjectDesignVisitRestrictionDetails(int ProjectDesignVisitId)
@@ -40,7 +38,6 @@ namespace GSC.Respository.Project.Design
                 if (p == null) return;
                 t.ProjectDesignVisitId = p.ProjectDesignVisitId;
                 t.IsAdd = p.IsAdd;
-                // t.IsEdit = p.IsEdit;
             });
 
             return SecurityRole.ToList();
@@ -63,18 +60,17 @@ namespace GSC.Respository.Project.Design
                 if (permission == null)
                 {
                     // if not exists in table than add data
-                    if (item.IsAdd || item.IsAdd)
+                    if (item.IsAdd)
                         Add(item);
                 }
                 else
                 {
                     // if exists in table and not any changes than not perform any action on that row
-                    if (permission.IsAdd == item.IsAdd) { }
-                    else
+                    if (permission.IsAdd != item.IsAdd)
                     {
                         // if exists in table and than delete first and if any changes than add new row for that record.
                         Delete(permission);
-                        if (item.IsAdd || item.IsAdd)
+                        if (item.IsAdd)
                             Add(item);
                     }
                 }

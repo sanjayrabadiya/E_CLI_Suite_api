@@ -54,9 +54,13 @@ namespace GSC.Api.Controllers.Project.Design
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             projectDesignTemplateNoteDto.Id = 0;
             var projectDesignTemplateNote = _mapper.Map<ProjectDesignTemplateNote>(projectDesignTemplateNoteDto);
-           
+
             _projectDesignTemplateNoteRepository.Add(projectDesignTemplateNote);
-            if (_uow.Save() <= 0) throw new Exception("Creating Test Group failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Test Group failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectDesignTemplateNote.Id);
         }
 
@@ -71,7 +75,11 @@ namespace GSC.Api.Controllers.Project.Design
 
             _projectDesignTemplateNoteRepository.Update(projectDesignTemplateNote);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Test Group failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Test Group failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectDesignTemplateNote.Id);
         }
 

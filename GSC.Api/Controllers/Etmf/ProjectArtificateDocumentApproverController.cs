@@ -60,7 +60,11 @@ namespace GSC.Api.Controllers.Etmf
             var ProjectArtificateDocumentApprover = _mapper.Map<ProjectArtificateDocumentApprover>(ProjectArtificateDocumentApproverDto);
 
             _projectArtificateDocumentApproverRepository.Add(ProjectArtificateDocumentApprover);
-            if (_uow.Save() <= 0) throw new Exception("Creating Approver failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Approver failed on save.");
+                return BadRequest(ModelState);
+            }
 
             _projectArtificateDocumentApproverRepository.SendMailForApprover(ProjectArtificateDocumentApproverDto);
             _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId, false);
@@ -84,8 +88,12 @@ namespace GSC.Api.Controllers.Etmf
 
                 _projectArtificateDocumentApproverRepository.Add(ProjectArtificateDocumentApprover);
 
-                if (_uow.Save() <= 0) throw new Exception("Creating Approver failed on save.");
-                //_projectArtificateDocumentApproverRepository.SendMailForApprover(ProjectArtificateDocumentApproverDto);
+                if (_uow.Save() <= 0)
+                {
+                    ModelState.AddModelError("Message", "Creating Approver failed on save.");
+                    return BadRequest(ModelState);
+                }
+
                 _projectWorkplaceArtificatedocumentRepository.UpdateApproveDocument(ProjectArtificateDocumentApproverDto.ProjectWorkplaceArtificatedDocumentId, false);
 
                 var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(ProjectArtificateDocumentApprover.ProjectWorkplaceArtificatedDocumentId);
@@ -95,7 +103,7 @@ namespace GSC.Api.Controllers.Etmf
 
 
 
-            if (projectArtificateDocumentApproveDto.Where(x => x.SequenceNo == null).Count() == projectArtificateDocumentApproveDto.Count())
+            if (projectArtificateDocumentApproveDto.Count(x => x.SequenceNo == null) == projectArtificateDocumentApproveDto.Count)
             {
                 foreach (var ReviewDto in projectArtificateDocumentApproveDto)
                 {
@@ -105,11 +113,11 @@ namespace GSC.Api.Controllers.Etmf
             else
             {
                 var firstRecord = projectArtificateDocumentApproveDto.OrderBy(x => x.SequenceNo).FirstOrDefault();
-                if (firstRecord.IsApproved == null)
+                if (firstRecord?.IsApproved == null)
                     _projectArtificateDocumentApproverRepository.SendMailForApprover(firstRecord);
             }
 
-            _projectArtificateDocumentApproverRepository.SkipDocumentApproval(projectArtificateDocumentApproveDto.FirstOrDefault().ProjectWorkplaceArtificatedDocumentId, false);
+            _projectArtificateDocumentApproverRepository.SkipDocumentApproval(projectArtificateDocumentApproveDto[0].ProjectWorkplaceArtificatedDocumentId, false);
 
             return Ok(1);
         }
@@ -134,9 +142,13 @@ namespace GSC.Api.Controllers.Etmf
             && x.ProjectWorkplaceArtificatedDocumentId == Id && x.IsApproved == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
 
             var ProjectArtificateDocumentApprover = _mapper.Map<ProjectArtificateDocumentApprover>(ProjectArtificateDocumentApproverDto);
-            ProjectArtificateDocumentApprover.IsApproved = DocApprover ? true : false;
+            ProjectArtificateDocumentApprover.IsApproved = DocApprover;
             _projectArtificateDocumentApproverRepository.Update(ProjectArtificateDocumentApprover);
-            if (_uow.Save() <= 0) throw new Exception("Updating Approver failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Approver failed on save.");
+                return BadRequest(ModelState);
+            }
             _projectArtificateDocumentApproverRepository.SendMailForApprovedRejected(ProjectArtificateDocumentApprover);
 
             _projectWorkplaceArtificatedocumentRepository.IsApproveDocument(Id);
@@ -171,7 +183,7 @@ namespace GSC.Api.Controllers.Etmf
 
                 var allRecords = _projectArtificateDocumentApproverRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && q.IsApproved != true && q.DeletedDate == null).ToList();
 
-                if (allRecords == null)
+                if (!allRecords.Any())
                     return NotFound();
 
                 foreach (var resultRecord in allRecords)
@@ -190,7 +202,7 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var document = _projectWorkplaceArtificatedocumentRepository.Find(item);
                 var allRecords = _projectArtificateDocumentApproverRepository.All.Where(q => q.ProjectWorkplaceArtificatedDocumentId == item && q.DeletedDate == null).ToList();
-                if (allRecords.All(x => x.IsApproved == true) && allRecords.Count > 0)
+                if (allRecords.TrueForAll(x => x.IsApproved == true) && allRecords.Count > 0)
                 {
                     document.IsAccepted = true;
                 }

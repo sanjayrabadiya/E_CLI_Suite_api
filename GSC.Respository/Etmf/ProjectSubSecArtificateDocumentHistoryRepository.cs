@@ -19,17 +19,12 @@ namespace GSC.Respository.Etmf
 {
     public class ProjectSubSecArtificateDocumentHistoryRepository : GenericRespository<ProjectSubSecArtificateDocumentHistory>, IProjectSubSecArtificateDocumentHistoryRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public ProjectSubSecArtificateDocumentHistoryRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public ProjectSubSecArtificateDocumentHistoryRepository(IGSCContext context)
            : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            _mapper = mapper;
         }
 
         public void AddHistory(ProjectWorkplaceSubSecArtificatedocument projectWorkplaceSubSecArtificatedocument, int? ReviewId, int? ApproverId)
@@ -42,7 +37,7 @@ namespace GSC.Respository.Etmf
             ProjectSubSecArtificateDocumentHistory.ExpiryDate = projectWorkplaceSubSecArtificatedocument.ExpiryDate;
 
             Add(ProjectSubSecArtificateDocumentHistory);
-             _context.Save();
+            _context.Save();
         }
     }
 }

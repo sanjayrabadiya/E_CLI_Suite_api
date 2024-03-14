@@ -19,23 +19,19 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
 
         public TemplateVariableSequenceNoSettingController(ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IGSCContext context,
-            IStudyVersionRepository studyVersionRepository)
+            IUnitOfWork uow, IMapper mapper)
         {
             _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
         }
 
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var templateVariableSettings = _templateVariableSequenceNoSettingRepository.FindBy(x => x.ProjectDesignId == id && x.DeletedDate==null).FirstOrDefault();
+            var templateVariableSettings = _templateVariableSequenceNoSettingRepository.FindBy(x => x.ProjectDesignId == id && x.DeletedDate == null).FirstOrDefault();
             var templateVariableSettingsDto = _mapper.Map<TemplateVariableSequenceNoSettingDto>(templateVariableSettings);
             return Ok(templateVariableSettingsDto);
         }
@@ -48,7 +44,11 @@ namespace GSC.Api.Controllers.Project.Design
             var template = _mapper.Map<TemplateVariableSequenceNoSetting>(templateDto);
 
             _templateVariableSequenceNoSettingRepository.Add(template);
-            if (_uow.Save() <= 0) throw new Exception("Creating template variable sequence failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating template variable sequence failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(template.Id);
         }
 
@@ -60,7 +60,11 @@ namespace GSC.Api.Controllers.Project.Design
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var template = _mapper.Map<TemplateVariableSequenceNoSetting>(templateDto);
             _templateVariableSequenceNoSettingRepository.Update(template);
-            if (_uow.Save() <= 0) throw new Exception("Creating template variable sequence failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating template variable sequence failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(template.Id);
         }
 
@@ -68,31 +72,6 @@ namespace GSC.Api.Controllers.Project.Design
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            //var record = _projectScheduleRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesign)
-            //    .FirstOrDefault();
-
-            //var recordTemplate = _projectScheduleTemplateRepository.FindByInclude(x => x.ProjectScheduleId == id && x.DeletedDate == null).ToList();
-
-            //if (record == null && recordTemplate == null)
-            //    return NotFound();
-
-            //if (!_studyVersionRepository.IsOnTrialByProjectDesing(record.ProjectDesign.Id))
-            //{
-            //    ModelState.AddModelError("Message", "Can not delete schedule!");
-            //    return BadRequest(ModelState);
-            //}
-
-            //_projectScheduleRepository.Delete(record);
-            //recordTemplate.ForEach(x =>
-            //{
-            //    _projectScheduleTemplateRepository.Delete(x);
-            //});
-
-            //_uow.Save();
-
-            //_projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(record.ProjectDesignPeriodId);
-            //_uow.Save();
-
             return Ok();
         }
     }

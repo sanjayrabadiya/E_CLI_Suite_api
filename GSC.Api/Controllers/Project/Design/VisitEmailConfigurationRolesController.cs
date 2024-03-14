@@ -11,18 +11,8 @@ namespace GSC.Api.Controllers.Project.Design
     [ApiController]
     public class VisitEmailConfigurationRolesController : BaseController
     {
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
-
-        public VisitEmailConfigurationRolesController(
-            IUnitOfWork uow, IMapper mapper,
-            IGSCContext context
-          )
+        public VisitEmailConfigurationRolesController()
         {
-            _uow = uow;
-            _mapper = mapper;
-            _context = context;
         }
     }
 }

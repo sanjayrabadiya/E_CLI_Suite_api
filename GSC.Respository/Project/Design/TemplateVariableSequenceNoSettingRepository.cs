@@ -11,18 +11,8 @@ namespace GSC.Respository.Project.Design
 {
     public class TemplateVariableSequenceNoSettingRepository : GenericRespository<TemplateVariableSequenceNoSetting>, ITemplateVariableSequenceNoSettingRepository
     {
-        private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public TemplateVariableSequenceNoSettingRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public TemplateVariableSequenceNoSettingRepository(IGSCContext context) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
-            _context = context;
         }
-
-
-
     }
 }

@@ -18,19 +18,16 @@ namespace GSC.Api.Controllers.Project.Design
     [ApiController]
     public class ProjectDesignVisitStatusController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IUnitOfWork _uow;
 
         public ProjectDesignVisitStatusController(IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         //added by vipul for get visit status by template id on 23092020
@@ -57,7 +54,7 @@ namespace GSC.Api.Controllers.Project.Design
             }
 
             _projectDesignVisitStatusRepository.Add(projectDesignVisitStatus);
-             _uow.Save();
+            _uow.Save();
             return Ok(projectDesignVisitStatus.Id);
         }
 

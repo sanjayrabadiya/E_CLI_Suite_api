@@ -63,7 +63,7 @@ namespace GSC.Api.Controllers.Project.EditCheck
 
             if (editCheckDetailDto.VariableIds.Length > 0)
             {
-                var checkIsFormula = _editCheckRepository.All.Where(x => x.Id == editCheckDetailDto.EditCheckId).FirstOrDefault().IsFormula;
+                var checkIsFormula = _editCheckRepository.Find(editCheckDetailDto.EditCheckId).IsFormula;
 
                 if (!editCheckDetailDto.IsTarget && !checkIsFormula && editCheckDetailDto.VariableIds.Length > 1 && string.IsNullOrEmpty(editCheckDetailDto.LogicalOperator))
                 {

@@ -58,8 +58,8 @@ namespace GSC.Respository.Etmf
 
         public List<MasterLibraryJoinDto> GetArtifcateWithAllListByVersion(int ParentProjectId)
         {
-            var result = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ParentProjectId && x.TableTag==(int)EtmfTableNameTag.ProjectWorkPlaceZone)
-                .Include(x=>x.EtmfMasterLibrary).FirstOrDefault();
+            var result = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ParentProjectId && x.TableTag == (int)EtmfTableNameTag.ProjectWorkPlaceZone)
+                .Include(x => x.EtmfMasterLibrary).FirstOrDefault();
 
             var dtolist = (from zone in _context.EtmfMasterLibrary.Where(t => t.Version == result.EtmfMasterLibrary.Version)
                            join section in _context.EtmfMasterLibrary on zone.Id equals
@@ -92,7 +92,7 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetArtificateDropDown(int EtmfSectionMasterLibraryId, int foldertype)
         {
-            return All.Where(x => x.EtmfSectionMasterLibraryId == EtmfSectionMasterLibraryId && (foldertype == 1 ? x.CountryLevelDoc == true : (foldertype == 2 ? x.SiteLevelDoc == true : x.TrailLevelDoc == true)))
+            return All.Where(x => x.EtmfSectionMasterLibraryId == EtmfSectionMasterLibraryId && (foldertype == 1 ? x.CountryLevelDoc : (foldertype == 2 ? x.SiteLevelDoc : x.TrailLevelDoc)))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.ArtificateName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }

@@ -25,7 +25,6 @@ namespace GSC.Respository.Etmf
     public class ProjectSubSecArtificateDocumentApproverRepository : GenericRespository<ProjectSubSecArtificateDocumentApprover>, IProjectSubSecArtificateDocumentApproverRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        //private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUserRepository _userRepository;
         private readonly IGSCContext _context;
@@ -33,32 +32,28 @@ namespace GSC.Respository.Etmf
         private readonly IProjectWorkplaceArtificateRepository _projectWorkplaceArtificateRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
         private readonly IMapper _mapper;
-        private readonly IAppSettingRepository _appSettingRepository;
         public ProjectSubSecArtificateDocumentApproverRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser,
-           //IProjectWorkplaceSubSecArtificatedocumentRepository projectWorkplaceSubSecArtificatedocumentRepository,
            IEmailSenderRespository emailSenderRespository,
            IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
            IProjectSubSecArtificateDocumentHistoryRepository projectSubSecArtificateDocumentHistoryRepository,
            IMapper mapper,
-           IUserRepository userRepository, IProjectRightRepository projectRightRepository, IAppSettingRepository appSettingRepository)
+           IUserRepository userRepository, IProjectRightRepository projectRightRepository)
            : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            //_projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
             _emailSenderRespository = emailSenderRespository;
             _userRepository = userRepository;
             _projectRightRepository = projectRightRepository;
             _projectWorkplaceArtificateRepository = projectWorkplaceArtificateRepository;
             _mapper = mapper;
             _projectSubSecArtificateDocumentHistoryRepository = projectSubSecArtificateDocumentHistoryRepository;
-            _appSettingRepository = appSettingRepository;
         }
 
         public List<ProjectSubSecArtificateDocumentReviewDto> UserNameForApproval(int Id, int ProjectId, int ProjectDetailsId)
         {
-            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone && x.DeletedDate == null).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
@@ -70,7 +65,7 @@ namespace GSC.Respository.Etmf
                     SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && (b.IsApproved == false || b.IsApproved == null))?.SequenceNo,
                     IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null
                     && (b.IsApproved == true || b.IsApproved == null)),
-                }).Where(x => x.IsSelected == false).ToList();
+                }).Where(x => !x.IsSelected).ToList();
 
             users.ForEach(x =>
             {
@@ -78,10 +73,10 @@ namespace GSC.Respository.Etmf
                 var etmfUserPermissions = _context.EtmfUserPermission.Include(y => y.ProjectWorkplaceDetail)
                                         .Where(y => y.ProjectWorkplaceDetailId == ProjectDetailsId && y.DeletedDate == null && y.UserId == x.UserId)
                                         .OrderByDescending(x => x.Id).FirstOrDefault();
-                x.IsRights = etmfUserPermissions != null ? etmfUserPermissions.IsAdd || etmfUserPermissions.IsEdit || etmfUserPermissions.IsView : false;
+                x.IsRights = etmfUserPermissions?.IsAdd == true || etmfUserPermissions?.IsEdit == true || etmfUserPermissions?.IsView == true;
             });
 
-            return users.Where(x => x.IsRights == true).ToList();
+            return users.Where(x => x.IsRights).ToList();
         }
 
         public void SendMailForApprover(ProjectSubSecArtificateDocumentApproverDto ProjectSubSecArtificateDocumentApproverDto)
@@ -89,11 +84,11 @@ namespace GSC.Respository.Etmf
             var project = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
                    .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
                    .ThenInclude(x => x.Project)
-                   .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId).FirstOrDefault();
+                   .FirstOrDefault(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId);
 
-            var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
-            var Document = project.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
-            var Artificate = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
+            var ProjectName = project?.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
+            var Document = project?.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
+            var Artificate = project?.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
             var User = _userRepository.Find(ProjectSubSecArtificateDocumentApproverDto.UserId);
 
             _emailSenderRespository.SendApproverEmailOfArtificate(User.Email, User.UserName, Document, Artificate, ProjectName);
@@ -103,11 +98,11 @@ namespace GSC.Respository.Etmf
             var project = All.Include(t => t.ProjectWorkplaceSubSecArtificateDocument)
                   .ThenInclude(x => x.ProjectWorkplaceSubSectionArtifact)
                   .ThenInclude(x => x.Project)
-                  .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId).FirstOrDefault();
+                  .FirstOrDefault(x => x.ProjectWorkplaceSubSecArtificateDocumentId == ProjectSubSecArtificateDocumentApproverDto.ProjectWorkplaceSubSecArtificateDocumentId);
 
-            var ProjectName = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
-            var Document = project.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
-            var Artificate = project.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
+            var ProjectName = project?.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.Project.ProjectName;
+            var Document = project?.ProjectWorkplaceSubSecArtificateDocument.DocumentName;
+            var Artificate = project?.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ArtifactName;
             var user = _userRepository.Find((int)ProjectSubSecArtificateDocumentApproverDto.CreatedBy);
             if (ProjectSubSecArtificateDocumentApproverDto.IsApproved == true)
             {
@@ -159,23 +154,6 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectSubSecArtificateDocumentApproverHistory> GetArtificateDocumentApproverHistory(int Id)
         {
-            //var result = All.Include(x => x.ProjectWorkplaceSubSecArtificateDocument).Include(x => x.ProjectSubSecArtificateDocumentHistory).Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id)
-            //    .Select(x => new ProjectSubSecArtificateDocumentApproverHistory
-            //    {
-            //        Id = x.Id,
-            //        DocumentName = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
-            //        ProjectArtificateDocumentHistoryId = x.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
-            //        UserName = _context.Users.Where(y => y.Id == x.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
-            //        UserId = x.UserId,
-            //        IsApproved = x.IsApproved,
-            //        ProjectWorkplaceSubSecArtificateDocumentId = x.ProjectWorkplaceSubSecArtificateDocumentId,
-            //        CreatedDate = x.CreatedDate,
-            //        CreatedByUser = _context.Users.Where(y => y.Id == x.CreatedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-            //        ModifiedDate = x.ModifiedDate,
-            //        ModifiedByUser = _context.Users.Where(y => y.Id == x.ModifiedBy && y.DeletedDate == null).FirstOrDefault().UserName,
-            //        Comment = x.Comment
-            //    }).OrderByDescending(x => x.Id).ToList();
-
             var result = (from approver in _context.ProjectSubSecArtificateDocumentApprover.Include(x => x.ProjectWorkplaceSubSecArtificateDocument).Include(x => x.ProjectSubSecArtificateDocumentHistory)
                           .Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == Id)
                           join auditReasonTemp in _context.AuditTrail.Where(x => x.TableName == "ProjectSubSecArtificateDocumentApprover" && x.ColumnName == "Is Approved")
@@ -184,9 +162,6 @@ namespace GSC.Respository.Etmf
                           select new ProjectSubSecArtificateDocumentApproverHistory
                           {
                               Id = approver.Id,
-                              //DocumentName = approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
-                              //ProjectArtificateDocumentHistoryId = approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
-                              //UserName = _context.Users.Where(y => y.Id == approver.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
                               DocumentName = approver.ProjectSubSecArtificateDocumentHistory.Count <= 0 ? "" : approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().DocumentName,
                               ProjectArtificateDocumentHistoryId = approver.ProjectSubSecArtificateDocumentHistory.Count <= 0 ? 0 : approver.ProjectSubSecArtificateDocumentHistory.OrderByDescending(y => y.Id).FirstOrDefault().Id,
                               UserName = _context.Users.Where(y => y.Id == approver.UserId && y.DeletedDate == null).FirstOrDefault().UserName,
@@ -207,7 +182,7 @@ namespace GSC.Respository.Etmf
 
         public List<ProjectSubSecArtificateDocumentReviewDto> GetUsers(int Id, int ProjectId)
         {
-            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && x.IsReviewDone && x.DeletedDate == null).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
@@ -219,7 +194,7 @@ namespace GSC.Respository.Etmf
                     SequenceNo = All.FirstOrDefault(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null && (b.IsApproved == false || b.IsApproved == null))?.SequenceNo,
                     IsSelected = All.Any(b => b.ProjectWorkplaceSubSecArtificateDocumentId == Id && b.UserId == c.UserId && b.DeletedDate == null
                     && (b.IsApproved == true || b.IsApproved == null)),
-                }).Where(x => x.IsSelected == false).ToList();
+                }).Where(x => !x.IsSelected).ToList();
 
             return users.ToList();
         }
@@ -227,7 +202,7 @@ namespace GSC.Respository.Etmf
         public int ReplaceUser(int documentId, int actualUserId, int replaceUserId)
         {
             var actualUsers = All.Where(q => q.UserId == actualUserId && q.ProjectWorkplaceSubSecArtificateDocumentId == documentId && q.DeletedDate == null && (q.IsApproved == null || q.IsApproved == false)).ToList();
-            if (actualUsers.Count() > 0)
+            if (actualUsers.Any())
             {
                 foreach (var user in actualUsers.Where(s => s.IsApproved == null))
                 {
@@ -243,7 +218,6 @@ namespace GSC.Respository.Etmf
                     Add(replaceUser);
                     _context.Save();
 
-                    //_projectWorkplaceSubSecArtificatedocumentRepository.UpdateApproveDocument(user.ProjectWorkplaceSubSecArtificateDocumentId, false);
                     var projectWorkplaceArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Find(user.ProjectWorkplaceSubSecArtificateDocumentId);
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, All.Max(p => p.Id));
 
@@ -294,7 +268,7 @@ namespace GSC.Respository.Etmf
                     {
                         var minseqno = _projectWorkplaceArtificateRepository.ClosestToNumber(numArray, reviewer.SequenceNo.Value);
                         var sendBackReviewers = All.Where(x => x.ProjectWorkplaceSubSecArtificateDocumentId == documentId && x.DeletedDate == null && x.SequenceNo == minseqno).ToList();
-                        var result = sendBackReviewers.Any(x => x.IsApproved == true);
+                        var result = sendBackReviewers.Exists(x => x.IsApproved == true);
                         return (!result);
                     }
                     else
@@ -343,7 +317,7 @@ namespace GSC.Respository.Etmf
                 Update(defaultUser);
                 if (isApproval)
                 {
-                    var document = _context.ProjectWorkplaceSubSecArtificatedocument.FirstOrDefault(x => x.Id == documentId);
+                    var document = _context.ProjectWorkplaceSubSecArtificatedocument.First(x => x.Id == documentId);
                     document.IsAccepted = true;
                     _context.ProjectWorkplaceSubSecArtificatedocument.Update(document);
                 }
@@ -361,7 +335,7 @@ namespace GSC.Respository.Etmf
             && x.DueDate.Value.Date >= DateTime.Now.Date).ToListAsync();
             foreach (var due in dueDates)
             {
-                var user = await _context.Users.FindAsync((int)due.UserId);
+                var user = await _context.Users.FindAsync(due.UserId);
                 var document = await _context.ProjectWorkplaceArtificatedocument.FindAsync(due.ProjectWorkplaceSubSecArtificateDocumentId);
                 var artificate = await _context.EtmfProjectWorkPlace.FindAsync(document.ProjectWorkplaceArtificateId);
                 string artificateName = artificate.ArtifactName;

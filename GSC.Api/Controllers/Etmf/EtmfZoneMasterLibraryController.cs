@@ -24,22 +24,18 @@ namespace GSC.Api.Controllers.Etmf
     [Route("api/[controller]")]
     public class EtmfZoneMasterLibraryController : BaseController
     {
-
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLibraryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public EtmfZoneMasterLibraryController(
             IUnitOfWork uow,
-            IMapper mapper,
             IEtmfMasterLbraryRepository etmfMasterLibraryRepository,
             IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLibraryRepository,
                 IUploadSettingRepository uploadSettingRepository
             )
         {
             _uow = uow;
-            _mapper = mapper;
             _etmfMasterLibraryRepository = etmfMasterLibraryRepository;
             _etmfArtificateMasterLibraryRepository = etmfArtificateMasterLibraryRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -69,7 +65,7 @@ namespace GSC.Api.Controllers.Etmf
                 result = _etmfMasterLibraryRepository.ExcelDataConvertToEntityformat(data);
 
                 var LastVersiondata = _etmfMasterLibraryRepository.FindByInclude(x => x.DeletedBy == null, x => x.EtmfSectionMasterLibrary).ToList();
-                if (LastVersiondata != null && LastVersiondata.Count > 0)
+                if (LastVersiondata.Any())
                 {
                     foreach (var Lastdata in LastVersiondata)
                     {
@@ -130,11 +126,6 @@ namespace GSC.Api.Controllers.Etmf
 
             var data = _etmfMasterLibraryRepository.Find(etmfZoneMasterLibraryDto.Id);
             data.ZonName = etmfZoneMasterLibraryDto.ZonName;
-            //if (etmfZoneMasterLibraryDto.Id <= 0) return BadRequest();
-
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-
-            //var etmfZoneMasterLibrary = _mapper.Map<EtmfZoneMasterLibrary>(etmfZoneMasterLibraryDto);
             var validate = _etmfMasterLibraryRepository.Duplicate(data);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -144,7 +135,11 @@ namespace GSC.Api.Controllers.Etmf
 
             _etmfMasterLibraryRepository.Update(data);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Drug failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Drug failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(data.Id);
         }
 

@@ -66,12 +66,12 @@ namespace GSC.Respository.Project.EditCheck
                 FetchingProjectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault() != null ? _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault().ProjectDesignVisitId : 0
             }).FirstOrDefault();
 
-            if (result.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
+            if (result?.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
             {
                 var variableAnnotation = GetCollectionSources(result.VariableAnnotation, result.ProjectDesignId);
                 result.CollectionSource = variableAnnotation?.CollectionSource;
                 result.DataType = variableAnnotation?.DataType;
-                if (variableAnnotation.Values != null)
+                if (variableAnnotation?.Values != null)
                     result.ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(variableAnnotation.Values.Where(x => x.DeletedDate == null).ToList());
             }
 
@@ -119,7 +119,7 @@ namespace GSC.Respository.Project.EditCheck
 
                 if (x.CheckBy == EditCheckRuleBy.ByVariable || x.CheckBy == EditCheckRuleBy.ByVariableRule)
                 {
-                    x.IsSameTemplate = result.Any(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.IsTarget != x.IsTarget);
+                    x.IsSameTemplate = result.Exists(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId && t.IsTarget != x.IsTarget);
                 }
 
                 Update(x);

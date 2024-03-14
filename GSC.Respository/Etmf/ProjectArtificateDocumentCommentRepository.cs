@@ -19,18 +19,13 @@ namespace GSC.Respository.Etmf
     public class ProjectArtificateDocumentCommentRepository : GenericRespository<ProjectArtificateDocumentComment>, IProjectArtificateDocumentCommentRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IGSCContext _context;
         public ProjectArtificateDocumentCommentRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
-           IUserRepository userRepository)
+           IJwtTokenAccesser jwtTokenAccesser)
            : base(context)
         {
             _context = context;
-            _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _userRepository = userRepository;
         }
 
         public IList<ProjectArtificateDocumentCommentDto> GetComments(int documentId)

@@ -45,31 +45,25 @@ namespace GSC.Api.Controllers.Etmf
 
 
         [HttpPut]
-        public IActionResult Put([FromBody]   List<EtmfArtificateMasterLbraryDto> EtmfArtificateMasterLbrary)
+        public IActionResult Put([FromBody] List<EtmfArtificateMasterLbraryDto> EtmfArtificateMasterLbrary)
         {
-            //if (data.Id <= 0) return BadRequest();
-
-            //if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             foreach (var item in EtmfArtificateMasterLbrary)
             {
                 var etmfArtificateMasterLbrary = _mapper.Map<EtmfArtificateMasterLbrary>(item);
                 _etmfArtificateMasterLbraryRepository.AddOrUpdate(etmfArtificateMasterLbrary);
-                if (_uow.Save() <= 0) throw new Exception("Updating Artificate data failed on save.");
+                if (_uow.Save() <= 0)
+                {
+                    ModelState.AddModelError("Message", "Updating Artificate data failed on save.");
+                    return BadRequest(ModelState);
+                }
             }
-            //var validate = _etmfArtificateMasterLbraryRepository.Duplicate(drug);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
             /* Added by swati for effective Date on 02-06-2019 */
             return Ok(EtmfArtificateMasterLbrary);
         }
 
         [HttpGet]
         [Route("GetArtificateDropDown/{EtmfSectionMasterLibraryId}/{foldertype}")]
-        public IActionResult GetArtificateDropDown(int EtmfSectionMasterLibraryId,short foldertype)
+        public IActionResult GetArtificateDropDown(int EtmfSectionMasterLibraryId, short foldertype)
         {
             return Ok(_etmfArtificateMasterLbraryRepository.GetArtificateDropDown(EtmfSectionMasterLibraryId, foldertype));
         }
