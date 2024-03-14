@@ -26,8 +26,6 @@ namespace GSC.Audit
         {
             _dictionaries.Add(new Dictionary { FieldName = "TrialTypeId", DisplayName = "Therapeutic Indication", SourceColumn = "TrialTypeName", TableName = "TrialType", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "OtherTitle", DisplayName = "Other Title" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Forename", DisplayName = "First Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "MiddleName", DisplayName = "Middle Name" });
             _dictionaries.Add(new Dictionary { FieldName = "Surname", DisplayName = "Last Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DateOfBirth", DisplayName = "Date Of Birth" });
             _dictionaries.Add(new Dictionary { FieldName = "CorrespondenceAddressId", DisplayName = "Address", SourceColumn = "DisplayAddress", TableName = "Address", PkName = "AddressId" });
@@ -42,7 +40,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsRepeated", DisplayName = "Is Repeated" });
             _dictionaries.Add(new Dictionary { FieldName = "ActivityCode", DisplayName = "Activity Code" });
             _dictionaries.Add(new Dictionary { FieldName = "ActivityName", DisplayName = "Activity Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ActivityId", DisplayName = "Activity Name", SourceColumn = "ActivityName", TableName = "Activity", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "VariableTemplateId", DisplayName = "Form", SourceColumn = "TemplateName", TableName = "VariableTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "DomainId", DisplayName = "Domain", SourceColumn = "DomainName", TableName = "Domain", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "CategoryName", DisplayName = "Category Name" });
@@ -114,9 +111,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "EmailOfInvestigator", DisplayName = "Email Of Investigator" });
             _dictionaries.Add(new Dictionary { FieldName = "ManageSiteId", DisplayName = "Site Name", SourceColumn = "SiteName", TableName = "ManageSite", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "IecirbId", DisplayName = "IEC/IRB Name", SourceColumn = "IECIRBName", TableName = "Iecirb", PkName = "Id" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IecirbId", DisplayName = "IEC/IRB Contact Name", SourceColumn = "IECIRBContactName", TableName = "Iecirb", PkName = "Id" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IecirbId", DisplayName = "IEC/IRB Contact No", SourceColumn = "IECIRBContactNumber", TableName = "Iecirb", PkName = "Id" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IecirbId", DisplayName = "IEC/IRB Contact Email", SourceColumn = "IECIRBContactEmail", TableName = "Iecirb", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactEmail", DisplayName = "Contact Email" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactNo", DisplayName = "Contact Number" });
@@ -128,7 +122,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "SiteName", DisplayName = "Site Name" });
             _dictionaries.Add(new Dictionary { FieldName = "SiteEmail", DisplayName = "Email" });
             _dictionaries.Add(new Dictionary { FieldName = "SiteAddress", DisplayName = "Site Address" });
-            //_dictionaries.Add(new Dictionary { FieldName = "Status", DisplayName = "Status" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactNumber", DisplayName = "Contact Number" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
             _dictionaries.Add(new Dictionary { FieldName = "IECIRBName", DisplayName = "IEC/IRB Name" });
@@ -149,7 +142,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsDefault", DisplayName = "Is Default" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactNo", DisplayName = "Contact Number" });
             _dictionaries.Add(new Dictionary { FieldName = "ContactName", DisplayName = "Contact Name" });
-            //_dictionaries.Add(new Dictionary { FieldName = "IsLogin", DisplayName = "Is Login" });
             _dictionaries.Add(new Dictionary { FieldName = "IsPowerAdmin", DisplayName = "Is Power Admin" });
             _dictionaries.Add(new Dictionary { FieldName = "IsLocked", DisplayName = "Locked Status" });
             _dictionaries.Add(new Dictionary { FieldName = "IsFirstTime", DisplayName = "Is First Time" });
@@ -199,8 +191,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsOnlyTarget", DisplayName = "Is Only Target" });
             _dictionaries.Add(new Dictionary { FieldName = "IsFormula", DisplayName = "Is Formula" });
             _dictionaries.Add(new Dictionary { FieldName = "AutoNumber", DisplayName = "Auto Number" });
-            //_dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
-
+         
             // Inform Consent audit
             _dictionaries.Add(new Dictionary { FieldName = "DocumentName", DisplayName = "Document Name" });
             _dictionaries.Add(new Dictionary { FieldName = "DocumentPath", DisplayName = "Document Path" });
@@ -222,13 +213,12 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "LegalRelationship", DisplayName = "Relationship to the Subject" });
             _dictionaries.Add(new Dictionary { FieldName = "HolidayType", DisplayName = "Holiday" });
             _dictionaries.Add(new Dictionary { FieldName = "FreezerType", DisplayName = "Freezer Type" });
-            //
+            
             _dictionaries.Add(new Dictionary { FieldName = "ScreeningNumber", DisplayName = "Screening Number" });
             _dictionaries.Add(new Dictionary { FieldName = "RandomizationNumber", DisplayName = "Randomization Number" });
             _dictionaries.Add(new Dictionary { FieldName = "DateOfScreening", DisplayName = "Date Of Screening" });
             _dictionaries.Add(new Dictionary { FieldName = "DateOfRandomization", DisplayName = "Date Of Randomization" });
 
-            //
             _dictionaries.Add(new Dictionary { FieldName = "EmergencyContactNumber", DisplayName = "Emergency Contact Number" });
             _dictionaries.Add(new Dictionary { FieldName = "Qualification", DisplayName = "Qualification" });
             _dictionaries.Add(new Dictionary { FieldName = "Occupation", DisplayName = "Occupation" });
@@ -243,14 +233,14 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "LegalEmergencyCoNumber", DisplayName = "(LR)Contact Number" });
             _dictionaries.Add(new Dictionary { FieldName = "LegalEmail", DisplayName = "(LR)Email" });
             _dictionaries.Add(new Dictionary { FieldName = "PrimaryContactNumber", DisplayName = "Primary Contact Number" });
-            //
+            
             _dictionaries.Add(new Dictionary { FieldName = "IsManualRandomNo", DisplayName = "Is Manual Randomization Number" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSiteDependentRandomNo", DisplayName = "Is Site Dependent Randomization Number" });
             _dictionaries.Add(new Dictionary { FieldName = "RandomNoLength", DisplayName = "Randomization Number Length" });
             _dictionaries.Add(new Dictionary { FieldName = "IsAlphaNumRandomNo", DisplayName = "Is Alpha Numeric Randomization Number" });
             _dictionaries.Add(new Dictionary { FieldName = "PrefixRandomNo", DisplayName = "Prefix Randomization Number" });
             _dictionaries.Add(new Dictionary { FieldName = "RandomNoStartsWith", DisplayName = "Randomization Number Starts with" });
-            //
+            
             _dictionaries.Add(new Dictionary { FieldName = "IsManualScreeningNo", DisplayName = "Is Manual Screening Number" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSiteDependentScreeningNo", DisplayName = "Is Site Dependent Screening Number" });
             _dictionaries.Add(new Dictionary { FieldName = "ScreeningLength", DisplayName = "Screening Number Length" });
@@ -275,7 +265,6 @@ namespace GSC.Audit
 
             //ProjectArtificateDocumentApprover
             _dictionaries.Add(new Dictionary { FieldName = "ProjectWorkplaceArtificatedDocumentId", DisplayName = "Project Workplace Artificated Document" });
-            // _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "User" });
             _dictionaries.Add(new Dictionary { FieldName = "IsApproved", DisplayName = "Is Approved" });
             _dictionaries.Add(new Dictionary { FieldName = "Comment", DisplayName = "Comment" });
 
@@ -329,7 +318,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "ExpiryDate", DisplayName = "Document Expiry Date" });
 
             //ProjectArtificateDocumentReview
-            // _dictionaries.Add(new Dictionary { FieldName = "RoleId", DisplayName = "Role" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSendBack", DisplayName = "Is SendBack" });
             _dictionaries.Add(new Dictionary { FieldName = "SendBackDate", DisplayName = "SendBack Date" });
             _dictionaries.Add(new Dictionary { FieldName = "Message", DisplayName = "Message" });
@@ -380,7 +368,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "RefrenceType", DisplayName = "Reference Type" }); //Field added by Sachin on 09/05/2023
             _dictionaries.Add(new Dictionary { FieldName = "ActivityType", DisplayName = "Activity Type" });  //Field added by Sachin on 09/05/2023
 
-            // _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Project", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "TaskTemplateId", DisplayName = "Template", SourceColumn = "TemplateCode", TableName = "TaskTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "StartDate", DisplayName = "StartDate" });
             _dictionaries.Add(new Dictionary { FieldName = "EndDate", DisplayName = "EndDate" });
@@ -393,8 +380,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "UserId", DisplayName = "Project Manager", SourceColumn = "UserName", TableName = "Users", PkName = "Id" });
 
             // Varable value
-            //  _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignVariableId", DisplayName = "Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
-            _dictionaries.Add(new Dictionary { FieldName = "ValueCode", DisplayName = "Value Code" });
+           _dictionaries.Add(new Dictionary { FieldName = "ValueCode", DisplayName = "Value Code" });
             _dictionaries.Add(new Dictionary { FieldName = "ValueName", DisplayName = "Value Name" });
             _dictionaries.Add(new Dictionary { FieldName = "Lable", DisplayName = "Lable" });
             _dictionaries.Add(new Dictionary { FieldName = "SeqNo", DisplayName = "Seq No" });
@@ -402,8 +388,7 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "Remarks", DisplayName = "Remarks" });
             _dictionaries.Add(new Dictionary { FieldName = "Style", DisplayName = "color/emoji" });
 
-            //_dictionaries.Add(new Dictionary { FieldName = "LargeStep", DisplayName = "Large Step" });
-
+           
             // ProducType
             _dictionaries.Add(new Dictionary { FieldName = "ProductTypeName", DisplayName = "Product Type Name" });
             _dictionaries.Add(new Dictionary { FieldName = "ProductTypeCode", DisplayName = "Product Type Code" });
@@ -416,7 +401,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "DepotType", DisplayName = "Depot Type" });
             _dictionaries.Add(new Dictionary { FieldName = "SupplyLocationId", DisplayName = "Locaton", SourceColumn = "LocationName", TableName = "SupplyLocation", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "CountryId", DisplayName = "Country", SourceColumn = "CountryName", TableName = "Country", PkName = "Id" });
-            //  _dictionaries.Add(new Dictionary { FieldName = "ProjectId", DisplayName = "Study", SourceColumn = "ProjectCode", TableName = "Project", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "StorageArea", DisplayName = "Storage Area" });
             _dictionaries.Add(new Dictionary { FieldName = "MinTemp", DisplayName = "Min Temp" });
             _dictionaries.Add(new Dictionary { FieldName = "MaxTemp", DisplayName = "Max Temp" });
@@ -424,7 +408,6 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "MaxHumidity", DisplayName = "Max Humidity" });
 
             //Version
-            // _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignId", DisplayName = "Project Design" });
             _dictionaries.Add(new Dictionary { FieldName = "VersionNumber", DisplayName = "Version Number" });
             _dictionaries.Add(new Dictionary { FieldName = "StudyVerionId", DisplayName = "Study Verion" });
             _dictionaries.Add(new Dictionary { FieldName = "VisitStatusId", DisplayName = "Visit Status" });
@@ -447,14 +430,12 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "IsRead", DisplayName = "Read" });
             _dictionaries.Add(new Dictionary { FieldName = "IsWrite", DisplayName = "Write" });
             _dictionaries.Add(new Dictionary { FieldName = "IsSpeak", DisplayName = "Speak" });
-            //  _dictionaries.Add(new Dictionary { FieldName = "Note", DisplayName = "Note" });
             _dictionaries.Add(new Dictionary { FieldName = "DocumentNameId", DisplayName = "Document Name", SourceColumn = "Name", TableName = "DocumentName", PkName = "Id" });
 
             _dictionaries.Add(new Dictionary { FieldName = "AttendanceTemplateId", DisplayName = "Fitness", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "DiscontinuedTemplateId", DisplayName = "Discontinued", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
 
             // Variable add column
-            //  _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignTemplateId", DisplayName = "Project Design Template", SourceColumn = "TemplateName", TableName = "ProjectDesignTemplate", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "VariableName", DisplayName = "Variable Name" });
             _dictionaries.Add(new Dictionary { FieldName = "VariableCode", DisplayName = "Variable Code" });
             _dictionaries.Add(new Dictionary { FieldName = "VariableAlias", DisplayName = "Variable Alias" });
@@ -483,8 +464,7 @@ namespace GSC.Audit
             // Project design template note
             _dictionaries.Add(new Dictionary { FieldName = "IsPreview", DisplayName = "Is Printable?" });
 
-            //   _dictionaries.Add(new Dictionary { FieldName = "ProjectDesignVariableId", DisplayName = "Variable", SourceColumn = "VariableName", TableName = "ProjectDesignVariable", PkName = "Id" });
-
+           
             // Pharmachy product study type
             _dictionaries.Add(new Dictionary { FieldName = "ProductTypeId", DisplayName = "Product Type", SourceColumn = "ProductTypeName", TableName = "ProductType", PkName = "Id" });
             _dictionaries.Add(new Dictionary { FieldName = "ProductUnitType", DisplayName = "Product Unit Type" });
