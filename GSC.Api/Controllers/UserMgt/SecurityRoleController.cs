@@ -22,8 +22,6 @@ namespace GSC.Api.Controllers.UserMgt
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IRolePermissionRepository _rolePermissionRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IRoleRepository _securityRoleRepository;
         private readonly IUserRoleRepository _userRoleRepository;
@@ -32,16 +30,12 @@ namespace GSC.Api.Controllers.UserMgt
 
         public SecurityRoleController(IRoleRepository securityRoleRepository,
             IRolePermissionRepository rolePermissionRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
             IUserRoleRepository userRoleRepository,
             IUploadSettingRepository uploadSettingRepository)
         {
             _securityRoleRepository = securityRoleRepository;
             _rolePermissionRepository = rolePermissionRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -91,13 +85,16 @@ namespace GSC.Api.Controllers.UserMgt
                     _uploadSettingRepository.GetImagePath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.RoleIcon, FolderType.RoleIcon.GetDescription());
 
             _securityRoleRepository.Add(securityrole);
-            if (_uow.Save() <= 0) throw new Exception("Creating Occupation failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Occupation failed on save.");
+                return BadRequest(ModelState);
+            }
 
             var i = securityrole.Id;
             var permissionDtos = _rolePermissionRepository.GetByRoleId(i);
 
             return Ok(permissionDtos);
-            //return Ok(securityrole.Id);
         }
 
         // PUT api/<controller>/5
@@ -119,7 +116,11 @@ namespace GSC.Api.Controllers.UserMgt
             }
 
             _securityRoleRepository.Update(securityRole);
-            if (_uow.Save() <= 0) throw new Exception("Updating a Role failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating a Role failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(securityRole.Id);
         }
 

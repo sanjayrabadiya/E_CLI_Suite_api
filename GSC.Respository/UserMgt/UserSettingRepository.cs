@@ -13,14 +13,12 @@ namespace GSC.Respository.UserMgt
 {
     public class UserSettingRepository : GenericRespository<UserSetting>, IUserSettingRepository
     {
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public UserSettingRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+            IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _context = context;
         }
 

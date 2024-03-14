@@ -14,16 +14,9 @@ namespace GSC.Respository.UserMgt
 {
     public class UserRoleRepository : GenericRespository<UserRole>, IUserRoleRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IRolePermissionRepository _rolePermissionRepository;
-
-        public UserRoleRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IRolePermissionRepository rolePermissionRepository)
+        public UserRoleRepository(IGSCContext context)
             : base(context)
         {
-            _rolePermissionRepository = rolePermissionRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public IList<DropDownDto> GetRoleByUserName(string userName)

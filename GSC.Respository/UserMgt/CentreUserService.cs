@@ -20,19 +20,16 @@ namespace GSC.Respository.UserMgt
 {
     public class CentreUserService : ICentreUserService
     {
-        private readonly ILoginPreferenceRepository _loginPreferenceRepository;
         private readonly HttpClient _httpClient;
         private readonly IGSCCaching _gSCCaching;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public CentreUserService(ILoginPreferenceRepository loginPreferenceRepository,
-            HttpClient httpClient,
+        public CentreUserService(HttpClient httpClient,
             IGSCCaching gSCCaching, IUserLoginReportRespository userLoginReportRepository,
             IOptions<EnvironmentSetting> environmentSetting,
             IJwtTokenAccesser jwtTokenAccesser)
         {
-            _loginPreferenceRepository = loginPreferenceRepository;
             _httpClient = httpClient;
             _gSCCaching = gSCCaching;
             _userLoginReportRepository = userLoginReportRepository;
@@ -117,8 +114,7 @@ namespace GSC.Respository.UserMgt
         public async Task GetBlockedUser(string clientUrl)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
-
-            var result = await HttpService.Get<UserOtp>(_httpClient, clientUrl);
+            await HttpService.Get<UserOtp>(_httpClient, clientUrl);
         }
 
         public async Task SentConnectionString(int CompanyID, string clientUrl)
@@ -228,8 +224,7 @@ namespace GSC.Respository.UserMgt
         public async void UpdateFirebaseToken(string clientUrl, string token)
         {
             _httpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", _jwtTokenAccesser.GetHeader("Authorization"));
-
-            var result = await HttpService.Get<int>(_httpClient, $"{clientUrl}/{_jwtTokenAccesser.UserId}/{token}");
+            await HttpService.Get<int>(_httpClient, $"{clientUrl}/{_jwtTokenAccesser.UserId}/{token}");
         }
     }
 }

@@ -34,50 +34,32 @@ namespace GSC.Respository.UserMgt
     public class UserRepository : GenericRespository<User>, IUserRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly ILoginPreferenceRepository _loginPreferenceRepository;
-        private readonly IRefreshTokenRepository _refreshTokenRepository;
         private readonly IUserLoginReportRespository _userLoginReportRepository;
-        private readonly IUserPasswordRepository _userPasswordRepository;
-        private readonly IOptions<JwtSettings> _settings;
-        private readonly Microsoft.Extensions.Configuration.IConfiguration _configuration;
         private readonly IGSCContext _context;
         private readonly ICompanyRepository _companyRepository;
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IRoleRepository _roleRepository;
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly ICentreUserService _centreUserService;
         private readonly IMapper _mapper;
         public UserRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            ILoginPreferenceRepository loginPreferenceRepository,
             IUserLoginReportRespository userLoginReportRepository,
-            IUserPasswordRepository userPasswordRepository,
-            IRefreshTokenRepository refreshTokenRepository,
-            IOptions<JwtSettings> settings,
-            Microsoft.Extensions.Configuration.IConfiguration configuration,
             ICompanyRepository companyRepository,
              IAppSettingRepository appSettingRepository,
              IUploadSettingRepository uploadSettingRepository,
-             IRoleRepository roleRepository,
              IRolePermissionRepository rolePermissionRepository,
              IUserRoleRepository userRoleRepository, IOptions<EnvironmentSetting> environmentSetting, ICentreUserService centreUserService,
              IMapper mapper)
             : base(context)
         {
-            _loginPreferenceRepository = loginPreferenceRepository;
             _userLoginReportRepository = userLoginReportRepository;
-            _userPasswordRepository = userPasswordRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _settings = settings;
-            _refreshTokenRepository = refreshTokenRepository;
-            _configuration = configuration;
             _context = context;
             _companyRepository = companyRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _appSettingRepository = appSettingRepository;
-            _roleRepository = roleRepository;
             _rolePermissionRepository = rolePermissionRepository;
             _userRoleRepository = userRoleRepository;
             _environmentSetting = environmentSetting;
@@ -121,7 +103,7 @@ namespace GSC.Respository.UserMgt
         {
             var result = All.Where(x =>
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.DeletedDate == null && x.UserType != UserMasterUserType.Patient)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.UserName }).OrderBy(o => o.Value) //c.FirstName + " " + c.LastName // changed by Neel for trainer dropdown
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.UserName }).OrderBy(o => o.Value)
                 .ToList();
             return result;
         }
@@ -136,7 +118,7 @@ namespace GSC.Respository.UserMgt
         }
         public LoginResponseDto GetLoginDetails()
         {
-            var roleTokenId = new Guid().ToString();
+            var roleTokenId = Guid.NewGuid().ToString();
             var user = All.Where(x => x.Id == _jwtTokenAccesser.UserId).FirstOrDefault();
 
             var login = new LoginResponseDto
@@ -173,7 +155,7 @@ namespace GSC.Respository.UserMgt
             login.LoginReportId =
                      _userLoginReportRepository.SaveLog("Successfully Login", user.Id, user.UserName, _jwtTokenAccesser.RoleId);
 
-            if (user != null && user.IsFirstTime)
+            if (user.IsFirstTime)
             {
                 user.IsFirstTime = false;
                 _context.Users.Update(user);
