@@ -49,7 +49,7 @@ namespace GSC.Respository.CTMS
                .Select(c => new ResourceByEdit
                {
                    resourceId = (c.ResourceType.ResourceTypes.GetDescription() == "Manpower") ? 1 : 2,
-                   subresource = GetSubResource(c.ResourceType.ResourceSubType.GetDescription()),
+                   subresource = (c.ResourceType.ResourceSubType.GetDescription() == "Permanent") ? 1 : c.ResourceType.ResourceSubType.GetDescription() == "Contract" ? 2 : c.ResourceType.ResourceSubType.GetDescription() == "Consumable" ? 3 : 4,
                    designation = c.ResourceType.Designation.Id,
                    nameOfMaterial = c.ResourceType.Id,
                    rollUser = c.ResourceType.Id,
@@ -64,17 +64,6 @@ namespace GSC.Respository.CTMS
 
             return gridResource;
 
-        }
-        public int GetSubResource(string std)
-        {
-            if (std == "Permanent")
-                return 1;
-            else if (std == "Contract")
-                return 2;
-            else if (std == "Consumable")
-                return 3;
-            else
-                return 4;
         }
         public string ValidationCurrency(int resourceId, int studyplanId)
         {

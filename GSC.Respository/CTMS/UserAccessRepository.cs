@@ -141,7 +141,7 @@ namespace GSC.Respository.CTMS
                 {
                     r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId && x.DeletedDate == null).Select(s => s.ProjectCode).FirstOrDefault();
-                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId && x.DeletedDate == null).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : GetSiteName(c)).FirstOrDefault();
+                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId && x.DeletedDate == null).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName : "").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
                     r.projectCreatedBy = _context.Project.Where(x => x.Id == studyId && x.DeletedDate == null).Select(s => s.CreatedByUser.Id).FirstOrDefault();
                     return r;
@@ -151,11 +151,11 @@ namespace GSC.Respository.CTMS
             {
                 var result = All.Where(x => x.ParentProjectId == studyId && x.ProjectId == siteId).OrderByDescending(x => x.Id).
                 ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
-               return result.Select(r =>
+                return result.Select(r =>
                 {
                     r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
-                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : GetSiteName(c)).FirstOrDefault();
+                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName : "").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
                     r.projectCreatedBy = _context.Project.Where(x => x.Id == studyId && x.DeletedDate == null).Select(s => s.CreatedByUser.Id).FirstOrDefault();
                     return r;
@@ -165,23 +165,16 @@ namespace GSC.Respository.CTMS
             {
                 var result = All.Where(x => x.ParentProjectId == studyId).OrderByDescending(x => x.Id).
                 ProjectTo<UserAccessGridDto>(_mapper.ConfigurationProvider).ToList();
-               return result.Select(r =>
+                return result.Select(r =>
                 {
                     r.Access = r.DeletedDate == null ? "Grant" : "Revoke";
                     r.ProjectCode = _context.Project.Where(x => x.Id == r.ParentProjectId).Select(s => s.ProjectCode).FirstOrDefault();
-                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : GetSiteName(c)).FirstOrDefault();
+                    r.SiteCode = _context.Project.Where(x => x.Id == r.ProjectId).Select(c => c.ProjectCode == null ? c.ManageSite.SiteName : c.ManageSiteId != null ? c.ProjectCode + " - " + c.ManageSite.SiteName : "").FirstOrDefault();
                     r.LoginUser = _jwtTokenAccesser.UserId;
                     r.projectCreatedBy = _context.Project.Where(x => x.Id == studyId && x.DeletedDate == null).Select(s => s.CreatedByUser.Id).FirstOrDefault();
                     return r;
                 }).ToList();
             }
-        }
-        public string GetSiteName(Data.Entities.Master.Project project)
-        {
-            if (project.ManageSiteId != null)
-                return project.ProjectCode + " - " + project.ManageSite.SiteName;
-            else
-                return "";
         }
         //Add by Mitul On 09-11-2023 GS1-I3112 -> If CTMS On By default Add CTMS Access table.
         public void AddProjectRight(int projectId, bool isCtms)
@@ -301,47 +294,19 @@ namespace GSC.Respository.CTMS
                     Id = x.Id,
                     TableName = x.TableName,
                     RecordId = x.RecordId,
-                    Action = getAction(x.Action),
+                    Action = x.Action == "Deleted" ? "Revoke" : x.Action == "Added" ? "Grant" : x.Action == "Modified" ? "Grant" : "",
                     ReasonOth = x.ReasonOth,
                     ReasonName = x.Reason,
                     RevokeOn = x.Action == "Deleted" ? x.CreatedDate : null,
                     RevokeBy = x.Action == "Deleted" ? x.User.UserName : "",
                     RevokeByRole = x.Action == "Deleted" ? x.UserRole : "",
-                    GrantOn = getCreatedDate(x),
-                    GrantBy = getUserName(x),
-                    GrantByRole = getUserRole(x),
+                    GrantOn = x.Action == "Added" ? x.CreatedDate : x.Action == "Modified" ? x.CreatedDate : null,
+                    GrantBy = x.Action == "Added" ? x.User.UserName : x.Action == "Modified" ? x.User.UserName : "",
+                    GrantByRole = x.Action == "Added" ? x.UserRole : x.Action == "Modified" ? x.UserRole : "",
                     TimeZone = x.TimeZone
                 }).ToList();
 
             return result;
-        }
-        public string getAction(string action)
-        {
-            if (action == "Added" || action == "Modified")
-                return "Grant";
-            else
-                return "Revoke";
-        }
-        public DateTime? getCreatedDate(AuditTrail x)
-        {
-            if (x.Action == "Added" || x.Action == "Modified")
-                return x.CreatedDate;
-            else
-                return null;
-        }
-        public string getUserName(AuditTrail x)
-        {
-            if (x.Action == "Added" || x.Action == "Modified")
-                return x.User.UserName;
-            else
-                return "";
-        }
-        public string getUserRole(AuditTrail x)
-        {
-            if (x.Action == "Added" || x.Action == "Modified")
-                return x.UserRole;
-            else
-                return "";
         }
     }
 }
