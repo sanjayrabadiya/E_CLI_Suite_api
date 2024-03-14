@@ -91,7 +91,7 @@ namespace GSC.Api.Controllers.LabManagement
                     ModelState.AddModelError("Message", "Form already configured study wise!");
                     return BadRequest(ModelState);
                 }
-                if (checkConfiguration.Any(x => x.ProjectId == configurationDto.ProjectId))
+                if (checkConfiguration.Exists(x => x.ProjectId == configurationDto.ProjectId))
                 {
                     ModelState.AddModelError("Message", "Form already configured!");
                     return BadRequest(ModelState);
