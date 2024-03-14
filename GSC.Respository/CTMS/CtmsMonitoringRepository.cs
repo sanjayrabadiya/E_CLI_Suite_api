@@ -140,8 +140,13 @@ namespace GSC.Respository.CTMS
                     ModifiedByUser = x.ModifiedByUser.UserName,
                     DeletedByUser = x.DeletedByUser.UserName,
                     ParentId = x.ParentId,
-                    ScreenCode = GetScreenCode(x.StudyLevelForm.Activity.CtmsActivity.ActivityCode)
+                    ScreenCode = x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_001" ? "mnu_feasibility" :
+                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_002" ? "mnu_siteselection" :
+                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_003" ? "mnu_siteinitiate" :
+                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_004" ? "mnu_monitoringvisit" :
+                                 x.StudyLevelForm.Activity.CtmsActivity.ActivityCode == "act_005" ? "mnu_closeout" : ""
                 }).ToList();
+
 
             var StudyLevelFormList = StudyLevelForm.Select(x => new CtmsMonitoringGridDto
             {
@@ -160,7 +165,11 @@ namespace GSC.Respository.CTMS
                 ModifiedByUser = ctmsMonitorings.Find(y => y.StudyLevelFormId == x.Id)?.ModifiedByUser,
                 DeletedByUser = ctmsMonitorings.Find(y => y.StudyLevelFormId == x.Id)?.DeletedByUser,
                 ParentId = ctmsMonitorings.Find(y => y.StudyLevelFormId == x.Id)?.ParentId,
-                ScreenCode = GetScreenCode(x.Activity.CtmsActivity.ActivityCode)
+                ScreenCode = x.Activity.CtmsActivity.ActivityCode == "act_001" ? "mnu_feasibility" :
+                                 x.Activity.CtmsActivity.ActivityCode == "act_002" ? "mnu_siteselection" :
+                                 x.Activity.CtmsActivity.ActivityCode == "act_003" ? "mnu_siteinitiate" :
+                                 x.Activity.CtmsActivity.ActivityCode == "act_004" ? "mnu_monitoringvisit" :
+                                 x.Activity.CtmsActivity.ActivityCode == "act_005" ? "mnu_monitoringvisit" : ""
             }).ToList();
 
             var result = ctmsMonitorings.Count == 0 ? StudyLevelFormList : ctmsMonitorings;
@@ -181,21 +190,6 @@ namespace GSC.Respository.CTMS
             });
 
             return result.FirstOrDefault();
-        }
-        public string GetScreenCode(string ActivityCode)
-        {
-            if (ActivityCode == "act_001")
-                return "mnu_feasibility";
-            else if (ActivityCode == "act_002")
-                return "mnu_siteselection";
-            else if (ActivityCode == "act_003")
-                return "mnu_siteinitiate";
-            else if (ActivityCode == "act_004")
-                return "mnu_siteinitiate";
-            else if (ActivityCode == "act_005")
-                return "mnu_closeout";
-            else
-                return "";
         }
         public string AddStudyPlanTask(CtmsMonitoringDto ctmsMonitoringDto)
         {
