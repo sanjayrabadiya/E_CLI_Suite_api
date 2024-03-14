@@ -16,14 +16,12 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web.Http.ModelBinding;
 
 namespace GSC.Respository.Screening
 {
     public class ScreeningVisitRepository : GenericRespository<ScreeningVisit>, IScreeningVisitRepository
     {
         private readonly IProjectDesignVisitRepository _projectDesignVisitRepository;
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IScreeningVisitHistoryRepository _screeningVisitHistoryRepository;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
         private readonly IRandomizationRepository _randomizationRepository;
@@ -48,7 +46,6 @@ namespace GSC.Respository.Screening
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IScreeningTemplateRepository screeningTemplateRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningProgress screeningProgress,
             IScheduleRuleRespository scheduleRuleRespository,
             IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
@@ -66,7 +63,6 @@ namespace GSC.Respository.Screening
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _screeningProgress = screeningProgress;
             _scheduleRuleRespository = scheduleRuleRespository;
             _impactService = impactService;
@@ -89,7 +85,7 @@ namespace GSC.Respository.Screening
                 DesignOrder = s.ProjectDesignVisit.DesignOrder,
                 ProjectDesignVisitId = s.ProjectDesignVisitId,
                 ScreeningVisitName = (_jwtTokenAccesser.Language != 1 ?
-                s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
+                s.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language).Select(a => a.Display).FirstOrDefault()
                 : s.ScreeningVisitName) +
                 //: s.ProjectDesignVisit.DisplayName) +
                                          Convert.ToString(s.RepeatedVisitNumber == null ? "" : "_" + s.RepeatedVisitNumber),
@@ -102,12 +98,12 @@ namespace GSC.Respository.Screening
             return result;
         }
 
-        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate, double? studyVersion)
+        public void ScreeningVisitSave(ScreeningEntry screeningEntry, int projectDesignPeriodId, int projectDesignVisitId, DateTime visitDate, double? StudyVersion)
         {
             var designVisits = _projectDesignVisitRepository.GetVisitAndTemplateByPeriordId(projectDesignPeriodId);
 
-            designVisits = designVisits.Where(x => (x.StudyVersion == null || x.StudyVersion <= studyVersion) &&
-            (x.InActiveVersion == null || x.InActiveVersion > studyVersion)).ToList();
+            designVisits = designVisits.Where(x => (x.StudyVersion == null || x.StudyVersion <= StudyVersion) &&
+            (x.InActiveVersion == null || x.InActiveVersion > StudyVersion)).ToList();
 
             var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(screeningEntry.ProjectDesignId);
 
@@ -127,20 +123,18 @@ namespace GSC.Respository.Screening
                 {
                     screeningVisit.VisitStartDate = visitDate;
                     _screeningVisitHistoryRepository.SaveByScreeningVisit(screeningVisit, ScreeningVisitStatus.Open, visitDate);
-                    //// send email
-                    //_visitEmailConfigurationRepository.SendEmailForVisitStatus(screeningVisit);
                 }
 
-                var editCheck = editCheckVisit.FirstOrDefault(c => c.ProjectDesignVisitId == r.Id && c.HideDisableType == HideDisableType.Disable);
+                var editCheck = editCheckVisit.Find(c => c.ProjectDesignVisitId == r.Id && c.HideDisableType == HideDisableType.Disable);
                 if (editCheck != null)
                     screeningVisit.HideDisableType = editCheck.HideDisableType;
 
-                editCheck = editCheckVisit.FirstOrDefault(c => c.ProjectDesignVisitId == r.Id && c.HideDisableType == HideDisableType.Hide);
+                editCheck = editCheckVisit.Find(c => c.ProjectDesignVisitId == r.Id && c.HideDisableType == HideDisableType.Hide);
                 if (editCheck != null)
                     screeningVisit.HideDisableType = editCheck.HideDisableType;
 
-                r.Templates.Where(b => (b.StudyVersion == null || b.StudyVersion <= studyVersion)
-                && (b.InActiveVersion == null || b.InActiveVersion > studyVersion)).ToList().ForEach(t =>
+                r.Templates.Where(b => (b.StudyVersion == null || b.StudyVersion <= StudyVersion)
+                && (b.InActiveVersion == null || b.InActiveVersion > StudyVersion)).ToList().ForEach(t =>
                 {
                     var screeningTemplate = new ScreeningTemplate
                     {
@@ -293,8 +287,9 @@ namespace GSC.Respository.Screening
 
             if (scheduleTemplates == null || refrenceSchedule == null) return "";
 
-            var scheduleTemplate = scheduleTemplates.FirstOrDefault(r => r.ProjectDesignVariableId == openVariable.Id);
+            var scheduleTemplate = scheduleTemplates.Find(r => r.ProjectDesignVariableId == openVariable.Id);
             if (scheduleTemplate == null) return "";
+
 
             var scheduleScreeningTemplate = _impactService.GetScreeningTemplateId(refrenceSchedule.FirstOrDefault().ProjectDesignTemplateId, visit.ScreeningEntryId);
             if (scheduleScreeningTemplate == null) return "";
@@ -358,16 +353,16 @@ namespace GSC.Respository.Screening
             var patientStatus = ScreeningPatientStatus.OnTrial;
 
 
-            if (visitStatus.Any(x => x == ScreeningVisitStatus.OnHold))
+            if (visitStatus.Exists(x => x == ScreeningVisitStatus.OnHold))
                 patientStatus = ScreeningPatientStatus.OnHold;
 
-            if (visitStatus.Any(x => x == ScreeningVisitStatus.Withdrawal))
+            if (visitStatus.Exists(x => x == ScreeningVisitStatus.Withdrawal))
                 patientStatus = ScreeningPatientStatus.Withdrawal;
 
-            if (visitStatus.Any(x => x == ScreeningVisitStatus.ScreeningFailure))
+            if (visitStatus.Exists(x => x == ScreeningVisitStatus.ScreeningFailure))
                 patientStatus = ScreeningPatientStatus.ScreeningFailure;
 
-            if (!visitStatus.Any(x => x != ScreeningVisitStatus.Completed))
+            if (!visitStatus.Exists(x => x != ScreeningVisitStatus.Completed))
                 patientStatus = ScreeningPatientStatus.Completed;
 
             _randomizationRepository.PatientStatus(patientStatus, screeningEntryId);
@@ -507,8 +502,7 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetVisitByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
-            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Visit = _context.ScreeningVisit.Include(a => a.ScreeningEntry).Include(a => a.ProjectDesignVisit)
                 .Include(a => a.ScreeningTemplates)
@@ -521,14 +515,14 @@ namespace GSC.Respository.Screening
             if (lockUnlockDDDto.Id != null)
                 Visit = Visit.Where(a => lockUnlockDDDto.Id.Contains(a.ProjectDesignVisit.ProjectDesignPeriodId)).ToList();
 
-            Visit = Visit.Where(a => a.ScreeningTemplates.Where(t => t.IsLocked == lockUnlockDDDto.IsLocked && t.IsHardLocked == lockUnlockDDDto.IsHardLocked).Count() > 0
+            Visit = Visit.Where(a => a.ScreeningTemplates.Exists(t => t.IsLocked == lockUnlockDDDto.IsLocked && t.IsHardLocked == lockUnlockDDDto.IsHardLocked)
                   && a.ScreeningTemplates != null).ToList();
 
             return Visit.GroupBy(x => x.ProjectDesignVisitId).Select(x => new DropDownDto
             {
                 Id = x.Key,
                 // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
-                Value = x.FirstOrDefault().ScreeningVisitName
+                Value = x.First().ScreeningVisitName
             }).Distinct().ToList();
         }
 
@@ -536,7 +530,7 @@ namespace GSC.Respository.Screening
         public List<DashboardQueryStatusDto> GetVisitStatus(int projectId)
         {
             var result = All.Where(x => (x.ScreeningEntry.ProjectId == projectId ||
-           x.ScreeningEntry.Project.ParentProjectId == projectId) && (x.ScreeningEntry.Project.IsTestSite != true) && x.DeletedDate == null).GroupBy(
+           x.ScreeningEntry.Project.ParentProjectId == projectId) && (!x.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null).GroupBy(
                t => new { t.Status }).Select(g => new DashboardQueryStatusDto
                {
                    DisplayName = g.Key.Status.GetDescription(),

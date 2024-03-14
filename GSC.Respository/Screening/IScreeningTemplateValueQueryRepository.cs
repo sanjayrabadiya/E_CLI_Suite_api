@@ -5,7 +5,6 @@ using GSC.Data.Dto.ProjectRight;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
-using GSC.Helper;
 
 namespace GSC.Respository.Screening
 {
