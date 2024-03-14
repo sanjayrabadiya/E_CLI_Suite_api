@@ -35,7 +35,7 @@ namespace GSC.Respository.Screening
             }
             else
             {
-                isFound = !(screeningTemplateEditCheckValue.EditCheckRefValue == sampleResult);
+                isFound = screeningTemplateEditCheckValue.EditCheckRefValue != sampleResult;
                 screeningTemplateEditCheckValue.EditCheckRefValue = sampleResult;
                 screeningTemplateEditCheckValue.ValidateType = validateType;
                 Update(screeningTemplateEditCheckValue);

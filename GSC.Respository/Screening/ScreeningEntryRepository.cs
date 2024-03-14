@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Master;
@@ -114,45 +113,49 @@ namespace GSC.Respository.Screening
                     StudyVersion = t.StudyVersion ?? 1
 
                 }).FirstOrDefault();
-
-            var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);
-
-            bool myReview = false;
-            screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview, siteId);
-
-            if (screeningEntryDto.AttendanceId != null)
+            if (screeningEntryDto != null)
             {
-                var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
-                GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
+                var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(screeningEntryDto.ProjectDesignId);
 
-                var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
+                bool myReview = false;
+                screeningEntryDto.ScreeningVisits = VisitTemplateProcess(screeningEntryDto.Id, workflowlevel, ref myReview, siteId);
 
-                var attendanceListByVolunteer = _attendanceRepository.All.Where(x => x.VolunteerId == (int)attendance.VolunteerId && x.DeletedDate == null).ToList();
+                if (screeningEntryDto.AttendanceId != null)
+                {
+                    var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
+                    GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
 
-                screeningEntryDto.AttendanceList = All.Where(x => attendanceListByVolunteer.Select(y => y.Id).ToList().Contains((int)x.AttendanceId))
-                    .Select(z => new VolunteerAttendanceDto
-                    {
-                        ScreeningEntryId = z.Id,
-                        AttendanceId = (int)z.AttendanceId,
-                        ScreeningNo = z.ScreeningNo,
-                        ScreeningDate = DateTime.Parse(z.ScreeningDate.ToString()).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture)
-                    }).ToList();
+                    var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
+
+                    var attendanceListByVolunteer = _attendanceRepository.All.Where(x => x.VolunteerId == (int)attendance.VolunteerId && x.DeletedDate == null).ToList();
+
+                    screeningEntryDto.AttendanceList = All.Where(x => attendanceListByVolunteer.Select(y => y.Id).ToList().Contains((int)x.AttendanceId))
+                        .Select(z => new VolunteerAttendanceDto
+                        {
+                            ScreeningEntryId = z.Id,
+                            AttendanceId = (int)z.AttendanceId,
+                            ScreeningNo = z.ScreeningNo,
+                            ScreeningDate = DateTime.Parse(z.ScreeningDate.ToString()).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture)
+                        }).ToList();
+                }
+
+                screeningEntryDto.IsElectronicSignature = workflowlevel.IsElectricSignature;
+
+
+                screeningEntryDto.IsMultipleVisits = screeningEntryDto.ScreeningVisits.Select(s => s.ProjectDesignVisitId).Distinct().Count() > 1;
+
+                screeningEntryDto.MyReview = myReview;
+
+                if (workflowlevel.WorkFlowText != null)
+                {
+                    screeningEntryDto.LevelName1 = workflowlevel.WorkFlowText.Where(r => r.LevelNo == 1).Select(t => t.RoleName).FirstOrDefault();
+                    screeningEntryDto.IsSystemQueryUpdate = workflowlevel.IsStartTemplate;
+                }
+
+                return screeningEntryDto;
             }
+            return null;
 
-            screeningEntryDto.IsElectronicSignature = workflowlevel.IsElectricSignature;
-
-
-            screeningEntryDto.IsMultipleVisits = screeningEntryDto.ScreeningVisits.Select(s => s.ProjectDesignVisitId).Distinct().Count() > 1;
-
-            screeningEntryDto.MyReview = myReview;
-
-            if (workflowlevel != null && workflowlevel.WorkFlowText != null)
-            {
-                screeningEntryDto.LevelName1 = workflowlevel.WorkFlowText.Where(r => r.LevelNo == 1).Select(t => t.RoleName).FirstOrDefault();
-                screeningEntryDto.IsSystemQueryUpdate = workflowlevel.IsStartTemplate;
-            }
-
-            return screeningEntryDto;
         }
 
         private List<ScreeningVisitTree> VisitTemplateProcess(int screeningEntryId, WorkFlowLevelDto workflowlevel, ref bool myReview, int? siteId)
@@ -171,17 +174,16 @@ namespace GSC.Respository.Screening
                 x.ScreeningTemplates = templates.Where(a => !excludeTemplate.Contains(a.ProjectDesignTemplateId) && a.ScreeningVisitId == x.ScreeningVisitId && a.ParentId == null).OrderBy(c => Convert.ToDecimal(c.DesignOrderForOrderBy)).ToList();
                 x.ScreeningTemplates.ForEach(v => v.Children = templates.Where(a => a.ParentId == v.Id).OrderBy(x => x.Id).ThenBy(c => c.DesignOrder).ToList());
 
-                x.IsVisitRepeated = x.ParentScreeningVisitId != null ? false :
-                    workflowlevel.IsStartTemplate && x.IsVisitRepeated ? true : false;
+                x.IsVisitRepeated = (x.ParentScreeningVisitId == null) && workflowlevel.IsStartTemplate && x.IsVisitRepeated;
 
-                if (x.VisitStatus == ScreeningVisitStatus.Missed || x.VisitStatus == ScreeningVisitStatus.Missed)
+                if (x.VisitStatus == ScreeningVisitStatus.Missed)
                     x.IsVisitRepeated = false;
-                x.IsLocked = x.ScreeningTemplates.All(x => x.IsLocked);
+                x.IsLocked = x.ScreeningTemplates.TrueForAll(x => x.IsLocked);
             });
 
-            visits = visits.Where(r => r.ScreeningTemplates.Count() > 0).ToList();
+            visits = visits.Where(r => r.ScreeningTemplates.Any()).ToList();
 
-            myReview = templates.Any(x => x.MyReview);
+            myReview = templates.Exists(x => x.MyReview);
 
             return visits;
         }
@@ -232,19 +234,21 @@ namespace GSC.Respository.Screening
                      ProjectDesignId = t.Id,
                      ProjectDesignPeriodId = t.ProjectDesignPeriods.Where(x => x.DeletedDate == null).Select(a => a.Id).OrderByDescending(t => t).FirstOrDefault()
                  }).FirstOrDefault();
-            randomization.PatientStatusId = ScreeningPatientStatus.OnTrial;
-            screeningEntry.ProjectId = randomization.ProjectId;
-            screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDetail.IsTestSite ? "TestingScreening" : "Screening");
-            screeningEntry.EntryType = DataEntryType.Randomization;
-            screeningEntry.RandomizationId = saveRandomizationDto.RandomizationId;
-            screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
-            screeningEntry.ProjectDesignId = projectDesign.ProjectDesignId;
-            screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
-            screeningEntry.StudyVersion = randomization.StudyVersion;
-            screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
+            if (projectDesign != null)
+            {
+                randomization.PatientStatusId = ScreeningPatientStatus.OnTrial;
+                screeningEntry.ProjectId = randomization.ProjectId;
+                screeningEntry.ScreeningNo = _numberFormatRepository.GenerateNumber(projectDetail.IsTestSite ? "TestingScreening" : "Screening");
+                screeningEntry.EntryType = DataEntryType.Randomization;
+                screeningEntry.RandomizationId = saveRandomizationDto.RandomizationId;
+                screeningEntry.ScreeningDate = saveRandomizationDto.VisitDate;
+                screeningEntry.ProjectDesignId = projectDesign.ProjectDesignId;
+                screeningEntry.ProjectDesignPeriodId = projectDesign.ProjectDesignPeriodId;
+                screeningEntry.StudyVersion = randomization.StudyVersion;
+                screeningEntry.ScreeningVisit = new List<ScreeningVisit>();
 
-            _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate, randomization.StudyVersion);
-
+                _screeningVisitRepository.ScreeningVisitSave(screeningEntry, projectDesign.ProjectDesignPeriodId, saveRandomizationDto.ProjectDesignVisitId, saveRandomizationDto.VisitDate, randomization.StudyVersion);
+            }
             screeningEntry.IsTesting = projectDetail.IsTestSite;
             screeningEntry.ScreeningHistory = new ScreeningHistory();
             _randomizationRepository.Update(randomization);
@@ -256,11 +260,12 @@ namespace GSC.Respository.Screening
 
             _screeningVisitRepository.PatientStatus(screeningEntry.Id);
 
-            var screningVisit = screeningEntry.ScreeningVisit.Where(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId).FirstOrDefault();
-
-            _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
-            _context.Save();
-
+            var screningVisit = screeningEntry.ScreeningVisit.FirstOrDefault(x => x.ProjectDesignVisitId == saveRandomizationDto.ProjectDesignVisitId);
+            if (screningVisit != null)
+            {
+                _screeningVisitRepository.FindOpenVisitVarible(screningVisit.ProjectDesignVisitId, screningVisit.Id, saveRandomizationDto.VisitDate, screningVisit.ScreeningEntryId);
+                _context.Save();
+            }
             var isScheduleReference = _projectScheduleRepository.All.Any(x => x.ProjectDesignVisitId == screningVisit.ProjectDesignVisitId && x.DeletedDate == null);
             if (screningVisit != null && isScheduleReference)
             {
@@ -299,27 +304,9 @@ namespace GSC.Respository.Screening
             {
                 if (!string.IsNullOrWhiteSpace(searchParam.TextSearch))
                 {
-                    //var volunterIds = _volunteerRepository.AutoCompleteSearch(searchParam.TextSearch.Trim());
-                    //screeningEntries =
-                    //    screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
                     var volunterIds = BarcodeSearch(searchParam.TextSearch.Trim());
                     screeningEntries = screeningEntries.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
                 }
-
-                //if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
-                //    screeningEntries = screeningEntries.Where(x =>
-                //        x.ScreeningDate.Date >= searchParam.FromDate.Value.Date &&
-                //        x.ScreeningDate.Date <= searchParam.ToDate.Value.Date);
-
-                //if (searchParam.FromDate.HasValue && searchParam.ToDate == null)
-                //    screeningEntries =
-                //        screeningEntries.Where(x => x.ScreeningDate.Date == searchParam.FromDate.Value.Date);
-
-                //if (status > 0)
-                //    screeningEntries = screeningEntries.Where(x => x.Status == searchParam.ScreeningStatus);
-
-                //if (searchParam.IsFitnessFit.HasValue)
-                //    screeningEntries = screeningEntries.Where(x => x.IsFitnessFit == searchParam.IsFitnessFit);
             }
 
             var role = _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_underTesting");
@@ -352,11 +339,6 @@ namespace GSC.Respository.Screening
                 items = items.Where(x => x.VolunteerId == searchParam.Id).ToList();
             }
 
-            //items.ForEach(data =>
-            //{
-            //    data.TemplateList = _screeningTemplateRepository.GetTemplateData(data.ScreeningEntryId, );
-            //});
-
             items.AddRange(attendanceResult);
 
 
@@ -377,8 +359,6 @@ namespace GSC.Respository.Screening
             if (searchParam.ProjectId > 0)
                 items = items.Where(x => x.ProjectId == searchParam.ProjectId).ToList();
 
-            //if (searchParam.VisitId > 0)
-            //    items = items.Where(x => x.ProjectId == searchParam.VisitId).ToList();
 
             return items.OrderByDescending(x => x.ScreeningDate ?? DateTime.MaxValue).ToList();
         }
@@ -456,9 +436,6 @@ namespace GSC.Respository.Screening
             if (searchParam.IsFitnessFit.HasValue)
                 items = items.Where(x => x.IsFitnessFit == (searchParam.IsFitnessFit == true && searchParam.IsFitnessFit != null ? "Yes" : "No")).ToList();
 
-            //if (searchParam.FromDate.HasValue && searchParam.ToDate.HasValue)
-            //    items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date >= searchParam.FromDate.Value.Date &&
-            //        x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
 
             if (searchParam.FromDate.HasValue)
             {
@@ -469,9 +446,6 @@ namespace GSC.Respository.Screening
             {
                 items = items.Where(x => x.AttendanceDate.Date == searchParam.AttendanceDate.Value.Date).ToList();
             }
-
-            //if (searchParam.ToDate.HasValue && searchParam.FromDate == null)
-            //    items = items.Where(x => x.ScreeningDate != null && x.ScreeningDate.Value.Date <= searchParam.ToDate.Value.Date).ToList();
 
             if (searchParam.ProjectId > 0)
                 items = items.Where(x => x.ProjectId == searchParam.ProjectId).ToList();
@@ -522,7 +496,7 @@ namespace GSC.Respository.Screening
                 Id = t.AttendanceId,
                 Value = t.BarcodeString
             }).ToList();
-            if (attendanceIds == null || attendanceIds.Count == 0) return new List<DropDownDto>();
+            if (attendanceIds.Count == 0) return new List<DropDownDto>();
 
             return attendanceIds;
         }
@@ -552,7 +526,6 @@ namespace GSC.Respository.Screening
 
             result.Add(new DropDownDto { Id = (int)ScreeningTemplateStatus.Pending, Value = ScreeningTemplateStatus.Pending.GetDescription(), ExtraData = false });
             result.Add(new DropDownDto { Id = (int)ScreeningTemplateStatus.InProcess, Value = ScreeningTemplateStatus.InProcess.GetDescription(), ExtraData = false });
-            //result.Add(new DropDownDto { Id = (int)ScreeningStatus.Pending, Value = ScreeningStatus.Pending.GetDescription(), ExtraData = false });
 
             var projectDesign = _context.ProjectDesign.FirstOrDefault(x => x.ProjectId == parentProjectId);
 
@@ -572,8 +545,8 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetSubjectByProjecId(int projectId)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
+            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s => s.ParentProjectId).FirstOrDefault();
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
 
             return All.Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == projectId : sites.Contains(a.ProjectId))
                 .Select(x => new DropDownDto
@@ -596,16 +569,14 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetSubjectByProjecIdLocked(int projectId, bool isLock, bool isHardLock, bool isParent)
         {
-            //var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
 
             var subject = All.Include(a => a.Randomization).Include(a => a.Attendance).Include(a => a.ScreeningVisit)
                 .ThenInclude(x => x.ScreeningTemplates).
                 Where(a => a.DeletedDate == null && !isParent ? a.ProjectId == projectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                ).ToList();
 
-            subject = subject.Where(x => x.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == isLock && t.IsHardLocked == isHardLock).Count() > 0 && z.ScreeningTemplates != null).Count() > 0
-                        && x.ScreeningVisit != null).ToList();
+            subject = subject.Where(x => x.ScreeningVisit.Any(z => !(!z.ScreeningTemplates.Exists(t => t.IsLocked == isLock && t.IsHardLocked == isHardLock) || z.ScreeningTemplates == null)) && x.ScreeningVisit != null).ToList();
 
             return subject.Select(x => new DropDownDto
             {
@@ -626,27 +597,24 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetPeriodByProjectIdIsLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
-            // var ParentProject = _context.Project.FirstOrDefault(x => x.Id == lockUnlockDDDto.ChildProjectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Period = All.Include(a => a.ProjectDesignPeriod).Include(a => a.ScreeningVisit).ThenInclude(a => a.ScreeningTemplates)
                  .Where(a => a.DeletedDate == null && lockUnlockDDDto.ChildProjectId > 0 ? a.ProjectId == lockUnlockDDDto.ChildProjectId : sites.Contains(a.ProjectId) // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
                 && (lockUnlockDDDto.SubjectIds == null || lockUnlockDDDto.SubjectIds.Contains(a.Id))).ToList();
 
-            Period = Period.Where(a => a.ScreeningVisit.Where(z => z.ScreeningTemplates.Where(t => t.IsLocked == lockUnlockDDDto.IsLocked && t.IsHardLocked == lockUnlockDDDto.IsHardLocked).Count() > 0
-                  && z.ScreeningTemplates != null).Count() > 0
-                && a.ScreeningVisit != null).ToList();
+            Period = Period.Where(a => a.ScreeningVisit.Any(z => z.ScreeningTemplates.Exists(t => t.IsLocked == lockUnlockDDDto.IsLocked && t.IsHardLocked == lockUnlockDDDto.IsHardLocked) && z.ScreeningTemplates != null) && a.ScreeningVisit != null).ToList();
 
             return Period.GroupBy(x => x.ProjectDesignPeriodId).Select(x => new DropDownDto
             {
                 Id = x.Key,
-                Value = x.FirstOrDefault().ProjectDesignPeriod.DisplayName
+                Value = x.First().ProjectDesignPeriod.DisplayName
             }).Distinct().ToList();
         }
 
         public List<ProjectDropDown> GetParentProjectDropdown(bool isLock, bool isHardLock)
         {
-            if (isLock == false && isHardLock == false)
+            if (!isLock && !isHardLock)
             {
                 var projectDropdowns = _projectRepository.GetParentStaticProjectDropDown();
                 return projectDropdowns;
@@ -682,34 +650,33 @@ namespace GSC.Respository.Screening
 
             var projectDesignVariable = _context.ProjectDesignVariable.Include(x => x.Domain).Where(x => x.Id == screeningTemplateValueDto.ProjectDesignVariableId).FirstOrDefault();
 
-            if (projectDesignVariable.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
+            if (projectDesignVariable != null && projectDesignVariable.Domain.DomainCode == ScreeningFitnessFit.FitnessFit.GetDescription())
             {
                 if (projectDesignVariable.DesignOrder == 3 || projectDesignVariable.DesignOrder == 4 || projectDesignVariable.DesignOrder == 5)
                 {
-                    if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Note.GetDescription())
+                    if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Note.GetDescription() && screeningEntry != null)
                     {
                         screeningEntry.FitnessNotes = screeningTemplateValueDto.Value;
                     }
-                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.ProjectNumber.GetDescription())
+                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.ProjectNumber.GetDescription() && screeningEntry != null && ScreeningHistory != null)
                     {
                         screeningEntry.ProjectNo = screeningTemplateValueDto.Value;
                         ScreeningHistory.ProjectNumber = screeningTemplateValueDto.Value;
                     }
-                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Reason.GetDescription())
+                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Reason.GetDescription() && screeningEntry != null)
                     {
                         screeningEntry.FitnessReason = screeningTemplateValueDto.Value;
-                        //ScreeningHistory.Reason = screeningTemplateValueDto.Value;
                     }
                 }
 
                 if (projectDesignVariable.DesignOrder == 1 || projectDesignVariable.DesignOrder == 2)
                 {
                     var ProjectDesignVariableValue = _context.ProjectDesignVariableValue.Where(x => x.Id == Convert.ToInt32(screeningTemplateValueDto.Value)).FirstOrDefault();
-                    if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.FitnessFit.GetDescription())
+                    if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.FitnessFit.GetDescription() && screeningEntry != null)
                     {
-                        if (ProjectDesignVariableValue != null)
+                        if (ProjectDesignVariableValue != null )
                         {
-                            screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                            screeningEntry.IsFitnessFit = ProjectDesignVariableValue.ValueName == "Yes";
 
                             if (screeningEntry.IsFitnessFit == true)
                             {
@@ -721,12 +688,12 @@ namespace GSC.Respository.Screening
                             screeningEntry.IsFitnessFit = null;
                         }
                     }
-                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription())
+                    else if (projectDesignVariable.VariableCode == ScreeningFitnessFitVariable.Enrolled.GetDescription() && screeningEntry !=null && ScreeningHistory !=null)
                     {
                         if (ProjectDesignVariableValue != null)
                         {
-                            screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
-                            ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes" ? true : false;
+                            screeningEntry.IsEnrolled = ProjectDesignVariableValue.ValueName == "Yes";
+                            ScreeningHistory.Enrolled = ProjectDesignVariableValue.ValueName == "Yes";
 
                             if (screeningEntry.IsEnrolled == true)
                             {

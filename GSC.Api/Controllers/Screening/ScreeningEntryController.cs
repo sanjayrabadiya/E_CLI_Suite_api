@@ -9,11 +9,9 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Respository.Attendance;
-using GSC.Respository.Common;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
 using GSC.Respository.Volunteer;
-using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -71,7 +69,7 @@ namespace GSC.Api.Controllers.Screening
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             if (screeningEntryDto.AttendanceId == 0 || screeningEntryDto.AttendanceId == null)
-                throw new Exception("Not found Attendance");
+                return Ok(new Exception("Not found Attendance"));
 
             var attendance = _attendanceRepository.Find((int)screeningEntryDto.AttendanceId);
 
@@ -98,7 +96,7 @@ namespace GSC.Api.Controllers.Screening
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var result = _screeningEntryRepository.SaveScreeningRandomization(saveRandomizationDto);
             _uow.Save();
-            if (result.Id <= 0) throw new Exception("Creating Screening Entry failed on save.");
+            if (result.Id <= 0) return Ok(new Exception("Creating Screening Entry failed on save."));
 
             return Ok(result.Id);
         }
@@ -133,7 +131,9 @@ namespace GSC.Api.Controllers.Screening
             var temp = _screeningEntryRepository.FindBy(t => t.Id == screeningEntryDto.Id).FirstOrDefault();
 
             var screeningEntry = _mapper.Map<ScreeningEntry>(screeningEntryDto);
+            if(temp != null) { 
             screeningEntry.ProjectId = temp.ProjectId;
+            }
 
             _screeningEntryRepository.Update(screeningEntry);
 

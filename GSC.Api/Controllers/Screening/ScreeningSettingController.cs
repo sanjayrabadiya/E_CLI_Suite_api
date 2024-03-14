@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using GSC.Api.Controllers.Common;
+﻿using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
@@ -15,17 +14,15 @@ namespace GSC.Api.Controllers.Screening
     [ApiController]
     public class ScreeningSettingController : BaseController
     {
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IScreeningSettingRepository _screeningSettingRepository;
         public ScreeningSettingController(
             IScreeningSettingRepository screeningSettingRepository,
             IJwtTokenAccesser jwtTokenAccesser,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow)
         {
             _uow = uow;
-            _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
             _screeningSettingRepository = screeningSettingRepository;
         }
@@ -62,7 +59,7 @@ namespace GSC.Api.Controllers.Screening
                 exists.VisitId= screeningSettingDto.VisitId;
                 _screeningSettingRepository.Update(exists);
             }
-            if (_uow.Save() <= 0) throw new Exception("Set default project failed.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Set default project failed."));
             return Ok();
         }
     }

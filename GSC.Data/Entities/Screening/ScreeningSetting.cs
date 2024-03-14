@@ -1,8 +1,5 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Entities.Screening
 {
@@ -12,6 +9,6 @@ namespace GSC.Data.Entities.Screening
         public int ProjectId { get; set; }
         public int VisitId { get; set; }
         public int RoleId { get; set; }
-        public Data.Entities.Master.Project Project { get; set; }
+        public Master.Project Project { get; set; }
     }
 }

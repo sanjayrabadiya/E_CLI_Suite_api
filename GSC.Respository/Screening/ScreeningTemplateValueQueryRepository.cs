@@ -15,7 +15,6 @@ using GSC.Respository.Configuration;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.Workflow;
 using GSC.Shared.Extension;
-using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -90,8 +89,11 @@ namespace GSC.Respository.Screening
             if (screeningTemplateValueQuery.QueryStatus != QueryStatus.Open && screeningTemplateValueQuery.QueryStatus != QueryStatus.SelfCorrection)
             {
                 var lastQuery = All.Where(x => x.ScreeningTemplateValueId == screeningTemplateValueQuery.ScreeningTemplateValueId).OrderByDescending(t => t.Id).FirstOrDefault();
-                screeningTemplateValueQuery.QueryParentId = lastQuery.Id;
-                screeningTemplateValueQuery.PreviousQueryDate = lastQuery.CreatedDate;
+                if(lastQuery!=null)
+                {
+                    screeningTemplateValueQuery.QueryParentId = lastQuery.Id;
+                    screeningTemplateValueQuery.PreviousQueryDate = lastQuery.CreatedDate;
+                }
             }
 
             screeningTemplateValueQuery.CreatedDate = _jwtTokenAccesser.GetClientDate();
@@ -366,11 +368,11 @@ namespace GSC.Respository.Screening
             var sites = new List<int>();
             if (filters.SiteId != null)
             {
-                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
             }
             else
             {
-                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && !x.IsTestSite).Select(x => x.Id).ToList();
             }
 
             var query = All.Where(x => (filters.SiteId != null ? x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId : sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId))
@@ -544,7 +546,7 @@ namespace GSC.Respository.Screening
             queryData = queryData.Where(x => x.ScreeningTemplateValueId == ParentData.ScreeningTemplateValueId).ToList();
             for (int i = 0; i < queryData.Count; i++)
             {
-                var child = queryData.Where(x => x.QueryParentId == QueryParentId).FirstOrDefault();
+                var child = queryData.Find(x => x.QueryParentId == QueryParentId);
                 if (child != null)
                 {
                     QueryParentId = child.Id;
@@ -569,8 +571,8 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetGenerateQueryBy(int projectId)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
+            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s=>s.ParentProjectId).FirstOrDefault();
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
 
             var queryData = (from query in _context.ScreeningTemplateValueQuery.Include(x => x.ScreeningTemplateValue).ThenInclude(x => x.ScreeningTemplate)
                              .ThenInclude(x => x.ScreeningVisit).ThenInclude(x => x.ScreeningEntry)
@@ -586,15 +588,14 @@ namespace GSC.Respository.Screening
                              }).ToList();
 
             var queryGeneratedBy = queryData.GroupBy(item => new { item.Value })
-                .Select(z => new QueryManagementDto { Id = z.FirstOrDefault().Id, Value = z.Key.Value }).ToList();
+                .Select(z => new QueryManagementDto { Id = z.First().Id, Value = z.Key.Value }).ToList();
             return queryGeneratedBy;
         }
 
         public IList<DropDownDto> GetDataEntryBy(int projectId)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectId).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).ToList().Select(x => x.Id).ToList();
-            var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == projectId).FirstOrDefault().Id;
+            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s=>s.ParentProjectId).FirstOrDefault();
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
 
             var dataEntryBy = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit)
                               .ThenInclude(x => x.ScreeningEntry).Where(t => ParentProject != null ? t.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId
@@ -606,7 +607,7 @@ namespace GSC.Respository.Screening
                                         : c.CreatedByUser.UserName + "(" + c.SecurityRole.RoleShortName + ")"
                               }).ToList();
 
-            return dataEntryBy.GroupBy(c => c.Value).Select(z => new DropDownDto { Id = z.FirstOrDefault().Id, Value = z.Key }).ToList();
+            return dataEntryBy.GroupBy(c => c.Value).Select(z => new DropDownDto { Id = z.First().Id, Value = z.Key }).ToList();
         }
 
         public WorkFlowLevelDto GetReviewLevel(int screeningTemplateId)
@@ -634,7 +635,7 @@ namespace GSC.Respository.Screening
             _workFlowLevelDto.IsNoCRF = templateData.IsNonCRF;
             _workFlowLevelDto.ProjectDesignId = templateData.ProjectDesignId;
             _workFlowLevelDto.ProjectDesignVisitId = templateData.ProjectDesignVisitId;
-            return _workFlowLevelDto; ;
+            return _workFlowLevelDto;
         }
 
         private void QueryAudit(ScreeningTemplateValueQueryDto screeningTemplateValueQueryDto,
@@ -703,7 +704,7 @@ namespace GSC.Respository.Screening
                       Status = t.Key.QueryStatus,
                       DisplayName = t.Key.QueryStatus.GetDescription(),
                       Total = t.Count()
-                  }).ToList().OrderBy(x => x.Status).ToList();
+                  }).OrderBy(x => x.Status).ToList();
 
             var closeQueries = All.Count(r =>
             (r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
@@ -713,7 +714,7 @@ namespace GSC.Respository.Screening
             queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
 
-            if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
+            if (!queries.Exists(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
                 queries.Add(new DashboardQueryStatusDto
                 {
                     DisplayName = QueryStatus.Closed.GetDescription(),
@@ -743,19 +744,19 @@ namespace GSC.Respository.Screening
                                select new DashboardQueryStatusDto
                                {
                                    DisplayName = g.Key.ProjectCode,
-                                   Open = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 1).Count(),
-                                   Answered = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 2).Count(),
-                                   Resolved = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 3).Count(),
-                                   ReOpened = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 4).Count(),
-                                   Closed = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 5).Count(),
-                                   SelfCorrection = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 6).Count(),
-                                   Acknowledge = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 7).Count(),
-                                   Total = g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 1).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 2).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 3).Count()
-                                           + g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 4).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 5).Count() +
-                                           g.Where(x => (int)x.stemplatevaluequery.QueryStatus == 6).Count()
+                                   Open = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 1),
+                                   Answered = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 2),
+                                   Resolved = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 3),
+                                   ReOpened = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 4),
+                                   Closed = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 5),
+                                   SelfCorrection = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 6),
+                                   Acknowledge = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 7),
+                                   Total = g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 1) +
+                                           g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 2) +
+                                           g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 3)
+                                           + g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 4) +
+                                           g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 5) +
+                                           g.Count(x => (int)x.stemplatevaluequery.QueryStatus == 6)
                                }).ToList();
             return queryStatus;
         }
@@ -845,7 +846,7 @@ namespace GSC.Respository.Screening
         {
             var queries = _screeningTemplateValueRepository.All.Where(r =>
             (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
-            (r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite != true) &&
+            (!r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) &&
             r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null && r.QueryStatus == QueryStatus.Open).
                  GroupBy(c => new
                  {

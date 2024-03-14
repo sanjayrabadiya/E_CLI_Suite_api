@@ -1,5 +1,4 @@
-﻿using GSC.Domain.Context;
-using GSC.Respository.Project.Design;
+﻿using GSC.Respository.Project.Design;
 using GSC.Respository.Project.EditCheck;
 using System.Linq;
 
@@ -7,16 +6,14 @@ namespace GSC.Respository.Screening
 {
     public class VersionEffectWithEditCheck : IVersionEffectWithEditCheck
     {
-        private readonly IGSCContext _context;
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IEditCheckDetailRepository _editCheckDetailRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IStudyVersionStatusRepository _studyVersionStatusRepository;
-        public VersionEffectWithEditCheck(IGSCContext context, IStudyVersionRepository studyVersionRepository,
+        public VersionEffectWithEditCheck(IStudyVersionRepository studyVersionRepository,
             IEditCheckDetailRepository editCheckDetailRepository, IScreeningTemplateRepository screeningTemplateRepository,
             IStudyVersionStatusRepository studyVersionStatusRepository)
         {
-            _context = context;
             _studyVersionRepository = studyVersionRepository;
             _editCheckDetailRepository = editCheckDetailRepository;
             _screeningTemplateRepository = screeningTemplateRepository;

@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using ClosedXML.Excel;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
@@ -31,8 +30,6 @@ namespace GSC.Respository.Screening
     public class ScreeningTemplateValueAuditRepository : GenericRespository<ScreeningTemplateValueAudit>,
         IScreeningTemplateValueAuditRepository
     {
-        private static List<string> _months = new List<string>
-            {"UNK", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 6);
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
@@ -111,15 +108,15 @@ namespace GSC.Respository.Screening
             }).OrderByDescending(t => t.CreatedDate).ToList();
         }
 
-        public void GetDataEntryAuditReportHistory(ProjectDatabaseSearchDto search)
+        public void GetDataEntryAuditReportHistory(ProjectDatabaseSearchDto filters)
         {
             var query = All.AsQueryable();
 
             var sites = new List<int>();
-            if (search.SiteId != null)
-                sites = _context.Project.Where(x => x.Id == search.SiteId).ToList().Select(x => x.Id).ToList();
+            if (filters.SiteId != null)
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
             else
-                sites = _context.Project.Where(x => x.ParentProjectId == search.ParentProjectId && x.IsTestSite == false).ToList().Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ParentProjectId && !x.IsTestSite).Select(x => x.Id).ToList();
 
             query = query.Where(x => sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId)
             && x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.DeletedDate == null
@@ -127,19 +124,19 @@ namespace GSC.Respository.Screening
              && x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DeletedDate == null
              && x.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null);
 
-            if (search.SubjectIds != null && search.SubjectIds.Length > 0)
-                query = query.Where(x => search.SubjectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id));
+            if (filters.SubjectIds != null && filters.SubjectIds.Length > 0)
+                query = query.Where(x => filters.SubjectIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id));
 
-            if (search.VisitIds != null && search.VisitIds.Length > 0)
-                query = query.Where(x => search.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId));
+            if (filters.VisitIds != null && filters.VisitIds.Length > 0)
+                query = query.Where(x => filters.VisitIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId));
 
-            if (search.TemplateIds != null && search.TemplateIds.Length > 0)
-                query = query.Where(x => search.TemplateIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId));
+            if (filters.TemplateIds != null && filters.TemplateIds.Length > 0)
+                query = query.Where(x => filters.TemplateIds.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId));
 
-            if (search.VariableIds != null && search.VariableIds.Length > 0)
-                query = query.Where(x => search.VariableIds.Contains(x.ScreeningTemplateValue.ProjectDesignVariableId));
+            if (filters.VariableIds != null && filters.VariableIds.Length > 0)
+                query = query.Where(x => filters.VariableIds.Contains(x.ScreeningTemplateValue.ProjectDesignVariableId));
 
-            GetItems(query, search);
+            GetItems(query, filters);
         }
 
         public void GetItems(IQueryable<ScreeningTemplateValueAudit> query, ProjectDatabaseSearchDto filters)
@@ -312,7 +309,6 @@ namespace GSC.Respository.Screening
             else
             {
                 #region Excel Report Design
-                var repeatdata = new List<RepeatTemplateDto>();
                 using (var workbook = new XLWorkbook())
                 {
                     IXLWorksheet worksheet;
@@ -410,8 +406,6 @@ namespace GSC.Respository.Screening
                             worksheet.Row(j).Cell(10).SetValue(d.NewValue);
                         }
                         #endregion old value
-                        // worksheet.Row(j).Cell(9).SetValue(d.OldValue);
-                        // worksheet.Row(j).Cell(10).SetValue(d.NewValue);
                         worksheet.Row(j).Cell(11).SetValue(d.User);
                         worksheet.Row(j).Cell(12).SetValue(d.Role);
                         worksheet.Row(j).Cell(13).SetValue(d.Reason);
@@ -437,7 +431,6 @@ namespace GSC.Respository.Screening
                     using (var stream = new MemoryStream())
                     {
                         workbook.SaveAs(stream);
-                        var content = stream.ToArray();
 
                         stream.Position = 0;
                         var FileName = "audit_" + DateTime.Now.Ticks + ".xlsx";
@@ -501,14 +494,8 @@ namespace GSC.Respository.Screening
             //Create a page template
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
             PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 24);
-            float doubleHeight = font.Height * 2;
             Color activeColor = Color.FromArgb(44, 71, 120);
             SizeF imageSize = new SizeF(110f, 35f);
-
-            //Locating the logo on the right corner of the Drawing Surface
-            PointF imageLocation = new PointF(doc.Pages[0].GetClientSize().Width - imageSize.Width - 20, 5);
-
-            //PdfImage img = new PdfBitmap("../../Data/logo.png");
 
             ////Draw the image in the Header.
             //header.Graphics.DrawImage(img, imageLocation, imageSize);

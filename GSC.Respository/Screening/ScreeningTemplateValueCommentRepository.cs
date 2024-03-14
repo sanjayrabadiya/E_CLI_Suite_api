@@ -1,18 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Screening
 {
     public class ScreeningTemplateValueCommentRepository :
         GenericRespository<ScreeningTemplateValueComment>, IScreeningTemplateValueCommentRepository
     {
-        public ScreeningTemplateValueCommentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
+        public ScreeningTemplateValueCommentRepository(IGSCContext context)
             : base(context)
         {
         }

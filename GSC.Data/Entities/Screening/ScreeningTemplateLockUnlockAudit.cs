@@ -1,8 +1,4 @@
 ﻿using GSC.Common.Base;
-using GSC.Data.Entities.Project.Design;
-using GSC.Helper;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GSC.Data.Entities.Screening
 {

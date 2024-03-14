@@ -203,8 +203,7 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplateValue = _screeningTemplateValueRepository.Find(screeningTemplateValueQueryDto.ScreeningTemplateValueId);
 
-            if (!screeningTemplateValueQueryDto.IsNa)
-                if (!string.IsNullOrEmpty(value) &&
+            if (!screeningTemplateValueQueryDto.IsNa && !string.IsNullOrEmpty(value) &&
                     (screeningTemplateValueQueryDto.Children == null ||
                      screeningTemplateValueQueryDto.Children.Count == 0) &&
                     screeningTemplateValueQueryDto.Value == screeningTemplateValue.Value)
@@ -233,34 +232,41 @@ namespace GSC.Api.Controllers.Screening
             var screeningVisit = _screeningVisitRepository.All.Where(x => x.Id == screeningTemplate.ScreeningVisitId).
                 Select(t => new { t.ProjectDesignVisitId, t.ParentId }).FirstOrDefault();
 
-            var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningEntryId, screeningTemplate.Id,
-                screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
-                screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, screeningVisit.ProjectDesignVisitId, screeningTemplateValueQueryDto.IsNa, screeningTemplate.Status);
-
-            List<ScheduleCheckValidateDto> scheduleResult = null;
-            if (screeningTemplate.ParentId == null && screeningVisit.ParentId == null && (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
-                screeningTemplateValueQueryDto.CollectionSource == CollectionSources.DateTime ||
-                screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time))
+            if (screeningVisit != null)
             {
+                var editResult = _editCheckImpactRepository.VariableValidateProcess(screeningEntryId, screeningTemplate.Id,
+               screeningTemplateValueQueryDto.IsNa ? "NA" : screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
+               screeningTemplateValue.ProjectDesignVariableId, screeningTemplateValueQueryDto.EditCheckIds, true, screeningTemplate.ScreeningVisitId, screeningVisit.ProjectDesignVisitId, screeningTemplateValueQueryDto.IsNa, screeningTemplate.Status);
 
-                scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId,
-                   screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
-                   screeningTemplateValue.ProjectDesignVariableId, true);
+
+
+                List<ScheduleCheckValidateDto> scheduleResult = null;
+                if (screeningTemplate.ParentId == null && screeningVisit.ParentId == null && (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Date ||
+                    screeningTemplateValueQueryDto.CollectionSource == CollectionSources.DateTime ||
+                    screeningTemplateValueQueryDto.CollectionSource == CollectionSources.Time))
+                {
+
+                    scheduleResult = _scheduleRuleRespository.ValidateByVariable(screeningEntryId, screeningTemplate.ScreeningVisitId,
+                       screeningTemplateValueQueryDto.Value, screeningTemplate.ProjectDesignTemplateId,
+                       screeningTemplateValue.ProjectDesignVariableId, true);
+                }
+
+
+                var result = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
+
+                _screeningVisitRepository.AutomaticStatusUpdate(screeningTemplate.Id);
+
+                //for variable email .prakash chauhan 14-05-2022
+                if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.RadioButton)
+                    _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
+                _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
+                _uow.Save();
+
+                _scheduleTerminate.TerminateScheduleTemplateVisit(screeningTemplate.ProjectDesignTemplateId, screeningEntryId, true);
+
+                return Ok(result);
             }
-
-            var result = _scheduleRuleRespository.VariableResultProcess(editResult, scheduleResult);
-
-            _screeningVisitRepository.AutomaticStatusUpdate(screeningTemplate.Id);
-
-            //for variable email .prakash chauhan 14-05-2022
-            if (screeningTemplateValueQueryDto.CollectionSource == CollectionSources.RadioButton)
-                _screeningTemplateRepository.SendVariableEmail(null, screeningTemplateValueQueryDto);
-            _screeningEntrytRepository.SetFitnessValue(screeningTemplateValue);
-            _uow.Save();
-
-            _scheduleTerminate.TerminateScheduleTemplateVisit(screeningTemplate.ProjectDesignTemplateId, screeningEntryId, true);
-
-            return Ok(result);
+            return Ok();
         }
 
         [HttpPost("AcknowledgeQuery")]
@@ -277,7 +283,7 @@ namespace GSC.Api.Controllers.Screening
             screeningTemplateValueQuery.Value = value;
             _screeningTemplateValueQueryRepository.AcknowledgeQuery(screeningTemplateValueQuery);
 
-            if (_uow.Save() <= 0) throw new Exception("Acknowledge query failed on save!");
+            if (_uow.Save() <= 0) return Ok(new Exception("Acknowledge query failed on save!"));
 
             return Ok(screeningTemplateValueQuery.Id);
         }
@@ -302,7 +308,7 @@ namespace GSC.Api.Controllers.Screening
             screeningTemplateValueQuery.QueryStatus = QueryStatus.Closed;
             _screeningTemplateValueQueryRepository.ReviewQuery(screeningTemplateValue, screeningTemplateValueQuery);
 
-            if (_uow.Save() <= 0) throw new Exception("DeleteQuery failed!");
+            if (_uow.Save() <= 0) return Ok(new Exception("DeleteQuery failed!"));
 
             return Ok();
         }

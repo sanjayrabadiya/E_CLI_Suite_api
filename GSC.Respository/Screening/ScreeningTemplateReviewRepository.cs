@@ -47,15 +47,14 @@ namespace GSC.Respository.Screening
 
         public IList<ReviewDto> GetReviewLevel(int projectId)
         {
-            var ParentProjectId = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ParentProjectId ?? projectId;
-            var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == ParentProjectId).FirstOrDefault().Id;
+            var ParentProjectId = _context.Project.Where(x => x.Id == projectId).Select(s => s.ParentProjectId == null ? projectId : s.ParentProjectId).FirstOrDefault();
+            var ProjectDesignId = _context.ProjectDesign.Where(x => x.ProjectId == ParentProjectId).Select(s=>s.Id).FirstOrDefault();
 
             var reviewdto = (from workflow in _context.ProjectWorkflow.Where(t => t.ProjectDesignId == ProjectDesignId)
                              join workflowlevel in _context.ProjectWorkflowLevel.Where(x => x.DeletedDate == null) on workflow.Id equals workflowlevel.ProjectWorkflowId
                              group workflowlevel by new
                              {
                                  ReviewLevel = workflowlevel.LevelNo,
-                                 // Value = "Reviewed " + workflowlevel.LevelNo.ToString()
                                  Value = workflowlevel.SecurityRole.RoleShortName
                              }
                              into level
@@ -98,7 +97,7 @@ namespace GSC.Respository.Screening
         // added for dynamic column 04/06/2023
         public string ReviewerName(int LevelNo, int screeningtemplateId)
         {
-            var result = All.Where(s => s.ScreeningTemplateId == screeningtemplateId && s.IsRepeat == false && s.ReviewLevel == LevelNo).FirstOrDefault();
+            var result = All.Where(s => s.ScreeningTemplateId == screeningtemplateId && !s.IsRepeat  && s.ReviewLevel == LevelNo).FirstOrDefault();
             if (result != null)
                 return _context.Users.Find(result.CreatedBy).UserName;
             return "";
@@ -114,13 +113,12 @@ namespace GSC.Respository.Screening
                     ReviewerRole=x.ReviewerRole,
                     LevelNo=x.LevelNo,
                     ReviewerName = ReviewerName(x.LevelNo, item.ScreeningTemplateId),
-                    ReviewedDate = All.Where(s => s.ScreeningTemplateId == item.ScreeningTemplateId && s.IsRepeat == false && s.ReviewLevel == x.LevelNo).FirstOrDefault()?.CreatedDate ?? null
+                    ReviewedDate = All.Where(s => s.ScreeningTemplateId == item.ScreeningTemplateId && !s.IsRepeat && s.ReviewLevel == x.LevelNo).FirstOrDefault()?.CreatedDate ?? null
                 }).ToList();
 
                 result.Add(item);
             }
             return result;
         }
-        //
     }
 }

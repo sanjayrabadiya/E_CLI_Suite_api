@@ -1,11 +1,5 @@
 ﻿using GSC.Common.Base;
-using GSC.Data.Entities.Master;
-using GSC.Data.Entities.UserMgt;
-using GSC.Helper;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Text;
 
 namespace GSC.Data.Entities.Screening
 {
@@ -20,7 +14,6 @@ namespace GSC.Data.Entities.Screening
         [ForeignKey("StudyId")] 
         public Master.Project Study { get; set; }
 
-       // public SecurityRole SecurityRole { get; set; }
 
     }
 }

@@ -4,8 +4,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
-using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Audit;
 using GSC.Respository.Common;
@@ -25,8 +23,7 @@ namespace GSC.Api.Controllers.Screening
 
         public ScreeningHistoryController(IScreeningHistoryRepository screeningHistoryRepository,
             IUnitOfWork uow, IMapper mapper,
-            IVolunteerAuditTrailRepository volunteerAuditTrailRepository,
-            IUserRecentItemRepository userRecentItemRepository)
+            IVolunteerAuditTrailRepository volunteerAuditTrailRepository)
         {
             _screeningHistoryRepository = screeningHistoryRepository;
             _volunteerAuditTrailRepository = volunteerAuditTrailRepository;
@@ -52,7 +49,7 @@ namespace GSC.Api.Controllers.Screening
             var screeningHistory = _mapper.Map<ScreeningHistory>(screeningHistoryDto);
             screeningHistory.Id = screeningHistoryDto.Id;
             _screeningHistoryRepository.Update(screeningHistory);
-            if (_uow.Save() <= 0) throw new Exception("Updating screening history failed on update.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating screening history failed on update."));
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerScreening, AuditAction.Inserted,
                screeningHistory.Id, screeningHistoryDto.VolunteerId, screeningHistoryDto.Changes);

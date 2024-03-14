@@ -1,14 +1,11 @@
 ﻿using AutoMapper;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
 using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Respository.Screening
 {
@@ -33,13 +30,11 @@ namespace GSC.Respository.Screening
             history.VisitStatusId = screeningVisitStatus;
             Add(history);
         }
-
         public void Save(ScreeningVisitHistoryDto screeningVisitHistoryDto)
         {
             var history = _mapper.Map<ScreeningVisitHistory>(screeningVisitHistoryDto);
             history.RoleId = _jwtTokenAccesser.RoleId;
             Add(history);
         }
-
     }
 }
