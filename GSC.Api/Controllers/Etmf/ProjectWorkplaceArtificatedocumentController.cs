@@ -29,14 +29,11 @@ namespace GSC.Api.Controllers.Etmf
     [Route("api/[controller]")]
     public class ProjectWorkplaceArtificatedocumentController : BaseController
     {
-        private readonly IHostingEnvironment _hostingEnvironment;
-        public IMemoryCache _cache;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
@@ -46,21 +43,17 @@ namespace GSC.Api.Controllers.Etmf
             IMapper mapper,
             IETMFWorkplaceRepository eTMFWorkplaceRepository,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
-            IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
             IProjectWorkplaceArtificateRepository projectWorkplaceArtificateRepository,
-            IGSCContext context, IMemoryCache cache, IHostingEnvironment hostingEnvironment)
+            IGSCContext context)
         {
-            _hostingEnvironment = hostingEnvironment;
-            _cache = cache;
             _uow = uow;
             _mapper = mapper;
             _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
-            _uploadSettingRepository = uploadSettingRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
@@ -100,7 +93,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
 
             _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
-            if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Document failed on save.");
+                return BadRequest(ModelState);
+            }
 
             _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
             _projectArtificateDocumentApproverRepository.SaveByDocumentIdInApprove(projectWorkplaceArtificatedocument.Id);
@@ -123,7 +120,7 @@ namespace GSC.Api.Controllers.Etmf
                         .Include(x => x.ProjectWorkPlace.EtmfMasterLibrary)
                         .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.EtmfMasterLibrary)
                         .Include(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission)
-                        .Where(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.IsAdd).Any()).ToList();
+                        .Where(x => x.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace.EtmfUserPermission.Any(x => x.UserId == _jwtTokenAccesser.UserId && x.IsAdd)).ToList();
 
                     foreach (var etmfProjectArtifact in etmfProjectArtifactList)
                     {
@@ -209,7 +206,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectWorkplaceArtificatedocument = _mapper.Map<ProjectWorkplaceArtificatedocument>(projectWorkplaceArtificatedocumentDto);
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectWorkplaceArtificatedocument.Id);
         }
 
@@ -230,7 +231,11 @@ namespace GSC.Api.Controllers.Etmf
 
             projectWorkplaceArtificatedocument.DocumentName = docName;
             _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
 
             if (!param.AddHistory)
                 _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
@@ -245,7 +250,11 @@ namespace GSC.Api.Controllers.Etmf
             var document = _projectWorkplaceArtificatedocumentRepository.WordToPdf(id);
 
             _projectWorkplaceArtificatedocumentRepository.Update(document);
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }
@@ -275,7 +284,11 @@ namespace GSC.Api.Controllers.Etmf
                 _projectWorkplaceArtificatedocumentRepository.Update(obj);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Document failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectWorkplaceArtificatedocument.Id);
         }
 
@@ -296,7 +309,7 @@ namespace GSC.Api.Controllers.Etmf
             for (var i = 0; i <= (workplaceFolderDto.Count - 1); i++)
             {
                 var document = _projectWorkplaceArtificatedocumentRepository.AddMovedDocument(workplaceFolderDto[i]);
-                var ProjectArtificate = _projectWorkplaceArtificateRepository.All.Where(x => x.Id == workplaceFolderDto[i].ProjectWorkplaceArtificateId).FirstOrDefault();
+                var ProjectArtificate = _projectWorkplaceArtificateRepository.All.First(x => x.Id == workplaceFolderDto[i].ProjectWorkplaceArtificateId);
                 ProjectArtificate.ParentArtificateId = document.ProjectWorkplaceArtificateId;
 
                 document.Id = 0;
@@ -315,9 +328,13 @@ namespace GSC.Api.Controllers.Etmf
                 _projectWorkplaceArtificateRepository.Update(ProjectArtificate);
                 if (i == 0) firstSaved = document;
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating move document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating move document failed on save.");
+                return BadRequest(ModelState);
+            }
 
-            return Ok(firstSaved.Id);
+            return Ok(firstSaved?.Id);
         }
 
         [HttpPost]
@@ -326,7 +343,7 @@ namespace GSC.Api.Controllers.Etmf
         {
             var history = _projectArtificateDocumentHistoryRepository.Find(id);
             var document = _projectWorkplaceArtificatedocumentRepository.Find(history.ProjectWorkplaceArtificateDocumentId);
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
@@ -395,7 +412,7 @@ namespace GSC.Api.Controllers.Etmf
             CommonArtifactDocumentDto obj = new CommonArtifactDocumentDto();
             var history = _projectArtificateDocumentHistoryRepository.Find(id);
             var document = _projectWorkplaceArtificatedocumentRepository.Find(history.ProjectWorkplaceArtificateDocumentId);
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             var FullPath = Path.Combine(upload.DocumentUrl, _jwtTokenAccesser.CompanyId.ToString(), document.DocPath, history.DocumentName);
             obj.FullDocPath = FullPath;
             return Ok(obj);

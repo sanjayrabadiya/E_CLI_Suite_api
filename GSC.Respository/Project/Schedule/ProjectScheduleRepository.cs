@@ -99,7 +99,6 @@ namespace GSC.Respository.Project.Schedule
 
         public int GetRefVariableValuefromTargetVariable(int projectDesignVariableId)
         {
-            //int id = 0;
             var referenceVariable = (from projectScheduletemp in _context.ProjectScheduleTemplate.Where(x =>
                     x.ProjectDesignVariableId == projectDesignVariableId && x.DeletedBy == null)
                                      join projectSchedule in _context.ProjectSchedule.Where(x => x.DeletedBy == null) on projectScheduletemp
@@ -108,8 +107,6 @@ namespace GSC.Respository.Project.Schedule
                                      {
                                          id = projectSchedule.ProjectDesignVariableId
                                      }).FirstOrDefault();
-
-            //int referenceVariableId = referenceVariable ? referenceVariable.id : null;
             if (referenceVariable == null)
                 return 0;
             return referenceVariable.id;

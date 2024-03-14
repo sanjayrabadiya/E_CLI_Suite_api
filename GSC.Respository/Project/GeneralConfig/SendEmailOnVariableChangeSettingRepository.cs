@@ -14,34 +14,31 @@ namespace GSC.Respository.Project.GeneralConfig
 {
     public class SendEmailOnVariableChangeSettingRepository : GenericRespository<SendEmailOnVariableChangeSetting>, ISendEmailOnVariableChangeSettingRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public SendEmailOnVariableChangeSettingRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public SendEmailOnVariableChangeSettingRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
         }
 
         public List<SendEmailOnVariableChangeSettingGridDto> GetList(int ProjectDesignId)
         {
-            var result= All.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == ProjectDesignId).
+            var result = All.Where(x => x.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Id == ProjectDesignId).
    ProjectTo<SendEmailOnVariableChangeSettingGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
-        result.ForEach(x =>
-            {
-                var CollectionValueList = x.CollectionValue.Split(',').Select(c => int.Parse(c));
-               
-                x.CollectionValue =
-                         string.IsNullOrEmpty(x.CollectionValue)
-                             ? ""
-                             :
-                               string.Join(", ", _context.ProjectDesignVariableValue
-                                                   .Where(t => CollectionValueList.Contains(t.Id)).
-                                                   Select(a => a.ValueName).ToList());
-            });
+            result.ForEach(x =>
+                {
+                    var CollectionValueList = x.CollectionValue.Split(',').Select(c => int.Parse(c));
+
+                    x.CollectionValue =
+                             string.IsNullOrEmpty(x.CollectionValue)
+                                 ? ""
+                                 :
+                                   string.Join(", ", _context.ProjectDesignVariableValue
+                                                       .Where(t => CollectionValueList.Contains(t.Id)).
+                                                       Select(a => a.ValueName).ToList());
+                });
 
             return result;
 

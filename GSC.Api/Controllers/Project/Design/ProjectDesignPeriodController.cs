@@ -25,7 +25,6 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
         private readonly IUnitOfWork _uow;
         private readonly IProjectDesignVisitStatusRepository _projectDesignVisitStatusRepository;
-        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly IVisitLanguageRepository _visitLanguageRepository;
         private readonly ITemplateLanguageRepository _templateLanguageRepository;
         private readonly IVariabeLanguageRepository _variabeLanguageRepository;
@@ -39,7 +38,6 @@ namespace GSC.Api.Controllers.Project.Design
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVisitStatusRepository projectDesignVisitStatusRepository,
-            IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
             ITemplateLanguageRepository templateLanguageRepository,
             IVariabeLanguageRepository variabeLanguageRepository,
             ITemplateNoteLanguageRepository templateNoteLanguageRepository,
@@ -55,7 +53,6 @@ namespace GSC.Api.Controllers.Project.Design
             _mapper = mapper;
             _context = context;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
-            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _visitLanguageRepository = visitLanguageRepository;
             _templateLanguageRepository = templateLanguageRepository;
             _variabeLanguageRepository = variabeLanguageRepository;
@@ -179,7 +176,7 @@ namespace GSC.Api.Controllers.Project.Design
                             });
 
                             var variableLanguage = _variabeLanguageRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignVariableId == variable.Id).ToList();
-                            if (variableLanguage != null)
+                            if (variableLanguage.Any())
                             {
                                 variableLanguage.ForEach(variableLang =>
                                 {
@@ -194,7 +191,7 @@ namespace GSC.Api.Controllers.Project.Design
                         });
                         var templateLanguage = _templateLanguageRepository.All.Where(x => x.ProjectDesignTemplateId == template.Id && x.DeletedDate == null).ToList();
 
-                        if (templateLanguage != null)
+                        if (templateLanguage.Any())
                         {
                             templateLanguage.ForEach(lang =>
                             {
@@ -205,7 +202,7 @@ namespace GSC.Api.Controllers.Project.Design
                         }
 
                         var notes = _projectDesignTemplateNoteRepository.All.Where(x => x.ProjectDesignTemplateId == template.Id && x.DeletedDate == null).Include(x => x.TemplateNoteLanguage).ToList();
-                        if (notes != null)
+                        if (notes.Any())
                         {
                             notes.ForEach(note =>
                             {
@@ -226,7 +223,7 @@ namespace GSC.Api.Controllers.Project.Design
                     });
 
                     _projectDesignVisitRepository.Add(visit);
-                    if (visitLanguages != null)
+                    if (visitLanguages.Any())
                     {
                         visitLanguages.ForEach(l =>
                         {
@@ -252,7 +249,7 @@ namespace GSC.Api.Controllers.Project.Design
 
             _uow.Save();
 
-            return Ok(firstSaved.Id);
+            return Ok(firstSaved?.Id);
         }
     }
 }

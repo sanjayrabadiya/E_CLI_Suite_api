@@ -9,7 +9,7 @@ namespace GSC.Respository.Project.Workflow
     public class ProjectWorkflowLevelRepository : GenericRespository<ProjectWorkflowLevel>,
         IProjectWorkflowLevelRepository
     {
-        public ProjectWorkflowLevelRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public ProjectWorkflowLevelRepository(IGSCContext context) : base(context)
         {
         }
     }

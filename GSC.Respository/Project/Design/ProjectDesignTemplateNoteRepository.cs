@@ -15,15 +15,10 @@ namespace GSC.Respository.Project.Design
 {
     public class ProjectDesignTemplateNoteRepository : GenericRespository<ProjectDesignTemplateNote>, IProjectDesignTemplateNoteRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
-        public ProjectDesignTemplateNoteRepository(IGSCContext context, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public ProjectDesignTemplateNoteRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _mapper = mapper;
         }
 

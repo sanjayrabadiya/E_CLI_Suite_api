@@ -21,21 +21,18 @@ namespace GSC.Respository.Etmf
 {
     public class SyncConfigurationMasterRepository : GenericRespository<SyncConfigurationMaster>, ISyncConfigurationMasterRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectWorkplaceArtificateDocumentReviewRepository _projectWorkplaceArtificateDocumentReviewRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
 
-        public SyncConfigurationMasterRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
+        public SyncConfigurationMasterRepository(IGSCContext context, IMapper mapper, IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
            IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository)
            : base(context)
         {
             _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
@@ -80,40 +77,31 @@ namespace GSC.Respository.Etmf
         public string ValidateMasterConfiguration(SyncConfigurationParameterDto details)
         {
             var validateMaster = ValidateSyncConfigurationMasterDetails(details.ProjectId, details.ReportCode);
-            if (!String.IsNullOrEmpty(validateMaster))
+            if (!string.IsNullOrEmpty(validateMaster))
                 return validateMaster;
 
-            if (details.ProjectId > 0 && details.CountryId > 0 && details.SiteId > 0)
+            WorkPlaceFolder folder;
+
+            if (details.ProjectId > 0)
             {
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Site);
-                if (!String.IsNullOrEmpty(validateDeails))
-                    return validateDeails;
-                return "";
-            }
-            else if (details.ProjectId > 0 && details.SiteId > 0)
-            {
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Site);
-                if (!String.IsNullOrEmpty(validateDeails))
-                    return validateDeails;
-                return "";
-            }
-            else if (details.ProjectId > 0 && details.CountryId > 0)
-            {
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Country);
-                if (!String.IsNullOrEmpty(validateDeails))
-                    return validateDeails;
-                return "";
+                if (details.CountryId > 0 && details.SiteId > 0)
+                    folder = WorkPlaceFolder.Site;
+                else if (details.SiteId > 0)
+                    folder = WorkPlaceFolder.Site;
+                else if (details.CountryId > 0)
+                    folder = WorkPlaceFolder.Country;
+                else
+                    folder = WorkPlaceFolder.Trial;
             }
             else
             {
-                // save on trial
-                var validateDeails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, WorkPlaceFolder.Trial);
-                if (!String.IsNullOrEmpty(validateDeails))
-                    return validateDeails;
-                return "";
+                folder = WorkPlaceFolder.Trial;
             }
-            //return "";
+
+            var validateDetails = ValidateFolderConfiguration(details.ProjectId, details.ReportCode, folder);
+            return string.IsNullOrEmpty(validateDetails) ? "" : validateDetails;
         }
+
 
         public string ValidateSyncConfigurationMasterDetails(int ProjectId, string ReportCode)
         {
@@ -130,8 +118,8 @@ namespace GSC.Respository.Etmf
             int ReportScreenId = _context.ReportScreen.Where(x => x.ReportCode == ReportCode && x.DeletedDate == null).Select(x => x.Id).FirstOrDefault();
             string Version = _context.EtmfProjectWorkPlace.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).Select(x => x.Version).FirstOrDefault();
             List<SyncConfigurationMasterDetails> details = All.Where(x => x.ReportScreenId == ReportScreenId && x.DeletedDate == null && x.Version == Version)
-                .Select(x => x.SyncConfigurationMasterDetails).FirstOrDefault();
-            if (details.Any(x => x.WorkPlaceFolder == folder && x.ZoneMasterLibraryId > 0 && x.SectionMasterLibraryId > 0 && x.ArtificateMasterLbraryId > 0))
+                .Select(x => x.SyncConfigurationMasterDetails).First();
+            if (details.Exists(x => x.WorkPlaceFolder == folder && x.ZoneMasterLibraryId > 0 && x.SectionMasterLibraryId > 0 && x.ArtificateMasterLbraryId > 0))
                 return "";
             else
                 return "please configuration Master details";
@@ -139,26 +127,26 @@ namespace GSC.Respository.Etmf
 
         public string GetsyncConfigurationPath(SyncConfigurationParameterDto details, out int ProjectWorkplaceArtificateId)
         {
-            if (details.ProjectId > 0 && details.CountryId > 0 && details.SiteId > 0)
+            WorkPlaceFolder folder;
+
+            if (details.ProjectId > 0)
             {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Site, out ProjectWorkplaceArtificateId);
-                return path;
-            }
-            else if (details.ProjectId > 0 && details.SiteId > 0)
-            {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Site, out ProjectWorkplaceArtificateId);
-                return path;
-            }
-            else if (details.ProjectId > 0 && details.CountryId > 0)
-            {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Country, out ProjectWorkplaceArtificateId);
-                return path;
+                if (details.CountryId > 0 && details.SiteId > 0)
+                    folder = WorkPlaceFolder.Site;
+                else if (details.SiteId > 0)
+                    folder = WorkPlaceFolder.Site;
+                else if (details.CountryId > 0)
+                    folder = WorkPlaceFolder.Country;
+                else
+                    folder = WorkPlaceFolder.Trial;
             }
             else
             {
-                string path = GetConfigurationPath(details, WorkPlaceFolder.Trial, out ProjectWorkplaceArtificateId);
-                return path;
+                folder = WorkPlaceFolder.Trial;
             }
+
+            string path = GetConfigurationPath(details, folder, out ProjectWorkplaceArtificateId);
+            return path;
         }
 
         private string GetConfigurationPath(SyncConfigurationParameterDto details, WorkPlaceFolder workplaceFolder, out int ProjectWorkplaceArtificateId)
@@ -220,14 +208,14 @@ namespace GSC.Respository.Etmf
             var reportList = _context.SyncConfigurationMaster.Where(q => q.DeletedDate == null)
                 .Include(x => x.ReportScreen).Select(s => new DropDownDto()
                 {
-                    Id=s.ReportScreen.Id,
+                    Id = s.ReportScreen.Id,
                     Code = s.ReportScreen.ReportCode,
                     Value = s.ReportScreen.ReportName,
                 }).Distinct().ToList();
 
             DropDownDto reportScreenDto = new DropDownDto()
             {
-                Id=0,
+                Id = 0,
                 Code = "crf",
                 Value = "CRF"
             };

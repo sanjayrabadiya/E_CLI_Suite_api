@@ -34,7 +34,6 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IProjectDesignTemplateNoteRepository _projectDesignTemplateNoteRepository;
         private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
-        private readonly IProjectDesignVariableRemarksRepository _projectDesignVariableRemarksRepository;
         private readonly ITemplateLanguageRepository _templateLanguageRepository;
         private readonly ITemplateNoteLanguageRepository _templateNoteLanguageRepository;
         private readonly IVariabeLanguageRepository _variableLanguageRepository;
@@ -43,8 +42,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IProjectDesignVariableEncryptRoleRepository _projectDesignVariableEncryptRoleRepository;
         private readonly IProjectDesingTemplateRestrictionRepository _templatePermissioRepository;
         private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        
+
         public ProjectDesignTemplateController(IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
             IVariableTemplateRepository variableTemplateRepository,
@@ -74,7 +72,6 @@ namespace GSC.Api.Controllers.Project.Design
             _projectScheduleTemplateRepository = projectScheduleTemplateRepository;
             _projectDesignVisitStatusRepository = projectDesignVisitStatusRepository;
             _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
-            _projectDesignVariableRemarksRepository = projectDesignVariableRemarksRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
             _templateLanguageRepository = templateLanguageRepository;
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
@@ -85,7 +82,6 @@ namespace GSC.Api.Controllers.Project.Design
             _domainRepository = domainRepository;
             _projectDesignVariableEncryptRoleRepository = projectDesignVariableEncryptRoleRepository;
             _templatePermissioRepository = templatePermissioRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _workflowTemplateRepository = workflowTemplateRepository;
         }
 
@@ -105,11 +101,11 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
         [HttpPost("GetByVisitIds")]
-        public IActionResult GetByVisitIds([FromBody]List<int> visitIds)
+        public IActionResult GetByVisitIds([FromBody] List<int> visitIds)
         {
             if (visitIds.Count <= 0) return BadRequest();
             var projectDesignVisitList = new List<ProjectDesignTemplateDto>();
-            foreach(var id in visitIds)
+            foreach (var id in visitIds)
             {
                 var templates = _projectDesignTemplateRepository.GetTemplateByVisitId(id);
                 templates.ForEach(t =>
@@ -138,7 +134,7 @@ namespace GSC.Api.Controllers.Project.Design
                 ModelState.AddModelError("Message", "Can't edit record!");
                 return BadRequest(ModelState);
             }
-           
+
             var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(projectDesignTemplateDto);
             var validateIWRS = _projectDesignTemplateRepository.ValidationTemplateIWRS(projectDesignTemplate);
             if (!string.IsNullOrEmpty(validateIWRS))
@@ -392,7 +388,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                         if (parentVariable != null)
                         {
-                            var clone = parentVariable.VariableLanguage.Where(x => x.Display == r.Display).FirstOrDefault();
+                            var clone = parentVariable.VariableLanguage.Find(x => x.Display == r.Display);
                             r.Id = clone?.Id ?? 0;
                         }
 
@@ -412,7 +408,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                         if (parentVariable != null)
                         {
-                            var clone = parentVariable.VariableNoteLanguage.Where(x => x.Display == r.Display).FirstOrDefault();
+                            var clone = parentVariable.VariableNoteLanguage.Find(x => x.Display == r.Display);
                             r.Id = clone?.Id ?? 0;
                         }
 
@@ -432,7 +428,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                         if (parentVariable != null)
                         {
-                            var clone = parentVariable.Roles.Where(x => x.RoleId == r.RoleId).FirstOrDefault();
+                            var clone = parentVariable.Roles.FirstOrDefault(x => x.RoleId == r.RoleId);
                             r.Id = clone?.Id ?? 0;
                         }
 
@@ -452,7 +448,7 @@ namespace GSC.Api.Controllers.Project.Design
                         ProjectDesignVariableValue cloneValue = null;
                         if (parentVariable != null)
                         {
-                            cloneValue = parentVariable.Values.Where(x => x.ValueCode == r.ValueCode).FirstOrDefault();
+                            cloneValue = parentVariable.Values.FirstOrDefault(x => x.ValueCode == r.ValueCode);
                             r.Id = cloneValue?.Id ?? 0;
                         }
 
@@ -474,7 +470,7 @@ namespace GSC.Api.Controllers.Project.Design
 
                             if (cloneValue != null)
                             {
-                                var clone = cloneValue.VariableValueLanguage.Where(b => b.LanguageId == x.LanguageId).FirstOrDefault();
+                                var clone = cloneValue.VariableValueLanguage.Find(b => b.LanguageId == x.LanguageId);
                                 x.Id = clone?.Id ?? 0;
                             }
                             // Change by Tinku Mahato (14-04-2022)
@@ -644,9 +640,6 @@ namespace GSC.Api.Controllers.Project.Design
         {
             if (id <= 0) return BadRequest();
             var designTemplate = _projectDesignTemplateRepository.GetTemplate(id);
-
-            // var designTemplateDto = _mapper.Map<ProjectDesignTemplate>(designTemplate);
-
             return Ok(designTemplate);
         }
 
@@ -723,7 +716,11 @@ namespace GSC.Api.Controllers.Project.Design
             var projectDesignTemplate = _mapper.Map<ProjectDesignTemplate>(projectDesignTemplateDto);
             _projectDesignTemplateRepository.Update(projectDesignTemplate);
 
-            if (_uow.Save() <= 0) throw new Exception("setting Failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Setting Failed.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

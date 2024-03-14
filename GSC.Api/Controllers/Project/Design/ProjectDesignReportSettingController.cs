@@ -16,18 +16,10 @@ namespace GSC.Api.Controllers.Project.Design
     public class ProjectDesignReportSettingController : BaseController
     {
         private readonly IProjectDesignReportSettingRepository _projectDesignReportSettingRepository;
-        private readonly IUnitOfWork _uow;
 
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public ProjectDesignReportSettingController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository,
-            IUnitOfWork uow,
-            IJwtTokenAccesser jwtTokenAccesser
-          )
+        public ProjectDesignReportSettingController(IProjectDesignReportSettingRepository projectDesignReportSettingRepository)
         {
             _projectDesignReportSettingRepository = projectDesignReportSettingRepository;
-            _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -38,8 +30,8 @@ namespace GSC.Api.Controllers.Project.Design
             {
                 return BadRequest();
             }
-            var client = _projectDesignReportSettingRepository.FindBy(x=>x.ProjectDesignId == projectDesignId && x.DeletedBy == null).FirstOrDefault();
-            
+            var client = _projectDesignReportSettingRepository.FindBy(x => x.ProjectDesignId == projectDesignId && x.DeletedBy == null).FirstOrDefault();
+
             return Ok(client);
         }
     }

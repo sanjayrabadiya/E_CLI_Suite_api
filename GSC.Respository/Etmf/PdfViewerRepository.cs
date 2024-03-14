@@ -15,15 +15,13 @@ namespace GSC.Respository.Etmf
 {
     public class PdfViewerRepository : GenericRespository<ProjectWorkplaceArtificatedocument>, IPdfViewerRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IProjectWorkplaceArtificatedocumentRepository _projectWorkplaceArtificatedocumentRepository;
         private readonly IProjectArtificateDocumentHistoryRepository _projectArtificateDocumentHistoryRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
         private readonly IProjectWorkplaceSubSecArtificatedocumentRepository _projectWorkplaceSubSecArtificatedocumentRepository;
-        public IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
         public PdfViewerRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser,
            IProjectArtificateDocumentHistoryRepository projectArtificateDocumentHistoryRepository,
             IMemoryCache cache,
             IProjectWorkplaceArtificatedocumentRepository projectWorkplaceArtificatedocumentRepository,
@@ -32,7 +30,6 @@ namespace GSC.Respository.Etmf
            : base(context)
         {
             _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _projectWorkplaceArtificatedocumentRepository = projectWorkplaceArtificatedocumentRepository;
             _projectArtificateDocumentHistoryRepository = projectArtificateDocumentHistoryRepository;
             _projectWorkplaceSubSecArtificatedocumentRepository = projectWorkplaceSubSecArtificatedocumentRepository;
@@ -42,23 +39,11 @@ namespace GSC.Respository.Etmf
 
         public void SaveDocument(Dictionary<string, string> jsonObject, byte[] byteArray)
         {
-            PdfRenderer pdfviewer = new PdfRenderer(_cache);
-
             var docName = jsonObject["documentName"].ToString();
             var fileName = docName.Contains('_') ? docName.Substring(0, docName.LastIndexOf('_')) : docName;
             var docExtendedName = fileName + "_" + DateTime.Now.Ticks + ".pdf";
-            //string documentBase = pdfviewer.GetDocumentAsBase64(jsonObject);
-            //string base64String = documentBase.Split(new string[] { "data:application/pdf;base64," }, StringSplitOptions.None)[1];
-            //if (base64String != null || base64String != string.Empty)
-            //{
-            //    byte[] byteArray = Convert.FromBase64String(base64String);
 
-            //    MemoryStream ms = new MemoryStream(byteArray);
-            //    System.IO.File.WriteAllBytes(jsonObject["documentPath"].ToString() + "/" + docExtendedName, byteArray);
-            //}
-
-            MemoryStream ms = new MemoryStream(byteArray);
-            System.IO.File.WriteAllBytes(jsonObject["documentPath"].ToString() + "/" + docExtendedName, byteArray);
+            System.IO.File.WriteAllBytes($"{jsonObject["documentPath"].ToString()}/{docExtendedName}", byteArray);
 
             var version = Convert.ToDouble(jsonObject["level"]);
             if (version == 6)
@@ -73,7 +58,7 @@ namespace GSC.Respository.Etmf
             }
             else if (version == 5.2)
             {
-                var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.Where(x => x.Id == Convert.ToInt32(jsonObject["artificateDocumentId"])).FirstOrDefault();
+                var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.First(x => x.Id == Convert.ToInt32(jsonObject["artificateDocumentId"]));
                 projectWorkplaceSubSecArtificatedocument.DocumentName = docExtendedName;
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceSubSecArtificatedocument);
                 if (_context.Save() <= 0) throw new Exception("Updating Document failed on save.");
@@ -88,7 +73,6 @@ namespace GSC.Respository.Etmf
             PdfRenderer pdfviewer = new PdfRenderer(_cache);
             MemoryStream stream = new MemoryStream();
 
-            object jsonResult = new object();
             if (jsonData != null && jsonData.ContainsKey("document"))
             {
                 if (bool.Parse(jsonData["isFileName"]))
@@ -109,10 +93,6 @@ namespace GSC.Respository.Etmf
                             byte[] pdfDoc = WebClient.DownloadData(jsonData["document"]);
                             stream = new MemoryStream(pdfDoc);
                         }
-                        //else
-                        //{
-                        //    return Content(jsonData["document"] + " is not found");
-                        //}
                     }
                 }
                 else
@@ -121,7 +101,7 @@ namespace GSC.Respository.Etmf
                     stream = new MemoryStream(bytes);
                 }
             }
-            jsonResult = pdfviewer.Load(stream, jsonData);
+            var jsonResult = pdfviewer.Load(stream, jsonData);
             return jsonResult;
         }
 

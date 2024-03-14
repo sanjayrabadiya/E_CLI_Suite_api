@@ -23,7 +23,6 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVisitEmailConfigurationRolesRepository _visitEmailConfigurationRolesRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
 
         public VisitEmailConfigurationController(
             IVisitEmailConfigurationRepository visitEmailConfigurationRepository,
@@ -36,7 +35,6 @@ namespace GSC.Api.Controllers.Project.Design
             _visitEmailConfigurationRolesRepository = visitEmailConfigurationRolesRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
         }
 
         [HttpGet("{isDeleted:bool?}/{projectDesignVisitId}")]
@@ -83,7 +81,11 @@ namespace GSC.Api.Controllers.Project.Design
                 i++;
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating email visit template failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating email visit template failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(email.Id);
         }
 
@@ -102,7 +104,11 @@ namespace GSC.Api.Controllers.Project.Design
             }
             _visitEmailConfigurationRepository.Update(email);
             _visitEmailConfigurationRolesRepository.updateVisitEmailRole(emailDto);
-            if (_uow.Save() <= 0) throw new Exception("Updating email visit template failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating email visit template failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(email.Id);
         }
 
@@ -116,7 +122,7 @@ namespace GSC.Api.Controllers.Project.Design
             if (record == null)
                 return NotFound();
 
-            if (record != null && record.VisitEmailConfigurationRoles != null)
+            if (record.VisitEmailConfigurationRoles != null)
                 record.VisitEmailConfigurationRoles = record.VisitEmailConfigurationRoles.Where(x => x.DeletedDate == null).ToList();
 
             _visitEmailConfigurationRepository.Delete(record);

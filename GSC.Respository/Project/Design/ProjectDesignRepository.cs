@@ -25,7 +25,7 @@ namespace GSC.Respository.Project.Design
         public IList<DesignDropDownDto> GetProjectByDesignDropDown()
         {
             var projectList = _projectRightRepository.GetProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return new List<DesignDropDownDto>();
             return All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                                   && x.DeletedDate == null
                                   && projectList.Any(c => c == x.ProjectId)

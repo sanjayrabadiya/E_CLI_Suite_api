@@ -25,9 +25,9 @@ namespace GSC.Api.Controllers.Etmf
     [Route("api/[controller]")]
     public class PdfViewerController : BaseController
     {
-        public IMemoryCache _cache;
+        private readonly IMemoryCache _cache;
 
-        private IPdfViewerRepository _pdfViewerRepository;
+        private readonly IPdfViewerRepository _pdfViewerRepository;
         private readonly ICentreUserService _centreUserService;
         private readonly IOptions<EnvironmentSetting> _environmentSetting;
 
@@ -163,7 +163,6 @@ namespace GSC.Api.Controllers.Etmf
         //Post action to import annotations
         public IActionResult ImportAnnotations([FromBody] Dictionary<string, string> jsonObject)
         {
-            PdfRenderer pdfviewer = new PdfRenderer(_cache);
             string jsonResult = string.Empty;
             if (jsonObject != null && jsonObject.ContainsKey("fileName"))
             {
@@ -190,15 +189,11 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var userName = Convert.ToString(jsonObject["userName"]);
                 var result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
-                int CompanyID = Convert.ToInt32(result.CompanyId);
                 _pdfViewerRepository.SetDbConnection(result.ConnectionString);
             }
-            //await _centreUserService.SentConnectionString(CompanyID, $"{_environmentSetting.Value.CentralApi}Company/GetConnectionDetails/{CompanyID}");
-            //_pdfViewerRepository.SaveDocument(jsonObject);
-
+            
             PdfRenderer pdfviewer = new PdfRenderer(_cache);
             string documentBase = pdfviewer.GetDocumentAsBase64(jsonObject);
-            //return Content(documentBase);
             string base64String = documentBase.Split(new string[] { "data:application/pdf;base64," }, StringSplitOptions.None)[1];
 
             byte[] byteArray = Convert.FromBase64String(base64String);

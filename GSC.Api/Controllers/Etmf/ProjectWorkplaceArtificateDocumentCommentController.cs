@@ -23,7 +23,7 @@ namespace GSC.Api.Controllers.Etmf
 
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IProjectArtificateDocumentCommentRepository _projectArtificateDocumentCommentRepository;        
+        private readonly IProjectArtificateDocumentCommentRepository _projectArtificateDocumentCommentRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         public ProjectWorkplaceArtificateDocumentCommentController(IUnitOfWork uow,
             IMapper mapper,
@@ -56,7 +56,11 @@ namespace GSC.Api.Controllers.Etmf
 
             _projectArtificateDocumentCommentRepository.Add(projectArtificateDocumentComment);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Comment failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Comment failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectArtificateDocumentComment.Id);
         }
 
@@ -73,7 +77,8 @@ namespace GSC.Api.Controllers.Etmf
                 projectArtificateDocumentCommentDto.ResponseDate = _jwtTokenAccesser.GetClientDate();
             }
 
-            if (projectArtificateDocumentCommentDto.IsClose) {
+            if (projectArtificateDocumentCommentDto.IsClose)
+            {
                 projectArtificateDocumentCommentDto.CloseBy = _jwtTokenAccesser.UserId;
                 projectArtificateDocumentCommentDto.CloseDate = _jwtTokenAccesser.GetClientDate();
             }
@@ -81,7 +86,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectArtificateDocumentComment = _mapper.Map<ProjectArtificateDocumentComment>(projectArtificateDocumentCommentDto);
             _projectArtificateDocumentCommentRepository.Update(projectArtificateDocumentComment);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Response failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Response failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectArtificateDocumentComment.Id);
         }
 

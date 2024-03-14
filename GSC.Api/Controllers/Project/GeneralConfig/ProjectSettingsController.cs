@@ -52,10 +52,14 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var projectSettings = _mapper.Map<ProjectSettings>(projectSettingsDto);
 
             _projectSettingsRepository.Add(projectSettings);
-            if (_uow.Save() <= 0) throw new Exception("Creating ctms settings failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating ctms settings failed on save.");
+                return BadRequest(ModelState);
+            }
 
             //Add by Mitul ->CTMS on Bydeful Add CTMS Access table
-             _userAccessRepository.AddProjectRight(projectSettingsDto.ProjectId, projectSettingsDto.IsCtms);
+            _userAccessRepository.AddProjectRight(projectSettingsDto.ProjectId, projectSettingsDto.IsCtms);
 
             return Ok(projectSettings.Id);
         }
@@ -70,10 +74,14 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             _projectSettingsRepository.Update(projectSettings);
 
-            if (_uow.Save() <= 0) throw new Exception("Update ctms settings failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update ctms settings failed on save.");
+                return BadRequest(ModelState);
+            }
 
             //Add by Mitul ->CTMS on Bydeful Add CTMS Access table
-             _userAccessRepository.AddProjectRight(projectSettingsDto.ProjectId, projectSettingsDto.IsCtms);
+            _userAccessRepository.AddProjectRight(projectSettingsDto.ProjectId, projectSettingsDto.IsCtms);
             return Ok(projectSettings.Id);
         }
 

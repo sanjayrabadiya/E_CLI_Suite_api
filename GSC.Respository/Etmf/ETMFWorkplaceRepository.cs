@@ -29,10 +29,8 @@ namespace GSC.Respository.Etmf
 {
     public class ETMFWorkplaceRepository : GenericRespository<EtmfProjectWorkPlace>, IETMFWorkplaceRepository
     {
-        EtmfProjectWorkPlace EtmfProjectWorkPlace = new EtmfProjectWorkPlace();
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        List<EtmfProjectWorkPlace> ProjectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRightRepository _projectRightRepository;
@@ -56,9 +54,7 @@ namespace GSC.Respository.Etmf
         private readonly IProjectSubSecArtificateDocumentApproverRepository _projectSubSecArtificateDocumentApproverRepository;
         private readonly IProjectSubSecArtificateDocumentCommentRepository _projectSubSecArtificateDocumentCommentRepository;
         private readonly IProjectSubSecArtificateDocumentHistoryRepository _projectSubSecArtificateDocumentHistoryRepository;
-
-        public string Workplace = "AAAAAA";
-
+        private readonly string Workplace = "AAAAAA";
         public ETMFWorkplaceRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper, IUploadSettingRepository uploadSettingRepository,
@@ -182,37 +178,37 @@ namespace GSC.Respository.Etmf
                 .Select(s => new
                 {
                     Id = s.Key,
-                    Value = s.FirstOrDefault().WorkPlaceFolderName
+                    Value = s.First().WorkPlaceFolderName
                 });
 
             var zones = distRecords.GroupBy(g => g.ZoneId)
                 .Select(s => new
                 {
                     Id = s.Key,
-                    Folder = s.FirstOrDefault().WorkPlaceFolderId,
-                    Value = s.FirstOrDefault().ZoneName
+                    Folder = s.First().WorkPlaceFolderId,
+                    Value = s.First().ZoneName
                 });
 
             var sections = distRecords.GroupBy(g => g.SectionId)
                .Select(s => new
                {
                    Id = s.Key,
-                   Zone = s.FirstOrDefault().ZoneId,
-                   Value = s.FirstOrDefault().SectionName
+                   Zone = s.First().ZoneId,
+                   Value = s.First().SectionName
                });
 
             var subSections = distRecords.GroupBy(g => g.SubSectionId)
               .Select(s => new
               {
                   Id = s.Key,
-                  Section = s.FirstOrDefault().SectionId,
-                  Value = s.FirstOrDefault().SubSectionName
+                  Section = s.First().SectionId,
+                  Value = s.First().SubSectionName
               });
 
             var docList = new List<EtmfSearchModel>();
             distRecords.ForEach(x =>
             {
-                if (x.DocumentList.Count() > 0)
+                if (x.DocumentList.Any())
                 {
                     x.DocumentList.ForEach(m =>
                     {
@@ -304,13 +300,12 @@ namespace GSC.Respository.Etmf
             List<TreeValue> pvList = new List<TreeValue>();
             TreeValue pvListObj = new TreeValue();
 
-
-            pvListObj.Id = projectWorkplaces.FirstOrDefault().Id;
+            pvListObj.Id = projectWorkplaces[0].Id;
             pvListObj.RandomId = Workplace;
-            pvListObj.Text = _context.Project.Where(x => x.Id == projectWorkplaces.FirstOrDefault().ProjectId).FirstOrDefault().ProjectCode;
+            pvListObj.Text = _context.Project.First(x => x.Id == projectWorkplaces[0].ProjectId).ProjectCode;
             pvListObj.Level = 1;
             pvListObj.Item = new List<TreeValue>();
-            pvListObj.ParentMasterId = projectWorkplaces.FirstOrDefault().ProjectId;
+            pvListObj.ParentMasterId = projectWorkplaces[0].ProjectId;
             pvListObj.Icon = "las la-folder-open text-blue eicon";
 
             TreeValue TrialFol = new TreeValue();
@@ -482,14 +477,14 @@ namespace GSC.Respository.Etmf
 
         public TreeValue GetIcon(TreeValue data)
         {
-            data.IconType = data.Item.Any(x => x.IconType == EtmfChartType.Missing) ? EtmfChartType.Missing :
-                            data.Item.Any(x => x.IconType == EtmfChartType.Incomplete) ? EtmfChartType.Incomplete :
-                            data.Item.Any(x => x.IconType == EtmfChartType.PendingReview) ? EtmfChartType.PendingReview :
-                            data.Item.Any(x => x.IconType == EtmfChartType.PendingApprove) ? EtmfChartType.PendingApprove :
-                            data.Item.Any(x => x.IconType == EtmfChartType.Final) ? EtmfChartType.Final :
-                            data.Item.Any(x => x.IconType == EtmfChartType.Expired) ? EtmfChartType.Expired :
-                            data.Item.Any(x => x.IconType == EtmfChartType.PendingFinal) ? EtmfChartType.PendingFinal :
-                            data.Item.Any(x => x.IconType == EtmfChartType.NotRequired) ? EtmfChartType.NotRequired
+            data.IconType = data.Item.Exists(x => x.IconType == EtmfChartType.Missing) ? EtmfChartType.Missing :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.Incomplete) ? EtmfChartType.Incomplete :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.PendingReview) ? EtmfChartType.PendingReview :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.PendingApprove) ? EtmfChartType.PendingApprove :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.Final) ? EtmfChartType.Final :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.Expired) ? EtmfChartType.Expired :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.PendingFinal) ? EtmfChartType.PendingFinal :
+                            data.Item.Exists(x => x.IconType == EtmfChartType.NotRequired) ? EtmfChartType.NotRequired
                             : EtmfChartType.Nothing;
             data.Icon = data.IconType == EtmfChartType.Missing ? "las la-folder-open text-missing eicon" :
                         data.IconType == EtmfChartType.Incomplete ? "las la-folder-open text-incomeplete eicon" :
@@ -603,7 +598,7 @@ namespace GSC.Respository.Etmf
                 pvListArtificateObj.IsView = rights != null && rights.IsView;
                 pvListArtificateObj.IsExport = rights != null && rights.IsExport;
                 pvListArtificateObj.ExpandData = string.Join(",", data, pvListArtificateObj.RandomId);
-                pvListArtificateObj.DocumentCount = Document.Count();
+                pvListArtificateObj.DocumentCount = Document.Count;
 
                 pvListArtificateObj.Icon = Document.Count() == 0 && f.IsNotRequired == false ? "las la-file-alt text-missing eicon" :
                     Document.Where(x => x.ProjectArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
@@ -744,7 +739,6 @@ namespace GSC.Respository.Etmf
                     pvListartifactsubsectionobj.IsExport = rights != null ? rights.IsExport : false;
                     pvListartifactsubsectionobj.ExpandData = string.Join(",", pvListSubSectionObj.ExpandData, pvListSubSectionObj.RandomId);
                     pvListartifactsubsectionobj.DocumentCount = Document.Count();
-                    //pvListartifactsubsectionList.Add(pvListartifactsubsectionobj);
 
                     pvListartifactsubsectionobj.Icon = Document.Count() == 0 && itemartifact.IsNotRequired == false ? "las la-file-alt text-missing eicon" :
                     Document.Where(x => x.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != x.CreatedBy).Count() == 0).Count() != 0 ? "las la-file-alt text-incomeplete eicon" :
@@ -846,19 +840,18 @@ namespace GSC.Respository.Etmf
             return pvListArtificateList;
         }
 
-        public EtmfProjectWorkPlace SaveFolderStructure(Data.Entities.Master.Project projectDetail, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
+        public EtmfProjectWorkPlace SaveFolderStructure(Data.Entities.Master.Project Project, List<ProjectDropDown> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string imageUrl)
         {
-            bool status = false;
             try
             {
                 string projectPath = string.Empty;
                 string countryPath = string.Empty;
                 string sitePath = string.Empty;
                 string trialPath = string.Empty;
-                EtmfProjectWorkPlace = new EtmfProjectWorkPlace();
-                ProjectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
-                EtmfProjectWorkPlace.ProjectId = projectDetail.Id;
-                projectPath = System.IO.Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""), FolderType.Etmf.GetDescription());
+                var etmfProjectWorkPlace = new EtmfProjectWorkPlace();
+                var projectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
+                etmfProjectWorkPlace.ProjectId = Project.Id;
+                projectPath = System.IO.Path.Combine(imageUrl, _jwtTokenAccesser.CompanyId.ToString(), Project.ProjectCode.Replace("/", ""), FolderType.Etmf.GetDescription());
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
                 sitePath = Path.Combine(projectPath, WorkPlaceFolder.Site.GetDescription());
@@ -903,10 +896,10 @@ namespace GSC.Respository.Etmf
                         CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                         var aa = createDBSet(CountryLevelArtificteData);
                         projectWorkplaceobj.ProjectWorkplaceDetails = aa;
-                        ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
+                        projectWorkplaceDetailList.Add(projectWorkplaceobj);
 
                     }
-                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
+                    etmfProjectWorkPlace.ProjectWorkplaceDetails = projectWorkplaceDetailList;
                 }
 
                 if (childProjectList != null && childProjectList.Count > 0)
@@ -931,9 +924,9 @@ namespace GSC.Respository.Etmf
                         CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                         var aa = createDBSet(CountryLevelArtificteData);
                         projectWorkplaceobj.ProjectWorkplaceDetails = aa;
-                        ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
+                        projectWorkplaceDetailList.Add(projectWorkplaceobj);
                     }
-                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
+                    etmfProjectWorkPlace.ProjectWorkplaceDetails = projectWorkplaceDetailList;
                 }
 
                 var TrialLevelArtificteData = artificiteList.Where(x => x.TrailLevelDoc == true).ToList();
@@ -955,17 +948,15 @@ namespace GSC.Respository.Etmf
                     CreateFolder(TrialLevelArtificteData, trialPath);
                     var aa = createDBSet(TrialLevelArtificteData);
                     projectWorkplaceobj.ProjectWorkplaceDetails = aa;
-                    ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
-                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
+                    projectWorkplaceDetailList.Add(projectWorkplaceobj);
+                    etmfProjectWorkPlace.ProjectWorkplaceDetails = projectWorkplaceDetailList;
                 }
 
-                return EtmfProjectWorkPlace;
+                return etmfProjectWorkPlace;
             }
             catch (Exception)
             {
-                status = true;
                 return null;
-
             }
         }
 
@@ -990,9 +981,6 @@ namespace GSC.Respository.Etmf
                 bool ArtifactExists = Directory.Exists(ArtifactPath);
                 if (!ArtifactExists) System.IO.Directory.CreateDirectory(Path.Combine(ArtifactPath));
             }
-
-            var aaa = EtmfProjectWorkPlace;
-
             return 1;
         }
 
@@ -1038,7 +1026,7 @@ namespace GSC.Respository.Etmf
             var childProjectList = _projectRightRepository.GetEtmfChildProjectRightIdList();
             projectList.AddRange(childProjectList);
 
-            if (projectList == null || projectList.Count == 0) return null;
+            if (!projectList.Any()) return new List<ETMFWorkplaceGridDto>();
 
             _projectWorkplaceArtificatedocumentRepository.UpdateDocumentExpiryStatus();
             _projectWorkplaceSubSecArtificatedocumentRepository.UpdateDocumentExpiryStatus();
@@ -1050,8 +1038,8 @@ namespace GSC.Respository.Etmf
 
         public byte[] CreateZipFileOfWorkplace(int Id)
         {
-            var EtmfProjectWorkPlace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), EtmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
+            var etmfProjectWorkPlace = All.Include(x => x.Project).FirstOrDefault(x => x.Id == Id);
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), etmfProjectWorkPlace?.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + ".zip", CompressionLevel.Fastest, true);
             byte[] compressedBytes;
             var zipfolder = FolderPath + ".zip";
@@ -1066,17 +1054,16 @@ namespace GSC.Respository.Etmf
         public void CreateZipFileOfWorkplaceJobMonitoring(int Id)
         {
             var etmfname = DateTime.Now.Ticks;
-            var EtmfProjectWorkPlace = All.Include(x => x.Project).Where(x => x.Id == Id).FirstOrDefault();
-            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), EtmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
+            var etmfProjectWorkPlace = All.Include(x => x.Project).First(x => x.Id == Id);
+            var FolderPath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), etmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""), JobNameType.ETMF.GetDescription());
             ZipFile.CreateFromDirectory(FolderPath, FolderPath + etmfname + ".zip", CompressionLevel.Fastest, true);
-            var zipfolder = FolderPath + ".zip";
 
             JobMonitoring jobMonitoring = new JobMonitoring();
             jobMonitoring.JobName = JobNameType.ETMF;
-            jobMonitoring.JobDescription = EtmfProjectWorkPlace.Project.Id;
+            jobMonitoring.JobDescription = etmfProjectWorkPlace.Project.Id;
             jobMonitoring.JobType = JobTypeEnum.Zip;
             jobMonitoring.JobStatus = JobStatusType.Completed;
-            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), EtmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""));
+            jobMonitoring.FolderPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), _jwtTokenAccesser.CompanyId.ToString(), etmfProjectWorkPlace.Project.ProjectCode.Replace("/", ""));
             jobMonitoring.FolderName = JobNameType.ETMF.GetDescription() + etmfname + ".zip";
             jobMonitoring.SubmittedBy = _jwtTokenAccesser.UserId;
             jobMonitoring.SubmittedTime = _jwtTokenAccesser.GetClientDate();
@@ -1086,14 +1073,13 @@ namespace GSC.Respository.Etmf
 
         public EtmfProjectWorkPlace SaveSiteFolderStructure(Data.Entities.Master.Project projectDetail, List<int> childProjectList, List<DropDownDto> countryList, List<MasterLibraryJoinDto> artificiteList, string docPath)
         {
-            bool status = false;
             try
             {
                 string projectPath = string.Empty;
                 string countryPath = string.Empty;
                 string sitePath = string.Empty;
-                EtmfProjectWorkPlace = All.Where(x => x.ProjectId == projectDetail.Id).FirstOrDefault();
-                ProjectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
+                var etmfProjectWorkPlace = All.First(x => x.ProjectId == projectDetail.Id);
+                var projectWorkplaceDetailList = new List<EtmfProjectWorkPlace>();
                 projectPath = Path.Combine(docPath, _jwtTokenAccesser.CompanyId.ToString(), projectDetail.ProjectCode.Replace("/", ""));
                 //Set Path of country, site, trial
                 countryPath = Path.Combine(projectPath, WorkPlaceFolder.Country.GetDescription());
@@ -1119,7 +1105,7 @@ namespace GSC.Respository.Etmf
                     foreach (var coountryp in countryList)
                     {
                         EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
-                        projectWorkplaceobj.EtmfProjectWorkPlaceId = EtmfProjectWorkPlace.Id;
+                        projectWorkplaceobj.EtmfProjectWorkPlaceId = etmfProjectWorkPlace.Id;
                         projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Country;
                         projectWorkplaceobj.ItemId = coountryp.Id;
                         projectWorkplaceobj.ItemName = coountryp.Value;
@@ -1137,14 +1123,14 @@ namespace GSC.Respository.Etmf
 
                             // Get CountryLevel Artificates
 
-                            var CountryLevelArtificteData = artificiteList.Where(x => x.CountryLevelDoc == true).ToList();
+                            var CountryLevelArtificteData = artificiteList.Where(x => x.CountryLevelDoc).ToList();
                             CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                             var aa = createDBSet(CountryLevelArtificteData);
                             projectWorkplaceobj.ProjectWorkplaceDetails = aa;
-                            ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
+                            projectWorkplaceDetailList.Add(projectWorkplaceobj);
                         }
                     }
-                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
+                    etmfProjectWorkPlace.ProjectWorkplaceDetails = projectWorkplaceDetailList;
                 }
 
                 if (childProjectList != null && childProjectList.Count > 0)
@@ -1163,10 +1149,10 @@ namespace GSC.Respository.Etmf
                                         Code = c.ProjectCode,
                                         IsStatic = c.IsStatic,
                                         ParentProjectId = c.ParentProjectId ?? 0
-                                    }).OrderBy(o => o.Value).FirstOrDefault();
+                                    }).OrderBy(o => o.Value).First();
 
                         EtmfProjectWorkPlace projectWorkplaceobj = new EtmfProjectWorkPlace();
-                        projectWorkplaceobj.EtmfProjectWorkPlaceId = EtmfProjectWorkPlace.Id;
+                        projectWorkplaceobj.EtmfProjectWorkPlaceId = etmfProjectWorkPlace?.Id ?? 0;
                         projectWorkplaceobj.WorkPlaceFolderId = (int)WorkPlaceFolder.Site;
                         projectWorkplaceobj.ItemId = childp.Id;
                         projectWorkplaceobj.ItemName = childp.Value;
@@ -1180,22 +1166,21 @@ namespace GSC.Respository.Etmf
                         {
                             Directory.CreateDirectory(Path.Combine(sitePath, childp.Value));
 
-                            var CountryLevelArtificteData = artificiteList.Where(x => x.SiteLevelDoc == true).ToList();
+                            var CountryLevelArtificteData = artificiteList.Where(x => x.SiteLevelDoc).ToList();
                             string CountryNameCreatePath = Path.Combine(sitePath, childp.Value);
                             CreateFolder(CountryLevelArtificteData, CountryNameCreatePath);
                             var aa = createDBSet(CountryLevelArtificteData);
                             projectWorkplaceobj.ProjectWorkplaceDetails = aa;
-                            ProjectWorkplaceDetailList.Add(projectWorkplaceobj);
+                            projectWorkplaceDetailList.Add(projectWorkplaceobj);
                         }
                     }
-                    EtmfProjectWorkPlace.ProjectWorkplaceDetails = ProjectWorkplaceDetailList;
+                    etmfProjectWorkPlace.ProjectWorkplaceDetails = projectWorkplaceDetailList;
                 }
 
-                return EtmfProjectWorkPlace;
+                return etmfProjectWorkPlace;
             }
             catch (Exception)
             {
-                status = true;
                 return null;
             }
         }
@@ -1360,7 +1345,7 @@ namespace GSC.Respository.Etmf
                                             obj.SectionName = e.EtmfMasterLibrary.SectionName;
                                             obj.ArtificateName = artificate.Text;
                                             obj.DocumentName = item.DocumentName.Contains('_') ? item.DocumentName.Substring(0, item.DocumentName.LastIndexOf('_')) : item.DocumentName;
-                                            obj.ReviewerApproverName = _context.ProjectArtificateDocumentApprover.Where(v => v.ProjectWorkplaceArtificatedDocumentId == item.Id && (v.IsApproved==null || v.IsApproved==false) && v.UserId != item.CreatedBy && v.DeletedDate == null).Join(_context.Users, x => x.UserId, y => y.Id, (x, y) => new { y.FirstName, y.LastName }).ToList().Select(s => s.FirstName + " " + s.LastName).Aggregate((a, b) => a + ", " + b);
+                                            obj.ReviewerApproverName = _context.ProjectArtificateDocumentApprover.Where(v => v.ProjectWorkplaceArtificatedDocumentId == item.Id && (v.IsApproved == null || v.IsApproved == false) && v.UserId != item.CreatedBy && v.DeletedDate == null).Join(_context.Users, x => x.UserId, y => y.Id, (x, y) => new { y.FirstName, y.LastName }).ToList().Select(s => s.FirstName + " " + s.LastName).Aggregate((a, b) => a + ", " + b);
                                             result.Add(obj);
                                         }
                                     }
@@ -1424,7 +1409,7 @@ namespace GSC.Respository.Etmf
                                 foreach (var artificate in pvListArtificateList.Where(x => x.Level == 5.1).ToList())
                                 {
                                     foreach (var subData in artificate?.Item)
-                                    {                                        
+                                    {
                                         if (chartType.Value == EtmfChartType.Incomplete)
                                         {
                                             var documents = _context.ProjectWorkplaceSubSecArtificatedocument.Where(z => z.DeletedDate == null && z.ProjectWorkplaceSubSectionArtifactId == artificate.ArtificateId && z.ProjectSubSecArtificateDocumentReview.Where(y => y.DeletedDate == null && y.UserId != z.CreatedBy).Count() == 0);

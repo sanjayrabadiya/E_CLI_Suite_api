@@ -91,22 +91,23 @@ namespace GSC.Respository.Etmf
 
             Worksplace.ForEach(w =>
             {
-                w.IsAdd = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsAdd);
-                w.IsEdit = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsEdit);
-                w.IsDelete = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsDelete);
-                w.IsView = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsView);
-                w.IsExport = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).Count() == 0 ? false : ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId).All(x => x.IsExport);
+                var workplaceDetails = ProjectWorkplaceDetail.Where(x => x.ParentWorksplaceFolderId == w.ItemId);
+                w.IsAdd = workplaceDetails.All(x => x.IsAdd);
+                w.IsEdit = workplaceDetails.All(x => x.IsEdit);
+                w.IsDelete = workplaceDetails.All(x => x.IsDelete);
+                w.IsView = workplaceDetails.All(x => x.IsView);
+                w.IsExport = workplaceDetails.All(x => x.IsExport);
                 w.IsAll = w.IsAdd && w.IsEdit && w.IsDelete && w.IsView && w.IsExport;
             });
 
             ProjectWorkplaceDetail.AddRange(Worksplace);
 
-            return ProjectWorkplaceDetail.OrderBy(item => item.ItemId == 3 ? 1 : item.ItemId == 1 ? 2 : 2).ToList();
+            return ProjectWorkplaceDetail.OrderBy(item => item.ItemId == 3 ? 1 : 2).ToList();
         }
 
         public int Save(List<EtmfUserPermission> EtmfUserPermission)
         {
-            var userId = EtmfUserPermission.First().UserId;
+            var userId = EtmfUserPermission[0].UserId;
 
             EtmfUserPermission = EtmfUserPermission.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
             var ProjectWorksplace = EtmfUserPermission.Where(t => t.IsAdd || t.IsEdit || t.IsDelete || t.IsView || t.IsExport)
@@ -130,21 +131,26 @@ namespace GSC.Respository.Etmf
         public void updatePermission(List<EtmfUserPermissionDto> EtmfUserPermissionDto)
         {
             var backupPermission = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0).ToList();
-            var userId = EtmfUserPermissionDto.First().UserId;
+            var userId = EtmfUserPermissionDto[0].UserId;
 
             var DeleteAll = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0 && (!x.IsAdd && !x.IsEdit && !x.IsDelete && !x.IsView && !x.IsExport)).ToList();
             var UpdateDeleteAll = DeleteAll.Where(t => t.EtmfUserPermissionId > 0).ToList();
 
             foreach (var item in UpdateDeleteAll)
             {
-                var existing = All.Where(t => t.DeletedDate == null && t.UserId == userId && t.ProjectWorkplaceDetailId == item.ProjectWorkplaceDetailId).FirstOrDefault();
-                if (existing.IsAdd == item.IsAdd && existing.IsEdit == item.IsEdit && existing.IsDelete == item.IsDelete
-                    && existing.IsView == item.IsView && existing.IsExport == item.IsExport) { }
+                var existing = All.FirstOrDefault(t => t.DeletedDate == null && t.UserId == userId && t.ProjectWorkplaceDetailId == item.ProjectWorkplaceDetailId);
+
+                if (existing != null && existing.IsAdd == item.IsAdd && existing.IsEdit == item.IsEdit && existing.IsDelete == item.IsDelete
+                    && existing.IsView == item.IsView && existing.IsExport == item.IsExport)
+                {
+                    // No action needed
+                }
                 else
                 {
                     Delete(existing);
                     _context.Save();
                 }
+
             }
 
             EtmfUserPermissionDto = EtmfUserPermissionDto.Where(x => x.ProjectWorkplaceDetailId > 0 && (x.IsAdd || x.IsEdit || x.IsDelete || x.IsView || x.IsExport)).ToList();
@@ -168,17 +174,16 @@ namespace GSC.Respository.Etmf
             var ToUpdate = EtmfUserPermissionDto.Where(t => t.EtmfUserPermissionId > 0).ToList();
             foreach (var item in ToUpdate)
             {
-                var existing = All.Where(t => t.DeletedDate == null && t.UserId == userId && t.ProjectWorkplaceDetailId == item.ProjectWorkplaceDetailId).FirstOrDefault();
+                var existing = All.First(t => t.DeletedDate == null && t.UserId == userId && t.ProjectWorkplaceDetailId == item.ProjectWorkplaceDetailId);
                 if (existing.IsAdd == item.IsAdd && existing.IsEdit == item.IsEdit && existing.IsDelete == item.IsDelete
-                    && existing.IsView == item.IsView && existing.IsExport == item.IsExport) { }
+                    && existing.IsView == item.IsView && existing.IsExport == item.IsExport)
+                {
+                    // No action needed
+                }
                 else
                 {
-                    // Delete old record & add same data to table
-                    //existing.DeletedBy = _jwtTokenAccesser.UserId;
-                    //existing.DeletedDate = DateTime.Now;
                     Delete(existing);
                     _context.Save();
-
                     var ToAddPermission = new EtmfUserPermission();
                     ToAddPermission.Id = 0;
                     ToAddPermission.UserId = existing.UserId;
@@ -211,7 +216,7 @@ namespace GSC.Respository.Etmf
                 {
                     var reviewers = _projectWorkplaceArtificateDocumentReviewRepository.All
                         .Include(x => x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
-                        .Where(x => x.UserId == permission.UserId && x.IsReviewed == false
+                        .Where(x => x.UserId == permission.UserId && !x.IsReviewed
                         && x.ProjectWorkplaceArtificatedDocument.ProjectWorkplaceArtificate.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace
                         .Id == permission.ProjectWorkplaceDetailId && x.DeletedDate == null).ToList();
 
@@ -222,7 +227,7 @@ namespace GSC.Respository.Etmf
 
                     var subDocumentReviewers = _projectSubSecArtificateDocumentReviewRepository.All
                        .Include(x => x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace)
-                       .Where(x => x.UserId == permission.UserId && x.IsReviewed == false
+                       .Where(x => x.UserId == permission.UserId && !x.IsReviewed
                        && x.ProjectWorkplaceSubSecArtificateDocument.ProjectWorkplaceSubSectionArtifact.ProjectWorkPlace.ProjectWorkPlace.ProjectWorkPlace
                        .Id == permission.ProjectWorkplaceDetailId && x.DeletedDate == null).ToList();
 
@@ -279,7 +284,7 @@ namespace GSC.Respository.Etmf
 
         public List<EtmfUserPermissionDto> GetEtmfPermissionData(int ProjectId)
         {
-            var ParentProject = _context.Project.Where(x => x.Id == ProjectId).FirstOrDefault().ParentProjectId;
+            var ParentProject = _context.Project.Where(x => x.Id == ProjectId).First().ParentProjectId;
             // get etmf rights list
             var result = All
                 .Where(x => (ParentProject == null ? x.ProjectWorkplaceDetail.ProjectId == ProjectId && (x.ProjectWorkplaceDetail.WorkPlaceFolderId == 3 || x.ProjectWorkplaceDetail.WorkPlaceFolderId == 1)
@@ -295,11 +300,11 @@ namespace GSC.Respository.Etmf
 
             result = result.OrderByDescending(x => x.Id).GroupBy(x => x.UserId).Select(x => new EtmfUserPermissionDto
             {
-                Id = x.FirstOrDefault().Id,
+                Id = x.First().Id,
                 UserId = x.Key,
-                IsRevoke = x.All(y => y.DeletedDate != null) ? true : false,
-                UserName = x.FirstOrDefault().UserName,
-                CreatedDate = x.FirstOrDefault().CreatedDate
+                IsRevoke = x.All(y => y.DeletedDate != null),
+                UserName = x.First().UserName,
+                CreatedDate = x.First().CreatedDate
             }).OrderByDescending(x => x.Id).ToList();
 
             return result;
@@ -381,7 +386,7 @@ namespace GSC.Respository.Etmf
 
         public List<DropDownDto> GetUsersByEtmfRights(int ProjectId, int ProjectDetailsId)
         {
-            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && (x.IsReviewDone == true || x.CreatedBy == x.UserId) && x.DeletedDate == null).ToList();
+            var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == ProjectId && (x.IsReviewDone || x.CreatedBy == x.UserId) && x.DeletedDate == null).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
@@ -401,15 +406,14 @@ namespace GSC.Respository.Etmf
                 if (etmfUserPermissions != null)
                 {
                     var obj = new DropDownDto();
-                    //obj.Id = etmfUserPermissions.Id;
                     obj.Id = x.UserId;
                     obj.Value = x.Name;
-                    obj.ExtraData = etmfUserPermissions != null ? etmfUserPermissions.IsDelete || etmfUserPermissions.IsView : false;
+                    obj.ExtraData = (etmfUserPermissions.IsDelete || etmfUserPermissions.IsView);
                     result.Add(obj);
                 }
             });
 
-            return result.Where(x => Convert.ToBoolean(x.ExtraData) == true).ToList();
+            return result.Where(x => Convert.ToBoolean(x.ExtraData)).ToList();
         }
     }
 }

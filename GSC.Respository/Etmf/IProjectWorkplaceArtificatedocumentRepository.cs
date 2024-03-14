@@ -18,7 +18,7 @@ namespace GSC.Respository.Etmf
         List<CommonArtifactDocumentModel> GetDocumentList(int id);
         string Duplicate(ProjectWorkplaceArtificatedocument objSave, ProjectWorkplaceArtificatedocumentDto objSaveDto);
         ProjectWorkplaceArtificatedocument AddDocument(ProjectWorkplaceArtificatedocumentDto projectWorkplaceArtificatedocumentDto);
-        ProjectWorkplaceArtificatedocument AddMovedDocument(WorkplaceFolderDto item);
+        ProjectWorkplaceArtificatedocument AddMovedDocument(WorkplaceFolderDto data);
         List<DropDownDto> GetEtmfCountrySiteDropdown(int projectId, int folderId);
         List<DropDownDto> GetEtmfZoneDropdown(int projectId);
         List<DropDownDto> GetEtmfSectionDropdown(int zoneId);

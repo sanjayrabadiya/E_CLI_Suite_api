@@ -24,16 +24,13 @@ namespace GSC.Api.Controllers.Etmf
     {
 
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IProjectWorkplaceSectionRepository _projectWorkplaceSectionRepository;
 
-        public ProjectWorkplaceSectionController(IProjectRepository projectRepository,
-            IUnitOfWork uow,
+        public ProjectWorkplaceSectionController(
             IMapper mapper,
             IProjectWorkplaceSectionRepository projectWorkplaceSectionRepository
             )
         {
-            _uow = uow;
             _mapper = mapper;
             _projectWorkplaceSectionRepository = projectWorkplaceSectionRepository;
         }
@@ -50,7 +47,7 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var projectWorkplaceSection = _projectWorkplaceSectionRepository.FindByInclude(x => x.Id == id, x => x.EtmfMasterLibrary).FirstOrDefault();
+            var projectWorkplaceSection = _projectWorkplaceSectionRepository.FindByInclude(x => x.Id == id, x => x.EtmfMasterLibrary).First();
             var projectWorkplaceSectionDto = _mapper.Map<EtmfProjectWorkPlaceDto>(projectWorkplaceSection);
             projectWorkplaceSectionDto.SectionName = projectWorkplaceSection.EtmfMasterLibrary.SectionName;
             return Ok(projectWorkplaceSectionDto);

@@ -20,7 +20,7 @@ namespace GSC.Api.Controllers.Project.Schedule
         private readonly IScheduleTerminateDetailRepository _scheduleTerminateDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        
+
 
         public ScheduleTerminateDetailController(IMapper mapper, IUnitOfWork uow, IJwtTokenAccesser jwtTokenAccesser, IScheduleTerminateDetailRepository scheduleTerminateDetailRepository)
         {
@@ -44,7 +44,11 @@ namespace GSC.Api.Controllers.Project.Schedule
             var terminate = _mapper.Map<ScheduleTerminateDetail>(terminateDto);
 
             _scheduleTerminateDetailRepository.Add(terminate);
-            if (_uow.Save() <= 0) throw new Exception("Creating Schedule Terminate Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Schedule Terminate Details failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(terminate.Id);
         }
 
@@ -63,14 +67,22 @@ namespace GSC.Api.Controllers.Project.Schedule
             terminate.DeletedDate = _jwtTokenAccesser.GetClientDate();
             terminate.DeletedBy = _jwtTokenAccesser.UserId;
             _scheduleTerminateDetailRepository.Update(terminate);
-            if (_uow.Save() <= 0) throw new Exception("Updating Schedule Terminate Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Schedule Terminate Details failed on save.");
+                return BadRequest(ModelState);
+            }
 
             var terminateAdd = _mapper.Map<ScheduleTerminateDetail>(terminateDto);
             terminateAdd.Id = 0;
             terminateAdd.AuditReasonId = null;
             terminateAdd.ReasonOth = null;
             _scheduleTerminateDetailRepository.Add(terminateAdd);
-            if (_uow.Save() <= 0) throw new Exception("Creating Schedule Terminate Details failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Schedule Terminate Details failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(terminateAdd.Id);
         }
@@ -79,31 +91,6 @@ namespace GSC.Api.Controllers.Project.Schedule
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            //var record = _projectScheduleRepository.FindByInclude(x => x.Id == id, x => x.ProjectDesign)
-            //    .FirstOrDefault();
-
-            //var recordTemplate = _projectScheduleTemplateRepository.FindByInclude(x => x.ProjectScheduleId == id && x.DeletedDate == null).ToList();
-
-            //if (record == null && recordTemplate == null)
-            //    return NotFound();
-
-            //if (!_studyVersionRepository.IsOnTrialByProjectDesing(record.ProjectDesign.Id))
-            //{
-            //    ModelState.AddModelError("Message", "Can not delete schedule!");
-            //    return BadRequest(ModelState);
-            //}
-
-            //_projectScheduleRepository.Delete(record);
-            //recordTemplate.ForEach(x =>
-            //{
-            //    _projectScheduleTemplateRepository.Delete(x);
-            //});
-
-            //_uow.Save();
-
-            //_projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(record.ProjectDesignPeriodId);
-            //_uow.Save();
-
             return Ok();
         }
 

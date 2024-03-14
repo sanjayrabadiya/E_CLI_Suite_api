@@ -77,7 +77,11 @@ namespace GSC.Api.Controllers.Etmf
                 syncConfigrationMasterDetails.ReasonId = Convert.ToInt32(_jwtTokenAccesser.GetHeader("audit-reason-id"));
                 _configurationMasterDetailsRepositoryAudit.Add(syncConfigrationMasterDetails);
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating Sync Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Sync Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(syncconfigDetails.Id);
         }
 
@@ -95,7 +99,6 @@ namespace GSC.Api.Controllers.Etmf
             _syncConfigurationMasterRepository.Update(syncconfigDetails);
             foreach (var item in syncconfigDetails.SyncConfigurationMasterDetails)
             {
-                //if (item.Id > 0)
                 _syncConfigurationMasterDetailsRepository.Update(item);
             }
             _uow.Save();
@@ -111,7 +114,11 @@ namespace GSC.Api.Controllers.Etmf
                 syncConfigrationMasterDetails.ReasonId = Convert.ToInt32(_jwtTokenAccesser.GetHeader("audit-reason-id"));
                 _configurationMasterDetailsRepositoryAudit.Add(syncConfigrationMasterDetails);
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating Sync Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Sync Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(syncconfigDetails.Id);
         }
 
@@ -184,7 +191,7 @@ namespace GSC.Api.Controllers.Etmf
 
 
 
-        [HttpPost]       
+        [HttpPost]
         [Route("GetSyncConfigrationPath")]
         public IActionResult GetSyncConfigrationPath([FromBody] SyncConfigurationParameterDto details)
         {
@@ -195,13 +202,13 @@ namespace GSC.Api.Controllers.Etmf
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details,out ProjectWorkplaceArtificateId);
+            var path = _syncConfigurationMasterRepository.GetsyncConfigurationPath(details, out ProjectWorkplaceArtificateId);
             if (string.IsNullOrEmpty(path))
             {
                 ModelState.AddModelError("Message", "Please Assign Rights");
                 return BadRequest(ModelState);
             }
-            return  Ok(new { PathDetail = path });
+            return Ok(new { PathDetail = path });
         }
 
         [HttpGet]

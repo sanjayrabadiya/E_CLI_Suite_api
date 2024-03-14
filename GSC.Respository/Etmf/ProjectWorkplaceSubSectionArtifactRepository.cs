@@ -75,14 +75,14 @@ namespace GSC.Respository.Etmf
             string filePath = string.Empty;
             string path = string.Empty;
 
-            if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
+            if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
 
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), projectWorkplaceSubSectionDto.ArtifactName.Trim());
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                 data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), projectWorkplaceSubSectionDto.ArtifactName.Trim());
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                    data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), projectWorkplaceSubSectionDto.ArtifactName.Trim());
             filePath = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), path);
@@ -129,21 +129,21 @@ namespace GSC.Respository.Etmf
             string OldfilePath = string.Empty;
             string Oldpath = string.Empty;
 
-            if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
+            if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                      data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), projectWorkplaceSubSectionDto.ArtifactName.Trim());
             }
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
                 path = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                  data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), projectWorkplaceSubSectionDto.ArtifactName.Trim());
             }
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                  data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
@@ -196,7 +196,6 @@ namespace GSC.Respository.Etmf
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
                             ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
                                         workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
-                            ProjectName = project.ProjectCode.Replace("/", ""),
                             ArtifactName = artifact.ArtifactName
 
                         }).FirstOrDefault();
@@ -205,19 +204,19 @@ namespace GSC.Respository.Etmf
             string OldfilePath = string.Empty;
             string Oldpath = string.Empty;
 
-            if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
+            if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Country)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Country.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
 
             }
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Site)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Site.GetDescription(),
                   data.ChildName.Trim(), data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());
 
             }
-            else if (data.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
+            else if (data?.WorkPlaceFolderId == (int)WorkPlaceFolder.Trial)
             {
                 Oldpath = System.IO.Path.Combine(data.ProjectName, FolderType.Etmf.GetDescription(), WorkPlaceFolder.Trial.GetDescription(),
                 data.ZonName.Trim(), data.SectionName.Trim(), data.SubSectionName.Trim(), data.ArtifactName.Trim());

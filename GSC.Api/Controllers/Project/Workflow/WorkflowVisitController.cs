@@ -25,20 +25,13 @@ namespace GSC.Api.Controllers.Project.Workflow
         private readonly IMapper _mapper;
         private readonly IWorkflowVisitRepository _workflowVisitRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
 
         public WorkflowVisitController(IWorkflowVisitRepository workflowVisitRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IGSCContext context,
-        IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _workflowVisitRepository = workflowVisitRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
-
         }
 
         [HttpPost]

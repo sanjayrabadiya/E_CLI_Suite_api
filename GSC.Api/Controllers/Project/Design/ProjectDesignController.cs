@@ -25,11 +25,9 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IUnitOfWork _uow;
         private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IStudyVersionRepository _studyVersionRepository;
-        private readonly IGSCContext _context;
 
         public ProjectDesignController(IProjectDesignRepository projectDesignRepository,
             IUnitOfWork uow, IMapper mapper,
-            IGSCContext context,
             IStudyVersionRepository studyVersionRepository,
             IUserRecentItemRepository userRecentItemRepository,
             IProjectDesignTemplateRepository projectDesignTemplateRepository,
@@ -38,7 +36,6 @@ namespace GSC.Api.Controllers.Project.Design
             _projectDesignRepository = projectDesignRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
             _studyVersionRepository = studyVersionRepository;
             _userRecentItemRepository = userRecentItemRepository;
             _projectDesignTemplateRepository = projectDesignTemplateRepository;
@@ -50,7 +47,7 @@ namespace GSC.Api.Controllers.Project.Design
         {
             if (id <= 0) return BadRequest();
             var projectDesign = _projectDesignRepository.FindByInclude(x => x.Id == id, x => x.Project)
-                .FirstOrDefault();
+                .First();
             var projectDesignDto = _mapper.Map<ProjectDesignDto>(projectDesign);
             projectDesignDto.LockedFullProject = _projectDesignTemplateRepository.GetAllTemplateIsLocked(id);
             projectDesignDto.Locked = !_studyVersionRepository.IsOnTrialByProjectDesing(id);
@@ -118,7 +115,11 @@ namespace GSC.Api.Controllers.Project.Design
 
             _projectDesignRepository.Update(projectDesign);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Project Design failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Project Design failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectDesign.Id);
         }
 
@@ -144,7 +145,7 @@ namespace GSC.Api.Controllers.Project.Design
         }
 
 
-     
+
 
         [HttpGet("GetIsCompleteDesign/{projectId}")]
         public IActionResult GetIsCompleteDesign(int projectId)
@@ -173,7 +174,7 @@ namespace GSC.Api.Controllers.Project.Design
         public IActionResult updateElectricSignature(int projectDesignId, string moduleName, bool isComplete)
         {
             var record = _projectDesignRepository.IsCompleteExist(projectDesignId, moduleName, isComplete);
-            return Ok();
+            return Ok(record);
         }
 
         [HttpGet("IsWorkFlowOrEditCheck/{projectDesignId}")]

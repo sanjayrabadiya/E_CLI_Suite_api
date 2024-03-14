@@ -16,33 +16,27 @@ namespace GSC.Respository.Project.Rights
 {
     public class ProjectModuleRightsRepository : GenericRespository<GSC.Data.Entities.Project.Rights.ProjectModuleRights>, IProjectModuleRightsRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public ProjectModuleRightsRepository(IGSCContext context,
-         IJwtTokenAccesser jwtTokenAccesser,
-         IMapper mapper)
+        public ProjectModuleRightsRepository(IGSCContext context)
          : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
             _context = context;
         }
 
         public void Save(StudyModuleDto details)
         {
             var project = _context.Project.Where(t => t.ProjectCode == details.StudyCode).SingleOrDefault();
-            
+
             var existing = _context.ProjectModuleRights.Where(t => t.ProjectID == project.Id).ToList();
             if (existing.Any())
             {
                 _context.ProjectModuleRights.RemoveRange(existing);
-                 _context.Save();
+                _context.Save();
             }
             List<GSC.Data.Entities.Project.Rights.ProjectModuleRights> rightdetails = new List<Data.Entities.Project.Rights.ProjectModuleRights>();
             var appscreen = _context.AppScreen.ToList();
-            foreach(var module in details.StudyModules)
+            foreach (var module in details.StudyModules)
             {
                 GSC.Data.Entities.Project.Rights.ProjectModuleRights data = new Data.Entities.Project.Rights.ProjectModuleRights();
                 data.ProjectID = project.Id;
@@ -50,7 +44,7 @@ namespace GSC.Respository.Project.Rights
                 rightdetails.Add(data);
             }
             _context.ProjectModuleRights.AddRange(rightdetails);
-             _context.Save();
+            _context.Save();
         }
 
     }

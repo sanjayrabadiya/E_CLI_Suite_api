@@ -28,11 +28,8 @@ namespace GSC.Api.Controllers.Etmf
     public class ETMFWorkplaceController : BaseController
     {
 
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IETMFWorkplaceRepository _eTMFWorkplaceRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IEtmfArtificateMasterLbraryRepository _etmfArtificateMasterLbraryRepository;
@@ -46,10 +43,7 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IEtmfUserPermissionRepository _etmfUserPermissionRepository;
         public ETMFWorkplaceController(IProjectRepository projectRepository,
             IUnitOfWork uow,
-            IMapper mapper,
             IETMFWorkplaceRepository eTMFWorkplaceRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             ICountryRepository countryRepository,
             IEtmfArtificateMasterLbraryRepository etmfArtificateMasterLbraryRepository,
             IUploadSettingRepository uploadSettingRepository,
@@ -60,11 +54,8 @@ namespace GSC.Api.Controllers.Etmf
             IEtmfUserPermissionRepository etmfUserPermissionRepository
             )
         {
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _projectRepository = projectRepository;
             _uow = uow;
-            _mapper = mapper;
             _eTMFWorkplaceRepository = eTMFWorkplaceRepository;
             _countryRepository = countryRepository;
             _etmfArtificateMasterLbraryRepository = etmfArtificateMasterLbraryRepository;
@@ -125,7 +116,7 @@ namespace GSC.Api.Controllers.Etmf
             var imageUrl = _uploadSettingRepository.GetDocumentPath();
 
             var SaveFolderStructure = _eTMFWorkplaceRepository.SaveFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
-            SaveFolderStructure.Version = artificiteList.FirstOrDefault().Version;
+            SaveFolderStructure.Version = artificiteList.FirstOrDefault()?.Version ?? "";
             SaveFolderStructure.TableTag = (int)EtmfTableNameTag.ProjectWorkPlace;
             _eTMFWorkplaceRepository.Add(SaveFolderStructure);
             foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetails)
@@ -161,7 +152,11 @@ namespace GSC.Api.Controllers.Etmf
                     }
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating ETMFWorkplace failed on save.");
+                return BadRequest(ModelState);
+            }
             _etmfUserPermissionRepository.AddEtmfAccessRights(SaveFolderStructure.ProjectWorkplaceDetails.ToList());
             return Ok(SaveFolderStructure.Id);
         }
@@ -200,7 +195,7 @@ namespace GSC.Api.Controllers.Etmf
         [Route("SaveSiteData")]
         public IActionResult SaveSiteData([FromBody] List<int> ProjectIds)
         {
-            var ParentProjectId = _projectRepository.FindByInclude(x => x.Id == ProjectIds[0]).FirstOrDefault().ParentProjectId;
+            var ParentProjectId = _projectRepository.FindByInclude(x => x.Id == ProjectIds[0]).First().ParentProjectId;
             var projectDetail = _projectRepository.Find((int)ParentProjectId);
             var childProjectList = ProjectIds;
             var countryList = _countryRepository.GetCountryByProjectIdDropDown((int)ParentProjectId);
@@ -208,7 +203,7 @@ namespace GSC.Api.Controllers.Etmf
             var imageUrl = _uploadSettingRepository.GetDocumentPath();
 
             var SaveFolderStructure = _eTMFWorkplaceRepository.SaveSiteFolderStructure(projectDetail, childProjectList, countryList, artificiteList, imageUrl);
-            SaveFolderStructure.Version = artificiteList.FirstOrDefault().Version;
+            SaveFolderStructure.Version = artificiteList.FirstOrDefault()?.Version ?? "";
             SaveFolderStructure.TableTag = (int)EtmfTableNameTag.ProjectWorkPlace;
             foreach (var workplaceDetail in SaveFolderStructure.ProjectWorkplaceDetails)
             {
@@ -244,7 +239,11 @@ namespace GSC.Api.Controllers.Etmf
                 }
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating ETMFWorkplace failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating ETMFWorkplace failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(SaveFolderStructure.Id);
         }
 
@@ -267,14 +266,7 @@ namespace GSC.Api.Controllers.Etmf
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
-        {
-            //var record = _eTMFWorkplaceRepository.GetWorkplaceDetails(id);
-            //if (record == null)
-            //    return NotFound();
-
-            //_eTMFWorkplaceRepository.Delete(record.Id);
-
-            //_eTMFWorkplaceRepository.DeleteAllTable(record);
+        {         
             _eTMFWorkplaceRepository.DeleteAllEtmfTableRecords(id);
             _uow.Save();
             return Ok();

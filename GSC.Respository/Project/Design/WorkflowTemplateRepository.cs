@@ -18,15 +18,12 @@ namespace GSC.Respository.Project.Design
     public class WorkflowTemplateRepository : GenericRespository<WorkflowTemplate>, IWorkflowTemplateRepository
     {
         private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
         public WorkflowTemplateRepository(IGSCContext context,
-             IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser) :
+             IMapper mapper) :
             base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
         }
@@ -44,10 +41,8 @@ namespace GSC.Respository.Project.Design
 
             //add new
             var firstNotSecond = workflowTemplateDto.LevelNos.Except(workflowTemplate.Select(x => x.LevelNo)).ToList();
-            // no change
-            var secondNotFirst = workflowTemplateDto.LevelNos.Except(firstNotSecond).ToList();
             // delete
-            var thirdNotFirst = workflowTemplate.ToList().Select(x => x.LevelNo).Except(workflowTemplateDto.LevelNos).ToList();
+            var thirdNotFirst = workflowTemplate.AsEnumerable().Select(x => x.LevelNo).Except(workflowTemplateDto.LevelNos).ToList();
 
             foreach (var item in firstNotSecond)
             {
@@ -58,7 +53,7 @@ namespace GSC.Respository.Project.Design
 
             foreach (var item in thirdNotFirst)
             {
-                var d = workflowTemplate.Where(x => x.LevelNo == item).FirstOrDefault();
+                var d = workflowTemplate.First(x => x.LevelNo == item);
                 Delete(d);
             }
             _context.Save();

@@ -17,11 +17,9 @@ namespace GSC.Respository.Project.Design
 {
     public class ProjectDesignVisitStatusRepository : GenericRespository<ProjectDesignVisitStatus>, IProjectDesignVisitStatusRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public ProjectDesignVisitStatusRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public ProjectDesignVisitStatusRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -59,8 +57,8 @@ namespace GSC.Respository.Project.Design
 
         public string Duplicate(ProjectDesignVisitStatusDto objSave)
         {
-            if (All.Any(x => x.ProjectDesignVisitId == objSave.ProjectDesignVisitId && 
-            x.ProjectDesignVariable.Id==objSave.ProjectDesignVariableId &&
+            if (All.Any(x => x.ProjectDesignVisitId == objSave.ProjectDesignVisitId &&
+            x.ProjectDesignVariable.Id == objSave.ProjectDesignVariableId &&
             x.ProjectDesignVariable.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
             x.DeletedDate == null))
                 return "Template already use.";

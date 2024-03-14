@@ -13,21 +13,16 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
 {
     public class StudyLevelFormVariableValueRepository : GenericRespository<StudyLevelFormVariableValue>, IStudyLevelFormVariableValueRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        private readonly IGSCContext _context;
-        public StudyLevelFormVariableValueRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public StudyLevelFormVariableValueRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _context = context;
         }
 
         public void UpdateVariableValues(StudyLevelFormVariableDto variableDto, bool CollectionValueDisable)
         {
 
-            if (CollectionValueDisable == true)
+            if (CollectionValueDisable)
             {
                 var deletedisableValues = All.Where(x => x.StudyLevelFormVariableId == variableDto.Id).ToList();
                 foreach (var item in deletedisableValues)
@@ -37,25 +32,24 @@ namespace GSC.Respository.Project.StudyLevelFormSetup
             }
             else
             {
-                if (variableDto.Values == null || variableDto.Values.Count() == 0) return;
+                if (variableDto.Values == null || !variableDto.Values.Any()) return;
                 int seqNo = 0;
                 variableDto.Values.ToList().ForEach(x =>
                 {
                     var variableValue = _mapper.Map<StudyLevelFormVariableValue>(x);
-                    if (x.Id > 0 && x.IsDeleted)
+                    if (x.Id > 0)
                     {
-                        //variableValue.InActiveVersion = checkVersion.VersionNumber;
-                        Update(variableValue);
+                        if (x.IsDeleted)
+                        {
+                            Remove(variableValue);
+                        }
+                        else
+                        {
+                            seqNo += 1;
+                            variableValue.SeqNo = seqNo;
+                            Update(variableValue);
+                        }
                     }
-                    else if (x.Id > 0 && x.IsDeleted)
-                        Remove(variableValue);
-                    else if (x.Id > 0)
-                    {
-                        seqNo += 1;
-                        variableValue.SeqNo = seqNo;
-                        Update(variableValue);
-                    }
-
                     else if (x.Id == 0 && !x.IsDeleted)
                     {
                         seqNo += 1;

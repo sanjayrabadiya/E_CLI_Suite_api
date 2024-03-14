@@ -20,7 +20,6 @@ namespace GSC.Api.Controllers.Project.Workflow
         private readonly IProjectWorkflowLevelRepository _projectWorkflowLevelRepository;
         private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IProjectDesignRepository _projectDesignRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IStudyVersionRepository _studyVersionRepository;
 
@@ -28,7 +27,6 @@ namespace GSC.Api.Controllers.Project.Workflow
             IProjectWorkflowIndependentRepository projectWorkflowIndependentRepository,
             IProjectWorkflowLevelRepository projectWorkflowLevelRepository,
             IUnitOfWork uow, IMapper mapper,
-            IProjectDesignRepository projectDesignRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IStudyVersionRepository studyVersionRepository)
         {
@@ -37,7 +35,6 @@ namespace GSC.Api.Controllers.Project.Workflow
             _projectWorkflowLevelRepository = projectWorkflowLevelRepository;
             _uow = uow;
             _mapper = mapper;
-            _projectDesignRepository = projectDesignRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _studyVersionRepository = studyVersionRepository;
         }
@@ -128,7 +125,6 @@ namespace GSC.Api.Controllers.Project.Workflow
         {
             var data = _projectWorkflowIndependentRepository.FindBy(x =>
                 x.ProjectWorkflowId == projectWorkflow.Id).ToList();
-            //&& !projectWorkflow.Independents.Any(c => c.Id == x.Id)).ToList();
             var deleteIndependents = data.Where(t => projectWorkflow.Independents.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addIndependents = projectWorkflow.Independents.Where(x => x.Id == 0).ToList();
             var updateValue = projectWorkflow.Independents.Where(x => x.Id != 0).ToList();
@@ -151,7 +147,6 @@ namespace GSC.Api.Controllers.Project.Workflow
         private void UpdateLevels(ProjectWorkflow projectWorkflow)
         {
             var data = _projectWorkflowLevelRepository.FindBy(x => x.ProjectWorkflowId == projectWorkflow.Id).ToList();
-            //&& !projectWorkflow.Levels.Any(c => c.Id == x.Id)).ToList();
             var deleteLevels = data.Where(t => projectWorkflow.Levels.Where(a => a.Id == t.Id).ToList().Count <= 0).ToList();
             var addLevels = projectWorkflow.Levels.Where(x => x.Id == 0).ToList();
             var updateValue = projectWorkflow.Levels.Where(x => x.Id != 0).ToList();

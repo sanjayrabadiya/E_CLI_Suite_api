@@ -13,23 +13,13 @@ namespace GSC.Respository.Project.Workflow
 {
     public class ProjectWorkflowRepository : GenericRespository<ProjectWorkflow>, IProjectWorkflowRepository
     {
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IProjectRightRepository _projectRightRepository;
 
-        public ProjectWorkflowRepository(IGSCContext context,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IProjectRightRepository projectRightRepository) : base(context)
+        public ProjectWorkflowRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _context = context;
-            _projectRightRepository = projectRightRepository;
         }
 
         public int GetMaxWorkFlowLevel(int projectDesignId)
@@ -57,10 +47,10 @@ namespace GSC.Respository.Project.Workflow
 
         }
 
-        public short GetVisitLevel( int projectDesignVisitId, int projectDesignId, short levelNo)
+        public short GetVisitLevel(int projectDesignVisitId, int projectDesignId, short levelNo)
         {
 
-            var result = _context.WorkflowVisit.Where(x => x.IsIndependent == false && x.ProjectDesignVisitId == projectDesignVisitId
+            var result = _context.WorkflowVisit.Where(x => x.IsIndependent && x.ProjectDesignVisitId == projectDesignVisitId
             && x.DeletedDate == null && x.ProjectWorkflowLevel.LevelNo > levelNo).Min(a => (short?)a.ProjectWorkflowLevel.LevelNo) ?? 0;
 
             if (result == 0)
@@ -75,7 +65,7 @@ namespace GSC.Respository.Project.Workflow
             var result = _context.WorkflowTemplate.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId
            && x.DeletedDate == null).Select(r => r.LevelNo).ToList();
 
-            if (result.Count() == 0)
+            if (!result.Any())
                 return 0;
 
             var level = result.Where(x => x > (int)levelNo).Min(a => a);
@@ -144,19 +134,19 @@ namespace GSC.Respository.Project.Workflow
                     IsLock = false,
                     WorkFlowText = workFlowText,
                     IsStartTemplate = independent.IsStartTemplate,
-                    IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
+                    IsWorkFlowBreak = projectWorkflowLevel.Exists(t => t.IsWorkFlowBreak),
                     LevelNo = levelNo,
                     SelfCorrection = independent.IsDataEntryUser,
                     IsGenerateQuery = independent.IsGenerateQuery,
                     IsVisitBase = projectWork.IsVisitBase ?? false
                 };
 
-            var level = projectWorkflowLevel.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null).FirstOrDefault();
+            var level = projectWorkflowLevel.Find(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null);
 
             var totalLevels = projectWorkflowLevel.Select(c => c.LevelNo).ToList();
 
             int totalLevel = 0;
-            if (totalLevels != null && totalLevels.Count > 0)
+            if (totalLevels.Count > 0)
                 totalLevel = totalLevels.Max(t => t);
 
 
@@ -168,7 +158,7 @@ namespace GSC.Respository.Project.Workflow
                     WorkFlowText = workFlowText,
                     TotalLevel = totalLevel,
                     IsStartTemplate = level.IsStartTemplate,
-                    IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
+                    IsWorkFlowBreak = projectWorkflowLevel.Exists(t => t.IsWorkFlowBreak),
                     LevelNo = level.LevelNo,
                     SelfCorrection = level.IsDataEntryUser,
                     IsGenerateQuery = level.IsGenerateQuery,
@@ -184,16 +174,16 @@ namespace GSC.Respository.Project.Workflow
                 IsLock = false,
                 IsStartTemplate = true,
                 WorkFlowText = workFlowText,
-                IsWorkFlowBreak = projectWorkflowLevel.Any(t => t.IsWorkFlowBreak),
+                IsWorkFlowBreak = projectWorkflowLevel.Exists(t => t.IsWorkFlowBreak),
                 LevelNo = levelNo,
                 SelfCorrection = false,
                 IsVisitBase = projectWork.IsVisitBase ?? false
             };
         }
 
-        public bool IsElectronicsSignatureComplete(int projectDesignId)
+        public bool IsElectronicsSignatureComplete(int ProjectDesignId)
         {
-            var IsElectronicsSignature = _context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
+            var IsElectronicsSignature = _context.ElectronicSignature.Where(x => x.ProjectDesignId == ProjectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
             if (IsElectronicsSignature == null)
             {
                 IsElectronicsSignature = false;
