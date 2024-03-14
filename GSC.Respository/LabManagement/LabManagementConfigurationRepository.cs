@@ -20,7 +20,6 @@ namespace GSC.Respository.LabManagement
 {
     public class LabManagementConfigurationRepository : GenericRespository<LabManagementConfiguration>, ILabManagementConfigurationRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IUploadSettingRepository _uploadSettingRepository;
@@ -29,10 +28,9 @@ namespace GSC.Respository.LabManagement
         public LabManagementConfigurationRepository(IGSCContext context,
              IUploadSettingRepository uploadSettingRepository,
              IProjectRightRepository projectRightRepository,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _uploadSettingRepository = uploadSettingRepository;
             _projectRightRepository = projectRightRepository;
             _mapper = mapper;
@@ -41,8 +39,6 @@ namespace GSC.Respository.LabManagement
 
         public List<LabManagementConfigurationGridDto> GetConfigurationList(int ProjectId, bool isDeleted)
         {
-            // var projectList = _projectRightRepository.GetParentProjectRightIdList();
-
             var result = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == ProjectId).
                    ProjectTo<LabManagementConfigurationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             result.ForEach(t => { t.SiteCode = t.ProjectId == null ? "" : _context.Project.Find(t.ProjectId).ProjectCode; });
@@ -62,7 +58,8 @@ namespace GSC.Respository.LabManagement
             if (Exists == 0)
             {
                 var documentUrl = _uploadSettingRepository.GetDocumentPath();
-                var projectDocuments = All.Where(x => x.Id == LabManagementConfigurationId).FirstOrDefault().PathName;
+                var firstItem = All.FirstOrDefault(x => x.Id == LabManagementConfigurationId);
+                var projectDocuments = firstItem != null ? firstItem.PathName : null;
 
                 string pathname = documentUrl + projectDocuments;
                 FileStream streamer = new FileStream(pathname, FileMode.Open);
@@ -98,8 +95,9 @@ namespace GSC.Respository.LabManagement
         // Add by vipul for only bind that project which map in lab management configuration
         public List<ProjectDropDown> GetParentProjectDropDownForUploadLabData()
         {
+            List<ProjectDropDown> objlist = new List<ProjectDropDown>();
             var projectList = _projectRightRepository.GetParentProjectRightIdList();
-            if (projectList == null || projectList.Count == 0) return null;
+            if (projectList == null || projectList.Count == 0) return objlist;
 
             var result = All.Where(x => x.DeletedDate == null
                     && projectList.Any(c => c == x.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId))
@@ -116,11 +114,11 @@ namespace GSC.Respository.LabManagement
             result = result.GroupBy(x => x.Id).Select(c => new ProjectDropDown
             {
                 Id = c.Key,
-                Value = c.FirstOrDefault().Value,
-                Code = c.FirstOrDefault().Code,
-                IsStatic = c.FirstOrDefault().IsStatic,
-                ParentProjectId = c.FirstOrDefault().ParentProjectId,
-                IsDeleted = c.FirstOrDefault().IsDeleted
+                Value = c.Select(x => x.Value).FirstOrDefault(),
+                Code = c.Select(x => x.Code).FirstOrDefault(),
+                IsStatic = c.Select(x => x.IsStatic).FirstOrDefault(),
+                ParentProjectId = c.Select(x => x.ParentProjectId).FirstOrDefault(),
+                IsDeleted = c.Select(x => x.IsDeleted).FirstOrDefault()
             }).OrderBy(o => o.Value).ToList();
 
             return result;
@@ -143,9 +141,9 @@ namespace GSC.Respository.LabManagement
             visits = visits.GroupBy(x => x.Id).Select(c => new DropDownDto
             {
                 Id = c.Key,
-                Value = c.FirstOrDefault().Value,
-                Code = c.FirstOrDefault().Code,
-                ExtraData = c.FirstOrDefault().ExtraData
+                Value = c.Select(x => x.Value).FirstOrDefault(),
+                Code = c.Select(x => x.Code).FirstOrDefault(),
+                ExtraData = c.Select(x => x.ExtraData).FirstOrDefault()
             }).ToList();
 
             return visits;
@@ -168,21 +166,21 @@ namespace GSC.Respository.LabManagement
         // Get Project design variable id by lab management configuration Id
         public int getProjectDesignVariableId(int LabManagementConfigurationId, string VariableName)
         {
-            var ProjectDesignTemplateId = All.Where(x => x.Id == LabManagementConfigurationId && x.DeletedDate == null).FirstOrDefault().ProjectDesignTemplateId;
+            var ProjectDesignTemplateId = All.Where(x => x.Id == LabManagementConfigurationId && x.DeletedDate == null).Select(x => x.ProjectDesignTemplateId).FirstOrDefault();
             var ProjectDesignVariable = _context.ProjectDesignVariable.Where(x => x.ProjectDesignTemplateId == ProjectDesignTemplateId
             && x.VariableName.Trim().ToLower() == VariableName.Trim().ToLower() && x.DeletedDate == null).ToList();
 
-            if (ProjectDesignVariable.Count() == 0)
+            if (ProjectDesignVariable.Count == 0)
                 return 0;
             else
-                return ProjectDesignVariable.FirstOrDefault().Id;
+                return ProjectDesignVariable.Select(x => x.Id).FirstOrDefault();
         }
 
         public List<DropDownDto> EmailUsers(int ProjectId)
         {
             var siterList = _context.Project.Where(x => x.ParentProjectId == ProjectId).Select(x => x.Id).ToList();
 
-            var projectListbyId = _projectRightRepository.FindByInclude(x => siterList.Contains(x.ProjectId) && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+            var projectListbyId = _projectRightRepository.FindByInclude(x => siterList.Contains(x.ProjectId) && x.IsReviewDone && x.DeletedDate == null).ToList();
             var latestProjectRight = projectListbyId.OrderByDescending(x => x.Id)
                 .GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
@@ -193,7 +191,6 @@ namespace GSC.Respository.LabManagement
                     Value = _context.Users.Where(p => p.Id == c.UserId).Select(r => r.UserName).FirstOrDefault(),
                 }).ToList();
 
-            //return users.Where(x => x.IsRights == true).ToList();
         }
 
     }

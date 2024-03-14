@@ -17,19 +17,15 @@ namespace GSC.Respository.LabManagement
 {
     public class LabManagementUploadExcelDataRepository : GenericRespository<LabManagementUploadExcelData>, ILabManagementUploadExcelDataRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public LabManagementUploadExcelDataRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository)
+            IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _context = context;
-            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public List<LabManagementUploadExcelDataDto> GetExcelDataList(int labManagementUploadDataId)
@@ -52,7 +48,8 @@ namespace GSC.Respository.LabManagement
 
         public FileStreamResult GetItems(IQueryable<LabManagementUploadExcelData> query, LabManagementUploadDataDto search)
         {
-            var StudyCode = _context.Project.Where(x => x.Id == search.ParentProjectId).FirstOrDefault().ProjectCode;
+            var project = _context.Project.FirstOrDefault(x => x.Id == search.ParentProjectId);
+            var StudyCode = project != null ? project.ProjectCode : null;
             var MainData = query.Select(r => new LabManagementUploadExcelDataDto
             {
                 StudyCode = StudyCode,
@@ -71,7 +68,7 @@ namespace GSC.Respository.LabManagement
                 AbnoramalFlag = r.AbnoramalFlag,
                 ReferenceRangeLow = r.ReferenceRangeLow,
                 ReferenceRangeHigh = r.ReferenceRangeHigh
-            }).ToList().OrderBy(x => x.Id).ToList();
+            }).OrderBy(x => x.Id).ToList();
 
             #region Excel Report Design
             using (var workbook = new XLWorkbook())
