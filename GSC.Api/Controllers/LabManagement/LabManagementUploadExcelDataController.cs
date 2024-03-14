@@ -12,20 +12,12 @@ namespace GSC.Api.Controllers.LabManagement
     [ApiController]
     public class LabManagementUploadExcelDataController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly ILabManagementUploadExcelDataRepository _labManagementUploadExcelDataRepository;
 
         public LabManagementUploadExcelDataController(
-            IUnitOfWork uow, IMapper mapper,
-            
-        ILabManagementUploadExcelDataRepository labManagementUploadExcelDataRepository,
-        IJwtTokenAccesser jwtTokenAccesser)
+                    ILabManagementUploadExcelDataRepository labManagementUploadExcelDataRepository
+       )
         {
-            _uow = uow;
-            _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _labManagementUploadExcelDataRepository = labManagementUploadExcelDataRepository;
         }
 
@@ -36,7 +28,7 @@ namespace GSC.Api.Controllers.LabManagement
             return Ok(_labManagementUploadExcelDataRepository.GetExcelDataList(labManagementUploadDataId));
         }
 
-        
+
         [HttpPost]
         [Route("GetDataNotUseInDataEntry")]
         public IActionResult GetDataNotUseInDataEntry([FromBody] LabManagementUploadDataDto search)

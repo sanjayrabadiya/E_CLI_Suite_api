@@ -19,7 +19,6 @@ namespace GSC.Data.Dto.LabManagement
         public string AbnoramalFlag { get; set; }
         public string ReferenceRangeLow { get; set; }
         public string ReferenceRangeHigh { get; set; }
-        // public string ClinicallySignificant { get; set; }
         public string StudyCode { get; set; }
         public string SiteCode { get; set; }
     }

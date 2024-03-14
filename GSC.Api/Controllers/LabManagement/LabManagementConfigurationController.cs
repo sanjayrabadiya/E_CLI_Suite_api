@@ -78,7 +78,7 @@ namespace GSC.Api.Controllers.LabManagement
 
             if (checkConfiguration.All(x => x.ProjectId == null))
             {
-                if (checkConfiguration.Count() != 0)
+                if (checkConfiguration.Count != 0)
                 {
                     ModelState.AddModelError("Message", "Form already configured!");
                     return BadRequest(ModelState);
@@ -86,28 +86,23 @@ namespace GSC.Api.Controllers.LabManagement
             }
             else
             {
-                if (checkConfiguration.Any(x => x.ProjectId == null))
+                if (checkConfiguration.Exists(x => x.ProjectId == null) && (checkConfiguration.Count != 0))
                 {
-                    if (checkConfiguration.Count() != 0)
-                    {
-                        ModelState.AddModelError("Message", "Form already configured study wise!");
-                        return BadRequest(ModelState);
-                    }
+                    ModelState.AddModelError("Message", "Form already configured study wise!");
+                    return BadRequest(ModelState);
                 }
-                if (checkConfiguration.Where(x => x.ProjectId == configurationDto.ProjectId).Count() != 0)
+                if (checkConfiguration.Any(x => x.ProjectId == configurationDto.ProjectId))
                 {
                     ModelState.AddModelError("Message", "Form already configured!");
                     return BadRequest(ModelState);
                 }
 
-                if (!checkConfiguration.Any(x => x.ProjectId == null))
+                if (!checkConfiguration.Exists(x => x.ProjectId == null) && (configurationDto.ProjectId == null))
                 {
-                    if (configurationDto.ProjectId == null)
-                    {
-                        ModelState.AddModelError("Message", "Form already configured site wise!");
-                        return BadRequest(ModelState);
-                    }
+                    ModelState.AddModelError("Message", "Form already configured site wise!");
+                    return BadRequest(ModelState);
                 }
+
             }
 
             //set file path and extension
@@ -119,16 +114,13 @@ namespace GSC.Api.Controllers.LabManagement
             }
 
             var configuration = _mapper.Map<LabManagementConfiguration>(configurationDto);
-            //var validate = _configurationRepository.Duplicate(configuration);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
-
             _configurationRepository.Add(configuration);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                Exception exception = new Exception("Creating Configuration failed on save.");
+                throw exception;
+            }
 
             if (configurationDto.UserIds.Length != 0)
             {
@@ -175,8 +167,11 @@ namespace GSC.Api.Controllers.LabManagement
             }
 
             _configurationRepository.Update(configuration);
-
-            if (_uow.Save() <= 0) throw new Exception("Updating Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                Exception exception = new Exception("Updating Configuration failed on save.");
+                throw exception;
+            }
             return Ok(configuration.Id);
         }
 
@@ -268,16 +263,14 @@ namespace GSC.Api.Controllers.LabManagement
         [Route("UpdateLabManagementConfiguration")]
         public IActionResult UpdateLabManagementConfiguration([FromBody] LabManagementConfigurationEdit configurationDto)
         {
-            //var configure = _configurationRepository.Find(configurationDto.Id);
-            //configure.SecurityRoleId = configurationDto.SecurityRoleId;
-            //_configurationRepository.Update(configure);
+
 
             // get role by Lab Management Configuration id
             var data = _labManagementSendEmailUserRepository.FindBy(x => x.LabManagementConfigurationId == configurationDto.Id && x.DeletedDate == null).ToList();
 
             foreach (var item in configurationDto.UserIds)
             {
-                var role = data.Where(t => t.UserId == item).FirstOrDefault();
+                var role = data.Find(t => t.UserId == item);
                 // add role if new select in dropdown
                 if (role == null)
                 {
@@ -293,7 +286,11 @@ namespace GSC.Api.Controllers.LabManagement
                 foreach (var item in Exists)
                     _labManagementSendEmailUserRepository.Delete(item);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                Exception exception = new Exception("Updating Configuration failed on save.");
+                throw exception;
+            }
             return Ok();
         }
 
@@ -304,7 +301,7 @@ namespace GSC.Api.Controllers.LabManagement
             if (projectDesignTemplateId <= 0) return BadRequest();
 
             var isExist = _configurationRepository.All.Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
-            var configuration = new LabManagementConfiguration();
+            LabManagementConfiguration configuration = new LabManagementConfiguration();
             if (isExist != null)
             {
                 configuration = _configurationRepository.All.Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
@@ -314,8 +311,6 @@ namespace GSC.Api.Controllers.LabManagement
                 configuration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
             }
 
-
-            //var configuration = _configurationRepository.FindByInclude(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             configurationDto.FullPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), configurationDto.PathName);
             return Ok(configurationDto);

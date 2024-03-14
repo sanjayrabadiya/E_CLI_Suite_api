@@ -34,7 +34,6 @@ namespace GSC.Respository.LabManagement
         private readonly IAppSettingRepository _appSettingRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         private readonly ILabManagementUploadExcelDataRepository _labManagementUploadExcelDataRepository;
-        private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateValueAuditRepository _screeningTemplateValueAuditRepository;
@@ -46,7 +45,7 @@ namespace GSC.Respository.LabManagement
             IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
             ILabManagementUploadExcelDataRepository labManagementUploadExcelDataRepository,
-            IProjectDesignVariableRepository projectDesignVariableRepository,
+
          IScreeningTemplateValueRepository screeningTemplateValueRepository,
         IScreeningTemplateRepository screeningTemplateRepository,
         IScreeningTemplateValueAuditRepository screeningTemplateValueAuditRepository,
@@ -63,7 +62,6 @@ namespace GSC.Respository.LabManagement
             _appSettingRepository = appSettingRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _labManagementUploadExcelDataRepository = labManagementUploadExcelDataRepository;
-            _projectDesignVariableRepository = projectDesignVariableRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _screeningTemplateRepository = screeningTemplateRepository;
             _screeningTemplateValueAuditRepository = screeningTemplateValueAuditRepository;
@@ -74,11 +72,12 @@ namespace GSC.Respository.LabManagement
 
         public List<LabManagementUploadDataGridDto> GetUploadDataList(int projectId, bool isDeleted)
         {
-            // var projectList = _projectRightRepository.GetProjectRightIdList();
             var result = All.Include(x => x.LabManagementUploadExcelDatas).Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.Project.ParentProjectId == projectId).
                    ProjectTo<LabManagementUploadDataGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-            result.ForEach(t => { t.FullPath = documentUrl + t.PathName; t.IsDifference = _context.ScreeningTemplateValue.AsNoTracking().All(a => !t.LabManagementUploadExcelDatas.Select(a => a.Id).ToList().Contains((int)a.LabManagementUploadExcelDataId));
+            result.ForEach(t =>
+            {
+                t.FullPath = documentUrl + t.PathName; t.IsDifference = _context.ScreeningTemplateValue.AsNoTracking().All(a => !t.LabManagementUploadExcelDatas.Select(a => a.Id).ToList().Contains((int)a.LabManagementUploadExcelDataId));
                 t.ScreeningNo = string.Join(",", t.LabManagementUploadExcelDatas.Where(y => y.LabManagementUploadDataId == t.Id).Select(s => s.ScreeningNo).Distinct().ToList());
             });
             return result;
@@ -123,9 +122,9 @@ namespace GSC.Respository.LabManagement
 
                 foreach (var item in results.Tables[0].Rows)
                 {
-                    if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != details.FirstOrDefault().ProjectCode.ToLower().Trim())
-                        return "Can not upload excel data due to study code not match.";
-
+                        if (((DataRow)item).ItemArray[0].ToString().ToLower().Trim() != details.FirstOrDefault().ProjectCode.ToLower().Trim())
+                            return "Can not upload excel data due to study code not match.";
+                    
                     if (((DataRow)item).ItemArray[1].ToString().ToLower().Trim() != SiteCode.ToLower().Trim())
                         return "Can not upload excel data due to site code not match.";
 
@@ -139,7 +138,7 @@ namespace GSC.Respository.LabManagement
                     obj.RepeatSampleCollection = ((DataRow)item).ItemArray[5].ToString();
                     obj.LaboratryName = ((DataRow)item).ItemArray[6].ToString();
                     obj.DateOfSampleCollection = ((DataRow)item).ItemArray[7].ToString() == "" ? (DateTime?)null : (DateTime)((DataRow)item).ItemArray[7];
-                    obj.DateOfReport = ((DataRow)item).ItemArray[8].ToString() == "" ? (DateTime?)null : (DateTime)((DataRow)item).ItemArray[8];//(DateTime)((DataRow)item).ItemArray[8];
+                    obj.DateOfReport = ((DataRow)item).ItemArray[8].ToString() == "" ? (DateTime?)null : (DateTime)((DataRow)item).ItemArray[8];
                     obj.Panel = ((DataRow)item).ItemArray[9].ToString();
                     obj.TestName = ((DataRow)item).ItemArray[10].ToString();
                     obj.Result = ((DataRow)item).ItemArray[11].ToString();
@@ -147,7 +146,6 @@ namespace GSC.Respository.LabManagement
                     obj.AbnoramalFlag = ((DataRow)item).ItemArray[13].ToString();
                     obj.ReferenceRangeLow = ((DataRow)item).ItemArray[14].ToString();
                     obj.ReferenceRangeHigh = ((DataRow)item).ItemArray[15].ToString();
-                    //    obj.ClinicallySignificant = ((DataRow)item).ItemArray[16].ToString();
                     obj.CreatedBy = _jwtTokenAccesser.UserId;
                     obj.CreatedDate = _jwtTokenAccesser.GetClientDate();
                     objLst.Add(obj);
@@ -193,7 +191,7 @@ namespace GSC.Respository.LabManagement
 
                 if (ExcelDataResult != null)
                 {
-                    var ScreningNumberList = ExcelDataResult.Select(x => x.ScreeningNo).ToList().Distinct();
+                    var ScreningNumberList = ExcelDataResult.Select(x => x.ScreeningNo).AsEnumerable().Distinct();
 
                     foreach (var ScreningNumber in ScreningNumberList)
                     {
@@ -203,7 +201,7 @@ namespace GSC.Respository.LabManagement
                                                     && x.ScreeningVisit.ScreeningEntry.Randomization.ProjectId == labManagementUpload.ProjectId
                                                      && x.ProjectDesignTemplateId == MappingData.FirstOrDefault().ProjectDesignTemplateId).FirstOrDefault();
 
-                        var isRepatTemplated = GetExcelDataByScreeningNumber.Any(t => t.RepeatSampleCollection == "Yes");
+                        var isRepatTemplated = GetExcelDataByScreeningNumber.Exists(t => t.RepeatSampleCollection == "Yes");
 
                         if (isRepatTemplated && screeningTemplate != null)
                         {
@@ -219,15 +217,12 @@ namespace GSC.Respository.LabManagement
                             }
                             else screeningTemplate = null;
                         }
-                        else if (screeningTemplate != null)
+                        else if (screeningTemplate != null && screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
                         {
-                            // update screening template status
-                            if (screeningTemplate.Status == Helper.ScreeningTemplateStatus.Pending)
-                            {
-                                screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
-                                screeningTemplate.IsDisable = false;
-                                _screeningTemplateRepository.Update(screeningTemplate);
-                            }
+                            screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
+                            screeningTemplate.IsDisable = false;
+                            _screeningTemplateRepository.Update(screeningTemplate);
+
                         }
 
                         if (screeningTemplate != null && (int)screeningTemplate.Status <= 2)
@@ -248,7 +243,7 @@ namespace GSC.Respository.LabManagement
 
                                 obj.ProjectDesignVariableId = item.ProjectDesignVariableId;
 
-                                var r = GetExcelDataByScreeningNumber.Where(x => x.TestName.Trim() == item.TargetVariable).FirstOrDefault();
+                                var r = GetExcelDataByScreeningNumber.Find(x => x.TestName.Trim() == item.TargetVariable);
 
                                 if (r == null)
                                 {
@@ -257,28 +252,41 @@ namespace GSC.Respository.LabManagement
                                         if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
                                         {
                                             DateTime dDate;
-                                            string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfSampleCollection.ToString();
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                                        .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                            obj.Value = dt;
-                                            r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                           // r.Result = dt;
+                                            var firstData = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            if (firstData != null)
+                                            {
+                                                string variablevalueformat = firstData.DateOfSampleCollection.ToString();
+                                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                            .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                                obj.Value = dt;
+                                                r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            }
+                                            
                                         }
                                         else if (item.TargetVariable.Trim().ToLower() == "date of report")
                                         {
                                             DateTime dDate;
-                                            string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfReport.ToString();
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                                                                            .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                            obj.Value = dt;
-                                            r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                            //r.Result = dt;
+                                            var firstData = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            if (firstData != null)
+                                            {
+                                                string variablevalueformat = firstData.DateOfReport.ToString();
+                                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
+                                                                                                .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+
+                                                obj.Value = dt;
+                                                r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            }
+
                                         }
                                         else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
                                         {
-                                            obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
-                                            r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                            //r.Result = obj.Value;
+                                            var firstdata = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            if(firstdata != null)
+                                            {
+                                                obj.Value = firstdata.LaboratryName.ToString();
+                                                r = GetExcelDataByScreeningNumber.FirstOrDefault();
+                                            }
+
                                         }
 
                                         obj.ReviewLevel = 0;
@@ -306,38 +314,7 @@ namespace GSC.Respository.LabManagement
                                     }
                                 }
                                 else
-                                //if (r != null || (item.TargetVariable.Trim().ToLower() == "date of sample collection" ||
-                                //        item.TargetVariable.Trim().ToLower() == "date of report" || item.TargetVariable.Trim().ToLower() == "laboratory name"))
                                 {
-                                    //if (item.TargetVariable.Trim().ToLower() == "date of sample collection")
-                                    //{
-                                    //    DateTime dDate;
-                                    //    string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfSampleCollection.ToString();
-                                    //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                    //                                                .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                    //    obj.Value = dt;
-                                    //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                    //    r.Result = dt;
-                                    //}
-                                    //else if (item.TargetVariable.Trim().ToLower() == "date of report")
-                                    //{
-
-                                    //    DateTime dDate;
-                                    //    string variablevalueformat = GetExcelDataByScreeningNumber.FirstOrDefault().DateOfReport.ToString();
-                                    //    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat)
-                                    //                                                    .ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                    //    obj.Value = dt;
-                                    //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                    //    r.Result = dt;
-                                    //}
-                                    //else if (item.TargetVariable.Trim().ToLower() == "laboratory name")
-                                    //{
-                                    //    obj.Value = GetExcelDataByScreeningNumber.FirstOrDefault().LaboratryName.ToString();
-                                    //    r = GetExcelDataByScreeningNumber.FirstOrDefault();
-                                    //    r.Result = obj.Value;
-                                    //}
-                                    //else
-                                    //{
                                     // set date time format if data type is date datetime or time
                                     if (dataType == CollectionSources.Date || dataType == CollectionSources.DateTime || dataType == CollectionSources.Time)
                                     {
@@ -354,7 +331,6 @@ namespace GSC.Respository.LabManagement
                                         obj.ReferenceRangeLow = r.ReferenceRangeLow;
                                         obj.Unit = r.Unit;
                                     }
-                                    // }
 
                                     obj.ReviewLevel = 0;
                                     obj.IsNa = false;
@@ -384,9 +360,6 @@ namespace GSC.Respository.LabManagement
                                         && item.TargetVariable.Trim().ToLower() != "date of report"
                                         && item.TargetVariable.Trim().ToLower() != "laboratory name")
                                     {
-                                        //var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId).ToList();
-                                        //if (studyUsers != null)
-                                        //{
                                         LabManagementEmailDetail emailObjDetail = new LabManagementEmailDetail();
                                         if (emailObj.ScreeningNumber == null)
                                         {
@@ -404,28 +377,19 @@ namespace GSC.Respository.LabManagement
 
                                         emailObj.LabManagementEmailDetail.Add(emailObjDetail);
 
-                                        //var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
-                                        //var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
-
-                                        //var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
-                                        //foreach (var email in emailuser)
-                                        //{
-                                        //    _emailSenderRespository.SendLabManagementAbnormalEMail(email, r.ScreeningNo, item.ProjectCode, _context.Project.Find(labManagementUpload.ProjectId).ProjectCode, r.Visit, r.TestName, r.ReferenceRangeLow, r.ReferenceRangeHigh, r.AbnoramalFlag);
-                                        //}
-                                        // }
                                     }
                                 }
                             }
                             // patient wise mail
                             if (emailObj != null && emailObj.StudyCode != null)
                             {
-                                var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId && x.DeletedDate==null).ToList();
+                                var studyUsers = _context.LabManagementSendEmailUser.Where(x => x.LabManagementConfigurationId == labManagementUpload.LabManagementConfigurationId && x.DeletedDate == null).ToList();
                                 if (studyUsers.Count != 0)
                                 {
-                                    var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone == true && x.DeletedDate == null).ToList();
+                                    var projectListbyId = _projectRightRepository.FindByInclude(x => x.ProjectId == labManagementUpload.ProjectId && x.IsReviewDone && x.DeletedDate == null).ToList();
                                     var projectRight = projectListbyId.OrderByDescending(x => x.Id).GroupBy(c => new { c.UserId }, (key, group) => group.First());
 
-                                    var emailuser = projectRight.Where(a => studyUsers.Any(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
+                                    var emailuser = projectRight.Where(a => studyUsers.Exists(x => x.UserId == a.UserId)).Select(a => _context.Users.Where(p => p.Id == a.UserId).Select(r => r.Email).FirstOrDefault()).ToList();
                                     foreach (var email in emailuser)
                                     {
                                         _emailSenderRespository.SendLabManagementAbnormalEMail(email, emailObj);
