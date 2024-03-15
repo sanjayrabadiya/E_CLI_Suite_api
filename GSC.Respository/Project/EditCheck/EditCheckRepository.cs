@@ -70,7 +70,7 @@ namespace GSC.Respository.Project.EditCheck
                 SampleResult = r.SampleResult,
                 ErrorMessage = r.ErrorMessage,
                 SourceFormula = r.SourceFormula,
-                StatusName = GetStatusName(r),
+                StatusName = !string.IsNullOrEmpty(r.TargetFormula) && !string.IsNullOrEmpty(r.SourceFormula) ? "Completed" : r.IsOnlyTarget ? "Only Target" : "In-Complete",
                 IsFormula = r.IsFormula,
                 IsReferenceVerify = r.IsReferenceVerify,
                 IsDeleted = r.DeletedDate != null,
@@ -81,22 +81,6 @@ namespace GSC.Respository.Project.EditCheck
                 DeletedDate = r.DeletedDate,
                 DeletedByUser = _context.Users.Where(x => x.Id == r.DeletedBy).FirstOrDefault().UserName,
             }).OrderByDescending(x => x.Id).ToList();
-        }
-
-        private string GetStatusName(Data.Entities.Project.EditCheck.EditCheck r)
-        {
-            if (!string.IsNullOrEmpty(r.TargetFormula) && !string.IsNullOrEmpty(r.SourceFormula))
-            {
-                return "Completed";
-            }
-            else if (r.IsOnlyTarget)
-            {
-                return "Only Target";
-            }
-            else
-            {
-                return "In-Complete";
-            }
         }
 
         public void SaveEditCheck(Data.Entities.Project.EditCheck.EditCheck editCheck)

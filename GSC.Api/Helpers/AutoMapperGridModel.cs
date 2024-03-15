@@ -74,7 +74,7 @@ namespace GSC.Api.Helpers
             CreateMap<CityArea, CityAreaGridDto>()
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.City.State.StateName))
-                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName)).ReverseMap(); ;
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.City.State.Country.CountryName)).ReverseMap();
             CreateMap<City, CityGridDto>()
                 .ForMember(x => x.StateName, x => x.MapFrom(a => a.State.StateName))
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.State.Country.CountryName)).ReverseMap();
@@ -126,7 +126,7 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.DataType, x => x.MapFrom(a => a.DataType))
                  .ForMember(x => x.Length, x => x.MapFrom(a => a.Length))
                  .ForMember(x => x.ValidationType, x => x.MapFrom(a => a.ValidationType))
-                 .ForMember(x => x.CollectionValue, x => x.MapFrom(a => string.Join(", ", a.Values.ToList().Select(x => x.ValueName))))
+                 .ForMember(x => x.CollectionValue, x => x.MapFrom(a => string.Join(", ", a.Values.AsEnumerable().Select(x => x.ValueName))))
                  .ForMember(x => x.DateValidate, x => x.MapFrom(a => a.DateValidate)).ReverseMap();
             CreateMap<PatientStatus, PatientStatusGridDto>().ReverseMap();
             CreateMap<VisitStatus, VisitStatusGridDto>().ReverseMap();
@@ -164,11 +164,9 @@ namespace GSC.Api.Helpers
             CreateMap<EtmfProjectWorkPlace, ETMFWorkplaceGridDto>()
                  .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectName))
                 .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
-                //.ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.ToList().Count() > 0 ? a.ChildProject.ToList().Count() : 0))
                 .ReverseMap();
 
             CreateMap<Data.Entities.Master.Project, ProjectGridDto>()
-                //.ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.ManageSite.City.State.Country.CountryName))
                 .ForMember(x => x.CityName, x => x.MapFrom(a => a.City.CityName))
                 .ForMember(x => x.AreaName, x => x.MapFrom(a => a.CityArea.AreaName))
@@ -183,7 +181,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.RegulatoryTypeName, x => x.MapFrom(a => a.RegulatoryType.RegulatoryTypeName))
                 .ForMember(x => x.ProjectDesignId, x => x.MapFrom(a => a.ProjectDesigns.Where(x => x.DeletedDate == null).Select(r => r.Id).FirstOrDefault()))
                 .ForMember(x => x.ParentProjectCode, x => x.MapFrom(a => a.ChildProject.Where(x => x.DeletedDate == null).Select(r => r.ProjectCode).FirstOrDefault()))
-                .ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.Where(x => x.DeletedDate == null).Count()))
+                .ForMember(x => x.NoofSite, x => x.MapFrom(a => a.ChildProject.Count(x => x.DeletedDate == null)))
                 .ReverseMap();
 
             CreateMap<ManageSite, ManageSiteGridDto>()
@@ -193,11 +191,9 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.SiteAddresses, x => x.MapFrom(a => a.ManageSiteAddress.Select(s => s.SiteAddress).ToList()))
                 .ForMember(x => x.TherapeuticIndicationName, x => x.MapFrom(a => string.Join(", ", a.ManageSiteRole.Where(x => x.DeletedDate == null).Select(s => s.TrialType.TrialTypeName).ToList())))
                 .ReverseMap();
-            //tinku
             CreateMap<VariableTemplate, VariableTemplateGridDto>()
                .ForMember(x => x.DomainName, x => x.MapFrom(a => a.Domain.DomainName))
                .ForMember(x => x.ActivityMode, x => x.MapFrom(a => a.ActivityMode.GetDescription()))
-               //.ForMember(x => x.ActivityName, x => x.MapFrom(a => a.Activity.CtmsActivity.ActivityName))
                .ForMember(x => x.ModuleName, x => x.MapFrom(a => a.AppScreen.ScreenName))
                .ReverseMap();
 
@@ -229,7 +225,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ContactName, x => x.MapFrom(a => a.ManageSite.ContactName))
                .ForMember(x => x.SiteEmail, x => x.MapFrom(a => a.ManageSite.SiteEmail))
                .ForMember(x => x.ManageSiteId, x => x.MapFrom(a => Convert.ToInt32(a.ManageSiteId)))
-               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.ManageSite.Iecirb.ToList().Select(x => x.IECIRBName))))
+               .ForMember(x => x.IECIRBName, x => x.MapFrom(a => string.Join(", ", a.ManageSite.Iecirb.AsEnumerable().Select(x => x.IECIRBName))))
                .ReverseMap();
 
             CreateMap<ProjectDesignVisitStatus, ProjectDesignVisitStatusGridDto>()
@@ -242,8 +238,6 @@ namespace GSC.Api.Helpers
             CreateMap<ProjectDesignTemplateNote, ProjectDesignTemplateNoteGridDto>()
                .ForMember(x => x.ProjectDesignTemplateName, x => x.MapFrom(a => a.ProjectDesignTemplate.TemplateName)).ReverseMap();
             CreateMap<EconsentSetup, EconsentSetupGridDto>()
-              //.ForMember(x => x.PatientStatusData, x => x.MapFrom(a => string.Join(", ", a.PatientStatus.ToList().Select(x => x.PatientStatus.StatusName))))
-              //.ForMember(x => x.ApproveBy, x => x.MapFrom(a => string.Join(", ", a.Roles.ToList().Select(x => x.SecurityRole.RoleShortName))))
               .ForMember(x => x.LanguageName, x => x.MapFrom(a => a.Language.LanguageName))
               .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
               .ForMember(x => x.DocumentStatus, x => x.MapFrom(a => a.DocumentStatusId.GetDescription()))
@@ -319,7 +313,7 @@ namespace GSC.Api.Helpers
 
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
                            .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
-                           .ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId != 0 ? false : false))
+                           .ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId != 0))
                            .ForMember(x => x.RefrenceTypeName, x => x.MapFrom(a => a.RefrenceType.GetDescription()))
                            .ForMember(x => x.EndDateDay, x => x.MapFrom(a => a.EndDate))
                            .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
@@ -331,8 +325,8 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.UserName, x => x.MapFrom(a => a.User.FirstName + ' ' + a.User.LastName))
                           .ReverseMap();
             CreateMap<HolidayMaster, HolidayMasterGridDto>()
-                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite == true ? a.Project.ProjectCode == null? a.Project.ManageSite.SiteName : a.Project.ProjectCode +" - " + a.Project.ManageSite.SiteName: ""))
-                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.IsSite == true ? Convert.ToString(a.Project.ParentProjectId) : a.Project.ProjectCode))
+                .ForMember(x => x.SiteCode, x => x.MapFrom(a => a.IsSite ? a.Project.ProjectCode == null ? a.Project.ManageSite.SiteName : a.Project.ProjectCode + " - " + a.Project.ManageSite.SiteName : ""))
+                .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.IsSite ? Convert.ToString(a.Project.ParentProjectId) : a.Project.ProjectCode))
                 .ReverseMap();
             CreateMap<SupplyLocation, SupplyLocationGridDto>().ReverseMap();
 
@@ -347,7 +341,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.StudyName, x => x.MapFrom(a => a.ProjectDesign.Project.ProjectCode))
                 .ForMember(x => x.VersionStatus, x => x.MapFrom(a => a.VersionStatus.GetDescription()))
                 .ForMember(x => x.GoLiveBy, x => x.MapFrom(a => a.GoLiveByUser.UserName))
-                .ForMember(x => x.PatientStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionStatus.ToList().Select(x => x.PatientStatusId.GetDescription()))))
+                .ForMember(x => x.PatientStatus, x => x.MapFrom(a => string.Join(", ", a.StudyVersionStatus.AsEnumerable().Select(x => x.PatientStatusId.GetDescription()))))
                 .ReverseMap();
 
             CreateMap<WeekEndMaster, WeekEndGridDto>()
@@ -465,7 +459,6 @@ namespace GSC.Api.Helpers
                   .ForMember(x => x.FromProjectId, x => x.MapFrom(a => a.SupplyManagementRequest.FromProjectId))
                   .ForMember(x => x.ToProjectId, x => x.MapFrom(a => a.SupplyManagementRequest.ToProjectId))
                   .ForMember(x => x.IsSiteRequest, x => x.MapFrom(a => a.SupplyManagementRequest.IsSiteRequest))
-                  //.ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
                   .ForMember(x => x.RequestBy, x => x.MapFrom(a => a.SupplyManagementRequest.CreatedByUser.UserName))
                   .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.SupplyManagementRequest.CreatedDate))
                   .ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.SupplyManagementRequest.PharmacyStudyProductType.ProductType.ProductTypeName))
@@ -479,7 +472,6 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.SupplyManagementShipment.SupplyManagementRequest.ToProject.ProjectCode))
                  .ForMember(x => x.Status, x => x.MapFrom(a => a.SupplyManagementShipment.Status))
                  .ForMember(x => x.AuditReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
-                 //.ForMember(x => x.ShipmentReason, x => x.MapFrom(a => a.SupplyManagementShipment.AuditReason.ReasonName))
                  .ForMember(x => x.ShipmentReasonOth, x => x.MapFrom(a => a.SupplyManagementShipment.ReasonOth))
                  .ForMember(x => x.StatusName, x => x.MapFrom(a => a.SupplyManagementShipment.Status.GetDescription()))
                  .ForMember(x => x.ApprovedQty, x => x.MapFrom(a => a.SupplyManagementShipment.ApprovedQty))
@@ -499,11 +491,8 @@ namespace GSC.Api.Helpers
                   .ForMember(x => x.FromProjectCode, x => x.MapFrom(a => a.FromProject.ProjectCode))
                   .ForMember(x => x.ToProjectCode, x => x.MapFrom(a => a.ToProject.ProjectCode))
                   .ForMember(x => x.SupplyManagementRequestId, x => x.MapFrom(a => a.Id))
-                  //.ForMember(x => x.StudyProductTypeName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductType.ProductTypeName))
-                  //.ForMember(x => x.StudyProductTypeUnitName, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType.GetDescription()))
                   .ForMember(x => x.RequestBy, x => x.MapFrom(a => a.CreatedByUser.UserName))
                   .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.CreatedDate))
-                  //.ForMember(x => x.ProductUnitType, x => x.MapFrom(a => a.PharmacyStudyProductType.ProductUnitType))
                   .ForMember(x => x.RequestDate, x => x.MapFrom(a => a.CreatedDate))
                   .ReverseMap();
 
@@ -517,7 +506,6 @@ namespace GSC.Api.Helpers
                  .ForMember(x => x.ApprovedQty, x => x.MapFrom(a => a.ApprovedQty))
                  .ForMember(x => x.ApproveRejectDateTime, x => x.MapFrom(a => a.CreatedDate))
                  .ForMember(x => x.ApproveRejectBy, x => x.MapFrom(a => a.CreatedByUser.UserName))
-                 //.ForMember(x => x.ShipmentReason, x => x.MapFrom(a => a.AuditReason.ReasonName))
                  .ForMember(x => x.ShipmentReasonOth, x => x.MapFrom(a => a.ReasonOth))
                  .ForMember(x => x.ShipmentNo, x => x.MapFrom(a => a.ShipmentNo))
                  .ForMember(x => x.CourierName, x => x.MapFrom(a => a.CourierName))
@@ -553,7 +541,6 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ProjectDesignVisit, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName))
                .ForMember(x => x.ProjectDesignTemplate, a => a.MapFrom(m => m.ProjectDesignVariable.ProjectDesignTemplate.TemplateName))
                .ForMember(x => x.ProjectDesignVariable, a => a.MapFrom(m => m.ProjectDesignVariable.VariableName))
-               // .ForMember(x => x.CollectionValue, a => a.MapFrom(m => string.Join(", ", m.ProjectDesignVariable.Values.Where(z=> m.CollectionValue.Contains(z.ValueName)).Select(x => x.ValueName))))
                .ForMember(x => x.Email, a => a.MapFrom(m => m.Email))
                .ForMember(x => x.EmailTemplate, a => a.MapFrom(m => m.EmailTemplate))
                .ReverseMap();
@@ -637,7 +624,6 @@ namespace GSC.Api.Helpers
             CreateMap<SupplyManagementKITSeries, SupplyManagementKITSeriesGridDto>()
              .ForMember(x => x.StudyCode, x => x.MapFrom(a => a.Project.ProjectCode))
              .ForMember(x => x.RandomizationNo, x => x.MapFrom(a => a.Randomization.RandomizationNumber))
-             //.ForMember(x => x.Reason, x => x.MapFrom(a => a.AuditReason.ReasonName))
              .ForMember(x => x.statusName, x => x.MapFrom(a => a.Status.GetDescription()))
              .ReverseMap();
 
@@ -693,7 +679,7 @@ namespace GSC.Api.Helpers
             .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
             .ForMember(x => x.BarcodeType, x => x.MapFrom(a => a.BarcodeType.BarcodeTypeName))
             .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
-            .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
+            .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate != null))
             .ReverseMap();
 
             CreateMap<SampleBarcode, SampleBarcodeGridDto>()
@@ -706,7 +692,7 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
            .ForMember(x => x.BarcodeType, x => x.MapFrom(a => a.BarcodeType.BarcodeTypeName))
            .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
-           .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
+           .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate != null))
            .ReverseMap();
 
 
@@ -720,7 +706,7 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.VolunteerName, x => x.MapFrom(a => a.Volunteer.FirstName + " " + a.Volunteer.LastName))
            .ForMember(x => x.BarcodeType, x => x.MapFrom(a => a.BarcodeType.BarcodeTypeName))
            .ForMember(x => x.PKBarcodeOption, x => x.MapFrom(a => a.PKBarcodeOption.GetDescription()))
-           .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate == null ? false : true))
+           .ForMember(x => x.isBarcodeGenerated, x => x.MapFrom(a => a.BarcodeDate != null))
            .ReverseMap();
 
             CreateMap<ManageSiteAddress, ManageSiteAddressGridDto>()
@@ -804,7 +790,7 @@ namespace GSC.Api.Helpers
             CreateMap<LabReport, LabReportGridDto>().ReverseMap();
 
             CreateMap<WorkingDay, WorkingDayListDto>()
-            .ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteTypes.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ManageSite.SiteName : s.Project.ProjectCode +" - "+ s.Project.ManageSite.SiteName).ToList())))
+            .ForMember(x => x.SiteCode, x => x.MapFrom(a => string.Join(", ", a.siteTypes.Where(x => x.DeletedDate == null).Select(s => s.Project.ProjectCode == null ? s.Project.ManageSite.SiteName : s.Project.ProjectCode + " - " + s.Project.ManageSite.SiteName).ToList())))
             .ReverseMap();
             CreateMap<SiteTypes, WorkingDayListDto>().ReverseMap();
 
@@ -848,7 +834,7 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.BudgetFlgTypeName, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
                 .ForMember(x => x.UnitType, x => x.MapFrom(a => a.Unit.UnitName))
                 .ForMember(x => x.CurrencyRate, x => x.MapFrom(a => a.CurrencyRate.LocalCurrencyRate))
-                .ForMember(x => x.CurrencyName, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencyName+ " -" + a.CurrencyRate.Currency.CurrencySymbol))
+                .ForMember(x => x.CurrencyName, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencyName + " -" + a.CurrencyRate.Currency.CurrencySymbol))
                 .ForMember(x => x.GlobleCurrencyId, x => x.MapFrom(a => a.CurrencyRate.GlobalCurrencyId))
                 .ForMember(x => x.LocalCurrencySymbol, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencySymbol))
                 .ReverseMap();
