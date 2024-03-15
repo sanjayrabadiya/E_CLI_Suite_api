@@ -45,7 +45,6 @@ namespace GSC.Api.Controllers.Volunteer
             ILocationRepository locationRepository,
             IUploadSettingRepository uploadSettingRepository,
             IVolunteerAuditTrailRepository volunteerAuditTrailRepository,
-            IUserRecentItemRepository userRecentItemRepository,
             IRolePermissionRepository rolePermissionRepository,
             IAttendanceRepository attendanceRepository,
             IVolunteerSummaryReport volunteerSummaryReport,
@@ -68,7 +67,7 @@ namespace GSC.Api.Controllers.Volunteer
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var volunteers = "";//_volunteerRepository.GetVolunteerDetail(isDeleted);
+            var volunteers = "";
             return Ok(volunteers);
         }
 

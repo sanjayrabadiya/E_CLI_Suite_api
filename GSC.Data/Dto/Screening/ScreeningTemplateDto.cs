@@ -8,7 +8,6 @@ namespace GSC.Data.Dto.Screening
     public class ScreeningVisitTree
     {
         public int ScreeningVisitId { get; set; }
-        //public string ProjectDesignVisitName { get; set; }
         public string ScreeningVisitName { get; set; }
         public int? VisitSeqNo { get; set; }
         public int ProjectDesignVisitId { get; set; }
