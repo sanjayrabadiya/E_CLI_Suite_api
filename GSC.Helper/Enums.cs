@@ -24,15 +24,6 @@ namespace GSC.Helper
         [Description("Active users")] ActiveUsers = 3,
         [Description("Login/Logout users")] LoginLogoutUsers = 4,
     }
-
-    //public enum RegulatoryType : short
-    //{
-    //    [Description("IEC/IRB")] Iecirb = 1,
-    //    [Description("T-License")] License = 2,
-    //    [Description("NOC")] Noc = 3,
-    //    [Description("Others")] Others = 4
-    //}
-
     public enum FreezerType : short
     {
         [Description("Freezer")] Freezer = 1,
@@ -571,21 +562,17 @@ namespace GSC.Helper
     {
         [Description("Volunteer")] Volunteer = 1,
         [Description("Common")] Common = 2,
-        //[Description("Attendance")] Attendance = 3,
         [Description("General Configuration")] GeneralConfiguration = 4,
         [Description("User management")] UserManagement = 5,
         [Description("Study Set Up")] StudySetUp = 6,
-        //[Description("Screening")] Screening = 7,
         [Description("Design library")] DesignLibrary = 8,
         [Description("Master")] Master = 9,
-        //[Description("Barcode")] Barcode = 10,
         [Description("Medical Coding")] MedicalCoding = 13,
         [Description("Data Management")] DataManagement = 14,
         [Description("ETMF")] ETMF = 15,
         [Description("Report")] Report = 16,
         [Description("Site Management")] SiteManagement = 17,
         [Description("Inform Consent")] InformConsent = 18,
-        //[Description("Study Output")] StudyOutput = 18,
         [Description("CTMS")] CTMS = 22,
         [Description("Adverse Event")] AdverseEvent = 23
     }

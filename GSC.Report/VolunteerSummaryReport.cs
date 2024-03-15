@@ -25,9 +25,7 @@ namespace GSC.Report
 {
     public class VolunteerSummaryReport : IVolunteerSummaryReport
     {
-        private IHostingEnvironment _hostingEnvironment;
-        private readonly IGSCContext _context;
-        private readonly IAppSettingRepository _appSettingRepository;
+        private readonly IHostingEnvironment _hostingEnvironment;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IVolunteerAddressRepository _volunteerAddressRepository;
@@ -36,28 +34,15 @@ namespace GSC.Report
         public readonly IVolunteerDocumentRepository _volunteerDocumentRepository;
         public readonly IVolunteerBlockHistoryRepository _volunteerBlockHistoryRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IMapper _mapper;
         private readonly ICompanyRepository _companyRepository;
         private readonly IClientRepository _clientRepository;
         private readonly IPageConfigurationRepository _pageConfigurationRepository;
-
-        private readonly PdfFont watermarkerfornt = new PdfStandardFont(PdfFontFamily.TimesRoman, 120, PdfFontStyle.Bold);
-        private readonly PdfFont extralargeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 20, PdfFontStyle.Bold);
-        private readonly PdfFont largeheaderfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 16, PdfFontStyle.Bold);
         private readonly PdfFont headerfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 14, PdfFontStyle.Bold);
-        private readonly PdfFont regularfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 12);
-        private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
-        private readonly Stream fontStream;
-
-        private PdfDocument document = null;
+        private readonly PdfFont regularfont;
+        private readonly PdfFont smallfont;
+        private PdfGrid pdfGrid = null;
         private PdfLayoutResult tocresult = null;
-        Dictionary<PdfPageBase, int> pages = new Dictionary<PdfPageBase, int>();
-        private List<TocIndexCreate> _pagenumberset = new List<TocIndexCreate>();
-        PdfGrid pdfGrid = null;
-
         public VolunteerSummaryReport(IHostingEnvironment hostingEnvironment,
-            IGSCContext context,
-            IAppSettingRepository appSettingRepository,
             IJwtTokenAccesser jwtTokenAccesser,
             IVolunteerRepository volunteerRepository,
             IVolunteerAddressRepository volunteerAddressRepository,
@@ -68,13 +53,10 @@ namespace GSC.Report
         IUploadSettingRepository uploadSettingRepository,
         ICompanyRepository companyRepository,
         IClientRepository clientRepository,
-            IMapper mapper,
             IPageConfigurationRepository pageConfigurationRepository
         )
         {
             _hostingEnvironment = hostingEnvironment;
-            _context = context;
-            _appSettingRepository = appSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _volunteerRepository = volunteerRepository;
             _volunteerAddressRepository = volunteerAddressRepository;
@@ -86,9 +68,9 @@ namespace GSC.Report
             _companyRepository = companyRepository;
             _clientRepository = clientRepository;
             _pageConfigurationRepository = pageConfigurationRepository;
-            _mapper = mapper;
-            fontStream = FilePathConvert();
+            Stream fontStream = FilePathConvert();
             regularfont = new PdfTrueTypeFont(fontStream, 12);
+            smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 8);
         }
 
         private Stream FilePathConvert()
@@ -103,10 +85,9 @@ namespace GSC.Report
         {
             var volunteerPage = _pageConfigurationRepository.GetPageConfigurationByAppScreen("mnu_volunteerdetail");
 
-            VolunteerSearchDto search = new VolunteerSearchDto();
             var volunteer = _volunteerRepository.GetVolunteerDetail(false, VolunteerID);
 
-            document = new PdfDocument();
+            PdfDocument document = new PdfDocument();
 
             document.PageSettings.Margins.Top = Convert.ToInt32(0.5 * 100);
             document.PageSettings.Margins.Bottom = Convert.ToInt32(0.5 * 100);
@@ -270,14 +251,14 @@ namespace GSC.Report
 
             DesginVoluteerAddress(VolunteerID, header, headerStyle, layoutFormat);
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactName").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactNo").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactName").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNo").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactName").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactNo").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible)
             {
                 /* Contact Detail Grid */
                 tocresult = AddString("Contact Details", tocresult.Page, new Syncfusion.Drawing.RectangleF(0, (tocresult.Bounds.Bottom + 10) > 605 ? (tocresult.Page.GetClientSize().Height + 10) : (tocresult.Bounds.Bottom + 10), tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height), PdfBrushes.Black, headerfont, layoutFormat);
@@ -317,22 +298,22 @@ namespace GSC.Report
             //Creates the datasource for the table
             DataTable addressDetails = new DataTable();
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "address").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "address").IsVisible)
                 addressDetails.Columns.Add("Address");
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "countryId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "countryId").IsVisible)
                 addressDetails.Columns.Add("Country");
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "stateId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "stateId").IsVisible)
                 addressDetails.Columns.Add("State");
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "cityId").IsVisible)
                 addressDetails.Columns.Add("City");
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityAreaId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "cityAreaId").IsVisible)
                 addressDetails.Columns.Add("City Area");
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "zip").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "zip").IsVisible)
                 addressDetails.Columns.Add("Zip/Post Code");
 
             addressDetails.Columns.Add("Current Address?");
@@ -343,36 +324,24 @@ namespace GSC.Report
             {
                 foreach (var address in volunteerAddress)
                 {
-
-                    //addressDetails.Rows.Add(new object[] {
-                    //                                  address.Location.Address
-                    //                                  , address.Location.CountryName
-                    //                                  , address.Location.StateName
-                    //                                , address.Location.CityName
-                    //                                , address.Location.CityAreaName
-                    //                                , address.Location.Zip
-                    //                                , address.IsCurrent ? "YES" : "NO"
-                    //                                , address.IsPermanent ? "YES":"NO"
-                    //                            });
-
                     var dataRow = addressDetails.NewRow();
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "address").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "address").IsVisible)
                         dataRow["Address"] = address.Location.Address;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "countryId").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "countryId").IsVisible)
                         dataRow["Country"] = address.Location.CountryName;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "stateId").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "stateId").IsVisible)
                         dataRow["State"] = address.Location.StateName;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityId").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "cityId").IsVisible)
                         dataRow["City"] = address.Location.CityName;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "cityAreaId").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "cityAreaId").IsVisible)
                         dataRow["City Area"] = address.Location.CityAreaName;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "zip").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "zip").IsVisible)
                         dataRow["Zip/Post Code"] = address.Location.Zip;
 
                     dataRow["Current Address?"] = address.IsCurrent ? "YES" : "NO";
@@ -389,7 +358,7 @@ namespace GSC.Report
 
 
             /* Address Detail Grid */
-            pdfGrid = new PdfGrid();
+            PdfGrid pdfGrid = new PdfGrid();
             //Assign data source
             pdfGrid.DataSource = addressDetails;
             pdfGrid.AllowRowBreakAcrossPages = true;
@@ -425,26 +394,26 @@ namespace GSC.Report
             //Creates the datasource for the table
             DataTable contactDetails = new DataTable();
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactName").IsVisible)
                 contactDetails.Columns.Add("Contact Name");
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
                 contactDetails.Columns.Add("Contact No.");
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
                 contactDetails.Columns.Add("Contact No. 2");
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
                 contactDetails.Columns.Add("Contact");
 
 
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
-                || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactName").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNo").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
+                || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
                 contactDetails.Columns.Add("Default Contact?");
 
-            if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactNo").IsVisible
-               || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
-               || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactName").IsVisible)
+            if (volunteerPage.Find(q => q.ActualFieldName == "emergencycontactNo").IsVisible
+               || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
+               || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactName").IsVisible)
                 contactDetails.Columns.Add("Emergency Contact?");
 
 
@@ -453,38 +422,30 @@ namespace GSC.Report
                 foreach (var contact in volunteercontact)
                 {
 
-                    //contactDetails.Rows.Add(new object[] {
-                    //                                  contact.ContactTypeName
-                    //                                , contact.ContactNo
-                    //                                , contact.ContactName
-                    //                                , contact.IsDefault ? "YES" : "NO"
-                    //                                , contact.IsEmergency ? "YES":"NO"
-                    //                            });
-
                     var dataRow = contactDetails.NewRow();
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
                         dataRow["Contact"] = contact.ContactTypeName;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNo").IsVisible)
                         dataRow["Contact No."] = contact.ContactNo;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible)
                         dataRow["Contact No. 2"] = contact.ContactNoTwo;
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactName").IsVisible)
                         dataRow["Contact Name"] = contact.ContactName;
 
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactName").IsVisible
-                        || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNo").IsVisible
-                        || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
-                        || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "defaultcontactName").IsVisible
+                        || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNo").IsVisible
+                        || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactNoTwo").IsVisible
+                        || volunteerPage.Find(q => q.ActualFieldName == "defaultcontactTypeId").IsVisible)
                         dataRow["Default Contact?"] = contact.IsDefault ? "YES" : "NO";
 
-                    if (volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactNo").IsVisible
-                       || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
-                       || volunteerPage.FirstOrDefault(q => q.ActualFieldName == "emergencycontactName").IsVisible)
+                    if (volunteerPage.Find(q => q.ActualFieldName == "emergencycontactNo").IsVisible
+                       || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactTypeId").IsVisible
+                       || volunteerPage.Find(q => q.ActualFieldName == "emergencycontactName").IsVisible)
                         dataRow["Emergency Contact?"] = contact.IsEmergency ? "YES" : "NO";
 
                     contactDetails.Rows.Add(dataRow);
@@ -541,7 +502,6 @@ namespace GSC.Report
 
                     languageDetails.Rows.Add(new object[] {
                                                       language.LanguageName
-                                                    //, language.Note
                                                     , language.IsRead ? "YES" : "NO"
                                                     , language.IsWrite ? "YES":"NO"
                                                     , language.IsSpeak ? "YES":"NO"
@@ -665,21 +625,11 @@ namespace GSC.Report
                 foreach (var data in volunteerDocument.Where(x => x.MimeType == "jpeg" || x.MimeType == "jpg" || x.MimeType == "png"))
                 {
                     PdfPage page = document.Pages.Add();
-                    int endIndex = document.Pages.Count - 1;
                     PdfBitmap image = new PdfBitmap(GetStreamFromUrl(data.PathName));
-
                     PdfLayoutFormat format = new PdfLayoutFormat();
                     format.Break = PdfLayoutBreakType.FitPage;
                     format.Layout = PdfLayoutType.OnePage;
-                    RectangleF imageBounds = new RectangleF(0, 0, 500, 600);
-
-                    //image.Draw(page, imageBounds, format);
                     page.Graphics.DrawImage(image, 0, 10, 500, 500);
-                }
-
-                foreach (var data in volunteerDocument.Where(x => x.MimeType == "pdf"))
-                {
-
                 }
             }
         }
@@ -786,7 +736,6 @@ namespace GSC.Report
 
             PdfCompositeField compositeField = new PdfCompositeField(font, brush, "Page {0} of {1}", pageNumber, count);
             compositeField.Bounds = footer.Bounds;
-            //string prientedby = "Printed By : " + _jwtTokenAccesser.UserName + " (" + DateTime.Now.ToString("dd-MM-yyyy h:mm tt") + ")";
             string prientedby = "";
             PdfCompositeField compositeFieldprintedby = new PdfCompositeField(font, brush, prientedby);
             compositeFieldprintedby.Bounds = footer.Bounds;
@@ -814,29 +763,7 @@ namespace GSC.Report
             return result;
         }
 
-        private void SetPageNumber()
-        {
 
-            for (int i = 0; i < document.Pages.Count; i++)
-            {
-                PdfPageBase page = document.Pages[i] as PdfPageBase;
-                //Add the page and index to dictionary 
-                pages.Add(page, i);
-            }
-
-            for (int i = 0; i < _pagenumberset.Count; i++)
-            {
-                PdfPageBase page = _pagenumberset[i].bookmark.Destination.Page;
-                if (pages.ContainsKey(page))
-                {
-                    int pagenumber = pages[page];
-                    pagenumber++;
-                    PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                    pageNumber.Draw(_pagenumberset[i].TocPage, _pagenumberset[i].Point);
-                }
-            }
-
-        }
 
         public FileStreamResult GetVolunteerSearchDesign(IList<VolunteerGridDto> volunteerGridDto)
         {

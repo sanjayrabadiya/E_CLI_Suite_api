@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Mail;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
@@ -66,7 +67,6 @@ namespace GSC.Respository.EmailSender
         }
 
         public async Task SendForgotPasswordEMail(string toMail, string mobile, string password, string userName, string companyName)
-        //void SendForgotPasswordEMail(string toMail, string password, string userName)
         {
             var emailMessage = ConfigureEmail("forgotpass", userName);
             emailMessage.SendTo = toMail;
@@ -249,21 +249,19 @@ namespace GSC.Respository.EmailSender
 
         public async Task SendEmailOfScreenedPatient(string toMail, string patientName, string userName, string password, string ProjectName, string mobile, int sendtype, bool isSendEmail, bool isSendSMS)
         {
-            if (isSendEmail == true || isSendSMS == true)
+            if (isSendEmail || isSendSMS)
             {
                 var emailMessage = ConfigureEmail("PatientScreened", userName);
                 emailMessage.SendTo = toMail;
                 emailMessage.MessageBody = ReplaceBodyForPatientScreened(emailMessage.MessageBody, userName, patientName, ProjectName, password);
                 emailMessage.Subject = ReplaceSubjectForPatientScreened(emailMessage.Subject, ProjectName);
-                if (toMail != null && toMail != "" && (sendtype == 1 || sendtype == 2))
+                if (toMail != null && toMail != "" && (sendtype == 1 || sendtype == 2) && isSendEmail)
                 {
-                    if (isSendEmail == true)
-                        _emailService.SendMail(emailMessage);
+                    _emailService.SendMail(emailMessage);
                 }
-                if (mobile != "" && (sendtype == 0 || sendtype == 2))
+                if (mobile != "" && (sendtype == 0 || sendtype == 2) && isSendSMS)
                 {
-                    if (isSendSMS == true)
-                        await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
+                    await SendSMS(mobile, emailMessage.MessageBody, emailMessage.DLTTemplateId);
                 }
             }
         }
@@ -282,7 +280,6 @@ namespace GSC.Respository.EmailSender
         {
             var emailMessage = ConfigureEmail("empreg", userName);
             emailMessage.SendTo = toMail;
-            //emailMessage.MessageBody = ReplaceBody(emailMessage.MessageBody, userName, password);
             emailMessage.MessageBody = "Message offline alert";
             _emailService.SendMail(emailMessage);
         }
@@ -339,13 +336,13 @@ namespace GSC.Respository.EmailSender
         }
         public async Task SendSMS(string mobile, string messagebody, string? DLTTemplateId)
         {
-            var smstemplate = messagebody;//emailMessage.MessageBody;
+            var smstemplate = messagebody;
             smstemplate = smstemplate.Replace("<p>", "");
             smstemplate = smstemplate.Replace("</p>", "\r\n");
             smstemplate = smstemplate.Replace("<strong>", "");
             smstemplate = smstemplate.Replace("</strong>", "");
             smstemplate = Regex.Replace(smstemplate, "<.*?>", String.Empty);
-            var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").ToList().FirstOrDefault();
+            var smssetting = _iSMSSettingRepository.FindBy(x => x.KeyName == "msg91").AsEnumerable().FirstOrDefault();
             var url = smssetting.SMSurl;
             url = url.Replace("##AuthKey##", smssetting.AuthKey);
             url = url.Replace("##Mobile##", "91" + mobile);
@@ -357,23 +354,22 @@ namespace GSC.Respository.EmailSender
             else
                 url = url.Replace("&DLT_TE_ID=##DLTTemplateId##", "");
             await HttpService.Get(_httpClient, url, null);
-            //var responseresult = _aPICall.Get(url);
         }
         public async Task SendSMSParticaularStudyWise(string mobile, string messagebody, string? DLTTemplateId)
         {
-            var smstemplate = messagebody;//emailMessage.MessageBody;
+            var smstemplate = messagebody;
             smstemplate = smstemplate.Replace("<p>", "");
             smstemplate = smstemplate.Replace("</p>", "\r\n");
             smstemplate = smstemplate.Replace("<strong>", "");
             smstemplate = smstemplate.Replace("</strong>", "");
             smstemplate = Regex.Replace(smstemplate, "<.*?>", String.Empty);
 
-            var url = "https://api.msg91.com/api/sendhttp.php?authkey=##AuthKey##&mobiles=##Mobile##&country=91&message=##message##&sender=##senderid##&route=##route##&DLT_TE_ID=##DLTTemplateId##&dev_mode=1";
+            var url = $"https://api.msg91.com/api/sendhttp.php?authkey=##AuthKey##&mobiles=##Mobile##&country=91&message=##message##&sender=##senderid##&route=##route##&DLT_TE_ID=##DLTTemplateId##&dev_mode=1";
             url = url.Replace("##AuthKey##", "349610As7MvryDDp5fdb3d6bP1");
             url = url.Replace("##Mobile##", "91" + mobile);
             url = url.Replace("##senderid##", "425096");
             url = url.Replace("##route##", "1");
-            url = url.Replace("##message##", Uri.EscapeDataString(smstemplate));//emailMessage.MessageBody
+            url = url.Replace("##message##", Uri.EscapeDataString(smstemplate));
             if (DLTTemplateId != null && DLTTemplateId != "")
                 url = url.Replace("##DLTTemplateId##", DLTTemplateId);
             else
@@ -399,7 +395,6 @@ namespace GSC.Respository.EmailSender
 
         public EmailMessage ConfigureEmail(string keyName, string userName)
         {
-            //        var user = _context.Users.Where(x => x.UserName == userName && x.DeletedDate == null).FirstOrDefault();
             var result = All.AsNoTracking().Include(x => x.EmailSetting).FirstOrDefault(x =>
                x.DeletedDate == null && x.KeyName == keyName);
             var emailMessage = new EmailMessage();
@@ -680,13 +675,24 @@ namespace GSC.Respository.EmailSender
             body = Regex.Replace(body, "##siteCode##", email.SiteCode, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##visit##", email.Visit, RegexOptions.IgnoreCase);
 
-            string temp = "<table style='width: 100 %;'><tr><th style='border: 1px solid black;'>Test Name</th><th style='border: 1px solid black;'>Result</th><th style='border: 1px solid black;'>Low Range</th><th style='border: 1px solid black;'>High Range</th><th style='border: 1px solid black;'>Flag</th></tr>";
+            StringBuilder tempBuilder = new StringBuilder();
+            tempBuilder.Append("<table style='width: 100 %;'>");
+            tempBuilder.Append("<tr><th style='border: 1px solid black;'>Test Name</th><th style='border: 1px solid black;'>Result</th><th style='border: 1px solid black;'>Low Range</th><th style='border: 1px solid black;'>High Range</th><th style='border: 1px solid black;'>Flag</th></tr>");
 
             foreach (var item in email.LabManagementEmailDetail)
             {
-                temp += "<tr><td style='border: 1px solid black;'>" + item.TestName + "</td><td style='border: 1px solid black;'>" + item.Result + "</td><td style='border: 1px solid black;'> " + item.ReferenceRangeLow + "</td><td style='border: 1px solid black;'>" + item.ReferenceRangeHigh + "</td><td style='border: 1px solid black;'>" + item.AbnoramalFlag + "</td></tr>";
+                tempBuilder.Append("<tr>");
+                tempBuilder.Append("<td style='border: 1px solid black;'>").Append(item.TestName).Append("</td>");
+                tempBuilder.Append("<td style='border: 1px solid black;'>").Append(item.Result).Append("</td>");
+                tempBuilder.Append("<td style='border: 1px solid black;'>").Append(item.ReferenceRangeLow).Append("</td>");
+                tempBuilder.Append("<td style='border: 1px solid black;'>").Append(item.ReferenceRangeHigh).Append("</td>");
+                tempBuilder.Append("<td style='border: 1px solid black;'>").Append(item.AbnoramalFlag).Append("</td>");
+                tempBuilder.Append("</tr>");
             }
-            temp += "</table>";
+
+            tempBuilder.Append("</table>");
+            string temp = tempBuilder.ToString();
+
             body = Regex.Replace(body, "##appendBody##", temp, RegexOptions.IgnoreCase);
             return body;
         }
@@ -702,8 +708,8 @@ namespace GSC.Respository.EmailSender
         {
             var emailMessage = ConfigureEmail("SendForVerification", "");
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
-            emailMessage.Subject = "Verification template received.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";
+            emailMessage.Subject = "Verification template received.";
             _emailService.SendMail(emailMessage);
         }
 
@@ -711,8 +717,8 @@ namespace GSC.Respository.EmailSender
         {
             var emailMessage = ConfigureEmail("SendBackByApprover", "");
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
-            emailMessage.Subject = "Rejected Verification By Approver.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";
+            emailMessage.Subject = "Rejected Verification By Approver.";
             _emailService.SendMail(emailMessage);
         }
 
@@ -720,8 +726,8 @@ namespace GSC.Respository.EmailSender
         {
             var emailMessage = ConfigureEmail("SendBackByApprover", "");
             emailMessage.SendTo = toMail;
-            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";//ReplaceBodyForLabManagementEmail(emailMessage.MessageBody, email);
-            emailMessage.Subject = "Approved Verification By Approver.";//ReplaceSubjectForLabManagementEmail(emailMessage.Subject, email.ScreeningNumber);
+            emailMessage.MessageBody = "Check Verification you have got an verification template for verified.";
+            emailMessage.Subject = "Approved Verification By Approver.";
             _emailService.SendMail(emailMessage);
         }
         //for variable email .prakash chauhan 14-05-2022
@@ -741,10 +747,9 @@ namespace GSC.Respository.EmailSender
             if (email.ScreeningEntryId == 0)
             {
                 var data = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit).Where(x => x.Id == email.Id).FirstOrDefault();
-                if (data != null)
+                if (data != null && (data.ScreeningTemplate != null && data.ScreeningTemplate.ScreeningVisit != null))
                 {
-                    if (data.ScreeningTemplate != null && data.ScreeningTemplate.ScreeningVisit != null)
-                        screeningentryid = data.ScreeningTemplate.ScreeningVisit.ScreeningEntryId;
+                    screeningentryid = data.ScreeningTemplate.ScreeningVisit.ScreeningEntryId;
                 }
             }
             else

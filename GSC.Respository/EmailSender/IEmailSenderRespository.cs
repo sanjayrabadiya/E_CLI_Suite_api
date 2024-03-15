@@ -55,7 +55,7 @@ namespace GSC.Respository.EmailSender
 
         void SendEmailonEmailvariableConfiguration(EmailConfigurationEditCheckSendEmail email, int userId, string toMails, string tophone);
 
-        void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight item, Randomization randomization);
+        void SendEmailonVisitStatus(VisitEmailConfigurationGridDto email, Data.Entities.ProjectRight.ProjectRight data, Randomization randomization);
 
         void SendALettersMailtoInvestigator(string fullPath, string email, string body, string CtmsActivity, string ScheduleStartDate);
 
