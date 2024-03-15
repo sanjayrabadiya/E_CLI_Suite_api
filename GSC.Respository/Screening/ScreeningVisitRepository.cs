@@ -398,14 +398,11 @@ namespace GSC.Respository.Screening
 
             ScreeningVisitStatus? visitStatus = ScreeningVisitStatus.InProgress;
 
-            if (screeningTemplate.Status >= ScreeningTemplateStatus.Submitted)
-            {
-                if (!_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
+            if (screeningTemplate.Status >= ScreeningTemplateStatus.Submitted && !_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
                 && x.ScreeningVisitId == screeningTemplate.ScreeningVisitId && !x.IsDisable && x.Status < ScreeningTemplateStatus.Submitted))
-                {
+            {
                     statusDate = _jwtTokenAccesser.GetClientDate();
                     visitStatus = ScreeningVisitStatus.Completed;
-                }
             }
 
             designVisitStatus.ForEach(x =>

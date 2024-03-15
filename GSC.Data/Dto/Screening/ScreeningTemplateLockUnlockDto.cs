@@ -6,17 +6,6 @@ using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Screening
 {
-    //public class ScreeningTemplateLockUnlockParams
-    //{
-    //    public int? ProjectDesignVisitId { get; set; }
-    //    public int ProjectId { get; set; }
-    //    public int? ProjectDesingId { get; set; }
-    //    public int? VolunteerId { get; set; }
-    //    public bool IsLock { get; set; }
-    //    public List<int> Ids { get; set; }
-    //    public ScreeningTemplateStatus Status { get; set; }
-    //}
-
     public class ScreeningTemplateLockUnlockDto
     {
         public int Id { get; set; }

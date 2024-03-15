@@ -11,7 +11,6 @@ using GSC.Domain.Context;
 using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Screening;
-using GSC.Respository.Volunteer;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
@@ -32,7 +31,6 @@ namespace GSC.Api.Controllers.Screening
         private readonly IGSCContext _context;
         public ScreeningEntryController(IScreeningEntryRepository screeningEntryRepository,
             IUnitOfWork uow, IMapper mapper,
-            IVolunteerRepository volunteerRepository,
             IAttendanceRepository attendanceRepository,
             IProjectDesignPeriodRepository projectDesignPeriodRepository,
             IScreeningProgress screeningProgress,

@@ -1,10 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
-using GSC.Respository.Configuration;
-using GSC.Respository.Project.Workflow;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
@@ -16,11 +13,7 @@ namespace GSC.Respository.Screening
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        public ScreeningTemplateLockUnlockRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUploadSettingRepository uploadSettingRepository,
-            IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IProjectWorkflowRepository projectWorkflowRepository)
+        public ScreeningTemplateLockUnlockRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;

@@ -589,10 +589,8 @@ namespace GSC.Respository.Screening
             if (!String.IsNullOrEmpty(pt.PreLabel))
                 str = pt.PreLabel;
 
-            if (!seq.IsTemplateSeqNo)
+            if (!seq.IsTemplateSeqNo && t.RepeatSeqNo != null)
             {
-                if (t.RepeatSeqNo != null)
-                {
                     if (!String.IsNullOrEmpty(seq.RepeatPrefix))
                         str += ((!String.IsNullOrEmpty(pt.PreLabel)) ? seq.SeparateSign : "") + seq.RepeatPrefix;
                     if (seq.RepeatSeqNo != null)
@@ -602,7 +600,6 @@ namespace GSC.Respository.Screening
                         else
                             str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
                     }
-                }
             }
             return str;
         }
