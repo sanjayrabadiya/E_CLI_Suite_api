@@ -8,7 +8,6 @@ using GSC.Respository.Volunteer;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 
 namespace GSC.Api.Controllers.Volunteer
 {
@@ -67,12 +66,10 @@ namespace GSC.Api.Controllers.Volunteer
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var volunteerQueryValue = _volunteerQueryRepository.GetLatest(volunteerQueryCommentDto.VolunteerId, volunteerQueryCommentDto.FieldName);
 
-            if (volunteerQueryValue != null) {
-                if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsDriect == true)
+                if (volunteerQueryValue != null && volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsDriect)
                 {
                     return BadRequest("Role is different, you can't close query.");
                 }
-            }
 
             if (volunteerQueryValue == null)
                 volunteerQueryCommentDto.QueryStatus = CommentStatus.Open;
@@ -84,9 +81,9 @@ namespace GSC.Api.Controllers.Volunteer
             {
                 if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole == _jwtTokenAccesser.RoleId)
                     volunteerQueryCommentDto.QueryStatus = CommentStatus.Closed;
-                else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsAnswered == true)
+                else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsAnswered)
                     volunteerQueryCommentDto.QueryStatus = CommentStatus.Answered;
-                else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsDriect == true)
+                else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId && volunteerQueryCommentDto.IsDriect)
                     volunteerQueryCommentDto.QueryStatus = CommentStatus.Answered;
                 else if (volunteerQueryValue.QueryStatus == CommentStatus.Open && volunteerQueryValue.UserRole != _jwtTokenAccesser.RoleId)
                     volunteerQueryCommentDto.QueryStatus = CommentStatus.Resolved;
@@ -102,7 +99,7 @@ namespace GSC.Api.Controllers.Volunteer
             _volunteerQueryRepository.Add(volunteerQueryComment);
 
             if (_uow.Save() <= 0)
-                throw new Exception("Creating Value Query failed on save.");
+                return Ok(new Exception("Creating Value Query failed on save."));
 
             return Ok(volunteerQueryComment.Id);
         }

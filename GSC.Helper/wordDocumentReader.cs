@@ -4,7 +4,6 @@ using System.Text;
 
 namespace GSC.Helper
 {
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
 
     public class SectionsHeader
     {
@@ -19,9 +18,6 @@ namespace GSC.Helper
         public bool IsReviewed { get; set; }
         public int ReviewTime { get; set; }
     }
-
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
-    // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse); 
     public class Tab
     {
         public string tabJustification { get; set; }
@@ -577,6 +573,7 @@ namespace GSC.Helper
 
     public class HeadersFooters
     {
+        //Empty class
     }
 
     public class SectionFormat

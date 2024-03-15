@@ -19,16 +19,11 @@ namespace GSC.Respository.Etmf
 {
     public class ProjectWorkplaceDetailRepository : GenericRespository<EtmfProjectWorkPlace>, IProjectWorkplaceDetailRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        private readonly IMapper _mapper;
-        public ProjectWorkplaceDetailRepository(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public ProjectWorkplaceDetailRepository(IGSCContext context)
            : base(context)
         {
             _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
         }
 
         public List<DropDownDto> GetCountryByWorkplace(int ParentProjectId)
@@ -55,7 +50,7 @@ namespace GSC.Respository.Etmf
                         select new DropDownDto
                         {
                             Id = workplacedetail.Id,
-                            Value =workplacedetail.ItemName
+                            Value = workplacedetail.ItemName
                         }).ToList();
 
             return data;

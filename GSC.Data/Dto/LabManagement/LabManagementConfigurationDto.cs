@@ -42,7 +42,6 @@ namespace GSC.Data.Dto.LabManagement
     public class LabManagementConfigurationEdit
     {
         public int Id { get; set; }
-       // public int SecurityRoleId { get; set; }
         public int?[] UserIds { get; set; }
     }
 }

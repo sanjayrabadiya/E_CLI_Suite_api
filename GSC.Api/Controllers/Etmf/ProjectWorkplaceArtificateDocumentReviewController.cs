@@ -75,7 +75,7 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult SendBackDocument(int id, bool isReview, int? seqNo)
         {
             var projectArtificateDocumentReviewDto = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
-            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && x.IsReviewed == false && x.DeletedDate == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).FirstOrDefault();
+            && x.UserId == _jwtTokenAccesser.UserId && x.SendBackDate == null && !x.IsReviewed && x.DeletedDate == null && x.SequenceNo == (seqNo == 0 ? null : seqNo)).First();
 
             projectArtificateDocumentReviewDto.IsSendBack = true;
             projectArtificateDocumentReviewDto.IsReviewed = isReview;
@@ -83,18 +83,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectArtificateDocumentReview = _mapper.Map<ProjectArtificateDocumentReview>(projectArtificateDocumentReviewDto);
             _projectWorkplaceArtificateDocumentReviewRepository.Update(projectArtificateDocumentReview);
 
-            //if (isReview)
-            //{
-            //    var projectArtificateDocumentReviewDtos = _projectWorkplaceArtificateDocumentReviewRepository.FindByInclude(x => x.ProjectWorkplaceArtificatedDocumentId == id
-            //    && x.UserId == _jwtTokenAccesser.UserId && x.IsSendBack == true && x.IsReviewed == false && x.DeletedDate == null);
-            //    foreach (var item in projectArtificateDocumentReviewDtos)
-            //    {
-            //        item.IsReviewed = true;
-            //        _projectWorkplaceArtificateDocumentReviewRepository.Update(item);
-            //    }
-            //}
-
-            if (_uow.Save() <= 0) throw new Exception("Updating Send Back failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Send Back failed on save.");
+                return BadRequest(ModelState);
+            }
             _projectWorkplaceArtificateDocumentReviewRepository.SendMailToSendBack(projectArtificateDocumentReview);
 
             if (seqNo > 0 && isReview)
@@ -124,9 +117,9 @@ namespace GSC.Api.Controllers.Etmf
             {
                 var record = _projectWorkplaceArtificateDocumentReviewRepository.Find(item);
 
-                var allRecords = _projectWorkplaceArtificateDocumentReviewRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && q.IsReviewed == false);
+                var allRecords = _projectWorkplaceArtificateDocumentReviewRepository.All.Where(q => q.UserId == record.UserId && q.DeletedDate == null && q.ProjectWorkplaceArtificatedDocumentId == record.ProjectWorkplaceArtificatedDocumentId && !q.IsReviewed);
 
-                if (allRecords == null)
+                if (!allRecords.Any())
                     return NotFound();
 
                 foreach (var resultRecord in allRecords)

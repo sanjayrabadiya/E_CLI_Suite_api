@@ -28,7 +28,6 @@ using GSC.Data.Dto.Project.Schedule;
 using GSC.Data.Dto.Project.StudyLevelFormSetup;
 using GSC.Data.Dto.Project.Workflow;
 using GSC.Data.Dto.ProjectRight;
-//using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Dto.UserMgt;
@@ -85,7 +84,6 @@ namespace GSC.Api.Helpers
             CreateMap<InsertStateDto, State>();
             CreateMap<UpdateStateDto, State>();
             CreateMap<State, StateDto>();
-            //.ForMember(x => x.CountryName, opt => opt.MapFrom(y => y.Country.CountryName));
 
             CreateMap<InsertCityDto, City>();
             CreateMap<UpdateCityDto, City>();
@@ -126,7 +124,6 @@ namespace GSC.Api.Helpers
             CreateMap<ClientAddress, ClientAddressDto>().ReverseMap();
             CreateMap<ClientContact, ClientContactDto>().ReverseMap();
             CreateMap<Project, ProjectDto>().ReverseMap();
-            //CreateMap<Project, RandomizationAndScreeningNumberFormatDto>().ReverseMap();
             CreateMap<UserRole, UserRoleDto>().ReverseMap();
             CreateMap<PopulationType, PopulationTypeDto>().ReverseMap();
             CreateMap<ProductType, ProductTypeDto>().ReverseMap();
@@ -155,10 +152,6 @@ namespace GSC.Api.Helpers
             CreateMap<VariableCategory, VariableCategoryDto>().ReverseMap();
             CreateMap<Unit, UnitDto>().ReverseMap();
             CreateMap<NumberFormat, NumberFormatDto>().ReverseMap();
-            //tinku
-            //CreateMap<RolePermission, RolePermissionDto>()
-            //    .ForMember(x => x.ScreenName, x => x.MapFrom(a => a.AppScreens.ScreenName))
-            //    .ReverseMap();
             CreateMap<AuditReason, AuditReasonDto>().ReverseMap();
             CreateMap<VolunteerAuditTrail, VolunteerAuditTrailDto>().ReverseMap();
             CreateMap<ProjectDesign, ProjectDesignDto>().ReverseMap();
@@ -269,22 +262,16 @@ namespace GSC.Api.Helpers
 
 
             CreateMap<EtmfMasterLibrary, EtmfMasterLibraryDto>().ReverseMap();
-            //CreateMap<EtmfSectionMasterLibrary, EtmfSectionMasterLibraryDto>().ReverseMap();
             CreateMap<EtmfArtificateMasterLbrary, EtmfArtificateMasterLbraryDto>().ReverseMap();
 
             CreateMap<EtmfProjectWorkPlace, ETMFWorkplaceDto>().ReverseMap();
             CreateMap<EtmfProjectWorkPlace, EtmfProjectWorkPlaceDto>()
                 .ForMember(x => x.ProjectWorkplaceDetailId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
-                //.ForMember(x => x.projectWorkplaceDetailId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
                 .ForMember(x => x.ProjectWorkplaceZoneId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
-                //.ForMember(x => x.ProjectWorkPlaceZoneId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
                 .ForMember(x => x.ProjectWorkplaceSectionId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
                 .ForMember(x => x.ProjectWorkplaceSubSectionId, y => y.MapFrom(a => a.EtmfProjectWorkPlaceId))
                 .ReverseMap();
             CreateMap<ProjectWorkplaceArtificatedocument, ProjectWorkplaceArtificatedocumentDto>().ReverseMap();
-            //CreateMap<ProjectWorkplaceSubSection, ProjectWorkplaceSubSectionDto>().ReverseMap();
-            //CreateMap<ProjectWorkplaceSubSectionArtifact, ProjectWorkplaceSubSectionArtifactDto>().ReverseMap();
-            //CreateMap<ProjectWorkplaceSection, ProjectWorkplaceSectionDto>().ReverseMap();
             CreateMap<ProjectWorkplaceSubSecArtificatedocument, ProjectWorkplaceSubSecArtificatedocumentDto>().ReverseMap();
             CreateMap<InvestigatorContactDetail, InvestigatorContactDetailDto>().ReverseMap();
             CreateMap<Holiday, HolidayDto>().ReverseMap();
@@ -313,7 +300,6 @@ namespace GSC.Api.Helpers
             CreateMap<Data.Entities.UserMgt.User, EConsentUserChatDto>()
                 .ForMember(x => x.UserName, y => y.MapFrom(a => a.FirstName + " " + a.LastName))
                 .ReverseMap();
-            //CreateMap<EconsentSetupRoles, EconsentSetupRolesDto>().ReverseMap();
             CreateMap<Site, SiteDto>().ReverseMap();
             CreateMap<ScreeningVisitHistory, ScreeningVisitHistoryDto>().ReverseMap();
             CreateMap<VisitLanguage, VisitLanguageDto>().ReverseMap();
@@ -343,11 +329,6 @@ namespace GSC.Api.Helpers
                 .ReverseMap();
 
             CreateMap<UserDto, RandomizationDto>()
-                 //.ForMember(x => x.FirstName, y => y.MapFrom(a => a.FirstName))
-                 //.ForMember(x => x.MiddleName, y => y.MapFrom(a => a.MiddleName))
-                 //.ForMember(x => x.LastName, y => y.MapFrom(a => a.LastName))
-                 //.ForMember(x => x.DateOfBirth, y => y.MapFrom(a => a.DateOfBirth))                 
-                 //.ForMember(x => x.Email, y => y.MapFrom(a => a.Email))
                  .ForMember(x => x.PrimaryContactNumber, y => y.MapFrom(a => a.Phone))
                  .ReverseMap();
 
@@ -373,7 +354,6 @@ namespace GSC.Api.Helpers
             CreateMap<EConsentVideo, EConsentVideoDto>().ReverseMap();
             CreateMap<StudyPlanTaskDto, StudyPlanTask>().ReverseMap();
             CreateMap<StudyPlantaskParameterDto, StudyPlanTask>().ReverseMap();
-            //CreateMap<DependentTaskParameterDto, DependentTask>().ReverseMap();
             CreateMap<HolidayMasterDto, HolidayMaster>().ReverseMap();
             CreateMap<HolidayMasterListDto, HolidayMaster>()
               .ForMember(x => x.HolidayName, x => x.MapFrom(a => a.Label))
@@ -400,14 +380,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.Religion, x => x.MapFrom(a => a.Religion.ReligionName))
                .ForMember(x => x.Gender, x => x.MapFrom(a => a.GenderId))
                .ReverseMap();
-            //CreateMap<VolunteerAddress, VolunteerAddressDto>().ReverseMap();
-            //CreateMap<VolunteerBiometric, VolunteerBiometricDto>().ReverseMap();
-            //CreateMap<VolunteerContact, VolunteerContactDto>().ReverseMap();
-            //CreateMap<VolunteerDocument, VolunteerDocumentDto>().ReverseMap();
-            //CreateMap<Volunteer, VolunteerDto>().ReverseMap();
             CreateMap<VolunteerFood, VolunteerFoodDto>().ReverseMap();
-            //CreateMap<VolunteerHistory, VolunteerHistoryDto>().ReverseMap();
-            //CreateMap<VolunteerLanguage, VolunteerLanguageDto>().ReverseMap();
             CreateMap<EconsentReviewDetails, EconsentDocumentDetailsDto>()
                  .ForMember(x => x.EconsentDocumentName, y => y.MapFrom(a => a.EconsentSetup.DocumentName))
                  .ReverseMap();
@@ -475,11 +448,9 @@ namespace GSC.Api.Helpers
             CreateMap<PageConfiguration, PageConfigurationCommon>()
               .ForMember(x => x.ActualFieldName, a => a.MapFrom(m => m.PageConfigurationFields.FieldName)).ReverseMap();
             CreateMap<PageConfigurationFields, PageConfigurationFieldsDto>().ReverseMap();
-            // CreateMap<KitManagement, KitManagementDto>().ReverseMap();
             CreateMap<SendEmailOnVariableChangeSetting, SendEmailOnVariableChangeSettingDto>().ReverseMap();
 
             CreateMap<SendEmailOnVariableValue, SendEmailOnVariableValueDto>().ReverseMap();
-            // CreateMap<DisplayMessageandLableSetting, DisplayMessageandLableSettingDto>().ReverseMap();
             CreateMap<ScheduleTerminateDetail, ScheduleTerminateDetailDto>().ReverseMap();
             CreateMap<TemplateVariableSequenceNoSetting, TemplateVariableSequenceNoSettingDto>().ReverseMap();
             CreateMap<SupplyManagementAllocation, SupplyManagementAllocationDto>().ReverseMap();
@@ -501,7 +472,6 @@ namespace GSC.Api.Helpers
             CreateMap<DossingBarcode, DossingBarcodeDto>().ReverseMap();
             CreateMap<ManageSiteAddress, ManageSiteAddressDto>().ReverseMap();
             CreateMap<ProjectSiteAddress, ProjectSiteAddressDto>().ReverseMap();
-            // CreateMap<CustomReport, CustomReportDto>().ReverseMap();
             CreateMap<Centrifugation, CentrifugationDto>().ReverseMap();
             CreateMap<CentrifugationDetails, CentrifugationDetailsDto>().ReverseMap();
             CreateMap<SampleSeparation, SampleSeparationDto>().ReverseMap();

@@ -70,8 +70,7 @@ namespace GSC.Respository.Project.EditCheck
                 SampleResult = r.SampleResult,
                 ErrorMessage = r.ErrorMessage,
                 SourceFormula = r.SourceFormula,
-                StatusName = !string.IsNullOrEmpty(r.TargetFormula) && !string.IsNullOrEmpty(r.SourceFormula) ? "Completed" :
-                r.IsOnlyTarget ? "Only Target" : "In-Complete",
+                StatusName = !string.IsNullOrEmpty(r.TargetFormula) && !string.IsNullOrEmpty(r.SourceFormula) ? "Completed" : r.IsOnlyTarget ? "Only Target" : "In-Complete",
                 IsFormula = r.IsFormula,
                 IsReferenceVerify = r.IsReferenceVerify,
                 IsDeleted = r.DeletedDate != null,
@@ -93,7 +92,7 @@ namespace GSC.Respository.Project.EditCheck
 
         public Data.Entities.Project.EditCheck.EditCheck CopyTo(int id)
         {
-            var editCheck = All.AsNoTracking().Where(x => x.Id == id).FirstOrDefault();
+            var editCheck = All.AsNoTracking().Where(x => x.Id == id).First();
             var number = All.Count(x => x.ProjectDesignId == editCheck.ProjectDesignId) + 1;
             editCheck.Id = 0;
             editCheck.AutoNumber = _numberFormatRepository.GetNumberFormat("EditCheck", number);
@@ -187,7 +186,7 @@ namespace GSC.Respository.Project.EditCheck
                  }).OrderBy(v => v.Id).ToList()
             }).FirstOrDefault();
 
-            resut.EditCheckDetails.ForEach(x =>
+            resut?.EditCheckDetails.ForEach(x =>
             {
 
                 if (x.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
@@ -195,7 +194,7 @@ namespace GSC.Respository.Project.EditCheck
                     var variableAnnotation = _editCheckDetailRepository.GetCollectionSources(x.VariableAnnotation, resut.ProjectDesignId);
                     x.CollectionSource = variableAnnotation?.CollectionSource;
                     x.DataType = variableAnnotation?.DataType;
-                    if (variableAnnotation.Values != null)
+                    if (variableAnnotation?.Values != null)
                         x.ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(variableAnnotation.Values.Where(x => x.DeletedDate == null).ToList());
                 }
 
@@ -286,7 +285,7 @@ namespace GSC.Respository.Project.EditCheck
 
             });
 
-            if (data.Any(x => x.Operator == Operator.Greater || x.Operator == Operator.GreaterEqual ||
+            if (data.Exists(x => x.Operator == Operator.Greater || x.Operator == Operator.GreaterEqual ||
                 x.Operator == Operator.Lessthen || x.Operator == Operator.LessthenEqual) && data.Count(x => !x.IsTarget) > 1)
                 data.ToList().ForEach(x =>
                 x.InputValue = ""
@@ -318,11 +317,6 @@ namespace GSC.Respository.Project.EditCheck
 
         private string GetFormula(int id, bool isTarget)
         {
-            var variableValues = _context.EditCheckDetail.
-                Where(x => x.EditCheckId == id
-                && x.IsTarget == isTarget
-                && x.DeletedDate == null).Select(r => r.CollectionValue).ToList();
-
             var result = _context.EditCheckDetail.Where(x => x.EditCheckId == id
                                                             && x.IsTarget == isTarget
                                                             && x.DeletedDate == null)
@@ -350,7 +344,7 @@ namespace GSC.Respository.Project.EditCheck
                     ProjectDesignId = r.EditCheck.ProjectDesignId,
                     CollectionValue2 = r.CollectionValue2,
                     CollectionSource = r.ProjectDesignVariable.CollectionSource
-                }).ToList().OrderBy(r => r.Id).ToList();
+                }).AsEnumerable().OrderBy(r => r.Id).ToList();
 
             var last = result.LastOrDefault();
             result.ForEach(x =>

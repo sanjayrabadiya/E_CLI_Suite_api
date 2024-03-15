@@ -32,7 +32,7 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IVariabeValueLanguageRepository _variableValueLanguageRepository;
         private readonly IVariabeLanguageRepository _variabeLanguageRepository;
-        
+
         public ProjectDesignVariableController(IProjectDesignVariableRepository projectDesignVariableRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRemarksRepository projectDesignVariableRemarksRepository,
@@ -60,7 +60,7 @@ namespace GSC.Api.Controllers.Project.Design
             _variableValueLanguageRepository = variableValueLanguageRepository;
             _variabeLanguageRepository = variabeLanguageRepository;
             _domainRepository = domainRepository;
-            
+
         }
 
         [HttpGet("{id}")]
@@ -192,13 +192,10 @@ namespace GSC.Api.Controllers.Project.Design
             }
             // added by vipul validation if variable use in visit status than data type not except date or datetime deleted on 25092020
             var Exists = _projectDesignVisitStatusRepository.All.Where(x => x.ProjectDesignVariableId == variableDto.Id && x.DeletedDate == null).Any();
-            if (Exists)
+            if (Exists && (variableDto.CollectionSource != CollectionSources.Date && variableDto.CollectionSource != CollectionSources.DateTime))
             {
-                if (variableDto.CollectionSource != CollectionSources.Date && variableDto.CollectionSource != CollectionSources.DateTime)
-                {
-                    ModelState.AddModelError("Message", "Variable collection source must be date or date time.");
-                    return BadRequest(ModelState);
-                }
+                ModelState.AddModelError("Message", "Variable collection source must be date or date time.");
+                return BadRequest(ModelState);
             }
 
             UpdateVariableEncryptRole(variable);
@@ -337,14 +334,14 @@ namespace GSC.Api.Controllers.Project.Design
 
             foreach (var item in variable.Roles)
             {
-                var role = data.Where(t => t.RoleId == item.RoleId).FirstOrDefault();
+                var role = data.Find(t => t.RoleId == item.RoleId);
                 // add role if new select in dropdown
                 if (role == null)
                     _projectDesignVariableEncryptRoleRepository.Add(item);
             }
             var RoleIds = variable.Roles.Select(x => new { x.RoleId }).ToList();
 
-            var Exists = data.Where(x => !RoleIds.Any(t => t.RoleId == x.RoleId)).ToList();
+            var Exists = data.Where(x => !RoleIds.Exists(t => t.RoleId == x.RoleId)).ToList();
             if (Exists.Count != 0)
                 foreach (var item in Exists)
                 {

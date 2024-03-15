@@ -114,12 +114,12 @@ namespace GSC.Helper
                                     best_pos = pos;
                                 }
                                 break;
-                        } // End switch (ch)
+                        } 
                     } // End if this is an operator.
-                } // else if (parens == 0)
+                } 
 
                 is_unary = next_unary;
-            } // for (int pos = 0; pos < expr_len; pos++)
+            } 
 
             // If the parentheses count is not zero,
             // there's a ) missing.

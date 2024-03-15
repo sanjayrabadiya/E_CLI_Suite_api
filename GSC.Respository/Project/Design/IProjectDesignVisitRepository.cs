@@ -19,6 +19,6 @@ namespace GSC.Respository.Project.Design
         IList<ProjectDesignVisitDto> GetVisitList(int projectDesignPeriodId);
         IList<DropDownDto> GetVisitsforWorkflowVisit(int projectDesignId);
 
-        string ValidationVisitIWRS(ProjectDesignVisit variable);
+        string ValidationVisitIWRS(ProjectDesignVisit visit);
     }
 }

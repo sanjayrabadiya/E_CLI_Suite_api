@@ -18,16 +18,13 @@ namespace GSC.Api.Controllers.UserMgt
     [ApiController]
     public class AppScreenPatientRightsController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IAppScreenPatientRightsRepository _appScreenPatientRightsRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
-        public AppScreenPatientRightsController(IJwtTokenAccesser jwtTokenAccesser,
-            IUnitOfWork uow, IMapper mapper,
+        public AppScreenPatientRightsController(IUnitOfWork uow, IMapper mapper,
             IAppScreenPatientRightsRepository appScreenPatientRightsRepository)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _appScreenPatientRightsRepository = appScreenPatientRightsRepository;
             _uow = uow;
             _mapper = mapper;
@@ -61,7 +58,7 @@ namespace GSC.Api.Controllers.UserMgt
                     _appScreenPatientRightsRepository.Remove(item);
                 }
 
-                var adddata = data.Where(x => x.IsChecked == true).ToList();
+                var adddata = data.Where(x => x.IsChecked).ToList();
                 foreach (var item in adddata)
                 {
                     var appScreenPatientRights = _mapper.Map<AppScreenPatientRights>(item);

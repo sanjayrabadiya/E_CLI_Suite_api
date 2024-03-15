@@ -13,7 +13,6 @@ namespace GSC.Data.Dto.Screening
         public string Initial { get; set; }
         public string ScreeningNo { get; set; }
         public DateTime ScreeningDate { get; set; }
-        //public int ProjectScheduleId { get; set; }
         public string RefVisit { get; set; }
         public string RefTemplate { get; set; }
         public string RefVariable { get; set; }

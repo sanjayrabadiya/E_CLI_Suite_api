@@ -18,7 +18,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IUnitOfWork _uow;
         private readonly ISendEmailOnVariableChangeSettingRepository _sendEmailOnVariableChangeSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        // private readonly ISendEmailOnVariableValueRepository _sendEmailOnVariableValueRepository;
         public SendEmailOnVariableChangeSettingController(
             IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser, ISendEmailOnVariableChangeSettingRepository sendEmailOnVariableChangeSettingRepository)
         {
@@ -26,7 +25,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             _mapper = mapper;
             _sendEmailOnVariableChangeSettingRepository = sendEmailOnVariableChangeSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            //      _sendEmailOnVariableValueRepository = sendEmailOnVariableValueRepository;
         }
 
         // GET: api/<controller>
@@ -37,15 +35,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             var lst = _sendEmailOnVariableChangeSettingRepository.GetList(projectDesignId);
             return Ok(lst);
         }
-
-        //[HttpGet("{id}")]
-        //public IActionResult Get(int id)
-        //{
-        //    var ctmsSettings = _ctmsSettingsRepository.FindBy(x => x.ProjectId == id).FirstOrDefault();
-        //    var ctmsSettingsDto = _mapper.Map<CtmsSettingsDto>(ctmsSettings);
-        //    return Ok(ctmsSettingsDto);
-        //}
-
 
         [HttpPost]
         public IActionResult Post([FromBody] SendEmailOnVariableChangeSettingDto sendEmailOnVariableChangeSettingDto)
@@ -61,7 +50,11 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             }
 
             _sendEmailOnVariableChangeSettingRepository.Add(sendEmailOnVariableChangeSetting);
-            if (_uow.Save() <= 0) throw new Exception("Creating Send Email On Variable Change Setting settings failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Send Email On Variable Change Setting settings failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(sendEmailOnVariableChangeSetting.Id);
         }
 
@@ -72,14 +65,18 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var record = _sendEmailOnVariableChangeSettingRepository.Find(sendEmailOnVariableChangeSettingDto.Id);
-            //var sendEmailOnVariableChangeSetting = _mapper.Map<SendEmailOnVariableChangeSetting>(sendEmailOnVariableChangeSettingDto);
+
             record.DeletedBy = _jwtTokenAccesser.UserId;
             record.DeletedDate = _jwtTokenAccesser.GetClientDate();
             record.AuditReasonId = sendEmailOnVariableChangeSettingDto.AuditReasonId;
             record.ReasonOth = sendEmailOnVariableChangeSettingDto.ReasonOth;
             _sendEmailOnVariableChangeSettingRepository.Update(record);
 
-            if (_uow.Save() <= 0) throw new Exception("Update Send Email On Variable Change Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update Send Email On Variable Change Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(record.Id);
         }
 

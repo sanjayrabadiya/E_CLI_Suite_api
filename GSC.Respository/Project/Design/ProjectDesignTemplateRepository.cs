@@ -102,7 +102,7 @@ namespace GSC.Respository.Project.Design
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
-                    DesignOrder = sequenseDeatils.IsTemplateSeqNo == true && sequenseDeatils.IsVariableSeqNo == true ? r.DesignOrder.ToString() : "",
+                    DesignOrder = sequenseDeatils.IsTemplateSeqNo && sequenseDeatils.IsVariableSeqNo ? r.DesignOrder.ToString() : "",
                     VariableTemplateId = r.VariableTemplateId,
                     DomainName = r.Domain.DomainName,
                     IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
@@ -134,7 +134,7 @@ namespace GSC.Respository.Project.Design
                         PrintType = x.PrintType,
                         //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
-                        DesignOrder = sequenseDeatils.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
+                        DesignOrder = sequenseDeatils.IsVariableSeqNo ? x.DesignOrder.ToString() : "",
                         DesignOrderForOrderBy = x.DesignOrder,
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
@@ -182,7 +182,7 @@ namespace GSC.Respository.Project.Design
 
                 variables.ForEach(x =>
                 {
-                    x.IsEncrypt = variableEncryptRole.Any(t => t == x.ProjectDesignVariableId);
+                    x.IsEncrypt = variableEncryptRole.Exists(t => t == x.ProjectDesignVariableId);
                     if (x.IsEncrypt != true)
                     {
                         x.Values = values.Where(c => c.ProjectDesignVariableId == x.ProjectDesignVariableId).OrderBy(c => c.SeqNo).ToList();
@@ -223,7 +223,7 @@ namespace GSC.Respository.Project.Design
                     DomainId = r.DomainId,
                     IsRepeated = r.IsRepeated,
                     IsSchedule = r.ProjectDesignVisit.IsSchedule ?? false,
-                    DesignOrder = sequenseDeatils.IsTemplateSeqNo == true && sequenseDeatils.IsVariableSeqNo == true ? r.DesignOrder.ToString() : "",
+                    DesignOrder = sequenseDeatils.IsTemplateSeqNo && sequenseDeatils.IsVariableSeqNo ? r.DesignOrder.ToString() : "",
                     VariableTemplateId = r.VariableTemplateId,
                     DomainName = r.Domain.DomainName,
                     IsTemplateSeqNo = sequenseDeatils.IsTemplateSeqNo,
@@ -256,9 +256,8 @@ namespace GSC.Respository.Project.Design
                         HighRangeValue = x.HighRangeValue,
                         RelationProjectDesignVariableId = x.RelationProjectDesignVariableId,
                         PrintType = x.PrintType,
-                        //Remarks = _mapper.Map<List<ScreeningVariableRemarksDto>>(x.Remarks.Where(x => x.DeletedDate == null)),
                         UnitName = x.Unit.UnitName,
-                        DesignOrder = sequenseDeatils.IsVariableSeqNo == true ? x.DesignOrder.ToString() : "",
+                        DesignOrder = sequenseDeatils.IsVariableSeqNo ? x.DesignOrder.ToString() : "",
                         DesignOrderForOrderBy = x.DesignOrder,
                         IsDocument = x.IsDocument,
                         VariableCategoryName = (_jwtTokenAccesser.Language != 1 ?
@@ -305,7 +304,7 @@ namespace GSC.Respository.Project.Design
 
                 variables.ForEach(x =>
                 {
-                    x.IsEncrypt = variableEncryptRole.Any(t => t == x.ProjectDesignVariableId);
+                    x.IsEncrypt = variableEncryptRole.Exists(t => t == x.ProjectDesignVariableId);
                     if (x.IsEncrypt != true)
                     {
                         x.Values = values.Where(c => c.ProjectDesignVariableId == x.ProjectDesignVariableId).OrderBy(c => c.SeqNo).ToList();
@@ -360,10 +359,9 @@ namespace GSC.Respository.Project.Design
         {
             var templates = All.Where(x => x.DeletedDate == null
                                            && x.ProjectDesignVisitId == projectDesignVisitId
-                                           && x.Variables.Where(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
+                                           && x.Variables.Any(y => collectionSource.Value > 0 ? (int)y.CollectionSource == collectionSource :
                                                y.CollectionSource == CollectionSources.Date ||
-                                               y.CollectionSource == CollectionSources.DateTime).Any()
-                                               // && (refVariable.Value > 0 ? !x.Variables.Any(v => _context.ProjectScheduleTemplate.Where(p => p.DeletedDate == null).Any(s => s.ProjectDesignVariableId == v.Id)) : true)
+                                               y.CollectionSource == CollectionSources.DateTime)
                                                && x.Variables != null
                                                ).OrderBy(t => t.DesignOrder)
                 .Select(t => new DropDownDto
@@ -422,7 +420,7 @@ namespace GSC.Respository.Project.Design
         public IList<DropDownDto> GetTemplateDropDownForVisitStatus(int projectDesignVisitId)
         {
             return All.Where(x => x.DeletedDate == null && x.ProjectDesignVisitId == projectDesignVisitId
-            && x.Variables.Where(y => (y.CollectionSource == CollectionSources.Date || y.CollectionSource == CollectionSources.DateTime) && y.DeletedDate == null).Any()).OrderBy(t => t.DesignOrder)
+            && x.Variables.Any(y => (y.CollectionSource == CollectionSources.Date || y.CollectionSource == CollectionSources.DateTime) && y.DeletedDate == null)).OrderBy(t => t.DesignOrder)
                 .Select(t => new DropDownDto { Id = t.Id, Value = t.TemplateName }).ToList();
         }
 
@@ -467,7 +465,7 @@ namespace GSC.Respository.Project.Design
 
             var screeningTemplate = _context.ScreeningTemplate.Where(x => projectDesignTemplate.Select(y => y.Id).Contains(x.ProjectDesignTemplateId)).ToList();
 
-            return screeningTemplate.Count() != 0 && screeningTemplate.All(x => x.IsLocked == true);
+            return screeningTemplate.Any() && screeningTemplate.TrueForAll(x => x.IsLocked);
         }
 
         public ProjectDesignTemplate GetTemplateSetting(int templateId)

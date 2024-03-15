@@ -11,7 +11,7 @@ namespace GSC.Respository.Etmf
     public interface IProjectWorkplaceSubSectionArtifactRepository : IGenericRepository<EtmfProjectWorkPlace>
     {
         string Duplicate(EtmfProjectWorkPlace objSave);
-        EtmfProjectWorkPlaceDto getSectionDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionArtifactDto);
+        EtmfProjectWorkPlaceDto getSectionDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto);
         List<DropDownDto> GetDrodDown(int subsectionId);
         EtmfProjectWorkPlaceDto UpdateArtifactDetail(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto);
         string DeletArtifactDetailFolder(int id);

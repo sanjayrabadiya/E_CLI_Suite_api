@@ -14,22 +14,17 @@ namespace GSC.Respository.Project.Schedule
 {
     public class ScheduleTerminateDetailRepository : GenericRespository<ScheduleTerminateDetail>, IScheduleTerminateDetailRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
         private readonly IMapper _mapper;
 
 
-        public ScheduleTerminateDetailRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public ScheduleTerminateDetailRepository(IGSCContext context, IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
             _mapper = mapper;
         }
 
         public ScheduleTerminateDetailDto GetDetailById(int ProjectScheduleTemplateId)
         {
-            var result = All.Where(x => x.ProjectScheduleTemplateId == ProjectScheduleTemplateId && x.DeletedDate==null).Select(c => new ScheduleTerminateDetailDto
+            var result = All.Where(x => x.ProjectScheduleTemplateId == ProjectScheduleTemplateId && x.DeletedDate == null).Select(c => new ScheduleTerminateDetailDto
             {
                 Id = c.Id,
                 ProjectScheduleTemplateId = c.ProjectScheduleTemplateId,
@@ -37,10 +32,10 @@ namespace GSC.Respository.Project.Schedule
                 ProjectDesignVisitId = c.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisitId,
                 ProjectDesignVariableId = c.ProjectDesignVariableId,
                 Value = c.Value,
-                ExtraData= _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
+                ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.ProjectDesignVariable.Values.Where(b => b.DeletedDate == null).ToList()),
                 DataType = c.ProjectDesignVariable.DataType,
-                Operator=c.Operator
-        }).FirstOrDefault();
+                Operator = c.Operator
+            }).FirstOrDefault();
 
             return result;
 

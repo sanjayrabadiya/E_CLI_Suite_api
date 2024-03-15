@@ -22,15 +22,12 @@ namespace GSC.Respository.Project.Workflow
     public class WorkflowVisitRepository : GenericRespository<WorkflowVisit>, IWorkflowVisitRepository
     {
         private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
         public WorkflowVisitRepository(IGSCContext context,
-             IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser) :
+             IMapper mapper) :
             base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
         }
@@ -54,12 +51,11 @@ namespace GSC.Respository.Project.Workflow
 
             //add new
             var firstNotSecond = workflowVisitDto.ProjectDesignVisitIds.Except(workflowvisit.Select(x => x.ProjectDesignVisitId)).ToList();
-            // no change
-            var secondNotFirst = workflowVisitDto.ProjectDesignVisitIds.Except(firstNotSecond).ToList();
+           
             // delete
-            var thirdNotFirst = workflowvisit.ToList().Select(x => x.ProjectDesignVisitId).Except(workflowVisitDto.ProjectDesignVisitIds).ToList();
+            var thirdNotFirst = workflowvisit.AsEnumerable().Select(x => x.ProjectDesignVisitId).Except(workflowVisitDto.ProjectDesignVisitIds).ToList();
 
-            
+
             foreach (var item in firstNotSecond)
             {
                 var result = _mapper.Map<WorkflowVisit>(workflowVisitDto);
@@ -69,7 +65,7 @@ namespace GSC.Respository.Project.Workflow
 
             foreach (var item in thirdNotFirst)
             {
-                var d= workflowvisit.Where(x=>x.ProjectDesignVisitId == item).FirstOrDefault();
+                var d = workflowvisit.First(x => x.ProjectDesignVisitId == item);
                 Delete(d);
             }
 

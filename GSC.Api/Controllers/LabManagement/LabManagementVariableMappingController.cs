@@ -15,10 +15,8 @@ namespace GSC.Api.Controllers.LabManagement
     [ApiController]
     public class LabManagementVariableMappingController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
         private readonly ILabManagementUploadDataRepository _labManagementUploadDataRepository;
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly ILabManagementConfigurationRepository _labManagementConfigurationRepository;
 
@@ -26,15 +24,13 @@ namespace GSC.Api.Controllers.LabManagement
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
             ILabManagementUploadDataRepository labManagementUploadDataRepository,
             ILabManagementConfigurationRepository labManagementConfigurationRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow)
         {
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
             _labManagementUploadDataRepository = labManagementUploadDataRepository;
             _labManagementConfigurationRepository = labManagementConfigurationRepository;
             _uow = uow;
-            _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
+           
         }
 
         // GET: api/<controller>
@@ -75,7 +71,11 @@ namespace GSC.Api.Controllers.LabManagement
                 mapping.TargetVariable = item.TargetVariable;
 
                 _labManagementVariableMappingRepository.Add(mapping);
-                if (_uow.Save() <= 0) throw new Exception("Creating Mapping failed on save.");
+                if (_uow.Save() <= 0)
+                {
+                    Exception exception = new Exception("Creating Mapping failed on save.");
+                    throw exception;
+                }
             }
 
             return Ok();

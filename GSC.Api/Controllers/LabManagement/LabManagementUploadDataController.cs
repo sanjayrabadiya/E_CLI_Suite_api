@@ -2,26 +2,17 @@
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.LabManagement;
 using GSC.Data.Entities.LabManagement;
-using GSC.Data.Entities.Screening;
 using GSC.Helper;
-using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.LabManagement;
 using GSC.Respository.Master;
-using GSC.Respository.Project.Design;
-using GSC.Respository.Screening;
 using GSC.Shared.DocumentService;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.LabManagement
 {
@@ -70,7 +61,8 @@ namespace GSC.Api.Controllers.LabManagement
             string SiteCode = "";
 
             var isExist = _configurationRepository.All.Where(x => x.ProjectId == labManagementUploadDataDto.ProjectId && x.DeletedDate == null && x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId).FirstOrDefault();
-            var LabManagementConfiguration = new LabManagementConfiguration();
+            LabManagementConfiguration LabManagementConfiguration = new LabManagementConfiguration();
+
             if (isExist != null)
             {
                 LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectId == labManagementUploadDataDto.ProjectId && x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
@@ -79,8 +71,11 @@ namespace GSC.Api.Controllers.LabManagement
             {
                 LabManagementConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == labManagementUploadDataDto.ProjectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
             }
+            if (LabManagementConfiguration != null)
+            {
+                labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
+            }
 
-            labManagementUploadDataDto.LabManagementConfigurationId = LabManagementConfiguration.Id;
 
             //set file path and extension
             if (labManagementUploadDataDto.FileModel?.Base64?.Length > 0)
@@ -103,7 +98,11 @@ namespace GSC.Api.Controllers.LabManagement
                 return BadRequest(ModelState);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating updaload data failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                Exception exception = new Exception("Creating updaload data failed on save.");
+                throw exception;
+            }
             return Ok(labManagementUploadData.Id);
         }
 
@@ -123,7 +122,11 @@ namespace GSC.Api.Controllers.LabManagement
                 _labManagementUploadDataRepository.InsertDataIntoDataEntry(labManagementUpload);
             _labManagementUploadDataRepository.Update(labManagementUpload);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating lab management data failed on action.");
+            if (_uow.Save() <= 0)
+            {
+                Exception exception = new Exception("Updating lab management data failed on action.");
+                throw exception;
+            }
             return Ok(labManagementUpload.Id);
         }
 

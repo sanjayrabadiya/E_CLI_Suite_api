@@ -33,7 +33,6 @@ namespace GSC.Audit
             try
             {
                 var userId = _jwtTokenAccesser.UserId;
-                var roleId = _jwtTokenAccesser.RoleId;
                 var clientDate = _jwtTokenAccesser.GetClientDate();
          
                 var changeTracker = entities.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted).ToList();
@@ -114,8 +113,8 @@ namespace GSC.Audit
 
             foreach (var prop in dbEntry.Properties)
             {
-                var dictionary = _dictionaryCollection.Dictionaries.Where(x =>
-                    x.FieldName.ToLower() == prop.Metadata.Name.ToLower()).FirstOrDefault();
+                var dictionary = _dictionaryCollection.Dictionaries.FirstOrDefault(x =>
+                    x.FieldName.ToLower() == prop.Metadata.Name.ToLower());
 
                 if (dictionary == null) continue;
 
@@ -137,9 +136,13 @@ namespace GSC.Audit
 
                     if (prop.Metadata.PropertyInfo.PropertyType == typeof(decimal?) || prop.Metadata.PropertyInfo.PropertyType == typeof(decimal))
                     {
-                        if (!string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue))
+                        if (string.IsNullOrEmpty(oldValue) || string.IsNullOrEmpty(newValue) || !Convert.ToDecimal(oldValue).Equals(Convert.ToDecimal(newValue)))
                         {
-                            if (Convert.ToDecimal(oldValue).Equals(Convert.ToDecimal(newValue))) continue;
+                            break;
+                        }
+                        else
+                        {
+                            continue;
                         }
 
                     }
@@ -164,28 +167,21 @@ namespace GSC.Audit
                         ? dictionary.FieldName
                         : dictionary.PkName;
 
-                    //if (dictionary.SourceColumn == "ProjectCode" && dictionary.TableName == "Project")
-                    //{
-                    //    var projectName = "CASE WHEN ParentProjectId IS NULL THEN 'Study Code' ELSE 'Site Code' END";
-                    //    string strSql = $"{"SELECT "} {projectName} {" AS Value FROM "} {dictionary.TableName} {"WHERE "} {pkName} {"="} {newValue}";
-                    //    dictionary.DisplayName = context.Set<AuditValue>().FromSqlRaw(strSql, "").ToList().Select(r => r.Value).FirstOrDefault();
-                    //}
-
-
+                   
                     if (!string.IsNullOrEmpty(newValue))
                     {
 
                         string strSql =
                             $"{"SELECT "} {dictionary.SourceColumn} {" AS Value FROM "} {dictionary.TableName} {"WHERE "} {pkName} {"="} {newValue}";
 
-                        newValue = context.Set<AuditValue>().FromSqlRaw(strSql, "").ToList().Select(r => r.Value).FirstOrDefault();
+                        newValue = context.Set<AuditValue>().FromSqlRaw(strSql, "").AsEnumerable().Select(r => r.Value).FirstOrDefault();
 
                     }
 
                     if (!string.IsNullOrEmpty(oldValue))
                     {
                         string strSql = $"{"SELECT "} {dictionary.SourceColumn} {" AS Value FROM "} {dictionary.TableName} {"WHERE "} {pkName} {"="} {oldValue}";
-                        oldValue = context.Set<AuditValue>().FromSqlRaw(strSql, "").ToList().Select(r => r.Value).FirstOrDefault();
+                        oldValue = context.Set<AuditValue>().FromSqlRaw(strSql, "").AsEnumerable().Select(r => r.Value).FirstOrDefault();
                     }
 
 
@@ -196,7 +192,7 @@ namespace GSC.Audit
                     if (string.IsNullOrEmpty(oldValue)) oldValue = "Empty";
                     if (string.IsNullOrEmpty(newValue)) newValue = "Empty";
                     var tableName = dbEntry.CurrentValues.EntityType.ClrType.Name.ToString().Trim();
-                    if (!trackers.Any(x => x.EntityName == tableName && x.FieldName == displayName.Trim()))
+                    if (!trackers.Exists(x => x.EntityName == tableName && x.FieldName == displayName.Trim()))
                         trackers.Add(new TrackerResult
                         {
                             EntityName = tableName,

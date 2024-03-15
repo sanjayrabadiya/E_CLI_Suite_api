@@ -24,18 +24,15 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IMapper _mapper;
         private readonly IWorkflowTemplateRepository _workflowTemplateRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
 
         public WorkflowTemplateController(IWorkflowTemplateRepository workflowTemplateRepository,
             IUnitOfWork uow, IMapper mapper,
-            IGSCContext context,
-        IJwtTokenAccesser jwtTokenAccesser)
+            IGSCContext context)
         {
             _workflowTemplateRepository = workflowTemplateRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
 
         }
@@ -88,7 +85,7 @@ namespace GSC.Api.Controllers.Project.Design
         [Route("CheckForVisitWorkflow/{projectDesignVisitId}")]
         public IActionResult CheckForVisitWorkflow(int projectDesignVisitId)
         {
-            var result = _context.WorkflowVisit.Any(x => x.DeletedDate ==null && x.ProjectDesignVisitId == projectDesignVisitId);
+            var result = _context.WorkflowVisit.Any(x => x.DeletedDate == null && x.ProjectDesignVisitId == projectDesignVisitId);
             return Ok(result);
         }
     }

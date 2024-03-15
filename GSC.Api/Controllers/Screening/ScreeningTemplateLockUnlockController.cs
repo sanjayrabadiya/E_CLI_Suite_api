@@ -4,11 +4,7 @@ using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
-using GSC.Respository.Attendance;
-using GSC.Respository.Project.Design;
-using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
-using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,40 +16,19 @@ namespace GSC.Api.Controllers.Screening
     {
         private readonly IScreeningTemplateRepository _screeningTemplateRepository;
         private readonly IScreeningTemplateLockUnlockRepository _screeningTemplateLockUnlockRepository;
-        private readonly IScreeningEntryRepository _screeningEntryRepository;
-        private readonly IAttendanceRepository _attendanceRepository;
-        private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
         private readonly IUnitOfWork _uow;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IScreeningTemplateReviewRepository _screeningTemplateReviewRepository;
-        private readonly IProjectWorkflowRepository _projectWorkflowRepository;
-        private readonly IProjectSubjectRepository _projectSubjectRepository;
         public ScreeningTemplateLockUnlockController(IScreeningTemplateRepository screeningTemplateRepository,
             IScreeningTemplateLockUnlockRepository screeningTemplateLockUnlockRepository,
-            IScreeningEntryRepository screeningEntryRepository,
-            IAttendanceRepository attendanceRepository,
-            IProjectDesignTemplateRepository projectDesignTemplateRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUnitOfWork uow, IMapper mapper,
-            IScreeningTemplateReviewRepository screeningTemplateReviewRepository,
-             IProjectWorkflowRepository projectWorkflowRepository,
-             IProjectSubjectRepository projectSubjectRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IUnitOfWork uow, IMapper mapper)
         {
             _screeningTemplateRepository = screeningTemplateRepository;
             _screeningTemplateLockUnlockRepository = screeningTemplateLockUnlockRepository;
-            _screeningEntryRepository = screeningEntryRepository;
-            _attendanceRepository = attendanceRepository;
-            _projectDesignTemplateRepository = projectDesignTemplateRepository;
             _uow = uow;
             _mapper = mapper;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _screeningTemplateReviewRepository = screeningTemplateReviewRepository;
-            _projectWorkflowRepository = projectWorkflowRepository;
-            _projectSubjectRepository = projectSubjectRepository;
         }
 
         [HttpGet]
@@ -79,7 +54,7 @@ namespace GSC.Api.Controllers.Screening
 
             foreach (var x in screeningTemplateIds)
             {
-                var item = AuditList.FirstOrDefault(t => t.ScreeningTemplateId == x);
+                var item = AuditList.Find(t => t.ScreeningTemplateId == x);
 
                 if (item.IsLocked)
                 {

@@ -1,21 +1,17 @@
 ﻿using AutoMapper;
 using AutoMapper.Internal;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml;
-using GSC.Common;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.LabReportManagement;
-using GSC.Data.Dto.Location;
 using GSC.Data.Entities.LabReportManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
-using GSC.Respository.LabManagement;
 using GSC.Shared.JWTAuth;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace GSC.Respository.LabReportManagement
 {
@@ -66,7 +62,6 @@ namespace GSC.Respository.LabReportManagement
                 {
                     byte[] fileBytes = Convert.FromBase64String(reportDto.DocumentBase64String);
                     File.WriteAllBytes(filePath, fileBytes);
-                    //reportDto.DocumentName = fileName;
                     reportDto.DocumentPath = Path.Combine(documentPath, fileName);
                     var labReport = _mapper.Map<LabReport>(reportDto);
                     _context.LabReport.Add(labReport);
@@ -75,6 +70,7 @@ namespace GSC.Respository.LabReportManagement
                 }
                 catch (Exception ex)
                 {
+                    Log.Error(ex.Message);
                     return 0;
                 }
             }

@@ -48,7 +48,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectSubSecArtificateDocumentComment = _mapper.Map<ProjectSubSecArtificateDocumentComment>(projectSubSecArtificateDocumentCommentDto);
 
             _projectSubSecArtificateDocumentCommentRepository.Add(projectSubSecArtificateDocumentComment);
-            if (_uow.Save() <= 0) throw new Exception("Creating Comment failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Comment failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectSubSecArtificateDocumentComment.Id);
         }
 
@@ -73,7 +77,11 @@ namespace GSC.Api.Controllers.Etmf
             var projectSubSecArtificateDocumentComment = _mapper.Map<ProjectSubSecArtificateDocumentComment>(projectSubSecArtificateDocumentCommentDto);
             _projectSubSecArtificateDocumentCommentRepository.Update(projectSubSecArtificateDocumentComment);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Response failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Response failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectSubSecArtificateDocumentComment.Id);
         }
 

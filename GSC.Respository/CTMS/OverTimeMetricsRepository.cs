@@ -48,23 +48,16 @@ namespace GSC.Respository.CTMS
             var overTimeMetrics = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && projectIds.Contains(x.ProjectId) && x.PlanMetricsId == metricsId).ToList();
             foreach (var task in overTimeMetrics)
             {
-                var ProjectSettings = _context.Randomization.Where(x => x.ProjectId == task.ProjectId && x.DeletedDate == null && GetValidation(x,task)).ToList();
+                var metricsType = _metricsRepository.Find(task.PlanMetricsId).MetricsType;
+                var ProjectSettings = _context.Randomization.Where(x => x.ProjectId == task.ProjectId && x.DeletedDate == null &&
+                metricsType == MetricsType.Enrolled ? x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate :
+                metricsType == MetricsType.Screened ? x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate :
+                x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate).ToList();
                 task.Actual = ProjectSettings.Count;
                 Update(task);
                 _uow.Save();
             }
             return overTimeMetrics;
-        }
-        public bool GetValidation(Randomization x, OverTimeMetrics task)
-        {
-            var metricsType = _metricsRepository.Find(task.PlanMetricsId).MetricsType;
-
-            if (metricsType == MetricsType.Enrolled)
-                return x.CreatedDate >= task.StartDate && x.CreatedDate <= task.EndDate;
-            else if (metricsType == MetricsType.Screened)
-                return x.DateOfScreening >= task.StartDate && x.DateOfScreening <= task.EndDate;
-            else
-                return x.DateOfRandomization >= task.StartDate && x.DateOfRandomization <= task.EndDate;
         }
 
         public List<OverTimeMetricsGridDto> GetTasklist(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)

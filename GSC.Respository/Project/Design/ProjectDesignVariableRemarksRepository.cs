@@ -13,7 +13,7 @@ namespace GSC.Respository.Project.Design
 {
     public class ProjectDesignVariableRemarksRepository : GenericRespository<ProjectDesignVariableRemarks>, IProjectDesignVariableRemarksRepository
     {
-        public ProjectDesignVariableRemarksRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) :
+        public ProjectDesignVariableRemarksRepository(IGSCContext context) :
             base(context)
         {
         }

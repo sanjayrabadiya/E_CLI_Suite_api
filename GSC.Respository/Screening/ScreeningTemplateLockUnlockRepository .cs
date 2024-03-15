@@ -1,10 +1,7 @@
 ﻿using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
-using GSC.Respository.Configuration;
-using GSC.Respository.Project.Workflow;
 using GSC.Shared.JWTAuth;
 using System;
 using System.Collections.Generic;
@@ -14,23 +11,11 @@ namespace GSC.Respository.Screening
 {
     public class ScreeningTemplateLockUnlockRepository : GenericRespository<ScreeningTemplateLockUnlockAudit>, IScreeningTemplateLockUnlockRepository
     {
-        private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IScreeningTemplateValueQueryRepository _screeningTemplateValueQueryRepository;
-        private readonly IProjectWorkflowRepository _projectWorkflowRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        public ScreeningTemplateLockUnlockRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IUploadSettingRepository uploadSettingRepository,
-            IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
-            IProjectWorkflowRepository projectWorkflowRepository)
+        public ScreeningTemplateLockUnlockRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser)
             : base(context)
         {
-            _screeningTemplateValueRepository = screeningTemplateValueRepository;
-            _uploadSettingRepository = uploadSettingRepository;
-            _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
-            _projectWorkflowRepository = projectWorkflowRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
         }
@@ -43,9 +28,9 @@ namespace GSC.Respository.Screening
             Add(screeningTemplateLockUnlock);
         }
 
-        public List<LockUnlockHistoryListDto> ProjectLockUnLockHistory(int projectId, int ParentProjectId)
+        public List<LockUnlockHistoryListDto> ProjectLockUnLockHistory(int projectId, int parentProjectId)
         {
-            var ProjectCode = _context.Project.Find(ParentProjectId).ProjectCode;
+            var ProjectCode = _context.Project.Find(parentProjectId).ProjectCode;
 
             var parent = _context.Project.Where(x => (x.Id == projectId) || (x.ParentProjectId == projectId)).Select(x => x.Id).ToList();
 

@@ -54,7 +54,7 @@ namespace GSC.Respository.Configuration
         public bool IsUnlimitedUploadlimit()
         {
             var details = All.FirstOrDefault();
-            if (details.UploadLimitType == UploadLimitType.Unlimited)
+            if (details?.UploadLimitType == UploadLimitType.Unlimited)
                 return true;
             else
                 return false;
@@ -64,7 +64,7 @@ namespace GSC.Respository.Configuration
         public string ValidateUploadlimit(int ProjectId)
         {
             var uploadDetails = All.Where(x => x.DeletedDate == null).FirstOrDefault();
-            if (uploadDetails.UploadLimitType == UploadLimitType.StudyBase)
+            if (uploadDetails?.UploadLimitType == UploadLimitType.StudyBase)
             {
                 string projectCode = GetProjectCode(ProjectId);
                 string[] paths = { uploadDetails.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), projectCode };
@@ -85,7 +85,7 @@ namespace GSC.Respository.Configuration
         private string GetProjectCode(int ProjectId)
         {
             var projectdDetail = _context.Project.Where(x => x.Id == ProjectId).Select(i => new { i.ParentProjectId, i.ProjectCode }).FirstOrDefault();
-            if (projectdDetail.ParentProjectId != null)
+            if (projectdDetail?.ParentProjectId != null)
             {
                 return _context.Project.Where(x => x.Id == projectdDetail.ParentProjectId).Select(x => x.ProjectCode).FirstOrDefault();
 

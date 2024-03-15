@@ -18,19 +18,13 @@ namespace GSC.Api.Controllers.UserMgt
     public class AppScreenController : BaseController
     {
         private readonly IAppScreenRepository _appScreenRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public AppScreenController(IAppScreenRepository appScreenRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper)
         {
             _appScreenRepository = appScreenRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
         }
@@ -72,7 +66,11 @@ namespace GSC.Api.Controllers.UserMgt
             appScreenDto.Id = 0;
             var appScreen = _mapper.Map<AppScreen>(appScreenDto);
             _appScreenRepository.Add(appScreen);
-            if (_uow.Save() <= 0) throw new Exception("Creating App Screen failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating App Screen failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(appScreen.Id);
         }
 
@@ -86,7 +84,11 @@ namespace GSC.Api.Controllers.UserMgt
             var appScreen = _mapper.Map<AppScreen>(appScreenDto);
 
             _appScreenRepository.Update(appScreen);
-            if (_uow.Save() <= 0) throw new Exception("Updating App Screen failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating App Screen failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(appScreen.Id);
         }
 

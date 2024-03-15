@@ -1,19 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
-using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
 using GSC.Domain.Context;
-using GSC.Shared.JWTAuth;
 
 namespace GSC.Respository.Volunteer
 {
     public class VolunteerLanguageRepository : GenericRespository<VolunteerLanguage>,
         IVolunteerLanguageRepository
     {
-        public VolunteerLanguageRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public VolunteerLanguageRepository(IGSCContext context)
             : base(context)
         {
         }
@@ -25,9 +22,9 @@ namespace GSC.Respository.Volunteer
             existingLanguages.ForEach(Remove);
         }
 
-        public List<VolunteerLanguageDto> GetLanguages(int volunteerId, bool isDeleted)
+        public List<VolunteerLanguageDto> GetLanguages(int volunteerId, bool isDelete)
         {
-            return FindByInclude(t => (isDeleted ? t.DeletedDate != null : t.DeletedDate == null) && t.VolunteerId == volunteerId && t.DeletedDate == null, t => t.Language).Select(
+            return FindByInclude(t => (isDelete ? t.DeletedDate != null : t.DeletedDate == null) && t.VolunteerId == volunteerId && t.DeletedDate == null, t => t.Language).Select(
                 t => new VolunteerLanguageDto
                 {
                     Id = t.Id,

@@ -19,11 +19,9 @@ namespace GSC.Respository.Etmf
     public class EtmfMasterLbraryRepository : GenericRespository<EtmfMasterLibrary>, IEtmfMasterLbraryRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
         public EtmfMasterLbraryRepository(IGSCContext context,
            IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
@@ -68,16 +66,17 @@ namespace GSC.Respository.Etmf
                             artificateObj.ArtificateName = item.ArtificateName;
                             artificateObj.ArtificateNo = item.ArtificateNo;
                             artificateObj.InclutionType = item.InclusionType;
-                            artificateObj.DeviceSponDoc = item.DeviceSponDoc == "X" ? true : false;
-                            artificateObj.DeviceInvesDoc = item.DeviceInvesDoc == "X" ? true : false;
+                            artificateObj.DeviceSponDoc = item.DeviceSponDoc == "X";
+                            artificateObj.DeviceInvesDoc = item.DeviceInvesDoc == "X";
 
-                            artificateObj.NondeviceSponDoc = item.NondeviceSponDoc == "X" ? true : false;
-                            artificateObj.NondeviceInvesDoc = item.NondeviceInvesDoc == "X" ? true : false;
+                            artificateObj.NondeviceSponDoc = item.NondeviceSponDoc == "X";
+                            artificateObj.NondeviceInvesDoc = item.NondeviceInvesDoc == "X";
 
                             artificateObj.StudyArtificates = item.StudyArtificates;
-                            artificateObj.TrailLevelDoc = item.TrailLevelDoc == "X" ? true : false;
-                            artificateObj.CountryLevelDoc = item.CountryLevelDoc == "X" ? true : false;
-                            artificateObj.SiteLevelDoc = item.SiteLevelDoc == "X" ? true : false;
+                            artificateObj.TrailLevelDoc = item.TrailLevelDoc == "X";
+                            artificateObj.CountryLevelDoc = item.CountryLevelDoc == "X";
+                            artificateObj.SiteLevelDoc = item.SiteLevelDoc == "X";
+
                             artificateObj.ArtifactCodeName = item.ArtifactCodeName;
 
                             sectionLibraryObj.EtmfArtificateMasterLbrary.Add(artificateObj);

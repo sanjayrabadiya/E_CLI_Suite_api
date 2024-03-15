@@ -3,8 +3,6 @@ using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
-using GSC.Data.Entities.Common;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using GSC.Respository.Attendance;
@@ -37,7 +35,6 @@ namespace GSC.Api.Controllers.Volunteer
         private readonly IRolePermissionRepository _rolePermissionRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IUserRecentItemRepository _userRecentItemRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IVolunteerSummaryReport _volunteerSummaryReport;
         private readonly IVolunteerFingerRepository _volunteerFingerRepository;
@@ -48,7 +45,6 @@ namespace GSC.Api.Controllers.Volunteer
             ILocationRepository locationRepository,
             IUploadSettingRepository uploadSettingRepository,
             IVolunteerAuditTrailRepository volunteerAuditTrailRepository,
-            IUserRecentItemRepository userRecentItemRepository,
             IRolePermissionRepository rolePermissionRepository,
             IAttendanceRepository attendanceRepository,
             IVolunteerSummaryReport volunteerSummaryReport,
@@ -61,7 +57,6 @@ namespace GSC.Api.Controllers.Volunteer
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
             _volunteerAuditTrailRepository = volunteerAuditTrailRepository;
-            _userRecentItemRepository = userRecentItemRepository;
             _rolePermissionRepository = rolePermissionRepository;
             _attendanceRepository = attendanceRepository;
             _volunteerSummaryReport = volunteerSummaryReport;
@@ -72,7 +67,7 @@ namespace GSC.Api.Controllers.Volunteer
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var volunteers = "";//_volunteerRepository.GetVolunteerDetail(isDeleted);
+            var volunteers = "";
             return Ok(volunteers);
         }
 
@@ -108,14 +103,6 @@ namespace GSC.Api.Controllers.Volunteer
             volunteerDto.IsBlockDisplay =
                 _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock").IsView;
 
-            //_userRecentItemRepository.SaveUserRecentItem(new UserRecentItem
-            //{
-            //    KeyId = volunteerDto.Id,
-            //    SubjectName = volunteerDto.VolunteerNo,
-            //    SubjectName1 = volunteer.FullName,
-            //    ScreenType = UserRecent.Volunteer
-            //});
-
             return Ok(volunteerDto);
         }
 
@@ -146,7 +133,7 @@ namespace GSC.Api.Controllers.Volunteer
                     address.Location = _locationRepository.SaveLocation(address.Location);
 
             _volunteerRepository.Add(volunteer);
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer failed on save."));
 
 
             if (volunteerDto.Changes != null)
@@ -184,7 +171,7 @@ namespace GSC.Api.Controllers.Volunteer
                     address.Location = _locationRepository.SaveLocation(address.Location);
 
             _volunteerRepository.Update(volunteer);
-            if (_uow.Save() <= 0) throw new Exception("Updating volunteer failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating volunteer failed on save."));
 
             if (volunteerDto.Changes != null)
                 _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.Volunteer, AuditAction.Updated, volunteer.Id,
@@ -405,7 +392,7 @@ namespace GSC.Api.Controllers.Volunteer
 
             _volunteerFingerRepository.Add(volunteerFinger);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer Finger failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer Finger failed on save."));
             return Ok();
         }
 
@@ -420,23 +407,13 @@ namespace GSC.Api.Controllers.Volunteer
         {
             int iIndex = 0;
             int nResult;
-            //retrieve the template data byte[] from string
-            //string strTmplaste = Request[data].ToString();
 
             byte[] decode_tmplate = Convert.FromBase64String(obj.Split(',')[1]);
 
             List<DbRecords> Users = _volunteerFingerRepository.GetFingers();
             FtrIdentifyRecord[] rgRecords = new FtrIdentifyRecord[Users.Count];
 
-
             rgRecords = Users.Select(item => new FtrIdentifyRecord { KeyValue = item.m_Key.ToByteArray(), Template = Convert.FromBase64String(item.m_Template.Split(',')[1])}).ToArray();
-
-            //foreach (DbRecords item in Users)
-            //{
-            //    rgRecords[iIndex].KeyValue = item.m_Key.ToByteArray();
-            //    rgRecords[iIndex].Template = Convert.FromBase64String(item.m_Template.Split(',')[1]);
-            //    iIndex++;
-            //}
 
             FutronicSdkBase m_Operation = new FutronicIdentification();
             ((FutronicIdentification)m_Operation).FARN = 245;

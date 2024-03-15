@@ -11,16 +11,9 @@ namespace GSC.Respository.Etmf
 {
    public class SyncConfigurationMasterDetailsRepositoryAudit : GenericRespository<SyncConfigurationMasterDetailsAudit>, ISyncConfigurationMasterDetailsRepositoryAudit
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
-        private readonly IMapper _mapper;
-        public SyncConfigurationMasterDetailsRepositoryAudit(IGSCContext context,
-           IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public SyncConfigurationMasterDetailsRepositoryAudit(IGSCContext context)
            : base(context)
         {
-            _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
         }
     }
 }

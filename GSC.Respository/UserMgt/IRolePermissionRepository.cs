@@ -7,8 +7,8 @@ namespace GSC.Respository.UserMgt
 {
     public interface IRolePermissionRepository : IGenericRepository<RolePermission>
     {
-        void Save(List<RolePermission> rolePermissionDtos);
-        void updatePermission(List<RolePermission> rolePermissionDtos);
+        void Save(List<RolePermission> rolePermissions);
+        void updatePermission(List<RolePermission> rolePermissions);
         List<RolePermissionDto> GetByRoleId(int roleId);
         List<AppScreen> GetByUserId(int userId, int roleId);
         RolePermission GetRolePermissionByScreenCode(string screenCode);

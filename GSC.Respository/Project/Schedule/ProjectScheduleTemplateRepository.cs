@@ -66,7 +66,7 @@ namespace GSC.Respository.Project.Schedule
             projectDesingVisit.ForEach(r =>
             {
                 r.IsSchedule = false;
-                if (targetVisits.Any(x => x == r.Id))
+                if (targetVisits.Exists(x => x == r.Id))
                     r.IsSchedule = true;
 
                 _projectDesignVisitRepository.Update(r);

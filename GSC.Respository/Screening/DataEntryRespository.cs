@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Attendance;
 using GSC.Data.Dto.ProjectRight;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -14,7 +13,6 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Project.EditCheck;
 using GSC.Respository.Project.Workflow;
-using GSC.Respository.ProjectRight;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -39,7 +37,6 @@ namespace GSC.Respository.Screening
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         public DataEntryRespository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
-            IProjectRightRepository projectRightRepository,
             IProjectWorkflowRepository projectWorkflowRepository,
             IRandomizationRepository randomizationRepository,
             IProjectDesignVisitRepository projectDesignVisitRepository,
@@ -98,11 +95,11 @@ namespace GSC.Respository.Screening
 
             projectDesignVisit.ForEach(a =>
             {
-                var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
+                var editCheck = editCheckVisit.Find(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
                 if (editCheck != null)
                     a.HideDisableType = editCheck.HideDisableType;
 
-                editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Hide);
+                editCheck = editCheckVisit.Find(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Hide);
                 if (editCheck != null)
                     a.HideDisableType = editCheck.HideDisableType;
             });
@@ -264,7 +261,7 @@ namespace GSC.Respository.Screening
 
                 r.Visit.Where(x => x.VisitStatusId > 3).ToList().ForEach(v =>
                 {
-                    v.IsLocked = tempTemplates.Any(x => x.IsLocked == false && x.ScreeningVisitId == v.ScreeningVisitId) ? false : true;
+                    v.IsLocked = tempTemplates.Exists(x => x.IsLocked && x.ScreeningVisitId == v.ScreeningVisitId);
                     v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
                     v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
 
@@ -316,7 +313,7 @@ namespace GSC.Respository.Screening
                 {
                     x.Visit.ForEach(a =>
                     {
-                        var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
+                        var editCheck = editCheckVisit.Find(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
                         if (editCheck != null)
                             a.EditCheckMsg = editCheck.EditCheckMsg;
 
@@ -327,7 +324,7 @@ namespace GSC.Respository.Screening
             }
 
 
-            if (hideTemplateIds.Count() > 0)
+            if (hideTemplateIds.Any())
             {
                 var visitTemplates = await _projectDesignVisitRepository.All.
                 Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesignId == projectDesignId).Select(r => new
@@ -342,7 +339,7 @@ namespace GSC.Respository.Screening
                     x.Visit.ForEach(a =>
                     {
                         var templatesIds = visitTemplates.Where(r => r.Id == a.ProjectDesignVisitId).Select(v => v.TemplatesIds).FirstOrDefault();
-                        if (templatesIds.Where(r => !hideTemplateIds.Contains(r)).Count() < 1)
+                        if (templatesIds != null && templatesIds.Exists(r => !hideTemplateIds.Contains(r)))
                             a.HideDisableType = HideDisableType.Hide;
                     });
 
@@ -392,7 +389,7 @@ namespace GSC.Respository.Screening
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                      PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-                 }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
+                 }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -443,7 +440,7 @@ namespace GSC.Respository.Screening
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                 PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-            }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
+            }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -487,12 +484,10 @@ namespace GSC.Respository.Screening
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                      PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-                 }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
+                 }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
-
-
         }
 
 
@@ -528,15 +523,11 @@ namespace GSC.Respository.Screening
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                         PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-                    }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
-
+                    }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
             return result;
 
-
         }
-
-
         public List<DataEntryTemplateCountDisplayTree> GetMyTemplateView(int parentProjectId, int projectId)
         {
             var projectDesignId = _projectDesignRepository.All.Where(r => r.ProjectId == parentProjectId).Select(t => t.Id).FirstOrDefault();
@@ -572,24 +563,20 @@ namespace GSC.Respository.Screening
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                    }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
-
+                    }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
             return result;
-
-
         }
 
         // Dashboard chart for data entry status
         public List<DashboardQueryStatusDto> GetDataEntriesStatus(int projectId)
         {
-            // Formula % = (OpenVisitTemplate-NotStartedTemplate)/OpenVisitTemplate*100;
             var result = _screeningTemplateRepository.All.Where(x => (x.ScreeningVisit.ScreeningEntry.ProjectId == projectId ||
           x.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) && (!x.ScreeningVisit.ScreeningEntry.Project.IsTestSite) && x.DeletedDate == null).GroupBy(
               t => new { t.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, t.ProjectDesignTemplate.ProjectDesignVisit.Id }).Select(g => new DashboardQueryStatusDto
               {
                   DisplayName = g.Key.DisplayName,
-                  Avg = Math.Round((g.Count() - g.Where(a => a.Status == ScreeningTemplateStatus.Pending).Count()) * 100d / g.Count(), 2),
+                  Avg = Math.Round((g.Count() - g.Count(a => a.Status == ScreeningTemplateStatus.Pending)) * 100d / g.Count(), 2),
                   // For order by visit id store visit id 
                   Total = g.Key.Id
               }).OrderBy(g => g.Total).ToList();
@@ -602,10 +589,8 @@ namespace GSC.Respository.Screening
             if (!String.IsNullOrEmpty(pt.PreLabel))
                 str = pt.PreLabel;
 
-            if (!seq.IsTemplateSeqNo)
+            if (!seq.IsTemplateSeqNo && t.RepeatSeqNo != null)
             {
-                if (t.RepeatSeqNo != null)
-                {
                     if (!String.IsNullOrEmpty(seq.RepeatPrefix))
                         str += ((!String.IsNullOrEmpty(pt.PreLabel)) ? seq.SeparateSign : "") + seq.RepeatPrefix;
                     if (seq.RepeatSeqNo != null)
@@ -615,7 +600,6 @@ namespace GSC.Respository.Screening
                         else
                             str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
                     }
-                }
             }
             return str;
         }
@@ -649,7 +633,7 @@ namespace GSC.Respository.Screening
 
             var hideTemplateIds = _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToList();
 
-            if (hideTemplateIds.Count() > 0)
+            if (hideTemplateIds.Any())
             {
                 var visitTemplates = _projectDesignVisitRepository.All.
                 Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesignId == visits.FirstOrDefault().ProjectDesignId).Select(r => new
@@ -670,18 +654,14 @@ namespace GSC.Respository.Screening
 
             visits = visits.Where(x => x.HideDisableType != HideDisableType.Hide).ToList();
 
-            if (visits.Any(x => x.HideDisableType == HideDisableType.Disable))
+            if (visits.Exists(x => x.HideDisableType == HideDisableType.Disable) && visits.Count !=0)
             {
                 var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(visits.FirstOrDefault().ProjectDesignId);
                 visits.ForEach(x =>
                 {
-                    x.EditCheckMsg = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable)?.EditCheckMsg;
+                    x.EditCheckMsg = editCheckVisit.Find(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable)?.EditCheckMsg;
                 });
             }
-
-
-
-
             return visits;
         }
     }

@@ -1,7 +1,6 @@
 ﻿using System;
 using GSC.Common.Base;
 using GSC.Common.Common;
-using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Screening
 {

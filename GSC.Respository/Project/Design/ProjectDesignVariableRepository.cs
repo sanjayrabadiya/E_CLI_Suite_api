@@ -21,16 +21,14 @@ namespace GSC.Respository.Project.Design
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly ISupplyManagementAllocationRepository _supplyManagementAllocationRepository;
         private readonly ISupplyManagementFactorMappingRepository _supplyManagementFactorMappingRepository;
-        public ProjectDesignVariableRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IStudyVersionRepository studyVersionRepository, ISupplyManagementAllocationRepository supplyManagementAllocationRepository,
+        public ProjectDesignVariableRepository(IGSCContext context, IMapper mapper, IStudyVersionRepository studyVersionRepository, 
+            ISupplyManagementAllocationRepository supplyManagementAllocationRepository,
             ISupplyManagementFactorMappingRepository supplyManagementFactorMappingRepository) : base(context)
         {
             _mapper = mapper;
             _context = context;
-            _studyVersionRepository = studyVersionRepository;
             _supplyManagementAllocationRepository = supplyManagementAllocationRepository;
             _supplyManagementFactorMappingRepository = supplyManagementFactorMappingRepository;
         }
@@ -76,23 +74,7 @@ namespace GSC.Respository.Project.Design
                 CollectionSources = c.CollectionSource,
                 ExtraData = _mapper.Map<List<ProjectDesignVariableValueDropDown>>(c.Values.Where(x => x.DeletedDate == null).ToList()),
                 InActive = c.InActiveVersion != null
-            }).Where(x => x.Id != variableId).ToList();
-            //validation comment temperory - prakash
-            //    .Where(x => x.CollectionSources == CollectionSources.TextBox ||
-            //x.CollectionSources == CollectionSources.MultilineTextBox ||
-            //x.CollectionSources == CollectionSources.Date ||
-            //x.CollectionSources == CollectionSources.DateTime
-            //|| x.CollectionSources == CollectionSources.Time)
-
-
-            //if (variableId > 0)
-            //{
-            //    var variable = _context.ProjectDesignVariable.Where(x => x.Id == variableId).FirstOrDefault();
-            //    if (variable != null)
-            //    {
-            //        data = data.Where(x => x.Id != variableId && x.CollectionSources == variable.CollectionSource).ToList();
-            //    }
-            //}
+            }).Where(x => x.Id != variableId).ToList();           
             return data;
 
         }
@@ -117,7 +99,7 @@ namespace GSC.Respository.Project.Design
                     }).Where(x => !String.IsNullOrEmpty(x.Value)).ToList();
             var grpresult = result.GroupBy(x => new { x.Value, x.Code, x.DataType, x.CollectionSources }).Select(s => new DropDownVaribleAnnotationDto
             {
-                Id = s.FirstOrDefault().Id,
+                Id = s.First().Id,
                 Value = s.Key.Value,
                 Code = s.Key.Code,
                 DataType = s.Key.DataType,
@@ -169,12 +151,6 @@ namespace GSC.Respository.Project.Design
                 x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId && x.DeletedDate == null))
                 return "Duplicate Variable code : " + objSave.VariableCode;
 
-            // discuss
-            //if (All.Any(x => x.Id != objSave.Id && x.VariableName == objSave.VariableName &&
-            //                 x.ProjectDesignTemplateId == objSave.ProjectDesignTemplateId &&
-            //                 x.DomainId == objSave.DomainId && x.AnnotationTypeId == objSave.AnnotationTypeId &&
-            //                 x.DeletedDate == null))
-            //    return "Duplicate Record : " + objSave.VariableName;
 
             if (All.Any(x =>
                 x.Id != objSave.Id && x.DomainId == objSave.DomainId &&
@@ -221,7 +197,7 @@ namespace GSC.Respository.Project.Design
                 DataType = c.Key.DataType,
                 CollectionSources = c.Key.CollectionSources,
                 VisitName = string.Join(", ", variableResult.Where(v => v.Value == c.Key.Value).Select(r => r.VisitName).ToList()),
-                ExtraData = isFormula ? null : variableResult.FirstOrDefault(v => v.Value == c.Key.Value)?.ExtraData
+                ExtraData = isFormula ? null : variableResult.Find(v => v.Value == c.Key.Value)?.ExtraData
             }).Where(x => x.Value != null).ToList();
         }
 

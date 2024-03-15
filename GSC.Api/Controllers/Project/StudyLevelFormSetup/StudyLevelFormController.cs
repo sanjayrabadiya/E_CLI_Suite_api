@@ -119,7 +119,11 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             }
             _studyLevelFormRepository.Add(studyLevelForm);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating setup form failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating setup form failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(studyLevelForm.Id);
         }
 
@@ -154,7 +158,11 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             }
             _studyLevelFormRepository.Update(studyLevelForm);
 
-            if (_uow.Save() <= 0) throw new Exception("Update setup form failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Update setup form failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(studyLevelForm.Id);
         }
 

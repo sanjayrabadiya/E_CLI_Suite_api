@@ -1,10 +1,7 @@
 using System;
-using System.ComponentModel.DataAnnotations.Schema;
 using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Master;
-using GSC.Data.Entities.UserMgt;
-using GSC.Shared.Extension;
 
 namespace GSC.Data.Entities.Volunteer
 {
@@ -18,7 +15,6 @@ namespace GSC.Data.Entities.Volunteer
         public int BlockCategoryId { get; set; }
         public bool IsPermanently { get; set; }
         public bool IsBlock { get; set; }
-
        
         public BlockCategory BlockCategory { get; set; }
 

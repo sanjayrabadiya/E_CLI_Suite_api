@@ -12,14 +12,8 @@ namespace GSC.Respository.Project.Design
 {
     public class VisitEmailConfigurationRolesRepository : GenericRespository<VisitEmailConfigurationRoles>, IVisitEmailConfigurationRolesRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
-        private readonly IMapper _mapper;
-        public VisitEmailConfigurationRolesRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
+        public VisitEmailConfigurationRolesRepository(IGSCContext context) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
-            _mapper = mapper;
         }
 
         public void updateVisitEmailRole(VisitEmailConfigurationDto visitEmailDto)
@@ -28,10 +22,8 @@ namespace GSC.Respository.Project.Design
 
             //add new
             var firstNotSecond = visitEmailDto.RoleId.Except(visitEmail.Select(x => x.SecurityRoleId)).ToList();
-            // no change
-            var secondNotFirst = visitEmailDto.RoleId.Except(firstNotSecond).ToList();
             // delete
-            var thirdNotFirst = visitEmail.ToList().Select(x => x.SecurityRoleId).Except(visitEmailDto.RoleId).ToList();
+            var thirdNotFirst = visitEmail.AsEnumerable().Select(x => x.SecurityRoleId).Except(visitEmailDto.RoleId).ToList();
 
 
             foreach (var item in firstNotSecond)
@@ -44,10 +36,9 @@ namespace GSC.Respository.Project.Design
 
             foreach (var item in thirdNotFirst)
             {
-                var d = visitEmail.Where(x => x.SecurityRoleId == item).FirstOrDefault();
+                var d = visitEmail.First(x => x.SecurityRoleId == item);
                 Delete(d);
             }
-           // _context.Save();
         }
     }
 }

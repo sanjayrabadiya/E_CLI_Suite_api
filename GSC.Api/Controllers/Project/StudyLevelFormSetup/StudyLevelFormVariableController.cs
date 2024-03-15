@@ -29,10 +29,8 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IUnitOfWork _uow;
         private readonly IStudyLevelFormRepository _studyLevelFormRepository;
         private readonly IStudyLevelFormVariableRepository _studyLevelFormVariableRepository;
-        private readonly IVariableTemplateRepository _variableTemplateRepository;
         private readonly IVariableRepository _variableRepository;
         private readonly IStudyLevelFormVariableValueRepository _studyLevelFormVariableValueRepository;
-        private readonly IStudyLevelFormVariableRemarksRepository _studyLevelFormVariableRemarksRepository;
         private readonly ICtmsMonitoringRepository _ctmsMonitoringRepository;
         public StudyLevelFormVariableController(
             IUnitOfWork uow, IMapper mapper, IStudyLevelFormRepository studyLevelFormRepository,
@@ -46,10 +44,8 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
             _uow = uow;
             _mapper = mapper;
             _studyLevelFormRepository = studyLevelFormRepository;
-            _variableTemplateRepository = variableTemplateRepository;
             _studyLevelFormVariableRepository = studyLevelFormVariableRepository;
             _studyLevelFormVariableValueRepository = studyLevelFormVariableValueRepository;
-            _studyLevelFormVariableRemarksRepository = studyLevelFormVariableRemarksRepository;
             _variableRepository = variableRepository;
             _ctmsMonitoringRepository = ctmsMonitoringRepository;
         }
@@ -234,7 +230,6 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         [Route("GetVariabeBasic/{studyLevelFormId}")]
         public IActionResult GetVariabeBasic(int studyLevelFormId)
         {
-            //var checkVersion = _projectDesignTemplateRepository.CheckStudyVersionForTemplate(projectDesignTemplateId);
             return Ok(_studyLevelFormVariableRepository.GetVariabeBasic(studyLevelFormId));
         }
 

@@ -24,7 +24,6 @@ namespace GSC.Respository.Screening
         private readonly IStudyVersionStatusRepository _studyVersionStatusRepository;
         private readonly IRandomizationRepository _randomizationRepository;
         private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectDesignRepository _projectDesignRepository;
         public VersionEffectRepository(IGSCContext context,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -49,7 +48,6 @@ namespace GSC.Respository.Screening
             _studyVersionStatusRepository = studyVersionStatusRepository;
             _randomizationRepository = randomizationRepository;
             _projectDesignVariableRepository = projectDesignVariableRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _screeningTemplateValueQueryRepository = screeningTemplateValueQueryRepository;
             _projectDesignRepository = projectDesignRepository;
         }
@@ -160,12 +158,12 @@ namespace GSC.Respository.Screening
                 r.Randomization,
                 r.Id,
                 ProjectDesignVisitIds = r.ScreeningVisit.Where(o => o.DeletedDate == null).Select(v => v.ProjectDesignVisitId).ToList()
-            }).ToList().Select(v => new
+            }).Select(v => new
             {
                 v.Randomization,
                 v.Id,
                 addVisits = addVisits.Where(z => !v.ProjectDesignVisitIds.Contains(z.Id)).ToList()
-            }).Where(m => m.addVisits.Count() > 0).ToList();
+            }).Where(m => m.addVisits.Any()).ToList();
 
 
             screeningEntrys.ForEach(x =>
@@ -257,7 +255,7 @@ namespace GSC.Respository.Screening
                 isAddTemplate = false;
                 addTemplates.ForEach(template =>
                 {
-                    if (!r.ScreeningTemplates.Any(c => c.ProjectDesignTemplateId == template.Id) && r.ProjectDesignVisitId == template.ProjectDesignVisitId)
+                    if (!r.ScreeningTemplates.Exists(c => c.ProjectDesignTemplateId == template.Id) && r.ProjectDesignVisitId == template.ProjectDesignVisitId)
                     {
                         isAddTemplate = true;
                         var screeningTemplate = new ScreeningTemplate
@@ -277,7 +275,6 @@ namespace GSC.Respository.Screening
                     r.Status = ScreeningVisitStatus.InProgress;
                     _screeningVisitRepository.Update(r);
                 }
-
             });
 
             _context.Save();

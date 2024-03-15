@@ -11,14 +11,14 @@ namespace GSC.Shared.DocumentService
 {
     public interface IImageService
     {
-        string ImageSave(FileModel file, string path, FolderType folderType);
+        string ImageSave(FileModel file, string path, FolderType imageType);
         string ImageSave(FileModel file, string path, string companyCode, FolderType imageType, string category);
         void RemoveImage(string basePath, string filePath);
     }
 
     public class ImageService : IImageService
     {
-        public string ImageSave(FileModel file, string path, string companyCode, FolderType imageType,string category)
+        public string ImageSave(FileModel file, string path, string companyCode, FolderType imageType, string category)
         {
             if (string.IsNullOrEmpty(path)) return null;
 
@@ -56,7 +56,7 @@ namespace GSC.Shared.DocumentService
 
             var fileBytes = Convert.FromBase64String(file.Base64);
 
-            string[] paths = {path, imageType.ToString(), "Original"};
+            string[] paths = { path, imageType.ToString(), "Original" };
             var fullPath = Path.Combine(paths);
 
             if (!Directory.Exists(fullPath)) Directory.CreateDirectory(fullPath);
@@ -68,7 +68,7 @@ namespace GSC.Shared.DocumentService
 
             var thumbFileBytes = CreateThumbByte(fileBytes);
 
-            string[] thumbPaths = {path, imageType.ToString(), "Thumbnail"};
+            string[] thumbPaths = { path, imageType.ToString(), "Thumbnail" };
             var thumbFullPath = Path.Combine(thumbPaths);
             if (!Directory.Exists(thumbFullPath)) Directory.CreateDirectory(thumbFullPath);
             var thumbFileName = Path.Combine(imageType.ToString(), "Thumbnail", strGuid);
@@ -90,7 +90,7 @@ namespace GSC.Shared.DocumentService
                 Log.Error(ex, "");
             }
 
-            return null;
+            return new byte[0];
         }
 
         private Image ByteArrayToImage(byte[] byteArrayIn)
@@ -115,17 +115,17 @@ namespace GSC.Shared.DocumentService
         {
             if (original == null || renderSize.Width == 0 || renderSize.Height == 0 ||
                 renderSize.Width >= original.Width || renderSize.Height >= original.Height) return original;
-            double num = original.Width / original.Height;
+            double num = (double)original.Width / original.Height;
             var num2 = Math.Min(renderSize.Width, renderSize.Height);
             double num3;
             if (num >= 1.0)
-                num3 = original.Width / num2;
+                num3 = (double)original.Width / num2;
             else
-                num3 = original.Height / num2;
+                num3 = (double)original.Height / num2;
             if (1.0 / num3 < 0.01)
                 throw new DivideByZeroException("NistCompliant size must be at least 1% of the original");
-            var width = (int) (original.Width / num3);
-            var height = (int) (original.Height / num3);
+            var width = (int)(original.Width / num3);
+            var height = (int)(original.Height / num3);
             var image = new Bitmap(width, height);
             using (var graphics = Graphics.FromImage(image))
             {

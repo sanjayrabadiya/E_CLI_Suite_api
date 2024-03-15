@@ -4,7 +4,6 @@ using System.Linq;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
-using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
@@ -99,7 +98,7 @@ namespace GSC.Api.Controllers.Screening
         [Route("GetProjectDesignTemplateList/{projectDesignVisitId}")]
         public IActionResult GetProjectDesignTemplateList([FromRoute] int projectDesignVisitId)
         {
-            var projectdesignTemplates = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == projectDesignVisitId && x.IsParticipantView == true).ToList();
+            var projectdesignTemplates = _projectDesignTemplateRepository.FindByInclude(x => x.ProjectDesignVisitId == projectDesignVisitId && x.IsParticipantView).ToList();
             return Ok(projectdesignTemplates);
         }
 
@@ -154,13 +153,16 @@ namespace GSC.Api.Controllers.Screening
                 t.ProjectDesignTemplateId
             }).FirstOrDefault();
 
-            _screeningProgress.GetScreeningProgress(tempValue.ScreeningEntryId, id);
-
+            if(tempValue != null)
+            {
+                _screeningProgress.GetScreeningProgress(tempValue.ScreeningEntryId, id);
+            }
             var result = _screeningVisitRepository.AutomaticStatusUpdate(id);
-
             _uow.Save();
-
-            _scheduleTerminate.TerminateScheduleTemplateVisit(tempValue.ProjectDesignTemplateId, tempValue.ScreeningEntryId, false);
+            if (tempValue != null)
+            {
+                _scheduleTerminate.TerminateScheduleTemplateVisit(tempValue.ProjectDesignTemplateId, tempValue.ScreeningEntryId, false);
+            }
 
             return Ok(result);
         }
@@ -369,7 +371,7 @@ namespace GSC.Api.Controllers.Screening
 
             _projectSubjectRepository.SaveSubjectForVolunteer((int)attendanceId, id);
 
-            if (_uow.Save() <= 0) throw new Exception("Submit Attendance Template failed.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Submit Attendance Template failed."));
 
             _screeningTemplateRepository.SubmitReviewTemplate(id, false);
 
@@ -387,7 +389,7 @@ namespace GSC.Api.Controllers.Screening
 
             _projectSubjectRepository.DiscontinueProjectSubject((int)attendanceId, id);
 
-            if (_uow.Save() <= 0) throw new Exception("Submit Discontinue Template failed.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Submit Discontinue Template failed."));
 
             return Ok();
         }

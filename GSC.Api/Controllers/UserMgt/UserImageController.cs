@@ -44,7 +44,11 @@ namespace GSC.Api.Controllers.UserMgt
             userImageDto.Id = 0;
             var userImage = _mapper.Map<UserImage>(userImageDto);
             _userImageRepository.Add(userImage);
-            if (_uow.Save() <= 0) throw new Exception("Creating User Image failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating User Image failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(userImage.Id);
         }
 
@@ -57,7 +61,11 @@ namespace GSC.Api.Controllers.UserMgt
 
             var userImage = _mapper.Map<UserImage>(userImageDto);
             _userImageRepository.Update(userImage);
-            if (_uow.Save() <= 0) throw new Exception("Updating User Image failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating User Image failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(userImage.Id);
         }
 

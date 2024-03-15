@@ -16,15 +16,11 @@ namespace GSC.Api.Controllers.Project.Design
     [ApiController]
     public class ProjectDesingTemplateRestrictionController : BaseController
     {
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         public ProjectDesingTemplateRestrictionController(
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
         IUnitOfWork uow, IMapper mapper)
         {
-            _uow = uow;
-            _mapper = mapper;
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
         }
 

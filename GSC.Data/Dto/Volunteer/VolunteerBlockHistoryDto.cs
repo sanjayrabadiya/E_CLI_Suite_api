@@ -1,6 +1,5 @@
 ﻿using System;
 using GSC.Data.Entities.Common;
-using GSC.Shared.Extension;
 
 namespace GSC.Data.Dto.Volunteer
 {

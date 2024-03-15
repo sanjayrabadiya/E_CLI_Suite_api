@@ -24,19 +24,16 @@ namespace GSC.Api.Controllers.Etmf
         private readonly IUnitOfWork _uow;
         private readonly IEtmfMasterLbraryRepository _etmfMasterLibraryRepository;
         private readonly IProjectWorkplaceSubSectionRepository _projectWorkplaceSubSectionRepository;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         public ProjectWorkplaceSubSectionController(
             IUnitOfWork uow,
             IMapper mapper,
             IEtmfMasterLbraryRepository etmfMasterLibraryRepository,
-            IUploadSettingRepository uploadSettingRepository,
             IProjectWorkplaceSubSectionRepository projectWorkplaceSubSectionRepository
             )
         {
             _uow = uow;
             _mapper = mapper;
             _etmfMasterLibraryRepository = etmfMasterLibraryRepository;
-            _uploadSettingRepository = uploadSettingRepository;
             _projectWorkplaceSubSectionRepository = projectWorkplaceSubSectionRepository;
         }
 
@@ -53,7 +50,7 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var projectWorkplaceSection = _projectWorkplaceSubSectionRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
+            var projectWorkplaceSection = _projectWorkplaceSubSectionRepository.FindByInclude(x => x.Id == id).First();
             var projectWorkplaceSectionDto = _mapper.Map<EtmfProjectWorkPlaceDto>(projectWorkplaceSection);
             projectWorkplaceSectionDto.SubSectionName = projectWorkplaceSection.SubSectionName;
             return Ok(projectWorkplaceSectionDto);
@@ -75,7 +72,11 @@ namespace GSC.Api.Controllers.Etmf
             }
 
             _projectWorkplaceSubSectionRepository.Add(projectWorkplaceSubSection);
-            if (_uow.Save() <= 0) throw new Exception("Creating Sub Section failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Sub Section failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectWorkplaceSubSection.Id);
         }
 
@@ -96,7 +97,11 @@ namespace GSC.Api.Controllers.Etmf
             }
 
             _projectWorkplaceSubSectionRepository.Update(projectWorkplaceSubSection);
-            if (_uow.Save() <= 0) throw new Exception("Creating Sub Section failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Sub Section failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(projectWorkplaceSubSection.Id);
         }
 
@@ -112,12 +117,11 @@ namespace GSC.Api.Controllers.Etmf
         {
             var subArtifact = _projectWorkplaceSubSectionRepository.FindByInclude(x => x.Id == id, x => x.ProjectWorkPlace)
                 .FirstOrDefault();
- 
+
             if (subArtifact == null)
                 return NotFound();
             _projectWorkplaceSubSectionRepository.Delete(subArtifact);
             _uow.Save();
-            var aa = _projectWorkplaceSubSectionRepository.DeletSectionDetailFolder(id);
             return Ok();
         }
     }

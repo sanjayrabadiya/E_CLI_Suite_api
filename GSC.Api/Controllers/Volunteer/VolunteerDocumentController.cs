@@ -5,7 +5,6 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Volunteer;
 using GSC.Data.Entities.Volunteer;
-using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.DocumentService;
 using GSC.Respository.Audit;
@@ -71,7 +70,7 @@ namespace GSC.Api.Controllers.Volunteer
 
             var volunteerDocument = _mapper.Map<VolunteerDocument>(volunteerDocumentDto);
             _volunteerDocumentRepository.Add(volunteerDocument);
-            if (_uow.Save() <= 0) throw new Exception("Creating volunteer document failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Creating volunteer document failed on save."));
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Inserted,
                 volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);
@@ -103,7 +102,7 @@ namespace GSC.Api.Controllers.Volunteer
             var volunteerDocument = _mapper.Map<VolunteerDocument>(document);
 
             _volunteerDocumentRepository.Update(volunteerDocument);
-            if (_uow.Save() <= 0) throw new Exception("Updating volunteer document failed on save.");
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating volunteer document failed on save."));
 
             _volunteerAuditTrailRepository.Save(AuditModule.Volunteer, AuditTable.VolunteerDocument, AuditAction.Updated,
                 volunteerDocument.Id, volunteerDocument.VolunteerId, volunteerDocumentDto.Changes);

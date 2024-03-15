@@ -20,19 +20,17 @@ namespace GSC.Api.Controllers.Project.Design
         private readonly IStudyVersionRepository _studyVersionRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
         private readonly IStudyVersionStatusRepository _studyVersionVisitStatusRepository;
         private readonly IVersionEffectRepository _versionEffectRepository;
         private readonly IVersionEffectWithEditCheck _versionEffectWithEditCheck;
 
         public StudyVersionController(IStudyVersionRepository studyVersionRepository,
-            IUnitOfWork uow, IMapper mapper, IGSCContext context, IStudyVersionStatusRepository studyVersionVisitStatusRepository,
+            IUnitOfWork uow, IMapper mapper, IStudyVersionStatusRepository studyVersionVisitStatusRepository,
             IVersionEffectRepository versionEffectRepository, IVersionEffectWithEditCheck versionEffectWithEditCheck)
         {
             _studyVersionRepository = studyVersionRepository;
             _uow = uow;
             _mapper = mapper;
-            _context = context;
             _studyVersionVisitStatusRepository = studyVersionVisitStatusRepository;
             _versionEffectRepository = versionEffectRepository;
             _versionEffectWithEditCheck = versionEffectWithEditCheck;
@@ -56,7 +54,7 @@ namespace GSC.Api.Controllers.Project.Design
             if (studyVersion == null)
                 return BadRequest();
 
-            if (studyVersion != null && studyVersion.StudyVersionStatus != null)
+            if (studyVersion.StudyVersionStatus != null)
                 studyVersion.StudyVersionStatus = studyVersion.StudyVersionStatus.Where(x => x.DeletedDate == null).ToList();
 
             var studyVersionDto = _mapper.Map<StudyVersionDto>(studyVersion);
@@ -146,7 +144,7 @@ namespace GSC.Api.Controllers.Project.Design
         {
             var studyVersion = _studyVersionRepository.All.AsNoTracking().Where(x => x.DeletedDate == null && x.ProjectDesignId == studyGoLiveDto.ProjectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial).FirstOrDefault();
 
-            if (_studyVersionRepository.AnyLive(studyGoLiveDto.ProjectDesignId) && studyGoLiveDto.IsOnTrial == false && (studyVersion.IsTestSiteVerified == null || studyVersion.IsTestSiteVerified == false))
+            if (_studyVersionRepository.AnyLive(studyGoLiveDto.ProjectDesignId) && studyGoLiveDto.IsOnTrial && (studyVersion?.IsTestSiteVerified == null || studyVersion.IsTestSiteVerified == false))
             {
                 ModelState.AddModelError("Message", "First verify on Test site");
                 return BadRequest(ModelState);

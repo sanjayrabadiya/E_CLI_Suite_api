@@ -39,14 +39,11 @@ namespace GSC.Respository.UserMgt
         public List<DropDownDto> GetTableColunms(int id)
         {
             var appscreen = All.Where(x => x.DeletedDate == null && x.Id == id).ToList();
-            if (appscreen != null)
+            if (!appscreen.Any() && appscreen[0].TableName != null)
             {
-                if (appscreen[0].TableName != null)
-                {
-                    return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == appscreen[0].TableName).Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList();
-                }
+                return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == appscreen[0].TableName).Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList();
             }
-            return null;
+            return new List<DropDownDto>();
         }
 
         public List<DropDownDto> GetMasterTableName()
@@ -58,7 +55,7 @@ namespace GSC.Respository.UserMgt
 
         public List<DropDownDto> GetAppScreenDropDownByParentScreenCode(string parentScreenCode)
         {
-            var parent = All.Where(x => x.DeletedDate == null && x.ScreenCode == parentScreenCode).FirstOrDefault().Id;
+            var parent = All.FirstOrDefault(x => x.DeletedDate == null && x.ScreenCode == parentScreenCode)?.Id;
             return All.Where(x => x.DeletedDate == null && x.ParentAppScreenId == parent)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.ScreenName }).OrderBy(o => o.Value).ToList();
         }
@@ -73,7 +70,7 @@ namespace GSC.Respository.UserMgt
                 return _context.TableFieldName.Where(x => x.DeletedDate == null && x.TableName == "KitManagement").Select(c => new DropDownDto { Id = c.Id, Value = c.LabelName }).OrderBy(o => o.Value).ToList();
             }
 
-            return null;
+            return new List<DropDownDto>();
         }
     }
 }

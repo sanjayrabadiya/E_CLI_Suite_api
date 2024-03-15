@@ -14,15 +14,10 @@ namespace GSC.Api.Controllers.Project.Design
     [ApiController]
     public class ProjectDesignVisitRestrictionController : BaseController
     {
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IProjectDesignVisitRestrictionRepository _projectDesignVisitRestrictionRepository;
         public ProjectDesignVisitRestrictionController(
-            IProjectDesignVisitRestrictionRepository projectDesignVisitRestrictionRepository,
-        IUnitOfWork uow, IMapper mapper)
+            IProjectDesignVisitRestrictionRepository projectDesignVisitRestrictionRepository)
         {
-            _uow = uow;
-            _mapper = mapper;
             _projectDesignVisitRestrictionRepository = projectDesignVisitRestrictionRepository;
         }
 

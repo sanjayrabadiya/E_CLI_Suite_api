@@ -11,14 +11,11 @@ namespace GSC.Respository.UserMgt
 {
     public class UserPasswordRepository : GenericRespository<UserPassword>, IUserPasswordRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         public UserPasswordRepository(
-            IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IGSCContext context)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
         }
 

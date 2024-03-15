@@ -5,7 +5,6 @@ using GSC.Data.Dto.LabReportManagement;
 using GSC.Respository.Configuration;
 using GSC.Respository.LabReportManagement;
 using GSC.Shared.JWTAuth;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
@@ -16,17 +15,15 @@ namespace GSC.Api.Controllers.LabReportManagement
     [ApiController]
     public class LabReportController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly ILabReportRepository _labReportRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public LabReportController(
           IUnitOfWork uow, IMapper mapper,
-          IJwtTokenAccesser jwtTokenAccesser, ILabReportRepository labReportRepository, IUploadSettingRepository uploadSettingRepository)
+          ILabReportRepository labReportRepository, IUploadSettingRepository uploadSettingRepository)
         {
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _labReportRepository = labReportRepository;
             _uploadSettingRepository = uploadSettingRepository;
@@ -63,7 +60,11 @@ namespace GSC.Api.Controllers.LabReportManagement
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var result = _labReportRepository.SaveLabReportDocument(labReportDto);
-            if (result <= 0) throw new Exception("Failed to save lab report");
+            if (result <= 0)
+            {
+                Exception exception = new Exception("Failed to save lab report");
+                throw exception;
+            }
 
             return Ok(result);
         }

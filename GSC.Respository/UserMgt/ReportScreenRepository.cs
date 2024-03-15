@@ -23,10 +23,6 @@ namespace GSC.Respository.UserMgt
         }
         public List<ReportScreenDto> GetReportScreen()
         {
-
-            //return All
-            //    .Select(c => new ReportScreenDto { Id = c.Id, ReportCode = c.ReportCode, ReportName = c.ReportName, ReportGroup = c.ReportGroup, IsFavourite = false }).OrderBy(o => o.Id).ToList();
-
             var reportmainmenu = _context.AppScreen.Where(x => x.ScreenCode == "mnu_report").FirstOrDefault();
 
             var screens = _context.AppScreen.Where(x => x.ParentAppScreenId == reportmainmenu.Id && x.DeletedDate == null).ToList();
@@ -43,13 +39,13 @@ namespace GSC.Respository.UserMgt
             screens.ForEach(t =>
             {
                 var p = permissions.Where(s => s.ScreenCode == t.ScreenCode).ToList();
-                t.IsAdd = isPowerAdmin || p.Any(s => s.IsAdd);
-                t.IsDelete = isPowerAdmin || p.Any(s => s.IsDelete);
-                t.IsEdit = isPowerAdmin || p.Any(s => s.IsEdit);
-                t.IsExport = isPowerAdmin || p.Any(s => s.IsExport);
-                t.IsView = isPowerAdmin || p.Any(s => s.IsView);
-                t.IsView = isPowerAdmin || p.Any(s => s.IsView);
-                t.IsFavorited = favorites.Any(f => f.AppScreenId == t.Id);
+                t.IsAdd = isPowerAdmin || p.Exists(s => s.IsAdd);
+                t.IsDelete = isPowerAdmin || p.Exists(s => s.IsDelete);
+                t.IsEdit = isPowerAdmin || p.Exists(s => s.IsEdit);
+                t.IsExport = isPowerAdmin || p.Exists(s => s.IsExport);
+                t.IsView = isPowerAdmin || p.Exists(s => s.IsView);
+                t.IsView = isPowerAdmin || p.Exists(s => s.IsView);
+                t.IsFavorited = favorites.Exists(f => f.AppScreenId == t.Id);
             });
 
             var result = All
@@ -58,12 +54,12 @@ namespace GSC.Respository.UserMgt
             result.ForEach(t =>
             {
                 var p = screens.Where(s => s.ScreenCode == t.ReportCode).ToList();
-                t.IsAdd = isPowerAdmin || p.Any(s => s.IsAdd);
-                t.IsDelete = isPowerAdmin || p.Any(s => s.IsDelete);
-                t.IsEdit = isPowerAdmin || p.Any(s => s.IsEdit);
-                t.IsExport = isPowerAdmin || p.Any(s => s.IsExport);
-                t.IsView = isPowerAdmin || p.Any(s => s.IsView);
-                t.IsView = isPowerAdmin || p.Any(s => s.IsView);
+                t.IsAdd = isPowerAdmin || p.Exists(s => s.IsAdd);
+                t.IsDelete = isPowerAdmin || p.Exists(s => s.IsDelete);
+                t.IsEdit = isPowerAdmin || p.Exists(s => s.IsEdit);
+                t.IsExport = isPowerAdmin || p.Exists(s => s.IsExport);
+                t.IsView = isPowerAdmin || p.Exists(s => s.IsView);
+                t.IsView = isPowerAdmin || p.Exists(s => s.IsView);
             });
 
             return result;

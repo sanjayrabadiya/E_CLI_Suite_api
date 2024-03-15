@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Api.Helpers;
 using GSC.Common.UnitOfWork;
@@ -18,7 +17,6 @@ using System.Linq;
 using GSC.Respository.Project.Design;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using GSC.Shared.Generic;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -119,7 +117,7 @@ namespace GSC.Api.Controllers.Screening
                 ScreeningTemplateValue = screeningTemplateValue,
                 Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
                 OldValue = screeningTemplateValueDto.OldValue,
-                ProjectDesignVariableValueId = screeningTemplateValue.Children.Count() == 0 ? null : screeningTemplateValue.Children[0]?.ProjectDesignVariableValueId,
+                ProjectDesignVariableValueId = screeningTemplateValue.Children.Any() ? null : screeningTemplateValue.Children[0]?.ProjectDesignVariableValueId,
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
 
@@ -184,13 +182,11 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValueDto.IsDeleted && (
                 screeningTemplateValueDto.CollectionSource == CollectionSources.Date ||
                 screeningTemplateValueDto.CollectionSource == CollectionSources.DateTime ||
-                screeningTemplateValueDto.CollectionSource == CollectionSources.Time))
+                screeningTemplateValueDto.CollectionSource == CollectionSources.Time)&&
+                !_screeningTemplateRepository.IsRepated(screeningTemplateValueDto.ScreeningTemplateId) && _impactService.CheckReferenceVariable(screeningTemplateValueDto.ProjectDesignVariableId))
             {
-                if (!_screeningTemplateRepository.IsRepated(screeningTemplateValueDto.ScreeningTemplateId) && _impactService.CheckReferenceVariable(screeningTemplateValueDto.ProjectDesignVariableId))
-                {
                     ModelState.AddModelError("Message", "Reference schedule date can't clear!");
                     return BadRequest(ModelState);
-                }
             }
 
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
@@ -244,20 +240,20 @@ namespace GSC.Api.Controllers.Screening
 
             if (screeningTemplateValueDto.FileModel?.Base64?.Length > 0)
             {
-                //var documentCategory = "Template";
-                //screeningTemplateValue.DocPath = DocumentService.SaveDocument(screeningTemplateValueDto.FileModel,
-                //    documentPath, FolderType.Screening, documentCategory);
                 var screningDetails = _context.ScreeningTemplate.Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).Select(a => new { a.ScreeningVisit.ScreeningEntry.ProjectId, a.ScreeningVisit.ScreeningEntry.Randomization.Initial, a.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber }).FirstOrDefault();
-                var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(screningDetails.ProjectId);
-                if (!string.IsNullOrEmpty(validateuploadlimit))
+               if(screningDetails != null)
                 {
-                    ModelState.AddModelError("Message", validateuploadlimit);
-                    return BadRequest(ModelState);
+                    var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(screningDetails.ProjectId);
+                    if (!string.IsNullOrEmpty(validateuploadlimit))
+                    {
+                        ModelState.AddModelError("Message", validateuploadlimit);
+                        return BadRequest(ModelState);
+                    }
+                    DocumentService.RemoveFile(documentPath, screeningTemplateValue.DocPath);
+                    string subject = screningDetails.ScreeningNumber + "-" + screningDetails.Initial;
+                    screeningTemplateValue.DocPath = DocumentService.SaveUploadDocument(screeningTemplateValueDto.FileModel,
+                          documentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(screningDetails.ProjectId), FolderType.DataEntry, subject);
                 }
-                DocumentService.RemoveFile(documentPath, screeningTemplateValue.DocPath);
-                string subject = screningDetails.ScreeningNumber + "-" + screningDetails.Initial;
-                screeningTemplateValue.DocPath = DocumentService.SaveUploadDocument(screeningTemplateValueDto.FileModel,
-                      documentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(screningDetails.ProjectId), FolderType.DataEntry, subject);
 
                 screeningTemplateValue.MimeType = screeningTemplateValueDto.FileModel.Extension;
             }
@@ -265,7 +261,6 @@ namespace GSC.Api.Controllers.Screening
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
             screeningTemplateValueDto.DocPath = screeningTemplateValue.DocPath;
             screeningTemplateValueDto.DocFullPath = documentUrl + screeningTemplateValue.DocPath;
-            screeningTemplateValue.DocPath = screeningTemplateValue.DocPath;
 
             _screeningTemplateValueRepository.Update(screeningTemplateValue);
             _uow.Save();
