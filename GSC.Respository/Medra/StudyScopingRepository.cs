@@ -16,15 +16,9 @@ namespace GSC.Respository.Medra
 {
     public class StudyScopingRepository : GenericRespository<StudyScoping>, IStudyScopingRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMeddraCodingRepository _meddraCodingRepository;
         private readonly IGSCContext _context;
-        public StudyScopingRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService, IMeddraCodingRepository meddraCodingRepository) : base(context)
+        public StudyScopingRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _meddraCodingRepository = meddraCodingRepository;
             _context = context;
         }
 
@@ -32,7 +26,7 @@ namespace GSC.Respository.Medra
         {
             if (All.AsNoTracking().Any(x => x.Id != objSave.Id && x.ProjectId == objSave.ProjectId && x.ProjectDesignVariableId == objSave.ProjectDesignVariableId && x.DeletedDate == null))
             {
-                return "Duplicate Variable name : " + _context.ProjectDesignVariable.Where(p => p.Id == objSave.ProjectDesignVariableId).FirstOrDefault().VariableName;
+                return "Duplicate Variable name : " + _context.ProjectDesignVariable.Where(p => p.Id == objSave.ProjectDesignVariableId).FirstOrDefault()?.VariableName;
             }
             return "";
         }
@@ -87,13 +81,6 @@ namespace GSC.Respository.Medra
             else
                 return false;
         }
-
-        //public StudyScoping GetData(int MeddraCodingId)
-        //{
-        //    var medra = _context.MeddraCoding.Find(MeddraCodingId);
-        //    var template = _context.ScreeningTemplateValue.Find(medra.ScreeningTemplateValueId);
-        //    return All.Where(x => x.ProjectDesignVariableId == template.ProjectDesignVariableId).FirstOrDefault();
-        //}
 
     }
 }

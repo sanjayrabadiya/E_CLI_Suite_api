@@ -14,11 +14,9 @@ namespace GSC.Respository.Medra
 {
     public class DictionaryRepository : GenericRespository<Dictionary>, IDictionaryRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public DictionaryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public DictionaryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 

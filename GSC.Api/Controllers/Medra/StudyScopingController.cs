@@ -23,13 +23,9 @@ namespace GSC.Api.Controllers.Medra
     {
         private readonly IStudyScopingRepository _studyScopingRepository;
         private readonly IMeddraCodingRepository _meddraCodingRepository;
-        private readonly IMedraConfigRepository _medraConfigRepository;
-        private readonly IDictionaryRepository _dictionaryRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IDocumentTypeRepository _documentTypeRepository;
 
         public StudyScopingController(IMedraConfigRepository medraConfigRepository,
             IMeddraCodingRepository meddraCodingRepository,
@@ -44,13 +40,9 @@ namespace GSC.Api.Controllers.Medra
         {
             _studyScopingRepository = studyScopingRepository;
             _meddraCodingRepository = meddraCodingRepository;
-            _medraConfigRepository = medraConfigRepository;
-            _dictionaryRepository = dictionaryRepository;
-            _userRepository = userRepository;
             _uow = uow;
             _mapper = mapper;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _documentTypeRepository = documentTypeRepository;
         }
 
         [HttpGet]
@@ -97,7 +89,11 @@ namespace GSC.Api.Controllers.Medra
                 if (string.IsNullOrEmpty(validate))
                 {
                     _studyScopingRepository.Add(studyScoping);
-                    if (_uow.Save() <= 0) throw new Exception($"Creating study Scoping failed on save.");
+                    if (_uow.Save() <= 0)
+                    {
+                        ModelState.AddModelError("Message", "Creating study Scoping failed on save.");
+                        return BadRequest(ModelState);
+                    }
                 }
 
             }
@@ -112,15 +108,12 @@ namespace GSC.Api.Controllers.Medra
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var result = _studyScopingRepository.All.AsNoTracking().Where(x => x.Id == studyScopingDto.Id).FirstOrDefault();
+            var result = _studyScopingRepository.All.AsNoTracking().First(x => x.Id == studyScopingDto.Id);
             var check = _studyScopingRepository.checkForScopingEdit(result.ProjectDesignVariableId);
-            if (check)
+            if (check && studyScopingDto.MedraConfigId != result.MedraConfigId)
             {
-                if (studyScopingDto.MedraConfigId != result.MedraConfigId)
-                {
-                    result.MedraConfigId = studyScopingDto.MedraConfigId;
-                    _meddraCodingRepository.UpdateScopingVersion(result);
-                }
+                result.MedraConfigId = studyScopingDto.MedraConfigId;
+                _meddraCodingRepository.UpdateScopingVersion(result);
             }
 
             var studyScoping = _mapper.Map<StudyScoping>(studyScopingDto);
@@ -128,7 +121,6 @@ namespace GSC.Api.Controllers.Medra
             if (string.IsNullOrEmpty(validate))
             {
                 _studyScopingRepository.Update(studyScoping);
-                // if (_uow.Save() <= 0) throw new Exception($"Updating Study Scoping failed on save.");
             }
             _uow.Save();
             return Ok(studyScoping.Id);

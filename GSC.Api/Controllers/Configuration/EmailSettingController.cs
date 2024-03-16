@@ -61,7 +61,11 @@ namespace GSC.Api.Controllers.Configuration
             emailSettingDto.Id = 0;
             var emailSetting = _mapper.Map<EmailSetting>(emailSettingDto);
             _emailSettingRepository.Add(emailSetting);
-            if (_uow.Save() <= 0) throw new Exception("Creating Email Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Email Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(emailSetting.Id);
         }
 
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Configuration
             var emailSetting = _mapper.Map<EmailSetting>(emailSettingDto);
 
             _emailSettingRepository.Update(emailSetting);
-            if (_uow.Save() <= 0) throw new Exception("Updating Email Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Email Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(emailSetting.Id);
         }
 

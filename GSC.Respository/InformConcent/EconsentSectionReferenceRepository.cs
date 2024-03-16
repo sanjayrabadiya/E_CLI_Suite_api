@@ -26,7 +26,6 @@ namespace GSC.Respository.InformConcent
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
@@ -34,14 +33,12 @@ namespace GSC.Respository.InformConcent
             IJwtTokenAccesser jwtTokenAccesser,
             IEconsentSetupRepository econsentSetupRepository,
             IUploadSettingRepository uploadSettingRepository,
-            IUnitOfWork uow,
             IMapper mapper) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _econsentSetupRepository = econsentSetupRepository;
             _uploadSettingRepository = uploadSettingRepository;
-            _uow = uow;
             _mapper = mapper;
         }
 
@@ -76,16 +73,15 @@ namespace GSC.Respository.InformConcent
                         {
                             DropDownDto sectionsHeader = new DropDownDto();
                             sectionsHeader.Id = sectioncount;
-
-                            string headerstring = "";
-                            foreach (var e3 in e2.inlines)
+                            StringBuilder headerStringBuilder = new StringBuilder();
+                            foreach (var e3 in e2.inlines.Select(s => s.text))
                             {
-                                if (e3.text != null)
+                                if (!string.IsNullOrEmpty(e3))
                                 {
-                                    headerstring = headerstring + e3.text;
+                                    headerStringBuilder.Append(e3);
                                 }
                             }
-                            sectionsHeader.Value = "(Section " + sectioncount.ToString() + ") " + headerstring;
+                            sectionsHeader.Value = "(Section " + sectioncount.ToString() + ") " + headerStringBuilder.ToString();
                             sectionsHeaders.Add(sectionsHeader);
                             sectioncount++;
                         }
@@ -111,7 +107,7 @@ namespace GSC.Respository.InformConcent
             if (extension == ".docx" || extension == ".doc")
             {
                 Stream stream = System.IO.File.OpenRead(path);
-                WordDocument document = null;
+                WordDocument document = new WordDocument();
                 if (extension == ".docx")
                     document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
                 if (extension == ".doc")
@@ -173,7 +169,7 @@ namespace GSC.Respository.InformConcent
             {
                 noneregister = _context.Randomization.Where(x => x.LARUserId == _jwtTokenAccesser.UserId).FirstOrDefault();
             }
-            if (noneregister == null) return null;
+            if (noneregister == null) return new List<EconsentSectionReferenceDocument>();
             var result = _context.EconsentReviewDetails.Where(x => x.RandomizationId == noneregister.Id && x.EconsentSetup.DeletedDate == null
                && x.EconsentSetup.LanguageId == noneregister.LanguageId
                && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Select(s => s.EconsentSetupId).ToList();
@@ -185,38 +181,15 @@ namespace GSC.Respository.InformConcent
             {
                 var econsentSectionReferenceDocument = new EconsentSectionReferenceDocument();
                 var upload = _uploadSettingRepository.GetDocumentPath();
-                //var Econsentsectiondocument = Find(id);
                 var FullPath = System.IO.Path.Combine(upload, Econsentsectiondocument.FilePath);
                 string path = FullPath;
                 if (!System.IO.File.Exists(path))
-                    return null;
+                    return new List<EconsentSectionReferenceDocument>();
                 string extension = System.IO.Path.GetExtension(path);
                 string type = "";
 
                 if (extension == ".docx" || extension == ".doc")
                 {
-                    //Stream stream = System.IO.File.OpenRead(path);
-                    //WordDocument document = null;
-                    //if (extension == ".docx")
-                    //    document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-                    //if (extension == ".doc")
-                    //    document = new WordDocument(stream, Syncfusion.DocIO.FormatType.Doc);
-                    //document.SaveOptions.HtmlExportCssStyleSheetType = CssStyleSheetType.Inline;
-                    //MemoryStream ms = new MemoryStream();
-                    //document.Save(ms, Syncfusion.DocIO.FormatType.Html);
-                    //document.Close();
-                    //ms.Position = 0;
-                    //StreamReader reader = new StreamReader(ms);
-                    //var htmlStringText = reader.ReadToEnd();
-                    //ms.Dispose();
-                    //reader.Dispose();
-                    //stream.Close();
-                    //stream.Dispose();
-                    //type = "doc";
-                    //econsentSectionReferenceDocument.type = type;
-                    //econsentSectionReferenceDocument.data = htmlStringText;
-                    //econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
-                    //econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                     var pdfupload = _uploadSettingRepository.GetWebDocumentUrl();
                     var pdfFullPath = System.IO.Path.Combine(pdfupload, Econsentsectiondocument.FilePath);
                     type = extension.Trim('.');
@@ -253,7 +226,6 @@ namespace GSC.Respository.InformConcent
                         econsentSectionReferenceDocument.type = type;
                         econsentSectionReferenceDocument.data = fileFullPath.Replace('\\', '/');
                         econsentSectionReferenceDocument.Title = Econsentsectiondocument.ReferenceTitle;
-                        //return econsentSectionReferenceDocument;
                         econsentSectionReferenceDocuments.Add(econsentSectionReferenceDocument);
                     }
                 }

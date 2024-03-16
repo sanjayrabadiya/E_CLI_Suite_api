@@ -61,7 +61,11 @@ namespace GSC.Api.Controllers.Configuration
             numberFormatDto.Id = 0;
             var numberFormat = _mapper.Map<NumberFormat>(numberFormatDto);
             _numberFormatRepository.Add(numberFormat);
-            if (_uow.Save() <= 0) throw new Exception("Creating Upload Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Upload Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(numberFormat.Id);
         }
 
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Configuration
             var numberFormat = _mapper.Map<NumberFormat>(numberFormatDto);
 
             _numberFormatRepository.Update(numberFormat);
-            if (_uow.Save() <= 0) throw new Exception("Updating Upload Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Upload Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(numberFormat.Id);
         }
 

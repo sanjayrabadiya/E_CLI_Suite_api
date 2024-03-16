@@ -31,7 +31,6 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMapper _mapper;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IDocumentTypeRepository _documentTypeRepository;
         private readonly IMedraConfigCommonRepository _medraConfigCommonRepository;
 
         private readonly IMeddraHlgtHltCompRepository _meddraHlgtHltCompRepository;
@@ -47,7 +46,6 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMeddraSocIntlOrderRepository _meddraSocIntlOrderRepository;
         private readonly IMeddraSocTermRepository _meddraSocTermRepository;
         private readonly IRoleRepository _securityRoleRepository;
-        private readonly IMeddraCodingRepository _meddraCodingRepository;
 
         public MedraConfigController(IMedraConfigRepository medraConfigRepository,
            IDictionaryRepository dictionaryRepository,
@@ -86,7 +84,6 @@ namespace GSC.Api.Controllers.Medra
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _documentTypeRepository = documentTypeRepository;
             _meddraHlgtHltCompRepository = meddraHlgtHltCompRepository;
             _meddraHlgtPrefTermRepository = meddraHlgtPrefTermRepository;
             _meddraHltPrefCompRepository = meddraHltPrefCompRepository;
@@ -99,7 +96,6 @@ namespace GSC.Api.Controllers.Medra
             _meddraSocHlgtCompRepository = meddraSocHlgtCompRepository;
             _meddraSocIntlOrderRepository = meddraSocIntlOrderRepository;
             _meddraSocTermRepository = meddraSocTermRepository;
-            _meddraCodingRepository = meddraCodingRepository;
             _securityRoleRepository = securityRoleRepository;
         }
 
@@ -173,70 +169,108 @@ namespace GSC.Api.Controllers.Medra
             if (_uow.Save() <= 0)
             {
                 _medraConfigCommonRepository.DeleteDirectory(root);
-                throw new Exception($"Creating Medra Config failed on save.");
+                ModelState.AddModelError("Message", "Creating Medra Config failed on save.");
+                return BadRequest(ModelState);
             }
 
             obj.MedraId = medra.Id;
 
             int Soccount = _meddraSocTermRepository.AddSocFileData(obj);
             if (Soccount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int Hlgtcount = _meddraHlgtPrefTermRepository.AddHlgtFileData(obj);
             if (Hlgtcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int Hltcount = _meddraHltPrefTermRepository.AddHltFileData(obj);
             if (Hltcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int Ptcount = _meddraPrefTermRepository.AddPtFileData(obj);
             if (Ptcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int Lltcount = _meddraLowLevelTermRepository.AddLltFileData(obj);
             if (Lltcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int SmqListcount = _meddraSmqListRepository.AddSmqListFileData(obj);
             if (SmqListcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int HlgtHltcount = _meddraHlgtHltCompRepository.AddHlgtHltFileData(obj);
             if (HlgtHltcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int HltPtcount = _meddraHltPrefCompRepository.AddHltPtFileData(obj);
             if (HltPtcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int Mdhiercount = _meddraMdHierarchyRepository.AddMdhierFileData(obj);
             if (Mdhiercount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int SmqContentcount = _meddraSmqContentRepository.AddSmqContentFileData(obj);
             if (SmqContentcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int SocHlgtcount = _meddraSocHlgtCompRepository.AddSocHlgtFileData(obj);
             if (SocHlgtcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             int IntlOrdcount = _meddraSocIntlOrderRepository.AddIntlOrdFileData(obj);
             if (IntlOrdcount != 0)
-                InsertFileData(root);
+            {
+                ModelState.AddModelError("Message", InsertFileData(root));
+                return BadRequest(ModelState);
+            }
 
             _medraConfigCommonRepository.DeleteDirectory(root);
             return Ok(medra.Id);
         }
 
-        private void InsertFileData(string root)
+        private string InsertFileData(string root)
         {
             if (_uow.Save() <= 0)
             {
                 _medraConfigCommonRepository.DeleteDirectory(root);
-                throw new Exception($"Creating Medra Config failed on save.");
+                return $"Creating Medra Config failed on save.";
             }
+            return "";
         }
 
         [HttpPut]
@@ -271,7 +305,8 @@ namespace GSC.Api.Controllers.Medra
 
             if (_uow.Save() <= 0)
             {
-                throw new Exception($"Updating Medra Config failed on save.");
+                ModelState.AddModelError("Message", "Updating Medra Config failed on save.");
+                return BadRequest(ModelState);
             }
             return Ok(medra.Id);
         }
@@ -365,7 +400,8 @@ namespace GSC.Api.Controllers.Medra
 
                     if (_uow.Save() <= 0)
                     {
-                        throw new Exception($"Active Medra dictionary failed.");
+                        ModelState.AddModelError("Message", "Active Medra dictionary failed.");
+                        return BadRequest(ModelState);
                     }
                 }
             }
@@ -381,13 +417,11 @@ namespace GSC.Api.Controllers.Medra
 
                 if (_uow.Save() <= 0)
                 {
-                    throw new Exception($"Active Medra dictionary failed.");
+                    ModelState.AddModelError("Message", "Active Medra dictionary failed.");
+                    return BadRequest(ModelState);
                 }
             }
-
-            //    _meddraCodingRepository.UpdateDictionaryVersion();
-
-            return Ok(active.Id);
+            return Ok(active?.Id);
         }
     }
 }

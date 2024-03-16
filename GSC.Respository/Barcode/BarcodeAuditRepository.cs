@@ -13,12 +13,10 @@ namespace GSC.Respository.Barcode
 {
     public class BarcodeAuditRepository : GenericRespository<BarcodeAudit>, IBarcodeAuditRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        public BarcodeAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public BarcodeAuditRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
         }

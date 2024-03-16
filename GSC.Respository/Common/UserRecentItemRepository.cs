@@ -28,7 +28,7 @@ namespace GSC.Respository.Common
             var result = All.Where(x => x.UserId == _jwtTokenAccesser.UserId).OrderByDescending(c => c.CreatedDate)
                 .Take(7).ToList();
 
-            if (!result.Any(c => c.ScreenType == userRecentItem.ScreenType && c.KeyId == userRecentItem.KeyId))
+            if (!result.Exists(c => c.ScreenType == userRecentItem.ScreenType && c.KeyId == userRecentItem.KeyId))
             {
                 userRecentItem.UserId = _jwtTokenAccesser.UserId;
                 userRecentItem.RoleId = _jwtTokenAccesser.RoleId;

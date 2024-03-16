@@ -17,35 +17,10 @@ namespace GSC.Api.Controllers.Medra
     [ApiController]
     public class MeddraCodingAuditController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMeddraCodingAuditRepository _meddraCodingAuditRepository;
-        private readonly IMeddraCodingRepository _meddraCodingRepository;
-        private readonly IMeddraSocTermRepository _meddraSocTermRepository;
-        private readonly IStudyScopingRepository _studyScopingRepository;
-        private readonly IMeddraCodingCommentRepository _meddraCodingCommentRepository;
-        private readonly IMeddraMdHierarchyRepository _meddraMdHierarchyRepository;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
-
-        public MeddraCodingAuditController(IMeddraCodingRepository meddraCodingRepository,
-            IMeddraCodingAuditRepository meddraCodingAuditRepository,
-            IMeddraCodingCommentRepository meddraCodingCommentRepository,
-            IStudyScopingRepository studyScopingRepository,
-            IMeddraSocTermRepository meddraSocTermRepository,
-            IMeddraMdHierarchyRepository meddraMdHierarchyRepository,
-            IUnitOfWork uow,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public MeddraCodingAuditController(IMeddraCodingAuditRepository meddraCodingAuditRepository)
         {
-            _meddraCodingRepository = meddraCodingRepository;
             _meddraCodingAuditRepository = meddraCodingAuditRepository;
-            _meddraCodingCommentRepository = meddraCodingCommentRepository;
-            _meddraMdHierarchyRepository = meddraMdHierarchyRepository;
-            _studyScopingRepository = studyScopingRepository;
-            _meddraSocTermRepository = meddraSocTermRepository;
-            _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
         }
 
         [HttpGet]

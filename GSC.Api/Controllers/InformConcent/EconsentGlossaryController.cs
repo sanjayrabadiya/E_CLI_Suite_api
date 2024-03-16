@@ -22,27 +22,15 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class EconsentGlossaryController : BaseController
     {
-        private readonly IEconsentSectionReferenceRepository _econsentSectionReferenceRepository;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
-        private readonly IProjectRepository _projectRepository;
         private readonly IEconsentGlossaryRepository _econsentGlossaryRepository;
-        public EconsentGlossaryController(IEconsentSectionReferenceRepository econsentSectionReferenceRepository,
-                                                IUnitOfWork uow,
+        public EconsentGlossaryController(IUnitOfWork uow,
                                                 IMapper mapper,
-                                                IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser, IGSCContext context, IProjectRepository projectRepository,
                                                 IEconsentGlossaryRepository econsentGlossaryRepository)
         {
-            _econsentSectionReferenceRepository = econsentSectionReferenceRepository;
             _uow = uow;
             _mapper = mapper;
-            _uploadSettingRepository = uploadSettingRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _context = context;
-            _projectRepository = projectRepository;
             _econsentGlossaryRepository = econsentGlossaryRepository;
         }
 
@@ -71,9 +59,13 @@ namespace GSC.Api.Controllers.InformConcent
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
             var econsentGlossary = _mapper.Map<EconsentGlossary>(econsentGlossaryDto);
-            
+
             _econsentGlossaryRepository.Add(econsentGlossary);
-            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent glossary failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Econsent glossary failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 
@@ -84,12 +76,13 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest();
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
-          
-            var Glossary = _econsentGlossaryRepository.Find(econsentGlossaryDto.Id);
             var econsentGlossary = _mapper.Map<EconsentGlossary>(econsentGlossaryDto);
-
             _econsentGlossaryRepository.Update(econsentGlossary);
-            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent glossary failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Econsent glossary failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

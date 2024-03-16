@@ -23,28 +23,22 @@ namespace GSC.Respository.Attendance
     {
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IVolunteerRepository _volunteerRepository;
-        private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMapper _mapper;
-        public SampleBarcodeRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IVolunteerRepository volunteerRepository, IMapper mapper, IProjectRightRepository projectRightRepository) : base(context)
+        public SampleBarcodeRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IMapper mapper) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _volunteerRepository = volunteerRepository;
             _mapper = mapper;
-            _projectRightRepository = projectRightRepository;
         }
 
         public List<SampleBarcodeGridDto> GetSampleBarcodeList(bool isDeleted)
         {
-            var list= All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
+            var list = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<SampleBarcodeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             list.ForEach(x =>
             {
                 x.isBarcodeGenerated = _context.SampleBarcodeGenerate.Any(t => t.SampleBarcodeId == x.Id && t.DeletedBy == null);
-                //x.PKBarcodeGenerateId = _context.PkBarcodeGenerate.Where(t => t.PKBarcodeId == x.Id && t.DeletedBy == null).FirstOrDefault()?.Id ?? 0;
             });
 
             return list;
@@ -65,39 +59,36 @@ namespace GSC.Respository.Attendance
 
         public string GenerateBarcodeString(SampleBarcodeDto objSave)
         {
-            string barcode = "";
             var volunteer = _context.Volunteer.FirstOrDefault(x => x.Id == objSave.VolunteerId);
-            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
+            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).First().ProjectDesignPeriod;
             var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == objSave.TemplateId);
 
+            var stringBuilder = new StringBuilder();
             if (objSave.PKBarcodeOption > 1)
             {
                 for (int i = 1; i <= objSave.PKBarcodeOption; i++)
                 {
-                    barcode = barcode + "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + "0" + i + ",";
+                    stringBuilder.Append($"SS{volunteer?.RandomizationNumber}{peroid.DisplayName}{template?.TemplateCode}0{i},");
                 }
             }
             else
             {
-                barcode = "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode;
+                stringBuilder.Append($"SS{volunteer?.RandomizationNumber}{peroid.DisplayName}{template?.TemplateCode}");
             }
+
+            var barcode = stringBuilder.ToString();
+
             return barcode.TrimEnd(',');
         }
 
         public List<ProjectDropDown> GetProjectDropdown()
         {
-            var projectList = _projectRightRepository.GetProjectRightIdList();
             var project = _context.PKBarcode.Include(x => x.Project)
                 .Where(x => x.DeletedDate == null)
                  .Select(c => new ProjectDropDown
                  {
                      Id = c.ProjectId.Value,
                      Value = c.Project.ProjectCode + " - " + c.Project.ProjectName,
-                     //Code = c.Project.ProjectCode,
-                     //IsStatic = c.Project.IsStatic,
-                     //IsDeleted = c.DeletedDate != null,
-                     //ParentProjectId = c.Project.ParentProjectId ?? c.ProjectId ?? 0,
-                     //AttendanceLimit = c.Project.AttendanceLimit ?? 0
                  }).Distinct().OrderBy(o => o.Value).ToList();
             return project;
         }
@@ -109,13 +100,7 @@ namespace GSC.Respository.Attendance
                  .Select(c => new ProjectDropDown
                  {
                      Id = c.SiteId ?? 0,
-                     Value = c.Site.ProjectCode == null ? c.Site.ManageSite.SiteName : c.Site.ProjectCode + " - " + c.Site.ManageSite.SiteName,
-                     //CountryId = c.Site.ManageSite != null && c.Site.ManageSite.City != null && c.Site.ManageSite.City.State != null ? c.Site.ManageSite.City.State.CountryId : 0,
-                     //Code = c.Site.ProjectCode,
-                     //IsStatic = c.Site.IsStatic,
-                     //IsTestSite = c.Site.IsTestSite,
-                     //ParentProjectId = c.Site.ParentProjectId ?? 0,
-                     //AttendanceLimit = c.Site.AttendanceLimit ?? 0,
+                     Value = c.Site.ProjectCode == null ? c.Site.ManageSite.SiteName : c.Site.ProjectCode + " - " + c.Site.ManageSite.SiteName
                  }).Distinct().OrderBy(o => o.Value).ToList();
 
             return project;
@@ -128,11 +113,7 @@ namespace GSC.Respository.Attendance
              .Select(t => new DropDownDto
              {
                  Id = t.VisitId ?? 0,
-                 Value = t.ProjectDesignVisit.DisplayName,
-                 //Code = t.ProjectDesignVisit.StudyVersion != null || t.ProjectDesignVisit.InActiveVersion != null ?
-                 //   "( V : " + t.ProjectDesignVisit.StudyVersion + (t.ProjectDesignVisit.StudyVersion != null && t.ProjectDesignVisit.InActiveVersion != null ? " - " : "" + t.ProjectDesignVisit.InActiveVersion) + ")" : "",
-                 //ExtraData = t.ProjectDesignVisit.IsNonCRF,
-                 //InActive = t.ProjectDesignVisit.InActiveVersion != null
+                 Value = t.ProjectDesignVisit.DisplayName
              }).Distinct().ToList();
 
             return visitList;
@@ -145,9 +126,7 @@ namespace GSC.Respository.Attendance
                 .Select(t => new DropDownDto
                 {
                     Id = t.TemplateId ?? 0,
-                    Value = t.ProjectDesignTemplate.TemplateName,
-                    //Code = _context.ProjectScheduleTemplate.Any(x => x.ProjectDesignTemplateId == t.Id) ? "Used" : "",
-                    //InActive = t.ProjectDesignTemplate.InActiveVersion != null
+                    Value = t.ProjectDesignTemplate.TemplateName
                 }).Distinct().ToList();
 
             return templateList;
@@ -160,17 +139,6 @@ namespace GSC.Respository.Attendance
             subjectList.Contains(x.Id) &&
                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId))
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.VolunteerNo + " " + c.FirstName + " " + c.MiddleName + " " + c.LastName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
-
-            //var templateList = _context.PKBarcode.Include(x => x.Volunteer)
-            //    .Where(x => x.DeletedDate == null && x.SiteId == siteId && x.BarcodeDate != null)
-            //    .Select(t => new DropDownDto
-            //    {
-            //        Id = t.VolunteerId ?? 0,
-            //        Code = "",
-            //        Value = t.Volunteer.FirstName + " " + t.Volunteer.LastName
-            //    }).Distinct().ToList();
-
-            //return templateList;
         }
 
         public void UpdateBarcode(List<int> ids)
@@ -178,7 +146,6 @@ namespace GSC.Respository.Attendance
             var barcodes = _context.SampleBarcode.Where(x => ids.Contains(x.Id));
             foreach (var barcode in barcodes)
             {
-                //barcode.IsBarcodeReprint = true;
                 barcode.BarcodeDate = DateTime.Now;
 
                 _context.SampleBarcode.Update(barcode);

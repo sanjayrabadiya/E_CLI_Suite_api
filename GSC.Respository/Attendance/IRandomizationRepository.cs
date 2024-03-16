@@ -19,24 +19,19 @@ namespace GSC.Respository.Attendance
     {
         string Duplicate(RandomizationDto objSave, int projectId);
         List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted);
-        //void SaveRandomization(Randomization randomization, RandomizationDto randomizationDto);
         void SaveRandomizationNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SaveScreeningNumber(Randomization randomization, RandomizationDto randomizationDto);
         void SendEmailOfStartEconsent(Randomization randomization);
         Task SendEmailOfScreenedtoPatient(Randomization randomization, int sendtype);
-        //void ChangeStatustoConsentInProgress();
         void ChangeStatustoConsentCompleted(int id);
         void ChangeStatustoReConsentInProgress(int id);
         Task PatientStatus(ScreeningPatientStatus patientStatus, int screeningEntryId);
         void ChangeStatustoWithdrawal();
         DashboardPatientDto GetDashboardPatientDetail();
-        //List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignVisitMobileDto> GetPatientVisits();
         List<ProjectDesignTemplateMobileDto> GetPatientTemplates(int screeningVisitId);
-        //RandomizationNumberDto GetRandomizationAndScreeningNumber(int id);
         RandomizationNumberDto GetRandomizationNumber(int id);
         RandomizationNumberDto GetScreeningNumber(int id);
-        //string ValidateRandomizationAndScreeningNumber(RandomizationDto randomization);
         string ValidateScreeningNumber(RandomizationDto randomization);
         string ValidateRandomizationNumber(RandomizationDto randomization);
         List<DropDownDto> GetRandomizationDropdown(int projectid);
@@ -62,9 +57,9 @@ namespace GSC.Respository.Attendance
 
         RandomizationDto SetKitNumber(RandomizationDto obj);
 
-        bool CheckKitNumber(RandomizationDto obj, bool IsIwrs);
+        bool CheckKitNumber(RandomizationDto obj, bool Isiwrs);
 
-        void UpdateRandmizationKitNotAssigned(RandomizationDto randomization);
+        void UpdateRandmizationKitNotAssigned(RandomizationDto obj);
 
         void SendRandomizationIWRSEMail(RandomizationDto obj);
 

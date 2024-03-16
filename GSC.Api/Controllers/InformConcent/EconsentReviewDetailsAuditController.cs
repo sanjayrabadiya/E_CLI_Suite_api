@@ -18,31 +18,18 @@ namespace GSC.Api.Controllers.InformConcent
     [ApiController]
     public class EconsentReviewDetailsAuditController : BaseController
     {
-
-        private readonly IUnitOfWork _uow;
-        private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IEconsentReviewDetailsAuditRepository _econsentReviewDetailsAuditRepository;
 
-        public EconsentReviewDetailsAuditController(
-            IUnitOfWork uow,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IGSCContext context,
-            IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository
-            )
+        public EconsentReviewDetailsAuditController(IEconsentReviewDetailsAuditRepository econsentReviewDetailsAuditRepository)
         {
-            _uow = uow;
-            _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
         }
 
         [HttpPost]
         [Route("GenerateICfDetailReport")]
         [TransactionRequired]
-        public async Task<IActionResult> GenerateICfDetailReport([FromBody] EconsentReviewDetailsAuditParameterDto details)
+        public IActionResult GenerateICfDetailReport([FromBody] EconsentReviewDetailsAuditParameterDto details)
         {
-
             _econsentReviewDetailsAuditRepository.GenerateICFDetailReport(details);
             return Ok();
         }

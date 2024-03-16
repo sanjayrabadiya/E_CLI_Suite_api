@@ -61,7 +61,11 @@ namespace GSC.Api.Controllers.Configuration
             uploadSettingDto.Id = 0;
             var uploadSetting = _mapper.Map<UploadSetting>(uploadSettingDto);
             _uploadSettingRepository.Add(uploadSetting);
-            if (_uow.Save() <= 0) throw new Exception("Creating Upload Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Upload Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(uploadSetting.Id);
         }
 
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Configuration
             var uploadSetting = _mapper.Map<UploadSetting>(uploadSettingDto);
 
             _uploadSettingRepository.Update(uploadSetting);
-            if (_uow.Save() <= 0) throw new Exception("Updating Upload Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Upload Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(uploadSetting.Id);
         }
 
@@ -110,8 +118,8 @@ namespace GSC.Api.Controllers.Configuration
         [HttpGet]
         [Route("IsUnlimitedUploadlimit")]
         public IActionResult IsUnlimitedUploadlimit()
-        {          
-            var uploadSetting = _uploadSettingRepository.IsUnlimitedUploadlimit();           
+        {
+            var uploadSetting = _uploadSettingRepository.IsUnlimitedUploadlimit();
             return Ok(uploadSetting);
         }
     }

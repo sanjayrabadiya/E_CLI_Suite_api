@@ -63,7 +63,7 @@ namespace GSC.Respository.Configuration
             {
                 KeyCode = x.KeyCode,
                 KeyName = x.KeyName,
-                Message = x.LanguageConfigurationDetailslist.Any(a => a.LanguageId == _jwtTokenAccesser.Language && a.LanguageConfigurationId == x.Id) ? x.LanguageConfigurationDetailslist.Where(a => a.LanguageId == _jwtTokenAccesser.Language && a.LanguageConfigurationId == x.Id).FirstOrDefault().Message : x.DefaultMessage              
+                Message = x.LanguageConfigurationDetailslist.Any(a => a.LanguageId == _jwtTokenAccesser.Language && a.LanguageConfigurationId == x.Id) ? x.LanguageConfigurationDetailslist.FirstOrDefault(a => a.LanguageId == _jwtTokenAccesser.Language && a.LanguageConfigurationId == x.Id).Message : x.DefaultMessage              
             }).ToList();
             return detail;
         }

@@ -18,16 +18,11 @@ namespace GSC.Respository.Medra
 {
     public class MeddraCodingCommentRepository : GenericRespository<MeddraCodingComment>, IMeddraCodingCommentRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IMeddraCodingAuditRepository _meddraCodingAuditRepository;
         private readonly IGSCContext _context;
-        public MeddraCodingCommentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService,
-            IMeddraCodingAuditRepository meddraCodingAuditRepository) : base(context)
+        public MeddraCodingCommentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _meddraCodingAuditRepository = meddraCodingAuditRepository;
             _context = context;
         }
 

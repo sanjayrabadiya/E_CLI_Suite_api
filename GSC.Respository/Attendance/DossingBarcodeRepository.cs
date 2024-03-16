@@ -22,15 +22,10 @@ namespace GSC.Respository.Attendance
     public class DossingBarcodeRepository : GenericRespository<DossingBarcode>, IDossingBarcodeRepository
     {
         private readonly IGSCContext _context;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IVolunteerRepository _volunteerRepository;
         private readonly IMapper _mapper;
-        public DossingBarcodeRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IVolunteerRepository volunteerRepository, IMapper mapper) : base(context)
+        public DossingBarcodeRepository(IGSCContext context, IMapper mapper) : base(context)
         {
             _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
-            _volunteerRepository = volunteerRepository;
             _mapper = mapper;
         }
 
@@ -42,7 +37,6 @@ namespace GSC.Respository.Attendance
             list.ForEach(x =>
             {
                 x.isBarcodeGenerated = _context.DossingBarcodeGenerate.Any(t => t.DossingBarcodeId == x.Id && t.DeletedBy == null);
-                //x.PKBarcodeGenerateId = _context.PkBarcodeGenerate.Where(t => t.PKBarcodeId == x.Id && t.DeletedBy == null).FirstOrDefault()?.Id ?? 0;
             });
 
             return list;
@@ -65,21 +59,8 @@ namespace GSC.Respository.Attendance
         {
             string barcode = "";
             var volunteer = _context.Volunteer.FirstOrDefault(x => x.Id == objSave.VolunteerId);
-            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
-            var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == objSave.TemplateId);
-
-            //if (objSave.PKBarcodeOption > 1)
-            //{
-            //    for (int i = 1; i <= objSave.PKBarcodeOption; i++)
-            //    {
-            //        barcode = barcode + "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder + "0" + i + ",";
-            //    }
-            //}
-            //else
-            //{
-            //    barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.DesignOrder;
-            //}
-            //return barcode.TrimEnd(',');
+            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).First().ProjectDesignPeriod;
+            var template = _context.ProjectDesignTemplate.First(x => x.Id == objSave.TemplateId);
 
             var randomization = _context.SupplyManagementUploadFileVisit.Include(x => x.SupplyManagementUploadFileDetail)
                 .Where(q => q.ProjectDesignVisitId == objSave.VisitId &&
@@ -106,7 +87,6 @@ namespace GSC.Respository.Attendance
             List<int> barcodeIds = new List<int>();
             foreach (var barcode in barcodes)
             {
-                //barcode.IsBarcodeReprint = true;
                 var strBarcode = GenerateBarcodeString(barcode);
                 if (!string.IsNullOrEmpty(strBarcode))
                 {

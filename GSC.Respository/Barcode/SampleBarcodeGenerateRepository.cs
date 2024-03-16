@@ -15,17 +15,11 @@ namespace GSC.Respository.Barcode
 {
     public class SampleBarcodeGenerateRepository : GenericRespository<SampleBarcodeGenerate>, ISampleBarcodeGenerateRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        private readonly IBarcodeDisplayInfoRepository _barcodeDisplayInfoRepository;
-        public SampleBarcodeGenerateRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IBarcodeDisplayInfoRepository barcodeDisplayInfoRepository)
+        public SampleBarcodeGenerateRepository(IGSCContext context)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            _barcodeDisplayInfoRepository = barcodeDisplayInfoRepository;
         }
 
         public List<SampleBarcodeGenerateGridDto> GetBarcodeDetail(int SampleBarcodeId)
@@ -54,7 +48,7 @@ namespace GSC.Respository.Barcode
                 {
                     sublst.BarcodeDisplayInfo[index] = new BarcodeDisplayInfo();
                     sublst.BarcodeDisplayInfo[index].Alignment = subitem.Alignment;
-                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.SampleBarcodeId, "SampleBarcode", subitem.TableFieldName.FieldName);
+                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.SampleBarcodeId, subitem.TableFieldName.FieldName);
                     sublst.BarcodeDisplayInfo[index].OrderNumber = subitem.OrderNumber;
                     sublst.BarcodeDisplayInfo[index].IsSameLine = subitem.IsSameLine;
                     index++;
@@ -90,7 +84,7 @@ namespace GSC.Respository.Barcode
                 {
                     sublst.BarcodeDisplayInfo[index] = new BarcodeDisplayInfo();
                     sublst.BarcodeDisplayInfo[index].Alignment = subitem.Alignment;
-                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.SampleBarcodeId, "SampleBarcode", subitem.TableFieldName.FieldName);
+                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.SampleBarcodeId, subitem.TableFieldName.FieldName);
                     sublst.BarcodeDisplayInfo[index].OrderNumber = subitem.OrderNumber;
                     sublst.BarcodeDisplayInfo[index].IsSameLine = subitem.IsSameLine;
                     index++;
@@ -100,7 +94,7 @@ namespace GSC.Respository.Barcode
             return lst;
         }
 
-        string GetColumnValue(int id, string TableName, string ColumnName)
+        string GetColumnValue(int id, string ColumnName)
         {
             var tableRepository = _context.SampleBarcode.Where(x => x.Id == id).Select(e => e).FirstOrDefault();
 
@@ -127,8 +121,8 @@ namespace GSC.Respository.Barcode
         {
             string barcode = "";
             var volunteer = _context.Volunteer.Find(SampleBarcode.VolunteerId);
-            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == SampleBarcode.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
-            var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == SampleBarcode.TemplateId);
+            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == SampleBarcode.VisitId).Include(x => x.ProjectDesignPeriod).First().ProjectDesignPeriod;
+            var template = _context.ProjectDesignTemplate.First(x => x.Id == SampleBarcode.TemplateId);
             if (number > 0)
             {
                 barcode = "SS" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + "0" + number;

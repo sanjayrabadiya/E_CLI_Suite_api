@@ -11,21 +11,13 @@ namespace GSC.Respository.Barcode
 {
     public class CentrifugationRepository : GenericRespository<Centrifugation>, ICentrifugationRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-
-        public CentrifugationRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser)
+        public CentrifugationRepository(IGSCContext context)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public string Duplicate(BarcodeType objSave)
-        {
-            //if (All.Any(
-            //    x => x.Id != objSave.Id && x.BarcodeTypeCode == objSave.BarcodeTypeCode.Trim() && x.DeletedDate == null))
-            //    return "Duplicate BarcodeType code : " + objSave.BarcodeTypeCode;
-
+        {  
             if (All.Any(x => x.DeletedDate == null))
                 return "Duplicate BarcodeType name : " + objSave.BarcodeTypeName;
 

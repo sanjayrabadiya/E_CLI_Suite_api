@@ -11,6 +11,5 @@ namespace GSC.Respository.Medra
         MeddraCodingComment GetLatest(int MeddraCodingId);
         MeddraCodingComment CheckWhileScopingVersionUpdate(int MeddraCodingId);
         IList<MeddraCodingCommentDto> GetData(int MeddraCodingId);
-//        MeddraCodingComment SaveComment(int meddraCodingId);
     }
 }

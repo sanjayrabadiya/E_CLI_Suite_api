@@ -32,6 +32,7 @@ using GSC.Data.Dto.Configuration;
 using Syncfusion.Pdf.Parsing;
 using Microsoft.AspNetCore.Mvc;
 using GSC.Data.Entities.Attendance;
+using System.Text;
 
 namespace GSC.Respository.InformConcent
 {
@@ -41,7 +42,6 @@ namespace GSC.Respository.InformConcent
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
         private readonly IProjectRepository _projectRepository;
-        private readonly IUserRepository _userRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUnitOfWork _uow;
@@ -64,7 +64,6 @@ namespace GSC.Respository.InformConcent
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
             _projectRepository = projectRepository;
-            _userRepository = userRepository;
             _uploadSettingRepository = uploadSettingRepository;
             _emailSenderRespository = emailSenderRespository;
             _uow = uow;
@@ -92,7 +91,7 @@ namespace GSC.Respository.InformConcent
                 && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).Include(x => x.EconsentReviewDetailsSections).ToList();
 
             if (eConsentResult.Count <= 0)
-                return null;
+                return new List<EConsentDocumentHeader>();
 
             var lastRecords = eConsentResult.Where(x => x.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < noneregister.CreatedDate.GetValueOrDefault().Ticks)
                 .OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
@@ -123,9 +122,8 @@ namespace GSC.Respository.InformConcent
 
         public List<SectionsHeader> GetEconsentSectionHeaders(int id)
         {
-            var econsentreviewdetail = FindByInclude(x => x.Id == id, x => x.EconsentSetup, x => x.EconsentReviewDetailsSections).FirstOrDefault();
-            // var document = _context.EconsentSetup.Where(x => x.Id == econsentreviewdetail.EconsentSetupId).FirstOrDefault();
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var econsentreviewdetail = FindByInclude(x => x.Id == id, x => x.EconsentSetup, x => x.EconsentReviewDetailsSections).First();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, econsentreviewdetail.EconsentSetup.DocumentPath);
             string path = FullPath;
             List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
@@ -148,14 +146,16 @@ namespace GSC.Respository.InformConcent
                             SectionsHeader sectionsHeader = new SectionsHeader();
                             sectionsHeader.SectionNo = sectioncount;
                             sectionsHeader.SectionName = "Section " + sectioncount.ToString();
-                            string headerstring = "";
-                            foreach (var e3 in e2.inlines)
+                            var stringBuilder = new StringBuilder();
+                            foreach (var e3 in e2.inlines.Select(s => s.text))
                             {
-                                if (e3.text != null)
+                                if (!string.IsNullOrEmpty(e3))
                                 {
-                                    headerstring = headerstring + e3.text;
+                                    stringBuilder.Append(e3);
                                 }
                             }
+
+                            string headerstring = stringBuilder.ToString();
                             sectionsHeader.Header = headerstring;
                             sectionsHeader.DocumentId = econsentreviewdetail.EconsentSetup.Id;
                             sectionsHeader.DocumentReviewId = econsentreviewdetail.Id;
@@ -175,8 +175,8 @@ namespace GSC.Respository.InformConcent
         public List<SectionsHeader> GetEconsentDocumentHeadersByDocumentId(int documentId)
         {
             // this method is called from Econsent setup page, when clicking on eye icon in the grid (display section wise documents)
-            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == documentId).ToList().FirstOrDefault();
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == documentId).AsEnumerable().First();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             List<SectionsHeader> sectionsHeaders = new List<SectionsHeader>();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
@@ -199,14 +199,15 @@ namespace GSC.Respository.InformConcent
                             SectionsHeader sectionsHeader = new SectionsHeader();
                             sectionsHeader.SectionNo = sectioncount;
                             sectionsHeader.SectionName = "Section " + sectioncount.ToString();
-                            string headerstring = "";
-                            foreach (var e3 in e2.inlines)
+                            var stringBuilder = new StringBuilder();
+                            foreach (var e3 in e2.inlines.Select(s => s.text))
                             {
-                                if (e3.text != null)
+                                if (!string.IsNullOrEmpty(e3))
                                 {
-                                    headerstring = headerstring + e3.text;
+                                    stringBuilder.Append(e3);
                                 }
                             }
+                            string headerstring = stringBuilder.ToString();
                             sectionsHeader.Header = headerstring;
                             sectionsHeader.DocumentId = Econsentdocument.Id;
                             sectionsHeader.DocumentName = Econsentdocument.DocumentName;
@@ -223,8 +224,8 @@ namespace GSC.Respository.InformConcent
         public AppEConsentSection ImportSectionDataHtml(int id, int sectionno)
         {
             // this method is called when clicking particular sections from the left side grid in Inform consent page(patient portal)
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
+            var Econsentdocument = _context.EconsentSetup.First(x => x.Id == id);
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
@@ -295,8 +296,8 @@ namespace GSC.Respository.InformConcent
         public string ImportSectionData(int id, int sectionno)
         {
             // this method is called when clicking particular sections from the left side grid in Inform consent page (patient portal)
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
+            var Econsentdocument = _context.EconsentSetup.First(x => x.Id == id);
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
@@ -354,11 +355,8 @@ namespace GSC.Respository.InformConcent
         public FileStreamResult GetEconsentDocument(int EconcentReviewId)
         {
             var document = Find(EconcentReviewId);
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             var FullPath = Path.Combine(upload.DocumentPath, document.PdfPath);
-            //if (!File.Exists(FullPath))
-            //    return null;
-            GC.Collect();
             FileStream stream = new FileStream(FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
             return new FileStreamResult(stream, "application/pdf");
         }
@@ -369,7 +367,7 @@ namespace GSC.Respository.InformConcent
             if (_context.ProjectRight.Any(x => rolelist.Contains(x.RoleId) && x.DeletedDate == null && x.RoleId == _jwtTokenAccesser.RoleId && x.UserId == _jwtTokenAccesser.UserId))
             {
                 var result = _context.EconsentReviewDetails.Where(x => x.EconsentSetup.ProjectId == ProjectId && x.DeletedDate == null && x.Randomization.DeletedDate == null
-                    && x.IsReviewedByPatient == true && x.IsReviewDoneByInvestigator == false
+                    && x.IsReviewedByPatient && !x.IsReviewDoneByInvestigator
                     && (x.Randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || x.Randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)).Select(x => new DashboardDto
                     {
                         Id = x.Id,
@@ -386,31 +384,28 @@ namespace GSC.Respository.InformConcent
         public CustomParameter downloadpdf(int id)
         {
             // after reviewed document patient can download pdf from dashboard
-            var econsentreviewdetails = FindByInclude(x => x.Id == id, x => x.EconsentSetup, x => x.Randomization).FirstOrDefault();
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var econsentreviewdetails = FindByInclude(x => x.Id == id, x => x.EconsentSetup, x => x.Randomization).First();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             var docName = Path.Combine(upload.DocumentUrl, econsentreviewdetails.PdfPath);
             CustomParameter param = new CustomParameter();
             param.documentData = docName;
-            //param.fileName = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             param.fileName = econsentreviewdetails.EconsentSetup.DocumentName + "_" + econsentreviewdetails.Randomization.ScreeningNumber;
             return param;
         }
 
         public List<EconsentReviewDetailsDto> GetEconsentReviewDetailsForSubjectManagement(int patientid)
         {
-            //var econsentReview = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid).GroupBy(x => x.EconsentSetupId).ToList();
-
-            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewedByPatient == true).
+            var EconsentReviewDetails = All.Where(x => x.DeletedDate == null && x.RandomizationId == patientid && x.IsReviewedByPatient).
                                         ProjectTo<EconsentReviewDetailsDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             EconsentReviewDetails = EconsentReviewDetails.GroupBy(x => new { x.RandomizationId, x.EconsentSetupId })
                 .Select(y => new EconsentReviewDetailsDto
                 {
-                    Id = y.FirstOrDefault().Id,
+                    Id = y.First().Id,
                     RandomizationId = y.Key.RandomizationId,
                     EconsentSetupId = y.Key.EconsentSetupId,
-                    IsReviewDoneByInvestigator = y.FirstOrDefault().IsReviewDoneByInvestigator,
-                    EconsentDocumentName = y.FirstOrDefault().EconsentDocumentName
+                    IsReviewDoneByInvestigator = y.First().IsReviewDoneByInvestigator,
+                    EconsentDocumentName = y.First().EconsentDocumentName
                 }).ToList();
 
 
@@ -431,12 +426,12 @@ namespace GSC.Respository.InformConcent
             }
 
             if (randomization == null)
-                return null;
+                return new List<EconsentDocumentDetailsDto>();
 
             var result = All.Where(x => x.RandomizationId == randomization.Id && x.EconsentSetup.DeletedDate == null && x.EconsentSetup.LanguageId == randomization.LanguageId
                          && (roleName == "LAR" ? x.IsLAR == true : x.IsLAR == null || x.IsLAR == false)).Include(x => x.EconsentSetup).ToList();
             if (result.Count <= 0)
-                return null;
+                return new List<EconsentDocumentDetailsDto>();
 
             var lastRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks < randomization.CreatedDate.GetValueOrDefault().Ticks).OrderByDescending(o => o.EconsentSetupId).FirstOrDefault();
             var afterRecords = result.Where(q => q.EconsentSetup.CreatedDate.GetValueOrDefault().Ticks > randomization.CreatedDate.GetValueOrDefault().Ticks).ToList();
@@ -465,7 +460,7 @@ namespace GSC.Respository.InformConcent
 
             string filePath = string.Empty;
 
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
             var projectId = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetailsDto.EconsentSetupId).Select(x => x.ProjectId).FirstOrDefault();
             var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
             filePath = System.IO.Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(projectId), FolderType.InformConcent.ToString(), docName);
@@ -498,7 +493,6 @@ namespace GSC.Respository.InformConcent
             var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
             var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
             string directorypath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF");
-            //string[] paths = { upload.DocumentPath, FolderType.InformConcent.ToString(), "ReviewedPDF" };
             var fullPath = Path.Combine(upload.DocumentPath, directorypath);
             var outputFile = Path.Combine(upload.DocumentPath, directorypath, outputname);
             if (!Directory.Exists(fullPath))
@@ -524,146 +518,13 @@ namespace GSC.Respository.InformConcent
             _context.EconsentReviewDetailsSections.AddRange(econsentReviewDetail.EconsentReviewDetailsSections);
 
             System.IO.File.Delete(filePath);
-            if (_uow.Save() <= 0) throw new Exception("Creating Econsent review insert failed on save.");
-            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentSetupId).FirstOrDefault();
+            _uow.Save();
+            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetail.EconsentSetupId).First();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetail.RandomizationId).First();
             _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
-            //var EconsentApprovedroles = _context.EconsentSetupRoles.Where(x => x.EconsentDocumentId == Econsentsetup.Id).Select(x => x.RoleId);
-            //var users = _context.ProjectRight.Where(x => x.ProjectId == randomization.ProjectId && EconsentApprovedroles.Contains(x.RoleId) && x.IsReviewDone == true).Select(x => x.UserId).Distinct();
-            //var usersdata = _context.Users.Where(x => users.Contains(x.Id) && x.DeletedDate == null).ToList();
-            //usersdata.ForEach(x =>
-            //{
-            //    _emailSenderRespository.SendEmailOfPatientReviewedPDFtoInvestigator(x.Email, x.UserName, Econsentsetup.DocumentName, project.ProjectCode, randomization.Initial + " " + randomization.ScreeningNumber, outputFile);
-            //});
             return econsentReviewDetail.Id;
         }
-
-        //public int ApproveRejectEconsentDocument(EconsentReviewDetailsDto econsentReviewDetailsDto)
-        //{
-        //    var generalSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
-        //    generalSettings.TimeFormat = generalSettings.TimeFormat.Replace("a", "tt");
-        //    // calls when investigator approve/reject document
-        //    var econsentReviewDetails = Find(econsentReviewDetailsDto.Id);
-        //    econsentReviewDetails.IsReviewDoneByInvestigator = true;
-        //    econsentReviewDetails.InvestigatorReviewedDatetime = _jwtTokenAccesser.GetClientDate();
-        //    econsentReviewDetails.ReviewDoneByRoleId = _jwtTokenAccesser.RoleId;
-        //    econsentReviewDetails.ReviewDoneByUserId = _jwtTokenAccesser.UserId;
-        //    econsentReviewDetails.IsApproved = econsentReviewDetailsDto.IsApproved;
-        //    econsentReviewDetails.ApproveRejectReasonId = econsentReviewDetailsDto.ApproveRejectReasonId;
-        //    econsentReviewDetails.ApproveRejectReasonOth = econsentReviewDetailsDto.ApproveRejectReasonOth;
-
-        //    string filePath = string.Empty;
-
-        //    var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
-
-        //    if (econsentReviewDetails.PdfPath != null)
-        //    {
-        //        //try
-        //        //{
-        //        string oldpdfpath = System.IO.Path.Combine(upload.DocumentPath, econsentReviewDetails?.PdfPath);
-        //        if (File.Exists(oldpdfpath))
-        //            System.IO.File.Delete(oldpdfpath);
-        //        //}
-        //        //catch (Exception ex)
-        //        //{
-
-        //        //}
-        //    }
-        //    int ProjectId = _context.EconsentReviewDetails.Where(x => x.Id == econsentReviewDetailsDto.Id).Select(x => x.EconsentSetup.ProjectId).FirstOrDefault();
-        //    var docName = Guid.NewGuid().ToString() + DateTime.Now.Ticks + ".docx";
-        //    filePath = System.IO.Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), docName);
-
-        //    Byte[] byteArray = Convert.FromBase64String(econsentReviewDetailsDto.DocumentData);
-        //    Stream stream = new MemoryStream(byteArray);
-
-        //    FileStream fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        //    Syncfusion.DocIO.DLS.WordDocument document = new Syncfusion.DocIO.DLS.WordDocument(stream, Syncfusion.DocIO.FormatType.Docx);
-        //    document.Save(fileStream, Syncfusion.DocIO.FormatType.Docx);
-        //    document.Close();
-
-        //    Syncfusion.DocIO.DLS.WordDocument wordDocument = new Syncfusion.DocIO.DLS.WordDocument(fileStream, Syncfusion.DocIO.FormatType.Automatic);
-
-        //    stream.Close();
-        //    stream.Dispose();
-        //    fileStream.Close();
-        //    fileStream.Dispose();
-
-        //    DocIORenderer render = new DocIORenderer();
-        //    render.Settings.PreserveFormFields = true;
-        //    PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
-
-        //    int pagecount = pdfDocument.Pages.Count;
-        //    PdfGraphics graphics = pdfDocument.Pages[pagecount - 1].Graphics;
-        //    PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 13, PdfFontStyle.Bold);
-        //    PdfFont fontnormal = new PdfStandardFont(PdfFontFamily.TimesRoman, 13);
-
-        //    //var userdetails = _context.Users.Where(x => x.Id == econsentReviewDetails.ReviewDoneByUserId && x.DeletedDate==null).Include(x=>x.UserRoles).SingleOrDefault();
-
-        //    if (econsentReviewDetailsDto.IsApproved == true)
-        //        graphics.DrawString("Approved By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
-        //    else
-        //        graphics.DrawString("Reject By: ", fontbold, PdfBrushes.Black, new PointF(70, 300));
-
-        //    graphics.DrawString(_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")", fontnormal, PdfBrushes.Black, new PointF(70, 320));
-        //    graphics.DrawString(Convert.ToDateTime(econsentReviewDetails.InvestigatorReviewedDatetime).ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat), fontnormal, PdfBrushes.Black, new PointF(70, 340));
-
-        //    if (econsentReviewDetailsDto.IsApproved == true)
-        //        graphics.DrawString("Approved Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 360));
-        //    else
-        //        graphics.DrawString("Reject Reason: ", fontbold, PdfBrushes.Black, new PointF(70, 360));
-
-        //    string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault().ReasonName;
-        //    graphics.DrawString(reasonName, fontnormal, PdfBrushes.Black, new PointF(175, 360));
-        //    if (econsentReviewDetailsDto.ApproveRejectReasonOth != null && econsentReviewDetailsDto.ApproveRejectReasonOth != "")
-        //    {
-        //        if (econsentReviewDetailsDto.IsApproved == true)
-        //            graphics.DrawString("Approved Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 380));
-        //        else
-        //            graphics.DrawString("Reject Comment: ", fontbold, PdfBrushes.Black, new PointF(70, 380));
-
-        //        graphics.DrawString(econsentReviewDetailsDto.ApproveRejectReasonOth, fontnormal, PdfBrushes.Black, new PointF(70, 400));
-        //    }
-        //    render.Dispose();
-        //    wordDocument.Dispose();
-        //    MemoryStream outputStream = new MemoryStream();
-        //    pdfDocument.Save(outputStream);
-        //    pdfDocument.Close();
-
-
-        //    var outputname = Guid.NewGuid().ToString() + "_" + DateTime.Now.Ticks + ".pdf";
-        //    var pdfpath = Path.Combine(_jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF", outputname);
-        //    var outputFile = Path.Combine(upload.DocumentPath, pdfpath);
-        //    var fullpath = Path.Combine(upload.DocumentPath, _jwtTokenAccesser.CompanyId.ToString(), _projectRepository.GetStudyCode(ProjectId), FolderType.InformConcent.ToString(), "ReviewedPDF");
-        //    if (!Directory.Exists(fullpath)) Directory.CreateDirectory(fullpath);
-        //    FileStream file = new FileStream(outputFile, FileMode.Create, FileAccess.Write);
-        //    outputStream.WriteTo(file);
-        //    file.Close();
-        //    file.Dispose();
-        //    outputStream.Close();
-        //    outputStream.Dispose();
-
-        //    econsentReviewDetails.PdfPath = pdfpath;
-
-        //    Update(econsentReviewDetails);
-        //    System.IO.File.Delete(filePath);
-
-        //    _uow.Save();
-        //    var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).ToList().FirstOrDefault();
-        //    var project = _projectRepository.Find(Econsentsetup.ProjectId);
-        //    var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.RandomizationId).ToList().FirstOrDefault();
-        //    _emailSenderRespository.SendEmailOfInvestigatorApprovedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
-        //    if (econsentReviewDetailsDto.IsApproved == true)
-        //        _randomizationRepository.ChangeStatustoConsentCompleted(econsentReviewDetails.RandomizationId);
-        //    else
-        //    {
-        //        var randomizationdata = _randomizationRepository.Find(econsentReviewDetails.RandomizationId);
-        //        randomizationdata.PatientStatusId = ScreeningPatientStatus.Withdrawal;
-        //        _randomizationRepository.Update(randomizationdata);
-        //    }
-        //    _uow.Save();
-        //    return econsentReviewDetails.Id;
-        //}
 
 
 
@@ -693,8 +554,6 @@ namespace GSC.Respository.InformConcent
                 AllDoc.ApproveRejectReasonOth = econsentReviewDetailsDto.ApproveRejectReasonOth;
             }
 
-            string filePath = string.Empty;
-
             var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
             int ProjectId = _context.EconsentReviewDetails.Where(x => x.Id == econsentReviewDetailsDto.Id).Select(x => x.EconsentSetup.ProjectId).FirstOrDefault();
 
@@ -703,12 +562,7 @@ namespace GSC.Respository.InformConcent
             FileStream docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
             PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
             pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
-            //PdfDocument pdfDocument = render.ConvertToPDF(wordDocument);
 
-
-
-            int pagecount = pdfDocument.Pages.Count;
-            PdfGraphics graphics = pdfDocument.Pages[pagecount - 1].Graphics;
             PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 13, PdfFontStyle.Bold);
             PdfFont regular = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
 
@@ -737,7 +591,7 @@ namespace GSC.Respository.InformConcent
                 result = AddString("Reject Reason: ", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
 
 
-            string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault().ReasonName;
+            string reasonName = _context.AuditReason.Where(x => x.Id == econsentReviewDetailsDto.ApproveRejectReasonId).FirstOrDefault()?.ReasonName ?? "";
             result = AddString(reasonName, result.Page, new Syncfusion.Drawing.RectangleF(175, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             if (econsentReviewDetailsDto.ApproveRejectReasonOth != null && econsentReviewDetailsDto.ApproveRejectReasonOth != "")
             {
@@ -752,9 +606,7 @@ namespace GSC.Respository.InformConcent
             stringFormat.MeasureTrailingSpaces = true;
             stringFormat.WordWrap = PdfWordWrapType.WordOnly;
             string message = "I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature";
-            result = AddString(message, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
-            //render.Dispose();
-            //wordDocument.Dispose();
+            AddString(message, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             MemoryStream outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
@@ -784,12 +636,10 @@ namespace GSC.Respository.InformConcent
                 AllDoc.PdfPath = pdfpath;
                 Update(AllDoc);
             }
-
-            //System.IO.File.Delete(filePath);
             _uow.Save();
-            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).ToList().FirstOrDefault();
+            var Econsentsetup = _context.EconsentSetup.Where(x => x.Id == econsentReviewDetails.EconsentSetupId).AsEnumerable().FirstOrDefault();
             var project = _projectRepository.Find(Econsentsetup.ProjectId);
-            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.RandomizationId).ToList().FirstOrDefault();
+            var randomization = _context.Randomization.Where(x => x.Id == econsentReviewDetails.RandomizationId).AsEnumerable().FirstOrDefault();
             if (econsentReviewDetailsDto.IsApproved == true)
             {
                 _emailSenderRespository.SendEmailOfInvestigatorApprovedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, Econsentsetup.DocumentName, project.ProjectCode, outputFile);
@@ -855,7 +705,7 @@ namespace GSC.Respository.InformConcent
             string filepath = "";
             PdfDocument pdfDocument = new PdfDocument();
             FileStream docStream;
-            if (String.IsNullOrEmpty(reviewdetails.PdfPath) && reviewdetails.IsReviewedByPatient == false)
+            if (String.IsNullOrEmpty(reviewdetails.PdfPath) && !reviewdetails.IsReviewedByPatient)
             {
                 filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), econsentSetupDetails.DocumentPath);
                 docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
@@ -865,8 +715,6 @@ namespace GSC.Respository.InformConcent
                 pdfDocument = render.ConvertToPDF(wordDocument);
                 render.Dispose();
                 wordDocument.Dispose();
-                //docStream.Close();
-                //docStream.Dispose();               
             }
             else
             {
@@ -874,13 +722,8 @@ namespace GSC.Respository.InformConcent
                 docStream = new FileStream(filepath, FileMode.Open, FileAccess.Read);
                 PdfLoadedDocument loadedDocument = new PdfLoadedDocument(docStream);
                 pdfDocument.ImportPageRange(loadedDocument, 0, loadedDocument.Pages.Count - 1);
-                //docStream.Close();
-                //docStream.Dispose();
             }
 
-
-            //add signature
-            //pdfDocument = CreateSignature(pdfDocument, Id);
 
             PdfPage page = pdfDocument.Pages.Add();
 
@@ -890,7 +733,6 @@ namespace GSC.Respository.InformConcent
             PdfLayoutFormat layoutFormat = new PdfLayoutFormat();
             layoutFormat.Layout = PdfLayoutType.Paginate;
             layoutFormat.Break = PdfLayoutBreakType.FitElement;
-            PdfGraphics graphics = page.Graphics;
             //Load the image from the disk
             PdfImage image = null;
             if (string.IsNullOrEmpty(econsentReviewDetailsDto.FileExtension))
@@ -905,95 +747,35 @@ namespace GSC.Respository.InformConcent
             PdfFont fontbold = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
             PdfFont regular = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
             PdfStringFormat format = new PdfStringFormat();
-            //format.Alignment = PdfTextAlignment.Left;
-            //format.LineAlignment = PdfVerticalAlignment.Top;
             format.MeasureTrailingSpaces = true;
             format.WordWrap = PdfWordWrapType.Word;
 
-            if (isWithdraw == false)
+            if (!isWithdraw)
             {
-                //graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
-                //graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
                 AddString(reviewdetails.IsLAR == true ? "LAR" : "Volunteer Initial:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
                 result = AddString(reviewdetails.IsLAR == true ? $"{randomization.LegalFirstName + " " + randomization.LegalLastName}" : $"{randomization.ScreeningNumber + " " + randomization.Initial}", result.Page, new Syncfusion.Drawing.RectangleF(170, result.Bounds.Bottom + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
-
-                //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
-                //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
                 result = AddString(reviewdetails.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
                 if (image != null)
                 {
                     result.Page.Graphics.DrawImage(image, new PointF(70, result.Bounds.Y + 20), new SizeF(400f, 100f));
                 }
-                //graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
-                //graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
 
                 AddString("DateTime:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
                 result = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result.Page, new Syncfusion.Drawing.RectangleF(140, result.Bounds.Y + 180, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
-
-                //if (AllDoc != null && AllDoc.IsReviewedByPatient)
-                //{
-                //    //add signature
-                //    //pdfDocument = CreateSignature(pdfDocument, Id);
-
-                //    PdfPage page1 = pdfDocument.Pages.Add();
-
-                //    RectangleF bounds1 = new RectangleF(new PointF(0, 10), new SizeF(0, 0));
-                //    PdfLayoutResult result1 = new PdfLayoutResult(page1, bounds1);
-
-                //    PdfLayoutFormat layoutFormat1 = new PdfLayoutFormat();
-                //    layoutFormat1.Layout = PdfLayoutType.Paginate;
-                //    layoutFormat1.Break = PdfLayoutBreakType.FitElement;
-                //    PdfGraphics graphics1 = page1.Graphics;
-                //    //Load the image from the disk
-                //    FileStream logoinputstream1 = new FileStream($"{_uploadSettingRepository.GetDocumentPath()}/{AllDoc.PatientdigitalSignImagepath}", FileMode.Open, FileAccess.Read);
-                //    PdfImage image1 = new PdfBitmap(logoinputstream1);
-                //    logoinputstream1.Close();
-                //    logoinputstream1.Dispose();
-                //    //Draw the image   
-
-                //    PdfFont fontbold1 = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Bold);
-                //    PdfFont regular1 = new PdfStandardFont(PdfFontFamily.TimesRoman, 12, PdfFontStyle.Regular);
-                //    PdfStringFormat format1 = new PdfStringFormat();
-                //    //format.Alignment = PdfTextAlignment.Left;
-                //    //format.LineAlignment = PdfVerticalAlignment.Top;
-                //    format1.MeasureTrailingSpaces = true;
-                //    format1.WordWrap = PdfWordWrapType.Word;
-
-                //    //graphics.DrawString("Volunteer Initial:", fontbold, PdfBrushes.Black, new PointF(70, 30), format);
-                //    //graphics.DrawString($"{randomization.ScreeningNumber + " " + randomization.Initial}", regular, PdfBrushes.Black, new PointF(170, 30), format);
-                //    AddString(AllDoc.IsLAR == true ? "LAR" : "Volunteer Initial:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Bottom + 20, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
-                //    result1 = AddString(AllDoc.IsLAR == true ? $"{randomization.LegalFirstName + " " + randomization.LegalLastName}" : $"{randomization.ScreeningNumber + " " + randomization.Initial}", result1.Page, new Syncfusion.Drawing.RectangleF(170, result1.Bounds.Bottom + 20, 500, result1.Page.GetClientSize().Height), PdfBrushes.Black, regular1, layoutFormat1);
-
-                //    //graphics.DrawString("Volunteer Signature:", fontbold, PdfBrushes.Black, new PointF(70, 50), format);
-                //    //graphics.DrawImage(image, new PointF(70, 70), new SizeF(400f, 100f));
-                //    result1 = AddString(AllDoc.IsLAR == true ? "LAR Signature:" : "Volunteer Signature:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Bottom + 20, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
-                //    result1.Page.Graphics.DrawImage(image1, new PointF(70, result1.Bounds.Y + 20), new SizeF(400f, 100f));
-
-                //    //graphics.DrawString("DateTime:", fontbold, PdfBrushes.Black, new PointF(70, 230), format);
-                //    //graphics.DrawString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", regular, PdfBrushes.Black, new PointF(140, 230), format);
-
-                //    AddString("DateTime:", result1.Page, new Syncfusion.Drawing.RectangleF(70, result1.Bounds.Y + 180, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, fontbold1, layoutFormat1);
-                //    result1 = AddString($"{_jwtTokenAccesser.GetClientDate().ToString(generalSettings.DateFormat + ' ' + generalSettings.TimeFormat)}", result1.Page, new Syncfusion.Drawing.RectangleF(140, result1.Bounds.Y + 180, result1.Page.GetClientSize().Width, result1.Page.GetClientSize().Height), PdfBrushes.Black, regular1, layoutFormat1);
-
-                //}
             }
 
-            if (isWithdraw == true)
+            if (isWithdraw)
             {
                 var reason = _jwtTokenAccesser.GetHeader("audit-reason-name");
                 var reasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
-                //graphics.DrawString("Withdraw By:", fontbold, PdfBrushes.Black, new PointF(70, 250), format);
-                //graphics.DrawString($"{_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")"}", regular, PdfBrushes.Black, new PointF(150, 250), format);
+
                 AddString("Withdraw By:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
                 result = AddString($"{_jwtTokenAccesser.UserName + "(" + _jwtTokenAccesser.RoleName + ")"}", result.Page, new Syncfusion.Drawing.RectangleF(150, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
-                //graphics.DrawString("Withdraw Reason:", fontbold, PdfBrushes.Black, new PointF(70, 280), format);
-                //graphics.DrawString($"{reason}", regular, PdfBrushes.Black, new PointF(180, 280), format);
                 AddString("Withdraw Reason:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
                 result = AddString($"{reason}", result.Page, new Syncfusion.Drawing.RectangleF(180, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
-                //graphics.DrawString("Comment:", fontbold, PdfBrushes.Black, new PointF(70, 300), format);
-                //graphics.DrawString($"{reasonOth}", regular, PdfBrushes.Black, new PointF(70, 320), format);
+
                 result = AddString("Comment:", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, fontbold, layoutFormat);
                 result = AddString($"{reasonOth}", result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Y + 20, 500, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
 
@@ -1001,9 +783,9 @@ namespace GSC.Respository.InformConcent
                 reviewdetails.WithdrawReason = reason;
                 reviewdetails.WithdrawComment = reasonOth;
             }
-            //graphics.DrawString("I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature", regular, PdfBrushes.Black, new PointF(70, isWithdraw ? 500 : 400), format);
+
             string message = "I, hereby understand, that applying my electronic signature in the electronic system is equivalent \n to utilising my hand written signature";
-            result = AddString(message, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
+            AddString(message, result.Page, new Syncfusion.Drawing.RectangleF(70, result.Bounds.Bottom + 20, result.Page.GetClientSize().Width, result.Page.GetClientSize().Height), PdfBrushes.Black, regular, layoutFormat);
             MemoryStream outputStream = new MemoryStream();
             pdfDocument.Save(outputStream);
             pdfDocument.Close();
@@ -1018,18 +800,14 @@ namespace GSC.Respository.InformConcent
             var fulldiractorypath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), diractorypath);
             if (!Directory.Exists(fulldiractorypath))
                 Directory.CreateDirectory(fulldiractorypath);
-            // var filewritepath = Path.Combine(outputFile, filename);
             FileStream file = new FileStream(filewritepath, FileMode.Create, FileAccess.Write);
             outputStream.WriteTo(file);
             file.Close();
             file.Dispose();
             outputStream.Close();
             outputStream.Dispose();
-
-            //var reviewDetails = _context.EconsentReviewDetails.Find(item.Id);
             reviewdetails.PdfPath = pdfpath;
             reviewdetails.IsReviewedByPatient = true;
-            reviewdetails.PatientdigitalSignImagepath = reviewdetails.PatientdigitalSignImagepath;
             reviewdetails.PatientApprovedDatetime = DateTime.Now;
             var details = _mapper.Map<EconsentReviewDetails>(reviewdetails);
             _context.EconsentReviewDetails.Update(details);
@@ -1053,7 +831,7 @@ namespace GSC.Respository.InformConcent
                 _emailSenderRespository.SendEmailOfPatientReviewedPDFtoPatient(randomization.Email, randomization.Initial + " " + randomization.ScreeningNumber, econsentSetupDetails.DocumentName, project.ProjectCode, filewritepath);
 
             var siteteam = _context.SiteTeam.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
-            var users = _context.ProjectRight.Where(x => x.ProjectId == randomization.ProjectId && siteteam.Contains(x.RoleId) && x.IsReviewDone == true).Select(x => x.UserId).Distinct();
+            var users = _context.ProjectRight.Where(x => x.ProjectId == randomization.ProjectId && siteteam.Contains(x.RoleId) && x.IsReviewDone).Select(x => x.UserId).Distinct();
             var usersdata = _context.Users.Where(x => users.Contains(x.Id) && x.DeletedDate == null).ToList();
             var roleName = _jwtTokenAccesser.RoleName;
 
@@ -1081,9 +859,6 @@ namespace GSC.Respository.InformConcent
 
         private PdfLayoutResult AddString(string note, PdfPage page, RectangleF position, PdfBrush brush, PdfFont font, PdfLayoutFormat pdfLayoutFormat)
         {
-            //font.SetTextEncoding(Encoding.GetEncoding("Windows-1250"))
-            //PdfTrueTypeFont fonts = new PdfTrueTypeFont(new Font("Microsoft Sans Serif", 14), true);
-
             PdfTextElement richTextElement = new PdfTextElement(String.IsNullOrEmpty(note) ? " " : note, font, brush);
             //Draws String       
             PdfStringFormat stringFormat = new PdfStringFormat();

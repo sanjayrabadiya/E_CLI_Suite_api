@@ -16,12 +16,8 @@ namespace GSC.Respository.Medra
 {
     public class MeddraSmqContentRepository : GenericRespository<MeddraSmqContent>, IMeddraSmqContentRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraSmqContentRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MeddraSmqContentRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public int AddSmqContentFileData(SaveFileDto obj)

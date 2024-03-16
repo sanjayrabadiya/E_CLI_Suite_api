@@ -53,7 +53,6 @@ namespace GSC.Common.GenericRespository
 
         public async Task<IEnumerable<TC>> FindByAsync(Expression<Func<TC, bool>> predicate)
         {
-            // IQueryable<TC> queryable = DbSet.AsNoTracking();
             IEnumerable<TC> results = await _dbSet.AsNoTracking().Where(predicate).ToListAsync();
             return results;
         }
@@ -78,12 +77,6 @@ namespace GSC.Common.GenericRespository
             Context.Set<TC>().Add(entity);
         }
 
-        public virtual void Delete(int id)
-        {
-            var entity = Context.Set<TC>().Find(id);
-            if (entity != null) Delete(entity);
-        }
-
         public virtual void Remove(TC entity)
         {
             Context.Set<TC>().Remove(entity);
@@ -98,6 +91,12 @@ namespace GSC.Common.GenericRespository
                 entity.AuditAction = AuditAction.Deleted;
                 Context.SetModified(entity);
             }
+        }
+
+        public virtual void Delete(int id)
+        {
+            var entity = Context.Set<TC>().Find(id);
+            if (entity != null) Delete(entity);
         }
 
         public virtual void Active(TC entityData)

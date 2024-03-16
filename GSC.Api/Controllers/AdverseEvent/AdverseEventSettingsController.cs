@@ -51,7 +51,7 @@ namespace GSC.Api.Controllers.AdverseEvent
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var existingdata = _adverseEventSettingsRepository.All.Where(x => x.ProjectId == adverseEventSettingsDto.ProjectId && x.DeletedDate == null).ToList();
-            if (existingdata != null && existingdata.Count > 0)
+            if (existingdata.Any())
             {
                 ModelState.AddModelError("Message", "Error to save Adverse Event settings.");
                 return BadRequest(ModelState);

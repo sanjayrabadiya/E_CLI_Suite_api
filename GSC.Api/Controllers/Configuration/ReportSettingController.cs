@@ -90,7 +90,11 @@ namespace GSC.Api.Controllers.Configuration
                 _reportSettingRepository.Update(reportSettingUpdate);
             }
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Report Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Report Setting failed on save.");
+                return BadRequest(ModelState);
+            } 
 
             return Ok(reportSetting.Id);
         }
@@ -103,7 +107,11 @@ namespace GSC.Api.Controllers.Configuration
             var reportSetting = _mapper.Map<ReportSetting>(reportSettingDto);
 
             _reportSettingRepository.Update(reportSetting);
-            if (_uow.Save() <= 0) throw new Exception("Updating Report Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Report Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(reportSetting.Id);
         }
 

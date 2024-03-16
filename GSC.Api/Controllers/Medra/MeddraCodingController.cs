@@ -28,10 +28,6 @@ namespace GSC.Api.Controllers.Medra
         private readonly IMeddraCodingAuditRepository _meddraCodingAuditRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IAttendanceHistoryRepository _attendanceHistoryRepository;
-        private readonly IProjectSubjectRepository _projectSubjectRepository;
-        private readonly IRandomizationRepository _randomizationRepository;
-        private readonly IStudyScopingRepository _studyScopingRepository;
         private readonly IMeddraLowLevelTermRepository _meddraLowLevelTermRepository;
         private readonly IScreeningEntryRepository _screeningEntryRepository;
         private readonly IProjectDesignRepository _projectDesignRepository;
@@ -42,10 +38,6 @@ namespace GSC.Api.Controllers.Medra
             IUnitOfWork uow,
             IMapper mapper,
             IJwtTokenAccesser jwtTokenAccesser,
-            IRandomizationRepository randomizationRepository,
-            IProjectSubjectRepository projectSubjectRepository,
-            IAttendanceHistoryRepository attendanceHistoryRepository,
-            IStudyScopingRepository studyScopingRepository,
             IMeddraLowLevelTermRepository meddraLowLevelTermRepository,
             IScreeningEntryRepository screeningEntryRepository,
             IProjectDesignRepository projectDesignRepository)
@@ -56,10 +48,6 @@ namespace GSC.Api.Controllers.Medra
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _randomizationRepository = randomizationRepository;
-            _projectSubjectRepository = projectSubjectRepository;
-            _attendanceHistoryRepository = attendanceHistoryRepository;
-            _studyScopingRepository = studyScopingRepository;
             _meddraLowLevelTermRepository = meddraLowLevelTermRepository;
             _screeningEntryRepository = screeningEntryRepository;
             _projectDesignRepository = projectDesignRepository;
@@ -132,25 +120,30 @@ namespace GSC.Api.Controllers.Medra
 
                 if (_uow.Save() <= 0)
                 {
-                    throw new Exception($"Coding failed on save.");
+                    ModelState.AddModelError("Message", "Coding failed on save.");
+                    return BadRequest(ModelState);
                 }
-                var meddraCodingAudit = _meddraCodingAuditRepository.SaveAudit(null, medra.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Recoded By Auto Coded", null, null);
+                _meddraCodingAuditRepository.SaveAudit(null, medra.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Recoded By Auto Coded", null, null);
                 _uow.Save();
                 return Ok(medra.Id);
             }
             else
             {
-                data.LastUpdateBy= _jwtTokenAccesser.UserId;
+                data.LastUpdateBy = _jwtTokenAccesser.UserId;
                 data.ModifiedDate = _jwtTokenAccesser.GetClientDate();
                 data.ModifiedBy = _jwtTokenAccesser.UserId;
                 data.CreatedRole = _jwtTokenAccesser.RoleId;
                 data.CodedType = CodedType.AutoCoded;
-                data.CodingType= CodedType.AutoCoded;
+                data.CodingType = CodedType.AutoCoded;
                 data.IsApproved = false;
                 var autoCode = _mapper.Map<MeddraCoding>(data);
                 _meddraCodingRepository.Add(autoCode);
-                if (_uow.Save() <= 0) throw new Exception("Coding failed on save.");
-                var meddraCodingAudit = _meddraCodingAuditRepository.SaveAudit(null, autoCode.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Added By Auto Coded", null, null);
+                if (_uow.Save() <= 0)
+                {
+                    ModelState.AddModelError("Message", "Coding failed on save.");
+                    return BadRequest(ModelState);
+                }
+                _meddraCodingAuditRepository.SaveAudit(null, autoCode.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Added By Auto Coded", null, null);
                 _uow.Save();
                 return Ok(autoCode.Id);
             }
@@ -178,9 +171,10 @@ namespace GSC.Api.Controllers.Medra
                     _meddraCodingRepository.Update(medra);
                     if (_uow.Save() <= 0)
                     {
-                        throw new Exception($"Coding failed on save.");
+                        ModelState.AddModelError("Message", "Coding failed on save.");
+                        return BadRequest(ModelState);
                     }
-                    var meddraCodingAudit = _meddraCodingAuditRepository.SaveAudit(null, medra.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Recoded By Manual Coded", null, null);
+                    _meddraCodingAuditRepository.SaveAudit(null, medra.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Recoded By Manual Coded", null, null);
                     _uow.Save();
                 }
                 else
@@ -194,8 +188,12 @@ namespace GSC.Api.Controllers.Medra
                     data.CreatedRole = _jwtTokenAccesser.RoleId;
                     var autoCode = _mapper.Map<MeddraCoding>(data);
                     _meddraCodingRepository.Add(autoCode);
-                    if (_uow.Save() <= 0) throw new Exception("Coding failed on save.");
-                    var meddraCodingAudit = _meddraCodingAuditRepository.SaveAudit(null, autoCode.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Added By Manual Coded", null, null);
+                    if (_uow.Save() <= 0)
+                    {
+                        ModelState.AddModelError("Message", "Coding failed on save.");
+                        return BadRequest(ModelState);
+                    }
+                    _meddraCodingAuditRepository.SaveAudit(null, autoCode.Id, data.MeddraLowLevelTermId, data.MeddraSocTermId, "Added By Manual Coded", null, null);
                     _uow.Save();
                 }
             }
@@ -217,11 +215,12 @@ namespace GSC.Api.Controllers.Medra
                 recodeData.IsApproved = true;
                 var medra = _mapper.Map<MeddraCoding>(recodeData);
                 _meddraCodingRepository.Update(medra);
-                var meddraCodingAudit = _meddraCodingAuditRepository.SaveAudit(null, medra.Id, null, null, "Approval Code", null, null);
+                _meddraCodingAuditRepository.SaveAudit(null, medra.Id, null, null, "Approval Code", null, null);
 
                 if (_uow.Save() <= 0)
                 {
-                    throw new Exception($"Coding failed on save.");
+                    ModelState.AddModelError("Message", "Coding failed on save.");
+                    return BadRequest(ModelState);
                 }
             }
             return Ok();

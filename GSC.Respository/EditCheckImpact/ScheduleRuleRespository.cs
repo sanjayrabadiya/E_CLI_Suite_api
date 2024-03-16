@@ -11,6 +11,7 @@ using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 
@@ -41,10 +42,10 @@ namespace GSC.Respository.EditCheckImpact
         {
             var targetScheduleTemplate = _impactService.GetTargetSchedule(screeningTemplateBasic.ProjectDesignTemplateId, isQuery);
 
-            if (targetScheduleTemplate == null || targetScheduleTemplate.Count == 0) return null;
+            if (targetScheduleTemplate == null || targetScheduleTemplate.Count == 0) return new List<ScheduleCheckValidateDto>();
             var projectScheduleId = targetScheduleTemplate.Select(t => t.ProjectScheduleId).ToList();
             var refrenceSchedule = _impactService.GetReferenceSchedule(projectScheduleId);
-            if (refrenceSchedule == null || refrenceSchedule.Count == 0) return null;
+            if (refrenceSchedule == null || refrenceSchedule.Count == 0) return new List<ScheduleCheckValidateDto>();
 
             SetValue(refrenceSchedule, values, screeningTemplateBasic);
             SetValue(targetScheduleTemplate, values, screeningTemplateBasic);
@@ -69,7 +70,7 @@ namespace GSC.Respository.EditCheckImpact
             {
                 x.ScreeningTemplate = screeningTempaltes.FirstOrDefault(t => t.ProjectDesignTemplateId == x.ProjectDesignTemplateId);
                 if (screeningTemplateBasic.ProjectDesignTemplateId == x.ProjectDesignTemplateId)
-                    x.Value = values.FirstOrDefault(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId)?.Value;
+                    x.Value = values.Find(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId)?.Value;
                 else if (x.ScreeningTemplate != null && (x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending || !x.IsTarget))
                     x.Value = _impactService.GetVariableValue(x.ScreeningTemplate.Id, x.ProjectDesignVariableId);
             });
@@ -80,7 +81,7 @@ namespace GSC.Respository.EditCheckImpact
             targetList = targetList.Where(x => x.ScreeningTemplate != null).ToList();
             targetList.ForEach(x =>
             {
-                var reference = referenceList.FirstOrDefault(t => t.ProjectScheduleId == x.ProjectScheduleId);
+                var reference = referenceList.Find(t => t.ProjectScheduleId == x.ProjectScheduleId);
                 x.AutoNumber = reference?.AutoNumber;
 
                 if (string.IsNullOrEmpty(reference?.Value))
@@ -88,10 +89,9 @@ namespace GSC.Respository.EditCheckImpact
                 else
                     x.ValidateType = Validate(x, x.Value, reference.Value) ? EditCheckValidateType.Passed : EditCheckValidateType.Failed;
 
-                if (isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null)
+                if (isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null && (x.ScreeningTemplate != null && x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending))
                 {
-                    if (x.ScreeningTemplate != null && x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending)
-                        x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message);
+                    x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message);
                 }
 
                 if (x.Operator != null && (x.Operator == ProjectScheduleOperator.Equal || x.Operator == ProjectScheduleOperator.Plus))
@@ -159,16 +159,16 @@ namespace GSC.Respository.EditCheckImpact
         {
             var targetScheduleTemplate = _impactService.GetTargetScheduleByVariableId(projectDesignVariableId);
 
-            if (targetScheduleTemplate == null || targetScheduleTemplate.Count == 0) return null;
+            if (targetScheduleTemplate == null || targetScheduleTemplate.Count == 0) return new List<ScheduleCheckValidateDto>();
 
             if (!isQuery)
                 targetScheduleTemplate = targetScheduleTemplate.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId).ToList();
 
-            if (targetScheduleTemplate.Count == 0) return null;
+            if (targetScheduleTemplate.Count == 0) return new List<ScheduleCheckValidateDto>();
 
             var projectScheduleId = targetScheduleTemplate.Select(t => t.ProjectScheduleId).ToList();
             var refrenceSchedule = _impactService.GetReferenceSchedule(projectScheduleId);
-            if (refrenceSchedule == null || refrenceSchedule.Count == 0) return null;
+            if (refrenceSchedule == null || refrenceSchedule.Count == 0) return new List<ScheduleCheckValidateDto>();
 
 
             var screeningTemplateBasic = new ScreeningTemplateBasic
@@ -184,7 +184,7 @@ namespace GSC.Respository.EditCheckImpact
 
             CheckValidationProcess(targetScheduleTemplate, refrenceSchedule, isQuery, targetValue, screeningEntryId);
 
-            var currentTarget = targetScheduleTemplate.FirstOrDefault(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ProjectDesignTemplateId == projectDesignTemplateId);
+            var currentTarget = targetScheduleTemplate.Find(x => x.ProjectDesignVariableId == projectDesignVariableId && x.ProjectDesignTemplateId == projectDesignTemplateId);
             if (currentTarget != null && !string.IsNullOrEmpty(value))
                 TemplateActualDate(currentTarget.ScreeningTemplate, Convert.ToDateTime(value));
 
@@ -204,7 +204,7 @@ namespace GSC.Respository.EditCheckImpact
             var projectDesignVariableIds = scheduleResult.Select(t => t.ProjectDesignVariableId).Distinct().ToList();
             projectDesignVariableIds.ForEach(x =>
             {
-                var editcheck = editCheckResult.FirstOrDefault(r => r.ProjectDesignVariableId == x);
+                var editcheck = editCheckResult.Find(r => r.ProjectDesignVariableId == x);
                 if (editcheck == null)
                 {
                     editcheck = new EditCheckTargetValidationList();
@@ -212,10 +212,10 @@ namespace GSC.Respository.EditCheckImpact
                     editCheckResult.Add(editcheck);
                 }
 
-                if (scheduleResult.Any(c => c.ProjectDesignVariableId == x && c.ValidateType == EditCheckValidateType.Failed))
+                if (scheduleResult.Exists(c => c.ProjectDesignVariableId == x && c.ValidateType == EditCheckValidateType.Failed))
                     editcheck.InfoType = EditCheckInfoType.Failed;
 
-                if (scheduleResult.Any(c => c.ProjectDesignVariableId == x && c.HasQueries))
+                if (scheduleResult.Exists(c => c.ProjectDesignVariableId == x && c.HasQueries))
                     editcheck.HasQueries = true;
 
                 editcheck.ProjectDesignVariableId = x;
@@ -225,7 +225,7 @@ namespace GSC.Respository.EditCheckImpact
                     Message = t.Message,
                     ValidateType = t.ValidateType.GetDescription()
                 }).ToList();
-                editcheck.ScheduleDate = scheduleResult.Where(c => c.ProjectDesignVariableId == x).FirstOrDefault()?.ScheduleDate;
+                editcheck.ScheduleDate = scheduleResult.Find(c => c.ProjectDesignVariableId == x)?.ScheduleDate;
                 editcheck.ScreeningTemplateValueId = scheduleResult.Where(c => c.ProjectDesignVariableId == x).Select(t => t.ScreeningTemplateValueId).FirstOrDefault();
                 editcheck.EditCheckMsg.AddRange(schMessage);
             });
@@ -239,10 +239,10 @@ namespace GSC.Respository.EditCheckImpact
             if (string.IsNullOrEmpty(referenceDate)) return false;
 
             DateTime targetValue;
-            DateTime.TryParse(targetDate, out targetValue);
+            DateTime.TryParse(targetDate, CultureInfo.InvariantCulture, out targetValue);
 
             DateTime referenceValue;
-            DateTime.TryParse(referenceDate, out referenceValue);
+            DateTime.TryParse(referenceDate, CultureInfo.InvariantCulture, out referenceValue);
 
             switch (scheduleCheckValidateDto.Operator)
             {
@@ -329,7 +329,7 @@ namespace GSC.Respository.EditCheckImpact
                 return;
 
             DateTime scheduleDate;
-            DateTime.TryParse(targetSchDate, out scheduleDate);
+            DateTime.TryParse(targetSchDate, CultureInfo.InvariantCulture, out scheduleDate);
 
             if (target.Operator == ProjectScheduleOperator.Plus)
             {
@@ -420,7 +420,7 @@ namespace GSC.Respository.EditCheckImpact
                 if (screeningTemplateValue.IsSystem)
                     return false;
 
-                var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).FirstOrDefault();
+                var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).First();
                 if ((int)screeningTemplate.Status < 3)
                     return false;
 

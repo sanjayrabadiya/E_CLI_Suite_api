@@ -92,9 +92,11 @@ namespace GSC.Api.Controllers.InformConcent
                     {
                         Directory.Delete(root, true);
                     }
-                    throw new Exception($"Creating Section Refrence failed on save.");
+
+                    ModelState.AddModelError("Message", "Creating Section Refrence failed on save.");
+                    return BadRequest(ModelState);
                 }
-            }          
+            }
             return Ok();
         }
 
@@ -106,7 +108,7 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest();
             if (!ModelState.IsValid)
                 return new UnprocessableEntityObjectResult(ModelState);
-          
+
             var document = _econsentSectionReferenceRepository.Find(econsentSectionReferenceDto.Id);
             var sectionRefrence = _mapper.Map<EconsentSectionReference>(econsentSectionReferenceDto);
             if (econsentSectionReferenceDto.FileModel.Count > 1)
@@ -131,10 +133,14 @@ namespace GSC.Api.Controllers.InformConcent
             }
             else
             {
-               sectionRefrence.FilePath = document.FilePath;
+                sectionRefrence.FilePath = document.FilePath;
             }
             _econsentSectionReferenceRepository.Update(sectionRefrence);
-            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent file failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Econsent file failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(document.Id);
         }
 

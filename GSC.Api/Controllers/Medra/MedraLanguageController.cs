@@ -22,49 +22,25 @@ namespace GSC.Api.Controllers.Master
     [Route("api/[controller]")]
     public class MedraLanguageController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMedraLanguageRepository _medraLanguageRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
 
         public MedraLanguageController(IMedraLanguageRepository medraLanguageRepository,
-                        IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IMapper mapper)
         {
             _medraLanguageRepository = medraLanguageRepository;
             _uow = uow;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
-        //[HttpGet("list")]
-        //public IActionResult GetList()
-        //{
-        //    var cultures = CultureInfo.GetCultures(CultureTypes.AllCultures);
-        //    var existing = _medraLanguageRepository.All.Select(x => x.Culture.ToLower());
-        //    var languages = cultures.Where(x => !existing.Contains(x.Name.ToLower()))
-        //        .Select(x => new MedraLanguageDto
-        //        {
-        //            LanguageName = x.DisplayName,
-        //            Culture = x.Name
-        //        });
-        //    return Ok(languages);
-        //}
 
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
             var languages = _medraLanguageRepository.GetMedraLanguageList(isDeleted);
-            return Ok(languages);
-            //var language = _medraLanguageRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-            //return Ok(languages);
+            return Ok(languages);          
         }
 
         [HttpGet("{id}")]
@@ -89,7 +65,11 @@ namespace GSC.Api.Controllers.Master
             }
 
             _medraLanguageRepository.Add(language);
-            if (_uow.Save() <= 0) throw new Exception("Creating Marital Status failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Marital Status failed on save.");
+                return BadRequest(ModelState);
+            } 
             return Ok(language.Id);
         }
 
@@ -103,15 +83,13 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            /* Added by Vipul for effective Date on 14-10-2019 */
-            //Delete(language.Id);
-            //language.Id = 0;
-            //_medraLanguageRepository.Add(language);
-            /* Added by vipul for new update method */
             _medraLanguageRepository.AddOrUpdate(language);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Language failed on save.");
+                return BadRequest(ModelState);
+            } 
 
             return Ok(language.Id);
         }

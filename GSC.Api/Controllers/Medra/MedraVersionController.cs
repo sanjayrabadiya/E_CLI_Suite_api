@@ -24,26 +24,17 @@ namespace GSC.Api.Controllers.Medra
         private readonly IDictionaryRepository _dictionaryRepository;
         private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
 
         public MedraVersionController(IMedraVersionRepository medraVersionRepository,
            IDictionaryRepository dictionaryRepository,
-           IUserRepository userRepository,
-            ICompanyRepository companyRepository,
         IUnitOfWork uow,
-          IMapper mapper,
-          IJwtTokenAccesser jwtTokenAccesser
+          IMapper mapper
           )
         {
             _medraVersionRepository = medraVersionRepository;
             _dictionaryRepository = dictionaryRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -57,8 +48,6 @@ namespace GSC.Api.Controllers.Medra
                 b.DictionaryName = _dictionaryRepository.Find(b.DictionaryId).DictionaryName;
             });
             return Ok(medraversion);
-            //var medra = _medraVersionRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Dictionary).OrderByDescending(x => x.Id).ToList();
-            //return Ok(medraDto);
         }
 
 
@@ -94,7 +83,8 @@ namespace GSC.Api.Controllers.Medra
             _medraVersionRepository.Add(medra);
             if (_uow.Save() <= 0)
             {
-                throw new Exception($"Creating Medra Version failed on save.");
+                ModelState.AddModelError("Message", "Creating Medra Version failed on save.");
+                return BadRequest(ModelState);                
             }
             return Ok(medra.Id);
         }
@@ -118,7 +108,8 @@ namespace GSC.Api.Controllers.Medra
 
             if (_uow.Save() <= 0)
             {
-                throw new Exception($"Updating Medra Version failed on save.");
+                ModelState.AddModelError("Message", "Updating Medra Version failed on save.");
+                return BadRequest(ModelState);
             }
             return Ok(medra.Id);
         }
