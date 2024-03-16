@@ -15,17 +15,13 @@ namespace GSC.Respository.Barcode
 {
     public class PkBarcodeGenerateRepository : GenericRespository<PkBarcodeGenerate>, IPkBarcodeGenerateRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        private readonly IBarcodeDisplayInfoRepository _barcodeDisplayInfoRepository;
         public PkBarcodeGenerateRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IBarcodeDisplayInfoRepository barcodeDisplayInfoRepository)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
-            _barcodeDisplayInfoRepository = barcodeDisplayInfoRepository;
         }
 
         public List<PkBarcodeGenerateGridDto> GetBarcodeDetail(int PkBarcodeId)
@@ -54,7 +50,7 @@ namespace GSC.Respository.Barcode
                 {
                     sublst.BarcodeDisplayInfo[index] = new BarcodeDisplayInfo();
                     sublst.BarcodeDisplayInfo[index].Alignment = subitem.Alignment;
-                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.PKBarcodeId, "PKBarcode", subitem.TableFieldName.FieldName);
+                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.PKBarcodeId, subitem.TableFieldName.FieldName);
                     sublst.BarcodeDisplayInfo[index].OrderNumber = subitem.OrderNumber;
                     sublst.BarcodeDisplayInfo[index].IsSameLine = subitem.IsSameLine;
                     index++;
@@ -90,7 +86,7 @@ namespace GSC.Respository.Barcode
                 {
                     sublst.BarcodeDisplayInfo[index] = new BarcodeDisplayInfo();
                     sublst.BarcodeDisplayInfo[index].Alignment = subitem.Alignment;
-                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.PKBarcodeId, "PKBarcode", subitem.TableFieldName.FieldName);
+                    sublst.BarcodeDisplayInfo[index].DisplayInformation = GetColumnValue(item.PKBarcodeId, subitem.TableFieldName.FieldName);
                     sublst.BarcodeDisplayInfo[index].OrderNumber = subitem.OrderNumber;
                     sublst.BarcodeDisplayInfo[index].IsSameLine = subitem.IsSameLine;
                     index++;
@@ -100,7 +96,7 @@ namespace GSC.Respository.Barcode
             return lst;
         }
 
-        string GetColumnValue(int id, string TableName, string ColumnName)
+        string GetColumnValue(int id, string ColumnName)
         {
             var tableRepository = _context.PKBarcode.Where(x => x.Id == id).Select(e => e).FirstOrDefault();
 
@@ -127,8 +123,8 @@ namespace GSC.Respository.Barcode
         {
             string barcode = "";
             var volunteer = _context.Volunteer.Find(pKBarcode.VolunteerId);
-            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == pKBarcode.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
-            var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == pKBarcode.TemplateId);
+            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == pKBarcode.VisitId).Include(x => x.ProjectDesignPeriod).First().ProjectDesignPeriod;
+            var template = _context.ProjectDesignTemplate.First(x => x.Id == pKBarcode.TemplateId);
             if (number > 0)
             {
                 barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + "0" + number;

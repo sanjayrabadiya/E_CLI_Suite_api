@@ -16,12 +16,8 @@ namespace GSC.Respository.Medra
 {
     public class MeddraHltPrefTermRepository : GenericRespository<MeddraHltPrefTerm>, IMeddraHltPrefTermRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraHltPrefTermRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MeddraHltPrefTermRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
         public int AddHltFileData(SaveFileDto obj)
         {

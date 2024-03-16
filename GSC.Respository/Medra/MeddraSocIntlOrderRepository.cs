@@ -16,12 +16,8 @@ namespace GSC.Respository.Medra
 {
     public class MeddraSocIntlOrderRepository : GenericRespository<MeddraSocIntlOrder>, IMeddraSocIntlOrderRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraSocIntlOrderRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MeddraSocIntlOrderRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public int AddIntlOrdFileData(SaveFileDto obj)

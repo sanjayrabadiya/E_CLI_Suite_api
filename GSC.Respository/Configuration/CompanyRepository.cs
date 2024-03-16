@@ -15,53 +15,19 @@ namespace GSC.Respository.Configuration
 {
     public class CompanyRepository : GenericRespository<Company>, ICompanyRepository
     {
-        private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IMapper _mapper;
 
         public CompanyRepository(IGSCContext context,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IUploadSettingRepository uploadSettingRepository)
+            IMapper mapper)
             : base(context)
         {
-            _uploadSettingRepository = uploadSettingRepository;
             _mapper = mapper;
         }
 
         public IList<CompanyGridDto> GetCompanies(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-            ProjectTo<CompanyGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            //var companies = FindByInclude(t => isDeleted ? t.DeletedDate != null : t.DeletedDate == null, t => t.Location).Select(s => new CompanyDto
-            //{
-            //    Id = s.Id,
-            //    CompanyCode = s.CompanyCode,
-            //    CompanyName = s.CompanyName,
-            //    Phone1 = s.Phone1,
-            //    Phone2 = s.Phone2,
-            //    Location = s.Location,
-            //    Logo = s.Logo,
-            //    IsDeleted = s.DeletedDate != null
-            //}).OrderByDescending(t => t.Id).ToList();
-            //var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            //foreach (var company in companies)
-            //{
-            //    company.LogoPath = imageUrl + (company.Logo ?? DocumentService.DefulatLogo);
-
-            //    if (company.Location == null)
-            //        continue;
-
-            //    var id = company.Location.CountryId;
-            //    company.Location.CountryName = id > 0 ? _context.Country.Find(id).CountryName : "";
-
-            //    id = company.Location.StateId;
-            //    company.Location.StateName = id > 0 ? _context.State.Find(id).StateName : "";
-
-            //    id = company.Location.CityId;
-            //    company.Location.CityName = id > 0 ? _context.City.Find(id).CityName : "";
-            //}
-
-            //return companies;
+            ProjectTo<CompanyGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();           
         }
 
         public List<DropDownDto> GetCompanyDropDown()

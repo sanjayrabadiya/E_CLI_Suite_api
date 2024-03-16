@@ -106,7 +106,6 @@ namespace GSC.Respository.Configuration
                 return mb / 1024.0;
             }
             return 0;
-            // return in gb
         }
     }
 }

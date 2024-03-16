@@ -16,12 +16,9 @@ namespace GSC.Respository.Medra
 {
     public class MeddraHlgtHltCompRepository : GenericRespository<MeddraHlgtHltComp>, IMeddraHlgtHltCompRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraHlgtHltCompRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MeddraHlgtHltCompRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
+
         }
 
         public int AddHlgtHltFileData(SaveFileDto obj)

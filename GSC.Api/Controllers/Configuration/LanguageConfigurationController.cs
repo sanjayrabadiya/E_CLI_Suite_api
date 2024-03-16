@@ -25,8 +25,8 @@ namespace GSC.Api.Controllers.Configuration
         public LanguageConfigurationController(ILanguageConfigurationRepository languageConfigurationRepository,
            IUnitOfWork uow, IMapper mapper, IGSCContext context)
         {
-            _languageConfigurationRepository = languageConfigurationRepository;          
-            _uow = uow;           
+            _languageConfigurationRepository = languageConfigurationRepository;
+            _uow = uow;
             _mapper = mapper;
             _context = context;
         }
@@ -35,7 +35,7 @@ namespace GSC.Api.Controllers.Configuration
         public IActionResult Get(bool isDeleted)
         {
             var departments = _languageConfigurationRepository.GetlanguageConfiguration(isDeleted);
-            return Ok(departments);          
+            return Ok(departments);
         }
 
         [HttpGet("{id}")]
@@ -62,7 +62,11 @@ namespace GSC.Api.Controllers.Configuration
             }
 
             _languageConfigurationRepository.Add(languageConfi);
-            if (_uow.Save() <= 0) throw new Exception("Creating Language Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Language Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(languageConfi.Id);
         }
 
@@ -77,18 +81,21 @@ namespace GSC.Api.Controllers.Configuration
             var languageConfi = _mapper.Map<LanguageConfiguration>(languageconfiDto);
             languageConfi.KeyCode = languagedetails.KeyCode;
             languageConfi.IsReadOnlyDefaultMessage = languagedetails.IsReadOnlyDefaultMessage;
-            if(languageConfi.IsReadOnlyDefaultMessage)
+            if (languageConfi.IsReadOnlyDefaultMessage)
                 languageConfi.DefaultMessage = languagedetails.DefaultMessage;
-            //languageConfi.Id = departmentDto.Id;
             var validate = _languageConfigurationRepository.Duplicate(languageConfi);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
-            }            
+            }
             _languageConfigurationRepository.Update(languageConfi);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Language Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Language Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(languageConfi.Id);
         }
 
@@ -160,7 +167,11 @@ namespace GSC.Api.Controllers.Configuration
                 return BadRequest(ModelState);
             }
             _context.LanguageConfigurationDetails.Add(languageConfiDetails);
-            if (_uow.Save() <= 0) throw new Exception("Creating Language Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Language Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(languageConfiDetails.Id);
         }
 
@@ -173,7 +184,6 @@ namespace GSC.Api.Controllers.Configuration
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var languageConfiDetails = _mapper.Map<LanguageConfigurationDetails>(languageconfiDetailDto);
-            //languageConfi.Id = departmentDto.Id;
             var validate = _languageConfigurationRepository.DuplicateLanguage(languageConfiDetails);
             if (!string.IsNullOrEmpty(validate))
             {
@@ -182,7 +192,11 @@ namespace GSC.Api.Controllers.Configuration
             }
             _context.LanguageConfigurationDetails.Update(languageConfiDetails);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Language Configuration failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Language Configuration failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(languageConfiDetails.Id);
         }
 

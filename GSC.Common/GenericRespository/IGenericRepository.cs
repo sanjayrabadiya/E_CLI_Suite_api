@@ -22,10 +22,10 @@ namespace GSC.Common.GenericRespository
         Task<TC> FindAsync(int id);
         void Add(TC entity);
         void Update(TC entity);
-        void Delete(int id);
         void Remove(TC entity);
-        void Delete(TC entity);
-        void Active(TC entity);
+        void Delete(int id);
+        void Delete(TC entityData);
+        void Active(TC entityData);
         void InsertUpdateGraph(TC entity);
         /// <summary>
         /// Adds new record and marks existing record as deleted if reference exists, or updates the record if no referece exists

@@ -15,15 +15,12 @@ namespace GSC.Respository.Medra
 {
     public class MedraLanguageRepository : GenericRespository<MedraLanguage>, IMedraLanguageRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
 
         public MedraLanguageRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 

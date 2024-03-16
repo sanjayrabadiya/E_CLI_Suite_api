@@ -15,11 +15,9 @@ namespace GSC.Respository.Medra
 {
     public class MedraConfigRepository : GenericRespository<MedraConfig>, IMedraConfigRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MedraConfigRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MedraConfigRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 

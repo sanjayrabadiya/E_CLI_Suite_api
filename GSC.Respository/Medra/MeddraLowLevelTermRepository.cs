@@ -16,12 +16,10 @@ namespace GSC.Respository.Medra
 {
     public class MeddraLowLevelTermRepository : GenericRespository<MeddraLowLevelTerm>, IMeddraLowLevelTermRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         public MeddraLowLevelTermRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
         }

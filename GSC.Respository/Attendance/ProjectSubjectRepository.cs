@@ -15,7 +15,6 @@ namespace GSC.Respository.Attendance
     {
         private readonly IAttendanceHistoryRepository _attendanceHistoryRepository;
         private readonly IAttendanceRepository _attendanceRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly INumberFormatRepository _numberFormatRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IScreeningTemplateValueRepository _screeningTemplateValueRepository;
@@ -23,7 +22,6 @@ namespace GSC.Respository.Attendance
         public ProjectSubjectRepository(IGSCContext context,
             INumberFormatRepository numberFormatRepository,
             IProjectRepository projectRepository,
-            IJwtTokenAccesser jwtTokenAccesser,
             IAttendanceRepository attendanceRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
             IAttendanceHistoryRepository attendanceHistoryRepository)
@@ -31,7 +29,6 @@ namespace GSC.Respository.Attendance
         {
             _numberFormatRepository = numberFormatRepository;
             _projectRepository = projectRepository;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _attendanceRepository = attendanceRepository;
             _screeningTemplateValueRepository = screeningTemplateValueRepository;
             _attendanceHistoryRepository = attendanceHistoryRepository;

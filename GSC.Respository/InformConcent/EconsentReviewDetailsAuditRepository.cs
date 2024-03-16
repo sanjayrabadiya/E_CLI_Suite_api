@@ -28,22 +28,16 @@ namespace GSC.Respository.InformConcent
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly PdfFont smallfont = new PdfStandardFont(PdfFontFamily.TimesRoman, 6);
         private readonly IJobMonitoringRepository _jobMonitoringRepository;
         public EconsentReviewDetailsAuditRepository(IGSCContext context,
                                     IJwtTokenAccesser jwtTokenAccesser,
-                                    IMapper mapper,
-                                    IUnitOfWork uow,
                                     IUploadSettingRepository uploadSettingRepository,
                                     IJobMonitoringRepository jobMonitoringRepository) : base(context)
         {
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _mapper = mapper;
-            _uow = uow;
             _uploadSettingRepository = uploadSettingRepository;
             _jobMonitoringRepository = jobMonitoringRepository;
         }
@@ -52,27 +46,27 @@ namespace GSC.Respository.InformConcent
         {
 
             var resultdetails = All.Where(y => y.EconsentReviewDetails.EconsentSetup.ProjectId == details.ParentProjectId
-             && (details.ProjectId > 0 ? y.EconsentReviewDetails.Randomization.ProjectId == details.ProjectId : true)
-             && (details.DocumentId > 0 ? y.EconsentReviewDetails.EconsentSetup.Id == details.DocumentId : true)
-             && (details.ActionId > 0 ? y.Activity == details.ActionId : true)
-             && (details.PatientStatusId > 0 ? y.PateientStatus == details.PatientStatusId : true)
-             && (details.SubjectIds.Count() > 0 ? details.SubjectIds.Select(x => x.Id).Contains(y.EconsentReviewDetails.RandomizationId) : true)
+             && (details.ProjectId <= 0 || y.EconsentReviewDetails.Randomization.ProjectId == details.ProjectId)
+             && (details.DocumentId <= 0 || y.EconsentReviewDetails.EconsentSetup.Id == details.DocumentId)
+             && (details.ActionId <= 0 || y.Activity == details.ActionId)
+             && (details.PatientStatusId <= 0 || y.PateientStatus == details.PatientStatusId)
+             && (details.SubjectIds.Any(x => x.Id == y.EconsentReviewDetails.RandomizationId))
              ).Select(x => new EconsentReviewDetailsAuditGridDto
-                {
-                    Key = x.EconsentReviewDetails.Randomization.Id,
-                    StudyCode = x.EconsentReviewDetails.EconsentSetup.Project.ProjectCode,
-                    SiteCode = x.EconsentReviewDetails.Randomization.Project.ProjectCode,
-                    DocumentName = x.EconsentReviewDetails.EconsentSetup.DocumentName,
-                    ScreeningNumber = x.EconsentReviewDetails.Randomization.ScreeningNumber,
-                    RandomizationNumber = x.EconsentReviewDetails.Randomization.RandomizationNumber,
-                    Initial = x.EconsentReviewDetails.Randomization.Initial,
-                    Version = x.EconsentReviewDetails.EconsentSetup.Version,
-                    LanguageName = x.EconsentReviewDetails.EconsentSetup.Language.LanguageName,
-                    Activity = x.Activity.GetDescription(),
-                    PatientStatus = x.PateientStatus.GetDescription(),
-                    CreatedByUser = x.CreatedByUser.UserName,
-                    CreatedDate = x.CreatedDate
-                }).ToList();
+             {
+                 Key = x.EconsentReviewDetails.Randomization.Id,
+                 StudyCode = x.EconsentReviewDetails.EconsentSetup.Project.ProjectCode,
+                 SiteCode = x.EconsentReviewDetails.Randomization.Project.ProjectCode,
+                 DocumentName = x.EconsentReviewDetails.EconsentSetup.DocumentName,
+                 ScreeningNumber = x.EconsentReviewDetails.Randomization.ScreeningNumber,
+                 RandomizationNumber = x.EconsentReviewDetails.Randomization.RandomizationNumber,
+                 Initial = x.EconsentReviewDetails.Randomization.Initial,
+                 Version = x.EconsentReviewDetails.EconsentSetup.Version,
+                 LanguageName = x.EconsentReviewDetails.EconsentSetup.Language.LanguageName,
+                 Activity = x.Activity.GetDescription(),
+                 PatientStatus = x.PateientStatus.GetDescription(),
+                 CreatedByUser = x.CreatedByUser.UserName,
+                 CreatedDate = x.CreatedDate
+             }).ToList();
             JobMonitoring jobMonitoring = new JobMonitoring();
             jobMonitoring.JobName = JobNameType.ICFDetailReport;
             jobMonitoring.JobDescription = details.ParentProjectId;
@@ -164,7 +158,6 @@ namespace GSC.Respository.InformConcent
                 pdfGrid.Draw(page, new PointF(10, 10));
 
                 string path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ICFDetailReport.ToString());
-                //string path = @"D:\";
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
@@ -189,13 +182,7 @@ namespace GSC.Respository.InformConcent
                     _context.Save();
                     #endregion
 
-                    //#region EmailSend
-                    //var user = _userRepository.Find(_jwtTokenAccesser.UserId);
-                    //var ProjectName = _context.Project.Find(filters.SelectedProject).ProjectCode + "-" + _context.Project.Find(filters.SelectedProject).ProjectName;
-                    //string pathofdoc = Path.Combine(savepath, FileName);
-                    //var linkOfDoc = "<a href='" + pathofdoc + "'>Click Here</a>";
-                    //_emailSenderRespository.SendDBDSGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfDoc);
-                    //#endregion
+
                 }
             }
 
@@ -203,7 +190,6 @@ namespace GSC.Respository.InformConcent
 
         private void GenerateExcelReport(List<EconsentReviewDetailsAuditGridDto> data, JobMonitoring jobMonitoring)
         {
-            //var repeatdata = new List<RepeatTemplateDto>();
             using (var workbook = new XLWorkbook())
             {
                 IXLWorksheet worksheet;
@@ -245,7 +231,6 @@ namespace GSC.Respository.InformConcent
 
 
                 string path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.ICFDetailReport.ToString());
-                //string path = @"D:\";
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
@@ -254,7 +239,6 @@ namespace GSC.Respository.InformConcent
                 using (var stream = new MemoryStream())
                 {
                     workbook.SaveAs(stream);
-                    var content = stream.ToArray();
 
                     stream.Position = 0;
                     var FileName = "IcfdetailReport__" + DateTime.Now.Ticks + ".xlsx";
@@ -263,7 +247,7 @@ namespace GSC.Respository.InformConcent
 
                     #region Update Job Status
                     var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-                    string savepath = Path.Combine(documentUrl, FolderType.ICFDetailReport.ToString());                   
+                    string savepath = Path.Combine(documentUrl, FolderType.ICFDetailReport.ToString());
                     jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
                     jobMonitoring.JobStatus = JobStatusType.Completed;
                     jobMonitoring.FolderPath = savepath;
@@ -272,13 +256,6 @@ namespace GSC.Respository.InformConcent
                     _context.Save();
                     #endregion
 
-                    //#region EmailSend
-                    //var user = _userRepository.Find(_jwtTokenAccesser.UserId);
-                    //var ProjectName = _context.Project.Find(filters.SelectedProject).ProjectCode + "-" + _context.Project.Find(filters.SelectedProject).ProjectName;
-                    //string pathofdoc = Path.Combine(savepath, FileName);
-                    //var linkOfDoc = "<a href='" + pathofdoc + "'>Click Here</a>";
-                    //_emailSenderRespository.SendDBDSGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfDoc);
-                    // #endregion
                 }
             }
         }
@@ -289,23 +266,11 @@ namespace GSC.Respository.InformConcent
 
             //Create a page template
             PdfPageTemplateElement header = new PdfPageTemplateElement(rect);
-            PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 24);
-            float doubleHeight = font.Height * 2;
             Color activeColor = Color.FromArgb(44, 71, 120);
-            SizeF imageSize = new SizeF(110f, 35f);
-
-            //Locating the logo on the right corner of the Drawing Surface
-            PointF imageLocation = new PointF(doc.Pages[0].GetClientSize().Width - imageSize.Width - 20, 5);
-
-            //PdfImage img = new PdfBitmap("../../Data/logo.png");
-
-            ////Draw the image in the Header.
-            //header.Graphics.DrawImage(img, imageLocation, imageSize);
 
             PdfSolidBrush brush = new PdfSolidBrush(activeColor);
 
-            PdfPen pen = new PdfPen(Color.DarkBlue, 3f);
-            font = new PdfStandardFont(PdfFontFamily.Helvetica, 16, PdfFontStyle.Bold);
+            PdfFont font = new PdfStandardFont(PdfFontFamily.Helvetica, 16, PdfFontStyle.Bold);
 
             //Set formattings for the text
             PdfStringFormat format = new PdfStringFormat();
@@ -314,18 +279,13 @@ namespace GSC.Respository.InformConcent
 
             //Draw title
             header.Graphics.DrawString(title, font, brush, new RectangleF(0, 0, header.Width, header.Height), format);
-            brush = new PdfSolidBrush(Color.Gray);
-            font = new PdfStandardFont(PdfFontFamily.Helvetica, 6, PdfFontStyle.Bold);
 
             format = new PdfStringFormat();
             format.Alignment = PdfTextAlignment.Left;
             format.LineAlignment = PdfVerticalAlignment.Bottom;
 
-            ////Draw description
-            //header.Graphics.DrawString(DateTime.Now.ToString(), font, brush, new RectangleF(0, 0, header.Width, header.Height - 8), format);
-
             //Draw some lines in the header
-            pen = new PdfPen(Color.DarkBlue, 0.7f);
+            PdfPen pen = new PdfPen(Color.DarkBlue, 0.7f);
             header.Graphics.DrawLine(pen, 0, 0, header.Width, 0);
             pen = new PdfPen(Color.DarkBlue, 2f);
             header.Graphics.DrawLine(pen, 0, 03, header.Width + 3, 03);

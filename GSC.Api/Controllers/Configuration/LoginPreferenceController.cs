@@ -24,29 +24,17 @@ namespace GSC.Api.Controllers.Configuration
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly ILoginPreferenceRepository _loginPreferenceRepository;
-        private readonly IUserLoginReportRespository _userLoginReportRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
-        private readonly IUserRepository _userRepository;
-        private readonly IOptions<EnvironmentSetting> _environmentSetting;
-        private readonly ICentreUserService _centreUserService;
 
-        public LoginPreferenceController(IUserRepository userRepository,
-            ILoginPreferenceRepository loginPreferenceRepository,
-            IUserLoginReportRespository userLoginReportRepository,
-            IOptions<EnvironmentSetting> environmentSetting,
+        public LoginPreferenceController(ILoginPreferenceRepository loginPreferenceRepository,
             IUnitOfWork uow, IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser,
-            ICentreUserService centreUserService)
+            IJwtTokenAccesser jwtTokenAccesser)
         {
-            _userRepository = userRepository;
             _loginPreferenceRepository = loginPreferenceRepository;
-            _userLoginReportRepository = userLoginReportRepository;
             _uow = uow;
-            _environmentSetting = environmentSetting;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _centreUserService = centreUserService;
         }
 
         // GET: api/<controller>
@@ -61,7 +49,7 @@ namespace GSC.Api.Controllers.Configuration
             return Ok(loginPreferencesDto);
         }
 
-      
+
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
@@ -79,7 +67,11 @@ namespace GSC.Api.Controllers.Configuration
             loginPreferenceDto.Id = 0;
             var loginPreference = _mapper.Map<LoginPreference>(loginPreferenceDto);
             _loginPreferenceRepository.Add(loginPreference);
-            if (_uow.Save() <= 0) throw new Exception("Creating Upload Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Upload Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(loginPreference.Id);
         }
 
@@ -93,7 +85,11 @@ namespace GSC.Api.Controllers.Configuration
             var loginPreference = _mapper.Map<LoginPreference>(loginPreferenceDto);
 
             _loginPreferenceRepository.Update(loginPreference);
-            if (_uow.Save() <= 0) throw new Exception("Updating Upload Setting failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Upload Setting failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(loginPreference.Id);
         }
 

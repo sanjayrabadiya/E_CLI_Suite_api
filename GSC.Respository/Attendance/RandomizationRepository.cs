@@ -133,28 +133,23 @@ namespace GSC.Respository.Attendance
             randomization.StudyVersion = randomizationDto.StudyVersion;
 
             Update(randomization);
-            if (!randomizationNumberDto.IsTestSite && !randomizationNumberDto.IsIGT)
+            if (!randomizationNumberDto.IsTestSite && !randomizationNumberDto.IsIGT && randomizationNumberDto.IsManualRandomNo == false)
             {
+                int projectidforRandomNo = 0;
+                if (randomizationNumberDto.IsSiteDependentRandomNo == true)
+                    projectidforRandomNo = randomizationNumberDto.ProjectId;
+                else
+                    projectidforRandomNo = randomizationNumberDto.ParentProjectId;
 
-                if (randomizationNumberDto.IsManualRandomNo == false)
-                {
-                    int projectidforRandomNo = 0;
-                    if (randomizationNumberDto.IsSiteDependentRandomNo == true)
-                        projectidforRandomNo = randomizationNumberDto.ProjectId;
-                    else
-                        projectidforRandomNo = randomizationNumberDto.ParentProjectId;
-
-                    var projectRandom = _context.RandomizationNumberSettings.Where(x => x.ProjectId == projectidforRandomNo).FirstOrDefault();//_projectRepository.Find(projectidforRandomNo);
-                    projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
-                    _randomizationNumberSettingsRepository.Update(projectRandom);
-                }
+                var projectRandom = _context.RandomizationNumberSettings.Where(x => x.ProjectId == projectidforRandomNo).First();
+                projectRandom.RandomizationNoseries = randomizationNumberDto.RandomizationNoseries + 1;
+                _randomizationNumberSettingsRepository.Update(projectRandom);
             }
         }
 
         public void SaveScreeningNumber(Randomization randomization, RandomizationDto randomizationDto)
         {
-            RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-            randomizationNumberDto = GenerateScreeningNumber(randomization.Id);
+            var randomizationNumberDto = GenerateScreeningNumber(randomization.Id);
             if (randomizationNumberDto.IsManualScreeningNo == true)
                 randomization.ScreeningNumber = randomizationDto.ScreeningNumber;
             else
@@ -176,7 +171,7 @@ namespace GSC.Respository.Attendance
                     else
                         projectidforscreeningNo = randomizationNumberDto.ParentProjectId;
 
-                    var projectSeries = _context.ScreeningNumberSettings.Where(x => x.ProjectId == projectidforscreeningNo).FirstOrDefault();//_projectRepository.Find(projectidforscreeningNo);
+                    var projectSeries = _context.ScreeningNumberSettings.First(x => x.ProjectId == projectidforscreeningNo);
                     projectSeries.ScreeningNoseries = randomizationNumberDto.ScreeningNoseries + 1;
                     _screeningNumberSettingsRepository.Update(projectSeries);
                 }
@@ -187,14 +182,11 @@ namespace GSC.Respository.Attendance
         {
             if (!_projectRepository.Find(randomization.ProjectId).IsTestSite)
             {
-                RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-                randomizationNumberDto = GenerateScreeningNumber(randomization.Id);
+                var randomizationNumberDto = GenerateScreeningNumber(randomization.Id);
                 randomizationNumberDto.ScreeningNumber = randomization.ScreeningNumber;
-                if (randomizationNumberDto.IsManualScreeningNo == true)
+                if (randomizationNumberDto.IsManualScreeningNo == true && randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
                 {
-                    if (randomizationNumberDto.ScreeningNumber.Length != randomizationNumberDto.ScreeningLength)
-                        return "Please enter the number as length of " + randomizationNumberDto.ScreeningLength.ToString();
-                    //return "Please add " + randomizationNumberDto.ScreeningLength.ToString() + " characters in Screening Number";
+                    return "Please enter the number as length of " + randomizationNumberDto.ScreeningLength.ToString();
                 }
                 return "";
             }
@@ -211,13 +203,11 @@ namespace GSC.Respository.Attendance
 
             if (!_projectRepository.Find(randomization.ProjectId).IsTestSite)
             {
-                RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
-                randomizationNumberDto = GenerateRandomizationNumber(randomization.Id);
+                var randomizationNumberDto = GenerateRandomizationNumber(randomization.Id);
                 randomizationNumberDto.RandomizationNumber = randomization.RandomizationNumber;
-                if (randomizationNumberDto.IsManualRandomNo == true)
+                if (randomizationNumberDto.IsManualRandomNo == true && randomizationNumberDto.RandomizationNumber.Length != randomizationNumberDto.RandomNoLength)
                 {
-                    if (randomizationNumberDto.RandomizationNumber.Length != randomizationNumberDto.RandomNoLength)
-                        return "Please add " + randomizationNumberDto.RandomNoLength.ToString() + " characters in Randomization Number";
+                    return "Please add " + randomizationNumberDto.RandomNoLength.ToString() + " characters in Randomization Number";
                 }
                 return "";
             }
@@ -228,8 +218,8 @@ namespace GSC.Respository.Attendance
         {
             var randomization = Find(id);
             var site = _projectRepository.Find(randomization.ProjectId);
-            var sitedata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == randomization.ProjectId).FirstOrDefault();//_projectRepository.Find(randomization.ProjectId);
-            var studydata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == (int)site.ParentProjectId).FirstOrDefault();//_projectRepository.Find((int)sitedata.ParentProjectId);
+            var sitedata = _context.RandomizationNumberSettings.First(x => x.ProjectId == randomization.ProjectId);
+            var studydata = _context.RandomizationNumberSettings.First(x => x.ProjectId == (int)site.ParentProjectId);
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto.ProjectId = randomization.ProjectId;
             randomizationNumberDto.ParentProjectId = (int)site.ParentProjectId;
@@ -242,34 +232,34 @@ namespace GSC.Respository.Attendance
 
             if (!studydata.IsIGT)
             {
-                if (studydata.IsManualRandomNo == true)
+                if (studydata.IsManualRandomNo)
                 {
                     randomizationNumberDto.RandomizationNumber = "";
                 }
                 else
                 {
                     int latestno;
-                    if (studydata.IsSiteDependentRandomNo == true)
+                    if (studydata.IsSiteDependentRandomNo)
                     {
                         latestno = sitedata.RandomizationNoseries;
                         randomizationNumberDto.RandomizationNoseries = sitedata.RandomizationNoseries;
                         if (string.IsNullOrEmpty(sitedata.PrefixRandomNo))
-                            randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                            randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft(studydata.RandomNoLength, '0');
                         else
-                            randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                            randomizationNumberDto.RandomizationNumber = sitedata.PrefixRandomNo + latestno.ToString().PadLeft(studydata.RandomNoLength, '0');
                     }
                     else
                     {
                         latestno = studydata.RandomizationNoseries;
                         randomizationNumberDto.RandomizationNoseries = studydata.RandomizationNoseries;
-                        randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                        randomizationNumberDto.RandomizationNumber = latestno.ToString().PadLeft(studydata.RandomNoLength, '0');
                     }
                 }
                 randomizationNumberDto.IsTestSite = site.IsTestSite;
                 if (site.IsTestSite)
                 {
                     var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.RandomizationNumber != null).Count() + 1;
-                    randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft((int)studydata.RandomNoLength, '0');
+                    randomizationNumberDto.RandomizationNumber = "TR -" + patientCount.ToString().PadLeft(studydata.RandomNoLength, '0');
                     return randomizationNumberDto;
                 }
             }
@@ -308,7 +298,6 @@ namespace GSC.Respository.Attendance
         }
         public RandomizationNumberDto GetRandNoIWRS(int projectid, int siteId, int? countryId, string productType, RandomizationNumberDto randomizationNumberDto, Randomization randomization, bool isIwrs)
         {
-            string randno = string.Empty;
             List<SupplyManagementKITDetail> kitdata = new List<SupplyManagementKITDetail>();
             List<SupplyManagementKITSeriesDetail> kitSequencedata = new List<SupplyManagementKITSeriesDetail>();
             SupplyManagementUploadFileDetail uploaddetail = new SupplyManagementUploadFileDetail();
@@ -571,7 +560,7 @@ namespace GSC.Respository.Attendance
                     foreach (var visititem in visitlist)
                     {
                         randomizationNumberDto.Dose = 0;
-                        if ((!string.IsNullOrEmpty(productType) && productType.Split(',').ToArray().Contains(visititem.Value.Trim()) && randomizationNumberDto.Dose != Convert.ToDecimal(randomization.Dosefactor)) || (randomizationNumberDto.Dose != Convert.ToDecimal(randomization.Dosefactor)))
+                        if ((!string.IsNullOrEmpty(productType) && productType.Split(',').AsEnumerable().Contains(visititem.Value.Trim()) && randomizationNumberDto.Dose != Convert.ToDecimal(randomization.Dosefactor)) || (randomizationNumberDto.Dose != Convert.ToDecimal(randomization.Dosefactor)))
                         {
 
                             var kit = kitdata.Where(x => x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visititem.Value.Trim()).OrderBy(x => x.Id).ToList();
@@ -581,8 +570,8 @@ namespace GSC.Respository.Attendance
                                 randomizationNumberDto.ProductCode = visititem.Value;
 
                                 randomizationNumberDto.KitDoseList = new List<KitDoseList>();
-                                decimal firstpriority = priorites.Where(s => s.DosePriority == DosePriority.Priority1).FirstOrDefault().Dose;
-                                decimal secondpriority = priorites.Where(s => s.DosePriority == DosePriority.Priority2).FirstOrDefault().Dose;
+                                decimal firstpriority = priorites.First(s => s.DosePriority == DosePriority.Priority1).Dose;
+                                decimal secondpriority = priorites.First(s => s.DosePriority == DosePriority.Priority2).Dose;
 
                                 var firstPrioritykit = kit.Where(s => (decimal)s.SupplyManagementKIT.Dose == firstpriority).ToList();
                                 decimal totaldose = 0;
@@ -1040,19 +1029,19 @@ namespace GSC.Respository.Attendance
 
                     if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                     {
-                        uploaddetail = data.Where(x => x.SupplyManagementUploadFile.SiteId == siteId).FirstOrDefault();
+                        uploaddetail = data.Find(x => x.SupplyManagementUploadFile.SiteId == siteId);
                     }
                     if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
                     {
-                        var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == countryId).FirstOrDefault();
+                        var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).FirstOrDefault(x => x.Id == countryId);
                         if (site != null)
                         {
-                            uploaddetail = data.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId && x.SupplyManagementUploadFile.ProjectId == projectid).FirstOrDefault();
+                            uploaddetail = data.Find(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId && x.SupplyManagementUploadFile.ProjectId == projectid);
                         }
                     }
                     if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                     {
-                        uploaddetail = data.Where(x => x.SupplyManagementUploadFile.ProjectId == projectid).FirstOrDefault();
+                        uploaddetail = data.Find(x => x.SupplyManagementUploadFile.ProjectId == projectid);
                     }
 
                     if (uploaddetail == null)
@@ -1075,8 +1064,7 @@ namespace GSC.Respository.Attendance
         }
         public void UpdateRandomizationIdForIWRS(RandomizationDto obj)
         {
-            string randno = string.Empty;
-            var data = new SupplyManagementUploadFileDetail();
+            SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
             var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (numerformate != null && numerformate.IsIGT)
             {
@@ -1158,7 +1146,7 @@ namespace GSC.Respository.Attendance
         }
         public bool ValidateRandomizationIdForIWRS(RandomizationDto obj)
         {
-            var data = new SupplyManagementUploadFileDetail();
+            SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
             var numerformate = _context.RandomizationNumberSettings.Where(x => x.ProjectId == obj.ParentProjectId).FirstOrDefault();
             if (numerformate != null && numerformate.IsIGT)
             {
@@ -1241,9 +1229,8 @@ namespace GSC.Respository.Attendance
         {
             var randomization = Find(id);
             var sitedata = _projectRepository.Find(randomization.ProjectId);
-            var studydata = _context.ScreeningNumberSettings.Where(x => x.ProjectId == (int)sitedata.ParentProjectId).FirstOrDefault();
-            //var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
-            if (studydata.ScreeningLength <= 0)
+            var studydata = _context.ScreeningNumberSettings.FirstOrDefault(x => x.ProjectId == (int)sitedata.ParentProjectId);
+            if (studydata?.ScreeningLength <= 0)
                 return false;
             return true;
         }
@@ -1252,9 +1239,8 @@ namespace GSC.Respository.Attendance
         {
             var randomization = Find(id);
             var sitedata = _projectRepository.Find(randomization.ProjectId);
-            //var studydata = _projectRepository.Find((int)sitedata.ParentProjectId);
-            var studydata = _context.RandomizationNumberSettings.Where(x => x.ProjectId == (int)sitedata.ParentProjectId).FirstOrDefault();
-            if (studydata.RandomNoLength <= 0 && !studydata.IsIGT)
+            var studydata = _context.RandomizationNumberSettings.FirstOrDefault(x => x.ProjectId == (int)sitedata.ParentProjectId);
+            if (studydata?.RandomNoLength <= 0 && !studydata.IsIGT)
                 return false;
             return true;
         }
@@ -1263,8 +1249,8 @@ namespace GSC.Respository.Attendance
         {
             var randomization = Find(id);
             var site = _projectRepository.Find(randomization.ProjectId);
-            var sitedata = _context.ScreeningNumberSettings.Where(x => x.ProjectId == randomization.ProjectId).FirstOrDefault();//_projectRepository.Find(randomization.ProjectId);
-            var studydata = _context.ScreeningNumberSettings.Where(x => x.ProjectId == (int)site.ParentProjectId).FirstOrDefault();//_projectRepository.Find((int)sitedata.ParentProjectId);
+            var sitedata = _context.ScreeningNumberSettings.First(x => x.ProjectId == randomization.ProjectId);
+            var studydata = _context.ScreeningNumberSettings.First(x => x.ProjectId == (int)site.ParentProjectId);
             RandomizationNumberDto randomizationNumberDto = new RandomizationNumberDto();
             randomizationNumberDto.ProjectId = randomization.ProjectId;
             randomizationNumberDto.ParentProjectId = (int)site.ParentProjectId;
@@ -1272,35 +1258,34 @@ namespace GSC.Respository.Attendance
             randomizationNumberDto.IsSiteDependentScreeningNo = studydata.IsSiteDependentScreeningNo;
             randomizationNumberDto.ScreeningLength = studydata.ScreeningLength;
 
-            if (studydata.IsManualScreeningNo == true)
+            if (studydata.IsManualScreeningNo)
             {
                 randomizationNumberDto.ScreeningNumber = "";
             }
             else
             {
                 int latestno;
-                if (studydata.IsSiteDependentScreeningNo == true)
+                if (studydata.IsSiteDependentScreeningNo)
                 {
                     latestno = sitedata.ScreeningNoseries;
                     randomizationNumberDto.ScreeningNoseries = sitedata.ScreeningNoseries;
                     if (string.IsNullOrEmpty(sitedata.PrefixScreeningNo))
-                        randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                        randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft(studydata.ScreeningLength, '0');
                     else
-                        randomizationNumberDto.ScreeningNumber = sitedata.PrefixScreeningNo + latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                        randomizationNumberDto.ScreeningNumber = sitedata.PrefixScreeningNo + latestno.ToString().PadLeft(studydata.ScreeningLength, '0');
                 }
                 else
                 {
                     latestno = studydata.ScreeningNoseries;
                     randomizationNumberDto.ScreeningNoseries = studydata.ScreeningNoseries;
-                    randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                    randomizationNumberDto.ScreeningNumber = latestno.ToString().PadLeft(studydata.ScreeningLength, '0');
                 }
             }
             randomizationNumberDto.IsTestSite = site.IsTestSite;
             if (site.IsTestSite)
             {
                 var patientCount = All.Where(x => x.ProjectId == randomization.ProjectId && x.DeletedDate == null && x.ScreeningNumber != null).Count() + 1;
-                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
-                //  randomizationNumberDto.RandomizationNumber = "TestRnd -" + patientCount.ToString().PadLeft((int)studydata.ScreeningLength, '0');
+                randomizationNumberDto.ScreeningNumber = "TS -" + patientCount.ToString().PadLeft(studydata.ScreeningLength, '0');
                 return randomizationNumberDto;
             }
             return randomizationNumberDto;
@@ -1314,9 +1299,7 @@ namespace GSC.Respository.Attendance
             var rolelist = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
             result.ForEach(x =>
             {
-                x.PatientStatusName = x.PatientStatusId == null ? "" : x.PatientStatusId.GetDescription();//_patientStatusRepository.Find((int)x.PatientStatusId).StatusName;
-                                                                                                          //x.IsShowEconsentIcon = x.EconsentReviewDetails.Any(x => x.IsReviewedByPatient == true);
-                                                                                                          //x.EconsentReviewDetails.Any(x => !String.IsNullOrEmpty(x.PdfPath))
+                x.PatientStatusName = x.PatientStatusId.GetDescription();
                 x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
             });
 
@@ -1325,11 +1308,11 @@ namespace GSC.Respository.Attendance
 
             result.ForEach(x =>
             {
-                x.IsEicf = ProjectSettings != null ? ProjectSettings.IsEicf : false;
-                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).Count() > 0 ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient == true) : false;
+                x.IsEicf = ProjectSettings?.IsEicf ?? false;
+                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Any(c => c.RandomizationId == x.Id) ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient) : false;
                 x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
-                x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
+                x.IsLocked = !screeningtemplate.Exists(y => y.IsLocked);
                 x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
             });
 
@@ -1358,10 +1341,9 @@ namespace GSC.Respository.Attendance
         {
             var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var studydata = _projectRepository.Find((int)studyId);
-            if (studydata.IsSendSMS == true || studydata.IsSendEmail == true)
+            if (studydata.IsSendSMS || studydata.IsSendEmail)
             {
                 var userdata = _userRepository.Find((int)randomization.UserId);
-                //var userotp = _userOtpRepository.All.Where(x => x.UserId == userdata.Id).ToList().FirstOrDefault();
                 var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
                 await _emailSenderRespository.SendEmailOfScreenedPatient(randomization.Email, randomization.ScreeningNumber + " " + randomization.Initial, userdata.UserName, userotp.Otp, studydata.ProjectCode, randomization.PrimaryContactNumber, sendtype, studydata.IsSendEmail, studydata.IsSendSMS);
             }
@@ -1371,7 +1353,7 @@ namespace GSC.Respository.Attendance
         {
             var studyId = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var studydata = _projectRepository.Find((int)studyId);
-            if (studydata.IsSendSMS == true || studydata.IsSendEmail == true)
+            if (studydata.IsSendSMS || studydata.IsSendEmail)
             {
                 var userdata = _userRepository.Find((int)randomization.LARUserId);
                 var userotp = await _centreUserService.GetUserOtpDetails($"{_environmentSetting.Value.CentralApi}UserOtp/GetuserOtpDetails/{userdata.Id}");
@@ -1381,7 +1363,6 @@ namespace GSC.Respository.Attendance
 
         public void SendEmailOfStartEconsent(Randomization randomization)
         {
-            //var projectname = _projectRepository.Find(randomization.ProjectId).ProjectCode;
             var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
             var study = _projectRepository.Find((int)studyid);
             var documentDetails = _context.EconsentSetup.Where(x => x.DeletedDate == null
@@ -1457,15 +1438,11 @@ namespace GSC.Respository.Attendance
         public void ChangeStatustoConsentCompleted(int id)
         {
             var randomization = Find(id);
-            var studyid = _projectRepository.Find(randomization.ProjectId).ParentProjectId;
-            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess)
+            if (randomization.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || randomization.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess && (!_context.EconsentReviewDetails.Any(x => x.RandomizationId == id && !x.IsReviewDoneByInvestigator)))
             {
-                if (_context.EconsentReviewDetails.Where(x => x.RandomizationId == id && x.IsReviewDoneByInvestigator == false).Count() == 0)
-                {
-                    randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
-                    Update(randomization);
-                    _context.Save();
-                }
+                randomization.PatientStatusId = ScreeningPatientStatus.ConsentCompleted;
+                Update(randomization);
+                _context.Save();
             }
         }
 
@@ -1495,16 +1472,14 @@ namespace GSC.Respository.Attendance
                     {
 
                         int userId = (int)randomization.UserId;
-                        User user = new User();
-                        user = _userRepository.Find(userId);
+                        User user = _userRepository.Find(userId);
                         user.ValidTo = DateTime.Today.AddDays(-1);
                         _userRepository.Update(user);
 
                         user = await _centreUserService.GetUserData($"{_environmentSetting.Value.CentralApi}Login/GetUserData/{user.UserName}");
                         user.ValidTo = DateTime.Today.AddDays(-1);
                         var userDto = _mapper.Map<UserDto>(user);
-                        CommonResponceView userdetails = await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
-
+                        await _centreUserService.UpdateUser(userDto, _environmentSetting.Value.CentralApi);
                     }
                 }
             }
@@ -1513,7 +1488,7 @@ namespace GSC.Respository.Attendance
         public void ChangeStatustoWithdrawal()
         {
             var roleName = _jwtTokenAccesser.RoleName;
-            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).AsEnumerable().First();
 
             if (roleName == "LAR")
             {
@@ -1525,18 +1500,17 @@ namespace GSC.Respository.Attendance
         }
         public DashboardPatientDto GetDashboardPatientDetail()
         {
-            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).AsEnumerable().FirstOrDefault();
 
             if (_jwtTokenAccesser.RoleName == "LAR")
             {
-                randomization = FindBy(x => x.LARUserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+                randomization = FindBy(x => x.LARUserId == _jwtTokenAccesser.UserId).AsEnumerable().FirstOrDefault();
             }
 
             if (randomization != null)
             {
-                var project = _context.Project.Where(x => x.Id == randomization.ProjectId).ToList().FirstOrDefault();
-                var parentproject = _context.Project.Where(x => x.Id == project.ParentProjectId).ToList().FirstOrDefault();
-                var investigator = _context.InvestigatorContact.Where(x => x.Id == project.InvestigatorContactId).ToList().FirstOrDefault();
+                var project = _context.Project.Where(x => x.Id == randomization.ProjectId).AsEnumerable().First();
+                var parentproject = _context.Project.Where(x => x.Id == project.ParentProjectId).AsEnumerable().First();
                 var idVerification = _context.IDVerification.Where(x => x.UserId == randomization.UserId && x.DeletedDate == null).FirstOrDefault();
                 DashboardPatientDto dashboardPatientDto = new DashboardPatientDto();
                 dashboardPatientDto.projectId = project.Id;
@@ -1554,8 +1528,8 @@ namespace GSC.Respository.Attendance
                     x.ContactMobile = _userRepository.Find(x.UserId).Phone;
                     x.UserName = _userRepository.Find(x.UserId).FirstName + " " + _userRepository.Find(x.UserId).LastName;
                     x.Role = _roleRepository.Find(x.RoleId).RoleName;
-                    //x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
-                    x.UserPicUrl = _context.UploadSetting.FirstOrDefault().ImageUrl + (_roleRepository.Find(x.RoleId).RoleIcon ?? _userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
+
+                    x.UserPicUrl = _context.UploadSetting.FirstOrDefault()?.ImageUrl + (_roleRepository.Find(x.RoleId).RoleIcon ?? _userRepository.Find(x.UserId).ProfilePic ?? DocumentService.DefulatProfilePic);
                 });
                 dashboardPatientDto.siteTeams = siteteamdtos;
                 if (project.ManageSiteId != null)
@@ -1565,9 +1539,6 @@ namespace GSC.Respository.Attendance
                     dashboardPatientDto.siteAddress = _manageSiteRepository.Find((int)project.ManageSiteId).SiteAddress;
                 }
                 dashboardPatientDto.patientdetail = _jwtTokenAccesser.RoleName == "LAR" ? "LAR FirstName: " + randomization.LegalFirstName + ", LAR LastName: " + randomization.LegalLastName : "Screening Number: " + randomization.ScreeningNumber + " Initial: " + randomization.Initial;
-                //dashboardPatientDto.investigatorName = investigator.NameOfInvestigator;
-                //dashboardPatientDto.investigatorcontact = investigator.ContactNumber;
-                //dashboardPatientDto.investigatorEmail = investigator.EmailOfInvestigator;
                 if (idVerification != null)
                 {
                     dashboardPatientDto.IsUpload = idVerification.IsUpload;
@@ -1588,7 +1559,7 @@ namespace GSC.Respository.Attendance
 
         public List<ProjectDesignVisitMobileDto> GetPatientVisits()
         {
-            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).AsEnumerable().FirstOrDefault();
             if (randomization == null) return new List<ProjectDesignVisitMobileDto>();
 
             var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
@@ -1596,10 +1567,10 @@ namespace GSC.Respository.Attendance
                         Select(r => new ProjectDesignVisitMobileDto
                         {
                             Id = r.Id,
-                            DisplayName = (_jwtTokenAccesser.Language != null && _jwtTokenAccesser.Language != 1) ?
-                                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == (int)_jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault()
+                            DisplayName = (_jwtTokenAccesser.Language != 1) ?
+                                r.ProjectDesignVisit.VisitLanguage.Where(x => x.LanguageId == _jwtTokenAccesser.Language && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault()
                                 // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
-                                : r.ScreeningVisitName, //r.ProjectDesignVisit.DisplayName,
+                                : r.ScreeningVisitName,
                             ScreeningEntryId = r.ScreeningEntryId
                         }).ToList();
 
@@ -1616,8 +1587,8 @@ namespace GSC.Respository.Attendance
                             ProjectDesignVisitId = r.ScreeningVisit.ProjectDesignVisitId,
                             // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                             TemplateName = ((_jwtTokenAccesser.Language != 1) ?
-                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == (int)_jwtTokenAccesser.Language
-                && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ScreeningTemplateName),// r.ProjectDesignTemplate.TemplateName,
+                r.ProjectDesignTemplate.TemplateLanguage.Where(x => x.DeletedDate == null && x.LanguageId == _jwtTokenAccesser.Language
+                && x.DeletedDate == null).Select(a => a.Display).FirstOrDefault() : r.ScreeningTemplateName),
                             Status = r.Status,
                             DesignOrder = r.ProjectDesignTemplate.DesignOrder,
                             ScheduleDate = r.ScheduleDate,
@@ -1627,12 +1598,12 @@ namespace GSC.Respository.Attendance
                             IsDateTime = false
                         }).OrderBy(r => r.DesignOrder).ToList();
 
-            data = data.Where(x => x.IsHide == false).ToList();
+            data = data.Where(x => !x.IsHide).ToList();
             data.ForEach(x =>
             {
                 if (x.Status == ScreeningTemplateStatus.Submitted)
                 {
-                    x.SubmittedDate = _context.ScreeningTemplateReview.Where(t => t.ScreeningTemplateId == x.ScreeningTemplateId && t.Status == ScreeningTemplateStatus.Submitted).ToList().FirstOrDefault().CreatedDate;
+                    x.SubmittedDate = _context.ScreeningTemplateReview.FirstOrDefault(t => t.ScreeningTemplateId == x.ScreeningTemplateId && t.Status == ScreeningTemplateStatus.Submitted)?.CreatedDate;
                 }
                 if (x.ScheduleDate != null)
                 {
@@ -1650,13 +1621,13 @@ namespace GSC.Respository.Attendance
                     var noofday = ProjectScheduleTemplates.Min(t => t.NoOfDay);
                     var noofHH = ProjectScheduleTemplates.Min(t => t.HH);
                     var noofMM = ProjectScheduleTemplates.Min(t => t.MM);
-                    var ProjectScheduleTemplate = ProjectScheduleTemplates.Where(x => x.NoOfDay == noofday).FirstOrDefault();
+                    var ProjectScheduleTemplate = ProjectScheduleTemplates.First(x => x.NoOfDay == noofday);
 
                     if ((noofday == null) && (noofHH != null || noofMM != null))
                     {
                         var mindate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.NegativeDeviation * -1);
                         var maxdate = ((DateTime)x.ScheduleDate).AddMinutes(ProjectScheduleTemplate.PositiveDeviation);
-                        var dateWithMin = _jwtTokenAccesser.GetClientDate().ToString("yyyy-MMM-dd HH:mm"); //DateTime.Now.AddHours(4).AddMinutes(30);
+                        var dateWithMin = _jwtTokenAccesser.GetClientDate().ToString("yyyy-MMM-dd HH:mm");
                         var clientDate = DateTime.ParseExact(dateWithMin, "yyyy-MMM-dd HH:mm", null);
                         if (clientDate >= mindate && clientDate <= maxdate)
                             x.IsTemplateRestricted = false;
@@ -1704,8 +1675,8 @@ namespace GSC.Respository.Attendance
 
         public List<DropDownDto> GetRandomizationDropdown(int projectid)
         {
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == projectid).ParentProjectId;
-            var sites = _context.Project.Where(x => x.ParentProjectId == projectid).ToList().Select(x => x.Id).ToList();
+            var ParentProject = _context.Project.First(x => x.Id == projectid).ParentProjectId;
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectid).AsEnumerable().Select(x => x.Id).ToList();
 
             return All.Where(a => a.DeletedDate == null && ParentProject != null ? a.ProjectId == projectid : sites.Contains(a.ProjectId))
                 .Select(x => new DropDownDto
@@ -1760,7 +1731,7 @@ namespace GSC.Respository.Attendance
             }
 
 
-            return null;
+            return new List<DropDownDto>();
         }
 
         private List<int> GetProjectList(int ProjectId)
@@ -1773,11 +1744,10 @@ namespace GSC.Respository.Attendance
         // Dashboard chart for target status
         public List<DashboardPatientStatusDto> GetDashboardPatientStatus(int projectId)
         {
-            var pro = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();
+            var pro = _context.Project.First(x => x.Id == projectId);
             var project = new List<Data.Entities.Master.Project>();
             if (pro.ParentProjectId == null)
             {
-                var projectList = _projectRightRepository.GetProjectRightIdList();
                 project = _context.Project.Where(x => x.ParentProjectId == projectId && _context.ProjectRight.Any(a => a.ProjectId == x.Id
                                                   && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
                                                   && a.DeletedDate == null && a.RollbackReason == null) && x.DeletedDate == null).ToList();
@@ -1794,7 +1764,7 @@ namespace GSC.Respository.Attendance
                 data.ProjectId = t.Id;
                 data.ProjectName = t.ProjectCode;
                 data.Target = 0;
-                data.IsParentProject = pro.ParentProjectId == null ? true : false;
+                data.IsParentProject = pro.ParentProjectId == null;
                 data.ParentProjectTarget = t.AttendanceLimit;
                 data.StatusList = new List<DashboardPatientStatusDisplayDto>();
                 result.Add(data);
@@ -1835,12 +1805,10 @@ namespace GSC.Respository.Attendance
 
         public List<DashboardRecruitmentStatusDisplayDto> GetDashboardRecruitmentStatus(int projectId)
         {
-            var pro = _context.Project.Where(x => x.Id == projectId).FirstOrDefault();
-
+            var pro = _context.Project.First(x => x.Id == projectId);
             var project = new List<Data.Entities.Master.Project>();
             if (pro.ParentProjectId == null)
             {
-                var projectList = _projectRightRepository.GetProjectRightIdList();
                 project = _context.Project.Where(x => x.ParentProjectId == projectId && _context.ProjectRight.Any(a => a.ProjectId == x.Id
                                                   && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
                                                   && a.DeletedDate == null && a.RollbackReason == null) && x.DeletedDate == null).ToList();
@@ -1904,23 +1872,23 @@ namespace GSC.Respository.Attendance
             var randomizationCount = new DashboardRecruitmentRateDto();
 
             var screeningFilter = randomization.Where(y => y.ScreeningDate != null).ToList();
-            if (screeningFilter.Count() > 0)
+            if (screeningFilter.Any())
             {
-                var AveragePerMonthScreening = screeningFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment);
+                var AveragePerMonthScreening = screeningFilter.Count / (pro.Recruitment == null ? 1 : (int)pro.Recruitment);
                 screeningCount = screeningFilter.GroupBy(x => x.ScreeningMonth)
                    .Select(g => new DashboardRecruitmentRateDto
                    {
                        ScreeningDataCount = g.Count(),
                        ScreeningAvgValue = AveragePerMonthScreening >= 1 ? (int?)Math.Round((decimal)(g.Count() * 100) / AveragePerMonthScreening, 2) : 0,
                        ScreeningMonth = DateTime.ParseExact(g.Key, "MMM yyyy", CultureInfo.CurrentCulture).Month,
-                       IsScreeningAchive = g.Count() >= (screeningFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment))
-                   }).Where(x => x.ScreeningMonth == today.Month).FirstOrDefault();
+                       IsScreeningAchive = g.Count() >= (screeningFilter.Count / (pro.Recruitment == null ? 1 : (int)pro.Recruitment))
+                   }).FirstOrDefault(x => x.ScreeningMonth == today.Month);
             }
 
             var randomizationFilter = randomization.Where(y => y.RandomizationDate != null).ToList();
-            if (randomizationFilter.Count() > 0)
+            if (randomizationFilter.Any())
             {
-                var AveragePerMonth = randomizationFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment);
+                var AveragePerMonth = randomizationFilter.Count / (pro.Recruitment == null ? 1 : (int)pro.Recruitment);
 
                 randomizationCount = randomizationFilter.GroupBy(x => x.RandomizationMonth)
                .Select(g => new DashboardRecruitmentRateDto
@@ -1928,8 +1896,8 @@ namespace GSC.Respository.Attendance
                    RandomizationDataCount = g.Count(),
                    RandomizationAvgValue = AveragePerMonth >= 1 ? (int?)Math.Round((decimal)(g.Count() * 100) / AveragePerMonth, 2) : 0,
                    RandomizationMonth = DateTime.ParseExact(g.Key, "MMM yyyy", CultureInfo.CurrentCulture).Month,
-                   IsRandomizationAchive = g.Count() >= (randomizationFilter.Count() / (pro.Recruitment == null ? 1 : (int)pro.Recruitment))
-               }).Where(x => x.RandomizationMonth == today.Month).FirstOrDefault();
+                   IsRandomizationAchive = g.Count() >= (randomizationFilter.Count / (pro.Recruitment == null ? 1 : (int)pro.Recruitment))
+               }).FirstOrDefault(x => x.RandomizationMonth == today.Month);
             }
 
             if (randomizationCount != null)
@@ -1937,8 +1905,8 @@ namespace GSC.Respository.Attendance
                 if (screeningCount == null)
                     screeningCount = new DashboardRecruitmentRateDto();
                 screeningCount.RandomizationDataCount = randomizationCount.RandomizationDataCount;
-                screeningCount.RandomizationAvgValue = randomizationCount?.RandomizationAvgValue;
-                screeningCount.RandomizationMonth = randomizationCount?.RandomizationMonth;
+                screeningCount.RandomizationAvgValue = randomizationCount.RandomizationAvgValue;
+                screeningCount.RandomizationMonth = randomizationCount.RandomizationMonth;
                 screeningCount.IsRandomizationAchive = randomizationCount.IsRandomizationAchive;
             }
 
@@ -1953,7 +1921,6 @@ namespace GSC.Respository.Attendance
             var project = new List<Data.Entities.Master.Project>();
             if (pro.ParentProjectId == null)
             {
-                var projectList = _projectRightRepository.GetProjectRightIdList();
                 project = _context.Project.Where(x => x.ParentProjectId == projectId && _context.ProjectRight.Any(a => a.ProjectId == x.Id
                                                   && a.UserId == _jwtTokenAccesser.UserId && a.RoleId == _jwtTokenAccesser.RoleId
                                                   && a.DeletedDate == null && a.RollbackReason == null) && x.DeletedDate == null).ToList();
@@ -1970,7 +1937,7 @@ namespace GSC.Respository.Attendance
                 data.ProjectId = t.Id;
                 data.ProjectName = t.ProjectCode;
                 data.Target = t.AttendanceLimit;
-                data.IsParentProject = pro.ParentProjectId == null ? true : false;
+                data.IsParentProject = pro.ParentProjectId == null;
                 data.ParentProjectTarget = pro.AttendanceLimit;
                 data.StatusList = new List<DashboardPatientStatusDisplayDto>();
                 result.Add(data);
@@ -2026,7 +1993,7 @@ namespace GSC.Respository.Attendance
             _userRepository.Add(userLar);
             UserRole userLarRole = new UserRole();
             userLarRole.UserId = userLardetails.Id;
-            userLarRole.UserRoleId = _context.SecurityRole.Where(c => c.RoleShortName == "LAR").FirstOrDefault().Id;
+            userLarRole.UserRoleId = _context.SecurityRole.FirstOrDefault(c => c.RoleShortName == "LAR")?.Id ?? 0;
             _userRoleRepository.Add(userLarRole);
         }
 
@@ -2199,14 +2166,14 @@ namespace GSC.Respository.Attendance
         {
             SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
 
-            var randomization = All.Where(x => x.Id == obj.Id).FirstOrDefault();
+            var randomization = All.First(x => x.Id == obj.Id);
             randomization.DateOfRandomization = null;
             randomization.RandomizationNumber = null;
             randomization.ProductCode = null;
             _context.Randomization.Update(randomization);
             _context.Save();
 
-            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.First(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve);
             if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
             {
                 data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
@@ -2306,22 +2273,22 @@ namespace GSC.Respository.Attendance
             var study = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault();
             if (study != null)
             {
-                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.SubjectRandomization).ToList();
-                if (emailconfiglist != null && emailconfiglist.Count > 0)
+                var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.SubjectRandomization).ToList();
+                if (emailconfiglist.Any())
                 {
                     var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                     if (siteconfig.Count > 0)
                     {
-                        emailconfig = siteconfig.Where(x => x.SiteId == obj.ProjectId).FirstOrDefault();
+                        emailconfig = siteconfig.Find(x => x.SiteId == obj.ProjectId);
                     }
                     else
                     {
                         emailconfig = emailconfiglist.FirstOrDefault();
                     }
                     var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                    if (details.Count() > 0)
+                    if (details.Any())
                     {
-                        iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault().ProjectCode;
+                        iWRSEmailModel.StudyCode = _context.Project.FirstOrDefault(x => x.Id == obj.ParentProjectId)?.ProjectCode;
 
                         var site = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
                         if (site != null)
@@ -2359,22 +2326,22 @@ namespace GSC.Respository.Attendance
                 var study = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault();
                 if (study != null)
                 {
-                    var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
-                    if (emailconfiglist != null && emailconfiglist.Count > 0)
+                    var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == obj.ParentProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
+                    if (emailconfiglist.Any())
                     {
                         var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                         if (siteconfig.Count > 0)
                         {
-                            emailconfig = siteconfig.Where(x => x.SiteId == obj.ProjectId).FirstOrDefault();
+                            emailconfig = siteconfig.Find(x => x.SiteId == obj.ProjectId);
                         }
                         else
                         {
                             emailconfig = emailconfiglist.FirstOrDefault();
                         }
                         var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                        if (details.Count() > 0)
+                        if (details.Any())
                         {
-                            iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == obj.ParentProjectId).FirstOrDefault().ProjectCode;
+                            iWRSEmailModel.StudyCode = _context.Project.FirstOrDefault(x => x.Id == obj.ParentProjectId)?.ProjectCode;
 
                             var site = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
                             if (site != null)
@@ -2420,9 +2387,9 @@ namespace GSC.Respository.Attendance
                     foreach (var threshold in data)
                     {
                         var sitedata = await _context.Project.Where(s => s.ParentProjectId == threshold.ProjectId && s.DeletedDate == null && (s.Status == MonitoringSiteStatus.Active || s.Status == MonitoringSiteStatus.Approved)).ToListAsync();
-                        if (sitedata != null && sitedata.Count > 0)
+                        if (sitedata.Any())
                         {
-                            foreach (var site in sitedata)
+                            foreach (var site in sitedata.Select(s => s.Id))
                             {
                                 int KitCount = 0;
                                 bool Issuccess = false;
@@ -2441,7 +2408,7 @@ namespace GSC.Respository.Attendance
                                                         && x.SupplyManagementKITSeries.ProjectId == threshold.ProjectId
                                                         && !x.SupplyManagementKITSeries.IsRetension
                                                         && x.SupplyManagementKITSeries.DeletedDate == null
-                                                        && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == site.Id
+                                                        && x.SupplyManagementKITSeries.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == site
                                                         && (x.SupplyManagementKITSeries.Status == KitStatus.WithIssue || x.SupplyManagementKITSeries.Status == KitStatus.WithoutIssue)
                                                         && x.RandomizationId == null).Count();
                                 }
@@ -2454,11 +2421,11 @@ namespace GSC.Respository.Attendance
                                                 ThenInclude(x => x.ProductType)
                                                 .Include(x => x.SupplyManagementShipment)
                                                 .ThenInclude(x => x.SupplyManagementRequest)
-                                                .Where(x =>x.DeletedDate == null
+                                                .Where(x => x.DeletedDate == null
                                                           && x.SupplyManagementKIT.DeletedDate == null
                                                           && x.SupplyManagementKIT.ProjectId == threshold.ProjectId
                                                           && !x.IsRetension
-                                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == site.Id
+                                                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == site
                                                           && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                                           && x.RandomizationId == null).Count();
                                 }
@@ -2466,13 +2433,13 @@ namespace GSC.Respository.Attendance
                                 var study = _context.Project.Where(x => x.Id == threshold.ProjectId).FirstOrDefault();
                                 if (study != null && KitCount < threshold.ThresholdValue)
                                 {
-                                    var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive == true && x.ProjectId == threshold.ProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
+                                    var emailconfiglist = _context.SupplyManagementEmailConfiguration.Where(x => x.DeletedDate == null && x.IsActive && x.ProjectId == threshold.ProjectId && x.Triggers == SupplyManagementEmailTriggers.Threshold).ToList();
                                     if (emailconfiglist != null && emailconfiglist.Count > 0)
                                     {
                                         var siteconfig = emailconfiglist.Where(x => x.SiteId > 0).ToList();
                                         if (siteconfig.Count > 0)
                                         {
-                                            emailconfig = siteconfig.Where(x => x.SiteId == site.Id).FirstOrDefault();
+                                            emailconfig = siteconfig.Find(x => x.SiteId == site);
                                         }
                                         else
                                         {
@@ -2481,16 +2448,16 @@ namespace GSC.Respository.Attendance
 
                                         projectId = threshold.ProjectId;
                                         recurenceType = emailconfig.RecurrenceType.GetDescription();
-                                        recordId = site.Id;
+                                        recordId = site;
 
-                                        var thresoldHistory = _context.SupplyManagementThresholdHistory.Where(s => s.ProjectId == threshold.ProjectId && s.SiteId == site.Id).OrderByDescending(s => s.Id).FirstOrDefault();
+                                        var thresoldHistory = _context.SupplyManagementThresholdHistory.Where(s => s.ProjectId == threshold.ProjectId && s.SiteId == site).OrderByDescending(s => s.Id).FirstOrDefault();
                                         if (thresoldHistory != null)
                                         {
                                             supplyManagementEmailScheduleLog.ProjectId = threshold.ProjectId;
                                             supplyManagementEmailScheduleLog.TriggerType = emailconfig.Triggers.GetDescription();
                                             supplyManagementEmailScheduleLog.RecurrenceType = emailconfig.RecurrenceType.GetDescription();
                                             supplyManagementEmailScheduleLog.Message = "Threshold Schedule Start " + DateTime.Now;
-                                            supplyManagementEmailScheduleLog.RecordId = site.Id;
+                                            supplyManagementEmailScheduleLog.RecordId = site;
                                             _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog);
                                             _context.Save();
 
@@ -2608,10 +2575,10 @@ namespace GSC.Respository.Attendance
                                             if (Issuccess)
                                             {
                                                 var details = _context.SupplyManagementEmailConfigurationDetail.Include(x => x.Users).Where(x => x.DeletedDate == null && x.SupplyManagementEmailConfigurationId == emailconfig.Id).ToList();
-                                                if (details.Count() > 0)
+                                                if (details.Any())
                                                 {
                                                     iWRSEmailModel.StudyCode = _context.Project.Where(x => x.Id == threshold.ProjectId).FirstOrDefault().ProjectCode;
-                                                    var project = _context.Project.Where(x => x.Id == site.Id).FirstOrDefault();
+                                                    var project = _context.Project.Where(x => x.Id == site).FirstOrDefault();
                                                     if (project != null)
                                                     {
                                                         iWRSEmailModel.SiteCode = project.ProjectCode;
@@ -2640,7 +2607,7 @@ namespace GSC.Respository.Attendance
                                             supplyManagementEmailScheduleLog1.TriggerType = emailconfig.Triggers.GetDescription();
                                             supplyManagementEmailScheduleLog1.RecurrenceType = emailconfig.RecurrenceType.GetDescription();
                                             supplyManagementEmailScheduleLog1.Message = "Threshold Schedule end " + DateTime.Now;
-                                            supplyManagementEmailScheduleLog1.RecordId = site.Id;
+                                            supplyManagementEmailScheduleLog1.RecordId = site;
                                             _context.SupplyManagementEmailScheduleLog.Add(supplyManagementEmailScheduleLog1);
                                             _context.Save();
 
@@ -2874,7 +2841,6 @@ namespace GSC.Respository.Attendance
 
         public RandomizationDto CheckDuplicateRandomizationNumberIWRS(RandomizationDto obj, RandomizationNumberSettings numerformate)
         {
-            string Message = string.Empty;
             var validateduplicate = Duplicate(obj, obj.ProjectId);
             if (!string.IsNullOrEmpty(validateduplicate))
             {
@@ -2887,19 +2853,19 @@ namespace GSC.Respository.Attendance
             {
                 return obj;
             }
-            if (numerformate.IsIWRS == true && string.IsNullOrEmpty(obj.KitNo) && !obj.IsDoseWiseKit)
+            if (numerformate.IsIWRS && string.IsNullOrEmpty(obj.KitNo) && !obj.IsDoseWiseKit)
             {
                 UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = "Kit is not available";
                 return obj;
             }
-            if (numerformate.IsIWRS == true && obj.KitDoseList != null && obj.KitDoseList.Count == 0 && obj.IsDoseWiseKit)
+            if (numerformate.IsIWRS && obj.KitDoseList != null && obj.KitDoseList.Count == 0 && obj.IsDoseWiseKit)
             {
                 UpdateRandmizationKitNotAssigned(obj);
                 obj.ErrorMessage = "Kit is not available";
                 return obj;
             }
-            if (numerformate.IsIGT == true && string.IsNullOrEmpty(obj.RandomizationNumber))
+            if (numerformate.IsIGT && string.IsNullOrEmpty(obj.RandomizationNumber))
             {
                 obj.ErrorMessage = "Please upload randomization sheet";
                 return obj;
@@ -2924,7 +2890,7 @@ namespace GSC.Respository.Attendance
 
         public List<ScreeningVisitForSubject> GetPatientVisitsForMobile()
         {
-            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).ToList().FirstOrDefault();
+            var randomization = FindBy(x => x.UserId == _jwtTokenAccesser.UserId).AsEnumerable().FirstOrDefault();
             if (randomization != null)
             {
                 var data = _context.ScreeningVisit.Include(x => x.ScreeningEntry).Include(x => x.ProjectDesignVisit).Include(x => x.ScreeningTemplates).
@@ -2944,7 +2910,7 @@ namespace GSC.Respository.Attendance
 
                 return data;
             }
-            return null;
+            return new List<ScreeningVisitForSubject>();
         }
     }
 }

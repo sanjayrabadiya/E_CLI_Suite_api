@@ -16,15 +16,12 @@ namespace GSC.Respository.Barcode
 {
     public class BarcodeConfigRepository : GenericRespository<BarcodeConfig>, IBarcodeConfigRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
         private readonly IMapper _mapper;
 
-        public BarcodeConfigRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper)
+        public BarcodeConfigRepository(IGSCContext context, IMapper mapper)
             : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _mapper = mapper;
         }
@@ -35,11 +32,16 @@ namespace GSC.Respository.Barcode
                   ProjectTo<BarcodeConfigGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
 
+        public BarcodeConfig GetBarcodeConfig(int barcodeTypeId)
+        {
+            var barcode = _context.BarcodeConfig.Where(t => t.BarcodeTypeId == barcodeTypeId)
+                .AsNoTracking().FirstOrDefault();
+
+            return barcode;
+        }
+
         public List<BarcodeConfigDto> GetBarcodeConfigById(int id)
         {
-            //var result =  All.Where(x => x.Id == id && x.DeletedBy == null)
-            //    .ProjectTo<BarcodeConfigDto>(_mapper.ConfigurationProvider).OrderByDescending(t => t.Id).ToList();
-
             var result = All.Include(x => x.AppScreen)
                 .Include(x => x.BarcodeDisplayInfo)
                 .ThenInclude(x => x.TableFieldName)
@@ -56,8 +58,7 @@ namespace GSC.Respository.Barcode
                     DisplayValue = x.DisplayValue,
                     FontSize = x.FontSize,
                     DisplayInformationLength = x.DisplayInformationLength,
-                    BarcodeCombinationList = x.BarcodeCombination.Where(x => x.DeletedDate == null).Select(s => (int)s.TableFieldNameId).ToList(),
-                    //BarcodeDisplayInfoStr = string.Join(",", x.BarcodeDisplayInfo.Where(x => x.DeletedDate == null).Select(s => s.TableFieldNameId).ToList()),
+                    BarcodeCombinationList = x.BarcodeCombination.Where(x => x.DeletedDate == null).Select(s => (int)s.TableFieldNameId).ToList(),                  
                     BarcodeDisplayInfo = x.BarcodeDisplayInfo.Where(t => t.BarcodConfigId == x.Id && t.DeletedBy == null).OrderByDescending(s => s.Id).ToList()
                 }).OrderByDescending(x => x.Id).ToList();
             return result;
@@ -85,14 +86,6 @@ namespace GSC.Respository.Barcode
                     DisplayValue = c.DisplayValue,
                     FontSize = c.FontSize,
                 }).FirstOrDefault();
-        }
-
-        public BarcodeConfig GetBarcodeConfig(int barcodeTypeId)
-        {
-            var barcode = _context.BarcodeConfig.Where(t => t.BarcodeTypeId == barcodeTypeId)
-                .AsNoTracking().FirstOrDefault();
-
-            return barcode;
         }
     }
 }

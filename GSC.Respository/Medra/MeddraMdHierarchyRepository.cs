@@ -16,13 +16,9 @@ namespace GSC.Respository.Medra
 {
     public class MeddraMdHierarchyRepository : GenericRespository<MeddraMdHierarchy>, IMeddraMdHierarchyRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IGSCContext _context;
-        public MeddraMdHierarchyRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MeddraMdHierarchyRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
         }
 

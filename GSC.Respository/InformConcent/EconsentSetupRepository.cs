@@ -56,7 +56,7 @@ namespace GSC.Respository.InformConcent
             _econsentReviewDetailsRepository = econsentReviewDetailsRepository;
             _uow = uow;
             _econsentReviewDetailsAuditRepository = econsentReviewDetailsAuditRepository;
-            _uploadSettingRepository= uploadSettingRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public string Duplicate(EconsentSetup objSave)
@@ -71,14 +71,14 @@ namespace GSC.Respository.InformConcent
         public List<DropDownDto> GetEconsentDocumentDropDown(int projectId)
         {
             return All.Where(x =>
-                   x.ProjectId == projectId && x.DeletedDate == null && x.DocumentStatusId==DocumentStatus.Final)
+                   x.ProjectId == projectId && x.DeletedDate == null && x.DocumentStatusId == DocumentStatus.Final)
                .Select(c => new DropDownDto { Id = c.Id, Value = c.DocumentName, IsDeleted = false }).OrderBy(o => o.Value)
                .ToList();
         }
 
         public List<EconsentSetupGridDto> GetEconsentSetupList(int projectid, bool isDeleted)
         {
-            var econsentSetups = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectid). //intList.Contains(x.ProjectId
+            var econsentSetups = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectid).
                    ProjectTo<EconsentSetupGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             econsentSetups.ForEach(t =>
@@ -125,18 +125,18 @@ namespace GSC.Respository.InformConcent
             {
                 foreach (var e2 in e1.blocks)
                 {
-                    string headerstring = "";
+                    StringBuilder headerstring = new StringBuilder();
                     if (e2.paragraphFormat != null && e2.paragraphFormat.styleName == "Heading 1")
                     {
-                        foreach (var e3 in e2.inlines)
+                        foreach (var e3 in e2.inlines.Select(s => s.text))
                         {
-                            if (e3.text != null)
+                            if (!string.IsNullOrEmpty(e3))
                             {
-                                headerstring = headerstring + e3.text;
+                                headerstring.Append(e3);
                             }
                         }
                         isheaderpresent = true;
-                        if (headerstring == "")
+                        if (headerstring.ToString() == "")
                         {
                             isheaderblank = true;
                             break;
@@ -144,11 +144,11 @@ namespace GSC.Respository.InformConcent
                     }
                 }
             }
-            if (isheaderpresent == false)
+            if (!isheaderpresent)
             {
                 return "Please apply 'Heading 1' style in all headings in the document for proper sections.";
             }
-            if (isheaderblank == true)
+            if (isheaderblank)
             {
                 return "Please check all occurances of 'Heading 1' format in the document, content in 'Heading 1' format must be not empty";
             }
@@ -157,22 +157,18 @@ namespace GSC.Respository.InformConcent
 
         public void SendDocumentEmailPatient(EconsentSetup econsent)
         {
-            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate==null && x.LanguageId == econsent.LanguageId
+            var result = _context.Randomization.Where(x => x.Project.ParentProjectId == econsent.ProjectId && x.DeletedDate == null && x.LanguageId == econsent.LanguageId
             && (x.PatientStatusId != ScreeningPatientStatus.Completed) && (x.PatientStatusId != ScreeningPatientStatus.Withdrawal)
-            //&& (x.PatientStatusId!=ScreeningPatientStatus.PreScreening)
             ).Include(x => x.Project).ToList();
 
             string projectcode = _projectRepository.Find(econsent.ProjectId).ProjectCode;
             foreach (var item in result)
             {
-                //if (item.PatientStatusId == ScreeningPatientStatus.ConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess || item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted)
-                // {
                 EconsentReviewDetails econsentReviewDetails = new EconsentReviewDetails();
                 econsentReviewDetails.RandomizationId = item.Id;
                 econsentReviewDetails.EconsentSetupId = econsent.Id;
                 econsentReviewDetails.IsReviewedByPatient = false;
                 _econsentReviewDetailsRepository.Add(econsentReviewDetails);
-                // if (item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || item.PatientStatusId == ScreeningPatientStatus.OnTrial)
                 if (item.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || item.PatientStatusId == ScreeningPatientStatus.OnTrial)
                 {
                     _randomizationRepository.ChangeStatustoReConsentInProgress(item.Id);
