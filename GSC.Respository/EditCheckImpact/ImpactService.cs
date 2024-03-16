@@ -207,21 +207,30 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public string GetHardSoftValue(int screeningTemplateId, int projectDesignVariableId, int soruceProjectDesignVariableId, CollectionSources? collectionSource)
+        public string GetHardSoftValue(int screeningTemplateId, int projectDesignVariableId, int targetProjectDesignVariableId, CollectionSources? targetCollectionSource)
         {
-            var value = GetVariableValue(screeningTemplateId, projectDesignVariableId);
-            if (IsNotDropDown(collectionSource))
-                return value;
 
-            int valueId;
+            var sourceValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(t =>
+                        t.ProjectDesignVariableId == projectDesignVariableId
+                        && t.ScreeningTemplateId == screeningTemplateId).Select(c => new { c.Value, c.ProjectDesignVariable.CollectionSource }).FirstOrDefault();
 
-            int.TryParse(value, out valueId);
+            if (sourceValue == null)
+                return null;
+
+            if (IsNotDropDown(sourceValue.CollectionSource))
+                return sourceValue.Value;
+
+
+            int.TryParse(sourceValue.Value, out int valueId);
             if (valueId > 0)
             {
                 var valueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == valueId).Select(t => t.ValueName).FirstOrDefault();
+                if (IsNotDropDown(targetCollectionSource))
+                    return valueName;
+
                 if (!string.IsNullOrEmpty(valueName))
                 {
-                    return _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == soruceProjectDesignVariableId && x.ValueName == valueName).Select(t => t.Id)?.FirstOrDefault().ToString();
+                    return _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == targetProjectDesignVariableId && x.ValueName == valueName).Select(t => t.Id)?.FirstOrDefault().ToString();
                 }
             }
 
