@@ -52,7 +52,11 @@ namespace GSC.Api.Controllers.Pharmacy
 
             _pharmacyEntryRepository.SavePharmacy(pharmacyEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Pharmacy Entry failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Pharmacy Entry failed on save.");
+                return BadRequest(ModelState);
+            } 
 
             var pharmacyvaluelist =
                 GetpharmacyTemplateValueList(pharmacyEntry.ProjectId, 0, pharmacyEntryDto.ProductTypeId);
@@ -71,7 +75,11 @@ namespace GSC.Api.Controllers.Pharmacy
 
             _pharmacyEntryRepository.Update(pharmacyEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Pharmacy Entry failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Pharmacy Entry failed on save.");
+                return BadRequest(ModelState);
+            } 
 
             return Ok(pharmacyEntry.Id);
         }
@@ -107,28 +115,6 @@ namespace GSC.Api.Controllers.Pharmacy
             var result = _pharmacyEntryRepository.GetpharmacyTemplateListByEntry(entryId);
             return Ok(result);
         }
-
-        //[HttpGet]
-        //[Route("GetAuditHistory/{id}")]   
-        //public IActionResult GetAuditHistory(int id)
-        //{
-        //    var auditHistory = _pharmacyEntryRepository.GetAuditHistory(id);
-
-        //    return Ok(auditHistory);
-        //}
-
-        //[HttpGet("Summary/{id}")]
-        //public IActionResult Summary(int id)
-        //{
-        //    if (id <= 0)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    var pharmacySummaryDto = _pharmacyEntryRepository.GetSummary(id);
-
-        //    return Ok(pharmacySummaryDto);
-        //}
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)

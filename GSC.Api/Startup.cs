@@ -64,8 +64,6 @@ namespace GSC.Api
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "GSC API", Version = "v3.1" });
             });
             services.AddHttpContextAccessor();
-            //services.AddHostedService<VolunteerUnblockService>();
-            //services.AddSignalR();
         }
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -77,7 +75,6 @@ namespace GSC.Api
             app.UseExceptionHandler(ErrorHandler.HttpExceptionHandling(env));
             app.UseAuthentication();
             app.UseMiddleware<LogMiddleware>();
-            // app.UseCors("AllowCorsPolicy");
             app.UseCors(builder =>
             {
                 builder.WithOrigins(new[] { "http://localhost:4100", "http://localhost:4200", "http://localhost:63980", "https://dev2.clinvigilant.com", "https://demo1.clinvigilant.com", "https://sandbox.clinvigilant.com",
@@ -85,19 +82,6 @@ namespace GSC.Api
                 .AllowAnyHeader().AllowAnyMethod().AllowCredentials();
             });
             app.UseStaticFiles();
-            var doc = _configuration["DocPath:DocDir"];
-
-            //if (!string.IsNullOrEmpty(doc))
-            //{
-            //    if (!Directory.Exists(doc))
-            //        Directory.CreateDirectory(doc);
-            //    app.UseStaticFiles(new StaticFileOptions
-            //    {
-            //        FileProvider = new PhysicalFileProvider(
-            //            Path.Combine(Directory.GetCurrentDirectory(), "TempDoc")),
-            //        RequestPath = "/static"
-            //    });
-            //}
 
             app.UseSwagger();
 
@@ -108,9 +92,7 @@ namespace GSC.Api
             app.UseEndpoints(e =>
             {
                 e.MapControllers();
-                // e.MapHub<MessageHub>("/MessageHub");
             });
-            //app.UseSpa(spa => { spa.Options.SourcePath = "wwwroot"; });
             Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("MzgxNjc2QDMxMzgyZTM0MmUzMG9ETm5BR0xPZzdMbjN0dTcwbjJhUmw2SUtqNUxYaEc4WFNrNXcwUzZvdEk9");
         }
 

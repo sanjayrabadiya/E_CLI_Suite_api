@@ -17,21 +17,19 @@ namespace GSC.Respository.Medra
 {
     public class MeddraCodingRepository : GenericRespository<MeddraCoding>, IMeddraCodingRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUserRepository _userRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IProjectRightRepository _projectRightRepository;
-        private IMeddraCodingAuditRepository _meddraCodingAuditRepository;
-        private IMeddraCodingCommentRepository _meddraCodingCommentRepository;
+        private readonly IMeddraCodingAuditRepository _meddraCodingAuditRepository;
+        private readonly IMeddraCodingCommentRepository _meddraCodingCommentRepository;
         private readonly IGSCContext _context;
 
         public MeddraCodingRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            IUserRepository userRepository, IRoleRepository roleRepository, IProjectRightRepository projectRightRepository, IPropertyMappingService propertyMappingService,
+            IUserRepository userRepository, IRoleRepository roleRepository, IProjectRightRepository projectRightRepository,
             IMeddraCodingAuditRepository meddraCodingAuditRepository, IMeddraCodingCommentRepository meddraCodingCommentRepository) : base(context)
 
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _userRepository = userRepository;
             _roleRepository = roleRepository;
@@ -102,14 +100,14 @@ namespace GSC.Respository.Medra
             objList.All = variable == null ? 0 : variable.All;
 
 
-            if (result.Count() > 0)
+            if (result.Any())
             {
-                objList.CodedData = result.Count();
-                objList.ApprovalData = result.FindAll(t => t.IsApproved == true).Count();
-                objList.ModifiedDate = result[result.Count() - 1].ModifiedDate;
-                int updated = (int)result[result.Count() - 1].ModifiedBy;
+                objList.CodedData = result.Count;
+                objList.ApprovalData = result.FindAll(t => t.IsApproved).Count;
+                objList.ModifiedDate = result[result.Count - 1].ModifiedDate;
+                int updated = (int)result[result.Count - 1].ModifiedBy;
                 objList.ModifiedBy = _userRepository.Find(updated).UserName;
-                objList.ModifiedByRole = _roleRepository.Find((int)result[result.Count() - 1].CreatedRole).RoleName;
+                objList.ModifiedByRole = _roleRepository.Find((int)result[result.Count - 1].CreatedRole).RoleName;
             }
             else
             {
