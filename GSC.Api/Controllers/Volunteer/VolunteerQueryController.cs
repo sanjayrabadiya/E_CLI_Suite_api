@@ -8,7 +8,6 @@ using GSC.Respository.Volunteer;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Linq;
 
 namespace GSC.Api.Controllers.Volunteer
 {

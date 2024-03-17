@@ -30,7 +30,9 @@ namespace GSC.Respository.EditCheckImpact
         private readonly IProjectScheduleTemplateRepository _projectScheduleTemplateRepository;
 
         public ImpactService(IGSCContext context,
+            IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper,
+            IScreeningTemplateValueQueryRepository screeningTemplateValueQueryRepository,
             IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IProjectDesignVariableRepository projectDesignVariableRepository,
             IScreeningTemplateValueRepository screeningTemplateValueRepository,
@@ -107,7 +109,7 @@ namespace GSC.Respository.EditCheckImpact
                                   FetchingProjectDesignVariableId = checkDetail.FetchingProjectDesignVariableId,
                               }).Distinct().ToList();
 
-            if (annotation.Any())
+            if (annotation != null)
                 result.AddRange(annotation);
 
             return result.OrderBy(t => t.EditCheckDetailId).ToList();
@@ -138,7 +140,7 @@ namespace GSC.Respository.EditCheckImpact
                         r.DataType = designVariable.DataType;
                     }
 
-                }
+                };
             });
 
             return result.OrderBy(t => t.EditCheckDetailId).ToList();
@@ -183,12 +185,12 @@ namespace GSC.Respository.EditCheckImpact
             isNa = false;
             if (screeningValue == null) return "";
 
-            var variableValue = screeningValue.Value;
+            var variableValue = screeningValue?.Value;
             isNa = screeningValue.IsNa;
-            if (string.IsNullOrEmpty(variableValue) && screeningValue.IsNa)
+            if (screeningValue != null && string.IsNullOrEmpty(variableValue) && screeningValue.IsNa)
                 return "NA";
 
-            if (
+            if (screeningValue != null &&
                 editCheckValidateDto.CollectionSource == CollectionSources.MultiCheckBox)
                 variableValue = GetMultiCheckBox(screeningValue.Id);
 
@@ -205,21 +207,30 @@ namespace GSC.Respository.EditCheckImpact
         }
 
 
-        public string GetHardSoftValue(int screeningTemplateId, int projectDesignVariableId, int soruceProjectDesignVariableId, CollectionSources? collectionSource)
+        public string GetHardSoftValue(int screeningTemplateId, int projectDesignVariableId, int targetProjectDesignVariableId, CollectionSources? targetCollectionSource)
         {
-            var value = GetVariableValue(screeningTemplateId, projectDesignVariableId);
-            if (IsNotDropDown(collectionSource))
-                return value;
 
-            int valueId;
+            var sourceValue = _screeningTemplateValueRepository.All.AsNoTracking().Where(t =>
+                        t.ProjectDesignVariableId == projectDesignVariableId
+                        && t.ScreeningTemplateId == screeningTemplateId).Select(c => new { c.Value, c.ProjectDesignVariable.CollectionSource }).FirstOrDefault();
 
-            int.TryParse(value, out valueId);
+            if (sourceValue == null)
+                return null;
+
+            if (IsNotDropDown(sourceValue.CollectionSource))
+                return sourceValue.Value;
+
+
+            int.TryParse(sourceValue.Value, out int valueId);
             if (valueId > 0)
             {
                 var valueName = _projectDesignVariableValueRepository.All.Where(x => x.Id == valueId).Select(t => t.ValueName).FirstOrDefault();
+                if (IsNotDropDown(targetCollectionSource))
+                    return valueName;
+
                 if (!string.IsNullOrEmpty(valueName))
                 {
-                    return _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == soruceProjectDesignVariableId && x.ValueName == valueName).Select(t => t.Id).FirstOrDefault().ToString();
+                    return _projectDesignVariableValueRepository.All.Where(x => x.ProjectDesignVariableId == targetProjectDesignVariableId && x.ValueName == valueName).Select(t => t.Id)?.FirstOrDefault().ToString();
                 }
             }
 
@@ -382,9 +393,9 @@ namespace GSC.Respository.EditCheckImpact
             && r.ProjectSchedule.DeletedDate == null && r.DeletedDate == null).
              Select(t => new { t.ProjectDesignVisitId, t.NoOfDay }).OrderBy(c => c.NoOfDay).Distinct().ToList();
 
-            if (visits.Any())
+            if (visits != null && visits.Count > 0)
             {
-                return visits.Find(x => x.ProjectDesignVisitId != projectDesignVisitId && !startedProjectDesignVisitId.Contains(x.ProjectDesignVisitId))?.ProjectDesignVisitId ?? 0;
+                return visits.Where(x => x.ProjectDesignVisitId != projectDesignVisitId && !startedProjectDesignVisitId.Contains(x.ProjectDesignVisitId)).FirstOrDefault()?.ProjectDesignVisitId ?? 0;
             }
 
             return 0;
