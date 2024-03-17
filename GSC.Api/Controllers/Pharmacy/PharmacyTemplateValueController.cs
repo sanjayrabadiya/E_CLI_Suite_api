@@ -47,26 +47,15 @@ namespace GSC.Api.Controllers.Pharmacy
 
             var pharmacyTemplateValue = _mapper.Map<PharmacyTemplateValue>(pharmacyTemplateValueDto);
             pharmacyTemplateValue.Id = 0;
-            //pharmacyTemplateValue.Audits = new List<PharmacyTemplateValueAudit>
-            //{
-            //    new PharmacyTemplateValueAudit
-            //    {
-            //        Value = string.IsNullOrWhiteSpace(pharmacyTemplateValueDto.ValueName) ? pharmacyTemplateValue.Value : pharmacyTemplateValueDto.ValueName,
-            //        OldValue = pharmacyTemplateValueDto.OldValue,
-            //        TimeZone = pharmacyTemplateValueDto.TimeZone,
-            //        UserId = _jwtTokenAccesser.UserId,
-            //        UserRoleId = _jwtTokenAccesser.RoleId,
-            //        IpAddress = _jwtTokenAccesser.IpAddress
-            //    }
-            //};
+
 
             _pharmacyTemplateValueRepository.Add(pharmacyTemplateValue);
 
-            //var pharmacyTemplate = _pharmacyTemplateRepository.Find(pharmacyTemplateValue.PharmacyTemplateId);
-            //pharmacyTemplate.Status = ScreeningStatus.InProcess;
-            //_pharmacyTemplateRepository.Update(pharmacyTemplate);
-
-            if (_uow.Save() <= 0) throw new Exception("Creating pharmacy Value failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating pharmacy Value failed on save.");
+                return BadRequest(ModelState);
+            }
 
             pharmacyTemplateValueDto = _mapper.Map<PharmacyTemplateValueDto>(pharmacyTemplateValue);
 
@@ -81,23 +70,15 @@ namespace GSC.Api.Controllers.Pharmacy
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var pharmacyTemplateValue = _mapper.Map<PharmacyTemplateValue>(pharmacyTemplateValueDto);
-            //pharmacyTemplateValue.Audits = new List<PharmacyTemplateValueAudit>
-            //{
-            //    new PharmacyTemplateValueAudit
-            //    {
-            //        Value = string.IsNullOrWhiteSpace(pharmacyTemplateValueDto.ValueName) ? pharmacyTemplateValue.Value : pharmacyTemplateValueDto.ValueName,
-            //        Note =pharmacyTemplateValueDto.IsDeleted ? "Clear Data" : null,
-            //        OldValue = pharmacyTemplateValueDto.OldValue,
-            //        TimeZone = pharmacyTemplateValueDto.TimeZone,
-            //        UserId = _jwtTokenAccesser.UserId,
-            //        UserRoleId = _jwtTokenAccesser.RoleId,
-            //        IpAddress = _jwtTokenAccesser.IpAddress
-            //    }
-            //};
+
 
             _pharmacyTemplateValueRepository.Update(pharmacyTemplateValue);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating pharmacy Value failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating pharmacy Value failed on save.");
+                return BadRequest(ModelState);
+            }
 
             pharmacyTemplateValueDto = _mapper.Map<PharmacyTemplateValueDto>(pharmacyTemplateValue);
 
@@ -113,14 +94,11 @@ namespace GSC.Api.Controllers.Pharmacy
 
             var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
 
-            //if (pharmacyTemplateValueDto.FileModel?.Base64?.Length > 0)
-            //{
-            //    var documentCategory = "Template";
-            //    pharmacyTemplateValue.DocPath = DocumentService.SaveDocument(pharmacyTemplateValueDto.FileModel, documentUrl, FolderType.Screening, documentCategory);
-            //    pharmacyTemplateValue.MimeType = pharmacyTemplateValueDto.FileModel.Extension;
-            //}
-
-            if (_uow.Save() <= 0) throw new Exception("Uploading document failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Uploading document failed on save.");
+                return BadRequest(ModelState);
+            }
 
             pharmacyTemplateValueDto.DocPath = documentUrl + pharmacyTemplateValue.DocPath;
 

@@ -17,7 +17,6 @@ namespace GSC.Respository.Pharmacy
 {
     public class PharmacyEntryRepository : GenericRespository<PharmacyEntry>, IPharmacyEntryRepository
     {
-        //private readonly IPharmacyTemplateRepository _pharmacyTemplateRepository;
         private readonly IPharmacyTemplateValueRepository _pharmacyTemplateValueRepository;
         private readonly IVolunteerRepository _volunteerRepository;
         private readonly IGSCContext _context;
@@ -29,7 +28,6 @@ namespace GSC.Respository.Pharmacy
             _volunteerRepository = volunteerRepository;
             _pharmacyTemplateValueRepository = pharmacyTemplateValueRepository;
             _context = context;
-            // _pharmacyTemplateRepository = pharmacyTemplateRepository;
         }
 
         public PharmacyEntryDto GetDetails(int id)
@@ -45,8 +43,6 @@ namespace GSC.Respository.Pharmacy
                     ProjectId = t.ProjectId,
                     FormId = t.FormId
                 }).FirstOrDefault();
-
-            //var workflowlevel = _projectWorkflowRepository.GetProjectWorkLevel(PharmacyEntryDto.ProjectId);
 
             if (pharmacyEntryDto != null)
             {
@@ -217,7 +213,6 @@ namespace GSC.Respository.Pharmacy
                                 ?.CategoryName;
                     }
                 });
-                //obj.VariableTemplate = template;
                 return template;
             }
 

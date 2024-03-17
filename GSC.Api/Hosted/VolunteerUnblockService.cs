@@ -15,16 +15,12 @@ namespace GSC.Api.Hosted
         private Timer _t;
         private readonly IServiceScopeFactory _scopeFactory;
 
-        string LogPath = null;
-        string FileName = null;
-
         public VolunteerUnblockService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
         }
         private static int MilliSecondsUntilMidnight()
         {
-            //var time = (int)(DateTime.Now.AddHours(6.0) - DateTime.Now).TotalMilliseconds;
 
             DateTime nowTime = DateTime.Now;
             DateTime oneAmTime = new DateTime(nowTime.Year, nowTime.Month, nowTime.Day, 17, 0, 0, 0);
@@ -36,11 +32,7 @@ namespace GSC.Api.Hosted
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            //FileName = "volunteer_" + DateTime.Now.ToString("dd-MM-yyyy") + "_" + DateTime.Now.Ticks;
-            //LogPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Logs", FileName + ".txt");
-            ////WriteToFile(DateTime.Now + "------Start Method" + Environment.NewLine, LogPath);
-
+        {          
             // set up a timer to be non-reentrant
             _t = new Timer(async _ => await OnTimerFiredAsync(cancellationToken),
                 null, MilliSecondsUntilMidnight(), Timeout.Infinite);
@@ -48,7 +40,6 @@ namespace GSC.Api.Hosted
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            //WriteToFile(DateTime.Now + "------Stop Method" + Environment.NewLine, LogPath);
             _t?.Dispose();
             return Task.CompletedTask;
         }
@@ -58,7 +49,6 @@ namespace GSC.Api.Hosted
             try
             {
                 // do your work here
-                //WriteToFile(DateTime.Now + "------Main Method" + Environment.NewLine, LogPath);
                 using var scope = _scopeFactory.CreateScope();
 
                 var context = scope.ServiceProvider.GetRequiredService<GscContext>();
@@ -76,15 +66,13 @@ namespace GSC.Api.Hosted
 
                 var Data = context.VolunteerBlockHistory.Where(x => blockHistoryGroupBy.Select(v => v.Id).Contains(x.Id)).ToList();
 
-                var VolunteerBlockHistory = Data.Where(x => x.IsPermanently == false && x.IsBlock == true && x.ToDate.Value.Date < NextDayDate.Date).ToList();
+                var VolunteerBlockHistory = Data.Where(x => !x.IsPermanently && x.IsBlock && x.ToDate.Value.Date < NextDayDate.Date).ToList();
 
                 VolunteerBlockHistory.ForEach(x =>
                 {
                     var item = x;
 
-                    //WriteToFile(DateTime.Now + "------UnBlock: " + x.VolunteerId + Environment.NewLine, LogPath);
-
-                    var volunteerToBlock = Volunteer.Where(z => z.Id == x.VolunteerId).FirstOrDefault();
+                    var volunteerToBlock = Volunteer.Find(z => z.Id == x.VolunteerId);
                     volunteerToBlock.IsBlocked = false;
                     context.Volunteer.Update(volunteerToBlock);
 
@@ -103,12 +91,10 @@ namespace GSC.Api.Hosted
             }
             catch (Exception ex)
             {
-                //WriteToFile(DateTime.Now + "------Error" + ex.Message.ToString() + " & " + ex.InnerException.ToString() + Environment.NewLine, LogPath);
+               //Empty code block
             }
             finally
-            {
-                //WriteToFile(DateTime.Now + "------Finally" + Environment.NewLine, LogPath);
-                // set timer to fire off again
+            {               
                 _t?.Change(MilliSecondsUntilMidnight(), Timeout.Infinite);
             }
         }
