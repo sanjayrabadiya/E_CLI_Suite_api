@@ -215,22 +215,42 @@ namespace GSC.Respository.CTMS
             var locCurrency = _context.Procedure.Where(s => s.Id == procedureVisitdadaDto[0].ProcedureId && s.DeletedDate == null).FirstOrDefault();
             var studyPlan = _context.StudyPlan.Where(s => s.ProjectId == procedureVisitdadaDto[0].ProjectId && s.DeletedDate == null).FirstOrDefault();
             var CurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlan.Id && s.CurrencyId == locCurrency.CurrencyId && s.DeletedDate == null).FirstOrDefault();
-
-            procedureVisitdadaDto.ForEach(d =>
+            if (CurrencyRate != null)
             {
-                var patientCost = _context.PatientCost.Where(s => s.Id == d.Id && s.DeletedBy == null).ToList();
-                patientCost.ForEach(t =>
+                procedureVisitdadaDto.ForEach(d =>
                 {
-                    t.ProcedureId = d.ProcedureId;
-                    t.Cost = d.Cost;
-                    t.FinalCost = d.FinalCost * CurrencyRate.LocalCurrencyRate; //Cost Conveart into globale currency
-                    t.Rate = d.Rate;
-                    t.CurrencyRateId = CurrencyRate.Id;
-                    t.CurrencyId = studyPlan.CurrencyId;
-                    _context.PatientCost.Update(t);
-                    _context.Save();
+                    var patientCost = _context.PatientCost.Where(s => s.Id == d.Id && s.DeletedBy == null).ToList();
+                    patientCost.ForEach(t =>
+                    {
+                        t.ProcedureId = d.ProcedureId;
+                        t.Cost = d.Cost;
+                        t.FinalCost = d.FinalCost * CurrencyRate.LocalCurrencyRate; //Cost Conveart into globale currency
+                        t.Rate = d.Rate;
+                        t.CurrencyRateId = CurrencyRate.Id;
+                        t.CurrencyId = studyPlan.CurrencyId;
+                        _context.PatientCost.Update(t);
+                        _context.Save();
+                    });
                 });
-            });
+            }
+            else
+            {
+                procedureVisitdadaDto.ForEach(d =>
+                {
+                    var patientCost = _context.PatientCost.Where(s => s.Id == d.Id && s.DeletedBy == null).ToList();
+                    patientCost.ForEach(t =>
+                    {
+                        t.ProcedureId = d.ProcedureId;
+                        t.Cost = d.Cost;
+                        t.FinalCost = d.FinalCost;  //Cost Conveart into same Currency
+                        t.Rate = d.Rate;
+                        t.CurrencyRateId = null;
+                        t.CurrencyId = studyPlan.CurrencyId;
+                        _context.PatientCost.Update(t);
+                        _context.Save();
+                    });
+                });
+            }
         }
         public void DeletePatientCost(int projectId, int procedureId)
         {
