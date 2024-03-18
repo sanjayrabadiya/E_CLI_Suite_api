@@ -7,7 +7,7 @@ namespace GSC.Data.Dto.Audit
 {
     public class VolunteerAuditTrailDto : BaseDto
     {
-        public DateTime? CreatedDate;
+        public DateTime? CreatedDate { get; set; }
         public AuditModule? ModuleId { get; set; }
         public AuditTable? TableId { get; set; }
         public int RecordId { get; set; }

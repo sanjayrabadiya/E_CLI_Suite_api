@@ -1,8 +1,4 @@
-﻿using GSC.Data.Entities.Common;
-using GSC.Shared.Extension;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System;
 
 namespace GSC.Data.Dto.Screening
 {
@@ -17,14 +13,7 @@ namespace GSC.Data.Dto.Screening
         public string visitName { get; set; }
         public string templateName { get; set; }
         public DateTime? scheduleDate { get; set; }
-        public string? scheduleDateExcel { get; set; }
-        //private DateTime? _scheduleDate { get; set; }
-        //public DateTime? scheduleDate
-        //{
-        //    get => _scheduleDate.UtcDate();
-        //    set => _scheduleDate = value.UtcDate();
-        //}
-
+        public string scheduleDateExcel { get; set; }
     }
 
     public class ScheduleDueReportSearchDto
@@ -37,17 +26,5 @@ namespace GSC.Data.Dto.Screening
         public int?[] PeriodIds { get; set; }
         public int?[] VisitIds { get; set; }
         public int?[] TemplateIds { get; set; }
-        //private DateTime? _fromDate { get; set; }
-        //public DateTime? fromDate
-        //{
-        //    get => _fromDate.UtcDate();
-        //    set => _fromDate = value.UtcDate();
-        //}
-        //private DateTime? _toDate { get; set; }
-        //public DateTime? toDate
-        //{
-        //    get => _toDate.UtcDate();
-        //    set => _toDate = value.UtcDate();
-        //}
     }
 }

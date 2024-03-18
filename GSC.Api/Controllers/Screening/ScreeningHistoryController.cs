@@ -6,7 +6,6 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Respository.Audit;
-using GSC.Respository.Common;
 using GSC.Respository.Screening;
 using GSC.Shared.Generic;
 using Microsoft.AspNetCore.Mvc;
