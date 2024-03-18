@@ -15,7 +15,7 @@ namespace GSC.Data.Dto.Master
         public bool? IsAlphaNumScreeningNo { get; set; }
         public int ScreeningNoseries { get; set; }
         public int? ScreeningNoStartsWith { get; set; }
-        public string? PrefixScreeningNo { get; set; }
+        public string PrefixScreeningNo { get; set; }
         public bool DisableRow { get; set; }
         public List<ScreeningNumberSettingsDto> ScreeningNumberSettingsSites { get; set; }
     }
