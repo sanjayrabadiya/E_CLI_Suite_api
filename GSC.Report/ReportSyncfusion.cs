@@ -431,7 +431,7 @@ namespace GSC.Report
                 _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });
             }
         }
-
+        
         private void SetPageNumber()
         {
             Stream fontStream = FilePathConvert();
@@ -456,7 +456,7 @@ namespace GSC.Report
             }
 
         }
-
+        
 
         //Report Generate
         public async Task<string> DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
@@ -479,7 +479,7 @@ namespace GSC.Report
                 fileInfo.ParentFolderName = parent.ProjectCode + "_" + DateTime.Now.Ticks;
             string ParentProctCode = string.Empty;
             string ParentProjectName = string.Empty;
-            var projectdesign = _context.ProjectDesign.Include(s => s.Project).Where(s => s.Id == reportSetting.ProjectId).FirstOrDefault();
+            var projectdesign = _context.ProjectDesign.Include(s => s.Project).Where(s => s.ProjectId == reportSetting.ProjectId).FirstOrDefault();
             if (projectdesign != null && projectdesign.Project != null)
             {
                 ParentProctCode = projectdesign.Project.ProjectCode;
@@ -2324,7 +2324,7 @@ namespace GSC.Report
 
             string ParentProctCode = string.Empty;
             string ParentProjectName = string.Empty;
-            var projectdesign = _context.ProjectDesign.Include(s => s.Project).Where(s => s.Id == reportSetting.ProjectId).FirstOrDefault();
+            var projectdesign = _context.ProjectDesign.Include(s => s.Project).Where(s => s.ProjectId == reportSetting.ProjectId).FirstOrDefault();
             if (projectdesign != null && projectdesign.Project != null)
             {
                 ParentProctCode = projectdesign.Project.ProjectCode;
@@ -2363,10 +2363,10 @@ namespace GSC.Report
                 PdfBookmarkBase bookmarks = document.Bookmarks;
                 foreach (PdfBookmark bookmark in bookmarks)
                 {
-                    ScreeningIndexCreate(bookmark, false);
+                    IndexCreate(bookmark, false);
                     foreach (PdfBookmark subbookmark in bookmark)
                     {
-                        ScreeningIndexCreate(subbookmark, true);
+                        IndexCreate(subbookmark, true);
                     }
                 }
 
@@ -2376,7 +2376,7 @@ namespace GSC.Report
                     DesignVoluteerDocumentShowPdf(item.VolunteerId, document);
                 }
 
-                ScreeningSetPageNumber();
+                SetPageNumber();
                 MemoryStream memoryStream = new MemoryStream();
                 document.Save(memoryStream);
 
@@ -2432,62 +2432,6 @@ namespace GSC.Report
                     ScreeningTemplateReport(template.ProjectDesignTemplatelist, reportSetting, template.DisplayName, pageContent);
                 }
             }
-        }
-
-        private void ScreeningIndexCreate(PdfBookmark bookmark, bool isSubSection)
-        {
-            Stream fontStream = FilePathConvert();
-            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
-            PdfLayoutFormat layoutformat = new PdfLayoutFormat();
-            layoutformat.Break = PdfLayoutBreakType.FitPage;
-            layoutformat.Layout = PdfLayoutType.Paginate;
-
-            PdfDocumentLinkAnnotation documentLinkAnnotation = new PdfDocumentLinkAnnotation(new Syncfusion.Drawing.RectangleF(0, tocresult.Bounds.Y + 20, tocresult.Page.GetClientSize().Width, tocresult.Page.GetClientSize().Height));
-            documentLinkAnnotation.AnnotationFlags = PdfAnnotationFlags.NoRotate;
-            documentLinkAnnotation.Text = bookmark.Title;
-            documentLinkAnnotation.Color = Color.Transparent;
-            //Sets the destination
-            documentLinkAnnotation.Destination = new PdfDestination(bookmark.Destination.Page);
-            documentLinkAnnotation.Destination.Location = new PointF(tocresult.Bounds.X, tocresult.Bounds.Y + 20);
-            //Adds this annotation to a new page
-            tocresult.Page.Annotations.Add(documentLinkAnnotation);
-            if (isSubSection)
-            {
-                PdfTextElement element = new PdfTextElement($"{bookmark.Title}", regularfont, PdfBrushes.Black);
-                tocresult = element.Draw(tocresult.Page, new PointF(10, tocresult.Bounds.Y + 20), layoutformat);
-                _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });
-            }
-            else
-            {
-                PdfTextElement element = new PdfTextElement($"{bookmark.Title}", headerfont, PdfBrushes.Black);
-                tocresult = element.Draw(tocresult.Page, new PointF(0, tocresult.Bounds.Y + 20), layoutformat);
-                _pagenumberset.Add(new TocIndexCreate { TocPage = tocresult.Page, Point = new PointF(tocresult.Page.Graphics.ClientSize.Width - 40, tocresult.Bounds.Y), bookmark = bookmark });
-            }
-        }
-
-        private void ScreeningSetPageNumber()
-        {
-            Stream fontStream = FilePathConvert();
-            PdfFont regularfont = new PdfTrueTypeFont(fontStream, 12);
-            for (int i = 0; i < document.Pages.Count; i++)
-            {
-                PdfPageBase page = document.Pages[i] as PdfPageBase;
-                //Add the page and index to dictionary 
-                pages.Add(page, i);
-            }
-
-            for (int i = 0; i < _pagenumberset.Count; i++)
-            {
-                PdfPageBase page = _pagenumberset[i].bookmark.Destination.Page;
-                if (pages.ContainsKey(page))
-                {
-                    int pagenumber = pages[page];
-                    pagenumber++;
-                    PdfTextElement pageNumber = new PdfTextElement(pagenumber.ToString(), regularfont, PdfBrushes.Black);
-                    pageNumber.Draw(_pagenumberset[i].TocPage, _pagenumberset[i].Point);
-                }
-            }
-
         }
 
         private void ScreeningTemplateReport(IList<ProjectDesignTemplatelist> designtemplate, ScreeningReportSetting reportSetting, string vistitName, PdfPage sectioncontent)

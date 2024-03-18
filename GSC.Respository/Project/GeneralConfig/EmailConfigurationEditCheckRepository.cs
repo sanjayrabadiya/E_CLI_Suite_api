@@ -248,7 +248,7 @@ namespace GSC.Respository.Project.GeneralConfig
             return result;
         }
 
-       static EmailConfigurationEditCheckResult ValidateDataTableEmailEditCheck(DataTable dt, string ruleStr)
+        static EmailConfigurationEditCheckResult ValidateDataTableEmailEditCheck(DataTable dt, string ruleStr)
         {
             var result = new EmailConfigurationEditCheckResult();
             DataRow dr = dt.NewRow();
@@ -289,10 +289,16 @@ namespace GSC.Respository.Project.GeneralConfig
                 {
                     Id = r.Id,
                     ProjectId = r.EmailConfigurationEditCheck.ProjectId,
-                    PeriodName = GetPeriodName(r),
+                    PeriodName = r.ProjectDesignVariable != null
+      ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
+          .DisplayName
+      : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
+          .DisplayName : "",
                     TemplateName = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.TemplateName : "",
                     VariableName = string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation,
-                    VisitName = GetVisitName(r),
+                    VisitName = r.ProjectDesignVariable != null && r.ProjectDesignVariable.ProjectDesignTemplate != null && r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit != null
+      ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
+      : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
                     Operator = r.Operator,
                     LogicalOperator = r.LogicalOperator,
                     startParens = r.startParens,
@@ -363,7 +369,7 @@ namespace GSC.Respository.Project.GeneralConfig
 
             return "";
         }
-        private static  string GetVisitName(EmailConfigurationEditCheckDetail r)
+        private static string GetVisitName(EmailConfigurationEditCheckDetail r)
         {
             if (r.ProjectDesignVariable != null && r.ProjectDesignVariable.ProjectDesignTemplate != null && r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit != null)
             {
@@ -413,10 +419,16 @@ namespace GSC.Respository.Project.GeneralConfig
                     ProjectDesignVisitId = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.ProjectDesignVisitId : 0,
                     dataType = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.DataType : null,
                     CollectionSource = r.ProjectDesignVariableId > 0 ? r.ProjectDesignVariable.CollectionSource : CollectionSources.TextBox,
-                    PeriodName = GetPeriodName(r),
+                    PeriodName = r.ProjectDesignVariable != null
+         ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
+             .DisplayName
+         : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod
+             .DisplayName : "",
                     TemplateName = r.ProjectDesignTemplateId > 0 ? r.ProjectDesignTemplate.TemplateName : "",
-                    VariableName = GetVariableName(r),
-                    VisitName = GetVisitName(r),
+                    VariableName = r.ProjectDesignVariable != null ? string.IsNullOrEmpty(r.ProjectDesignVariable.Annotation) ? r.ProjectDesignVariable.VariableName : r.ProjectDesignVariable.Annotation : "",
+                    VisitName = r.ProjectDesignVariable != null
+         ? r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName
+         : r.ProjectDesignTemplate != null ? r.ProjectDesignTemplate.ProjectDesignVisit.DisplayName : "",
                     CheckBy = r.CheckBy,
                     VariableAnnotation = r.VariableAnnotation,
                     EmailConfigurationEditCheckId = r.EmailConfigurationEditCheckId
