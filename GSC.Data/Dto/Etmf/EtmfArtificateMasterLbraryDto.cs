@@ -20,6 +20,5 @@ namespace GSC.Data.Dto.Etmf
         public bool SiteLevelDoc { get; set; }
         public string ArtifactCodeName { get; set; }
         public int EtmfSectionMasterLibraryId { get; set; }
-        //public EtmfSectionMasterLibraryDto EtmfSectionMasterLibrary { get; set; }
     }
 }

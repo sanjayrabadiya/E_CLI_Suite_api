@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.LabManagement
 
             var checkConfiguration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == configurationDto.ProjectDesignTemplateId && x.DeletedDate == null).ToList();
 
-            if (checkConfiguration.All(x => x.ProjectId == null))
+            if (checkConfiguration.TrueForAll(x => x.ProjectId == null))
             {
                 if (checkConfiguration.Count != 0)
                 {
@@ -301,15 +301,9 @@ namespace GSC.Api.Controllers.LabManagement
             if (projectDesignTemplateId <= 0) return BadRequest();
 
             var isExist = _configurationRepository.All.Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
-            LabManagementConfiguration configuration = new LabManagementConfiguration();
-            if (isExist != null)
-            {
-                configuration = _configurationRepository.All.Where(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
-            }
-            else
-            {
-                configuration = _configurationRepository.All.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null).FirstOrDefault();
-            }
+            var configuration = isExist != null
+                  ? _configurationRepository.All.FirstOrDefault(x => x.ProjectId == projectId && x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null)
+                  : _configurationRepository.All.FirstOrDefault(x => x.ProjectDesignTemplateId == projectDesignTemplateId && x.DeletedDate == null);
 
             var configurationDto = _mapper.Map<LabManagementConfigurationDto>(configuration);
             configurationDto.FullPath = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), configurationDto.PathName);

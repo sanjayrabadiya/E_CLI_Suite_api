@@ -15,7 +15,5 @@ namespace GSC.Data.Dto.Project.Design
         public bool IsAdd { get; set; }
         public bool IsHide { get; set; }
         public bool hasChild { get; set; }
-        //public SecurityRole SecurityRole { get; set; }
-        //public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
     }
 }

@@ -9,7 +9,6 @@ namespace GSC.Data.Dto.Master
         public string Culture { get; set; }
         public bool IsDefault { get; set; }
         public int? CompanyId { get; set; }
-        //public string CompanyName { get; set; }
         public string shortName { get; set; }
     }
 

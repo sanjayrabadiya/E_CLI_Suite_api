@@ -30,7 +30,6 @@ namespace GSC.Data.Dto.UserMgt
 
         public string MiddleName { get; set; }
 
-        //[Required(ErrorMessage = "Email is required.")]
         public string Email { get; set; }
         public DateTime? _DateOfBirth { get; set; }
         public DateTime? DateOfBirth
@@ -45,19 +44,10 @@ namespace GSC.Data.Dto.UserMgt
 
         public int? CompanyId { get; set; }
         public DateTime? ValidFrom { get; set; }
-        //public DateTime? ValidFrom
-        //{
-        //    get => _ValidFrom?.UtcDate();
-        //    set => _ValidFrom = value?.UtcDate();
-        //}
+       
         public DateTime? ValidTo { get; set; }
 
-        //public DateTime? ValidTo
-        //{
-        //    get => _ValidTo?.UtcDate();
-        //    set => _ValidTo = value?.UtcDate();
-        //}
-
+       
         public int? FailedLoginAttempts { get; set; }
 
         public bool IsLocked { get; set; }
@@ -86,7 +76,6 @@ namespace GSC.Data.Dto.UserMgt
         public bool IsFirstTime { get; set; }
         public int? Language { get; set; }
         public string LanguageShortName { get; set; }
-        //public string? SignaturePath { get; set; }
         public string CompanyName { get; set; }
 
         public UserMasterUserType? UserType { get; set; }

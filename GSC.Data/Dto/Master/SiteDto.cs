@@ -22,7 +22,5 @@ namespace GSC.Data.Dto.Master
         public string SiteEmail { get; set; }
         public string ContactName { get; set; }
         public int ManageSiteId { get; set; }
-        //public int ManageSiteId { get; set; }
-        //public int InvestigatorContactId { get; set; }
     }
 }

@@ -167,7 +167,6 @@ namespace GSC.Domain.Context
 
         DbSet<PharmacyEntry> PharmacyEntry { get; set; }
 
-        //DbSet<PharmacyTemplate> PharmacyTemplate { get; set; }
         DbSet<CustomTable> CustomTable { get; set; }
         DbSet<CompanyData> CompanyData { get; set; }
         DbSet<CntTable> CntTable { get; set; }
@@ -213,20 +212,11 @@ namespace GSC.Domain.Context
         DbSet<MeddraCodingComment> MeddraCodingComment { get; set; }
         DbSet<MeddraCodingAudit> MeddraCodingAudit { get; set; }
         DbSet<ElectronicSignature> ElectronicSignature { get; set; }
-        //DbSet<EtmfZoneMasterLibrary> EtmfZoneMasterLibrary { get; set; }
-        //DbSet<EtmfSectionMasterLibrary> EtmfSectionMasterLibrary { get; set; }
         DbSet<EtmfMasterLibrary> EtmfMasterLibrary { get; set; }
         DbSet<EtmfArtificateMasterLbrary> EtmfArtificateMasterLbrary { get; set; }
 
         DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
-        //DbSet<EtmfProjectWorkPlace> EtmfProjectWorkPlace { get; set; }
-        //DbSet<ProjectWorkplaceArtificate> ProjectWorkplaceArtificate { get; set; }
-        //DbSet<ProjectWorkplaceDetail> ProjectWorkplaceDetail { get; set; }
-        //DbSet<ProjectWorkplaceSection> ProjectWorkplaceSection { get; set; }
-        //DbSet<ProjectWorkPlaceZone> ProjectWorkPlaceZone { get; set; }
         DbSet<ProjectWorkplaceArtificatedocument> ProjectWorkplaceArtificatedocument { get; set; }
-        //DbSet<ProjectWorkplaceSubSection> ProjectWorkplaceSubSection { get; set; }
-        //DbSet<ProjectWorkplaceSubSectionArtifact> ProjectWorkplaceSubSectionArtifact { get; set; }
         DbSet<ProjectWorkplaceSubSecArtificatedocument> ProjectWorkplaceSubSecArtificatedocument { get; set; }
         DbSet<InvestigatorContactDetail> InvestigatorContactDetail { get; set; }
         DbSet<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
@@ -242,13 +232,11 @@ namespace GSC.Domain.Context
         DbSet<ProjectArtificateDocumentComment> ProjectArtificateDocumentComment { get; set; }
 
         DbSet<ProjectArtificateDocumentHistory> ProjectArtificateDocumentHistory { get; set; }
-        // DbSet<EconsentSetupPatientStatus> EconsentSetupPatientStatus { get; set; }
         DbSet<EconsentSetup> EconsentSetup { get; set; }
         DbSet<EconsentReviewDetails> EconsentReviewDetails { get; set; }
         DbSet<EconsentSectionReference> EconsentSectionReference { get; set; }
         DbSet<EconsentReviewDetailsSections> EconsentReviewDetailsSections { get; set; }
         DbSet<EconsentChat> EconsentChat { get; set; }
-        //DbSet<EconsentSetupRoles> EconsentSetupRoles { get; set; }
         DbSet<RegulatoryType> RegulatoryType { get; set; }
         DbSet<ProjectArtificateDocumentApprover> ProjectArtificateDocumentApprover { get; set; }
         DbSet<Site> Site { get; set; }
@@ -357,8 +345,6 @@ namespace GSC.Domain.Context
         DbSet<PageConfigurationFields> PageConfigurationFields { get; set; }
         DbSet<SendEmailOnVariableChangeSetting> SendEmailOnVariableChangeSetting { get; set; }
         DbSet<SendEmailOnVariableValue> SendEmailOnVariableValue { get; set; }
-        //  DbSet<KitManagement> KitManagement { get; set; }
-        //  DbSet<DisplayMessageandLableSetting> DisplayMessageandLableSetting { get; set; }
         DbSet<ScheduleTerminateDetail> ScheduleTerminateDetail { get; set; }
         DbSet<TemplateVariableSequenceNoSetting> TemplateVariableSequenceNoSetting { get; set; }
 

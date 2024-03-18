@@ -26,7 +26,6 @@ namespace GSC.Data.Dto.Etmf
 
         public int ProjectWorkplaceDetailId { get; set; }
         public int EtmfZoneMasterLibraryId { get; set; }
-        //public int ProjectWorkPlaceZoneId { get; set; }
         public int EtmfSectionMasterLibraryId { get; set; }
         public string SectionName { get; set; }
 
@@ -44,7 +43,6 @@ namespace GSC.Data.Dto.Etmf
         public string ZonName { get; set; }
         public string ChildName { get; set; }
         public string ProjectName { get; set; }
-        //public int projectWorkplaceDetailId { get; set; }
         public string SubSectionArtifactName { get; set; }
         public int CompanyId { get; set; }
 

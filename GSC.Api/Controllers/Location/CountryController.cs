@@ -21,25 +21,16 @@ namespace GSC.Api.Controllers.Location
     public class CountryController : BaseController
     {
         private readonly ICountryRepository _countryRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public CountryController(
             ICountryRepository countryRepository,
-              IUserRepository userRepository,
-              ICompanyRepository companyRepository,
             IUnitOfWork uow,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IMapper mapper)
         {
             _countryRepository = countryRepository;
-            _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -48,7 +39,6 @@ namespace GSC.Api.Controllers.Location
         {
             var countries = _countryRepository.GetCountryList(isDeleted);
             return Ok(countries);
-            //var countries = _countryRepository.FindBy(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
         }
 
         [HttpGet("{id}")]
@@ -104,7 +94,11 @@ namespace GSC.Api.Controllers.Location
             /* Added by swati for effective Date on 02-06-2019 */
             _countryRepository.Update(country);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Country failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Country failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(country.Id);
         }

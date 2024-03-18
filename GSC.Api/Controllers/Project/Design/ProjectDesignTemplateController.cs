@@ -253,7 +253,7 @@ namespace GSC.Api.Controllers.Project.Design
                 projectDesignTemplate.Domain = null;
                 projectDesignTemplate.StudyVersion = checkVersion.VersionNumber;
                 projectDesignTemplate.InActiveVersion = null;
-                projectDesignTemplate.TemplateName = projectDesignTemplate.TemplateName + "_" + designOrder;
+                projectDesignTemplate.TemplateName = $"{projectDesignTemplate.TemplateName} _ {designOrder}";
 
                 foreach (var variable in projectDesignTemplate.Variables)
                 {

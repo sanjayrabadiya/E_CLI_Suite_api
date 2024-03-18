@@ -124,14 +124,7 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult UpdateNotRequired(int id)
         {
             var projectWorkplaceSubSecArtificatDto = _projectWorkplaceSubSectionArtifactRepository.Find(id);
-            if (projectWorkplaceSubSecArtificatDto.IsNotRequired)
-            {
-                projectWorkplaceSubSecArtificatDto.IsNotRequired = !projectWorkplaceSubSecArtificatDto.IsNotRequired;
-            }
-            else
-            {
-                projectWorkplaceSubSecArtificatDto.IsNotRequired = !projectWorkplaceSubSecArtificatDto.IsNotRequired;
-            }
+            projectWorkplaceSubSecArtificatDto.IsNotRequired = !projectWorkplaceSubSecArtificatDto.IsNotRequired;
             var projectWorkplaceSubSecArtificat = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceSubSecArtificatDto);
             _projectWorkplaceSubSectionArtifactRepository.Update(projectWorkplaceSubSecArtificat);
 

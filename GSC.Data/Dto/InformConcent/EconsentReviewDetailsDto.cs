@@ -23,9 +23,7 @@ namespace GSC.Data.Dto.InformConcent
         public bool IsReviewedByPatient { get; set; }
 
         public string? PatientdigitalSignBase64 { get; set; }
-        //public string? investigatordigitalSignBase64 { get; set; }
         public string? PatientdigitalSignImagepath { get; set; }
-        //public string? investigatordigitalSignImagepath { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
         public int? ReviewDoneByUserId { get; set; }
         public bool? IsApproved { get; set; }
@@ -47,7 +45,6 @@ namespace GSC.Data.Dto.InformConcent
     {
         public int EconcentReviewDetailsId { get; set; }
         public string PatientdigitalSignBase64 { get; set; }
-        //public bool IsWithdraw { get; set; }
         public string FileExtension { get; set; }
         public List<EconsentReviewDetailsSectionsDto> EconsentReviewDetailsSections { get; set; }
     }

@@ -51,9 +51,13 @@ namespace GSC.Api.Controllers.Client
 
 
             _clientContactRepository.Add(clientContact);
-            if (_uow.Save() <= 0) throw new Exception("Creating client contact failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating client contact failed on save.");
+                return BadRequest(ModelState);
+            }
             var returnClientContactDto = _mapper.Map<ClientContactDto>(clientContact);
-            return CreatedAtAction("Get", new {id = clientContact.Id}, returnClientContactDto);
+            return CreatedAtAction("Get", new { id = clientContact.Id }, returnClientContactDto);
         }
 
         // PUT api/<controller>/5
@@ -78,7 +82,11 @@ namespace GSC.Api.Controllers.Client
             /* Added by swati for effective Date on 02-06-2019 */
             _clientContactRepository.AddOrUpdate(clientContact);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating client contact failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating client contact failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(clientContact.Id);
         }
 

@@ -17,7 +17,6 @@ namespace GSC.Api.Controllers.LanguageSetup
         private readonly IMapper _mapper;
         private readonly ITemplateLanguageRepository _templateLanguageRepository;
         private readonly IUnitOfWork _uow;
-        IJwtTokenAccesser _jwtTokenAccesser;
 
         public TemplateLanguageController(
             IUnitOfWork uow, IMapper mapper,
@@ -27,7 +26,6 @@ namespace GSC.Api.Controllers.LanguageSetup
             _templateLanguageRepository = templateLanguageRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -63,7 +61,11 @@ namespace GSC.Api.Controllers.LanguageSetup
                     _templateLanguageRepository.Add(language);
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating template language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating template language failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

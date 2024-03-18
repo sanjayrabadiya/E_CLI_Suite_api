@@ -22,9 +22,9 @@ namespace GSC.Common
 
         private static bool IsWeekend(DateTime date)
         {
-            if (WorkingDay.Any(x => x.Weekend == date.DayOfWeek.ToString()))
+            if (WorkingDay.Exists(x => x.Weekend == date.DayOfWeek.ToString()))
             {
-                var result = WorkingDay.Where(x => x.Weekend == date.DayOfWeek.ToString()).FirstOrDefault();
+                var result = WorkingDay.Find(x => x.Weekend == date.DayOfWeek.ToString());
                 if (result != null)
                 {
                     if (result.Frequency == "All")

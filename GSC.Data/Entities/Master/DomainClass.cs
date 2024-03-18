@@ -11,6 +11,5 @@ namespace GSC.Data.Entities.Master
         public int? CompanyId { get; set; }
 
         public bool? IsStatic { get; set; }
-       // public bool SystemType { get; set; }
     }
 }

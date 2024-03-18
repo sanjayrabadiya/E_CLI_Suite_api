@@ -375,7 +375,7 @@ namespace GSC.Report
                     // water marker                 
                     PdfGraphics graphics = page.Graphics;
                     //Draw watermark text
-                    PdfGraphicsState state = graphics.Save();
+                    graphics.Save();
                     graphics.SetTransparency(0.25f);
                     graphics.RotateTransform(-40);
                     graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
@@ -507,7 +507,7 @@ namespace GSC.Report
                         // water marker                 
                         PdfGraphics graphics = page.Graphics;
                         //Draw watermark text
-                        PdfGraphicsState state = graphics.Save();
+                        graphics.Save();
                         graphics.SetTransparency(0.25f);
                         graphics.RotateTransform(-40);
                         graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
@@ -2353,7 +2353,7 @@ namespace GSC.Report
                         // water marker                 
                         PdfGraphics graphics = page.Graphics;
                         //Draw watermark text
-                        PdfGraphicsState state = graphics.Save();
+                        graphics.Save();
                         graphics.SetTransparency(0.25f);
                         graphics.RotateTransform(-40);
                         graphics.DrawString("Draft", watermarkerfornt, PdfPens.LightBlue, PdfBrushes.LightBlue, new PointF(-100, 300));
@@ -3283,10 +3283,7 @@ namespace GSC.Report
             }
             bool exists = Directory.Exists(filePath);
             if (!exists)
-                if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
-                    Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
-                else
-                    Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
+                Directory.CreateDirectory(Path.Combine(fileInfo.Base_URL, fileInfo.ModuleName, fileInfo.FolderType, fileInfo.ParentFolderName));
 
             using (System.IO.FileStream fs = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
             {

@@ -15,9 +15,7 @@ namespace GSC.Respository.Barcode
     public class AttendanceBarcodeGenerateRepository : GenericRespository<AttendanceBarcodeGenerate>, IAttendanceBarcodeGenerateRepository
     {
         private readonly IGSCContext _context;
-        public AttendanceBarcodeGenerateRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
-            IBarcodeDisplayInfoRepository barcodeDisplayInfoRepository)
+        public AttendanceBarcodeGenerateRepository(IGSCContext context)
             : base(context)
         {
             _context = context;
@@ -42,7 +40,7 @@ namespace GSC.Respository.Barcode
                     DisplayValue = item.BarcodeConfig.DisplayValue,
                     DisplayInformationLength = item.BarcodeConfig.DisplayInformationLength,
                     FontSize = item.BarcodeConfig.FontSize,
-                    BarcodeDisplayInfo = new BarcodeDisplayInfo[item.BarcodeConfig.BarcodeDisplayInfo.Count()]
+                    BarcodeDisplayInfo = new BarcodeDisplayInfo[item.BarcodeConfig.BarcodeDisplayInfo.Count]
                 };
                 int index = 0;
                 foreach (var subitem in item.BarcodeConfig.BarcodeDisplayInfo)

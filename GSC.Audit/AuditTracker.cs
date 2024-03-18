@@ -34,7 +34,7 @@ namespace GSC.Audit
             {
                 var userId = _jwtTokenAccesser.UserId;
                 var clientDate = _jwtTokenAccesser.GetClientDate();
-         
+
                 var changeTracker = entities.Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted).ToList();
 
 
@@ -167,11 +167,10 @@ namespace GSC.Audit
                         ? dictionary.FieldName
                         : dictionary.PkName;
 
-                   
+
                     if (!string.IsNullOrEmpty(newValue))
                     {
-                        //string strSql = $"SELECT {dictionary.SourceColumn} AS Value FROM {dictionary.TableName} WHERE {pkName} = @newValue";
-                        string strSql =  $"SELECT {SafeIdentifier(dictionary.SourceColumn)} AS Value FROM {SafeIdentifier(dictionary.TableName)} WHERE {SafeIdentifier(pkName)} = @oldValue";
+                        string strSql = $"SELECT {SafeIdentifier(dictionary.SourceColumn)} AS Value FROM {SafeIdentifier(dictionary.TableName)} WHERE {SafeIdentifier(pkName)} = @oldValue";
                         var parameters = new SqlParameter("@newValue", newValue);
                         newValue = context.Set<AuditValue>().FromSqlRaw(strSql, parameters).AsEnumerable().Select(r => r.Value).FirstOrDefault();
 

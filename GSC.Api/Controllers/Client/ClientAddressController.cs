@@ -49,9 +49,13 @@ namespace GSC.Api.Controllers.Client
             clientAddress.Location = _locationRepository.SaveLocation(clientAddress.Location);
             _locationRepository.Add(clientAddress.Location);
             _clientAddressRepository.Add(clientAddress);
-            if (_uow.Save() <= 0) throw new Exception("Creating client address failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating client address failed on save.");
+                return BadRequest(ModelState);
+            }
             var returnClientAddressDto = _mapper.Map<ClientAddressDto>(clientAddress);
-            return CreatedAtAction("Get", new {id = clientAddress.Id}, returnClientAddressDto);
+            return CreatedAtAction("Get", new { id = clientAddress.Id }, returnClientAddressDto);
         }
 
         [HttpPut]
@@ -73,7 +77,11 @@ namespace GSC.Api.Controllers.Client
             /* Added by swati for effective Date on 02-06-2019 */
             _clientAddressRepository.Update(clientAddress);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Client address failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Client address failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(clientAddress.Id);
         }
 

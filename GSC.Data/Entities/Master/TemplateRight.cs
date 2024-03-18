@@ -12,8 +12,5 @@ namespace GSC.Data.Entities.Master
         public int? CompanyId { get; set; }
 
         public VariableTemplate VariableTemplate { get; set; }
-        //public List<TemplateRightsRoleList> TemplateRightsRoleList { get; set; }
-
-        //public SecurityRole SecurityRole { get; set; }
     }
 }

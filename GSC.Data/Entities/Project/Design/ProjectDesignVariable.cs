@@ -39,7 +39,6 @@ namespace GSC.Data.Entities.Project.Design
         public double? InActiveVersion{ get; set; }
         public double? StudyVersion { get; set; }
         public IList<ProjectDesignVariableValue> Values { get; set; } = null;
-       // public IList<ProjectDesignVariableRemarks> Remarks { get; set; } = null;
         public Unit Unit { get; set; }
         public ProjectDesignTemplate ProjectDesignTemplate { get; set; }
         public int DesignOrder { get; set; }

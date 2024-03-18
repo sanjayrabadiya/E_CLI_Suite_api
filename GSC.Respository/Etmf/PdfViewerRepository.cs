@@ -51,7 +51,7 @@ namespace GSC.Respository.Etmf
                 var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.Find(Convert.ToInt32(jsonObject["artificateDocumentId"]));
                 projectWorkplaceArtificatedocument.DocumentName = docExtendedName;
                 _projectWorkplaceArtificatedocumentRepository.Update(projectWorkplaceArtificatedocument);
-                if (_context.Save() <= 0) throw new Exception("Updating Document failed on save.");
+                _context.Save();
 
                 if (!Convert.ToBoolean(jsonObject["addHistory"].ToString()))
                     _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
@@ -61,7 +61,7 @@ namespace GSC.Respository.Etmf
                 var projectWorkplaceSubSecArtificatedocument = _context.ProjectWorkplaceSubSecArtificatedocument.First(x => x.Id == Convert.ToInt32(jsonObject["artificateDocumentId"]));
                 projectWorkplaceSubSecArtificatedocument.DocumentName = docExtendedName;
                 _projectWorkplaceSubSecArtificatedocumentRepository.Update(projectWorkplaceSubSecArtificatedocument);
-                if (_context.Save() <= 0) throw new Exception("Updating Document failed on save.");
+                _context.Save();
 
                 if (!Convert.ToBoolean(jsonObject["addHistory"].ToString()))
                     _projectSubSecArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceSubSecArtificatedocument, null, null);

@@ -71,6 +71,21 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(volunteers);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var volunteer = _volunteerRepository.Find(id);
+            var volunteerDto = _mapper.Map<VolunteerDto>(volunteer);
+            volunteerDto.ProfilePicPath = _uploadSettingRepository.GetWebImageUrl() +
+                                          (volunteerDto.ProfilePic ?? DocumentService.DefulatProfilePic);
+            volunteerDto.StatusName = volunteerDto.Status.GetDescription();
+            volunteerDto.IsBlockDisplay =
+                _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock").IsView;
+
+            return Ok(volunteerDto);
+        }
+
         [HttpPost]
         [Route("Search")]
         public IActionResult Search([FromBody] VolunteerSearchDto search)
@@ -89,21 +104,6 @@ namespace GSC.Api.Controllers.Volunteer
 
             var volunteers = _volunteerRepository.GetVolunteerForAttendance(search);
             return Ok(volunteers);
-        }
-
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var volunteer = _volunteerRepository.Find(id);
-            var volunteerDto = _mapper.Map<VolunteerDto>(volunteer);
-            volunteerDto.ProfilePicPath = _uploadSettingRepository.GetWebImageUrl() +
-                                          (volunteerDto.ProfilePic ?? DocumentService.DefulatProfilePic);
-            volunteerDto.StatusName = volunteerDto.Status.GetDescription();
-            volunteerDto.IsBlockDisplay =
-                _rolePermissionRepository.GetRolePermissionByScreenCode("mnu_volunteerblock").IsView;
-
-            return Ok(volunteerDto);
         }
 
         [HttpPost]
@@ -259,7 +259,7 @@ namespace GSC.Api.Controllers.Volunteer
 
         [HttpPut]
         [Route("assignRandomizationNumberToVoluteer/{volunteerId}/{randomizationNumber}/{reasonId}/{reasonAuth}")]
-        public ActionResult AssignRandomizationNumberToVoluteer(int volunteerId,string randomizationNumber, int reasonId, string reasonAuth)
+        public ActionResult AssignRandomizationNumberToVoluteer(int volunteerId, string randomizationNumber, int reasonId, string reasonAuth)
         {
             var record = _volunteerRepository.Find(volunteerId);
 
@@ -281,7 +281,7 @@ namespace GSC.Api.Controllers.Volunteer
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            
+
             _volunteerRepository.Update(record);
 
             _uow.Save();
@@ -411,9 +411,8 @@ namespace GSC.Api.Controllers.Volunteer
             byte[] decode_tmplate = Convert.FromBase64String(obj.Split(',')[1]);
 
             List<DbRecords> Users = _volunteerFingerRepository.GetFingers();
-            FtrIdentifyRecord[] rgRecords = new FtrIdentifyRecord[Users.Count];
 
-            rgRecords = Users.Select(item => new FtrIdentifyRecord { KeyValue = item.m_Key.ToByteArray(), Template = Convert.FromBase64String(item.m_Template.Split(',')[1])}).ToArray();
+            var rgRecords = Users.Select(item => new FtrIdentifyRecord { KeyValue = item.m_Key.ToByteArray(), Template = Convert.FromBase64String(item.m_Template.Split(',')[1]) }).ToArray();
 
             FutronicSdkBase m_Operation = new FutronicIdentification();
             ((FutronicIdentification)m_Operation).FARN = 245;
