@@ -207,7 +207,7 @@ namespace GSC.Api.Controllers.Project.Schedule
             if (record == null && !recordTemplate.Any())
                 return NotFound();
 
-            if (!_studyVersionRepository.IsOnTrialByProjectDesing(record.ProjectDesign.Id))
+            if (!_studyVersionRepository.IsOnTrialByProjectDesing(record?.ProjectDesign.Id ?? 0))
             {
                 ModelState.AddModelError("Message", "Can not delete schedule!");
                 return BadRequest(ModelState);
@@ -221,7 +221,7 @@ namespace GSC.Api.Controllers.Project.Schedule
 
             _uow.Save();
 
-            _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(record.ProjectDesignPeriodId);
+            _projectScheduleTemplateRepository.UpdateDesignTemplatesSchedule(record?.ProjectDesignPeriodId ?? 0);
             _uow.Save();
 
             return Ok();

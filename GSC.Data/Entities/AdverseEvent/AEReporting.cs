@@ -27,7 +27,5 @@ namespace GSC.Data.Entities.AdverseEvent
        
         public int? ScreeningTemplateId { get; set; }
         public int? AdverseEventSettingsId { get; set; }
-       
-        //public List<AdverseEventSettings> AdverseEventSettings { get; set; }
     }
 }

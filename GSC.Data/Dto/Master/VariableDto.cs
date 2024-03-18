@@ -36,7 +36,6 @@ namespace GSC.Data.Dto.Master
         public int? AnnotationTypeId { get; set; }
         public string Annotation { get; set; }
 
-        //public int? CompanyId { get; set; }
 
         public ValidationType ValidationType { get; set; }
 
@@ -60,7 +59,6 @@ namespace GSC.Data.Dto.Master
 
         public int? CompanyId { get; set; }
         public double? LargeStep { get; set; }
-        //   public IList<VariableRemarks> Remarks { get; set; } = null;
         public Alignment? Alignment { get; set; }
         public bool CollectionValueDisable { get; set; }
         public ScaleType? ScaleType { get; set; }
@@ -95,39 +93,4 @@ namespace GSC.Data.Dto.Master
     }
 
 
-    //public class VerificationApprovalVariableDto
-    //{
-    //    public int Id { get; set; }
-    //    public int StudyLevelFormId { get; set; }
-    //    public int? StudyLevelFormVariableId { get; set; }
-    //    public string VariableName { get; set; }
-    //    public string VariableCode { get; set; }
-    //    public CollectionSources CollectionSource { get; set; }
-    //    public ValidationType ValidationType { get; set; }
-    //    public ValidationType OriginalValidationType { get; set; }
-    //    public DataType? DataType { get; set; }
-    //    public int? Length { get; set; }
-    //    public string DefaultValue { get; set; }
-    //    public string LowRangeValue { get; set; }
-    //    public string HighRangeValue { get; set; }
-    //    public PrintType? PrintType { get; set; }
-    //    public IList<VerificationApprovalVariableValueDto> Values { get; set; } = null;
-    //    // public IList<ScreeningVariableRemarksDto> Remarks { get; set; } = null;
-    //    public string UnitName { get; set; }
-    //    public int? DesignOrder { get; set; }
-    //    public string VerificationApprovalValue { get; set; }
-    //    public int VerificationApprovalTemplateValueId { get; set; }
-    //    public string VerificationApprovalValueOld { get; set; }
-    //    public string VariableCategoryName { get; set; }
-    //    public VariableCategoryType? SystemType { get; set; }
-    //    public bool IsNa { get; set; }
-    //    public DateValidateType? DateValidate { get; set; }
-    //    public bool IsNaValue { get; set; }
-    //    public bool IsSystem { get; set; }
-    //    public string Note { get; set; }
-    //    public string ValidationMessage { get; set; }
-    //    public Alignment? Alignment { get; set; }
-    //    public int? LargeStep { get; set; }
-
-    //}
 }

@@ -19,17 +19,14 @@ namespace GSC.Api.Controllers.LanguageSetup
         private readonly IMapper _mapper;
         private readonly IVisitLanguageRepository _visitLanguageRepository;
         private readonly IUnitOfWork _uow;
-        IJwtTokenAccesser _jwtTokenAccesser;
 
         public VisitLanguageController(
             IUnitOfWork uow, IMapper mapper,
-            IVisitLanguageRepository visitLanguageRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IVisitLanguageRepository visitLanguageRepository)
         {
             _visitLanguageRepository = visitLanguageRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -65,7 +62,11 @@ namespace GSC.Api.Controllers.LanguageSetup
                     _visitLanguageRepository.Add(language);
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating visit language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating visit language failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

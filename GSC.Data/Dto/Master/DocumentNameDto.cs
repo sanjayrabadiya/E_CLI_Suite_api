@@ -14,7 +14,6 @@ namespace GSC.Data.Dto.Master
         [Required(ErrorMessage = "Document Name is required.")]
         public string Name { get; set; }
 
-        //  public int? CompanyId { get; set; }
         public string Description { get; set; }
         public int? DocumentSize { get; set; }
         public DocumentPickFromType? PickFromType { get; set; }

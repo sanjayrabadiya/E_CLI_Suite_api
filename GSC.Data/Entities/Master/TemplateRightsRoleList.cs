@@ -9,11 +9,8 @@ namespace GSC.Data.Entities.Master
         [ForeignKey("SecurityRoleId")] public string SecurityRoleId { get; set; }
 
 
-        //[ForeignKey("TemplateRightsId")]
         public int? TemplateRightsId { get; set; }
 
         public int? CompanyId { get; set; }
-
-        //public TemplateRights TemplateRightsRole { get; set; }
     }
 }

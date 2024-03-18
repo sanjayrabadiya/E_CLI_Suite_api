@@ -24,12 +24,7 @@ namespace GSC.Data.Entities.Medra
         public MeddraLowLevelTerm MeddraLowLevelTerm { get; set; }
         public int? CreatedRole { get; set; }
 
-        // private DateTime? _approveDate;
         public int? LastUpdateBy { get; set; }
         public DateTime? ApproveDate { get; set; }
-        //{
-        //    get => _approveDate?.UtcDateTime();
-        //    set => _approveDate = value?.UtcDateTime();
-        //}
     }
 }

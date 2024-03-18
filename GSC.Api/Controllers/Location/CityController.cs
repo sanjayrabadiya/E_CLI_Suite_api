@@ -20,28 +20,16 @@ namespace GSC.Api.Controllers.Location
     public class CityController : BaseController
     {
         private readonly ICityAreaRepository _areaRepository;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly ICityRepository _cityRepository;
-        private readonly IStateRepository _stateRepository;
-        private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
         public CityController(ICityRepository cityRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
-            IStateRepository stateRepository,
-            ICountryRepository countryRepository,
             ICityAreaRepository areaRepository,
             IUnitOfWork uow,
             IMapper mapper)
         {
             _cityRepository = cityRepository;
-            _stateRepository = stateRepository;
-            _userRepository = userRepository;
-            _countryRepository = countryRepository;
-            _companyRepository = companyRepository;
             _areaRepository = areaRepository;
             _uow = uow;
             _mapper = mapper;
@@ -51,9 +39,9 @@ namespace GSC.Api.Controllers.Location
         public IActionResult GetCities(bool isDeleted)
         {
             var cities = _cityRepository.GetCityList(isDeleted);
-            
+
             return Ok(cities);
-           
+
         }
 
         [HttpGet("{id}")]
@@ -109,7 +97,11 @@ namespace GSC.Api.Controllers.Location
             /* Added by swati for effective Date on 02-06-2019 */
             _cityRepository.AddOrUpdate(city);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating City failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating City failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(city.Id);
         }

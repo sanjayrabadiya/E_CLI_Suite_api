@@ -51,8 +51,6 @@ namespace GSC.Data.Entities.Project.StudyLevelFormSetup
         public DateValidateType? DateValidate { get; set; }
         public Domain Domain { get; set; }
         public string Note { get; set; }
-       // public List<VariableLanguage> VariableLanguage { get; set; }
-       // public List<VariableNoteLanguage> VariableNoteLanguage { get; set; }
         public Alignment? Alignment { get; set; }
         public int? LargeStep { get; set; }
         public AnnotationType AnnotationType { get; set; }

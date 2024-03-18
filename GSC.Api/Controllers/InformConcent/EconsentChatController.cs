@@ -34,7 +34,7 @@ namespace GSC.Api.Controllers.InformConcent
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
                                         IFirebaseNotification firebaseNotification,
-                                        IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, 
+                                        IEconsentChatRepository econsentChatRepository, IUserRepository userRepository,
                                         IMapper mapper)
         {
             _econsentChatRepository = econsentChatRepository;
@@ -63,7 +63,7 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(data);
         }
 
-        
+
         [HttpPost]
         [Route("GetEconsentChat")]
         public IActionResult GetEconsentChat([FromBody] EconcentChatParameterDto details)
@@ -129,8 +129,7 @@ namespace GSC.Api.Controllers.InformConcent
                 _econsentChatRepository.Update(messages[i]);
             }
             _uow.Save();
-            List<int> senderids = new List<int>();
-            senderids = messages.Select(x => x.SenderId).Distinct().ToList();
+            var senderids = messages.Select(x => x.SenderId).Distinct().ToList();
 
             EconsentChatCentralDto obj = new EconsentChatCentralDto();
             obj.ReceiverId = receiverId;

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -172,12 +173,12 @@ namespace GSC.Api.Controllers.Pharmacy
 
             obj.VariableTemplate = variableTemplateDto;
 
-            foreach (var v in obj.VariableTemplate.VariableTemplateDetails)
+            foreach (var VariableId in obj.VariableTemplate.VariableTemplateDetails.AsEnumerable().Select(s => s.VariableId))
             {
-                var variableDetail = _variableRepository.Find(v.VariableId);
-                var variableValueDetail = _variableValueRepository.FindByInclude(x => x.VariableId == v.VariableId);
+                var variableDetail = _variableRepository.Find(VariableId);
+                var variableValueDetail = _variableValueRepository.FindByInclude(x => x.VariableId == VariableId);
                 var objDto = new ProjectDesignVariableDto();
-                objDto.VariableId = v.VariableId;
+                objDto.VariableId = VariableId;
                 objDto.CollectionSource = variableDetail.CollectionSource;
                 objDto.VariableName = variableDetail.VariableName;
                 objDto.VariableCode = variableDetail.VariableCode;

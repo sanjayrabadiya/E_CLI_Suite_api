@@ -214,7 +214,7 @@ namespace GSC.Respository.Master
                      Status = t.Key.QueryStatus,
                      DisplayName = t.Key.QueryStatus.GetDescription(),
                      Total = t.Count()
-                 }).ToList().OrderBy(x => x.Status).ToList();
+                 }).AsEnumerable().OrderBy(x => x.Status).ToList();
 
             var closeQueries = _screeningTemplateValueQueryRepository.All.Count(r => projectIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) &&
             r.QueryStatus == QueryStatus.Closed &&
@@ -223,14 +223,14 @@ namespace GSC.Respository.Master
             queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
 
-            if (closeQueries > 0)
+            if (closeQueries > 0 && !queries.Exists(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
             {
-                if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
-                    queries.Add(new DashboardQueryStatusDto
-                    {
-                        DisplayName = QueryStatus.Closed.GetDescription(),
-                        Total = closeQueries
-                    });
+
+                queries.Add(new DashboardQueryStatusDto
+                {
+                    DisplayName = QueryStatus.Closed.GetDescription(),
+                    Total = closeQueries
+                });
             }
 
             var list = new List<string>() { "Open", "Resolved", "Answered", "Closed" };
@@ -252,7 +252,7 @@ namespace GSC.Respository.Master
 
                 var isTestSite = _projectRepository.Find(project.Id).IsTestSite;
 
-                if ((!isTestSite && siteId == 0) || ((isTestSite && siteId != 0)))
+                if ((!isTestSite && siteId == 0) || (isTestSite && siteId != 0))
                 {
                     labelGraphs.Add(new LabelGraph()
                     {
@@ -383,7 +383,7 @@ namespace GSC.Respository.Master
                      Status = t.Key.QueryStatus,
                      DisplayName = t.Key.QueryStatus.GetDescription(),
                      Total = t.Count()
-                 }).ToList().OrderBy(x => x.Status).ToList();
+                 }).AsEnumerable().OrderBy(x => x.Status).ToList();
 
             var closeQueries = _screeningTemplateValueQueryRepository.All.Count(r => projectIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) &&
             r.QueryStatus == QueryStatus.Closed &&
@@ -392,7 +392,7 @@ namespace GSC.Respository.Master
 
             queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
-            if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
+            if (!queries.Exists(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
                 queries.Add(new DashboardQueryStatusDto
                 {
                     DisplayName = QueryStatus.Closed.GetDescription(),
@@ -457,7 +457,7 @@ namespace GSC.Respository.Master
             (siteId == 0 ? (!x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.IsTestSite) : true)
                 && (x.QueryStatus == Helper.QueryStatus.Open || x.QueryStatus == Helper.QueryStatus.Closed)
                ).OrderBy(x => x.CreatedDate).ToList();
-                if (query != null && query.Count > 0)
+                if (query.Any())
                 {
                     var opendata = query.Where(x => x.QueryStatus == Helper.QueryStatus.Open).ToList();
 
@@ -467,7 +467,7 @@ namespace GSC.Respository.Master
                         var data1 = FindClosedData(item, slist);
                         if (data1 != null && data1.Count > 0)
                         {
-                            var finaldata = data1.Where(x => x != null && x.QueryStatus == QueryStatus.Closed).FirstOrDefault();
+                            var finaldata = data1.Find(x => x != null && x.QueryStatus == QueryStatus.Closed);
                             if (finaldata != null)
                             {
                                 DashboardQueryGraphDto obj = new DashboardQueryGraphDto();
@@ -480,7 +480,7 @@ namespace GSC.Respository.Master
                             }
                         }
                     }
-                    if (list != null && list.Count > 0)
+                    if (list.Any())
                     {
                         finallist = list.OrderBy(x => x.week).GroupBy(x => x.Lable).Select(x => new DashboardQueryGraphFinalDto
                         {
@@ -523,13 +523,13 @@ namespace GSC.Respository.Master
 
             var result = new DashboardInformConsentStatusDto();
 
-            result.TotalRandomization = randomizations.Count();
-            result.PreScreening = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.PreScreening || (int)x.PatientStatusId > 1).Count();
-            result.Screened = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.Screening).Count();
-            result.ConsentInProgress = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess).Count();
-            result.ConsentCompleted = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || ((int)x.PatientStatusId > 4 && (int)x.PatientStatusId < 10 && (int)x.PatientStatusId != 5)).Count();
-            result.ReConsent = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess).Count();
-            result.ConsentWithdraw = randomizations.Where(x => x.PatientStatusId == ScreeningPatientStatus.Withdrawal).Count();
+            result.TotalRandomization = randomizations.Count;
+            result.PreScreening = randomizations.Count(x => x.PatientStatusId == ScreeningPatientStatus.PreScreening || (int)x.PatientStatusId > 1);
+            result.Screened = randomizations.Count(x => x.PatientStatusId == ScreeningPatientStatus.Screening);
+            result.ConsentInProgress = randomizations.Count(x => x.PatientStatusId == ScreeningPatientStatus.ConsentInProcess);
+            result.ConsentCompleted = randomizations.Count(x => x.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || ((int)x.PatientStatusId > 4 && (int)x.PatientStatusId < 10 && (int)x.PatientStatusId != 5));
+            result.ReConsent = randomizations.Count(x => x.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess);
+            result.ConsentWithdraw = randomizations.Count(x => x.PatientStatusId == ScreeningPatientStatus.Withdrawal);
 
             return result;
 
@@ -553,12 +553,12 @@ namespace GSC.Respository.Master
             {
                 var obj = new DashboardInformConsentStatusDto();
                 obj.DisplayName = x.Value;
-                obj.Total = randomizations.Where(v => (x.Id == 1 ? v.PatientStatusId == ScreeningPatientStatus.Screening
+                obj.Total = randomizations.Count(v => (x.Id == 1 ? v.PatientStatusId == ScreeningPatientStatus.Screening
                                                 : x.Id == 2 ? v.PatientStatusId == ScreeningPatientStatus.ConsentInProcess
                                                 : x.Id == 3 ? (v.PatientStatusId == ScreeningPatientStatus.ConsentCompleted || ((int)v.PatientStatusId > 4 && (int)v.PatientStatusId < 10 && (int)v.PatientStatusId != 5))
                                                 : x.Id == 4 ? v.PatientStatusId == ScreeningPatientStatus.ReConsentInProcess
                                                 : v.PatientStatusId == ScreeningPatientStatus.Withdrawal
-                                                )).Count();
+                                                ));
                 result.Add(obj);
             });
 
@@ -597,15 +597,15 @@ namespace GSC.Respository.Master
                 .ThenInclude(i => i.Activity)
                 .ThenInclude(i => i.CtmsActivity)
                 .Where(z => projectIds.Contains(z.CtmsMonitoring.ProjectId) && StudyLevelForm.Select(y => y.Id).Contains(z.CtmsMonitoring.StudyLevelFormId)
-                 && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true) && z.DeletedDate == null).ToList()
+                 && (siteId == 0 ? (!z.CtmsMonitoring.Project.IsTestSite) : true) && z.DeletedDate == null).AsEnumerable()
                 .GroupBy(x => new { x.CtmsMonitoring.StudyLevelForm.Activity.CtmsActivity.ActivityName, x.ReportStatus })
                 .Select(s => new
                 {
                     name = s.Key.ActivityName,
-                    NotInitiated = s.Where(q => q.ReportStatus == MonitoringReportStatus.OnGoing).Count(),
-                    SendForReview = s.Where(q => q.ReportStatus == MonitoringReportStatus.UnderReview).Count(),
-                    QueryGenerated = s.Where(q => q.ReportStatus == MonitoringReportStatus.ReviewInProgress).Count(),
-                    FormApproved = s.Where(q => q.ReportStatus == MonitoringReportStatus.Approved).Count(),
+                    NotInitiated = s.Count(q => q.ReportStatus == MonitoringReportStatus.OnGoing),
+                    SendForReview = s.Count(q => q.ReportStatus == MonitoringReportStatus.UnderReview),
+                    QueryGenerated = s.Count(q => q.ReportStatus == MonitoringReportStatus.ReviewInProgress),
+                    FormApproved = s.Count(q => q.ReportStatus == MonitoringReportStatus.Approved)
                 });
             return list;
         }
@@ -669,8 +669,8 @@ namespace GSC.Respository.Master
                 var result = asd.GroupBy(g => g.ActivityName).Select(n => new CtmsMonitoringStatusChartDto
                 {
                     ActivityName = n.Key,
-                    ACount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Approved).Count(),
-                    RCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Rejected).Count(),
+                    ACount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.Approved),
+                    RCount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.Rejected),
                     EntrollCount = 0
                 }).ToList();
 
@@ -710,17 +710,17 @@ namespace GSC.Respository.Master
                 var result = asd.GroupBy(g => g.ActivityName).Select(n => new CtmsMonitoringStatusChartDto
                 {
                     ActivityName = n.Key,
-                    ACount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Approved).Count(),
-                    RCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Rejected).Count(),
-                    TerminatedCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Terminated).Count(),
-                    OnHoldCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.OnHold).Count(),
-                    CloseOutCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.CloseOut).Count(),
-                    ActiveCount = n.ToList().Where(x => x.Status == MonitoringSiteStatus.Active).Count(),
+                    ACount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.Approved),
+                    RCount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.Rejected),
+                    TerminatedCount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.Terminated),
+                    OnHoldCount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.OnHold),
+                    CloseOutCount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.CloseOut),
+                    ActiveCount = n.AsEnumerable().Count(x => x.Status == MonitoringSiteStatus.Active),
                     EntrollCount = 0
                 }).ToList();
 
                 List<CtmsMonitoringStatusPIChartDto> list = new List<CtmsMonitoringStatusPIChartDto>();
-                if (result.Count > 0)
+                if (result.Any())
                 {
                     foreach (var item in result)
                     {
@@ -915,7 +915,7 @@ namespace GSC.Respository.Master
                 {
                     if (item.StatusName == "Open")
                     {
-                        TimeSpan v = (TimeSpan)(today - item.QueryDate);
+                        TimeSpan v = (today - item.QueryDate);
                         Total = Total + v.Days;
                         Count++;
                     }
@@ -1077,11 +1077,11 @@ namespace GSC.Respository.Master
 
             var result = new List<DynamicAeChart>();
 
-            foreach (var t in ser)
+            foreach (var ValueName in ser.Select(s => s.ValueName))
             {
                 var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "001");
+                r.SeriesName = ValueName;
+                r.Data = GetDetails(tenoResult, ValueName, "001");
                 result.Add(r);
             }
 
@@ -1117,11 +1117,11 @@ namespace GSC.Respository.Master
 
             var result = new List<DynamicAeChart>();
 
-            foreach (var t in ser)
+            foreach (var ValueName in ser.Select(s => s.ValueName))
             {
                 var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "001");
+                r.SeriesName = ValueName;
+                r.Data = GetDetails(tenoResult, ValueName, "001");
                 result.Add(r);
             }
             return result;
@@ -1158,11 +1158,11 @@ namespace GSC.Respository.Master
             var result = new List<DynamicAeChart>();
 
 
-            foreach (var t in ser)
+            foreach (var ValueName in ser.Select(s => s.ValueName))
             {
                 var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "SAE001");
+                r.SeriesName = ValueName;
+                r.Data = GetDetails(tenoResult, ValueName, "SAE001");
                 result.Add(r);
             }
 
@@ -1199,11 +1199,11 @@ namespace GSC.Respository.Master
 
             var result = new List<DynamicAeChart>();
 
-            foreach (var t in ser)
+            foreach (var ValueName in ser.Select(s => s.ValueName))
             {
                 var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "SAE001");
+                r.SeriesName = ValueName;
+                r.Data = GetDetails(tenoResult, ValueName, "SAE001");
                 result.Add(r);
             }
             return result;
@@ -1221,7 +1221,7 @@ namespace GSC.Respository.Master
                 {
                     var result = new DynamicAeChartDetails();
                     result.X = item;
-                    result.Y = data.Where(e => e.Against == item && e.VariableValue == ser).ToList().Count();
+                    result.Y = data.Count(e => e.Against == item && e.VariableValue == ser);
                     if (result.Y != 0)
                         r.Add(result);
                 }
@@ -1258,11 +1258,11 @@ namespace GSC.Respository.Master
 
             var result = new List<DynamicAeChart>();
 
-            foreach (var t in ser)
+            foreach (var ValueName in ser.Select(s => s.ValueName))
             {
                 var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "Dev001");
+                r.SeriesName = ValueName;
+                r.Data = GetDetails(tenoResult, ValueName, "Dev001");
                 result.Add(r);
             }
 
@@ -1294,11 +1294,11 @@ namespace GSC.Respository.Master
 
             var result = new List<DynamicAeChart>();
 
-            foreach (var t in ser)
+            foreach (var ValueName in ser.Select(s => s.ValueName))
             {
                 var r = new DynamicAeChart();
-                r.SeriesName = t.ValueName;
-                r.Data = GetDetails(tenoResult, t.ValueName, "DiscR001");
+                r.SeriesName = ValueName;
+                r.Data = GetDetails(tenoResult, ValueName, "DiscR001");
                 result.Add(r);
             }
 
@@ -1382,7 +1382,7 @@ namespace GSC.Respository.Master
                     var enresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == enresult.Id && x.If_Active != false
                         && x.DeletedDate == null).ToList();
 
-                    entotals = (int)enresults.Sum(c => c.Planned);
+                    entotals = enresults.Sum(c => c.Planned);
 
                     var r = new DashboardEnrolledGraph();
                     r.DisplayName = "Planned";
@@ -1410,7 +1410,7 @@ namespace GSC.Respository.Master
                 {
                     var scsresults = _context.OverTimeMetrics.Where(x => ScStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == scdata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
 
-                    sctotals = (int)scsresults.Sum(c => c.Planned);
+                    sctotals = scsresults.Sum(c => c.Planned);
 
                     var r = new DashboardEnrolledGraph();
                     r.DisplayName = "Planned";
@@ -1437,7 +1437,7 @@ namespace GSC.Respository.Master
                     var scresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == scresult.Id && x.If_Active != false
                         && x.DeletedDate == null).ToList();
 
-                    sctotals = (int)scresults.Sum(c => c.Planned);
+                    sctotals = scresults.Sum(c => c.Planned);
 
                     var r = new DashboardScreenedGraph();
                     r.DisplayName = "Planned";
@@ -1466,7 +1466,7 @@ namespace GSC.Respository.Master
                 {
                     var rasresults = _context.OverTimeMetrics.Where(x => RaStudyproject.Contains(x.ProjectId) && x.PlanMetricsId == radata.Id && x.If_Active != false && x.DeletedDate == null).ToList();
 
-                    ratotals = (int)rasresults.Sum(c => c.Planned);
+                    ratotals = rasresults.Sum(c => c.Planned);
 
                     var r = new DashboardEnrolledGraph();
                     r.DisplayName = "Planned";
@@ -1493,7 +1493,7 @@ namespace GSC.Respository.Master
                     var raresults = _context.OverTimeMetrics.Where(x => x.PlanMetricsId == raresult.Id && x.If_Active != false
                         && x.DeletedDate == null).ToList();
 
-                    ratotals = (int)raresults.Sum(c => c.Planned);
+                    ratotals = raresults.Sum(c => c.Planned);
 
                     var r = new DashboardRandomizedGraph();
                     r.DisplayName = "Planned";
@@ -1512,8 +1512,6 @@ namespace GSC.Respository.Master
 
         public List<PlanMetricsGridDto> GetDashboardNumberOfSubjectsGrid(bool isDeleted, int metricsId, int projectId, int countryId, int siteId)
         {
-            var list = new List<PlanMetricsGridDto>();
-
             if (countryId != 0 || siteId != 0)
             {
                 var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
@@ -1626,7 +1624,7 @@ namespace GSC.Respository.Master
             {
                 var result = new TreatmentvsArms();
                 result.Name = item;
-                result.Count = data.Where(e => e.TreatmentType == item).ToList().Count();
+                result.Count = data.Count(e => e.TreatmentType == item);
                 r.Add(result);
             }
             return r;
@@ -1755,8 +1753,8 @@ namespace GSC.Respository.Master
                         foreach (var item in visitids)
                         {
                             var result = new TreatmentvsArms();
-                            result.Name = _context.ProjectDesignVisit.Where(s => s.Id == item).FirstOrDefault().DisplayName;
-                            result.Count = data.Where(e => e.SupplyManagementKIT.ProjectDesignVisitId == item).ToList().Count();
+                            result.Name = _context.ProjectDesignVisit.Where(s => s.Id == item).FirstOrDefault()?.DisplayName ?? "";
+                            result.Count = data.Count(e => e.SupplyManagementKIT.ProjectDesignVisitId == item);
                             r.Add(result);
                         }
                     }
@@ -1823,8 +1821,8 @@ namespace GSC.Respository.Master
                               && !s.IsRetension
                               && s.SupplyManagementKIT.DeletedDate == null && (s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue || s.Status == KitStatus.Allocated)).ToList();
 
-                        obj.Available = kitdata.Where(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue).Count();
-                        obj.Allocated = kitdata.Where(s => s.Status == KitStatus.Allocated).Count();
+                        obj.Available = kitdata.Count(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue);
+                        obj.Allocated = kitdata.Count(s => s.Status == KitStatus.Allocated);
                         obj.Treatment = product.ProductType.ProductTypeCode;
                         var project = _context.Project.Where(s => s.Id == item).FirstOrDefault();
                         if (project != null)
@@ -1851,8 +1849,8 @@ namespace GSC.Respository.Master
                           && !s.IsRetension
                           && s.DeletedDate == null && (s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue || s.Status == KitStatus.Allocated)).ToList();
 
-                    obj.Available = kitdata.Where(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue).Count();
-                    obj.Allocated = kitdata.Where(s => s.Status == KitStatus.Allocated).Count();
+                    obj.Available = kitdata.Count(s => s.Status == KitStatus.WithIssue || s.Status == KitStatus.WithoutIssue);
+                    obj.Allocated = kitdata.Count(s => s.Status == KitStatus.Allocated);
                     var project = _context.Project.Where(s => s.Id == item).FirstOrDefault();
                     if (project != null)
                     {
@@ -1874,7 +1872,6 @@ namespace GSC.Respository.Master
         public List<ProductWiseVerificationCountReport> GetProductWiseVerificationReport(int projectId, int countryId, int siteId)
         {
             List<ProductWiseVerificationCountReport> Data = new List<ProductWiseVerificationCountReport>();
-            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
 
             var isShow = _context.SupplyManagementKitNumberSettingsRole.
                  Include(s => s.SupplyManagementKitNumberSettings).Any(s => s.DeletedDate == null && s.SupplyManagementKitNumberSettings.ProjectId == projectId
@@ -1891,7 +1888,7 @@ namespace GSC.Respository.Master
                 ProductWiseVerificationCountReport obj = new ProductWiseVerificationCountReport();
                 var productreceipt = _context.ProductVerificationDetail.Include(s => s.ProductReceipt).Where(x => x.DeletedDate == null && (x.ProductReceipt.Status == ProductVerificationStatus.Quarantine || x.ProductReceipt.Status == ProductVerificationStatus.SentForApproval
                      || x.ProductReceipt.Status == ProductVerificationStatus.Approved) && x.ProductReceipt.ProjectId == projectId && x.ProductReceipt.PharmacyStudyProductTypeId == item.Id).ToList();
-                if (productreceipt != null && productreceipt.Count > 0)
+                if (productreceipt.Any())
                 {
                     foreach (var rec in productreceipt)
                     {
@@ -1917,7 +1914,6 @@ namespace GSC.Respository.Master
 
         public List<TreatmentvsArms> GetkitCreatedDataReport(int projectId, int countryId, int siteId)
         {
-            var projectIds = GetProjectIds(projectId, countryId, siteId).Select(s => s.Id).ToList();
             var data = new List<TreatmentvsArms>();
 
             var isShow = _context.SupplyManagementKitNumberSettingsRole.
@@ -1941,7 +1937,7 @@ namespace GSC.Respository.Master
 
                     var result = new TreatmentvsArms();
                     result.Name = item.ProductType.ProductTypeCode;
-                    result.Count = kitdata.Count();
+                    result.Count = kitdata.Count;
                     data.Add(result);
                 }
             }

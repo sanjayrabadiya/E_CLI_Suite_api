@@ -88,6 +88,23 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(usersDto);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var user = _userRepository.FindByInclude(x => x.Id == id, x => x.UserRoles)
+                .FirstOrDefault();
+
+            if (user != null && user.UserRoles != null)
+                user.UserRoles = user.UserRoles.Where(x => x.DeletedDate == null).ToList();
+
+            var userDto = _mapper.Map<UserDto>(user);
+            var imageUrl = _uploadSettingRepository.GetWebImageUrl();
+            userDto.ProfilePicPath = imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic);
+
+            return Ok(userDto);
+        }
+
         [HttpPost("Getpatients")]
         public IActionResult Getpatients([FromBody] PatientDto userDto)
         {
@@ -126,22 +143,7 @@ namespace GSC.Api.Controllers.UserMgt
             return Ok(null);
         }
 
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var user = _userRepository.FindByInclude(x => x.Id == id, x => x.UserRoles)
-                .FirstOrDefault();
 
-            if (user != null && user.UserRoles != null)
-                user.UserRoles = user.UserRoles.Where(x => x.DeletedDate == null).ToList();
-
-            var userDto = _mapper.Map<UserDto>(user);
-            var imageUrl = _uploadSettingRepository.GetWebImageUrl();
-            userDto.ProfilePicPath = imageUrl + (userDto.ProfilePic ?? DocumentService.DefulatProfilePic);
-
-            return Ok(userDto);
-        }
 
         [HttpGet("GetUserNameByRoleId/{roleId}")]
         public IActionResult GetUserNameByRoleId(int roleId)
@@ -214,7 +216,11 @@ namespace GSC.Api.Controllers.UserMgt
 
             UpdateRole(user);
             _userRepository.Update(user);
-            if (_uow.Save() <= 0) throw new Exception("Updating user failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating user failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(user.Id);
         }
@@ -228,7 +234,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             user.UserRoles.ForEach(z =>
             {
-                var role = userrole.Where(x => x.UserId == user.Id && x.UserRoleId == z.UserRoleId).FirstOrDefault();
+                var role = userrole.Find(x => x.UserId == user.Id && x.UserRoleId == z.UserRoleId);
                 if (role == null)
                 {
                     _userRoleRepository.Add(z);
@@ -240,7 +246,7 @@ namespace GSC.Api.Controllers.UserMgt
 
             userRoles.ForEach(t =>
             {
-                var role = userrole.Where(x => x.UserId == t.UserId && x.UserRoleId == t.UserRoleId).FirstOrDefault();
+                var role = userrole.Find(x => x.UserId == t.UserId && x.UserRoleId == t.UserRoleId);
                 if (role == null)
                 {
                     //delete
@@ -350,8 +356,7 @@ namespace GSC.Api.Controllers.UserMgt
         [HttpPost]
         [Route("UpdateFirebaseToken")]
         public IActionResult UpdateFirebaseToken([FromBody] UserFirebaseToken token)
-        {
-            //_centreUserService.UpdateFirebaseToken($"{_environmentSetting.Value.CentralApi}user/updateFirebaseToken", token);
+        {        
             _userRepository.UpdateFirebaseToken(_jwtTokenAccesser.UserId, token);
             return Ok(1);
         }

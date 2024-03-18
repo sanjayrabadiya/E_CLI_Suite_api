@@ -108,7 +108,6 @@ namespace GSC.Common.Base
                 if (entry.State == EntityState.Added)
                 {
                     entry.Entity.CreatedBy = _commonSharedService.JwtTokenAccesser.UserId;
-                    // entry.Entity.CreatedDate = DateTime.Now.ToUniversalTime();
                     entry.Entity.CreatedDate = _commonSharedService.JwtTokenAccesser.GetClientDate();
 
                 }
@@ -120,13 +119,11 @@ namespace GSC.Common.Base
                     if (entry.Entity.AuditAction == AuditAction.Deleted)
                     {
                         entry.Entity.DeletedBy = _commonSharedService.JwtTokenAccesser.UserId;
-                        // entry.Entity.DeletedDate = DateTime.Now.ToUniversalTime();
                         entry.Entity.DeletedDate = _commonSharedService.JwtTokenAccesser.GetClientDate();
                     }
                     else
                     {
                         entry.Entity.ModifiedBy = _commonSharedService.JwtTokenAccesser.UserId;
-                        // entry.Entity.ModifiedDate = DateTime.Now.ToUniversalTime();
                         entry.Entity.ModifiedDate = _commonSharedService.JwtTokenAccesser.GetClientDate();
                     }
                 }
@@ -167,7 +164,7 @@ namespace GSC.Common.Base
         async void AduitSave(List<AuditTrail> audits)
         {
             DetachAllEntities();
-            if (audits != null && audits.Count() > 0)
+            if (audits != null && audits.Any())
             {
                 audits.ForEach(x =>
                 {

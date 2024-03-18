@@ -164,9 +164,11 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult ImportAnnotations([FromBody] Dictionary<string, string> jsonObject)
         {
             string jsonResult = string.Empty;
-            if (jsonObject != null && jsonObject.ContainsKey("fileName"))
+            string fileName = "";
+            bool isFile = jsonObject.TryGetValue("fileName", out fileName);
+            if (isFile)
             {
-                string documentPath = jsonObject["fileName"];
+                string documentPath = fileName;
                 if (!string.IsNullOrEmpty(documentPath))
                 {
                     jsonResult = System.IO.File.ReadAllText(documentPath);
@@ -191,7 +193,7 @@ namespace GSC.Api.Controllers.Etmf
                 var result = await _centreUserService.GetUserDetails($"{_environmentSetting.Value.CentralApi}Login/GetUserDetails/{userName}");
                 _pdfViewerRepository.SetDbConnection(result.ConnectionString);
             }
-            
+
             PdfRenderer pdfviewer = new PdfRenderer(_cache);
             string documentBase = pdfviewer.GetDocumentAsBase64(jsonObject);
             string base64String = documentBase.Split(new string[] { "data:application/pdf;base64," }, StringSplitOptions.None)[1];

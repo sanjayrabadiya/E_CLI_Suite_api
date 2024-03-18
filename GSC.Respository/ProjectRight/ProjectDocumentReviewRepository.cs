@@ -566,7 +566,7 @@ namespace GSC.Respository.ProjectRight
                        MimeType = c.ProjectDocument.MimeType,
                        ParentProjectCode = _context.Project.Where(x => x.Id == projectId).FirstOrDefault().ProjectCode,
                        ReviewDate = c.ReviewDate,
-                       TrainingTypeName = GetTrainingType(c),
+                       TrainingTypeName = c.TrainingType == null && !c.IsReview? "Not Applicable": c.TrainingType.GetDescription(),
                        TrainerName = c.TrainerId == null ? "Not Applicable" : _context.Users.FirstOrDefault(x => x.Id == c.TrainerId).UserName
                    }).Distinct().ToList();
 
@@ -588,13 +588,6 @@ namespace GSC.Respository.ProjectRight
             });
 
             return projectDashBoardDto;
-        }
-        public string GetTrainingType(ProjectDocumentReview c)
-        {
-            if (c.TrainingType == null && !c.IsReview)
-                return "Not Applicable";
-            else
-                return c.TrainingType.GetDescription();
         }
 
         public int CountTranningNotification()

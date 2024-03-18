@@ -51,18 +51,6 @@ namespace GSC.Api.Controllers.Common
             return result;
         }
 
-        //[HttpGet]
-        //[Route("GetRegulatoryType")]
-        //public IList<DropDownEnum> GetRegulatoryType()
-        //{
-        //    return Enum.GetValues(typeof(RegulatoryType))
-        //        .Cast<RegulatoryType>().Select(e => new DropDownEnum
-        //        {
-        //            Id = Convert.ToInt16(e),
-        //            Value = e.GetDescription()
-        //        }).OrderBy(o => o.Value).ToList();
-        //}
-
         [HttpGet]
         [Route("GetCoreVariableType")]
         public IList<DropDownEnum> GetCoreVariableType()

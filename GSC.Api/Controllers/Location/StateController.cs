@@ -20,9 +20,6 @@ namespace GSC.Api.Controllers.Location
     [Route("api/[controller]")]
     public class StateController : BaseController
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly ICountryRepository _countryRepository;
         private readonly IMapper _mapper;
         private readonly IStateRepository _stateRepository;
@@ -30,19 +27,13 @@ namespace GSC.Api.Controllers.Location
 
         public StateController(
             IStateRepository stateRepository,
-            IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             ICountryRepository countryRepository,
             IUnitOfWork uow,
-            IMapper mapper,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IMapper mapper)
         {
             _stateRepository = stateRepository;
-            _userRepository = userRepository;
             _countryRepository = countryRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
-            _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }
 
@@ -56,22 +47,6 @@ namespace GSC.Api.Controllers.Location
                 b.CountryName = _countryRepository.Find(b.CountryId).CountryName;
             });
             return Ok(states);
-            //var states = _stateRepository.FindByInclude(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-            //   , t => t.Country).OrderByDescending(x => x.Id).ToList();
-            //var states = _stateRepository
-            //    .FindByInclude(
-            //        x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
-            //             isDeleted ? x.DeletedDate != null : x.DeletedDate == null, x => x.Country)
-            //    .Select(x => new StateDto
-            //    {
-            //        Id = x.Id,
-            //        CountryId = x.CountryId,
-            //        CountryName = x.Country.CountryName,
-            //        IsDeleted = x.IsDeleted,
-            //        StateName = x.StateName
-            //    }).OrderByDescending(x => x.Id).ToList();
-
-            //return Ok(stateDtoDto);
         }
 
         [HttpGet("GetStateDropDown/{id}")]
@@ -127,7 +102,11 @@ namespace GSC.Api.Controllers.Location
             /* Added by swati for effective Date on 02-06-2019 */
             _stateRepository.AddOrUpdate(state);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating State failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating State failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(state.Id);
         }

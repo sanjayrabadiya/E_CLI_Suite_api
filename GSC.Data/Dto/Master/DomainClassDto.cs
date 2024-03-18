@@ -15,7 +15,6 @@ namespace GSC.Data.Dto.Master
         public bool? IsStatic { get; set; }
 
         public int? CompanyId { get; set; }
-      //  public bool SystemType { get; set; }
 
     }
 
@@ -23,6 +22,5 @@ namespace GSC.Data.Dto.Master
     {
         public string DomainClassCode { get; set; }
         public string DomainClassName { get; set; }
-      //  public bool SystemType { get; set; }
     }
 }

@@ -67,14 +67,7 @@ namespace GSC.Api.Controllers.Etmf
         public IActionResult UpdateNotRequired(int id)
         {
             var projectWorkplaceArtificateDto = _projectWorkplaceArtificateRepository.Find(id);
-            if (projectWorkplaceArtificateDto.IsNotRequired)
-            {
-                projectWorkplaceArtificateDto.IsNotRequired = !projectWorkplaceArtificateDto.IsNotRequired;
-            }
-            else
-            {
-                projectWorkplaceArtificateDto.IsNotRequired = !projectWorkplaceArtificateDto.IsNotRequired;
-            }
+            projectWorkplaceArtificateDto.IsNotRequired = !projectWorkplaceArtificateDto.IsNotRequired;
             var projectWorkplaceArtificate = _mapper.Map<EtmfProjectWorkPlace>(projectWorkplaceArtificateDto);
             _projectWorkplaceArtificateRepository.Update(projectWorkplaceArtificate);
 

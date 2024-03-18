@@ -82,7 +82,6 @@ namespace GSC.Data.Entities.UserMgt
         public bool IsPowerAdmin { get; set; }
 
         public int? Language { get; set; }
-        //public string SignaturePath { get; set; }
         public UserMasterUserType? UserType { get; set; }
         public Company Company { get; set; }
         public Randomization Randomization { get; set; }

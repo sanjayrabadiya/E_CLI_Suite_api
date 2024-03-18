@@ -14,8 +14,6 @@ namespace GSC.Data.Dto.Barcode
         public int? TemplateId { get; set; }
         public int? BarcodeTypeId { get; set; }
         public int? PKBarcodeOption { get; set; }
-        //public string Anticogulant { get; set; }
-        //public string MLSample { get; set; }
         public string BarcodeString { get; set; }
         public DateTime? BarcodeDate { get; set; }
         public bool IsBarcodeReprint { get; set; }
@@ -34,8 +32,6 @@ namespace GSC.Data.Dto.Barcode
         public string Template { get; set; }
         public string BarcodeType { get; set; }
         public string PKBarcodeOption { get; set; }
-        //public string Anticogulant { get; set; }
-        //public string MLSample { get; set; }
         public string BarcodeString { get; set; }
         public DateTime? BarcodeDate { get; set; }
         public bool IsBarcodeReprint { get; set; }

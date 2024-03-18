@@ -20,8 +20,5 @@ namespace GSC.Data.Dto.Master
         public string patientdetail { get; set; }
         public bool IsUpload { get; set; }
         public DocumentVerifyStatus VerifyStatus { get; set; }
-        //public string investigatorName { get; set; }
-        //public string investigatorcontact { get; set; }
-        //public string investigatorEmail { get; set; }
     }
 }
