@@ -1,4 +1,5 @@
-﻿using GSC.Common;
+﻿
+using GSC.Common;
 using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Shared.Generic;
@@ -8,7 +9,6 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Serilog;
 using System;
 using System.Collections.Generic;
-using Microsoft.Data.SqlClient;
 using System.Linq;
 
 namespace GSC.Audit
@@ -170,19 +170,18 @@ namespace GSC.Audit
                    
                     if (!string.IsNullOrEmpty(newValue))
                     {
-                        //string strSql = $"SELECT {dictionary.SourceColumn} AS Value FROM {dictionary.TableName} WHERE {pkName} = @newValue";
-                        string strSql =  $"SELECT {SafeIdentifier(dictionary.SourceColumn)} AS Value FROM {SafeIdentifier(dictionary.TableName)} WHERE {SafeIdentifier(pkName)} = @oldValue";
-                        var parameters = new SqlParameter("@newValue", newValue);
-                        newValue = context.Set<AuditValue>().FromSqlRaw(strSql, parameters).AsEnumerable().Select(r => r.Value).FirstOrDefault();
+
+                        string strSql = $"{"SELECT "} {dictionary.SourceColumn} {" AS Value FROM "} {dictionary.TableName} {"WHERE "} {pkName} {"="} {newValue}";
+                        newValue = context.Set<AuditValue>().FromSqlRaw(strSql, "").AsEnumerable().Select(r => r.Value).FirstOrDefault();
 
                     }
 
                     if (!string.IsNullOrEmpty(oldValue))
                     {
-                        string strSql = $"SELECT {dictionary.SourceColumn} AS Value FROM {dictionary.TableName} WHERE {pkName} = @oldValue";
-                        var parameters = new SqlParameter("@oldValue", oldValue);
-                        oldValue = context.Set<AuditValue>().FromSqlRaw(strSql, parameters).AsEnumerable().Select(r => r.Value).FirstOrDefault();
+                        string strSql = $"{"SELECT "} {dictionary.SourceColumn} {" AS Value FROM "} {dictionary.TableName} {"WHERE "} {pkName} {"="} {oldValue}";
+                        oldValue = context.Set<AuditValue>().FromSqlRaw(strSql, "").AsEnumerable().Select(r => r.Value).FirstOrDefault();
                     }
+
 
                 }
 
@@ -202,11 +201,6 @@ namespace GSC.Audit
                 }
 
             }
-        }
-
-        string SafeIdentifier(string identifier)
-        {
-            return string.Concat(identifier.Where(c => char.IsLetterOrDigit(c) || c == '_'));
         }
 
     }
