@@ -145,7 +145,8 @@ namespace GSC.Respository.SupplyManagement
                                         .Cast<KitStatus>().Select(e => new DropDownStudyDto
                                         {
                                             Id = Convert.ToInt16(e),
-                                            Value = GetStatusString(e)
+                                            Value = Convert.ToInt16(e) == 6 ? e.GetDescription() + " (With issue)" :
+ Convert.ToInt16(e) == 7 ? e.GetDescription() + " (Without issue) " : e.GetDescription()
                                         }).Where(x => x.Id == 4 || x.Id == 5 || x.Id == 6 || x.Id == 7).ToList();
                     item.StatusList = refrencetype;
                 }
@@ -174,7 +175,8 @@ namespace GSC.Respository.SupplyManagement
                                         .Cast<KitStatus>().Select(e => new DropDownStudyDto
                                         {
                                             Id = Convert.ToInt16(e),
-                                            Value = GetStatusString(e)
+                                            Value = Convert.ToInt16(e) == 6 ? e.GetDescription() + " (With issue)" :
+ Convert.ToInt16(e) == 7 ? e.GetDescription() + " (Without issue) " : e.GetDescription()
                                         }).Where(x => x.Id == 4 || x.Id == 5 || x.Id == 6 || x.Id == 7).ToList();
                     item.StatusList = refrencetype;
                 }
@@ -183,17 +185,7 @@ namespace GSC.Respository.SupplyManagement
             return data;
         }
 
-        private static string GetStatusString(KitStatus e)
-        {
-            if (e == KitStatus.WithIssue)
-                return KitStatus.WithIssue.GetDescription() + " (With issue)";
-            else if (e == KitStatus.WithoutIssue)
-                return KitStatus.WithIssue.GetDescription() + " (Without issue)";
-            else
-                e.GetDescription();
-
-            return "";
-        }
+        
         public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
         {
 
