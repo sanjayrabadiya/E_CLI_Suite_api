@@ -44,7 +44,7 @@ namespace GSC.Api.Controllers.Etmf
         {
             if (UserId <= 0) return BadRequest();
 
-            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == ProjectId)?.ParentProjectId ?? 0;
+            var ParentProject = _context.Project.FirstOrDefault(x => x.Id == ProjectId)?.ParentProjectId ?? null;
             var validate = _projectWorkplaceDetailRepository.FindByInclude(t => t.DeletedDate == null && t.ProjectWorkPlace.ProjectId == (ParentProject > 0 ? ParentProject : ProjectId));
             if (!validate.Any())
             {
