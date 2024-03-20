@@ -28,28 +28,19 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IEconsentChatRepository _econsentChatRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUserRepository _userRepository;
-        private readonly IEmailSenderRespository _emailSenderRespository;
-        private readonly ICentreUserService _centreUserService;
-        private readonly IOptions<EnvironmentSetting> _environmentSetting;
         private readonly IMapper _mapper;
         private readonly IFirebaseNotification _firebaseNotification;
 
         public EconsentChatController(IUnitOfWork uow,
                                         IJwtTokenAccesser jwtTokenAccesser,
-                                        ICentreUserService centreUserService,
                                         IFirebaseNotification firebaseNotification,
-                                         IOptions<EnvironmentSetting> environmentSetting,
-                                        IEconsentChatRepository econsentChatRepository, IUserRepository userRepository, IEmailSenderRespository emailSenderRespository,
+                                        IEconsentChatRepository econsentChatRepository, IUserRepository userRepository,
                                         IMapper mapper)
         {
             _econsentChatRepository = econsentChatRepository;
             _uow = uow;
             _jwtTokenAccesser = jwtTokenAccesser;
-            _centreUserService = centreUserService;
-            //_hubcontext = hubcontext;
             _userRepository = userRepository;
-            _emailSenderRespository = emailSenderRespository;
-            _environmentSetting = environmentSetting;
             _mapper = mapper;
             _firebaseNotification = firebaseNotification;
         }
@@ -72,7 +63,7 @@ namespace GSC.Api.Controllers.InformConcent
             return Ok(data);
         }
 
-        
+
         [HttpPost]
         [Route("GetEconsentChat")]
         public IActionResult GetEconsentChat([FromBody] EconcentChatParameterDto details)
@@ -101,12 +92,6 @@ namespace GSC.Api.Controllers.InformConcent
             _econsentChatRepository.Add(econsentChat);
             _uow.Save();
             econsentChat.Message = EncryptionDecryption.DecryptString(econsentChat.Salt, econsentChat.Message);
-            // var senderdetails = _userRepository.Find(econsentChat.ReceiverId);
-            //var connection = ConnectedUser.Ids.Where(x => x.userId == econsentChat.ReceiverId).Any();
-            //if (!senderdetails.IsLogin)
-            //{
-            //    _emailSenderRespository.SendOfflineChatNotification(senderdetails.Email, senderdetails.FirstName);
-            //}
             econsentChat.Sender = _userRepository.Find(econsentChat.SenderId);
             econsentChat.Receiver = _userRepository.Find(econsentChat.ReceiverId);
             _firebaseNotification.SendEConsentChatMessage(econsentChat);
@@ -133,10 +118,10 @@ namespace GSC.Api.Controllers.InformConcent
 
         [HttpPut]
         [Route("AllMessageDelivered/{receiverId}")]
-        public async Task<IActionResult> AllMessageDelivered(int receiverId)
+        public IActionResult AllMessageDelivered(int receiverId)
         {
             // this method calls when user login then update delivered flag for all the unsend messages
-            var messages = _econsentChatRepository.FindBy(x => x.ReceiverId == receiverId && x.IsDelivered == false).ToList();
+            var messages = _econsentChatRepository.FindBy(x => x.ReceiverId == receiverId && !x.IsDelivered).ToList();
             for (int i = 0; i < messages.Count; i++)
             {
                 messages[i].IsDelivered = true;
@@ -144,8 +129,7 @@ namespace GSC.Api.Controllers.InformConcent
                 _econsentChatRepository.Update(messages[i]);
             }
             _uow.Save();
-            List<int> senderids = new List<int>();
-            senderids = messages.Select(x => x.SenderId).Distinct().ToList();
+            var senderids = messages.Select(x => x.SenderId).Distinct().ToList();
 
             EconsentChatCentralDto obj = new EconsentChatCentralDto();
             obj.ReceiverId = receiverId;
@@ -155,13 +139,10 @@ namespace GSC.Api.Controllers.InformConcent
 
         [HttpPut]
         [Route("AllMessageRead/{senderId}")]
-        public async Task<IActionResult> AllMessageRead(int senderId)
+        public IActionResult AllMessageRead(int senderId)
         {
             //all message read flag update when user clicks on particular user chat
             _econsentChatRepository.AllMessageRead(senderId);
-            
-            //await _centreUserService.AllMessageRead($"{_environmentSetting.Value.CentralApi}Chat/AllMessageRead/{_jwtTokenAccesser.UserId}/{senderId}");
-            
             return Ok(senderId);
         }
     }

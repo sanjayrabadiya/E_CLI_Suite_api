@@ -11,7 +11,6 @@ namespace GSC.Data.Dto.Configuration
         public string KeyName { get; set; }
         public string DefaultMessage { get; set; }
         public bool IsReadOnlyDefaultMessage { get; set; }
-        //public IList<LanguageConfigurationDetailsDto> LanguageConfigurationDetailslist { get; set; }
     }
 
     public class LanguageConfigurationDetailsDto : BaseDto

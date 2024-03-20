@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -52,7 +53,11 @@ namespace GSC.Api.Controllers.Pharmacy
 
             _pharmacyEntryRepository.SavePharmacy(pharmacyEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Pharmacy Entry failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Pharmacy Entry failed on save.");
+                return BadRequest(ModelState);
+            }
 
             var pharmacyvaluelist =
                 GetpharmacyTemplateValueList(pharmacyEntry.ProjectId, 0, pharmacyEntryDto.ProductTypeId);
@@ -71,7 +76,11 @@ namespace GSC.Api.Controllers.Pharmacy
 
             _pharmacyEntryRepository.Update(pharmacyEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Pharmacy Entry failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Pharmacy Entry failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(pharmacyEntry.Id);
         }
@@ -107,28 +116,6 @@ namespace GSC.Api.Controllers.Pharmacy
             var result = _pharmacyEntryRepository.GetpharmacyTemplateListByEntry(entryId);
             return Ok(result);
         }
-
-        //[HttpGet]
-        //[Route("GetAuditHistory/{id}")]   
-        //public IActionResult GetAuditHistory(int id)
-        //{
-        //    var auditHistory = _pharmacyEntryRepository.GetAuditHistory(id);
-
-        //    return Ok(auditHistory);
-        //}
-
-        //[HttpGet("Summary/{id}")]
-        //public IActionResult Summary(int id)
-        //{
-        //    if (id <= 0)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    var pharmacySummaryDto = _pharmacyEntryRepository.GetSummary(id);
-
-        //    return Ok(pharmacySummaryDto);
-        //}
 
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
@@ -180,12 +167,12 @@ namespace GSC.Api.Controllers.Pharmacy
 
             obj.VariableTemplate = variableTemplateDto;
 
-            foreach (var v in obj.VariableTemplate.VariableTemplateDetails)
+            foreach (var VariableId in obj.VariableTemplate.VariableTemplateDetails.AsEnumerable().Select(s => s.VariableId))
             {
-                var variableDetail = _variableRepository.Find(v.VariableId);
-                var variableValueDetail = _variableValueRepository.FindByInclude(x => x.VariableId == v.VariableId);
+                var variableDetail = _variableRepository.Find(VariableId);
+                var variableValueDetail = _variableValueRepository.FindByInclude(x => x.VariableId == VariableId);
                 var objDto = new ProjectDesignVariableDto();
-                objDto.VariableId = v.VariableId;
+                objDto.VariableId = VariableId;
                 objDto.CollectionSource = variableDetail.CollectionSource;
                 objDto.VariableName = variableDetail.VariableName;
                 objDto.VariableCode = variableDetail.VariableCode;
@@ -218,11 +205,11 @@ namespace GSC.Api.Controllers.Pharmacy
 
                 objDto.Values = variableValueList;
                 var detailList = pharmacytemplate.PharmacyTemplateValue.Find(x =>
-                    x.VariableId == v.VariableId && x.PharmacyEntryId == entryId);
+                    x.VariableId == VariableId && x.PharmacyEntryId == entryId);
                 if (detailList != null)
                 {
                     objDto.ScreeningValue = detailList.ValueId;
-                    objDto.Id = detailList.TempId == null ? 0 : (int) detailList.TempId;
+                    objDto.Id = detailList.TempId == null ? 0 : (int)detailList.TempId;
                 }
 
                 obj.Variables.Add(objDto);

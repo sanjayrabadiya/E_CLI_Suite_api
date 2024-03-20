@@ -25,7 +25,6 @@ namespace GSC.Api.Controllers.Client
         private readonly IClientTypeRepository _clientTypeRepository;
         private readonly IRoleRepository _securityRoleRepository;
         private readonly IUserRepository _userRepository;
-        private readonly ICompanyRepository _companyRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
@@ -37,7 +36,6 @@ namespace GSC.Api.Controllers.Client
             IClientTypeRepository clientTypeRepository,
             IRoleRepository securityRoleRepository,
             IUserRepository userRepository,
-            ICompanyRepository companyRepository,
             IUnitOfWork uow, IMapper mapper,
             IUploadSettingRepository uploadSettingRepository,
              IClientAddressRepository clientAddressRepository,
@@ -48,7 +46,6 @@ namespace GSC.Api.Controllers.Client
             _securityRoleRepository = securityRoleRepository;
             _clientRepository = clientRepository;
             _userRepository = userRepository;
-            _companyRepository = companyRepository;
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
@@ -106,7 +103,11 @@ namespace GSC.Api.Controllers.Client
             }
 
             _clientRepository.Add(client);
-            if (_uow.Save() <= 0) throw new Exception("Creating client failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating client failed on save.");
+                return BadRequest(ModelState);
+            }
             _mapper.Map<ClientDto>(client);
             return Ok(client.Id);
         }
@@ -134,7 +135,7 @@ namespace GSC.Api.Controllers.Client
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var clientAdreess = _clientAddressRepository.FindByInclude(x => x.ClientId == clientDto.Id, x=>x.Location).ToList();
+            var clientAdreess = _clientAddressRepository.FindByInclude(x => x.ClientId == clientDto.Id, x => x.Location).ToList();
             var clientContact = _clientContactRepository.All.Where(x => x.ClientId == clientDto.Id).ToList();
 
 
@@ -142,7 +143,11 @@ namespace GSC.Api.Controllers.Client
             /* Added by swati for effective Date on 02-06-2019 */
             _clientRepository.AddOrUpdate(client);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating client failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating client failed on save.");
+                return BadRequest(ModelState);
+            }
 
             foreach (var item in clientAdreess)
             {

@@ -11,7 +11,7 @@ namespace GSC.Respository.Barcode
     public interface IDossingBarcodeGenerateRepository : IGenericRepository<DossingBarcodeGenerate>
     {
         List<DossingBarcodeGenerateGridDto> GetReprintBarcodeGenerateData(int[] Ids);
-        List<DossingBarcodeGenerateGridDto> GetBarcodeDetail(int attendanceId);
+        List<DossingBarcodeGenerateGridDto> GetBarcodeDetail(int DossingBarcodeId);
         string GetBarcodeString(DossingBarcode DossingBarcode, int number);
     }
 }

@@ -483,6 +483,7 @@ namespace GSC.Respository.Screening
 
                 var tempValue = _context.ScreeningTemplateValue.Where(r => r.DeletedDate == null && r.ScreeningTemplate.DeletedDate == null && r.ScreeningTemplate.ScreeningVisit.DeletedDate == null
                  && r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.DeletedDate == null &&
+                 r.ProjectDesignVariable.DeletedDate == null &&
                  sites.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId));
 
                 if (filters.PeriodIds != null && filters.PeriodIds.Any())
@@ -520,7 +521,7 @@ namespace GSC.Respository.Screening
                     ProjectCode = ProjectCode,
                     ParentProjectId = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId,
                     DesignOrder = x.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
-
+                    VariableCode = x.ProjectDesignVariable.VariableCode,
                     TemplateId = x.ScreeningTemplate.ProjectDesignTemplateId,
                     TemplateName = x.ScreeningTemplate.ScreeningTemplateName,
                     DomainName = x.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainName,
@@ -581,11 +582,11 @@ namespace GSC.Respository.Screening
                     TemplateId = y.First().TemplateId,
                     DesignOrder = y.First().DesignOrder,
                     LstVariable = y.Where(q => q.DomainId == y.Key.DomainId && q.VariableName != null).
-                    GroupBy(vari => vari.VariableName).Select(v =>
+                    GroupBy(vari => new { vari.VariableName, vari.VariableCode }).Select(v =>
                         new ProjectDatabaseVariableDto
                         {
                             DomainName = v.First().DomainName,
-                            VariableName = v.Key,
+                            VariableName = v.Key.VariableCode + "_" + v.Key.VariableName,
                             Annotation = v.First().Annotation,
                             UnitId = v.First().UnitId,
                             Unit = v.First().Unit,
@@ -627,7 +628,7 @@ namespace GSC.Respository.Screening
                                     TemplateId = i.TemplateId,
                                     ScreeningTemplateParentId = i.ScreeningTemplateParentId,
                                     DomainName = i.DomainName,
-                                    VariableName = i.VariableName,
+                                    VariableName = i.VariableCode + "_" + i.VariableName,
                                     ScreeningTemplateId = i.ScreeningTemplateId,
                                     CollectionSource = i.CollectionSource,
                                     VariableNameValue = i.VariableNameValue,
@@ -696,9 +697,7 @@ namespace GSC.Respository.Screening
                                          ScreeningNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.ScreeningNumber : st.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.VolunteerNo,
                                          RandomizationNumber = st.ScreeningVisit.ScreeningEntry.RandomizationId != null ? r.RandomizationNumber : "",
                                          RepeatedVisit = st.ScreeningVisit.RepeatedVisitNumber,
-                                         // changes on 13/06/2023 for add visit name in screeningvisit table change by vipul rokad
                                          Visit = st.ScreeningVisit.ScreeningVisitName + Convert.ToString(st.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + st.ScreeningVisit.RepeatedVisitNumber),
-                                         // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
                                          TemplateName = st.ScreeningTemplateName,
                                          VariableAnnotation = pdv.Annotation,
                                          CollectionSource = (int)stv.ProjectDesignVariable.CollectionSource,
@@ -1025,7 +1024,7 @@ namespace GSC.Respository.Screening
                             var ProjectDesignVariableList = _context.ProjectDesignVariable.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == temp.FirstOrDefault().TemplateId).OrderBy(x => x.DesignOrder).ToList();
                             ProjectDesignVariableList.ForEach(variable =>
                             {
-                                worksheet.Row(2).Cell(visitCell).SetValue(variable.VariableName);
+                                worksheet.Row(2).Cell(visitCell).SetValue(variable.VariableCode + "_" + variable.VariableName);
                                 visitCell++;
                             });
 
@@ -1077,6 +1076,7 @@ namespace GSC.Respository.Screening
                             {
                                 worksheet.Cell(rownumber, cellnumber).SetValue(x.VariableNameValue);
                             }
+
                         }
                     });
                 }

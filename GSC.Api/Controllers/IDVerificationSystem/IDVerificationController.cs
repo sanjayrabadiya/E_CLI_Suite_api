@@ -42,6 +42,27 @@ namespace GSC.Api.Controllers.LabReportManagement
             return Ok(idVerificationDto);
         }
 
+        [HttpGet("{id}")]
+        public IActionResult Get(int id)
+        {
+            if (id <= 0) return BadRequest();
+            var idVerification = _iIDVerificationRepository.Find(id);
+            if (idVerification.DeletedDate == null)
+            {
+                var idVerificationDto = _mapper.Map<IDVerificationDto>(idVerification);
+                foreach (var document in idVerificationDto.IDVerificationFiles)
+                {
+                    var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), document.DocumentPath).Replace('\\', '/');
+                    document.DocumentPath = path;
+                }
+                return Ok(idVerificationDto);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
         [HttpGet("GetDocumentByUser/{userId}")]
         public IActionResult GetDocumentByUser(int userId)
         {
@@ -68,35 +89,16 @@ namespace GSC.Api.Controllers.LabReportManagement
             }
         }
 
-
-        [HttpGet("{id}")]
-        public IActionResult Get(int id)
-        {
-            if (id <= 0) return BadRequest();
-            var idVerification = _iIDVerificationRepository.Find(id);
-            if (idVerification.DeletedDate == null)
-            {
-                var idVerificationDto = _mapper.Map<IDVerificationDto>(idVerification);
-                foreach (var document in idVerificationDto.IDVerificationFiles)
-                {
-                    var path = Path.Combine(_uploadSettingRepository.GetWebDocumentUrl(), document.DocumentPath).Replace('\\', '/');
-                    document.DocumentPath = path;
-                }
-                return Ok(idVerificationDto);
-            }
-            else
-            {
-                return NotFound();
-            }
-        }
-
         [HttpPost]
         public IActionResult Post([FromBody] IDVerificationDto idVerificationDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var result = _iIDVerificationRepository.SaveIDVerificationDocument(idVerificationDto);
-            if (result <= 0) throw new Exception("Failed to save document");
-
+            if (result <= 0)
+            {
+                ModelState.AddModelError("Message", "Failed to save document");
+                return BadRequest(ModelState);
+            }
             return Ok(result);
         }
 

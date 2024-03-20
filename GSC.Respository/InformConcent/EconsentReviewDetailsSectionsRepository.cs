@@ -11,13 +11,8 @@ namespace GSC.Respository.InformConcent
 {
     public class EconsentReviewDetailsSectionsRepository : GenericRespository<EconsentReviewDetailsSections>, IEconsentReviewDetailsSectionsRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IGSCContext _context;
-        public EconsentReviewDetailsSectionsRepository(IGSCContext context,
-                                                IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public EconsentReviewDetailsSectionsRepository(IGSCContext context) : base(context)
         {
-            _context = context;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
     }
 }

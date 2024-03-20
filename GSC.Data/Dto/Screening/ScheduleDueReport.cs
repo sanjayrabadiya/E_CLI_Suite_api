@@ -18,12 +18,7 @@ namespace GSC.Data.Dto.Screening
         public string templateName { get; set; }
         public DateTime? scheduleDate { get; set; }
         public string? scheduleDateExcel { get; set; }
-        //private DateTime? _scheduleDate { get; set; }
-        //public DateTime? scheduleDate
-        //{
-        //    get => _scheduleDate.UtcDate();
-        //    set => _scheduleDate = value.UtcDate();
-        //}
+      
 
     }
 
@@ -37,17 +32,6 @@ namespace GSC.Data.Dto.Screening
         public int?[] PeriodIds { get; set; }
         public int?[] VisitIds { get; set; }
         public int?[] TemplateIds { get; set; }
-        //private DateTime? _fromDate { get; set; }
-        //public DateTime? fromDate
-        //{
-        //    get => _fromDate.UtcDate();
-        //    set => _fromDate = value.UtcDate();
-        //}
-        //private DateTime? _toDate { get; set; }
-        //public DateTime? toDate
-        //{
-        //    get => _toDate.UtcDate();
-        //    set => _toDate = value.UtcDate();
-        //}
+       
     }
 }

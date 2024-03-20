@@ -156,7 +156,7 @@ namespace GSC.Api.Controllers.Etmf
                             var projectWorkplaceArtificatedocument = _projectWorkplaceArtificatedocumentRepository.AddDocument(projectWorkplaceArtificatedocumentDto);
                             _projectWorkplaceArtificatedocumentRepository.Add(projectWorkplaceArtificatedocument);
 
-                            if (_uow.Save() <= 0) throw new Exception("Creating Document failed on save.");
+                            _uow.Save();
 
                             _projectWorkplaceArtificateDocumentReviewRepository.SaveByDocumentIdInReview(projectWorkplaceArtificatedocument.Id);
                             _projectArtificateDocumentHistoryRepository.AddHistory(projectWorkplaceArtificatedocument, null, null);
@@ -315,9 +315,10 @@ namespace GSC.Api.Controllers.Etmf
                 document.Id = 0;
                 document.ProjectWorkplaceArtificateId = workplaceFolderDto[i].ProjectWorkplaceArtificateId;
 
-                document.ProjectArtificateDocumentReview.Select(x => { x.Id = 0; return x; }).ToList();
-                document.ProjectArtificateDocumentApprover.Select(x => { x.Id = 0; return x; }).ToList();
-                document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
+                var reviewList = document.ProjectArtificateDocumentReview.Select(x => { x.Id = 0; return x; }).ToList();
+                var approverList = document.ProjectArtificateDocumentApprover.Select(x => { x.Id = 0; return x; }).ToList();
+                var commentList = document.ProjectArtificateDocumentComment.Select(x => { x.Id = 0; return x; }).ToList();
+
                 document.ProjectArtificateDocumentHistory = null;
 
                 document.IsMoved = true;

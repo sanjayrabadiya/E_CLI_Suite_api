@@ -9,14 +9,12 @@ namespace GSC.Api.Controllers.UserMgt
     [ApiController]
     public class ReportScreenController : BaseController
     {
-        private readonly IUnitOfWork _uow;
         private readonly IReportScreenRepository _reportScreenRepository;
 
         public ReportScreenController(IReportScreenRepository reportScreenRepository,
             IUnitOfWork uow)
         {
             _reportScreenRepository = reportScreenRepository;
-            _uow = uow;
         }
 
         [HttpGet]       

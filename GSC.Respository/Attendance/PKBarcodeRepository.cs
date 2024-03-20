@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace GSC.Respository.Attendance
 {
@@ -33,7 +34,6 @@ namespace GSC.Respository.Attendance
             list.ForEach(x =>
             {
                 x.isBarcodeGenerated = _context.PkBarcodeGenerate.Any(t => t.PKBarcodeId == x.Id && t.DeletedBy == null);
-                //x.PKBarcodeGenerateId = _context.PkBarcodeGenerate.Where(t => t.PKBarcodeId == x.Id && t.DeletedBy == null).FirstOrDefault()?.Id ?? 0;
             });
 
             return list;
@@ -54,21 +54,33 @@ namespace GSC.Respository.Attendance
 
         public string GenerateBarcodeString(PKBarcodeDto objSave)
         {
-            string barcode = "";
-            var volunteer = _context.Volunteer.FirstOrDefault(x => x.Id == objSave.VolunteerId);
-            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).FirstOrDefault().ProjectDesignPeriod;
-            var template = _context.ProjectDesignTemplate.FirstOrDefault(x => x.Id == objSave.TemplateId);
+            var volunteer = _context.Volunteer.First(x => x.Id == objSave.VolunteerId);
+            var peroid = _context.ProjectDesignVisit.Where(x => x.Id == objSave.VisitId).Include(x => x.ProjectDesignPeriod).First().ProjectDesignPeriod;
+            var template = _context.ProjectDesignTemplate.First(x => x.Id == objSave.TemplateId);
+            StringBuilder barcodeBuilder = new StringBuilder();
+
             if (objSave.PKBarcodeOption > 1)
             {
                 for (int i = 1; i <= objSave.PKBarcodeOption; i++)
                 {
-                    barcode = barcode + "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode + "0" + i + ",";
+                    barcodeBuilder.Append("PK")
+                        .Append(volunteer.RandomizationNumber)
+                        .Append(peroid.DisplayName)
+                        .Append(template.TemplateCode)
+                        .Append("0")
+                        .Append(i)
+                        .Append(",");
                 }
             }
             else
             {
-                barcode = "PK" + volunteer.RandomizationNumber + peroid.DisplayName + template.TemplateCode;
+                barcodeBuilder.Append("PK")
+                    .Append(volunteer.RandomizationNumber)
+                    .Append(peroid.DisplayName)
+                    .Append(template.TemplateCode);
             }
+
+            string barcode = barcodeBuilder.ToString();
             return barcode.TrimEnd(',');
         }
 
@@ -134,41 +146,40 @@ namespace GSC.Respository.Attendance
                 x.BarcodeString = BarcodeString(siteId, x.ProjectDesignTemplateId, x.VolunteerId, generationType, x.AttendanceId);
                 if (generationType == BarcodeGenerationType.PkBarocde)
                 {
-                    if (All.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).ToList().Count() != 0)
-                        x.PKBarcodeOption = All.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+                    if (All.Any(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId))
+                        x.PKBarcodeOption = All.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault()?.PKBarcodeOption;
                 }
-                else if (generationType == BarcodeGenerationType.DosingBarcode)
+                else if (generationType == BarcodeGenerationType.DosingBarcode && _context.DossingBarcode.Any(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId))
                 {
-                    if (_context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).ToList().Count() != 0)
-                        x.PKBarcodeOption = _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault().PKBarcodeOption;
+                    x.PKBarcodeOption = _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == x.ProjectDesignTemplateId && r.DeletedDate == null && r.VolunteerId == x.VolunteerId).FirstOrDefault()?.PKBarcodeOption;
                 }
             });
 
-            return projectdata.ToList().Where(p => p.BarcodeString != "").ToList();
+            return projectdata.Where(p => p.BarcodeString != "").ToList();
         }
 
         string BarcodeString(int siteId, int templateId, int VolunteerId, BarcodeGenerationType generationType, int AttendanceId)
         {
             if (generationType == BarcodeGenerationType.PkBarocde)
             {
-                if (All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).ToList().Count() != 0)
-                    return All.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+                if (All.Any(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId))
+                    return All.FirstOrDefault(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId)?.BarcodeString;
                 else
                     return "";
             }
             else if (generationType == BarcodeGenerationType.SampleBarcode)
-                return _context.SampleBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+                return _context.SampleBarcode.FirstOrDefault(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId)?.BarcodeString;
             else if (generationType == BarcodeGenerationType.DosingBarcode)
             {
-                if (_context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).ToList().Count() != 0)
-                    return _context.DossingBarcode.Where(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId).FirstOrDefault().BarcodeString;
+                if (_context.DossingBarcode.Any(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId))
+                    return _context.DossingBarcode.FirstOrDefault(r => r.SiteId == siteId && r.TemplateId == templateId && r.DeletedDate == null && r.VolunteerId == VolunteerId)?.BarcodeString;
                 else
                     return "";
             }
             else if (generationType == BarcodeGenerationType.SubjectBarcode)
             {
-                if (_context.AttendanceBarcodeGenerate.Where(r => r.DeletedDate == null && r.AttendanceId == AttendanceId).ToList().Count() != 0)
-                    return _context.AttendanceBarcodeGenerate.Where(r => r.DeletedDate == null && r.AttendanceId == AttendanceId).FirstOrDefault().BarcodeString;
+                if (_context.AttendanceBarcodeGenerate.Any(r => r.DeletedDate == null && r.AttendanceId == AttendanceId))
+                    return _context.AttendanceBarcodeGenerate.FirstOrDefault(r => r.DeletedDate == null && r.AttendanceId == AttendanceId)?.BarcodeString;
                 else
                     return "";
 

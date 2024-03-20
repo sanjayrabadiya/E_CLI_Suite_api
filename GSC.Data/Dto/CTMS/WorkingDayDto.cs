@@ -43,7 +43,7 @@ namespace GSC.Data.Dto.CTMS
     }
     public class WorkingDayListDto : BaseAuditDto
     {
-        public int? ParentProjectId { get; set; }
+        public int ParentProjectId { get; set; }
         public string ProjectCode { get; set; }
         public string SiteCode { get; set; }
         public bool? IsSite { get; set; }

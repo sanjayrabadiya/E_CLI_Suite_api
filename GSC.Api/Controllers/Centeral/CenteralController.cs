@@ -23,20 +23,15 @@ namespace GSC.Api.Controllers.Centeral
     public class CenteralController : ControllerBase
     {
         private readonly IMapper _mapper;
-        private readonly IUnitOfWork _uow;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectModuleRightsRepository _projectModuleRightsRepository;
-        private readonly IEmailSenderRespository _emailSenderRespository;
 
 
-        public CenteralController(IProjectRepository projectRepository, IUnitOfWork uow, IMapper mapper, IProjectModuleRightsRepository projectModuleRightsRepository, IEmailSenderRespository emailSenderRespository)
+        public CenteralController(IProjectRepository projectRepository, IMapper mapper, IProjectModuleRightsRepository projectModuleRightsRepository)
         {
-
             _projectRepository = projectRepository;
-            _uow = uow;
             _mapper = mapper;
             _projectModuleRightsRepository = projectModuleRightsRepository;
-            _emailSenderRespository = emailSenderRespository;
         }
 
         [HttpPost]
@@ -69,9 +64,8 @@ namespace GSC.Api.Controllers.Centeral
         }
         [HttpGet]
         [Route("SendRegisterEMail")]
-        public IActionResult SendRegisterEMail(string email,string password,string username)
+        public IActionResult SendRegisterEMail(string email, string password, string username)
         {
-            //_emailSenderRespository()
             return Ok();
         }
 

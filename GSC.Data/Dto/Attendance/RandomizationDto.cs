@@ -88,12 +88,6 @@ namespace GSC.Data.Dto.Attendance
         public string LastName { get; set; }
         public string Initial { get; set; }
         public DateTime? DateOfBirth { get; set; }
-        //public DateTime? DateOfBirth
-        //{
-        //    get => _DateOfBirth.UtcDate();
-        //    set => _DateOfBirth = value.UtcDate();
-        //}
-
         public string PrimaryContactNumber { get; set; }
         public string EmergencyContactNumber { get; set; }
         public string Email { get; set; }
@@ -115,18 +109,10 @@ namespace GSC.Data.Dto.Attendance
         public int? CountryId { get; set; }
         public string ScreeningNumber { get; set; }
         public DateTime? DateOfScreening { get; set; }
-        //public DateTime? DateOfScreening
-        //{
-        //    get => _DateOfScreening.UtcDate();
-        //    set => _DateOfScreening = value.UtcDate();
-        //}
+      
         public string RandomizationNumber { get; set; }
         public DateTime? DateOfRandomization { get; set; }
-        //public DateTime? DateOfRandomization
-        //{
-        //    get => _DateOfRandomization.UtcDate();
-        //    set => _DateOfRandomization = value.UtcDate();
-        //}
+       
 
         public string Language { get; set; }
         public string ParentProjectCode { get; set; }

@@ -339,7 +339,8 @@ namespace GSC.Respository.Screening
                     x.Visit.ForEach(a =>
                     {
                         var templatesIds = visitTemplates.Where(r => r.Id == a.ProjectDesignVisitId).Select(v => v.TemplatesIds).FirstOrDefault();
-                        if (templatesIds != null && templatesIds.Exists(r => !hideTemplateIds.Contains(r)))
+                        //if (templatesIds != null && templatesIds.Exists(r => !hideTemplateIds.Contains(r)))
+                        if (templatesIds.Where(r => !hideTemplateIds.Contains(r)).Count() < 1)
                             a.HideDisableType = HideDisableType.Hide;
                     });
 
@@ -591,15 +592,15 @@ namespace GSC.Respository.Screening
 
             if (!seq.IsTemplateSeqNo && t.RepeatSeqNo != null)
             {
-                    if (!String.IsNullOrEmpty(seq.RepeatPrefix))
-                        str += ((!String.IsNullOrEmpty(pt.PreLabel)) ? seq.SeparateSign : "") + seq.RepeatPrefix;
-                    if (seq.RepeatSeqNo != null)
-                    {
-                        if (seq.RepeatSubSeqNo == null)
-                            str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
-                        else
-                            str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
-                    }
+                if (!String.IsNullOrEmpty(seq.RepeatPrefix))
+                    str += ((!String.IsNullOrEmpty(pt.PreLabel)) ? seq.SeparateSign : "") + seq.RepeatPrefix;
+                if (seq.RepeatSeqNo != null)
+                {
+                    if (seq.RepeatSubSeqNo == null)
+                        str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + (seq.RepeatSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                    else
+                        str += ((!String.IsNullOrEmpty(seq.RepeatPrefix) || (!String.IsNullOrEmpty(pt.PreLabel))) ? seq.SeparateSign : "") + seq.RepeatSeqNo + seq.SeparateSign + (seq.RepeatSubSeqNo + t.RepeatSeqNo.Value - 1).ToString();
+                }
             }
             return str;
         }
@@ -645,7 +646,7 @@ namespace GSC.Respository.Screening
                 visits.ForEach(a =>
                 {
                     var templatesIds = visitTemplates.Where(r => r.Id == a.ProjectDesignVisitId).Select(v => v.TemplatesIds).FirstOrDefault();
-                    if (templatesIds.Where(r => !hideTemplateIds.Contains(r)).Count() < 1)
+                    if (!templatesIds.Exists(r => !hideTemplateIds.Contains(r)))
                         a.HideDisableType = HideDisableType.Hide;
                 });
             }
@@ -654,9 +655,9 @@ namespace GSC.Respository.Screening
 
             visits = visits.Where(x => x.HideDisableType != HideDisableType.Hide).ToList();
 
-            if (visits.Exists(x => x.HideDisableType == HideDisableType.Disable) && visits.Count !=0)
+            if (visits.Exists(x => x.HideDisableType == HideDisableType.Disable) && visits.Count != 0)
             {
-                var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(visits.FirstOrDefault().ProjectDesignId);
+                var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(visits.FirstOrDefault()?.ProjectDesignId ?? 0);
                 visits.ForEach(x =>
                 {
                     x.EditCheckMsg = editCheckVisit.Find(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable)?.EditCheckMsg;

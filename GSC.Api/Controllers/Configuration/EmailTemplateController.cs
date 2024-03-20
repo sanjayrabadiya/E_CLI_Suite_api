@@ -61,7 +61,11 @@ namespace GSC.Api.Controllers.Configuration
             emailTemplateDto.Id = 0;
             var emailTemplate = _mapper.Map<EmailTemplate>(emailTemplateDto);
             _emailTemplateRepository.Add(emailTemplate);
-            if (_uow.Save() <= 0) throw new Exception("Creating Email Template failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Email Template failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(emailTemplate.Id);
         }
 
@@ -75,7 +79,11 @@ namespace GSC.Api.Controllers.Configuration
             var emailTemplate = _mapper.Map<EmailTemplate>(emailTemplateDto);
 
             _emailTemplateRepository.Update(emailTemplate);
-            if (_uow.Save() <= 0) throw new Exception("Updating Email Template failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Email Template failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(emailTemplate.Id);
         }
 

@@ -58,7 +58,11 @@ namespace GSC.Api.Controllers.UserMgt
                     _userGridSettingRepository.Add(userGridSetting);
             });
 
-            if (_uow.Save() <= 0) throw new Exception("Saving grid settings failed.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Saving grid settings failed.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }

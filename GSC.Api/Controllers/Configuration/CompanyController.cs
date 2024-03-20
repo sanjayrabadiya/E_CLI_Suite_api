@@ -41,7 +41,6 @@ namespace GSC.Api.Controllers.Configuration
         public IActionResult Get(bool isDeleted)
         {
             var companys = _companyRepository.GetCompanies(isDeleted);
-            //var companysDto = _mapper.Map<IEnumerable<CompanyDto>>(companys);
             return Ok(companys);
         }
 
@@ -72,7 +71,11 @@ namespace GSC.Api.Controllers.Configuration
             company.Location = _locationRepository.SaveLocation(companyDto.Location);
             _locationRepository.Add(company.Location);
             _companyRepository.Add(company);
-            if (_uow.Save() <= 0) throw new Exception("Creating Company failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Company failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(company.Id);
         }
@@ -95,7 +98,11 @@ namespace GSC.Api.Controllers.Configuration
             else
                 _locationRepository.Add(company.Location);
             _companyRepository.Update(company);
-            if (_uow.Save() <= 0) throw new Exception("Updating Company failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Company failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(company.Id);
         }
 

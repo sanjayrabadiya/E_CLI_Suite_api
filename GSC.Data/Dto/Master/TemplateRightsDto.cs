@@ -13,6 +13,5 @@ namespace GSC.Data.Dto.Master
         public string RoleId { get; set; }
 
         public VariableTemplate VariableTemplate { get; set; }
-        //public SecurityRole SecurityRole { get; set; }
     }
 }

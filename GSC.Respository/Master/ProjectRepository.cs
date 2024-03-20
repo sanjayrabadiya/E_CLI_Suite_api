@@ -139,9 +139,9 @@ namespace GSC.Respository.Master
             else
             {
                 var numberFormat = _numberFormatRepository.FindBy(x => x.KeyName == "projectchild" && x.DeletedDate == null).First();
-                var projectSettings = _projectSettingsRepository.All.Where(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null).First();
+                var projectSettings = _projectSettingsRepository.All.FirstOrDefault(x => x.ProjectId == project.ParentProjectId && x.DeletedDate == null);
                 project.Status = MonitoringSiteStatus.Active;
-                if (projectSettings.IsCtms)
+                if (projectSettings != null && projectSettings.IsCtms)
                 {
                     project.ProjectCode = null;
                 }

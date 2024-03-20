@@ -14,14 +14,12 @@ namespace GSC.Data.Dto.Project.Design
         public int ProjectDesignVisitId { get; set; }
         public string TemplateName { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
-        //public DateTime? SubmittedDate { get; set; }
         private DateTime? _SubmittedDate { get; set; }
         public DateTime? SubmittedDate
         {
             get => _SubmittedDate?.UtcDateTime();
             set => _SubmittedDate = value?.UtcDateTime();
         }
-        //public DateTime? ScheduleDate { get; set; }
         public int DesignOrder { get; set; }
         private DateTime? _scheduleDate { get; set; }
         public DateTime? ScheduleDate

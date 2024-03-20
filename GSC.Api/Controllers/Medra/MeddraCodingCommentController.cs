@@ -54,18 +54,17 @@ namespace GSC.Api.Controllers.Medra
             var oldHierarchy = new MeddraMdHierarchy();
             if (recodeData.MeddraSocTermId != null && recodeData.MeddraLowLevelTermId != null)
                 oldHierarchy = _meddraMdHierarchyRepository.GetHierarchyData((int)recodeData.MeddraSocTermId, (int)recodeData.MeddraLowLevelTermId);
-            var newHierarchy = _meddraMdHierarchyRepository.GetHierarchyData((int)meddraCodingCommentDto.MeddraSocTermId, (int)meddraCodingCommentDto.MeddraLowLevelTermId);
-            if (recodeData != null)
-            {
-                recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
-                recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
-                recodeData.LastUpdateBy = _jwtTokenAccesser.UserId;
-                recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
-                recodeData.MeddraLowLevelTermId = meddraCodingCommentDto.MeddraLowLevelTermId;
-                recodeData.MeddraSocTermId = meddraCodingCommentDto.MeddraSocTermId;
-                var medra = _mapper.Map<MeddraCoding>(recodeData);
-                _meddraCodingRepository.Update(medra);
-            }
+            var newHierarchy = _meddraMdHierarchyRepository.GetHierarchyData((int)meddraCodingCommentDto.MeddraSocTermId, meddraCodingCommentDto.MeddraLowLevelTermId);
+
+            recodeData.ModifiedDate = _jwtTokenAccesser.GetClientDate();
+            recodeData.ModifiedBy = _jwtTokenAccesser.UserId;
+            recodeData.LastUpdateBy = _jwtTokenAccesser.UserId;
+            recodeData.CreatedRole = _jwtTokenAccesser.RoleId;
+            recodeData.MeddraLowLevelTermId = meddraCodingCommentDto.MeddraLowLevelTermId;
+            recodeData.MeddraSocTermId = meddraCodingCommentDto.MeddraSocTermId;
+            var medra = _mapper.Map<MeddraCoding>(recodeData);
+            _meddraCodingRepository.Update(medra);
+
 
             if (recodeData.MeddraSocTermId != null && recodeData.MeddraLowLevelTermId != null)
             {
@@ -92,12 +91,16 @@ namespace GSC.Api.Controllers.Medra
                 _meddraCodingCommentRepository.Add(meddraCodingComment);
                 _meddraCodingAuditRepository.SaveAudit(meddraCodingComment.ReasonOth, meddraCodingComment.MeddraCodingId, meddraCodingCommentDto.MeddraLowLevelTermId, meddraCodingCommentDto.MeddraSocTermId, "Comment Status " + meddraCodingCommentDto.CommentStatus.GetDescription() + " Added", meddraCodingCommentDto.ReasonId, meddraCodingCommentDto.ReasonOth);
             }
-            else {
+            else
+            {
                 _meddraCodingAuditRepository.SaveAudit(meddraCodingCommentDto.ReasonOth, recodeData.Id, meddraCodingCommentDto.MeddraLowLevelTermId, meddraCodingCommentDto.MeddraSocTermId, "Manual Coding for record data.", meddraCodingCommentDto.ReasonId, meddraCodingCommentDto.ReasonOth);
             }
-            
+
             if (_uow.Save() <= 0)
-                throw new Exception("Creating Value Query failed on save.");
+            {
+                ModelState.AddModelError("Message", "Creating Value Query failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok();
         }
@@ -129,7 +132,10 @@ namespace GSC.Api.Controllers.Medra
             else
                 _meddraCodingAuditRepository.SaveAudit(meddraCodingComment.ReasonOth, meddraCodingComment.MeddraCodingId, null, null, "Comment Status " + meddraCodingCommentDto.CommentStatus.GetDescription() + " Added", meddraCodingComment.ReasonId, meddraCodingComment.ReasonOth);
             if (_uow.Save() <= 0)
-                throw new Exception("Creating Value Query failed on save.");
+            {
+                ModelState.AddModelError("Message", "Creating Value Query failed on save.");
+                return BadRequest(ModelState);
+            }
 
             return Ok(meddraCodingComment.Id);
         }

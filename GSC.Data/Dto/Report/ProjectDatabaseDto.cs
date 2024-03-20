@@ -48,6 +48,7 @@ namespace GSC.Data.Dto.Report
         public List<ProjectDatabaseDto> LstProjectDataBaseVisit { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseitems { get; set; }
         public string VariableChildValue { get; set; }
+        public string VariableCode { get; set; }
     }
 
     public class ProjectDatabaseDomainDto
@@ -63,6 +64,7 @@ namespace GSC.Data.Dto.Report
 
     public class ProjectDatabaseVariableDto
     {
+        public string VariableCode { get; set; }
         public string VariableName { get; set; }
         public string Annotation { get; set; }
         public string Unit { get; set; }

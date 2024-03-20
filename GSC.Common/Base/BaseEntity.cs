@@ -41,9 +41,7 @@ namespace GSC.Common.Base
 
         public int? DeletedBy { get; set; }
 
-        //[NotMapped] 
-        //public ViewModelState State { get; set; }
-
+       
      
         [NotMapped] 
         public AuditAction AuditAction { get; set; }

@@ -103,13 +103,12 @@ namespace GSC.Respository.IDVerificationSystem
                     {
                         byte[] fileBytes = Convert.FromBase64String(IdFile.DocumentBase64String);
                         File.WriteAllBytes(filePath, fileBytes);
-                        //reportDto.DocumentName = fileName;
                         IdFile.DocumentPath = Path.Combine(documentPath, fileName);
                         IdFile.IDVerificationId = iDVerification.Id;
                         var iDVerificationFile = _mapper.Map<IDVerificationFile>(IdFile);
                         _context.IDVerificationFile.Add(iDVerificationFile);
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         return 0;
                     }

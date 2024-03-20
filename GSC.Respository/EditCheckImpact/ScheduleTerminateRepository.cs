@@ -54,11 +54,6 @@ namespace GSC.Respository.EditCheckImpact
 
             var isValid = false;
 
-            var templateValues = _screeningTemplateValueRepository.All.AsNoTracking().Where(x => x.DeletedDate == null
-            && x.ScreeningTemplate.ProjectDesignTemplateId == projectDesignTemplateId
-            && x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId == screeningEntryId
-            && x.ScreeningTemplate.ParentId == null).ToList();
-
             scheduleTerminates.ForEach(x =>
             {
                 var editChecks = new List<EditCheckValidate>();

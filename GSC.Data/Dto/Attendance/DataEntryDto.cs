@@ -130,7 +130,6 @@ namespace GSC.Data.Dto.Attendance
         public int? ParentId { get; set; }
         public int? ProjectDesignPeriodId { get; set; }
         public ScreeningTemplateStatus Status { get; set; }
-        // public string ProjectDesignTemplateName { get; set; }
         public string ScreeningTemplateName { get; set; }
         public string DesignOrder { get; set; }
         public decimal DesignOrderForOrderBy { get; set; }

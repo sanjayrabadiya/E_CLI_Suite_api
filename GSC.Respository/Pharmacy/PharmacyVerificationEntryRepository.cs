@@ -17,34 +17,24 @@ namespace GSC.Respository.Pharmacy
 {
     public class PharmacyVerificationEntryRepository : GenericRespository<PharmacyVerificationEntry>,
         IPharmacyVerificationEntryRepository
-    {
-        //private readonly IAttendanceRepository _attendanceRepository;
-        //private readonly IProjectWorkflowRepository _projectWorkflowRepository;        
+    {      
         private readonly IPharmacyVerificationTemplateValueRepository _pharmacyVerificationTemplateValueRepository;
         private readonly IGSCContext _context;
-        //private readonly IProjectDesignTemplateRepository _projectDesignTemplateRepository;
-        //private readonly IProjectDesignVariableRepository _projectDesignVariableRepository;
         private readonly IVolunteerRepository _volunteerRepository;
 
-        public PharmacyVerificationEntryRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
-            //IProjectDesignTemplateRepository projectDesignTemplateRepository,
+        public PharmacyVerificationEntryRepository(IGSCContext context,
             IVolunteerRepository volunteerRepository,
             IPharmacyVerificationTemplateValueRepository pharmacyVerificationTemplateValueRepository
-        // IProjectDesignVariableRepository projectDesignVariableRepository
         )
             : base(context)
         {
             _context = context;
-            //_projectDesignVariableRepository = projectDesignVariableRepository;
-            //_projectDesignTemplateRepository = projectDesignTemplateRepository;
             _volunteerRepository = volunteerRepository;
             _pharmacyVerificationTemplateValueRepository = pharmacyVerificationTemplateValueRepository;
         }
 
         public PharmacyVerificationEntryDto GetDetails(int id)
         {
-            //var PharmacyTemplateValue = _pharmacyTemplateValueRepository.
-            //    FindBy(x => x.DeletedDate == null && x.PharmacyEntryId == id).ToList();
 
             var pharmacyVerificationEntryDto = _context.PharmacyVerificationEntry
                 .Where(t => t.Id == id && t.DeletedDate == null)
@@ -242,16 +232,6 @@ namespace GSC.Respository.Pharmacy
             if (volunterIds == null || volunterIds.Count == 0) return new List<DropDownDto>();
 
             var items = new List<DropDownDto>();
-            //var query = All.Where(t => t.DeletedDate == null)
-            //    .Include(t => t.Attendance).AsQueryable();
-
-            //query = query.Where(x => volunterIds.Any(a => a.Id == x.Attendance.VolunteerId));
-
-            //var items = query.Select(t => new DropDownDto
-            //{
-            //    Id = t.Attendance.VolunteerId,
-            //    Value = t.Attendance.Volunteer.VolunteerNo + " " + t.Attendance.Volunteer.FullName
-            //}).ToList();
 
             return items;
         }

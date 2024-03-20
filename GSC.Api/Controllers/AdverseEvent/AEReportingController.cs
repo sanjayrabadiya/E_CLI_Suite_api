@@ -117,13 +117,10 @@ namespace GSC.Api.Controllers.AdverseEvent
             var randomization = await _randomizationRepository.AllIncluding(x => x.ScreeningEntry).FirstOrDefaultAsync(x => x.UserId == _jwtTokenAccesser.UserId);
 
             var template = _context.ScreeningTemplate.Include(x => x.ScreeningVisit.ScreeningEntry).FirstOrDefault(q => q.ProjectDesignTemplateId == aEReporting.ScreeningTemplateId && q.ScreeningVisit.ScreeningEntry.RandomizationId == randomization.Id);
-            if (template != null)
+            if (template != null && (template.IsHardLocked || template.IsLocked))
             {
-                if (template.IsHardLocked || template.IsLocked)
-                {
-                    ModelState.AddModelError("Message", "The template is locked");
-                    return BadRequest(ModelState);
-                }
+                ModelState.AddModelError("Message", "The template is locked");
+                return BadRequest(ModelState);
             }
 
             if (randomization == null)

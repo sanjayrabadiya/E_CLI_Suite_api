@@ -26,7 +26,6 @@ namespace GSC.Api.Controllers.InformConcent
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRepository _projectRepository;
         public EconsentsetupController(
@@ -39,7 +38,6 @@ namespace GSC.Api.Controllers.InformConcent
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
-            _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
             _projectRepository = projectRepository;
         }
@@ -60,7 +58,6 @@ namespace GSC.Api.Controllers.InformConcent
         {
             //calls when edit particular document         
             if (id <= 0) return BadRequest();
-            //var ecincentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id, x => x.Roles, x => x.PatientStatus).FirstOrDefault();
             var ecincentSetup = _econsentSetupRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
             var econcentsetupDto = _mapper.Map<EconsentSetupDto>(ecincentSetup);
             return Ok(econcentsetupDto);
@@ -138,7 +135,11 @@ namespace GSC.Api.Controllers.InformConcent
                 return BadRequest(ModelState);
             }
             _econsentSetupRepository.Add(econsent);
-            if (_uow.Save() <= 0) throw new Exception($"Creating Econsent File failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Econsent File failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(econsent.Id);
         }
 
@@ -193,7 +194,11 @@ namespace GSC.Api.Controllers.InformConcent
             }
             econsent.DocumentStatusId = document.DocumentStatusId;
             _econsentSetupRepository.Update(econsent);
-            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent File failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Econsent File failed on save.");
+                return BadRequest(ModelState);
+            }
             _uow.Save();
             return Ok(econsent.Id);
         }
@@ -223,7 +228,11 @@ namespace GSC.Api.Controllers.InformConcent
             econsent.DocumentStatusId = DocumentStatus.Final;
             _econsentSetupRepository.SendDocumentEmailPatient(econsent);
             _econsentSetupRepository.Update(econsent);
-            if (_uow.Save() <= 0) throw new Exception($"Updating Econsent File failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Econsent File failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(econsent.Id);
         }
     }

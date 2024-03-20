@@ -29,11 +29,7 @@ namespace GSC.Respository.Barcode
         }
 
         public string Duplicate(BarcodeType objSave)
-        {
-            //if (All.Any(
-            //    x => x.Id != objSave.Id && x.BarcodeTypeCode == objSave.BarcodeTypeCode.Trim() && x.DeletedDate == null))
-            //    return "Duplicate BarcodeType code : " + objSave.BarcodeTypeCode;
-
+        {           
             if (All.Any(
                 x => x.Id != objSave.Id && x.BarcodeTypeName == objSave.BarcodeTypeName.Trim() && x.DeletedDate == null))
                 return "Duplicate BarcodeType name : " + objSave.BarcodeTypeName;

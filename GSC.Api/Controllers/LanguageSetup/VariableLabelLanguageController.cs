@@ -17,17 +17,14 @@ namespace GSC.Api.Controllers.LanguageSetup
         private readonly IMapper _mapper;
         private readonly IVariabeLabelLanguageRepository _variableLabelLanguageRepository;
         private readonly IUnitOfWork _uow;
-        IJwtTokenAccesser _jwtTokenAccesser;
 
         public VariableLabelLanguageController(
             IUnitOfWork uow, IMapper mapper,
-            IVariabeLabelLanguageRepository variableLabelLanguageRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IVariabeLabelLanguageRepository variableLabelLanguageRepository)
         {
             _variableLabelLanguageRepository = variableLabelLanguageRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -63,7 +60,11 @@ namespace GSC.Api.Controllers.LanguageSetup
                     _variableLabelLanguageRepository.Add(language);
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating variable label language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating variable label language failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

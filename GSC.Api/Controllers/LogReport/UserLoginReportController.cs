@@ -63,7 +63,11 @@ namespace GSC.Api.Controllers.LogReport
             userLoginReportDto.Id = 0;
             var userLoginReport = _mapper.Map<UserLoginReport>(userLoginReportDto);
             _userLoginReportRepository.Add(userLoginReport);
-            if (_uow.Save() <= 0) throw new Exception("Creating User Login Report failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating User Login Report failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(userLoginReport.Id);
         }
 
@@ -77,7 +81,11 @@ namespace GSC.Api.Controllers.LogReport
             var userLoginReport = _mapper.Map<UserLoginReport>(userLoginReportDto);
 
             _userLoginReportRepository.Update(userLoginReport);
-            if (_uow.Save() <= 0) throw new Exception("Updating User Login Report failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating User Login Report failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(userLoginReport.Id);
         }
 

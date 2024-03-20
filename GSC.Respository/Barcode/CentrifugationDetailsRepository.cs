@@ -88,11 +88,13 @@ namespace GSC.Respository.Barcode
                                                          ReasonOth = null,
                                                          MissedBy = null,
                                                          MissedOn = null,
-                                                         ReCentrifugateReason=null,
+                                                         ReCentrifugateReason = null,
                                                          ReCentrifugateReasonOth = null
                                                      }).FirstOrDefault();
-                if(data!=null)
-                listci.Add(data);
+                if (data != null)
+                {
+                    listci.Add(data);
+                }
 
             }
             else
@@ -134,39 +136,39 @@ namespace GSC.Respository.Barcode
         public List<CentrifugationDetailsGridDto> GetCentrifugationDetailsByPKBarcode(string PkBarcodeString)
         {
             List<CentrifugationDetailsGridDto> listci = new List<CentrifugationDetailsGridDto>();
-             _pKBarcodeRepository.All.Where(p => p.DeletedDate == null && p.BarcodeString == PkBarcodeString).ToList().ForEach(r =>
-            {
-                var projectDesignVariable = _projectDesignVariableRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == r.TemplateId).OrderBy(x => x.DesignOrder).FirstOrDefault();
+            _pKBarcodeRepository.All.Where(p => p.DeletedDate == null && p.BarcodeString == PkBarcodeString).ToList().ForEach(r =>
+           {
+               var projectDesignVariable = _projectDesignVariableRepository.All.Where(x => x.DeletedDate == null && x.ProjectDesignTemplateId == r.TemplateId).OrderBy(x => x.DesignOrder).FirstOrDefault();
 
-                var exists = All.Where(x => x.PKBarcodeId == r.Id).FirstOrDefault();
-                if (exists == null)
-                {
-                    var data = _screeningTemplateValueRepository.All
-                                                         .Where(x => x.ScreeningTemplate.Status >= Helper.ScreeningTemplateStatus.Submitted
-                                                         && x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == r.VolunteerId
-                                                         && x.ProjectDesignVariableId == projectDesignVariable.Id)
-                                                         .Select(x => new CentrifugationDetailsGridDto
-                                                         {
-                                                             PKBarcodeId = r.Id,
-                                                             StudyCode = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
-                                                             SiteCode = _projectRepository.All.Where(p => p.Id == (int)x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.SiteId).FirstOrDefault().ProjectCode,
-                                                             RandomizationNumber = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.RandomizationNumber,
-                                                             PKBarcode = r.BarcodeString,
-                                                             PKActualTime = x.Value,
-                                                             CentrifugationStartTime = null,
-                                                             CentrifugationByUser = null,
-                                                             CentrifugationOn = null,
-                                                             Status = null,
-                                                             ReCentrifugationByUser = null,
-                                                             ReCentrifugationOn = null,
-                                                             AuditReason = null,
-                                                             ReasonOth = null,
-                                                             MissedBy = null,
-                                                             MissedOn = null
-                                                         }).FirstOrDefault();
-                    listci.Add(data);
-                }
-            });
+               var exists = All.Where(x => x.PKBarcodeId == r.Id).FirstOrDefault();
+               if (exists == null)
+               {
+                   var data = _screeningTemplateValueRepository.All
+                                                        .Where(x => x.ScreeningTemplate.Status >= Helper.ScreeningTemplateStatus.Submitted
+                                                        && x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == r.VolunteerId
+                                                        && x.ProjectDesignVariableId == projectDesignVariable.Id)
+                                                        .Select(x => new CentrifugationDetailsGridDto
+                                                        {
+                                                            PKBarcodeId = r.Id,
+                                                            StudyCode = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ProjectCode,
+                                                            SiteCode = _projectRepository.All.Where(p => p.Id == (int)x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.SiteId).FirstOrDefault().ProjectCode,
+                                                            RandomizationNumber = x.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.RandomizationNumber,
+                                                            PKBarcode = r.BarcodeString,
+                                                            PKActualTime = x.Value,
+                                                            CentrifugationStartTime = null,
+                                                            CentrifugationByUser = null,
+                                                            CentrifugationOn = null,
+                                                            Status = null,
+                                                            ReCentrifugationByUser = null,
+                                                            ReCentrifugationOn = null,
+                                                            AuditReason = null,
+                                                            ReasonOth = null,
+                                                            MissedBy = null,
+                                                            MissedOn = null
+                                                        }).FirstOrDefault();
+                   listci.Add(data);
+               }
+           });
 
             return listci;
         }
@@ -197,7 +199,7 @@ namespace GSC.Respository.Barcode
                 detail.ReCentrifugationBy = _jwtTokenAccesser.UserId;
                 detail.ReCentrifugationOn = _jwtTokenAccesser.GetClientDate();
                 detail.ReCentrifugateReason = dto.AuditReasonId;
-                    detail.ReCentrifugateReasonOth = dto.ReasonOth;
+                detail.ReCentrifugateReasonOth = dto.ReasonOth;
                 detail.Status = CentrifugationFilter.ReCentrifugation;
                 Update(detail);
             }

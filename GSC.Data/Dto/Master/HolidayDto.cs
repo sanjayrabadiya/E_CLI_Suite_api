@@ -13,8 +13,7 @@ namespace GSC.Data.Dto.Master
         public HolidayType HolidayType { get; set; }
         [Required(ErrorMessage = "Holiday Name is required.")]
         public string HolidayName { get; set; }
-        [Required(ErrorMessage = "Holiday Date is required.")]
-        //public DateTime? HolidayDate { get; set; }
+       
         private DateTime? _approveDate;
         public DateTime? HolidayDate
         {

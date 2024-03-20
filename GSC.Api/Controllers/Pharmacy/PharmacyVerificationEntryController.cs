@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -62,7 +63,11 @@ namespace GSC.Api.Controllers.Pharmacy
             pharmacyEntry.Status = IsFormType.IsVerification;
             _pharmacyEntryRepository.Update(pharmacyEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Creating Pharmacy Verification Entry failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Pharmacy Verification Entry failed on save.");
+                return BadRequest(ModelState);
+            }
             var pharmacyverificationvaluelist =
                 GetpharmacyVerificationTemplateValueList(pharmacyVerificationEntry.ProjectId, 0);
 
@@ -78,17 +83,14 @@ namespace GSC.Api.Controllers.Pharmacy
             var pharmacyVerificationEntry = _mapper.Map<PharmacyVerificationEntry>(pharmacyVerificationEntryDto);
             _pharmacyVerificationEntryRepository.Update(pharmacyVerificationEntry);
 
-            if (_uow.Save() <= 0) throw new Exception("Updating Pharmacy Verification Entry failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Updating Pharmacy Verification Entry failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok(pharmacyVerificationEntry.Id);
         }
 
-
-        //[HttpGet("AutoCompleteSearch")]
-        //public IActionResult AutoCompleteSearch(string searchText)
-        //{
-        //    var result = _pharmacyVerificationEntryRepository.AutoCompleteSearch(searchText);
-        //    return Ok(result);
-        //}
 
         [HttpGet]
         [Route("GetpharmacyVerificationList")]
@@ -147,7 +149,6 @@ namespace GSC.Api.Controllers.Pharmacy
         public IActionResult PreviewVerification(int entryId, int receiptTemplateId)
         {
             var obj = new ProjectDesignTemplateDto();
-            //PharmacyTemplateDto pharmacytemplate = new PharmacyTemplateDto();
             var pharmacyverificationtemplate = new PharmacyVerificationEntryDto();
             obj.Variables = new List<ProjectDesignVariableDto>();
             var variableTemplate = _pharmacyVerificationEntryRepository.GetTemplate(receiptTemplateId);
@@ -159,7 +160,6 @@ namespace GSC.Api.Controllers.Pharmacy
                 {
                     obj.ParentId = pharmacyVerificationEntry.ProjectId;
                     obj.TemplateCode = pharmacyVerificationEntry.PharmacyVerificationNo;
-                    //obj.ProductTypeId = pharmacyVerificationEntry.ProductTypeId;
                 }
 
                 var pharmacyVerificationTemplateValuelist =
@@ -173,12 +173,12 @@ namespace GSC.Api.Controllers.Pharmacy
 
             obj.VariableTemplate = variableTemplateDto;
 
-            foreach (var v in obj.VariableTemplate.VariableTemplateDetails)
+            foreach (var VariableId in obj.VariableTemplate.VariableTemplateDetails.AsEnumerable().Select(s => s.VariableId))
             {
-                var variableDetail = _variableRepository.Find(v.VariableId);
-                var variableValueDetail = _variableValueRepository.FindByInclude(x => x.VariableId == v.VariableId);
+                var variableDetail = _variableRepository.Find(VariableId);
+                var variableValueDetail = _variableValueRepository.FindByInclude(x => x.VariableId == VariableId);
                 var objDto = new ProjectDesignVariableDto();
-                objDto.VariableId = v.VariableId;
+                objDto.VariableId = VariableId;
                 objDto.CollectionSource = variableDetail.CollectionSource;
                 objDto.VariableName = variableDetail.VariableName;
                 objDto.VariableCode = variableDetail.VariableCode;
@@ -210,12 +210,6 @@ namespace GSC.Api.Controllers.Pharmacy
                 }
 
                 objDto.Values = variableValueList;
-                //var detailList = pharmacyverificationtemplate.PharmacyVerificationTemplateValuesList.Find(x => x.VariableId == v.VariableId && x.PharmacyVerificationEntryId == entryId);
-                //if (detailList != null)
-                //{
-                //    objDto.ScreeningValue = detailList.ValueId;
-                //    objDto.Id = detailList.TempId == null ? 0 : (int)detailList.TempId;
-                //}
                 obj.Variables.Add(objDto);
             }
 

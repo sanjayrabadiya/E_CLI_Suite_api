@@ -18,17 +18,14 @@ namespace GSC.Api.Controllers.LanguageSetup
         private readonly IMapper _mapper;
         private readonly ITemplateNoteLanguageRepository _templateNoteLanguageRepository;
         private readonly IUnitOfWork _uow;
-        IJwtTokenAccesser _jwtTokenAccesser;
 
         public TemplateNoteLanguageController(
             IUnitOfWork uow, IMapper mapper,
-            ITemplateNoteLanguageRepository templateNoteLanguageRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            ITemplateNoteLanguageRepository templateNoteLanguageRepository)
         {
             _templateNoteLanguageRepository = templateNoteLanguageRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -64,7 +61,11 @@ namespace GSC.Api.Controllers.LanguageSetup
                     _templateNoteLanguageRepository.Add(language);
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating template note language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating template note language failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

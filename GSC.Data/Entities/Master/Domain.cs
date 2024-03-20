@@ -12,6 +12,5 @@ namespace GSC.Data.Entities.Master
         public int DomainClassId { get; set; }
         public DomainClass DomainClass { get; set; }
         public bool? IsStatic { get; set; }
-      //  public bool SystemType { get; set; }
     }
 }

@@ -17,14 +17,11 @@ namespace GSC.Respository.Medra
 {
     public class MedraVersionRepository : GenericRespository<MedraVersion>, IMedraVersionRepository
     {
-        private IPropertyMappingService _propertyMappingService;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public MedraVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, 
-            IPropertyMappingService propertyMappingService,
+        public MedraVersionRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
         }

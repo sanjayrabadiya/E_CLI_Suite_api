@@ -2,7 +2,6 @@
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Configuration;
-using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Authorization;
@@ -38,7 +37,11 @@ namespace GSC.Api.Controllers.Configuration
         public IActionResult SaveGeneralSettings([FromBody] GeneralSettingsDto commonSettiongs)
         {
             _appSettingRepository.Save(commonSettiongs, _jwtTokenAccesser.CompanyId);
-            if (_uow.Save() <= 0) throw new Exception("Creating Common Settings failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating Common Settings failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
     }

@@ -1,8 +1,5 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace GSC.Data.Entities.Master
 {
@@ -16,6 +13,6 @@ namespace GSC.Data.Entities.Master
         public bool? IsAlphaNumScreeningNo { get; set; }
         public int ScreeningNoseries { get; set; }
         public int? ScreeningNoStartsWith { get; set; }
-        public string? PrefixScreeningNo { get; set; }
+        public string PrefixScreeningNo { get; set; }
     }
 }

@@ -23,23 +23,17 @@ namespace GSC.Respository.InformConcent
 {
     public class EconsentGlossaryRepository : GenericRespository<EconsentGlossary>, IEconsentGlossaryRepository
     {
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IEconsentSetupRepository _econsentSetupRepository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly IUnitOfWork _uow;
         private readonly IMapper _mapper;
 
         public EconsentGlossaryRepository(IGSCContext context,
-            IJwtTokenAccesser jwtTokenAccesser,
             IEconsentSetupRepository econsentSetupRepository,
             IUploadSettingRepository uploadSettingRepository,
-            IUnitOfWork uow,
             IMapper mapper) : base(context)
         {
-            _jwtTokenAccesser = jwtTokenAccesser;
             _econsentSetupRepository = econsentSetupRepository;
             _uploadSettingRepository = uploadSettingRepository;
-            _uow = uow;
             _mapper = mapper;
         }
 

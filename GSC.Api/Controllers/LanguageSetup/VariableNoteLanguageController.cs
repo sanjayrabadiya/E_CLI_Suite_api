@@ -17,17 +17,14 @@ namespace GSC.Api.Controllers.LanguageSetup
         private readonly IMapper _mapper;
         private readonly IVariabeNoteLanguageRepository _variableNoteLanguageRepository;
         private readonly IUnitOfWork _uow;
-        IJwtTokenAccesser _jwtTokenAccesser;
 
         public VariableNoteLanguageController(
             IUnitOfWork uow, IMapper mapper,
-            IVariabeNoteLanguageRepository variableNoteLanguageRepository,
-            IJwtTokenAccesser jwtTokenAccesser)
+            IVariabeNoteLanguageRepository variableNoteLanguageRepository)
         {
             _variableNoteLanguageRepository = variableNoteLanguageRepository;
             _uow = uow;
             _mapper = mapper;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -63,7 +60,11 @@ namespace GSC.Api.Controllers.LanguageSetup
                     _variableNoteLanguageRepository.Add(language);
                 }
             }
-            if (_uow.Save() <= 0) throw new Exception("Creating variable note language failed on save.");
+            if (_uow.Save() <= 0)
+            {
+                ModelState.AddModelError("Message", "Creating variable note language failed on save.");
+                return BadRequest(ModelState);
+            }
             return Ok();
         }
 

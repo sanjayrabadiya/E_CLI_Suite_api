@@ -16,12 +16,8 @@ namespace GSC.Respository.Medra
 {
     public class MeddraSocTermRepository : GenericRespository<MeddraSocTerm>, IMeddraSocTermRepository
     {
-        private IPropertyMappingService _propertyMappingService;
-        private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public MeddraSocTermRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IPropertyMappingService propertyMappingService) : base(context)
+        public MeddraSocTermRepository(IGSCContext context) : base(context)
         {
-            _propertyMappingService = propertyMappingService;
-            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         public int AddSocFileData(SaveFileDto obj)
