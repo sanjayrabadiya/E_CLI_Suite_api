@@ -117,7 +117,7 @@ namespace GSC.Api.Controllers.Screening
                 ScreeningTemplateValue = screeningTemplateValue,
                 Value = screeningTemplateValueDto.IsNa ? "N/A" : value,
                 OldValue = screeningTemplateValueDto.OldValue,
-                ProjectDesignVariableValueId = screeningTemplateValue.Children.Any() ? null : screeningTemplateValue.Children[0]?.ProjectDesignVariableValueId,
+                ProjectDesignVariableValueId = screeningTemplateValue.Children.Count() == 0 ? null : screeningTemplateValue.Children[0]?.ProjectDesignVariableValueId,
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
 
@@ -133,7 +133,7 @@ namespace GSC.Api.Controllers.Screening
             //for variable email .prakash chauhan 14-05-2022
             if (screeningTemplateValueDto.CollectionSource == CollectionSources.RadioButton)
                 _screeningTemplateRepository.SendEmailOnVaribleConfiguration(screeningTemplateValue.ScreeningTemplateId);
-           
+
 
             return Ok(result);
         }
@@ -182,11 +182,11 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValueDto.IsDeleted && (
                 screeningTemplateValueDto.CollectionSource == CollectionSources.Date ||
                 screeningTemplateValueDto.CollectionSource == CollectionSources.DateTime ||
-                screeningTemplateValueDto.CollectionSource == CollectionSources.Time)&&
+                screeningTemplateValueDto.CollectionSource == CollectionSources.Time) &&
                 !_screeningTemplateRepository.IsRepated(screeningTemplateValueDto.ScreeningTemplateId) && _impactService.CheckReferenceVariable(screeningTemplateValueDto.ProjectDesignVariableId))
             {
-                    ModelState.AddModelError("Message", "Reference schedule date can't clear!");
-                    return BadRequest(ModelState);
+                ModelState.AddModelError("Message", "Reference schedule date can't clear!");
+                return BadRequest(ModelState);
             }
 
             var value = _screeningTemplateValueRepository.GetValueForAudit(screeningTemplateValueDto);
@@ -199,8 +199,8 @@ namespace GSC.Api.Controllers.Screening
                 Value = value,
                 Note = screeningTemplateValueDto.IsDeleted ? "Clear Data" : null,
                 OldValue = screeningTemplateValueDto.OldValue,
-                ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth"),
-                ReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"))
+                ReasonOth = _jwtTokenAccesser.RoleId == 2 ? null : _jwtTokenAccesser.GetHeader("audit-reason-oth"),
+                ReasonId = _jwtTokenAccesser.RoleId == 2 ? null : int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"))
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
 
@@ -223,7 +223,7 @@ namespace GSC.Api.Controllers.Screening
 
             var result = _screeningTemplateRepository.ValidateVariableValue(screeningTemplateValue, screeningTemplateValueDto.EditCheckIds, screeningTemplateValueDto.CollectionSource);
 
-            
+
             return Ok(result);
         }
 
@@ -241,7 +241,7 @@ namespace GSC.Api.Controllers.Screening
             if (screeningTemplateValueDto.FileModel?.Base64?.Length > 0)
             {
                 var screningDetails = _context.ScreeningTemplate.Where(x => x.Id == screeningTemplateValue.ScreeningTemplateId).Select(a => new { a.ScreeningVisit.ScreeningEntry.ProjectId, a.ScreeningVisit.ScreeningEntry.Randomization.Initial, a.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber }).FirstOrDefault();
-               if(screningDetails != null)
+                if (screningDetails != null)
                 {
                     var validateuploadlimit = _uploadSettingRepository.ValidateUploadlimit(screningDetails.ProjectId);
                     if (!string.IsNullOrEmpty(validateuploadlimit))
