@@ -279,7 +279,7 @@ namespace GSC.Respository.SupplyManagement
 
 
 
-       static FactorCheckResult ValidateDataTableFactor(DataTable dt, string ruleStr)
+       FactorCheckResult ValidateDataTableFactor(DataTable dt, string ruleStr)
         {
             var result = new FactorCheckResult();
             DataRow dr = dt.NewRow();
@@ -895,7 +895,7 @@ namespace GSC.Respository.SupplyManagement
 
             return result;
         }
-       static string SingleQuote(FectorOperator? _operator, DataType? dataType)
+       string SingleQuote(FectorOperator? _operator, DataType? dataType)
         {
             if (_operator == null && dataType == null)
                 return "";
@@ -908,7 +908,7 @@ namespace GSC.Respository.SupplyManagement
 
             return "'";
         }
-        static bool IsNumeric(Fector? collection1, DataType? dataType)
+        bool IsNumeric(Fector? collection1, DataType? dataType)
         {
             if (!(collection1 == Fector.Gender || collection1 == Fector.Diatory || collection1 == Fector.Joint || collection1 == Fector.Eligibility)
                  && dataType != null && dataType != DataType.Character)
