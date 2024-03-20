@@ -31,10 +31,8 @@ namespace GSC.Respository.Master
         private readonly IGSCContext _context;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IUploadSettingRepository _uploadSettingRepository;
-        private readonly ILettersActivityRepository _lettersActivityRepository;
         public LettersActivityRepository(IGSCContext context, IEmailSenderRespository emailSenderRespository,
-            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository,
-            ILettersActivityRepository lettersActivityRepository)
+            IJwtTokenAccesser jwtTokenAccesser, IMapper mapper, IUploadSettingRepository uploadSettingRepository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -42,7 +40,6 @@ namespace GSC.Respository.Master
             _context = context;
             _emailSenderRespository = emailSenderRespository;
             _uploadSettingRepository = uploadSettingRepository;
-            _lettersActivityRepository = lettersActivityRepository;
         }
         public List<DropDownDto> GetActivityTypeDropDown()
         {
@@ -241,7 +238,7 @@ namespace GSC.Respository.Master
         }
         public string GetSendMail(SendMailModel sendMailModel)
         {
-            var record = _lettersActivityRepository.Find(sendMailModel.Id);
+            var record = _context.LettersActivity.Find(sendMailModel.Id);
             var data = _context.LettersActivity.Include(c => c.Activity).Include(m => m.CtmsMonitoring).Where(x => x.Id == sendMailModel.Id).FirstOrDefault();
             if (record == null) return "";
             var lettersActivityDto = _mapper.Map<LettersActivityDto>(record);
@@ -267,7 +264,7 @@ namespace GSC.Respository.Master
             }
 
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
-            _lettersActivityRepository.Update(lettersActivity);
+            _context.LettersActivity.Update(lettersActivity);
             _context.Save();
             return "";
         }
