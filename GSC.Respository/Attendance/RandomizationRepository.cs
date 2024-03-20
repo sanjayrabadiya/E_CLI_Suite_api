@@ -1312,7 +1312,7 @@ namespace GSC.Respository.Attendance
                 x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Any(c => c.RandomizationId == x.Id) ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient) : false;
                 x.ParentProjectCode = project.ProjectCode;
                 var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
-                x.IsLocked = !screeningtemplate.Exists(y => y.IsLocked);
+                x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
                 x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
             });
 
