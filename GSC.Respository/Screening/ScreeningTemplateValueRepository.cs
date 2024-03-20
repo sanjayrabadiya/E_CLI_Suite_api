@@ -582,11 +582,11 @@ namespace GSC.Respository.Screening
                     TemplateId = y.First().TemplateId,
                     DesignOrder = y.First().DesignOrder,
                     LstVariable = y.Where(q => q.DomainId == y.Key.DomainId && q.VariableName != null).
-                    GroupBy(vari => vari.VariableName).Select(v =>
+                    GroupBy(vari => new { vari.VariableName, vari.VariableCode }).Select(v =>
                         new ProjectDatabaseVariableDto
                         {
                             DomainName = v.First().DomainName,
-                            VariableName = v.First().VariableCode + "_" + v.Key,
+                            VariableName = v.Key.VariableCode + "_" + v.Key.VariableName,
                             Annotation = v.First().Annotation,
                             UnitId = v.First().UnitId,
                             Unit = v.First().Unit,
