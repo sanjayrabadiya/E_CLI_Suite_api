@@ -91,6 +91,18 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
+        [HttpPatch("{id}")]
+        public IActionResult Active(int id)
+        {
+            var record = _budgetPaymentFinalCostRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+            _budgetPaymentFinalCostRepository.Active(record);
+            _uow.Save();
+
+            return Ok();
+        }
 
         [HttpGet]
         [Route("GetFinalBudgetCost/{ProjectId}")]
