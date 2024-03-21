@@ -76,5 +76,9 @@ namespace GSC.Respository.SupplyManagement
         string GenerateKitBarcode(SupplyManagementKITDetail supplyManagementKITDetail);
 
         List<ProductRecieptBarcodeGenerateGridDto> GetkitBarcodeDetail(int id, string type);
+
+        List<KitListApprove> GetAvailableKitManual(int projectId, int siteId, int visitId, int productId, int id);
+
+        SupplyManagementVisitKITDetailDto KitAllocationManual(SupplyManagementVisitKITDetailDto obj);
     }
 }

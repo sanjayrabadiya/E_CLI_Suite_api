@@ -68,5 +68,16 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
+
+        public bool IsManual { get; set; }
+
+        public int PharmacyStudyProductTypeId { get; set; }
+
+        public string ManualName { get; set; }
+
+        public decimal? Dose { get; set; }
+
+        public int? SupplyManagementKITSeriesdetailId { get; set; }
+
     }
 }

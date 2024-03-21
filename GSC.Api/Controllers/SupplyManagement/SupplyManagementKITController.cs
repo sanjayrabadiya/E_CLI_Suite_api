@@ -25,7 +25,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         private readonly ISupplyManagementKitDetailRepository _supplyManagementKITDetailRepository;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
-       
+
         public SupplyManagementKitController(ISupplyManagementKitRepository supplyManagementKITRepository,
             IUnitOfWork uow, IMapper mapper,
             IGSCContext context,
@@ -37,7 +37,7 @@ namespace GSC.Api.Controllers.SupplyManagement
             _jwtTokenAccesser = jwtTokenAccesser;
             _context = context;
             _supplyManagementKITDetailRepository = supplyManagementKITDetailRepository;
-            
+
         }
 
         [HttpGet("{id}")]
@@ -60,7 +60,7 @@ namespace GSC.Api.Controllers.SupplyManagement
         [TransactionRequired]
         public IActionResult Post([FromBody] SupplyManagementKITDto supplyManagementUploadFileDto)
         {
-           
+
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             supplyManagementUploadFileDto.Id = 0;
             var kitsettings = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == supplyManagementUploadFileDto.ProjectId).FirstOrDefault();
@@ -382,6 +382,31 @@ namespace GSC.Api.Controllers.SupplyManagement
                 }
             }
             return Ok(_supplyManagementKITRepository.GetkitBarcodeDetail(id, type));
+        }
+
+        [HttpGet]
+        [Route("GetAvailableKitManual/{projectId}/{siteId}/{visitId}/{productId}/{id}")]
+        public IActionResult GetAvailableKitManual(int projectId, int siteId, int visitId, int productId, int id)
+        {
+            return Ok(_supplyManagementKITRepository.GetAvailableKitManual(projectId, siteId, visitId, productId, id));
+        }
+
+        [HttpPost]
+        [Route("AssignKitNumberManual")]
+        public IActionResult AssignKitNumberManual([FromBody] SupplyManagementVisitKITDetailDto supplyManagementVisitKITDetailDto)
+        {
+            supplyManagementVisitKITDetailDto = _supplyManagementKITRepository.KitAllocationManual(supplyManagementVisitKITDetailDto);
+            if (!string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.ExpiryMesage))
+            {
+                ModelState.AddModelError("Message", supplyManagementVisitKITDetailDto.ExpiryMesage);
+                return BadRequest(ModelState);
+            }
+            if (string.IsNullOrEmpty(supplyManagementVisitKITDetailDto.KitNo))
+            {
+                ModelState.AddModelError("Message", "Kit is not available");
+                return BadRequest(ModelState);
+            }
+            return Ok();
         }
     }
 }

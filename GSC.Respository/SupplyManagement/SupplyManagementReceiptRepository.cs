@@ -74,13 +74,15 @@ namespace GSC.Respository.SupplyManagement
                  ProjectTo<SupplyManagementReceiptGridDto>(_mapper.ConfigurationProvider).ToList();
             requestdata.ForEach(t =>
             {
-                t.Id = 0;
-                t.ApproveRejectDateTime = t.CreatedDate;
-                t.WithIssueName = "";
-                t.CreatedByUser = null;
-                t.CreatedDate = null;
-                t.WithIssue = null;
-                t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
+                SupplyManagementReceiptGridDto obj = new SupplyManagementReceiptGridDto();
+                obj = t;
+                obj.Id = 0;
+                obj.ApproveRejectDateTime = t.CreatedDate;
+                obj.WithIssueName = "";
+                obj.CreatedByUser = null;
+                obj.CreatedDate = null;
+                obj.WithIssue = null;
+                obj.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : t.StudyProductTypeName;
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
                 if (fromproject != null)
                 {
@@ -91,7 +93,9 @@ namespace GSC.Respository.SupplyManagement
                         t.ProjectId = study.Id;
                     }
                 }
-                data.Add(t);
+                obj.IpAddress = t.IpAddress;
+                obj.TimeZone = t.TimeZone;
+                data.Add(obj);
             });
             return data.OrderByDescending(x => x.ApproveRejectDateTime).ToList();
         }

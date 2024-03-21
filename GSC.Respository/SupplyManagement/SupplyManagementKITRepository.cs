@@ -185,7 +185,7 @@ namespace GSC.Respository.SupplyManagement
             return data;
         }
 
-        
+
         public string GenerateKitNo(SupplyManagementKitNumberSettings kitsettings, int noseriese)
         {
 
@@ -314,6 +314,26 @@ namespace GSC.Respository.SupplyManagement
                          && x.RandomizationId == id).
                          ProjectTo<SupplyManagementVisitKITDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
+                foreach (var item in data)
+                {
+                    var kit = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT).ThenInclude(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType)
+                        .Where(s => s.Id == item.SupplyManagementKITDetailId).FirstOrDefault();
+                    if (kit != null && kit.SupplyManagementKIT != null && kit.SupplyManagementKIT.PharmacyStudyProductType != null && kit.SupplyManagementKIT.PharmacyStudyProductType.ProductType != null)
+                    {
+                        item.PharmacyStudyProductTypeId = kit.SupplyManagementKIT.PharmacyStudyProductTypeId;
+                        item.ProductCode = kit.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                        item.Dose = kit.SupplyManagementKIT.Dose;
+                        var allocation = _context.SupplyManagementKitAllocationSettings.Where(s => s.DeletedDate == null &&
+                                  s.ProjectDesignVisitId == item.ProjectDesignVisitId
+                                && s.PharmacyStudyProductTypeId == kit.SupplyManagementKIT.PharmacyStudyProductTypeId).FirstOrDefault();
+                        if (allocation != null)
+                        {
+                            item.IsManual = allocation.IsManual;
+                            item.ManualName = allocation.IsManual ? "Manual Kit Assign" : "Automated Kit Assign";
+                        }
+                    }
+                }
+
                 var randomizationdata = _context.Randomization.Include(x => x.Project).Where(x => x.Id == id).FirstOrDefault();
 
                 if (data.Count > 0 && supplyManagementUploadFileDetail != null && randomizationdata != null)
@@ -338,10 +358,26 @@ namespace GSC.Respository.SupplyManagement
                             obj.VisitName = item.ProjectDesignVisit.DisplayName;
                             obj.ParentProjectId = item.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id;
                             obj.ProjectId = randomizationdata.Project.Id;
+
+                            var productType = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null
+                            && s.ProductType.ProductTypeCode == item.Value && s.ProjectId == item.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id).FirstOrDefault();
+                            if (productType != null)
+                            {
+                                obj.PharmacyStudyProductTypeId = productType.Id;
+                                obj.ProductCode = item.Value;
+                                var allocation = _context.SupplyManagementKitAllocationSettings.Where(s => s.DeletedDate == null &&
+                                  s.ProjectDesignVisitId == item.ProjectDesignVisitId
+                                && s.PharmacyStudyProductTypeId == productType.Id).FirstOrDefault();
+                                if (allocation != null)
+                                {
+                                    obj.IsManual = allocation.IsManual;
+                                    obj.ManualName = allocation.IsManual ? "Manual Kit Assign" : "Automated Kit Assign";
+                                }
+                            }
+
                             data.Add(obj);
                         }
                     }
-
                 }
             }
             if (setting.KitCreationType == KitCreationType.SequenceWise)
@@ -352,6 +388,16 @@ namespace GSC.Respository.SupplyManagement
                          && x.Randomization.ProjectId == siteId
                          && x.RandomizationId == id).
                          ProjectTo<SupplyManagementVisitKITDetailGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+                foreach (var item in data)
+                {
+                    var kit = _context.SupplyManagementKITSeriesDetail.Include(s => s.SupplyManagementKITSeries).Include(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType)
+                          .Where(s => s.Id == item.SupplyManagementKITSeriesdetailId).FirstOrDefault();
+                    if (kit != null && kit.SupplyManagementKITSeries != null && kit.PharmacyStudyProductType != null && kit.PharmacyStudyProductType.ProductType != null)
+                    {
+                        item.PharmacyStudyProductTypeId = kit.PharmacyStudyProductTypeId;
+                    }
+                }
 
                 var randomizationdata = _context.Randomization.Include(x => x.Project).Where(x => x.Id == id).FirstOrDefault();
 
@@ -379,6 +425,15 @@ namespace GSC.Respository.SupplyManagement
                             obj.VisitName = item.ProjectDesignVisit.DisplayName;
                             obj.ParentProjectId = item.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id;
                             obj.ProjectId = randomizationdata.Project.Id;
+
+                            var productType = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.DeletedDate == null
+                             && s.ProductType.ProductTypeCode == item.Value && s.ProjectId == item.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.Project.Id).FirstOrDefault();
+                            if (productType != null)
+                            {
+                                obj.PharmacyStudyProductTypeId = productType.Id;
+                                obj.ProductCode = item.Value;
+                            }
+
                             data.Add(obj);
                         }
                     }
@@ -2000,5 +2055,168 @@ namespace GSC.Respository.SupplyManagement
             return "";
         }
 
+        public List<KitListApprove> GetAvailableKitManual(int projectId, int siteId, int visitId, int productId, int id)
+        {
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == projectId).FirstOrDefault();
+            if (setting == null)
+                return new List<KitListApprove>();
+
+            if (setting.KitCreationType == KitCreationType.KitWise)
+            {
+                var data = _context.SupplyManagementKITDetail.Include(s => s.SupplyManagementKIT)
+                             .Include(s => s.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject)
+                             .Where(x =>
+                              x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : productId)
+                              && (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
+                              && x.SupplyManagementKIT.ProjectId == projectId
+                              && x.SupplyManagementKIT.ProjectDesignVisitId == visitId
+                              && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == siteId
+                              && x.DeletedDate == null).Select(x => new KitListApprove
+                              {
+                                  Id = x.Id,
+                                  KitNo = x.KitNo,
+                                  VisitName = x.SupplyManagementKIT.ProjectDesignVisit.DisplayName,
+                                  SiteCode = x.SupplyManagementShipment.SupplyManagementRequest.FromProject.ProjectCode,
+                                  ProductCode = x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode,
+                                  RetestExpiry = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().RetestExpiryDate : null,
+                                  LotBatchNo = x.SupplyManagementKIT.ProductReceiptId > 0 ? _context.ProductVerification.Where(s => s.ProductReceiptId == x.SupplyManagementKIT.ProductReceiptId).FirstOrDefault().BatchLotNumber : "",
+                                  Dose = x.SupplyManagementKIT.Dose,
+                                  Barcode = x.Barcode
+                              }).OrderBy(x => x.KitNo).ToList();
+                return data;
+            }
+            return new List<KitListApprove>();
+        }
+
+        public SupplyManagementVisitKITDetailDto KitAllocationManual(SupplyManagementVisitKITDetailDto obj)
+        {
+
+            int kitcount = 0;
+
+            var randdata = _context.Randomization.Include(s => s.Project).Where(x => x.Id == obj.RandomizationId).FirstOrDefault();
+            if (randdata == null)
+            {
+                obj.ExpiryMesage = "Randomization not found";
+                return obj;
+            }
+
+            if (randdata.PatientStatusId != ScreeningPatientStatus.Screening && randdata.PatientStatusId != ScreeningPatientStatus.OnTrial)
+            {
+                obj.ExpiryMesage = "Patient status is not eligible for randomization";
+                return obj;
+            }
+            var screeningentry = _context.ScreeningEntry.Where(x => x.RandomizationId == obj.RandomizationId).FirstOrDefault();
+            if (screeningentry != null)
+            {
+                var screeningvisit = _context.ScreeningVisit.Where(x => x.ScreeningEntryId == screeningentry.Id && x.ProjectDesignVisitId == obj.ProjectDesignVisitId && x.Status == ScreeningVisitStatus.Missed).FirstOrDefault();
+                if (screeningvisit != null)
+                {
+                    obj.ExpiryMesage = "Patient Visit status is not eligible for randomization";
+                    return obj;
+                }
+            }
+
+
+            SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
+            var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId).FirstOrDefault();
+            if (setting == null)
+                return obj;
+
+
+            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+            if (SupplyManagementUploadFile == null)
+                return obj;
+
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
+            {
+                data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
+               && x.DeletedDate == null && x.RandomizationId == obj.RandomizationId && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                if (data == null)
+                    return obj;
+
+            }
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
+            {
+                var country = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
+                var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == country.ManageSiteId).FirstOrDefault();
+                if (site != null)
+                {
+                    data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                       && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                      && x.DeletedDate == null && x.RandomizationId == obj.RandomizationId && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    if (data == null)
+                        return obj;
+                }
+            }
+
+            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
+            {
+                data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                && x.DeletedDate == null && x.RandomizationId == obj.RandomizationId && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+
+                if (data == null)
+                    return obj;
+            }
+
+            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null
+            && x.ProjectDesignVisitId == obj.ProjectDesignVisitId && x.SupplyManagementUploadFileDetailId == data.Id).FirstOrDefault();
+            if (visit == null)
+                return obj;
+
+            if (setting.KitCreationType == KitCreationType.KitWise)
+            {
+                var kit = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).Where(x =>
+                                    x.DeletedDate == null
+                                    && x.Id == obj.Id
+                                    && x.RandomizationId == null).OrderBy(x => x.Id).FirstOrDefault();
+
+                if (kit == null)
+                    return obj;
+
+                if (string.IsNullOrEmpty(obj.KitNo))
+                {
+                    var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt).Where(x => x.ProductReceiptId == kit.SupplyManagementKIT.ProductReceiptId).FirstOrDefault();
+                    if (productreciept != null)
+                    {
+                        var expiry = Convert.ToDateTime(productreciept.RetestExpiryDate).Date;
+                        var date = expiry.AddDays((int)kit.SupplyManagementKIT.Days);
+                        var currentdate = DateTime.Now.Date;
+                        if (currentdate.Date < date.Date)
+                        {
+                            kit.RandomizationId = obj.RandomizationId;
+                            kit.Status = KitStatus.Allocated;
+                            _context.SupplyManagementKITDetail.Update(kit);
+                            var supplyManagementVisitKITDetailDto = new SupplyManagementVisitKITDetailDto
+                            {
+                                RandomizationId = obj.RandomizationId,
+                                ProjectDesignVisitId = visit.ProjectDesignVisitId,
+                                KitNo = kit.KitNo,
+                                ProductCode = visit.Value,
+                                ReasonOth = obj.ReasonOth,
+                                AuditReasonId = obj.AuditReasonId,
+                                SupplyManagementKITDetailId = kit.Id,
+                                SupplyManagementShipmentId = kit.SupplyManagementShipmentId,
+                                IpAddress = _jwtTokenAccesser.IpAddress,
+                                TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone")
+
+                            };
+                            InsertKitRandomizationDetail(supplyManagementVisitKITDetailDto);
+                            _context.Save();
+                            obj.KitNo = kit.KitNo;
+                            SendRandomizationThresholdEMail(obj, kitcount);
+                            return obj;
+                        }
+                        else
+                        {
+                            obj.ExpiryMesage = "Kit is expired";
+                            return obj;
+                        }
+                    }
+                }
+
+            }
+            return obj;
+        }
     }
 }
+
