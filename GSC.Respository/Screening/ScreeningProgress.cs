@@ -54,7 +54,7 @@ namespace GSC.Respository.Screening
 
                 SELECT ((@ScreeningCnt * 100) / @TotalCnt) AS Cnt";
 
-            var result = _context.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).FirstOrDefault();
+            var result = _context.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
 
             if (result != null)
                 return result.Cnt;
@@ -88,7 +88,7 @@ namespace GSC.Respository.Screening
 
                 SELECT ((@ScreeningCnt * 100) / @TotalCnt) AS Cnt";
 
-            var result = _context.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).FirstOrDefault();
+            var result = _context.FromSql<CntTable>(sqlquery, new SqlParameter("@Id", id)).ToList().FirstOrDefault();
 
             if (result != null)
                 return result.Cnt;
