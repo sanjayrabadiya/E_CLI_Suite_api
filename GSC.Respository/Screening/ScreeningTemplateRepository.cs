@@ -1298,7 +1298,7 @@ namespace GSC.Respository.Screening
             var ScreeningTemplates = All.Where(y => y.DeletedDate == null && ParentProject != null ? y.ScreeningVisit.ScreeningEntry.ProjectId == ProjectId
             : sites.Contains(y.ScreeningVisit.ScreeningEntry.ProjectId)).ToList();
 
-            var IsLocked = ScreeningTemplates.Any() || ScreeningTemplates.Exists(y => !y.IsLocked);
+            var IsLocked = ScreeningTemplates.Count() <= 0 || ScreeningTemplates.Any(y => y.IsLocked == false) ? false : true;
             return IsLocked;
         }
 
@@ -1477,7 +1477,7 @@ namespace GSC.Respository.Screening
                             if (variable.CollectionSource == CollectionSources.CheckBox)
                             {
                                 if (t.Value == "true")
-                                    variable.ScreeningValue = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.Id == t.ProjectDesignVariableId && x.DeletedDate == null).Select(s=>s.ValueName).FirstOrDefault();
+                                    variable.ScreeningValue = _context.ProjectDesignVariableValue.Where(x => x.ProjectDesignVariable.Id == t.ProjectDesignVariableId && x.DeletedDate == null).Select(s => s.ValueName).FirstOrDefault();
                                 else
                                     variable.ScreeningValue = String.Empty;
                             }
