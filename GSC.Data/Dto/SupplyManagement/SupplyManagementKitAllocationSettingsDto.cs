@@ -17,6 +17,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public string ProductName { get; set; }
 
+        public bool IsManual { get; set; }
+
     }
 
     public class SupplyManagementKitAllocationSettingsGridDto : BaseAuditDto
@@ -35,6 +37,10 @@ namespace GSC.Data.Dto.SupplyManagement
         public string IpAddress { get; set; }
 
         public string TimeZone { get; set; }
+
+        public bool IsManual { get; set; }
+
+        
     }
 
 }

@@ -50,8 +50,8 @@ namespace GSC.Respository.SupplyManagement
 
             var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).FirstOrDefault();
 
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && ((x.SupplyManagementRequest.IsSiteRequest && x.SupplyManagementRequest.ToProjectId == SiteId)
-            || (!x.SupplyManagementRequest.IsSiteRequest && x.SupplyManagementRequest.FromProjectId == SiteId))).
+            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && ((x.SupplyManagementRequest.IsSiteRequest == true && x.SupplyManagementRequest.ToProjectId == SiteId)
+            || (x.SupplyManagementRequest.IsSiteRequest == false && x.SupplyManagementRequest.FromProjectId == SiteId))).
                     ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
 
             data.ForEach(t =>
@@ -60,31 +60,31 @@ namespace GSC.Respository.SupplyManagement
             });
 
             var requestdata = _context.SupplyManagementRequest.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
-                       && ((x.IsSiteRequest && x.ToProjectId == SiteId)
-            || (!x.IsSiteRequest && x.FromProjectId == SiteId)) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
+                       && ((x.IsSiteRequest == true && x.ToProjectId == SiteId)
+            || (x.IsSiteRequest == false && x.FromProjectId == SiteId)) && !data.Select(x => x.SupplyManagementRequestId).Contains(x.Id)).
                      ProjectTo<SupplyManagementShipmentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             requestdata.ForEach(t =>
             {
-
-
-                t.Id = 0;
-                t.RequestDate = t.CreatedDate;
-                t.CreatedByUser = null;
-                t.CreatedDate = null;
-                t.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
+                SupplyManagementShipmentGridDto obj = new SupplyManagementShipmentGridDto();
+                obj = t;
+                obj.Id = 0;
+                obj.RequestDate = t.CreatedDate;
+                obj.CreatedByUser = null;
+                obj.CreatedDate = null;
+                obj.ProductUnitType = t.StudyProductTypeId > 0 ? t.ProductUnitType : ProductUnitType.Kit;
                 var product = t.StudyProductTypeId > 0 ? _context.PharmacyStudyProductType.Include(x => x.ProductType).Where(x => x.Id == t.StudyProductTypeId).Select(x => x.ProductType.ProductTypeName).FirstOrDefault() : "";
-                t.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : product;
+                obj.StudyProductTypeName = setting != null && setting.IsBlindedStudy == true && isShow ? "" : product;
                 if (t.StudyProductTypeId > 0)
                 {
                     var ptype = _context.PharmacyStudyProductType.Where(x => x.Id == t.StudyProductTypeId).FirstOrDefault();
                     if (ptype != null)
                     {
-                        t.StudyProductTypeUnitName = ptype.ProductUnitType.GetDescription();
+                        obj.StudyProductTypeUnitName = ptype.ProductUnitType.GetDescription();
                     }
                 }
                 else
                 {
-                    t.StudyProductTypeUnitName = "Kit";
+                    obj.StudyProductTypeUnitName = "Kit";
                 }
 
                 var fromproject = _context.Project.Where(x => x.Id == t.FromProjectId).FirstOrDefault();
@@ -93,8 +93,8 @@ namespace GSC.Respository.SupplyManagement
                     var study = _context.Project.Where(x => x.Id == fromproject.ParentProjectId).FirstOrDefault();
                     if (study != null)
                     {
-                        t.StudyProjectCode = study.ProjectCode;
-                        t.ProjectId = study.Id;
+                        obj.StudyProjectCode = study != null ? study.ProjectCode : "";
+                        obj.ProjectId = study.Id;
                     }
                 }
                 t.SiteRequest = t.IsSiteRequest ? "Site to Site" : "Site to Study";
@@ -109,27 +109,28 @@ namespace GSC.Respository.SupplyManagement
 
                     if (workflow != null && supplyManagementShipmentApproval == null)
                     {
-                        t.IsWorkflowApproval = true;
+                        obj.IsWorkflowApproval = true;
                     }
                     if (supplyManagementShipmentApproval != null)
                     {
-                        t.WorkflowApprovalName = supplyManagementShipmentApproval.Users.UserName;
+                        obj.WorkflowApprovalName = supplyManagementShipmentApproval.Users.UserName;
                         var role = _context.SecurityRole.Where(a => a.Id == supplyManagementShipmentApproval.RoleId).FirstOrDefault();
                         if (role != null)
-                            t.WorkflowApprovalRoleName = role.RoleName;
-                        t.WorkflowDate = supplyManagementShipmentApproval.CreatedDate;
-                        t.WorkflowId = supplyManagementShipmentApproval.Id;
-                        t.WorkflowComments = supplyManagementShipmentApproval.Comments;
-                        t.WorkflowStatus = supplyManagementShipmentApproval.Status;
-                        t.IsWorkflowApproval = false;
+                            obj.WorkflowApprovalRoleName = role.RoleName;
+                        obj.WorkflowDate = supplyManagementShipmentApproval.CreatedDate;
+                        obj.WorkflowId = supplyManagementShipmentApproval.Id;
+                        obj.WorkflowComments = supplyManagementShipmentApproval.Comments;
+                        obj.WorkflowStatus = supplyManagementShipmentApproval.Status;
+                        obj.IsWorkflowApproval = false;
                     }
                 }
                 else
                 {
-                    t.WorkflowStatus = SupplyManagementApprovalStatus.Approved;
+                    obj.WorkflowStatus = SupplyManagementApprovalStatus.Approved;
                 }
-
-                FinalData.Add(t);
+                obj.IpAddress = t.IpAddress;
+                obj.TimeZone = t.TimeZone;
+                FinalData.Add(obj);
 
             });
             return FinalData.OrderByDescending(x => x.RequestDate).ToList();
