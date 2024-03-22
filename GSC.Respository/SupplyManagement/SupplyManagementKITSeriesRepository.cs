@@ -103,7 +103,7 @@ namespace GSC.Respository.SupplyManagement
             if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count > 0)
             {
                 var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
-                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Select(s => s.ProductReceiptId).Contains((int)x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
                 if (productreciept == null)
                     return "Product receipt not found";
 
@@ -122,7 +122,7 @@ namespace GSC.Respository.SupplyManagement
             if (supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail != null && supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Count > 0)
             {
                 var days = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Sum(x => x.Days);
-               
+
                 var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
                     .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
                 if (productreciept != null)
