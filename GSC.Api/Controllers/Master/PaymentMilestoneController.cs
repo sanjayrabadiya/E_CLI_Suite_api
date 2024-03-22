@@ -58,6 +58,9 @@ namespace GSC.Api.Controllers.Master
             if (paymentMilestoneDto.PatientCostIds != null)
                 _paymentMilestoneRepository.AddPaymentMilestoneVisitDetail(paymentMilestoneDto);
 
+            if (paymentMilestoneDto.PassThroughCostIds != null)
+                _paymentMilestoneRepository.AddPaymentMilestonePassThroughCostDetail(paymentMilestoneDto);
+
             return Ok(paymentMilestone.Id);
         }
 
@@ -66,6 +69,7 @@ namespace GSC.Api.Controllers.Master
         {
             _paymentMilestoneRepository.DeletePaymentMilestoneTaskDetail(id);
             _paymentMilestoneRepository.DeletePaymentMilestoneVisitDetail(id);
+            _paymentMilestoneRepository.DeletePaymentMilestonePassThroughCostDetail(id);
 
             var record = _paymentMilestoneRepository.Find(id);
 
@@ -83,6 +87,7 @@ namespace GSC.Api.Controllers.Master
         {
             _paymentMilestoneRepository.ActivePaymentMilestoneTaskDetail(id);
             _paymentMilestoneRepository.ActivePaymentMilestoneVisitDetail(id);
+            _paymentMilestoneRepository.ActivePaymentMilestonePassThroughCostDetail(id);
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -120,6 +125,12 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetVisitDropDown(int parentProjectId, int procedureId)
         {
             return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId, procedureId));
+        }
+        [HttpGet]
+        [Route("GetPassThroughCostActivity/{projectId:int}")]
+        public IActionResult GetPassThroughCostActivity( int projectId)
+        {
+            return Ok(_paymentMilestoneRepository.GetPassThroughCostActivity(projectId));
         }
     }
 }
