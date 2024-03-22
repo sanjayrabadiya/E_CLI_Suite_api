@@ -368,11 +368,11 @@ namespace GSC.Respository.Screening
             var sites = new List<int>();
             if (filters.SiteId != null)
             {
-                sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.Id == filters.SiteId).ToList().Select(x => x.Id).ToList();
             }
             else
             {
-                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && !x.IsTestSite).Select(x => x.Id).ToList();
+                sites = _context.Project.Where(x => x.ParentProjectId == filters.ProjectId && !x.IsTestSite).ToList().Select(x => x.Id).ToList();
             }
 
             var query = All.Where(x => (filters.SiteId != null ? x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId : sites.Contains(x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId))
@@ -588,7 +588,7 @@ namespace GSC.Respository.Screening
                              }).ToList();
 
             var queryGeneratedBy = queryData.GroupBy(item => new { item.Value })
-                .Select(z => new QueryManagementDto { Id = z.First().Id, Value = z.Key.Value }).ToList();
+                .Select(z => new QueryManagementDto { Id = z.FirstOrDefault().Id, Value = z.Key.Value }).ToList();
             return queryGeneratedBy;
         }
 
@@ -607,7 +607,7 @@ namespace GSC.Respository.Screening
                                         : c.CreatedByUser.UserName + "(" + c.SecurityRole.RoleShortName + ")"
                               }).ToList();
 
-            return dataEntryBy.GroupBy(c => c.Value).Select(z => new DropDownDto { Id = z.First().Id, Value = z.Key }).ToList();
+            return dataEntryBy.GroupBy(c => c.Value).Select(z => new DropDownDto { Id = z.FirstOrDefault().Id, Value = z.Key }).ToList();
         }
 
         public WorkFlowLevelDto GetReviewLevel(int screeningTemplateId)
@@ -704,7 +704,7 @@ namespace GSC.Respository.Screening
                       Status = t.Key.QueryStatus,
                       DisplayName = t.Key.QueryStatus.GetDescription(),
                       Total = t.Count()
-                  }).OrderBy(x => x.Status).ToList();
+                  }).ToList().OrderBy(x => x.Status).ToList();
 
             var closeQueries = All.Count(r =>
             (r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId || r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Project.ParentProjectId == projectId) &&
@@ -714,7 +714,7 @@ namespace GSC.Respository.Screening
             queries.Where(x => x.DisplayName == QueryStatus.Closed.GetDescription()).OrderBy(x => x.Status).ToList().ForEach(x => x.Total = closeQueries);
 
 
-            if (!queries.Exists(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
+            if (!queries.Any(x => x.DisplayName == QueryStatus.Closed.GetDescription()))
                 queries.Add(new DashboardQueryStatusDto
                 {
                     DisplayName = QueryStatus.Closed.GetDescription(),

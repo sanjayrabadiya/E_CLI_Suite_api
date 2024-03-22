@@ -95,11 +95,11 @@ namespace GSC.Respository.Screening
 
             projectDesignVisit.ForEach(a =>
             {
-                var editCheck = editCheckVisit.Find(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
+                var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
                 if (editCheck != null)
                     a.HideDisableType = editCheck.HideDisableType;
 
-                editCheck = editCheckVisit.Find(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Hide);
+                editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Hide);
                 if (editCheck != null)
                     a.HideDisableType = editCheck.HideDisableType;
             });
@@ -261,7 +261,7 @@ namespace GSC.Respository.Screening
 
                 r.Visit.Where(x => x.VisitStatusId > 3).ToList().ForEach(v =>
                 {
-                    v.IsLocked = tempTemplates.Exists(x => x.IsLocked && x.ScreeningVisitId == v.ScreeningVisitId);
+                    v.IsLocked = tempTemplates.Any(x => x.IsLocked ==false && x.ScreeningVisitId == v.ScreeningVisitId)?false:true;
                     v.NotStarted = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
                     v.InProgress = templates.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
 
@@ -313,7 +313,7 @@ namespace GSC.Respository.Screening
                 {
                     x.Visit.ForEach(a =>
                     {
-                        var editCheck = editCheckVisit.Find(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
+                        var editCheck = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == a.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable);
                         if (editCheck != null)
                             a.EditCheckMsg = editCheck.EditCheckMsg;
 
@@ -324,7 +324,7 @@ namespace GSC.Respository.Screening
             }
 
 
-            if (hideTemplateIds.Any())
+            if (hideTemplateIds.Count()>0)
             {
                 var visitTemplates = await _projectDesignVisitRepository.All.
                 Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesignId == projectDesignId).Select(r => new
@@ -390,7 +390,7 @@ namespace GSC.Respository.Screening
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                      PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-                 }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -441,7 +441,7 @@ namespace GSC.Respository.Screening
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                 PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-            }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
+            }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -485,7 +485,7 @@ namespace GSC.Respository.Screening
                                          ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                          : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                      PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-                 }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
+                 }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
 
             return result;
@@ -524,7 +524,7 @@ namespace GSC.Respository.Screening
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName,
                         PreLabel = PreLabelSetting(t, t.ProjectDesignTemplate, sequenseDeatils)
-                    }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
+                    }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
             return result;
 
@@ -564,7 +564,7 @@ namespace GSC.Respository.Screening
                         SubjectName = t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer == null
                                             ? t.ScreeningVisit.ScreeningEntry.Randomization.Initial
                                             : t.ScreeningVisit.ScreeningEntry.Attendance.Volunteer.AliasName
-                    }).OrderBy(t => t.DesignOrderForOrderBy).ToList();
+                    }).ToList().OrderBy(t => t.DesignOrderForOrderBy).ToList();
 
             return result;
         }
@@ -577,7 +577,7 @@ namespace GSC.Respository.Screening
               t => new { t.ProjectDesignTemplate.ProjectDesignVisit.DisplayName, t.ProjectDesignTemplate.ProjectDesignVisit.Id }).Select(g => new DashboardQueryStatusDto
               {
                   DisplayName = g.Key.DisplayName,
-                  Avg = Math.Round((g.Count() - g.Count(a => a.Status == ScreeningTemplateStatus.Pending)) * 100d / g.Count(), 2),
+                  Avg = Math.Round((g.Count() - g.Where(a => a.Status == ScreeningTemplateStatus.Pending).Count()) * 100d / g.Count(), 2),
                   // For order by visit id store visit id 
                   Total = g.Key.Id
               }).OrderBy(g => g.Total).ToList();
@@ -634,7 +634,7 @@ namespace GSC.Respository.Screening
 
             var hideTemplateIds = _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToList();
 
-            if (hideTemplateIds.Any())
+            if (hideTemplateIds.Count()>0)
             {
                 var visitTemplates = _projectDesignVisitRepository.All.
                 Where(x => x.DeletedDate == null && x.ProjectDesignPeriod.ProjectDesignId == visits.FirstOrDefault().ProjectDesignId).Select(r => new
@@ -655,12 +655,12 @@ namespace GSC.Respository.Screening
 
             visits = visits.Where(x => x.HideDisableType != HideDisableType.Hide).ToList();
 
-            if (visits.Exists(x => x.HideDisableType == HideDisableType.Disable) && visits.Count != 0)
+            if (visits.Any(x => x.HideDisableType == HideDisableType.Disable) && visits.Count != 0)
             {
                 var editCheckVisit = _editCheckDetailRepository.GetProjectDesignVisitIds(visits.FirstOrDefault()?.ProjectDesignId ?? 0);
                 visits.ForEach(x =>
                 {
-                    x.EditCheckMsg = editCheckVisit.Find(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable)?.EditCheckMsg;
+                    x.EditCheckMsg = editCheckVisit.FirstOrDefault(r => r.ProjectDesignVisitId == x.ProjectDesignVisitId && r.HideDisableType == HideDisableType.Disable)?.EditCheckMsg;
                 });
             }
             return visits;

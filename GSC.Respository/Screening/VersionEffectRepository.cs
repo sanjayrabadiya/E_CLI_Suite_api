@@ -158,12 +158,12 @@ namespace GSC.Respository.Screening
                 r.Randomization,
                 r.Id,
                 ProjectDesignVisitIds = r.ScreeningVisit.Where(o => o.DeletedDate == null).Select(v => v.ProjectDesignVisitId).ToList()
-            }).Select(v => new
+            }).ToList().Select(v => new
             {
                 v.Randomization,
                 v.Id,
                 addVisits = addVisits.Where(z => !v.ProjectDesignVisitIds.Contains(z.Id)).ToList()
-            }).Where(m => m.addVisits.Any()).ToList();
+            }).Where(m => m.addVisits.Count() >0).ToList();
 
 
             screeningEntrys.ForEach(x =>
@@ -255,7 +255,7 @@ namespace GSC.Respository.Screening
                 isAddTemplate = false;
                 addTemplates.ForEach(template =>
                 {
-                    if (!r.ScreeningTemplates.Exists(c => c.ProjectDesignTemplateId == template.Id) && r.ProjectDesignVisitId == template.ProjectDesignVisitId)
+                    if (!r.ScreeningTemplates.Any(c => c.ProjectDesignTemplateId == template.Id) && r.ProjectDesignVisitId == template.ProjectDesignVisitId)
                     {
                         isAddTemplate = true;
                         var screeningTemplate = new ScreeningTemplate
