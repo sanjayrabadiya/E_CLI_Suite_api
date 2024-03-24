@@ -51,6 +51,10 @@ namespace GSC.Data.Dto.Project.EditCheck
         public int? FetchingProjectDesignVariableId { get; set; }
 
         public int? FetchingProjectDesignVisitId { get; set; }
+        public bool? IsAdditionalTarget { get; set; }
+        public Operator? AdditionalTargetOperator { get; set; }
+        public string AdditionalTargetValue { get; set; }
+
 
 
     }

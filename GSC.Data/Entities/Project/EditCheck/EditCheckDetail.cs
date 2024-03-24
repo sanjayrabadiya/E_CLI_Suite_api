@@ -37,6 +37,10 @@ namespace GSC.Data.Entities.Project.EditCheck
 
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
 
+        public bool? IsAdditionalTarget { get; set; }
+        public Operator? AdditionalTargetOperator { get; set; }
+        public string AdditionalTargetValue { get; set; }
+
 
     }
 }

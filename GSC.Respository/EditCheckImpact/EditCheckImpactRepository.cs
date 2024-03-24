@@ -12,6 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using GSC.Shared.Extension;
+using Microsoft.IdentityModel.Tokens;
+using GSC.Data.Entities.Project.Design;
 
 namespace GSC.Respository.EditCheckImpact
 {
@@ -341,7 +343,7 @@ namespace GSC.Respository.EditCheckImpact
                     hideDisableType = HideDisableType.Hide;
                 else if (visits.Any(r => r.Operator == Operator.Enable && r.ProjectDesignVisitId == x && r.ValidateType != EditCheckValidateType.Passed))
                     hideDisableType = HideDisableType.Disable;
-                
+
                 var ScreeningVisits = _context.ScreeningVisit.Where(a => a.ScreeningEntryId == screeningEntryId && a.ProjectDesignVisitId == x).ToList();
                 ScreeningVisits.ForEach(a =>
                 {
@@ -525,13 +527,26 @@ namespace GSC.Respository.EditCheckImpact
                         isEditCheckRefValue = _screeningTemplateEditCheckValueRepository.CheckUpdateEditCheckRefValue(r.ScreeningTemplateId,
                                 r.ProjectDesignVariableId, r.EditCheckDetailId, r.ValidateType, r.SampleResult);
 
+
+                    if (isQueryRaise && r.Status > ScreeningTemplateStatus.InProcess)
+                    {
+                        var additionalResult = AdditionalTargetValidate(r, editCheckTarget.Value);
+                        if (!additionalResult)
+                        {
+                            editCheckTarget.HasQueries = true;
+                            isEditCheckRefValue = true;
+                        }
+                    }
+
+
                     if (editCheckTarget.HasQueries && isEditCheckRefValue)
                     {
                         editCheckTarget.HasQueries = SystemQuery(r.ScreeningTemplateId, r.ProjectDesignVariableId, r.AutoNumber, r.Message);
                         editCheckMessage.HasQueries = editCheckTarget.HasQueries;
                     }
-
                 });
+
+
 
                 if (editCheckTarget.EditCheckMsg.Any(r => r.InfoType == EditCheckInfoType.Warning))
                     editCheckTarget.InfoType = EditCheckInfoType.Warning;
@@ -547,6 +562,27 @@ namespace GSC.Respository.EditCheckImpact
             });
 
             return _editCheckTargetValidationLists;
+        }
+
+        bool AdditionalTargetValidate(EditCheckValidateDto editCheckValidateDto, string stringValue)
+        {
+            if (editCheckValidateDto.IsAdditionalTarget == true && !string.IsNullOrEmpty(stringValue) && !string.IsNullOrEmpty(editCheckValidateDto.AdditionalTargetValue))
+            {
+                var editChecks = new List<EditCheckValidate>();
+                var editCheck = new EditCheckValidate();
+                editCheck.InputValue = stringValue;
+                editCheck.Operator = editCheckValidateDto.AdditionalTargetOperator;
+                editCheck.CollectionValue = editCheckValidateDto.AdditionalTargetValue;
+                editCheck.DataType = editCheckValidateDto.DataType;
+                editCheck.CollectionSource = editCheckValidateDto.CollectionSource;
+                editCheck.OperatorName = editCheckValidateDto.AdditionalTargetOperator.GetDescription();
+                editChecks.Add(editCheck);
+
+                var editCheckResult = _editCheckRuleRepository.ValidateRuleReference(editChecks, true);
+                return editCheckResult.IsValid;
+            }
+
+            return true;
         }
 
 
