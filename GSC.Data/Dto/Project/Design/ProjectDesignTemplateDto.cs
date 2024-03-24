@@ -87,4 +87,9 @@ namespace GSC.Data.Dto.Project.Design
         public int Id { get; set; }
         public List<int> ClonnedTemplateIds { get; set; }
     }
+    public class ProjectDesignTemplateSiteAccessDto
+    {
+        public int TemplateId { get; set; }
+        public List<int> SiteIds { get; set; }
+    }
 }

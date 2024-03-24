@@ -117,12 +117,6 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
-        //[HttpGet]
-        //[Route("GetResourceTypeDropDown")]
-        //public IActionResult GetResourceTypeDropDown()
-        //{
-        //    return Ok(_resourcetypeRepository.GetResourceTypeDropDown());
-        //}
 
         [HttpGet]
         [Route("GetUnitTypeDropDown")]

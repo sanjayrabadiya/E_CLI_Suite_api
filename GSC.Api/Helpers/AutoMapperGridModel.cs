@@ -97,7 +97,9 @@ namespace GSC.Api.Helpers
             CreateMap<Religion, ReligionGridDto>().ReverseMap();
             CreateMap<TestGroup, TestGroupGridDto>().ReverseMap();
             CreateMap<Test, TestGridDto>().ReverseMap();
-            CreateMap<Unit, UnitGridDto>().ReverseMap();
+            CreateMap<Unit, UnitGridDto>()
+                .ForMember(x => x.AppScreenName, a => a.MapFrom(x => x.AppScreen.ScreenName))
+                .ReverseMap();
             CreateMap<State, StateGridDto>().ReverseMap();
             CreateMap<TrialType, TrialTypeGridDto>().ReverseMap();
             CreateMap<ScopeName, ScopeNameGridDto>().ForMember(x => x.ScopeName, y => y.MapFrom(a => a.Name)).ReverseMap();
@@ -318,7 +320,7 @@ namespace GSC.Api.Helpers
             CreateMap<StudyPlanTask, StudyPlanTaskDto>()
                            .ForMember(x => x.Predecessor, x => x.MapFrom(a => a.DependentTaskId > 0 ? a.DependentTaskId + "" + a.ActivityType + "+" + a.OffSet : ""))
                            .ForMember(x => x.IsManual, x => x.MapFrom(a => a.ParentId != 0 ? false : false))
-                           //.ForMember(x => x.IsManual, x => x.MapFrom(a => a.Duration == 0 ? false : true))
+                           .ForMember(x => x.RefrenceTypeName, x => x.MapFrom(a => a.RefrenceType.GetDescription()))
                            .ForMember(x => x.EndDateDay, x => x.MapFrom(a => a.EndDate))
                            .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
                            .ForMember(x => x.DurationDay, x => x.MapFrom(a => a.Duration))
@@ -839,6 +841,27 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.Unit, x => x.MapFrom(a => a.Unit.UnitName))
                .ForMember(x => x.CurrencyType, x => x.MapFrom(a => a.Currency != null ? a.Currency.CurrencyName + "-" + a.Currency.CurrencySymbol + "   -" + a.Currency.Country.CountryName : ""))
                .ReverseMap();
+            CreateMap<PassThroughCostActivity, PassThroughCostActivityGridDto>().ReverseMap();
+            CreateMap<PassThroughCost, PassThroughCostGridDto>()
+                .ForMember(x => x.PassThroughCostActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                .ForMember(x => x.BudgetFlgTypeName, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
+                .ForMember(x => x.UnitType, x => x.MapFrom(a => a.Unit.UnitName))
+                .ForMember(x => x.CurrencyRate, x => x.MapFrom(a => a.CurrencyRate.LocalCurrencyRate))
+                .ForMember(x => x.CurrencyName, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencyName+ " -" + a.CurrencyRate.Currency.CurrencySymbol))
+                .ForMember(x => x.GlobleCurrencyId, x => x.MapFrom(a => a.CurrencyRate.GlobalCurrencyId))
+                .ForMember(x => x.LocalCurrencySymbol, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencySymbol))
+                .ReverseMap();
+            CreateMap<PaymentMilestone, PaymentMilestoneGridDto>()
+              .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+               .ForMember(x => x.MilestoneType, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
+               .ForMember(x => x.PaymentType, x => x.MapFrom(a => a.PaymentType.GetDescription()))
+               .ForMember(x => x.StudyPlanTasks, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneTaskDetails.Select(s => s.StudyPlanTask.TaskName).ToList())))
+              .ReverseMap();
+            CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
+            .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
+            .ReverseMap();
         }
     }
 }

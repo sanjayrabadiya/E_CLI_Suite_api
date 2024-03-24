@@ -46,8 +46,29 @@ namespace GSC.Respository.CTMS
 
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms == true && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             var ctmsProjectList = _context.Project.Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
+
+            //Update main Total from ResourceCost + PatientCost + PassThroughCost
+            var StudyplanData1 = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).ToList();
+            TotalCostStudyUpdate(StudyplanData1);
+
             return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c=>c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
             ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
+        }
+        public void TotalCostStudyUpdate(List<StudyPlan> StudyPlan)
+        {
+            StudyPlan.ForEach(i =>
+            {
+                //ResourceCost + PatientCost + PassThroughCost
+                decimal? TotalResourceCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == i.Id && s.DeletedBy == null).Sum(d => d.TotalCost);
+                decimal? TotalPatientCost = _context.PatientCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalCost);
+                decimal? TotalPassThroughCost = _context.PassThroughCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.Total);
+
+                i.TotalCost = TotalResourceCost + TotalPatientCost + TotalPassThroughCost ;
+                _context.StudyPlan.UpdateRange(i);
+                _context.Save();
+            });
+
+     
         }
 
         public string ImportTaskMasterData(StudyPlan studyplan)
@@ -134,7 +155,7 @@ namespace GSC.Respository.CTMS
                 currencyRateData.Id = 0;
                 currencyRateData.StudyPlanId = objSave.Id;
                 currencyRateData.GlobalCurrencyId=objSave.CurrencyId;
-                currencyRateData.LocalCurrencyId=i.localCurrencyId;
+                currencyRateData.CurrencyId =i.localCurrencyId;
                 currencyRateData.LocalCurrencyRate=i.localCurrencyRate;
                 _context.CurrencyRate.Add(currencyRateData);
                 _context.Save();
@@ -159,7 +180,7 @@ namespace GSC.Respository.CTMS
                 currencyRateData.Id = 0;
                 currencyRateData.StudyPlanId = objSave.Id;
                 currencyRateData.GlobalCurrencyId = objSave.CurrencyId;
-                currencyRateData.LocalCurrencyId = i.localCurrencyId;
+                currencyRateData.CurrencyId = i.localCurrencyId;
                 currencyRateData.LocalCurrencyRate = i.localCurrencyRate;
                 _context.CurrencyRate.Add(currencyRateData);
                 _context.Save();

@@ -460,6 +460,8 @@ namespace GSC.Domain.Context
         DbSet<UserAccess> UserAccess { get; set; }
         DbSet<Procedure> Procedure { get; set; }
         DbSet<PatientCost> PatientCost { get; set; }
+        DbSet<PassThroughCostActivity> PassThroughCostActivity { get; set; }
+        DbSet<PassThroughCost> PassThroughCost { get; set; }
         DbSet<SupplyManagementKitNumberSettingsRole> SupplyManagementKitNumberSettingsRole { get; set; }
 
         DbSet<PharmacyBarcodeConfig> PharmacyBarcodeConfig { get; set; }
@@ -467,6 +469,11 @@ namespace GSC.Domain.Context
         DbSet<SupplyManagementEmailScheduleLog> SupplyManagementEmailScheduleLog { get; set; }
 
         DbSet<SupplyManagementThresholdHistory> SupplyManagementThresholdHistory { get; set; }
+        DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
+        DbSet<PaymentMilestone> PaymentMilestone { get; set; }
+        DbSet<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetail { get; set; }
+
+        DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
 
     }
 }

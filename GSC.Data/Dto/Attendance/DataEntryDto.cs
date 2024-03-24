@@ -39,6 +39,7 @@ namespace GSC.Data.Dto.Attendance
         public List<DataEntryVisitTemplateDto> Visit { get; set; }
         public bool IsLocked { get; set; }
 
+        public bool IsGeneric { get; set; }
 
     }
 
@@ -96,6 +97,8 @@ namespace GSC.Data.Dto.Attendance
         public HideDisableType? HideDisableType { get; set; }
         public string EditCheckMsg { get; set; }
         public int ProjectDesignId { get; set; }
+
+        public bool IsPatientLevel { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto

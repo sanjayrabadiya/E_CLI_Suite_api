@@ -518,11 +518,16 @@ namespace GSC.Domain.Context
         public DbSet<CurrencyRate> CurrencyRate { get; set; }
         public DbSet<Procedure> Procedure { get; set; }
         public DbSet<PatientCost> PatientCost { get; set; }
-
+        public DbSet<PassThroughCostActivity> PassThroughCostActivity { get; set; }
+        public DbSet<PassThroughCost> PassThroughCost { get; set; }
         public DbSet<SupplyManagementEmailScheduleLog> SupplyManagementEmailScheduleLog { get; set; }
 
         public DbSet<SupplyManagementThresholdHistory> SupplyManagementThresholdHistory { get; set; }
+        public DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
+        public DbSet<PaymentMilestone> PaymentMilestone { get; set; }
+        public DbSet<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetail { get; set; }
 
+        public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
 
     }
 }

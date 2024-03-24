@@ -218,5 +218,20 @@ namespace GSC.Api.Controllers.Etmf
             var docHistory = _projectWorkplaceSubSecArtificatedocumentRepository.GetSubSectionDocumentHistory(documentId).OrderByDescending(q => q.ExpiryDate);
             return Ok(docHistory);
         }
+
+        [HttpGet]
+        [Route("DownloadDocument/{id}")]
+        public IActionResult DownloadDocument(int id)
+        {
+            var file = _projectWorkplaceSubSecArtificatedocumentRepository.DownloadDocument(id);
+            if (file.FileBytes == null)
+            {
+                return BadRequest();
+            }
+            else
+            {
+                return File(file.FileBytes, file.MIMEType, file.DocumentName);
+            }
+        }
     }
 }

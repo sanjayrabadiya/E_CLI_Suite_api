@@ -7,6 +7,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Project.GeneralConfig;
 using GSC.Data.Entities.Project.Generalconfig;
+using GSC.Domain.Context;
 using GSC.Respository.CTMS;
 using GSC.Respository.Project.GeneralConfig;
 using Microsoft.AspNetCore.Mvc;
@@ -23,13 +24,15 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         private readonly IUnitOfWork _uow;
         private readonly IProjectSettingsRepository _projectSettingsRepository;
         private readonly IUserAccessRepository _userAccessRepository;
+        private readonly IGSCContext _context;
         public ProjectSettingsController(
-            IUnitOfWork uow, IMapper mapper, IProjectSettingsRepository projectSettingsRepository, IUserAccessRepository userAccessRepository)
+            IUnitOfWork uow, IMapper mapper, IProjectSettingsRepository projectSettingsRepository, IUserAccessRepository userAccessRepository, IGSCContext context)
         {
             _uow = uow;
             _mapper = mapper;
             _projectSettingsRepository = projectSettingsRepository;
             _userAccessRepository = userAccessRepository;
+            _context = context;
         }
 
         [HttpGet("{id}")]
@@ -86,6 +89,16 @@ namespace GSC.Api.Controllers.Project.GeneralConfig
         public IActionResult GetParentProjectDropDownScreening()
         {
             return Ok(_projectSettingsRepository.GetParentProjectDropDownScreening());
+        }
+        [HttpGet]
+        [Route("GetProjectConfiguration/{id}")]
+        public IActionResult GetProjectConfiguration(int id)
+        {
+            var projectdesign = _context.ProjectDesign.Where(s => s.Id == id).FirstOrDefault();
+            if (projectdesign == null)
+                return Ok(null);
+            var projectSetting = _context.ProjectSettings.Where(s => s.ProjectId == projectdesign.ProjectId).FirstOrDefault();
+            return Ok(projectSetting);
         }
     }
 }

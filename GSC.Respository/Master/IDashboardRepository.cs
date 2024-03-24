@@ -64,5 +64,7 @@ namespace GSC.Respository.Master
 
         List<TreatmentvsArms> GetkitCreatedDataReport(int projectId, int countryId, int siteId);
 
+        dynamic GetSubjectStatusGraph(int projectId, int countryId, int siteId);
+        dynamic GetDashboardSubjectList(int projectId, int countryId, int siteId);
     }
 }

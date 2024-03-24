@@ -140,4 +140,11 @@ namespace GSC.Data.Dto.Etmf
         public string DocumentName { get; set; }
         public List<ProjectWorkplaceArtificatedocumentDto> DocumentList { get; set; }
     }
+
+    public class DownloadFile
+    {
+        public string DocumentName { get; set; }
+        public byte[] FileBytes { get; set; }
+        public string MIMEType { get; set; }
+    }
 }

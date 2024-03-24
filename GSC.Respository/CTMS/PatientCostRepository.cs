@@ -194,12 +194,12 @@ namespace GSC.Respository.CTMS
             var studyPlan = _context.StudyPlan.Where(s => s.ProjectId == ProcedureVisitdadaDto[0].ProjectId && s.DeletedDate == null).FirstOrDefault();
 
             //new Cost add time duplication check
-            if (All.Any(x => x.Id != ProcedureVisitdadaDto[0].Id && x.ProcedureId == ProcedureVisitdadaDto[0].ProcedureId && x.DeletedDate == null && ProcedureVisitdadaDto[0].IfEdit == false))
+            if (All.Any(x => x.Id != ProcedureVisitdadaDto[0].Id && x.ProcedureId == ProcedureVisitdadaDto[0].ProcedureId && x.DeletedDate == null && x.ProjectId == ProcedureVisitdadaDto[0].ProjectId && ProcedureVisitdadaDto[0].IfEdit == false))
             {
                 return "Duplicate Patient Cost";
             }
             //check currency rate added or not, currency rate is requerd
-            else if (!_context.CurrencyRate.Where(s => s.StudyPlanId == studyPlan.Id && s.LocalCurrencyId == locCurrency.CurrencyId && s.DeletedBy == null).Any() && locCurrency.CurrencyId != studyPlan.CurrencyId)
+            else if (!_context.CurrencyRate.Where(s => s.StudyPlanId == studyPlan.Id && s.CurrencyId == locCurrency.CurrencyId && s.DeletedBy == null).Any() && locCurrency.CurrencyId != studyPlan.CurrencyId)
             {
                 return locCurrency.Currency.CurrencyName + " - " + locCurrency.Currency.CurrencySymbol + " Is Currency And Rate Added in Study plan. ";
             }
@@ -213,7 +213,7 @@ namespace GSC.Respository.CTMS
             //get CurrencyRate And Globel Currency form studyPlan
             var locCurrency = _context.Procedure.Where(s => s.Id == procedureVisitdada[0].ProcedureId && s.DeletedDate == null).FirstOrDefault();
             var studyPlan = _context.StudyPlan.Where(s => s.ProjectId == procedureVisitdada[0].ProjectId && s.DeletedDate == null).FirstOrDefault();
-            var CurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlan.Id && s.LocalCurrencyId == locCurrency.CurrencyId && s.DeletedDate == null).FirstOrDefault();
+            var CurrencyRate = _context.CurrencyRate.Where(s=>s.StudyPlanId== studyPlan.Id && s.CurrencyId == locCurrency.CurrencyId && s.DeletedDate == null).FirstOrDefault();
 
             procedureVisitdada.ForEach(d =>
             {

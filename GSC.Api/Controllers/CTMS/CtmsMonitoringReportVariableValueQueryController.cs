@@ -120,13 +120,7 @@ namespace GSC.Api.Controllers.Screening
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var ctmsMonitoringReportVariableValue = _ctmsMonitoringReportVariableValueRepository.Find(CtmsMonitoringReportVariableValueQueryDto.CtmsMonitoringReportVariableValueId);
-            //if (manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Answered ||
-            //    manageMonitoringReportVariable.QueryStatus == CtmsCommentStatus.Resolved)
-            //{
-            //    ModelState.AddModelError("Message", "Query is already updated.");
-            //    return BadRequest(ModelState);
-            //}
-
+            
             var CtmsMonitoringReportVariableValueQuery = _mapper.Map<CtmsMonitoringReportVariableValueQuery>(CtmsMonitoringReportVariableValueQueryDto);
             CtmsMonitoringReportVariableValueQuery.QueryStatus = CtmsCommentStatus.Closed;
             _ctmsMonitoringReportVariableValueQueryRepository.SaveCloseQuery(CtmsMonitoringReportVariableValueQuery);

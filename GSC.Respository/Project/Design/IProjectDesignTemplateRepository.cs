@@ -36,5 +36,9 @@ namespace GSC.Respository.Project.Design
         IList<DropDownDto> GetTemplateCRFDropDown(int projectDesignVisitId);
 
         string ValidationTemplateIWRS(ProjectDesignTemplate template);
+
+        void SaveProjectDesignTemplateSiteAccess(ProjectDesignTemplateSiteAccessDto projectDesignTemplateSiteAccessDto);
+
+        ProjectDesignTemplateSiteAccessDto GetSitesAccessByTemplateId(int templateId);
     }
 }

@@ -22,5 +22,7 @@ namespace GSC.Data.Entities.Project.Design
         public double? StudyVersion { get; set; }
         public List<ProjectDesignVisitStatus> ProjectDesignVisitStatus { get; set; }
         public bool OffSite { get; set; }
+
+        public bool IsPatientLevel { get; set; }
     }
 }

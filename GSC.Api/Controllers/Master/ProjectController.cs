@@ -188,6 +188,7 @@ namespace GSC.Api.Controllers.Master
                 ScreenType = UserRecent.Project
             });
 
+            _projectRepository.AddDefaultRandomizationEntry(project);
 
             return Ok(project);
         }
@@ -711,6 +712,14 @@ namespace GSC.Api.Controllers.Master
         public IActionResult CheckSiteStatus(int projectId)
         {
             return Ok(_projectRepository.CheckSiteStatus(projectId));
+        }
+
+        [HttpGet]
+        [Route("GetSitesByTemplateId/{templateId}")]
+        public IActionResult GetSitesByTemplateId(int templateId)
+        {
+            var sites = _projectRepository.GetSitesByTemplateId(templateId);
+            return Ok(sites);
         }
     }
 }

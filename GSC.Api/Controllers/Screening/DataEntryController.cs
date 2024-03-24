@@ -28,10 +28,10 @@ namespace GSC.Api.Controllers.Screening
 
 
         [HttpGet]
-        [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{parentProjectId}/{projectId}")]
-        public async Task<IActionResult> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId)
+        [Route("GetDataEntriesBySubjectForGrid/{projectDesignPeriodId}/{parentProjectId}/{projectId}/{IsPatientLevel}")]
+        public async Task<IActionResult> GetDataEntriesBySubjectForGrid(int projectDesignPeriodId, int parentProjectId, int projectId,bool IsPatientLevel)
         {
-            var result = await _dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, parentProjectId, projectId);
+            var result = await _dataEntryRespository.GetDataEntriesBySubjectForGrid(projectDesignPeriodId, parentProjectId, projectId, IsPatientLevel);
             return Ok(result);
         }
 

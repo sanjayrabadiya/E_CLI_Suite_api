@@ -21,6 +21,8 @@ namespace GSC.Data.Dto.Audit
         public string UserRoleName { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
+        public int? ParentId { get; set; }
+        public int? ProjectId { get; set; }
     }
 
     public class ProjectDesignAuditReportDto : BaseDto

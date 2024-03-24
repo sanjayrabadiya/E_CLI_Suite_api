@@ -48,7 +48,7 @@ namespace GSC.Api.Controllers.CTMS
 
             if (taskmaster != null && taskmaster.RefrenceTypes != null)
                 taskmaster.RefrenceTypes = taskmaster.RefrenceTypes.Where(x => x.DeletedDate == null).ToList();
-            //var task = _taskMasterRepository.Find(id);
+          
             var taskDto = _mapper.Map<TaskmasterDto>(taskmaster);
             return Ok(taskDto);
         }
@@ -108,9 +108,7 @@ namespace GSC.Api.Controllers.CTMS
                     _context.RefrenceTypes.Update(t);
                 }
             });
-            //var refrenceTypes = _context.RefrenceTypes.Where(x => x.TaskMasterId == taskmaster.Id
-            //                                                   && taskmaster.RefrenceTypes.Select(x => x.Id).Contains(x.Id)
-            //                                                   && x.DeletedDate == null).ToList();
+            
             taskmaster.RefrenceTypes.ForEach(z =>
             {
                 _context.RefrenceTypes.Add(z);

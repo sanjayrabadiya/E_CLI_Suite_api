@@ -197,7 +197,7 @@ namespace GSC.Helper
 
     public enum ActivityMode : short
     {
-        [Description("Non CRF Form")] Generic = 1,
+        [Description("Source Form")] Generic = 1,
         [Description("CRF Form")] SubjectSpecific = 2
     }
 
@@ -1213,5 +1213,23 @@ namespace GSC.Helper
         [Description("Quarterly")] Quarterly = 7,
         [Description("Every 6 months")] EverySixMonth = 8,
         [Description("Yearly")] Yearly = 9
+    }
+    public enum BudgetFlgType : short
+    {
+        [Description("Study")] Study = 1,
+        [Description("Site")] Site = 2,
+        [Description("Patient")] Patient = 3,
+    }
+    public enum MilestoneType : short
+    {
+        [Description("Resource Cost")] ResourceCost = 1,
+        [Description("Patient Cost")] PatientCost = 2,
+        [Description("Pass Through Cost")] PassThroughCost = 3,
+    }
+    public enum PaymentType : short
+    {
+        [Description("Study")] Study = 1,
+        [Description("Site")] Site = 2,
+      
     }
 }

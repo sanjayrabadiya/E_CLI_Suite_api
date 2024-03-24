@@ -12,16 +12,13 @@ namespace GSC.Api.Controllers.CTMS
     public class UserAccessController : BaseController
     {
         private readonly IUserAccessRepository _userAccessRepository;
-        private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
-        public UserAccessController(IUserAccessRepository userAccessRepository,
-
-            IUnitOfWork uow, IMapper mapper)
+        public UserAccessController(IUserAccessRepository userAccessRepository, IUnitOfWork uow)
         {
             _userAccessRepository = userAccessRepository;
             _uow = uow;
-            _mapper = mapper;
+
         }
 
         [HttpGet("{isDeleted:bool?}/{studyId}/{siteId}")]
@@ -42,7 +39,7 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
             var ActiveData = _userAccessRepository.getActive(userAccessDto);
-            if(ActiveData.Count==0)
+            if (ActiveData.Count == 0)
                 _userAccessRepository.AddSiteUserAccesse(userAccessDto);
 
             return Ok(true);

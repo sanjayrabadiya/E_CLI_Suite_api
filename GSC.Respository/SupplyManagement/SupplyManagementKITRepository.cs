@@ -1827,7 +1827,7 @@ namespace GSC.Respository.SupplyManagement
                   .Include(s => s.PharmacyStudyProductType).ThenInclude(s => s.ProductType).Where(s => s.Id == supplyManagementKITDetail.SupplyManagementKITId).FirstOrDefault();
             if (detail != null)
             {
-                barcode = detail.Project.ProjectCode + supplyManagementKITDetail.KitNo + detail.ProjectDesignVisit.DisplayName + detail.PharmacyStudyProductType.ProductType.ProductTypeCode;
+                barcode = detail.Project.ProjectCode + supplyManagementKITDetail.KitNo;
             }
             return barcode;
         }
@@ -1928,7 +1928,7 @@ namespace GSC.Respository.SupplyManagement
                         if (ColumnName == "InvestigatorContactId")
                         {
                             var randomization = _context.Randomization.Include(s => s.Project).ThenInclude(s => s.InvestigatorContact).Where(s => s.Id == tableRepository.RandomizationId).FirstOrDefault();
-                            return randomization != null ? randomization.Project.InvestigatorContact.NameOfInvestigator : "";
+                            return randomization != null && randomization.Project.InvestigatorContact != null ? randomization.Project.InvestigatorContact.NameOfInvestigator : "";
                         }
                     }
                 }

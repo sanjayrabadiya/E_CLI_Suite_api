@@ -52,7 +52,7 @@ namespace GSC.Api.Controllers.CTMS
                 currencyRatedata.ForEach(s=>{
                     var CurrencyRateList = new CurrencyRateDTO()
                     {
-                        localCurrencyId = s.LocalCurrencyId,
+                        localCurrencyId = s.CurrencyId,
                         localCurrencyRate = s.LocalCurrencyRate
                     };
                     CurrencyRateList1.Add(CurrencyRateList);
@@ -81,6 +81,7 @@ namespace GSC.Api.Controllers.CTMS
                     data.EndDate = studyplanDto.EndDate;
                     data.ProjectId = s.Id;
                     data.TaskTemplateId = studyplanDto.TaskTemplateId;
+                    data.CurrencyId = studyplanDto.CurrencyId;
                     lstStudyPlan.Add(data);
                 });
             }
@@ -106,7 +107,7 @@ namespace GSC.Api.Controllers.CTMS
                     ModelState.AddModelError("Message", validate);
                     return BadRequest(ModelState);
                 }
-                //_uow.Save();
+                
             }
 
             _studyPlanRepository.PlanUpdate(studyplanDto.ProjectId);
@@ -165,8 +166,6 @@ namespace GSC.Api.Controllers.CTMS
                     var validatecode = _studyPlanRepository.Duplicate(data);
                     if (string.IsNullOrEmpty(validatecode))
                     {
-                        //ModelState.AddModelError("Message", validatecode);
-                        //return BadRequest(ModelState);
                         data.DeletedBy = null;
                         data.DeletedDate = null;
                         _studyPlanRepository.Active(data);

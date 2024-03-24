@@ -84,7 +84,8 @@ namespace GSC.Api.Controllers.CTMS
         {
             var ctmsMonitoringReportReviewDto = _ctmsMonitoringReportReviewRepository.FindByInclude(x => x.CtmsMonitoringReportId == id
             && x.UserId == _jwtTokenAccesser.UserId && x.ApproveDate == null && x.DeletedDate == null).FirstOrDefault();
-
+            if (ctmsMonitoringReportReviewDto == null)
+                return Ok();
             ctmsMonitoringReportReviewDto.IsApproved = true;
             ctmsMonitoringReportReviewDto.ApproveDate = _jwtTokenAccesser.GetClientDate();
             var ctmsMonitoringReportReview = _mapper.Map<CtmsMonitoringReportReview>(ctmsMonitoringReportReviewDto);

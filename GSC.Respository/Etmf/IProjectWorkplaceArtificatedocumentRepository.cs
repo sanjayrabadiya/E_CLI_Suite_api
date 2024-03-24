@@ -37,5 +37,7 @@ namespace GSC.Respository.Etmf
         List<ProjectArtificateDocumentExpiryHistoryDto> GetDocumentHistory(int documentId);
         List<CommonArtifactDocumentDto> GetExpiredDocumentReports(int projectId);
         void IsApproveDocument(int Id);
+
+        public DownloadFile DownloadDocument(int id);
     }
 }
