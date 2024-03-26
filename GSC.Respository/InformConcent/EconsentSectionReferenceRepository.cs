@@ -59,9 +59,14 @@ namespace GSC.Respository.InformConcent
             {
                 Stream stream = System.IO.File.OpenRead(path);
                 EJ2WordDocument doc = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+
+                doc.OptimizeSfdt = false;
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
-                stream.Close();
                 doc.Dispose();
+
+                //string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
+                stream.Close();
+                //doc.Dispose();
                 JObject jsonstr = JObject.Parse(json);
                 Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
                 int sectioncount = 1;

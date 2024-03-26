@@ -115,8 +115,14 @@ namespace GSC.Respository.InformConcent
             string sfdtText = "";
             EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+
+            wdocument.OptimizeSfdt = false;
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
             wdocument.Dispose();
-            string json = sfdtText;
+
+
+            //wdocument.Dispose();
+            //string json = sfdtText;
             stream.Position = 0;
             stream.Close();
             JObject jsonstr = JObject.Parse(json);

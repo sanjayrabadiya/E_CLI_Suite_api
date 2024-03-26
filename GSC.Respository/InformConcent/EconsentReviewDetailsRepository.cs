@@ -131,9 +131,14 @@ namespace GSC.Respository.InformConcent
             {
                 Stream stream = System.IO.File.OpenRead(path);
                 EJ2WordDocument doc = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+
+                doc.OptimizeSfdt = false;
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
-                stream.Close();
                 doc.Dispose();
+
+                // string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
+                stream.Close();
+                // doc.Dispose();
                 JObject jsonstr = JObject.Parse(json);
                 Root jsonobj = JsonConvert.DeserializeObject<Root>(jsonstr.ToString());
                 int sectioncount = 1;
@@ -184,7 +189,13 @@ namespace GSC.Respository.InformConcent
             {
                 Stream stream = System.IO.File.OpenRead(path);
                 EJ2WordDocument doc = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
+                // string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
+
+                doc.OptimizeSfdt = false;
                 string json = Newtonsoft.Json.JsonConvert.SerializeObject(doc);
+                doc.Dispose();
+
+
                 stream.Close();
                 doc.Dispose();
                 JObject jsonstr = JObject.Parse(json);
@@ -305,9 +316,14 @@ namespace GSC.Respository.InformConcent
             Stream stream = System.IO.File.OpenRead(path);
             string sfdtText = "";
             EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+
+            wdocument.OptimizeSfdt = false;
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
             wdocument.Dispose();
-            string json = sfdtText;
+
+            //sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+            //wdocument.Dispose();
+            //string json = sfdtText;
             stream.Position = 0;
             stream.Close();
             JObject jsonstr = JObject.Parse(json);
