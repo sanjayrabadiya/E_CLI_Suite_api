@@ -44,6 +44,9 @@ namespace GSC.Data.Dto.Screening
         public ScreeningTemplateStatus Status { get; set; }
         public int? FetchingProjectDesignTemplateId { get; set; }
         public int? FetchingProjectDesignVariableId { get; set; }
+        public bool? IsAdditionalTarget { get; set; }
+        public Operator? AdditionalTargetOperator { get; set; }
+        public string AdditionalTargetValue { get; set; }
 
     }
     public class ScheduleTemplateDto

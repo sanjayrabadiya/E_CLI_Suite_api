@@ -107,6 +107,9 @@ namespace GSC.Respository.EditCheckImpact
                                   EndParens = checkDetail.EndParens,
                                   FetchingProjectDesignTemplateId = checkDetail.FetchingProjectDesignTemplateId,
                                   FetchingProjectDesignVariableId = checkDetail.FetchingProjectDesignVariableId,
+                                  IsAdditionalTarget= checkDetail.IsAdditionalTarget,
+                                  AdditionalTargetOperator= checkDetail.AdditionalTargetOperator,
+                                  AdditionalTargetValue = checkDetail.AdditionalTargetValue
                               }).Distinct().ToList();
 
             if (annotation != null)
