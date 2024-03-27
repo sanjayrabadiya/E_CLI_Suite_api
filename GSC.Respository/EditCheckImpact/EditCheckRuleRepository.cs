@@ -84,7 +84,7 @@ namespace GSC.Respository.EditCheckImpact
             {
                 if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
                 {
-                    EditCheckResult result = new EditCheckResult();
+                    EditCheckResult result = null;
                     var message = "";
                     var newCase = editCheck.Where(x => x.IsTarget).ToList();
                     foreach (var x in editCheck.Where(x => !x.IsTarget).ToList())
