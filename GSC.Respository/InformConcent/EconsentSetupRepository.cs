@@ -4,7 +4,6 @@ using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.InformConcent;
 using GSC.Data.Dto.Master;
-using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.InformConcent;
 using GSC.Domain.Context;
 using GSC.Helper;
@@ -12,9 +11,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Master;
-using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
-using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -115,8 +112,14 @@ namespace GSC.Respository.InformConcent
             string sfdtText = "";
             EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
             sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+
+            wdocument.OptimizeSfdt = false;
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
             wdocument.Dispose();
-            string json = sfdtText;
+
+
+            //wdocument.Dispose();
+            //string json = sfdtText;
             stream.Position = 0;
             stream.Close();
             JObject jsonstr = JObject.Parse(json);
