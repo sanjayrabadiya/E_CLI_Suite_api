@@ -89,7 +89,7 @@ namespace GSC.Respository.EditCheckImpact
                 else
                     x.ValidateType = Validate(x, x.Value, reference.Value) ? EditCheckValidateType.Passed : EditCheckValidateType.Failed;
 
-                if (isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null && (x.ScreeningTemplate != null && x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending))
+                if ((isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null) && (x.ScreeningTemplate != null && x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending))
                 {
                     x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message);
                 }
