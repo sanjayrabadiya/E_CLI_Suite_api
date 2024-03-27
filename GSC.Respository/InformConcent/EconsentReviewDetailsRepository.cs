@@ -235,8 +235,8 @@ namespace GSC.Respository.InformConcent
         public AppEConsentSection ImportSectionDataHtml(int id, int sectionno)
         {
             // this method is called when clicking particular sections from the left side grid in Inform consent page(patient portal)
-            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).First();
-            var Econsentdocument = _context.EconsentSetup.First(x => x.Id == id);
+            var upload = _context.UploadSetting.OrderByDescending(x => x.Id).FirstOrDefault();
+            var Econsentdocument = _context.EconsentSetup.Where(x => x.Id == id).FirstOrDefault();
             var FullPath = System.IO.Path.Combine(upload.DocumentPath, Econsentdocument.DocumentPath);
             string path = FullPath;
             if (!System.IO.File.Exists(path))
