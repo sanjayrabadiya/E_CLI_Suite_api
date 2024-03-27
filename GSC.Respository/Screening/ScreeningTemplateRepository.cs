@@ -44,6 +44,8 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
+                private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+
         private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IEmailConfigurationEditCheckRepository _emailConfigurationEditCheckRepository;
@@ -56,6 +58,7 @@ namespace GSC.Respository.Screening
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
+                        IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IAppSettingRepository appSettingRepository,
              ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IEmailSenderRespository emailSenderRespository,
@@ -74,6 +77,7 @@ namespace GSC.Respository.Screening
             _appSettingRepository = appSettingRepository;
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
+                        _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _emailSenderRespository = emailSenderRespository;
             _emailConfigurationEditCheckRepository = emailConfigurationEditCheckRepository;
@@ -116,6 +120,11 @@ namespace GSC.Respository.Screening
         private List<ScreeningTemplateValueChild> GetScreeningTemplateValueChild(int ScreeningTemplateValueId)
         {
             return _screeningTemplateValueChildRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateValueId == ScreeningTemplateValueId && t.DeletedDate == null).ToList();
+        }
+
+        private List<ProjectDesignVariableValue> GetProjectDesignVariableValue(int ProjectDesignVariableId)
+        {
+            return _projectDesignVariableValueRepository.All.AsNoTracking().Where(t => t.ProjectDesignVariableId == ProjectDesignVariableId && t.DeletedDate == null).ToList();
         }
 
         public DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId)
@@ -187,7 +196,7 @@ namespace GSC.Respository.Screening
 
             labVariable.ForEach(x =>
             {
-                var screeningVariable = variables.Find(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId);
+                var screeningVariable = variables.FirstOrDefault(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId);
                 if (screeningVariable != null)
                 {
                     if (screeningTemplateBasic.Gender == Gender.Female)
