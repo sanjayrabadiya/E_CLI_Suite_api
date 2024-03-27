@@ -196,5 +196,20 @@ namespace GSC.Api.Controllers.SupplyManagement
             }
             return Ok(Isblined);
         }
+
+        [HttpGet("CheckDisplayRandomizationFromSheet/{projectId}")]
+        public IActionResult CheckDisplayRandomizationFromSheet(int projectId)
+        {
+            bool IsStaticRandomizationNo = false;
+            if (_context.SupplyManagementKitNumberSettings.Any(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsStaticRandomizationNo == true))
+            {
+                IsStaticRandomizationNo = true;
+            }
+            else
+            {
+                IsStaticRandomizationNo = false;
+            }
+            return Ok(IsStaticRandomizationNo);
+        }
     }
 }

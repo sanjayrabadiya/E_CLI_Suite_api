@@ -29,6 +29,8 @@ namespace GSC.Data.Dto.SupplyManagement
 
         public bool IsBarcodeScan { get; set; }
 
+
+        public bool? IsStaticRandomizationNo { get; set; }
     }
 
     public class SupplyManagementKitNumberSettingsGridDto : BaseAuditDto
@@ -54,6 +56,8 @@ namespace GSC.Data.Dto.SupplyManagement
         public string TimeZone { get; set; }
 
         public bool IsBarcodeScan { get; set; }
+
+        public bool? IsStaticRandomizationNo { get; set; }
     }
 
 }

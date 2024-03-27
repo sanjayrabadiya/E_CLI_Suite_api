@@ -80,13 +80,17 @@ namespace GSC.Respository.SupplyManagement
 
         public void GenerateProductRecieptBarcode(ProductReceipt productReceipt)
         {
-            var project = _context.Project.Where(s => s.Id == productReceipt.ProjectId).FirstOrDefault();
-            var pharmacyStudyProductType = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.Id == productReceipt.PharmacyStudyProductTypeId).FirstOrDefault();
-            if (project != null && pharmacyStudyProductType != null && pharmacyStudyProductType.ProductType != null)
+            var pharmacyBarcodeConfig = _context.PharmacyBarcodeConfig.Where(s => s.DeletedDate == null && s.ProjectId == productReceipt.ProjectId && s.BarcodeModuleType == BarcodeModuleType.Verification).FirstOrDefault();
+            if (pharmacyBarcodeConfig != null)
             {
-                productReceipt.Barcode = project.ProjectCode + pharmacyStudyProductType.ProductType.ProductTypeCode;
-                Update(productReceipt);
-                _context.Save();
+                var project = _context.Project.Where(s => s.Id == productReceipt.ProjectId).FirstOrDefault();
+                var pharmacyStudyProductType = _context.PharmacyStudyProductType.Include(s => s.ProductType).Where(s => s.Id == productReceipt.PharmacyStudyProductTypeId).FirstOrDefault();
+                if (project != null && pharmacyStudyProductType != null && pharmacyStudyProductType.ProductType != null)
+                {
+                    productReceipt.Barcode = project.ProjectCode + pharmacyStudyProductType.ProductType.ProductTypeCode;
+                    Update(productReceipt);
+                    _context.Save();
+                }
             }
         }
 

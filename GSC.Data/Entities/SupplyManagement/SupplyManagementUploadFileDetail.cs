@@ -17,6 +17,9 @@ namespace GSC.Data.Entities.SupplyManagement
         public int? RandomizationId { get; set; }
 
         public int? SupplyManagementKITSeriesId { get; set; }
+
+        public string DisplayRandomizationNumber { get; set; }
+
         public IList<SupplyManagementUploadFileVisit> Visits { get; set; } = null;
         public SupplyManagementUploadFile SupplyManagementUploadFile { get; set; }
 

@@ -38,6 +38,7 @@ using GSC.Respository.SupplyManagement;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Data.Entities.Master;
+using System.Security.Policy;
 
 
 namespace GSC.Respository.Attendance
@@ -285,9 +286,13 @@ namespace GSC.Respository.Attendance
                             randomizationNumberDto = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType, randomizationNumberDto, randomization, studydata.IsIWRS);
                             if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
                             {
-                                if (!string.IsNullOrEmpty(randomizationNumberDto.PrefixRandomNo.Trim()))
+                                if (!randomizationNumberDto.IsStaticRandomizationNo && !string.IsNullOrEmpty(randomizationNumberDto.PrefixRandomNo.Trim()))
                                 {
                                     randomizationNumberDto.RandomizationNumber = randomizationNumberDto.PrefixRandomNo.Trim() + randomizationNumberDto.RandomizationNumber;
+                                }
+                                if (randomizationNumberDto.IsStaticRandomizationNo)
+                                {
+                                    randomizationNumberDto.RandomizationNumber = randomizationNumberDto.DisplayRandomizationNumber;
                                 }
                             }
                         }
@@ -315,6 +320,10 @@ namespace GSC.Respository.Attendance
                 randomizationNumberDto.ErrorMessage = "Please set first kit number setting!";
                 return randomizationNumberDto;
             }
+            if (supplyManagementKitNumberSettings.IsStaticRandomizationNo == null)
+                randomizationNumberDto.IsStaticRandomizationNo = false;
+            else
+                randomizationNumberDto.IsStaticRandomizationNo = (bool)supplyManagementKitNumberSettings.IsStaticRandomizationNo;
             var project = _context.Project.Where(s => s.Id == siteId).FirstOrDefault();
             if (project != null && (project.Status == Helper.MonitoringSiteStatus.CloseOut || project.Status == Helper.MonitoringSiteStatus.Terminated || project.Status == Helper.MonitoringSiteStatus.OnHold || project.Status == Helper.MonitoringSiteStatus.Rejected))
             {
@@ -388,6 +397,7 @@ namespace GSC.Respository.Attendance
                             {
                                 randomizationNumberDto.RandomizationNumber = Convert.ToString(visititem.SupplyManagementUploadFileDetail.RandomizationNo);
                                 randomizationNumberDto.ProductCode = visititem.Value;
+                                randomizationNumberDto.DisplayRandomizationNumber = visititem.SupplyManagementUploadFileDetail.DisplayRandomizationNumber;
                                 var kit = kitSequencedata.Where(x => x.SupplyManagementKITSeries.KitNo.ToLower() == visititem.SupplyManagementUploadFileDetail.KitNo.ToLower()).OrderBy(x => x.Id).FirstOrDefault();
 
                                 if (kit != null)
@@ -403,13 +413,10 @@ namespace GSC.Respository.Attendance
                                 }
                             }
                         }
-                        if (string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
+                        if (string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber) && kitSequencedata.Count > 0)
                         {
-                            if (kitSequencedata.Count > 0)
-                            {
-                                randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
-                                return randomizationNumberDto;
-                            }
+                            randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
+                            return randomizationNumberDto;
 
                         }
 
@@ -447,6 +454,7 @@ namespace GSC.Respository.Attendance
                             {
                                 randomizationNumberDto.RandomizationNumber = Convert.ToString(visititem.SupplyManagementUploadFileDetail.RandomizationNo);
                                 randomizationNumberDto.ProductCode = visititem.Value;
+                                randomizationNumberDto.DisplayRandomizationNumber = visititem.SupplyManagementUploadFileDetail.DisplayRandomizationNumber;
                                 var kit = kitSequencedata.Where(x => x.SupplyManagementKITSeries.KitNo.ToLower() == visititem.SupplyManagementUploadFileDetail.KitNo.ToLower()).OrderBy(x => x.Id).FirstOrDefault();
 
                                 if (kit != null)
@@ -462,9 +470,7 @@ namespace GSC.Respository.Attendance
                                 }
                             }
                         }
-
                         return randomizationNumberDto;
-
                     }
                 }
                 if (supplyManagementKitNumberSettings.IsDoseWiseKit)
@@ -568,7 +574,7 @@ namespace GSC.Respository.Attendance
                             {
                                 randomizationNumberDto.RandomizationNumber = Convert.ToString(visititem.SupplyManagementUploadFileDetail.RandomizationNo);
                                 randomizationNumberDto.ProductCode = visititem.Value;
-
+                                randomizationNumberDto.DisplayRandomizationNumber = visititem.SupplyManagementUploadFileDetail.DisplayRandomizationNumber;
                                 randomizationNumberDto.KitDoseList = new List<KitDoseList>();
                                 decimal firstpriority = priorites.First(s => s.DosePriority == DosePriority.Priority1).Dose;
                                 decimal secondpriority = priorites.First(s => s.DosePriority == DosePriority.Priority2).Dose;
@@ -652,14 +658,10 @@ namespace GSC.Respository.Attendance
                         }
                     }
 
-                    if (string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
+                    if (string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber) && kitdata.Count > 0)
                     {
-                        if (kitdata.Count > 0)
-                        {
-                            randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
-                            return randomizationNumberDto;
-
-                        }
+                        randomizationNumberDto.ErrorMessage = "Please upload randomization sheet";
+                        return randomizationNumberDto;
                     }
 
                     return randomizationNumberDto;
@@ -763,7 +765,7 @@ namespace GSC.Respository.Attendance
                         {
                             randomizationNumberDto.RandomizationNumber = Convert.ToString(visititem.SupplyManagementUploadFileDetail.RandomizationNo);
                             randomizationNumberDto.ProductCode = visititem.Value;
-
+                            randomizationNumberDto.DisplayRandomizationNumber = visititem.SupplyManagementUploadFileDetail.DisplayRandomizationNumber;
                             if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                             {
                                 var kit = kitdata.Where(x => x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visititem.Value.Trim()).OrderBy(x => x.Id).FirstOrDefault();
@@ -883,7 +885,7 @@ namespace GSC.Respository.Attendance
                         {
                             randomizationNumberDto.RandomizationNumber = Convert.ToString(visititem.SupplyManagementUploadFileDetail.RandomizationNo);
                             randomizationNumberDto.ProductCode = visititem.Value;
-
+                            randomizationNumberDto.DisplayRandomizationNumber = visititem.SupplyManagementUploadFileDetail.DisplayRandomizationNumber;
                             if (supplyManagementKitNumberSettings.KitCreationType == KitCreationType.KitWise)
                             {
                                 var kit = kitdata.Where(x => x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visititem.Value.Trim()).OrderBy(x => x.Id).FirstOrDefault();
@@ -1003,6 +1005,7 @@ namespace GSC.Respository.Attendance
                                         randomizationNumberDto.RandomizationNumber = Convert.ToString(item.RandomizationNo);
                                         randomizationNumberDto.ProductCode = visit.Value;
                                         randomizationNumberDto.VisitId = visit.ProjectDesignVisitId;
+                                        randomizationNumberDto.DisplayRandomizationNumber = item.DisplayRandomizationNumber;
                                         return randomizationNumberDto;
                                     }
                                 }
@@ -1056,6 +1059,7 @@ namespace GSC.Respository.Attendance
                         randomizationNumberDto.VisitId = visits.ProjectDesignVisitId;
                     }
                     randomizationNumberDto.RandomizationNumber = Convert.ToString(uploaddetail.RandomizationNo);
+                    randomizationNumberDto.DisplayRandomizationNumber = uploaddetail.DisplayRandomizationNumber;
                 }
             }
 
@@ -1073,12 +1077,22 @@ namespace GSC.Respository.Attendance
                 {
                     return;
                 }
+                var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId).FirstOrDefault();
+                if (setting == null)
+                {
+                    return;
+                }
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
-                    if (!string.IsNullOrEmpty(numerformate.PrefixRandomNo))
+                    if (setting.IsStaticRandomizationNo == false && !string.IsNullOrEmpty(numerformate.PrefixRandomNo))
                     {
                         data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId && x.DeletedDate == null
-                    && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                       && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    }
+                    else if(setting.IsStaticRandomizationNo == true)
+                    {
+                        data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId && x.DeletedDate == null
+                      && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                     }
                     else
                     {
@@ -1099,11 +1113,17 @@ namespace GSC.Respository.Attendance
                     var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == country.ManageSiteId).FirstOrDefault();
                     if (site != null)
                     {
-                        if (!string.IsNullOrEmpty(numerformate.PrefixRandomNo))
+                        if (setting.IsStaticRandomizationNo == false && !string.IsNullOrEmpty(numerformate.PrefixRandomNo))
                         {
                             data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
                            && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId && x.DeletedDate == null
                            && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                        }
+                        else if (setting.IsStaticRandomizationNo == true)
+                        {
+                            data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                             && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId && x.DeletedDate == null
+                             && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                         }
                         else
                         {
@@ -1122,10 +1142,15 @@ namespace GSC.Respository.Attendance
                 }
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                 {
-                    if (!string.IsNullOrEmpty(numerformate.PrefixRandomNo))
+                    if (setting.IsStaticRandomizationNo == false && !string.IsNullOrEmpty(numerformate.PrefixRandomNo))
                     {
                         data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
                         && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    }
+                    else if (setting.IsStaticRandomizationNo == true)
+                    {
+                        data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                       && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.DeletedDate == null && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                     }
                     else
                     {
@@ -1155,13 +1180,22 @@ namespace GSC.Respository.Attendance
                 {
                     return false;
                 }
-
+                var setting = _context.SupplyManagementKitNumberSettings.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId).FirstOrDefault();
+                if (setting == null)
+                {
+                    return false;
+                }
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
                 {
-                    if (!string.IsNullOrEmpty(numerformate.PrefixRandomNo))
+                    if (setting.IsStaticRandomizationNo == false && !string.IsNullOrEmpty(numerformate.PrefixRandomNo))
                     {
                         data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
                         && x.DeletedDate == null && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    }
+                    else if (setting.IsStaticRandomizationNo == true)
+                    {
+                        data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
+                       && x.DeletedDate == null && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                     }
                     else
                     {
@@ -1181,11 +1215,18 @@ namespace GSC.Respository.Attendance
                     var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == country.ManageSiteId).FirstOrDefault();
                     if (site != null)
                     {
-                        if (!string.IsNullOrEmpty(numerformate.PrefixRandomNo))
+                        if (setting.IsStaticRandomizationNo == false && !string.IsNullOrEmpty(numerformate.PrefixRandomNo))
                         {
                             data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
                             && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
                             && x.DeletedDate == null && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+
+                        }
+                        else if (setting.IsStaticRandomizationNo == true)
+                        {
+                            data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
+                              && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                              && x.DeletedDate == null && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
 
                         }
                         else
@@ -1205,10 +1246,15 @@ namespace GSC.Respository.Attendance
                 }
                 if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
                 {
-                    if (!string.IsNullOrEmpty(numerformate.PrefixRandomNo))
+                    if (setting.IsStaticRandomizationNo == false && !string.IsNullOrEmpty(numerformate.PrefixRandomNo))
                     {
                         data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
                         && x.DeletedDate == null && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
+                    }
+                    else if (setting.IsStaticRandomizationNo == true)
+                    {
+                        data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
+                       && x.DeletedDate == null && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                     }
                     else
                     {
@@ -2205,66 +2251,6 @@ namespace GSC.Respository.Attendance
                 _context.SupplyManagementUploadFileDetail.Update(data);
                 _context.Save();
             }
-        }
-        public bool CheckKitNumber(RandomizationDto obj, bool Isiwrs)
-        {
-            if (!Isiwrs)
-            {
-                return true;
-            }
-            SupplyManagementUploadFileDetail data = new SupplyManagementUploadFileDetail();
-            var SupplyManagementUploadFile = _context.SupplyManagementUploadFile.Where(x => x.DeletedDate == null && x.ProjectId == obj.ParentProjectId && x.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-            if (SupplyManagementUploadFile == null)
-                return false;
-            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Site)
-            {
-                data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId
-               && x.DeletedDate == null && x.RandomizationId == obj.Id && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-
-                if (data == null)
-                    return false;
-            }
-            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Country)
-            {
-                var country = _context.Project.Where(x => x.Id == obj.ProjectId).FirstOrDefault();
-                var site = _context.ManageSite.Include(x => x.City).ThenInclude(x => x.State).Where(x => x.Id == country.ManageSiteId).FirstOrDefault();
-                if (site != null)
-                {
-                    data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.CountryId == site.City.State.CountryId
-                       && x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                      && x.DeletedDate == null && x.RandomizationId == obj.Id && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-
-                    if (data == null)
-                        return false;
-                }
-            }
-
-            if (SupplyManagementUploadFile.SupplyManagementUploadFileLevel == SupplyManagementUploadFileLevel.Study)
-            {
-                data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.ProjectId == obj.ParentProjectId
-                && x.DeletedDate == null && x.RandomizationId == obj.Id && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
-
-                if (data == null)
-                    return false;
-            }
-
-            var visit = _context.SupplyManagementUploadFileVisit.Where(x => x.DeletedDate == null && x.SupplyManagementUploadFileDetailId == data.Id && x.Isfirstvisit == true).FirstOrDefault();
-            if (visit == null)
-                return false;
-
-            var kitdata = _context.SupplyManagementKITDetail.Where(x => x.DeletedDate == null
-                          && x.SupplyManagementKIT.ProjectDesignVisitId == visit.ProjectDesignVisitId
-                          && x.SupplyManagementKIT.PharmacyStudyProductType.ProjectId == obj.ParentProjectId
-                          && x.SupplyManagementKIT.PharmacyStudyProductType.ProductType.ProductTypeCode == visit.Value
-                          && x.SupplyManagementShipmentId != null
-                          && x.SupplyManagementKIT.DeletedDate == null
-                          && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ProjectId
-                          && (x.Status == KitStatus.Allocated)
-                          && x.RandomizationId == obj.Id).OrderBy(x => x.Id).FirstOrDefault();
-            if (kitdata != null)
-                return false;
-
-            return true;
         }
         public void SendRandomizationIWRSEMail(RandomizationDto obj)
         {
