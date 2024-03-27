@@ -546,7 +546,7 @@ namespace GSC.Respository.Screening
             queryData = queryData.Where(x => x.ScreeningTemplateValueId == ParentData.ScreeningTemplateValueId).ToList();
             for (int i = 0; i < queryData.Count; i++)
             {
-                var child = queryData.Find(x => x.QueryParentId == QueryParentId);
+                var child = queryData.Where(x => x.QueryParentId == QueryParentId).FirstOrDefault();
                 if (child != null)
                 {
                     QueryParentId = child.Id;
