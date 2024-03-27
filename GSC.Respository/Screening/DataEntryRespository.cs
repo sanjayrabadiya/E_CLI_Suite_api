@@ -646,7 +646,7 @@ namespace GSC.Respository.Screening
                 visits.ForEach(a =>
                 {
                     var templatesIds = visitTemplates.Where(r => r.Id == a.ProjectDesignVisitId).Select(v => v.TemplatesIds).FirstOrDefault();
-                    if (!templatesIds.Where(r => !hideTemplateIds.Contains(r)).Count() < 1)
+                    if (templatesIds.Where(r => !hideTemplateIds.Contains(r)).Count() < 1)
                         a.HideDisableType = HideDisableType.Hide;
                 });
             }
