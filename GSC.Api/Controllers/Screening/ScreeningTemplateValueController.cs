@@ -183,7 +183,7 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplateValueDto.CollectionSource == CollectionSources.Date ||
                 screeningTemplateValueDto.CollectionSource == CollectionSources.DateTime ||
                 screeningTemplateValueDto.CollectionSource == CollectionSources.Time) &&
-                !_screeningTemplateRepository.IsRepated(screeningTemplateValueDto.ScreeningTemplateId) && _impactService.CheckReferenceVariable(screeningTemplateValueDto.ProjectDesignVariableId))
+                (!_screeningTemplateRepository.IsRepated(screeningTemplateValueDto.ScreeningTemplateId) && _impactService.CheckReferenceVariable(screeningTemplateValueDto.ProjectDesignVariableId)))
             {
                 ModelState.AddModelError("Message", "Reference schedule date can't clear!");
                 return BadRequest(ModelState);

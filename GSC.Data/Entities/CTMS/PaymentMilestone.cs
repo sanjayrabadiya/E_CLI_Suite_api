@@ -24,5 +24,6 @@ namespace GSC.Data.Entities.CTMS
         public Country Country { get; set; }
         public List<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetails { get; set; } = null;
         public List<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetails { get; set; } = null;
+        public List<PaymentMilestonePassThroughDetail> PaymentMilestonePassThroughDetail { get; set; } = null;
     }
 }

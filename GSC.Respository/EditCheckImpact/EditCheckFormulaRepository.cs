@@ -16,9 +16,9 @@ namespace GSC.Respository.EditCheckImpact
         {
             var result = ValidateFormulaReference(editCheck.Where(r => !r.IsTarget).ToList());
 
-            var refCount = editCheck.Count(x => !x.IsTarget && x.InputValue != "" && x.InputValue != null && x.InputValue != "0");
+            var refCount = editCheck.Where(x => !x.IsTarget && x.InputValue != "" && x.InputValue != null && x.InputValue != "0").Count();
 
-            if (result.IsValid && editCheck.Exists(r => r.IsTarget && r.IsFormula))
+            if (result.IsValid && editCheck.Any(r => r.IsTarget && r.IsFormula))
             {
                 result.Target = new List<EditCheckResult>();
 
@@ -79,7 +79,7 @@ namespace GSC.Respository.EditCheckImpact
             try
             {
 
-                TimeSpan t1 = TimeSpan.Parse("00:00", CultureInfo.InvariantCulture);
+                TimeSpan t1 = TimeSpan.Parse("00:00");
                 string timeDiff = "";
                 Operator? lastOperator = Operator.Minus;
                 bool isMathAbs = false;
@@ -96,12 +96,12 @@ namespace GSC.Respository.EditCheckImpact
 
                     if (r.CollectionSource == CollectionSources.Time && !string.IsNullOrEmpty(r.InputValue) && r.InputValue != "0" && r.InputValue != "1")
                     {
-                        DateTime dt = DateTime.ParseExact(r.InputValue, "MM/dd/yyyy HH:mm:ss", CultureInfo.InvariantCulture);
-                        if (lastDate != null)
+                        DateTime dt = DateTime.ParseExact(r.InputValue, "MM/dd/yyyy HH:mm:ss", null);
+                        if (lastDate != null && dt != null)
                         {
                             if (lastOperator == Operator.Plus)
                             {
-                                TimeSpan duration = t1.Add(TimeSpan.Parse(dt.ToString(@"HH\:mm"), CultureInfo.InvariantCulture));
+                                TimeSpan duration = t1.Add(TimeSpan.Parse(dt.ToString(@"HH\:mm")));
                                 if (duration.Days > 0)
                                 {
                                     timeDiff = $"{duration.Hours + (24 * duration.Days)}:{duration.Minutes.ToString().PadLeft(2, '0')}";
@@ -112,15 +112,15 @@ namespace GSC.Respository.EditCheckImpact
                             else
                             {
 
-                                TimeSpan duration = t1 - TimeSpan.Parse(dt.ToString(@"HH\:mm"), CultureInfo.InvariantCulture);
+                                TimeSpan duration = t1 - TimeSpan.Parse(dt.ToString(@"HH\:mm"));
                                 timeDiff = duration.ToString(@"hh\:mm");
                             }
-                            t1 = TimeSpan.Parse(timeDiff, CultureInfo.InvariantCulture);
+                            t1 = TimeSpan.Parse(timeDiff);
                         }
                         lastDate = dt;
                         lastOperator = r.Operator;
                         if (string.IsNullOrEmpty(timeDiff))
-                            t1 = TimeSpan.Parse(dt.ToString(@"HH\:mm"), CultureInfo.InvariantCulture);
+                            t1 = TimeSpan.Parse(dt.ToString(@"HH\:mm"));
                     }
 
                     if (!string.IsNullOrEmpty(r.CollectionValue) && r.CollectionValue == "0")

@@ -26,10 +26,10 @@ namespace GSC.Respository.EditCheckImpact
 
         public EditCheckResult ValidateEditCheck(List<EditCheckValidate> editCheck)
         {
-            var dateDiff = editCheck.Exists(x => x.Operator == Operator.Different);
-            if (!dateDiff && editCheck.Exists(x => x.IsFormula) && editCheck.Exists(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
+            var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
+            if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
-                if (editCheck.Exists(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
+                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
                 {
                     EditCheckResult result = null;
                     var newCase = editCheck.Where(x => x.IsTarget).ToList();
@@ -70,7 +70,7 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
             }
-            else if (!dateDiff && editCheck.Exists(x => x.IsFormula))
+            else if (!dateDiff && editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormula(editCheck);
             else
                 return ValidateRule(editCheck, true);
@@ -79,12 +79,12 @@ namespace GSC.Respository.EditCheckImpact
 
         public EditCheckResult ValidateEditCheckReference(List<EditCheckValidate> editCheck)
         {
-            var dateDiff = editCheck.Exists(x => x.Operator == Operator.Different);
-            if (!dateDiff && editCheck.Exists(x => x.IsFormula) && editCheck.Exists(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
+            var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
+            if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
-                if (editCheck.Exists(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
+                if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
                 {
-                    EditCheckResult result = new EditCheckResult();
+                    EditCheckResult result = null;
                     var message = "";
                     var newCase = editCheck.Where(x => x.IsTarget).ToList();
                     foreach (var x in editCheck.Where(x => !x.IsTarget).ToList())
@@ -126,7 +126,7 @@ namespace GSC.Respository.EditCheckImpact
                 }
 
             }
-            else if (!dateDiff && editCheck.Exists(x => x.IsFormula))
+            else if (!dateDiff && editCheck.Any(x => x.IsFormula))
                 return _editCheckFormulaRepository.ValidateFormulaReference(editCheck.Where(x => x.CheckBy != EditCheckRuleBy.ByVariableRule).ToList());
             else
                 return ValidateRule(editCheck, false);
@@ -134,9 +134,9 @@ namespace GSC.Respository.EditCheckImpact
 
         EditCheckResult ValidateRule(List<EditCheckValidate> editCheck, bool isFromValidate)
         {
-            if (editCheck.Exists(r => r.Operator == Operator.Different))
+            if (editCheck.Any(r => r.Operator == Operator.Different))
                 return GetDifferentValue(editCheck, isFromValidate);
-            else if (!editCheck.Exists(r => !r.IsTarget))
+            else if (editCheck.Count(r => !r.IsTarget) == 0)
             {
                 var editCheckResult = new EditCheckResult();
                 editCheckResult.Target = new List<EditCheckResult>();
@@ -147,7 +147,7 @@ namespace GSC.Respository.EditCheckImpact
                     if (c.Operator == Operator.HardFetch || c.Operator == Operator.SoftFetch)
                     {
                         targetResult.IsValid = true;
-                        targetResult.Result = editCheck.Find(x => !x.IsTarget)?.InputValue;
+                        targetResult.Result = editCheck.Where(x => !x.IsTarget).FirstOrDefault()?.InputValue;
                     }
                     else if (c.Operator == Operator.Default)
                     {
@@ -167,9 +167,9 @@ namespace GSC.Respository.EditCheckImpact
                 });
                 return editCheckResult;
             }
-            else if (editCheck.Exists(r => r.IsReferenceValue) || editCheck.Exists(r => r.Operator == Operator.Percentage))
+            else if (editCheck.Any(r => r.IsReferenceValue) || editCheck.Any(r => r.Operator == Operator.Percentage))
             {
-                var reference = editCheck.Find(r => !r.IsTarget);
+                var reference = editCheck.FirstOrDefault(r => !r.IsTarget);
                 editCheck = editCheck.Where(r => r.IsTarget).ToList();
                 var editCheckResult = new EditCheckResult();
                 editCheckResult.IsValid = true;
@@ -244,7 +244,7 @@ namespace GSC.Respository.EditCheckImpact
                     var editCheckResult = new EditCheckResult();
                     editCheckResult.Id = r.Id;
                     editCheckResult.IsValid = true;
-                    editCheckResult.Result = editCheck.Find(x => !x.IsTarget)?.InputValue;
+                    editCheckResult.Result = editCheck.Where(x => !x.IsTarget).FirstOrDefault()?.InputValue;
                     result.Target.Add(editCheckResult);
                 }
                 else if (r.Operator == Operator.Default)
@@ -269,7 +269,7 @@ namespace GSC.Respository.EditCheckImpact
                 }
             });
 
-            if (!isFromValidate && result.Target != null && result.Target.Exists(r => !r.IsValid))
+            if (!isFromValidate && result.Target != null && result.Target.Any(r => !r.IsValid))
             {
                 result.IsValid = false;
                 result.ErrorMessage += " syntax error in target";
@@ -305,8 +305,8 @@ namespace GSC.Respository.EditCheckImpact
         private EditCheckResult GetDifferentValue(List<EditCheckValidate> editCheck, bool isFromValidate)
         {
             var result = new EditCheckResult();
-            var from = editCheck.Find(r => r.Operator != null && !r.IsTarget);
-            var to = editCheck.Find(r => r.Operator == null && !r.IsTarget);
+            var from = editCheck.FirstOrDefault(r => r.Operator != null && !r.IsTarget);
+            var to = editCheck.FirstOrDefault(r => r.Operator == null && !r.IsTarget);
             result.SampleText = from?.FieldName + "-" + to?.FieldName;
             if (from == null || to == null)
             {
@@ -324,15 +324,15 @@ namespace GSC.Respository.EditCheckImpact
             result.Target = new List<EditCheckResult>();
             var targetResult = new EditCheckResult();
 
-            var targetEditCheck = editCheck.Find(r => r.IsTarget);
+            var targetEditCheck = editCheck.FirstOrDefault(r => r.IsTarget);
 
-            if (editCheck.Exists(x => x.IsFormula) && targetEditCheck == null)
+            if (editCheck.Any(x => x.IsFormula) && targetEditCheck == null)
                 targetEditCheck = new EditCheckValidate();
 
             if (targetEditCheck == null) return result;
 
             targetResult.Id = targetEditCheck.Id;
-            targetResult.SampleText = $"{from.FieldName} {"-"} {to.FieldName}";
+            targetResult.SampleText = $"{from?.FieldName} {"-"} {to?.FieldName}";
 
             if (!string.IsNullOrEmpty(from.InputValue) && !string.IsNullOrEmpty(to.InputValue))
             {
@@ -493,7 +493,7 @@ namespace GSC.Respository.EditCheckImpact
                     if (!string.IsNullOrEmpty(r.InputValue) && !(r.Operator == Operator.NotNull || r.Operator == Operator.Null))
                     {
                         DateTime createdDate;
-                        var isSucess = DateTime.TryParse(r.InputValue, CultureInfo.InvariantCulture, out createdDate);
+                        var isSucess = DateTime.TryParse(r.InputValue, out createdDate);
                         if (isSucess)
                             col.DataType = Type.GetType("System.DateTime");
                     }
@@ -519,7 +519,7 @@ namespace GSC.Respository.EditCheckImpact
 
             ruleStr = ruleStr.Replace("  ", " ").Trim();
 
-            var result = ValidateDataTable(dt, ruleStr, isFromValidate, editCheck.Exists(r => r.IsTarget));
+            var result = ValidateDataTable(dt, ruleStr, isFromValidate, editCheck.Any(r => r.IsTarget));
 
             result.SampleText = displayRule;
             return result;
@@ -535,7 +535,7 @@ namespace GSC.Respository.EditCheckImpact
                 var foundDt = dt.Select(ruleStr);
                 result.IsValid = true;
 
-                if (foundDt == null || !foundDt.Any())
+                if (foundDt == null || foundDt.Count() == 0)
                 {
                     result.Result = "Input value not verified!";
                     if (isFromValidate && !isTarget)

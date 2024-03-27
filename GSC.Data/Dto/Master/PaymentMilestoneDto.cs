@@ -23,6 +23,7 @@ namespace GSC.Data.Dto.Master
         public int? PatientStatus { get; set; }
         public int[] StudyPlanTaskIds { get; set; }
         public int[] PatientCostIds { get; set; }
+        public int[] PassThroughCostIds { get; set; }
     }
     public class PaymentMilestoneGridDto : BaseAuditDto
     {
@@ -40,6 +41,7 @@ namespace GSC.Data.Dto.Master
         public int? PatientCount { get; set; }
         public string PatientStatus { get; set; }
         public string PatientCostVisits { get; set; }
+        public string PassThroughCostCountry { get; set; }
 
     }
 }

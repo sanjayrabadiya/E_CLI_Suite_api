@@ -63,7 +63,10 @@ namespace GSC.Respository.Project.EditCheck
                      : "",
                 FetchingProjectDesignTemplateId = c.FetchingProjectDesignTemplateId,
                 FetchingProjectDesignVariableId = c.FetchingProjectDesignVariableId,
-                FetchingProjectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault() != null ? _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault().ProjectDesignVisitId : 0
+                FetchingProjectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault() != null ? _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault().ProjectDesignVisitId : 0,
+                IsAdditionalTarget = c.IsAdditionalTarget,
+                AdditionalTargetValue = c.AdditionalTargetValue,
+                AdditionalTargetOperator = c.AdditionalTargetOperator
             }).FirstOrDefault();
 
             if (result?.CheckBy == EditCheckRuleBy.ByVariableAnnotation)

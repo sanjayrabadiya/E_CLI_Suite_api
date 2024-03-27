@@ -44,6 +44,8 @@ namespace GSC.Respository.Screening
         private readonly IGSCContext _context;
         private readonly IProjectDesingTemplateRestrictionRepository _projectDesingTemplateRestrictionRepository;
         private readonly ILabManagementVariableMappingRepository _labManagementVariableMappingRepository;
+                private readonly IProjectDesignVariableValueRepository _projectDesignVariableValueRepository;
+
         private readonly ITemplateVariableSequenceNoSettingRepository _templateVariableSequenceNoSettingRepository;
         private readonly IEmailSenderRespository _emailSenderRespository;
         private readonly IEmailConfigurationEditCheckRepository _emailConfigurationEditCheckRepository;
@@ -56,6 +58,7 @@ namespace GSC.Respository.Screening
             IScreeningTemplateValueChildRepository screeningTemplateValueChildRepository,
             IProjectDesingTemplateRestrictionRepository projectDesingTemplateRestrictionRepository,
             ILabManagementVariableMappingRepository labManagementVariableMappingRepository,
+                        IProjectDesignVariableValueRepository projectDesignVariableValueRepository,
             IAppSettingRepository appSettingRepository,
              ITemplateVariableSequenceNoSettingRepository templateVariableSequenceNoSettingRepository,
             IEmailSenderRespository emailSenderRespository,
@@ -74,6 +77,7 @@ namespace GSC.Respository.Screening
             _appSettingRepository = appSettingRepository;
             _projectDesingTemplateRestrictionRepository = projectDesingTemplateRestrictionRepository;
             _labManagementVariableMappingRepository = labManagementVariableMappingRepository;
+                        _projectDesignVariableValueRepository = projectDesignVariableValueRepository;
             _templateVariableSequenceNoSettingRepository = templateVariableSequenceNoSettingRepository;
             _emailSenderRespository = emailSenderRespository;
             _emailConfigurationEditCheckRepository = emailConfigurationEditCheckRepository;
@@ -116,6 +120,11 @@ namespace GSC.Respository.Screening
         private List<ScreeningTemplateValueChild> GetScreeningTemplateValueChild(int ScreeningTemplateValueId)
         {
             return _screeningTemplateValueChildRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateValueId == ScreeningTemplateValueId && t.DeletedDate == null).ToList();
+        }
+
+        private List<ProjectDesignVariableValue> GetProjectDesignVariableValue(int ProjectDesignVariableId)
+        {
+            return _projectDesignVariableValueRepository.All.AsNoTracking().Where(t => t.ProjectDesignVariableId == ProjectDesignVariableId && t.DeletedDate == null).ToList();
         }
 
         public DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId)
@@ -187,7 +196,7 @@ namespace GSC.Respository.Screening
 
             labVariable.ForEach(x =>
             {
-                var screeningVariable = variables.Find(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId);
+                var screeningVariable = variables.FirstOrDefault(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId);
                 if (screeningVariable != null)
                 {
                     if (screeningTemplateBasic.Gender == Gender.Female)
@@ -269,9 +278,9 @@ namespace GSC.Respository.Screening
                     variable.ScheduleDate = t.ScheduleDate;
                     variable.QueryStatus = t.QueryStatus;
                     variable.HasComments = t.IsComment;
-                    variable.HasQueries = t.QueryStatus != null;
+                    variable.HasQueries = t.QueryStatus != null?true:false;
                     variable.IsNaValue = t.IsNa;
-                    variable.IsSystem = (t.QueryStatus != QueryStatus.Closed) && t.IsSystem;
+                    variable.IsSystem = t.QueryStatus == QueryStatus.Closed?false: t.IsSystem;
 
                     if (!isRestriction)
                         variable.WorkFlowButton = SetWorkFlowButton(t, workflowlevel, designTemplateDto, screeningTemplateBasic);
@@ -308,12 +317,12 @@ namespace GSC.Respository.Screening
                             var childValue = t.Children.Where(v => v.ProjectDesignVariableValueId == val.Id).GroupBy(x => x.LevelNo)
                             .Select(x => new ScreeningTemplateValueChild
                             {
-                                Id = x.First().Id,
-                                ScreeningTemplateValueId = x.First().ScreeningTemplateValueId,
-                                ProjectDesignVariableValueId = x.First().ProjectDesignVariableValueId,
-                                Value = x.First().Value,
-                                LevelNo = x.First().LevelNo,
-                                DeletedDate = x.First().DeletedDate
+                                Id = x.FirstOrDefault().Id,
+                                ScreeningTemplateValueId = x.FirstOrDefault().ScreeningTemplateValueId,
+                                ProjectDesignVariableValueId = x.FirstOrDefault().ProjectDesignVariableValueId,
+                                Value = x.FirstOrDefault().Value,
+                                LevelNo = x.FirstOrDefault().LevelNo,
+                                DeletedDate = x.FirstOrDefault().DeletedDate
                             }).ToList();
 
 
@@ -330,7 +339,7 @@ namespace GSC.Respository.Screening
                                 childValue.Add(obj);
                             });
 
-                            if (childValue.Any() && Levels.Any())
+                            if (childValue.Count()==0 && Levels.Count()==0)
                             {
                                 ScreeningTemplateValueChild obj = new ScreeningTemplateValueChild();
                                 obj.Id = 0;
@@ -351,12 +360,12 @@ namespace GSC.Respository.Screening
                                 obj.ScreeningTemplateValueChildId = child.Id;
                                 obj.LevelNo = child.LevelNo;
                                 obj.ValueName = val.ValueName;
-                                obj.IsDeleted = child.DeletedDate != null;
+                                obj.IsDeleted = child.DeletedDate == null?false:true;
                                 obj.TableCollectionSource = val.TableCollectionSource;
                                 ValuesList.Add(obj);
                             });
                         });
-                        variable.Values = ValuesList.Where(x => x.IsDeleted).ToList();
+                        variable.Values = ValuesList.Where(x => x.IsDeleted==false).ToList();
                     }
 
                     variable.IsSaved = variable.IsValid;
@@ -403,7 +412,7 @@ namespace GSC.Respository.Screening
             var variableTargetResult = _editCheckImpactRepository.UpdateVariale(result.Where(x => x.IsTarget).ToList(), screeningTemplateBasic.ScreeningEntryId, screeningTemplateBasic.ScreeningVisitId, false, false);
             projectDesignTemplateDto.Variables.ToList().ForEach(r =>
             {
-                var singleResult = variableTargetResult.Find(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId);
+                var singleResult = variableTargetResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).FirstOrDefault();
                 if (singleResult != null)
                 {
                     r.EditCheckValidation = new EditCheckTargetValidation();
@@ -447,7 +456,7 @@ namespace GSC.Respository.Screening
                     projectDesignTemplateDto.Variables.ToList().ForEach(r =>
                     {
                         var scheduleVariable = scheduleResult.Where(x => x.ProjectDesignVariableId == r.ProjectDesignVariableId).ToList();
-                        if (scheduleVariable.Count > 0)
+                        if (scheduleVariable !=null && scheduleVariable.Count > 0)
                         {
                             if (r.EditCheckValidation == null)
                             {
@@ -455,10 +464,10 @@ namespace GSC.Respository.Screening
                                 r.EditCheckValidation.InfoType = EditCheckInfoType.Info;
                             }
 
-                            if (scheduleVariable.Exists(x => x.ValidateType == EditCheckValidateType.Failed))
+                            if (scheduleVariable.Any(x => x.ValidateType == EditCheckValidateType.Failed))
                                 r.EditCheckValidation.InfoType = EditCheckInfoType.Failed;
 
-                            if (scheduleVariable.Exists(x => x.HasQueries))
+                            if (scheduleVariable.Any(x => x.HasQueries))
                                 r.EditCheckValidation.HasQueries = true;
 
                             var schMessage = scheduleResult.Select(t => new EditCheckMessage
@@ -484,7 +493,7 @@ namespace GSC.Respository.Screening
             if (editCheckIds.Count > 0)
                 RecuranceEditCheck(editCheckValidateDtos, editCheckIds, ref editCheckIds, projectDesignTemplateId);
 
-            TargetVaribaleAndReferenceEditCheck(editCheckValidateDtos, editCheckIds, ref editCheckIds);
+            TargetVaribaleAndReferenceEditCheck(editCheckValidateDtos, editCheckIds, ref editCheckIds,projectDesignTemplateId);
 
             return editCheckIds.GroupBy(t => t).Select(r => new EditCheckIds { EditCheckId = r.Key }).ToList();
         }
@@ -500,7 +509,7 @@ namespace GSC.Respository.Screening
             }
         }
 
-        void TargetVaribaleAndReferenceEditCheck(List<EditCheckValidateDto> editCheckValidateDtos, List<int> editCheckIds, ref List<int> result)
+        void TargetVaribaleAndReferenceEditCheck(List<EditCheckValidateDto> editCheckValidateDtos, List<int> editCheckIds, ref List<int> result,int projectDesignTemplateId)
         {
             var variable = editCheckValidateDtos.
               Where(x => editCheckIds.Contains(x.EditCheckId) && x.IsTarget &&
@@ -814,7 +823,7 @@ namespace GSC.Respository.Screening
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             var result = All.Where(x => x.DeletedDate == null && x.ScreeningVisit.Status != ScreeningVisitStatus.NotStarted);
 
-            result = result.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId);
+            if (filters.ProjectId !=null)result = result.Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.ProjectId);
             if (filters.StudyId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.StudyId == filters.StudyId);
             if (filters.VolunteerId != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.Attendance.VolunteerId == filters.VolunteerId);
             if (filters.ScreeningDate != null) result = result.Where(x => x.ScreeningVisit.ScreeningEntry.ScreeningDate.Date == Convert.ToDateTime(filters.ScreeningDate).Date);
@@ -915,8 +924,8 @@ namespace GSC.Respository.Screening
                 basicDetail.ReviewLevel > 0)
             {
                 if (workFlowLevel.WorkFlowText != null
-                    && workFlowLevel.WorkFlowText.Exists(x => x.LevelNo == basicDetail.ReviewLevel))
-                    return workFlowLevel.WorkFlowText.Find(x => x.LevelNo == basicDetail.ReviewLevel)
+                    && workFlowLevel.WorkFlowText.Any(x => x.LevelNo == basicDetail.ReviewLevel))
+                    return workFlowLevel.WorkFlowText.FirstOrDefault(x => x.LevelNo == basicDetail.ReviewLevel)
                         ?.RoleName;
                 return "Completed";
             }
@@ -1016,7 +1025,7 @@ namespace GSC.Respository.Screening
                     y.DataEntryStatus = GetStatusName(new ScreeningTemplateBasic { ReviewLevel = y.ReviewLevel, Status = y.ScreeningTemplateStatus }, false, workflowlevel);
                 });
             });
-            return grpresult.OrderBy(x => x.SubjectNo).ThenBy(x => x.lstTemplate.Count > 0).ToList();
+            return grpresult.OrderBy(x => x.SubjectNo).Where(x => x.lstTemplate.Count > 0).ToList();
         }
 
 
@@ -1026,7 +1035,7 @@ namespace GSC.Respository.Screening
             result.Children = screeningTemplateValue.Children.Select(r => new ScreeningTemplateValueChildBasic { Id = r.Id }).ToList();
             result.Id = screeningTemplateValue.Id;
 
-            if (EditCheckIds != null && EditCheckIds.Any() || collectionSource == CollectionSources.Date
+            if ((EditCheckIds != null && EditCheckIds.Count() > 0) || collectionSource == CollectionSources.Date
                 || collectionSource == CollectionSources.DateTime || collectionSource == CollectionSources.Time)
             {
                 var value = screeningTemplateValue.IsNa ? "NA" : screeningTemplateValue.Value;
@@ -1063,7 +1072,7 @@ namespace GSC.Respository.Screening
         public IList<DropDownDto> GetTemplateByLockedDropDown(LockUnlockDDDto lockUnlockDDDto)
         {
       
-            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
+            var sites = _context.Project.Where(x => x.ParentProjectId == lockUnlockDDDto.ProjectId).ToList().Select(x => x.Id).ToList(); // Change by Tinku for add separate dropdown for parent project (24/06/2022) 
 
             var Templates = All.Include(a => a.ProjectDesignTemplate).Include(a => a.ScreeningVisit)
                 .ThenInclude(a => a.ScreeningEntry)
@@ -1080,10 +1089,10 @@ namespace GSC.Respository.Screening
 
             return Templates.GroupBy(w => w.ProjectDesignTemplateId).Select(x => new DropDownDto
             {
-                Id = x.First().ProjectDesignTemplateId,
+                Id = x.FirstOrDefault().ProjectDesignTemplateId,
                 // changes on 13/06/2023 for add template name in screeningtemplate table change by vipul rokad
-                Value = x.First().ScreeningTemplateName,
-                ExtraData = x.First().ProjectDesignTemplate.DesignOrder
+                Value = x.FirstOrDefault().ScreeningTemplateName,
+                ExtraData = x.FirstOrDefault().ProjectDesignTemplate.DesignOrder
             }).OrderBy(x => x.ExtraData).ToList();
         }
 
@@ -1390,7 +1399,7 @@ namespace GSC.Respository.Screening
                         if (data.Email.Contains(","))
                         {
                             var list = data.Email.Split(',').ToList();
-                            if (list.Count > 0)
+                            if (list !=null && list.Count > 0)
                             {
                                 list.ForEach(x =>
                                 {
