@@ -106,7 +106,7 @@ namespace GSC.Respository.Screening
         public void UpdateDefaultValue(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId)
         {
             var screeningDesignVariableId = All.Where(x => x.ScreeningTemplateId == screeningTemplateId).Select(r => r.ProjectDesignVariableId).ToList();
-            if (screeningDesignVariableId.Count > 0)
+            if (screeningDesignVariableId !=null && screeningDesignVariableId.Count >0)
                 return;
 
             var templateVariable = variableList.Where(r => !screeningDesignVariableId.Contains(r.Id)
@@ -210,7 +210,7 @@ namespace GSC.Respository.Screening
                                 {
                                     var producttype = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementKIT).Where(x => x.SupplyManagementKIT.ProjectDesignVisitId == designScreeningTemplateDto.ProjectDesignVisitId
                                     && x.DeletedDate == null && x.RandomizationId == projectdata.RandomizationId).Select(s => s.KitNo).ToList();
-                                    value = producttype.Count > 0 ? String.Join(",", producttype.Distinct()) : "";
+                                    value = producttype!=null && producttype.Count > 0 ? String.Join(",", producttype.Distinct()) : "";
                                 }
                                 else
                                 {
@@ -319,7 +319,7 @@ namespace GSC.Respository.Screening
                         Total = b.Count()
                     }).ToList();
 
-            result.Where(a => a.Level != 0).ToList().ForEach(x => x.LevelName = workText.Find(a => a.LevelNo == x.Level)?.RoleName);
+            result.Where(a => a.Level != 0).ToList().ForEach(x => x.LevelName = workText.FirstOrDefault(a => a.LevelNo == x.Level)?.RoleName);
 
             return result;
 
@@ -1350,7 +1350,7 @@ namespace GSC.Respository.Screening
                 variableDetail.ScheduleDate = screeningValue.ScheduleDate;
                 variableDetail.QueryStatus = screeningValue.QueryStatus;
                 variableDetail.IsNaValue = screeningValue.IsNa;
-                variableDetail.IsSystem = (screeningValue.QueryStatus != QueryStatus.Closed) && screeningValue.IsSystem;
+                variableDetail.IsSystem = screeningValue.QueryStatus == QueryStatus.Closed?false: screeningValue.IsSystem;
 
 
                 variableDetail.DocPath = screeningValue.DocPath != null ? screeningValue.DocPath : null;
