@@ -124,7 +124,7 @@ namespace GSC.Respository.SupplyManagement
                 var days = supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Sum(x => x.Days);
 
                 var productreciept = _context.ProductVerification.Include(x => x.ProductReceipt)
-                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Any(z => z.ProductReceiptId == x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
+                    .Where(x => supplyManagementKITSeriesDto.SupplyManagementKITSeriesDetail.Select(s => s.ProductReceiptId).Contains((int)x.ProductReceiptId)).OrderBy(a => a.RetestExpiryDate).FirstOrDefault();
                 if (productreciept != null)
                 {
                     var date = productreciept.RetestExpiryDate.Value.AddDays(-days);

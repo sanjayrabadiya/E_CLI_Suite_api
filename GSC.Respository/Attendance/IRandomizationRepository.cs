@@ -56,9 +56,6 @@ namespace GSC.Respository.Attendance
         RandomizationDto GetRandomizationNumberIWRS(RandomizationDto randomizationDto);
 
         RandomizationDto SetKitNumber(RandomizationDto obj);
-
-        bool CheckKitNumber(RandomizationDto obj, bool Isiwrs);
-
         void UpdateRandmizationKitNotAssigned(RandomizationDto obj);
 
         void SendRandomizationIWRSEMail(RandomizationDto obj);

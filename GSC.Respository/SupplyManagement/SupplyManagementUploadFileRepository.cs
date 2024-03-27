@@ -161,15 +161,38 @@ namespace GSC.Respository.SupplyManagement
                 worksheet.Range("A5:B5").Style.Font.SetBold();
                 worksheet.Cell(5, 1).Value = "Randomization No";
                 worksheet.Cell(5, 2).Value = "Product Code";
-                if (setting.IsUploadWithKit)
+
+                var j = 0;
+                if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == false)
                 {
                     worksheet.Row(5).Cell(3).Style.Fill.BackgroundColor = XLColor.LightGreen;
                     worksheet.Row(5).Cell(3).Style.Font.SetBold();
                     worksheet.Cell(5, 3).Value = "Kit No";
+                    j = 4;
+                }
+                else if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                {
+                    worksheet.Row(5).Cell(3).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                    worksheet.Row(5).Cell(3).Style.Font.SetBold();
+                    worksheet.Cell(5, 3).Value = "Kit No";
+
+                    worksheet.Row(5).Cell(4).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                    worksheet.Row(5).Cell(4).Style.Font.SetBold();
+                    worksheet.Cell(5, 4).Value = "Display Randomization No";
+                    j = 5;
+                }
+                else if (!setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                {
+                    worksheet.Row(5).Cell(3).Style.Fill.BackgroundColor = XLColor.LightGreen;
+                    worksheet.Row(5).Cell(3).Style.Font.SetBold();
+                    worksheet.Cell(5, 3).Value = "Display Randomization No";
+                    j = 4;
+                }
+                else
+                {
+                    j = 3;
                 }
 
-
-                var j = setting.IsUploadWithKit ? 4 : 3;
                 projectDesignVisits.ForEach(d =>
                 {
                     worksheet.Row(5).Cell(j).Style.Fill.BackgroundColor = XLColor.LightGreen;
@@ -263,25 +286,71 @@ namespace GSC.Respository.SupplyManagement
 
             foreach (var item in results.Tables[0].Rows[4].ItemArray.Where(x => x.ToString() != ""))
             {
-                if (setting.IsUploadWithKit)
+                if (setting.IsUploadWithKit || setting.IsStaticRandomizationNo == true)
                 {
                     selectQuery.Append("Column" + j + " is null or ");
-                    if (j > 2)
+                    if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
                     {
-                        var r = projectDesignVisits.Exists(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
-                        if (!r)
-                            return "Visit name not match with design visit.";
+                        if (j > 3)
+                        {
+                            var r = projectDesignVisits.Exists(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                            if (!r)
+                                return "Visit name not match with design visit.";
+                        }
+                        else
+                        {
+                            if (j == 0 && item.ToString().Trim().ToLower() != "randomization no")
+                                return "File is not Compatible!";
+
+                            if (j == 1 && item.ToString().Trim().ToLower() != "product code")
+                                return "File is not Compatible!";
+
+                            if (j == 2 && item.ToString().Trim().ToLower() != "kit no")
+                                return "File is not Compatible!";
+
+                            if (j == 3 && item.ToString().Trim().ToLower() != "display randomization no")
+                                return "File is not Compatible!";
+                        }
                     }
-                    else
+                    if (!setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
                     {
-                        if (j == 0 && item.ToString().Trim().ToLower() != "randomization no")
-                            return "File is not Compatible!";
+                        if (j > 2)
+                        {
+                            var r = projectDesignVisits.Exists(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                            if (!r)
+                                return "Visit name not match with design visit.";
+                        }
+                        else
+                        {
+                            if (j == 0 && item.ToString().Trim().ToLower() != "randomization no")
+                                return "File is not Compatible!";
 
-                        if (j == 1 && item.ToString().Trim().ToLower() != "product code")
-                            return "File is not Compatible!";
+                            if (j == 1 && item.ToString().Trim().ToLower() != "product code")
+                                return "File is not Compatible!";
 
-                        if (j == 2 && item.ToString().Trim().ToLower() != "kit no")
-                            return "File is not Compatible!";
+                            if (j == 2 && item.ToString().Trim().ToLower() != "display randomization no")
+                                return "File is not Compatible!";
+                        }
+                    }
+                    if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == false)
+                    {
+                        if (j > 2)
+                        {
+                            var r = projectDesignVisits.Exists(x => x.DisplayName.ToLower().Trim() == item.ToString().ToLower().Trim());
+                            if (!r)
+                                return "Visit name not match with design visit.";
+                        }
+                        else
+                        {
+                            if (j == 0 && item.ToString().Trim().ToLower() != "randomization no")
+                                return "File is not Compatible!";
+
+                            if (j == 1 && item.ToString().Trim().ToLower() != "product code")
+                                return "File is not Compatible!";
+
+                            if (j == 2 && item.ToString().Trim().ToLower() != "kit no")
+                                return "File is not Compatible!";
+                        }
                     }
                     j++;
                 }
@@ -314,35 +383,108 @@ namespace GSC.Respository.SupplyManagement
                 DataRow[] dr = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).CopyToDataTable().Select(selectQuery.ToString().Substring(0, selectQuery.Length - 3));
                 if (dr.Length != 0)
                     return "Please fill required randomization details!";
-                else
+                else if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
                 {
-                    if (setting.IsUploadWithKit)
-                    {
 
-                        var kits = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).Select(k => k.Field<string>("Column2")).Distinct().OrderBy(k => k).ToArray();
-                        foreach (string item in kits)
+                    var kits = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).Select(k => k.Field<string>("Column2")).Distinct().OrderBy(k => k).ToArray();
+                    foreach (string item in kits)
+                    {
+                        var kit = _context.SupplyManagementKITSeries.Where(x => x.DeletedDate == null && x.KitNo == item && x.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
+                        if (kit != null)
                         {
-                            var kit = _context.SupplyManagementKITSeries.Where(x => x.DeletedDate == null && x.KitNo == item && x.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
-                            if (kit != null)
+                            return item + " kit number is already created or assigned";
+                        }
+                        int i = 0;
+                        foreach (DataRow row in results.Tables[0].Rows)
+                        {
+                            if (row["Column2"].ToString() == item)
                             {
-                                return item + " kit number is already created or assigned";
-                            }
-                            int i = 0;
-                            foreach (DataRow row in results.Tables[0].Rows)
-                            {
-                                if (row["Column2"].ToString() == item)
+                                if (i > 0)
                                 {
-                                    if (i > 0)
-                                    {
-                                        return item + " Duplicate kit number found in sheet";
-                                    }
-                                    i++;
+                                    return item + " Duplicate kit number found in sheet";
                                 }
+                                i++;
                             }
                         }
                     }
-                    return "";
+
+                    var randomizationNos = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).Select(k => k.Field<string>("Column3")).Distinct().OrderBy(k => k).ToArray();
+                    foreach (string item in randomizationNos)
+                    {
+                        var uploadDetail = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(x => x.DeletedDate == null
+                                  && x.DisplayRandomizationNumber == item
+                                  && x.SupplyManagementUploadFile.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
+                        if (uploadDetail != null)
+                        {
+                            return item + " Randomization number is already created or assigned";
+                        }
+
+                        int i = 0;
+                        foreach (DataRow row in results.Tables[0].Rows)
+                        {
+                            if (row["Column3"].ToString() == item)
+                            {
+                                if (i > 0)
+                                {
+                                    return item + " Duplicate display randomization number found in sheet";
+                                }
+                                i++;
+                            }
+                        }
+                    }
                 }
+                else if (!setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                {
+                    var randomizationNos = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).Select(k => k.Field<string>("Column2")).Distinct().OrderBy(k => k).ToArray();
+                    foreach (string item in randomizationNos)
+                    {
+                        var uploadDetail = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(x => x.DeletedDate == null
+                                  && x.DisplayRandomizationNumber == item
+                                  && x.SupplyManagementUploadFile.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
+                        if (uploadDetail != null)
+                        {
+                            return item + " Randomization number is already created or assigned";
+                        }
+
+                        int i = 0;
+                        foreach (DataRow row in results.Tables[0].Rows)
+                        {
+                            if (row["Column2"].ToString() == item)
+                            {
+                                if (i > 0)
+                                {
+                                    return item + " Duplicate display randomization number found in sheet";
+                                }
+                                i++;
+                            }
+                        }
+                    }
+                }
+                else if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == false)
+                {
+                    var kits = results.Tables[0].AsEnumerable().Where((row, index) => index > 4).Select(k => k.Field<string>("Column2")).Distinct().OrderBy(k => k).ToArray();
+                    foreach (string item in kits)
+                    {
+                        var kit = _context.SupplyManagementKITSeries.Where(x => x.DeletedDate == null && x.KitNo == item && x.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
+                        if (kit != null)
+                        {
+                            return item + " kit number is already created or assigned";
+                        }
+                        int i = 0;
+                        foreach (DataRow row in results.Tables[0].Rows)
+                        {
+                            if (row["Column2"].ToString() == item)
+                            {
+                                if (i > 0)
+                                {
+                                    return item + " Duplicate kit number found in sheet";
+                                }
+                                i++;
+                            }
+                        }
+                    }
+                }
+                return "";
             }
             else
             {
@@ -367,9 +509,19 @@ namespace GSC.Respository.SupplyManagement
                 supplyManagementUploadFileDetail.SupplyManagementUploadFileId = supplyManagementUploadFile.Id;
                 supplyManagementUploadFileDetail.RandomizationNo = Convert.ToInt32(dt.Rows[i][0]);
                 supplyManagementUploadFileDetail.TreatmentType = dt.Rows[i][1].ToString();
-                if (setting.IsUploadWithKit)
+                if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                {
                     supplyManagementUploadFileDetail.KitNo = dt.Rows[i][2].ToString();
-
+                    supplyManagementUploadFileDetail.DisplayRandomizationNumber = dt.Rows[i][3].ToString();
+                }
+                if (!setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                {
+                    supplyManagementUploadFileDetail.DisplayRandomizationNumber = dt.Rows[i][2].ToString();
+                }
+                if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == false)
+                {
+                    supplyManagementUploadFileDetail.KitNo = dt.Rows[i][2].ToString();
+                }
                 _supplyManagementUploadFileDetailRepository.Add(supplyManagementUploadFileDetail);
                 _context.Save();
 
@@ -380,10 +532,16 @@ namespace GSC.Respository.SupplyManagement
                     supplyManagementUploadFileVisit.Id = 0;
                     supplyManagementUploadFileVisit.SupplyManagementUploadFileDetailId = supplyManagementUploadFileDetail.Id;
                     supplyManagementUploadFileVisit.ProjectDesignVisitId = visitIds[j];
-                    if (setting.IsUploadWithKit)
+
+                    if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                        supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 4].ToString();
+                    else if (!setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                        supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 3].ToString();
+                    else if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == false)
                         supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 3].ToString();
                     else
                         supplyManagementUploadFileVisit.Value = dt.Rows[i][j + 2].ToString();
+
                     if (j == 0)
                     {
                         supplyManagementUploadFileVisit.Isfirstvisit = true;

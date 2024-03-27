@@ -194,6 +194,10 @@ namespace GSC.Data.Dto.Attendance
         public decimal? Dose { get; set; }
 
         public List<KitDoseList> KitDoseList { get; set; }
+
+        public bool IsStaticRandomizationNo { get; set; }
+
+        public string DisplayRandomizationNumber { get; set; }
     }
     public class RandomizationFactor
     {
