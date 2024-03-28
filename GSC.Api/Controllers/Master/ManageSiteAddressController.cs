@@ -42,12 +42,21 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{id}")]
         public IActionResult Get(int id)
         {
-            var mangeSite = _manageSiteAddressRepository.FindByInclude(q => q.Id == id, x => x.City, x => x.City.State).FirstOrDefault();
-            var manageSiteDto = _mapper.Map<ManageSiteAddressDto>(mangeSite);
-            manageSiteDto.StateId = mangeSite?.City?.StateId ?? 0;
-            manageSiteDto.CountryId = mangeSite?.City?.State?.CountryId ?? 0;
-            manageSiteDto.Facilities = mangeSite?.Facilities.Split(',').ToList();
-            return Ok(manageSiteDto);
+            var mangeSite = _manageSiteAddressRepository.FindByInclude(q => q.Id == id, x => x.City, x => x.City.State)
+                .Select(s=> new ManageSiteAddressDto
+                {
+                    Id=s.Id,
+                    SiteAddress=s.SiteAddress,
+                    ManageSiteId=s.ManageSiteId,
+                    ContactName=s.ContactName,
+                    SiteEmail=s.SiteEmail,
+                    ContactNumber=s.ContactNumber,
+                    CityId=s.CityId,
+                    StateId = s.City?.StateId ?? 0,
+                    CountryId = s.City?.State?.CountryId ?? 0,
+                    Facilities = s.Facilities.Split(',').ToList()
+        }).FirstOrDefault();
+            return Ok(mangeSite);
         }
 
         [HttpPost]

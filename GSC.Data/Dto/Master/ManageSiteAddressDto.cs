@@ -1,8 +1,6 @@
-﻿using GSC.Data.Dto.Location;
-using GSC.Data.Entities.Common;
-using System;
+﻿using GSC.Data.Entities.Common;
 using System.Collections.Generic;
-using System.Text;
+using GSC.Data.Entities.Location;
 
 namespace GSC.Data.Dto.Master
 {
@@ -19,6 +17,7 @@ namespace GSC.Data.Dto.Master
         public int? CompanyId { get; set; }
         public List<string> Facilities { get; set; }
         public ManageSiteDto ManageSite { get; set; }
+        public City City { get; set; }
     }
 
     public class ManageSiteAddressGridDto : BaseAuditDto
