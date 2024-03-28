@@ -533,7 +533,7 @@ namespace GSC.Respository.ProjectRight
                 {
                     DocumentPath = b.ProjectDocument.FileName,
                     IsDeleted = b.ProjectDocument.DeletedDate.HasValue ? "Yes" : "No"
-                }).OrderByDescending(y => y.AssignedDate).ToList();
+                }).ToList().OrderByDescending(y => y.AssignedDate).ToList();
 
             objdochistory.PendingReview.ForEach(collection =>
             {
