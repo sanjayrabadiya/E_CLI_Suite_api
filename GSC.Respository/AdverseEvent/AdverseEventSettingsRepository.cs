@@ -89,27 +89,14 @@ namespace GSC.Respository.AdverseEvent
                         Value = x.ValueName,
                         SeqNo = x.SeqNo,
                         SeveritySeqNo = x.SeqNo,
-                        Severity = GetSeverityByCode(x.SeqNo)
+                        Severity = x.SeqNo == 1 ? "Low" : (x.SeqNo == 2 ? "Medium" : "High")
                     }).ToList();
                 return projectdesignvariablevalues;
             }
             return new List<AdverseEventSettingsVariableValue>();
         }
 
-        private string GetSeverityByCode(int code)
-        {
-            switch (code)
-            {
-                case 1:
-                    return "Low";
-                case 2:
-                    return "Medium";
-                default:
-                  return  "High";
-
-            }
-        }
-
+      
         public AdverseEventSettingsListDto GetData(int projectId)
         {
             var adverseEventSettingsDto = _context.AdverseEventSettings.Where(x => x.ProjectId == projectId && x.DeletedDate == null)
