@@ -377,7 +377,8 @@ namespace GSC.Helper
         [Description("*")] Multiplication = 27,
         [Description("^")] Power = 28,
         [Description("√")] SquareRoot = 29,
-        [Description("Default")] Default = 30
+        [Description("Default")] Default = 30,
+        [Description("Reference Validate")] RefValidate = 31
     }
 
     public enum ProjectScheduleOperator : short

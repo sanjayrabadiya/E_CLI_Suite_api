@@ -411,6 +411,11 @@ namespace GSC.Respository.EditCheckImpact
                             _editCheckTargetEnableViewModels.Add(new EditCheckTargetEnableViewModel { ProjectDesignVariableId = t, Value = r.ScreeningTemplateValue });
 
                     }
+                    else if (r.Operator == Operator.RefValidate)
+                    {
+                        if (isQueryRaise) editCheckTarget.HasQueries = r.ValidateType == EditCheckValidateType.Failed;
+                        editCheckTarget.InfoType = r.ValidateType == EditCheckValidateType.Failed ? EditCheckInfoType.Failed : EditCheckInfoType.Info;
+                    }
                     else if (r.Operator == Operator.Default)
                     {
                         if (r.ValidateType == EditCheckValidateType.Passed)
@@ -528,7 +533,7 @@ namespace GSC.Respository.EditCheckImpact
                                 r.ProjectDesignVariableId, r.EditCheckDetailId, r.ValidateType, r.SampleResult);
 
 
-                    if (isQueryRaise && r.Status > ScreeningTemplateStatus.InProcess)
+                    if (r.Operator != Operator.RefValidate && isQueryRaise && r.Status > ScreeningTemplateStatus.InProcess)
                     {
                         var additionalResult = AdditionalTargetValidate(r, editCheckTarget.Value);
                         if (!additionalResult)
@@ -878,10 +883,9 @@ namespace GSC.Respository.EditCheckImpact
                     Operator = x.IsNa ? Operator.Equal : x.Operator,
                     IsFormula = x.IsFormula,
                     IsTarget = x.IsTarget,
-                    CheckBy = x.CheckBy
+                    CheckBy = x.CheckBy,
+                    AdditionalTargetOperator = x.AdditionalTargetOperator
                 }).ToList();
-
-
 
                 var validateResult = _editCheckRuleRepository.ValidateEditCheck(editCheckValidates);
 

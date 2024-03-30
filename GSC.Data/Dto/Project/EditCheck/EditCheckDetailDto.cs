@@ -79,6 +79,7 @@ namespace GSC.Data.Dto.Project.EditCheck
         public bool IsSkip { get; set; }
         public bool IsTarget { get; set; }
         public EditCheckRuleBy CheckBy { get; set; }
+        public Operator? AdditionalTargetOperator { get; set; }
     }
 
     public class EditCheckResult
