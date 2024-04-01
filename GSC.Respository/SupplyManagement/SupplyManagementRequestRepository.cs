@@ -303,6 +303,7 @@ namespace GSC.Respository.SupplyManagement
                              && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                              && x.SupplyManagementKIT.SiteId == obj.ToProjectId
                              && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                             && !x.IsRetension
                              && x.DeletedDate == null).Select(x => new KitListApprove
                              {
                                  Id = x.Id,
@@ -320,7 +321,7 @@ namespace GSC.Respository.SupplyManagement
 
                     var data1 = _context.SupplyManagementKITDetail.Include(x => x.SupplyManagementShipment).ThenInclude(s => s.SupplyManagementRequest).ThenInclude(s => s.FromProject).Where(x =>
                                   x.SupplyManagementKIT.PharmacyStudyProductTypeId == (setting.IsBlindedStudy == true ? x.SupplyManagementKIT.PharmacyStudyProductTypeId : obj.StudyProductTypeId)
-
+                                  && !x.IsRetension
                                   && (x.Status == KitStatus.WithoutIssue || x.Status == KitStatus.WithIssue)
                                   && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ToProjectId
                                   && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
@@ -349,6 +350,7 @@ namespace GSC.Respository.SupplyManagement
                                   && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                                   && x.SupplyManagementKIT.ProjectId == obj.FromProject.ParentProjectId
                                   && x.SupplyManagementKIT.ProjectDesignVisitId == obj.VisitId
+                                  && !x.IsRetension
                                   && x.DeletedDate == null).Select(x => new KitListApprove
                                   {
                                       Id = x.Id,
@@ -374,6 +376,7 @@ namespace GSC.Respository.SupplyManagement
                              x.SiteId != null
                              && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                              && x.SiteId == obj.ToProjectId
+                             && !x.IsRetension
                              && x.DeletedDate == null).Select(x => new KitListApprove
                              {
                                  Id = x.Id,
@@ -389,6 +392,7 @@ namespace GSC.Respository.SupplyManagement
                     var data1 = _context.SupplyManagementKITSeries.Include(x => x.SupplyManagementShipment).ThenInclude(x => x.SupplyManagementRequest).ThenInclude(x => x.FromProject).Where(x =>
                                    (x.Status == KitStatus.WithIssue || x.Status == KitStatus.WithoutIssue)
                                    && x.SupplyManagementShipment.SupplyManagementRequest.FromProjectId == obj.ToProjectId
+                                   && !x.IsRetension
                                    && x.DeletedDate == null).Select(x => new KitListApprove
                                    {
                                        Id = x.Id,
@@ -412,6 +416,7 @@ namespace GSC.Respository.SupplyManagement
                              x.SiteId == null
                              && (x.Status == KitStatus.AllocationPending || x.Status == KitStatus.ReturnReceiveWithIssue || x.Status == KitStatus.ReturnReceiveWithoutIssue)
                              && x.ProjectId == obj.FromProject.ParentProjectId
+                             && !x.IsRetension
                              && x.DeletedDate == null).Select(x => new KitListApprove
                              {
                                  Id = x.Id,

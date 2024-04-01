@@ -412,7 +412,7 @@ namespace GSC.Respository.SupplyManagement
                     foreach (string item in randomizationNos)
                     {
                         var uploadDetail = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(x => x.DeletedDate == null
-                                  && x.DisplayRandomizationNumber == item
+                                  && x.DisplayRandomizationNumber == item && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                   && x.SupplyManagementUploadFile.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
                         if (uploadDetail != null)
                         {
@@ -439,7 +439,7 @@ namespace GSC.Respository.SupplyManagement
                     foreach (string item in randomizationNos)
                     {
                         var uploadDetail = _context.SupplyManagementUploadFileDetail.Include(s => s.SupplyManagementUploadFile).Where(x => x.DeletedDate == null
-                                  && x.DisplayRandomizationNumber == item
+                                  && x.DisplayRandomizationNumber == item && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve
                                   && x.SupplyManagementUploadFile.ProjectId == supplyManagementUploadFile.ProjectId).FirstOrDefault();
                         if (uploadDetail != null)
                         {

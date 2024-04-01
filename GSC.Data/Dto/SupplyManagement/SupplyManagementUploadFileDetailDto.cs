@@ -15,5 +15,7 @@ namespace GSC.Data.Dto.SupplyManagement
         public string ScreeningNumber { get; set; }
 
         public string SiteName { get; set; }
+
+        public string DisplayRandomizationNumber { get; set; }
     }
 }
