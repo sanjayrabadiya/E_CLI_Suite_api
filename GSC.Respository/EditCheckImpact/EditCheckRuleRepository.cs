@@ -27,6 +27,11 @@ namespace GSC.Respository.EditCheckImpact
         public EditCheckResult ValidateEditCheck(List<EditCheckValidate> editCheck)
         {
             var dateDiff = editCheck.Any(x => x.Operator == Operator.Different);
+
+            var refValidate = editCheck.Any(x => x.Operator == Operator.RefValidate);
+            if (refValidate)
+                return RefValidateTarget(editCheck);
+
             if (!dateDiff && editCheck.Any(x => x.IsFormula) && editCheck.Any(x => x.CheckBy == EditCheckRuleBy.ByVariableRule))
             {
                 if (editCheck.Any(x => !string.IsNullOrEmpty(x.CollectionValue) && x.CollectionValue.Contains("End Case", StringComparison.OrdinalIgnoreCase)))
@@ -74,6 +79,28 @@ namespace GSC.Respository.EditCheckImpact
                 return _editCheckFormulaRepository.ValidateFormula(editCheck);
             else
                 return ValidateRule(editCheck, true);
+        }
+
+        public EditCheckResult RefValidateTarget(List<EditCheckValidate> editCheck)
+        {
+            var refEditChecks = editCheck.Where(x => !x.IsTarget).ToList();
+            var targetEditChecks = editCheck.Where(x => x.IsTarget).ToList();
+            EditCheckResult result = null;
+            if (refEditChecks.Any(x => x.IsFormula))
+                result = _editCheckFormulaRepository.ValidateFormula(refEditChecks);
+            else
+                result = ValidateRule(refEditChecks, true);
+            targetEditChecks.ForEach(r =>
+            {
+                if (result != null && result.Target != null && result.Target.Count > 0)
+                    r.InputValue = result.Target.FirstOrDefault().Result;
+                else
+                    r.InputValue = result?.Result;
+                r.DataType = null;
+                r.Operator = r.AdditionalTargetOperator;
+                r.OperatorName = r.AdditionalTargetOperator.GetDescription();
+            });
+            return ValidateRule(targetEditChecks, true);
         }
 
 
@@ -329,21 +356,16 @@ namespace GSC.Respository.EditCheckImpact
             if (editCheck.Any(x => x.IsFormula) && targetEditCheck == null)
                 targetEditCheck = new EditCheckValidate();
 
-            if (targetEditCheck == null) return result;
+            //if (targetEditCheck == null) return result;
 
-            targetResult.Id = targetEditCheck.Id;
+            targetResult.Id = targetEditCheck?.Id ?? 0;
             targetResult.SampleText = $"{from?.FieldName} {"-"} {to?.FieldName}";
 
             if (!string.IsNullOrEmpty(from.InputValue) && !string.IsNullOrEmpty(to.InputValue))
             {
                 targetResult.IsValid = true;
-                DateTime startDate = Convert.ToDateTime(from.InputValue);
-                DateTime endDate = Convert.ToDateTime(to.InputValue);
-                if (endDate < startDate)
-                {
-                    endDate = Convert.ToDateTime(from.InputValue);
-                    startDate = Convert.ToDateTime(to.InputValue);
-                }
+                DateTime startDate = DateTime.ParseExact(from.InputValue, "MM/dd/yyyy HH:mm:ss", null);
+                DateTime endDate = DateTime.ParseExact(to.InputValue, "MM/dd/yyyy HH:mm:ss", null);
 
                 targetResult.ResultMessage = $"{startDate.ToString("dd-MMM-yyyy")} {"-"} {endDate.ToString("dd-MMM-yyyy")}";
                 decimal ruleResult = 0;
@@ -367,9 +389,9 @@ namespace GSC.Respository.EditCheckImpact
                     if (ts.Days != 0)
                         hr = Math.Abs(ts.Hours) + (Math.Abs(ts.Days) * 24);
 
-                    if (targetEditCheck.DataType == DataType.Numeric1Decimal)
+                    if (targetEditCheck?.DataType == DataType.Numeric1Decimal)
                         ruleResult = Math.Round(Convert.ToDecimal($"{hr}.{Math.Abs(ts.Minutes).ToString().PadLeft(2, '0')}"), 1);
-                    else if (targetEditCheck.DataType == DataType.Numeric2Decimal)
+                    else if (targetEditCheck?.DataType == DataType.Numeric2Decimal)
                         ruleResult = Convert.ToDecimal($"{hr}.{Math.Abs(ts.Minutes).ToString().PadLeft(2, '0')}");
                     else
                         ruleResult = Convert.ToDecimal(hr);

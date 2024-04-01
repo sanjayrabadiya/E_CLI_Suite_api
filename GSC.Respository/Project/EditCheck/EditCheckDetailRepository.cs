@@ -66,7 +66,8 @@ namespace GSC.Respository.Project.EditCheck
                 FetchingProjectDesignVisitId = _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault() != null ? _context.ProjectDesignTemplate.Where(x => x.Id == c.FetchingProjectDesignTemplateId).FirstOrDefault().ProjectDesignVisitId : 0,
                 IsAdditionalTarget = c.IsAdditionalTarget,
                 AdditionalTargetValue = c.AdditionalTargetValue,
-                AdditionalTargetOperator = c.AdditionalTargetOperator
+                AdditionalTargetOperator = c.AdditionalTargetOperator,
+                CollectionSource = c.ProjectDesignVariable.CollectionSource
             }).FirstOrDefault();
 
             if (result?.CheckBy == EditCheckRuleBy.ByVariableAnnotation)
