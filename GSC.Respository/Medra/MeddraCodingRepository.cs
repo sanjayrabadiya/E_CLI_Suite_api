@@ -289,40 +289,40 @@ namespace GSC.Respository.Medra
 
             var dataEntries = new List<MeddraCodingSearchDetails>();
 
-            var r1 = (from stv in _context.ScreeningTemplateValue
-                      join pdvv in _context.ProjectDesignVariableValue on stv.Value equals pdvv.ValueName
-                      join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
-                      join scrVisit in _context.ScreeningVisit.Where(t => t.DeletedDate == null) on st.ScreeningVisitId equals scrVisit.Id
-                      join pt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
-                      join se in _context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id 
-                      join randomizationTemp in _context.Randomization.Where(t => t.DeletedDate == null) on se.RandomizationId equals randomizationTemp.Id into randomizationDto
-                      from randomization in randomizationDto.DefaultIfEmpty()      
-                      join mllt in _context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on pdvv.ValueName equals mllt.llt_name
-                      join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
-                      join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
-                      join soc in _context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
-                      where pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
-                      select new MeddraCodingSearchDetails
-                      {
-                          SubjectId = randomization.RandomizationNumber,
-                          ScreeningNumber = randomization.ScreeningNumber,
-                          VisitName = scrVisit.ProjectDesignVisit.DisplayName,
-                          TemplateName = pt.TemplateName,
-                          LLTValue = mllt.llt_name,
-                          Value = pdvv.ValueName,
-                          SocCode = soc.soc_code.ToString(),
-                          PT = md.pt_name,
-                          HLT = md.hlt_name,
-                          HLGT = md.hlgt_name,
-                          SOCValue = md.soc_name,
-                          PrimarySoc = md.primary_soc_fg,
-                          MeddraConfigId = meddraCodingSearchDto.MeddraConfigId,
-                          ScreeningTemplateValueId = stv.Id,
-                          MeddraLowLevelTermId = mllt.Id,
-                          MeddraSocTermId = soc.Id,
-                          SiteCode = se.Project.ProjectCode
-                      }).ToList();
-            dataEntries.AddRange(r1);
+            //var r1 = (from stv in _context.ScreeningTemplateValue
+            //          join pdvv in _context.ProjectDesignVariableValue on stv.Value equals pdvv.ValueName
+            //          join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
+            //          join scrVisit in _context.ScreeningVisit.Where(t => t.DeletedDate == null) on st.ScreeningVisitId equals scrVisit.Id
+            //          join pt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
+            //          join se in _context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id 
+            //          join randomizationTemp in _context.Randomization.Where(t => t.DeletedDate == null) on se.RandomizationId equals randomizationTemp.Id into randomizationDto
+            //          from randomization in randomizationDto.DefaultIfEmpty()      
+            //          join mllt in _context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on pdvv.ValueName equals mllt.llt_name
+            //          join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
+            //          join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
+            //          join soc in _context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
+            //          where pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
+            //          select new MeddraCodingSearchDetails
+            //          {
+            //              SubjectId = randomization.RandomizationNumber,
+            //              ScreeningNumber = randomization.ScreeningNumber,
+            //              VisitName = scrVisit.ProjectDesignVisit.DisplayName,
+            //              TemplateName = pt.TemplateName,
+            //              LLTValue = mllt.llt_name,
+            //              Value = pdvv.ValueName,
+            //              SocCode = soc.soc_code.ToString(),
+            //              PT = md.pt_name,
+            //              HLT = md.hlt_name,
+            //              HLGT = md.hlgt_name,
+            //              SOCValue = md.soc_name,
+            //              PrimarySoc = md.primary_soc_fg,
+            //              MeddraConfigId = meddraCodingSearchDto.MeddraConfigId,
+            //              ScreeningTemplateValueId = stv.Id,
+            //              MeddraLowLevelTermId = mllt.Id,
+            //              MeddraSocTermId = soc.Id,
+            //              SiteCode = se.Project.ProjectCode
+            //          }).ToList();
+            //dataEntries.AddRange(r1);
 
             var r2 = (from stv in _context.ScreeningTemplateValue
                       join mllt in _context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on stv.Value equals mllt.llt_name
@@ -360,42 +360,42 @@ namespace GSC.Respository.Medra
                       }).ToList();
             dataEntries.AddRange(r2);
 
-            var r3 = (from stv in _context.ScreeningTemplateValue
-                      join stvc in _context.ScreeningTemplateValueChild on stv.Id equals stvc.ScreeningTemplateValueId
-                      join pdvv in _context.ProjectDesignVariableValue on stvc.ProjectDesignVariableValueId equals pdvv.Id
-                      join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
-                      join scrVisit in _context.ScreeningVisit.Where(t => t.DeletedDate == null) on st.ScreeningVisitId equals scrVisit.Id
-                      join pt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
-                      join se in _context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id
-                      join randomizationTemp in _context.Randomization.Where(t => t.DeletedDate == null) on se.RandomizationId equals randomizationTemp.Id into randomizationDto
-                      from randomization in randomizationDto.DefaultIfEmpty()
-                      join mllt in _context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId)
-                      on pdvv.ValueName equals mllt.llt_name
-                      join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
-                      join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
-                      join soc in _context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
-                      where stvc.Value == "True" && pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
-                      select new MeddraCodingSearchDetails
-                      {
-                          SubjectId = randomization.RandomizationNumber,
-                          ScreeningNumber = randomization.ScreeningNumber,
-                          VisitName = scrVisit.ProjectDesignVisit.DisplayName,
-                          TemplateName = pt.TemplateName,
-                          LLTValue = mllt.llt_name,
-                          Value = pdvv.ValueName,
-                          SocCode = soc.soc_code.ToString(),
-                          PT = md.pt_name,
-                          HLT = md.hlt_name,
-                          HLGT = md.hlgt_name,
-                          SOCValue = soc.soc_name,
-                          PrimarySoc = md.primary_soc_fg,
-                          MeddraConfigId = meddraCodingSearchDto.MeddraConfigId,
-                          ScreeningTemplateValueId = stv.Id,
-                          MeddraLowLevelTermId = mllt.Id,
-                          MeddraSocTermId = soc.Id,
-                          SiteCode = se.Project.ProjectCode
-                      }).ToList();
-            dataEntries.AddRange(r3);
+            //var r3 = (from stv in _context.ScreeningTemplateValue
+            //          join stvc in _context.ScreeningTemplateValueChild on stv.Id equals stvc.ScreeningTemplateValueId
+            //          join pdvv in _context.ProjectDesignVariableValue on stvc.ProjectDesignVariableValueId equals pdvv.Id
+            //          join st in _context.ScreeningTemplate.Where(t => t.DeletedDate == null && t.Status != ScreeningTemplateStatus.Pending && t.Status != ScreeningTemplateStatus.InProcess) on stv.ScreeningTemplateId equals st.Id
+            //          join scrVisit in _context.ScreeningVisit.Where(t => t.DeletedDate == null) on st.ScreeningVisitId equals scrVisit.Id
+            //          join pt in _context.ProjectDesignTemplate on st.ProjectDesignTemplateId equals pt.Id
+            //          join se in _context.ScreeningEntry.Where(x => projectList.Contains(x.Project.Id)) on st.ScreeningVisit.ScreeningEntryId equals se.Id
+            //          join randomizationTemp in _context.Randomization.Where(t => t.DeletedDate == null) on se.RandomizationId equals randomizationTemp.Id into randomizationDto
+            //          from randomization in randomizationDto.DefaultIfEmpty()
+            //          join mllt in _context.MeddraLowLevelTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId)
+            //          on pdvv.ValueName equals mllt.llt_name
+            //          join pdv in _context.ProjectDesignVariable on stv.ProjectDesignVariableId equals pdv.Id
+            //          join md in _context.MeddraMdHierarchy.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId && t.primary_soc_fg == "Y") on mllt.pt_code equals md.pt_code
+            //          join soc in _context.MeddraSocTerm.Where(t => t.DeletedDate == null && t.MedraConfigId == meddraCodingSearchDto.MeddraConfigId) on md.soc_code equals soc.soc_code
+            //          where stvc.Value == "True" && pdv.Id == meddraCodingSearchDto.ProjectDesignVariableId && !(from o in Exists select o.ScreeningTemplateValueId).Contains(stv.Id)
+            //          select new MeddraCodingSearchDetails
+            //          {
+            //              SubjectId = randomization.RandomizationNumber,
+            //              ScreeningNumber = randomization.ScreeningNumber,
+            //              VisitName = scrVisit.ProjectDesignVisit.DisplayName,
+            //              TemplateName = pt.TemplateName,
+            //              LLTValue = mllt.llt_name,
+            //              Value = pdvv.ValueName,
+            //              SocCode = soc.soc_code.ToString(),
+            //              PT = md.pt_name,
+            //              HLT = md.hlt_name,
+            //              HLGT = md.hlgt_name,
+            //              SOCValue = soc.soc_name,
+            //              PrimarySoc = md.primary_soc_fg,
+            //              MeddraConfigId = meddraCodingSearchDto.MeddraConfigId,
+            //              ScreeningTemplateValueId = stv.Id,
+            //              MeddraLowLevelTermId = mllt.Id,
+            //              MeddraSocTermId = soc.Id,
+            //              SiteCode = se.Project.ProjectCode
+            //          }).ToList();
+            //dataEntries.AddRange(r3);
             int i = 0;
             foreach (var item in dataEntries)
             {

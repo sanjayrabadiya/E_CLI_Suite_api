@@ -177,87 +177,44 @@ namespace GSC.Api.Controllers.Medra
 
             int Soccount = _meddraSocTermRepository.AddSocFileData(obj);
             if (Soccount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+                InsertFileData(root);
 
             int Hlgtcount = _meddraHlgtPrefTermRepository.AddHlgtFileData(obj);
             if (Hlgtcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+                InsertFileData(root);
 
             int Hltcount = _meddraHltPrefTermRepository.AddHltFileData(obj);
             if (Hltcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+                InsertFileData(root);
 
             int Ptcount = _meddraPrefTermRepository.AddPtFileData(obj);
             if (Ptcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+                InsertFileData(root);
 
             int Lltcount = _meddraLowLevelTermRepository.AddLltFileData(obj);
             if (Lltcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+                InsertFileData(root);
 
             int SmqListcount = _meddraSmqListRepository.AddSmqListFileData(obj);
-            if (SmqListcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (SmqListcount != 0) InsertFileData(root);
 
             int HlgtHltcount = _meddraHlgtHltCompRepository.AddHlgtHltFileData(obj);
-            if (HlgtHltcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (HlgtHltcount != 0) InsertFileData(root);
 
             int HltPtcount = _meddraHltPrefCompRepository.AddHltPtFileData(obj);
-            if (HltPtcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (HltPtcount != 0) InsertFileData(root);
 
             int Mdhiercount = _meddraMdHierarchyRepository.AddMdhierFileData(obj);
-            if (Mdhiercount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (Mdhiercount != 0) InsertFileData(root);
 
             int SmqContentcount = _meddraSmqContentRepository.AddSmqContentFileData(obj);
-            if (SmqContentcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (SmqContentcount != 0) InsertFileData(root);
 
             int SocHlgtcount = _meddraSocHlgtCompRepository.AddSocHlgtFileData(obj);
-            if (SocHlgtcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (SocHlgtcount != 0) InsertFileData(root);
 
             int IntlOrdcount = _meddraSocIntlOrderRepository.AddIntlOrdFileData(obj);
-            if (IntlOrdcount != 0)
-            {
-                ModelState.AddModelError("Message", InsertFileData(root));
-                return BadRequest(ModelState);
-            }
+            if (IntlOrdcount != 0) InsertFileData(root);
 
             _medraConfigCommonRepository.DeleteDirectory(root);
             return Ok(medra.Id);

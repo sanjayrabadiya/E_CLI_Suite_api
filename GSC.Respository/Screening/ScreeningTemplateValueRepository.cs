@@ -888,8 +888,9 @@ namespace GSC.Respository.Screening
                                         }
                                         else if (collectionSource == (int)CollectionSources.Time)
                                         {
+                                            DateTime dDate;
                                             var variablevalueformat = d.LstProjectDataBase[n].LstProjectDataBaseVisit[vst].LstProjectDataBaseTemplate[temp].LstProjectDataBaseitems[indexrow].VariableNameValue;
-                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
                                             worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                                         }
                                         else
@@ -1068,8 +1069,9 @@ namespace GSC.Respository.Screening
                             }
                             else if (collectionSource == (int)CollectionSources.Time)
                             {
+                                DateTime dDate;
                                 var variablevalueformat = x.VariableNameValue;
-                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : "";
+                                var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
                                 worksheet.Cell(rownumber, cellnumber).SetValue(dt);
                             }
                             else
