@@ -83,7 +83,7 @@ namespace GSC.Api.Controllers.Report
             _jobMonitoringRepository.Add(jobMonitoring);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Job Monitoring failed on save."));
-            string message = await _reportSuncfusion.ScreeningPdfReportGenerate(reportSetting, jobMonitoring);
+            string message =  _reportSuncfusion.ScreeningPdfReportGenerate(reportSetting, jobMonitoring);
 
             if (!string.IsNullOrEmpty(message))
             {
@@ -124,7 +124,7 @@ namespace GSC.Api.Controllers.Report
                 _jobMonitoringRepository.Add(jobMonitoring);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Job Monitoring failed on save."));
-            string message = await _reportSuncfusion.DossierPdfReportGenerate(reportSetting, jobMonitoring);
+            string message = _reportSuncfusion.DossierPdfReportGenerate(reportSetting, jobMonitoring);
 
             if (!string.IsNullOrEmpty(message))
             {
