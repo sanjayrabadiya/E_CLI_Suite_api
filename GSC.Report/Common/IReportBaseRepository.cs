@@ -13,9 +13,5 @@ namespace GSC.Report.Common
         List<DossierReportDto> GetDataPdfReport(ReportSettingNew reportSetting);
         List<ScreeningPdfReportDto> GetScreeningDataPdfReport(ScreeningReportSetting reportSetting);
         List<ScreeningPdfReportDto> GetScreeningBlankPdfData(ScreeningReportSetting reportSetting);
-
-        List<ScreeningPdfReportDto> GetScreeningPdfData(ScreeningReportSetting reportSetting);
-
-        List<DossierReportDto> GetDossierPdfData(ReportSettingNew reportSetting);
     }
 }
