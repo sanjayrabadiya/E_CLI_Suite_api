@@ -14,7 +14,6 @@ namespace GSC.Data.Dto.Master
         public MilestoneType MilestoneType { get; set; }
         public PaymentType PaymentType { get; set; }
         public decimal? EstimatedRevenue { get; set; }
-        public decimal? PaidRevenue { get; set; }
         public decimal? TotalRevenue { get; set; }
         public decimal? TotalPerPatient { get; set; }
         public bool? IsApproved { get; set; }
@@ -34,7 +33,6 @@ namespace GSC.Data.Dto.Master
         public string MilestoneType { get; set; }
         public string PaymentType { get; set; }
         public decimal? EstimatedRevenue { get; set; }
-        public decimal? PaidRevenue { get; set; }
         public decimal? TotalRevenue { get; set; }
         public decimal? TotalPerPatient { get; set; }
         public string StudyPlanTasks { get; set; }

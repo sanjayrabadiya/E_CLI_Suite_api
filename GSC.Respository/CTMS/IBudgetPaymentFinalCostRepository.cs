@@ -8,6 +8,7 @@ namespace GSC.Respository.CTMS
     public interface IBudgetPaymentFinalCostRepository : IGenericRepository<BudgetPaymentFinalCost>
     {
         List<BudgetPaymentFinalCostGridDto> GetBudgetPaymentFinalCostList(int projectId, bool isdelete);
-        BudgetPaymentFinalCost GetFinalBudgetCost(int projectId);
+        BudgetPaymentFinalCostDto GetFinalBudgetCost(int projectId);
+        string Duplicate(BudgetPaymentFinalCostDto budgetPaymentFinalCostDto);
     }
 }

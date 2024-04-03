@@ -25,6 +25,7 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? ActualEndDate { get; set; }
         public int? CurrencyId { get; set; } // Global Currency
         public decimal? TotalCost { get; set; }
+        public decimal? TotalFinalCost { get; set; }
         public Master.Project Project { get; set; }
         public Currency Currency { get; set; }
     }

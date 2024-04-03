@@ -59,8 +59,10 @@ namespace GSC.Respository.CTMS
                 decimal? TotalResourceCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == i.Id && s.DeletedBy == null).Sum(d => d.TotalCost);
                 decimal? TotalPatientCost = _context.PatientCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalCost);
                 decimal? TotalPassThroughCost = _context.PassThroughCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.Total);
+                decimal? TotalFinalCost = _context.BudgetPaymentFinalCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalTotalAmount);
 
                 i.TotalCost = TotalResourceCost + TotalPatientCost + TotalPassThroughCost;
+                i.TotalFinalCost = TotalFinalCost;
                 _context.StudyPlan.UpdateRange(i);
                 _context.Save();
             });

@@ -13,5 +13,6 @@ namespace GSC.Data.Dto.CTMS
         public string GlobalCurrency { get; set; }
         public string GlobalCurrencySymbol { get; set; }
         public decimal? TotalCost { get; set; }
+        public decimal? TotalFinalCost { get; set; }
     }
 }
