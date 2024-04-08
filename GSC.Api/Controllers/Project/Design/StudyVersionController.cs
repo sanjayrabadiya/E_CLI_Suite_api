@@ -144,7 +144,7 @@ namespace GSC.Api.Controllers.Project.Design
         {
             var studyVersion = _studyVersionRepository.All.AsNoTracking().Where(x => x.DeletedDate == null && x.ProjectDesignId == studyGoLiveDto.ProjectDesignId && x.VersionStatus == Helper.VersionStatus.OnTrial).FirstOrDefault();
 
-            if (_studyVersionRepository.AnyLive(studyGoLiveDto.ProjectDesignId) && studyGoLiveDto.IsOnTrial && (studyVersion?.IsTestSiteVerified == null || studyVersion.IsTestSiteVerified == false))
+            if (_studyVersionRepository.AnyLive(studyGoLiveDto.ProjectDesignId) && !studyGoLiveDto.IsOnTrial && (studyVersion?.IsTestSiteVerified == null || studyVersion.IsTestSiteVerified == false))
             {
                 ModelState.AddModelError("Message", "First verify on Test site");
                 return BadRequest(ModelState);

@@ -68,7 +68,7 @@ namespace GSC.Respository.LabManagement
                 AbnoramalFlag = r.AbnoramalFlag,
                 ReferenceRangeLow = r.ReferenceRangeLow,
                 ReferenceRangeHigh = r.ReferenceRangeHigh
-            }).OrderBy(x => x.Id).ToList();
+            }).ToList().OrderBy(x => x.Id).ToList();
 
             #region Excel Report Design
             using (var workbook = new XLWorkbook())
