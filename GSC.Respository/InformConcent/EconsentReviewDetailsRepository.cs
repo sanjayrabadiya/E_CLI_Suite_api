@@ -241,14 +241,18 @@ namespace GSC.Respository.InformConcent
             string path = FullPath;
             if (!System.IO.File.Exists(path))
                 return null;
+
+
             Stream stream = System.IO.File.OpenRead(path);
-            string sfdtText = "";
             EJ2WordDocument wdocument = EJ2WordDocument.Load(stream, Syncfusion.EJ2.DocumentEditor.FormatType.Docx);
-            sfdtText = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
+            wdocument.OptimizeSfdt = false;
+            string json = Newtonsoft.Json.JsonConvert.SerializeObject(wdocument);
             wdocument.Dispose();
-            string json = sfdtText;
+
             stream.Position = 0;
             stream.Close();
+
+
             GSC.Helper.DocumentReader.Root jsonobj = JsonConvert.DeserializeObject<GSC.Helper.DocumentReader.Root>(json);
             List<GSC.Helper.DocumentReader.Block> blocks = new List<GSC.Helper.DocumentReader.Block>();
             int headercount = 0;
