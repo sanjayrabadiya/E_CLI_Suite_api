@@ -232,7 +232,8 @@ namespace GSC.Respository.Screening
                    VisitName = //a.ProjectDesignVisit.DisplayName 
                    a.ScreeningVisitName
                    + Convert.ToString(a.ParentId != null ? "-" + a.RepeatedVisitNumber.ToString() : ""),
-                   VisitStatus = a.Status.GetDescription(),
+                   VisitStatus = !a.IsNA ? a.Status.GetDescription() : "Not Applicable",
+                   //a.Status.GetDescription(),
                    VisitStatusId = (int)a.Status,
                    ActualDate = (int)a.Status > 3 ? a.VisitStartDate : null,
                    ScheduleDate = a.ScheduleDate,
@@ -241,7 +242,8 @@ namespace GSC.Respository.Screening
                    StudyVersion = a.ProjectDesignVisit.StudyVersion,
                    IsScheduleTerminate = a.IsScheduleTerminate,
                    ScreeningEntryId = a.ScreeningEntryId,
-                   IsPatientLevel = a.ProjectDesignVisit.IsPatientLevel
+                   IsPatientLevel = a.ProjectDesignVisit.IsPatientLevel,
+                   IsNA=a.IsNA,
                }).ToListAsync();
 
             if (!IsPatientLevel && visits.Count > 0)

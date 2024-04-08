@@ -491,6 +491,7 @@ namespace GSC.Api.Controllers.Screening
         [HttpPost("SetStatusNA")]
         public ActionResult SetStatusNA([FromBody] List<int> screeningTemplateId)
         {
+            int screeningVisitId = 0;
             foreach (var item in screeningTemplateId)
             {
                 var record = _screeningTemplateRepository.Find(item);
@@ -498,10 +499,88 @@ namespace GSC.Api.Controllers.Screening
                     return NotFound();
                 record.IsNA = true;
                 _screeningTemplateRepository.Update(record);
-                _uow.Save();
+                
+                screeningVisitId = record.ScreeningVisitId;
             }
+            
+            var result = _screeningTemplateRepository.All.Any(x=>x.ScreeningVisitId == screeningVisitId && x.IsNA && x.DeletedDate==null);
+
+            if (result)
+            {
+                var screeningVisit = _screeningVisitRepository.Find(screeningVisitId);
+                if (screeningVisit == null)
+                    return NotFound();
+                screeningVisit.IsNA = true;
+                _screeningVisitRepository.Update(screeningVisit);
+            }
+            _uow.Save();
             return Ok(true);
+
+
         }
+
+        [HttpGet]
+        [Route("GetVisitDropDownForApplicableByProjectId/{ProjectId}")]
+        public IActionResult GetVisitDropDownForApplicableByProjectId(int ProjectId)
+        {
+            return Ok(_screeningTemplateRepository.GetVisitDropDownForApplicableByProjectId(ProjectId));
+        }
+
+        [HttpGet]
+        [Route("GetTemplateDropDownForApplicable/{ProjectDesignVisitId}")]
+        public IActionResult GetTemplateDropDownForApplicable(int ProjectDesignVisitId)
+        {
+            return Ok(_screeningTemplateRepository.GetTemplateDropDownForApplicable(ProjectDesignVisitId));
+        }
+
+        [HttpGet]
+        [Route("GetSubjectDropDownForApplicable/{ProjectId}")]
+        public IActionResult GetSubjectDropDownForApplicable(int ProjectId)
+        {
+            return Ok(_screeningTemplateRepository.GetSubjectDropDownForApplicable(ProjectId));
+        }
+
+        [HttpGet]
+        [Route("GetAReportData")]
+        public IActionResult GetAReportData([FromQuery] NAReportSearchDto filters)
+        {
+            if (filters.SiteId <= 0) return BadRequest();
+
+            var reportDto = _screeningTemplateRepository.AReport(filters);
+
+            return Ok(reportDto);
+        }
+
+        [HttpPost("SetStatusA")]
+        public ActionResult SetStatusA([FromBody] List<int> screeningTemplateId)
+        {
+            int screeningVisitId = 0;
+            foreach (var item in screeningTemplateId)
+            {
+                var record = _screeningTemplateRepository.Find(item);
+                if (record == null)
+                    return NotFound();
+                record.IsNA = false;
+                _screeningTemplateRepository.Update(record);
+
+                screeningVisitId = record.ScreeningVisitId;
+            }
+
+            var result = _screeningTemplateRepository.All.Where(x => x.ScreeningVisitId == screeningVisitId && x.IsNA);
+
+            if (result != null)
+            {
+                var screeningVisit = _screeningVisitRepository.Find(screeningVisitId);
+                if (screeningVisit == null)
+                    return NotFound();
+                screeningVisit.IsNA = false;
+                _screeningVisitRepository.Update(screeningVisit);
+            }
+            _uow.Save();
+            return Ok();
+
+        }
+
         // Na report
 
     }

@@ -50,6 +50,10 @@ namespace GSC.Respository.Screening
 
         void SendEmailOnVaribleConfiguration(int id);
         List<NAReportDto> NAReport(NAReportSearchDto filters);
+        IList<DropDownDto> GetVisitDropDownForApplicableByProjectId(int ProjectId);
 
+        IList<DropDownDto> GetTemplateDropDownForApplicable(int projectDesignVisitId);
+        IList<DropDownDto> GetSubjectDropDownForApplicable(int ProjectId);
+        List<NAReportDto> AReport(NAReportSearchDto filters);
     }
 }

@@ -561,5 +561,25 @@ namespace GSC.Respository.Screening
                   }).ToList();
 
         }
+
+        public List<NAReportDto> AReport(NAReportSearchDto filters)
+        {
+            return All.Include(x => x.ScreeningEntry)
+                  .ThenInclude(x => x.Randomization)
+                  .Where(x => x.ScreeningEntry.ProjectId == filters.SiteId
+               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
+               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignVisitId))
+               && x.IsNA)
+                  .Select(x => new NAReportDto
+                  {
+                      ScreeningTemplateId = x.Id,
+                      Visit = x.ScreeningVisitName,
+                      VisitStatus = x.Status.GetDescription(),
+                      ScreeningNo = x.ScreeningEntry.Randomization.ScreeningNumber,
+                      RandomizationNumber = x.ScreeningEntry.Randomization.RandomizationNumber,
+                      Initial = x.ScreeningEntry.Randomization.Initial
+                  }).ToList();
+
+        }
     }
 }

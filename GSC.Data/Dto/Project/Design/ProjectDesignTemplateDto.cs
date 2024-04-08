@@ -80,6 +80,7 @@ namespace GSC.Data.Dto.Project.Design
         public int VariableTemplateId { get; set; }
         public bool? IsTemplateSeqNo { get; set; }
         public bool? IsVariableSeqNo { get; set; }
+        public bool IsNA { get; set; }
     }
 
     public class CloneTemplateDto
