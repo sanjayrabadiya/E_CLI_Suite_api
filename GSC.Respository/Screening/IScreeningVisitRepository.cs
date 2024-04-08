@@ -33,5 +33,6 @@ namespace GSC.Respository.Screening
         //Add by Tinku Mahato by screening visit list on 21-06-2022
         List<int> GetScreeningVisitList(int screeningEntryId);
         List<NAReportDto> NAReport(NAReportSearchDto filters);
+        List<NAReportDto> AReport(NAReportSearchDto filters);
     }
 }

@@ -99,6 +99,7 @@ namespace GSC.Data.Dto.Attendance
         public int ProjectDesignId { get; set; }
 
         public bool IsPatientLevel { get; set; }
+        public bool IsNA { get; set; }
     }
 
     public class DataEntryTemplateCountDisplayDto
