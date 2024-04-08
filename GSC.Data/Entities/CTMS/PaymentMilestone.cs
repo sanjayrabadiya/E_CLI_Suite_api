@@ -15,7 +15,6 @@ namespace GSC.Data.Entities.CTMS
         public int? PatientCount { get; set; }
         public int? PatientStatus { get; set; }
         public decimal? EstimatedRevenue { get; set; }
-        public decimal? PaidRevenue { get; set; }
         public decimal? TotalRevenue { get; set; }
         public decimal? TotalPerPatient { get; set; }
         public bool IsApproved { get; set; }

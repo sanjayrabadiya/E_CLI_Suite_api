@@ -5,6 +5,7 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Shared.Email;
@@ -65,5 +66,6 @@ namespace GSC.Respository.EmailSender
         EmailMessage ConfigureEmail(string keyName, string userName);
         void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate);
         void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate);
+        void SendMailCtmsApproval(CtmsApprovalWorkFlowDetail ctmsApprovalWorkFlowDetail, bool ifPlanApproval);
     }
 }

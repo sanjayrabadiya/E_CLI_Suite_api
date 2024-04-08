@@ -54,6 +54,12 @@ namespace GSC.Api.Controllers.CTMS
             ctmsActionPointDto.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             ctmsActionPointDto.IpAddress = _jwtTokenAccesser.IpAddress;
             var ctmsActionPoint = _mapper.Map<BudgetPaymentFinalCost>(ctmsActionPointDto);
+            var validate = _budgetPaymentFinalCostRepository.Duplicate(ctmsActionPointDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _budgetPaymentFinalCostRepository.Add(ctmsActionPoint);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating budget payment final cost failed on save."));
 
@@ -71,6 +77,12 @@ namespace GSC.Api.Controllers.CTMS
             ctmsActionPointDto.IpAddress = _jwtTokenAccesser.IpAddress;
 
             var ctmsActionPoint = _mapper.Map<BudgetPaymentFinalCost>(ctmsActionPointDto);
+            var validate = _budgetPaymentFinalCostRepository.Duplicate(ctmsActionPointDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             _budgetPaymentFinalCostRepository.Update(ctmsActionPoint);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating action point failed on save."));
