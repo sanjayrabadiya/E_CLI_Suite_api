@@ -15,12 +15,14 @@ using GSC.Data.Dto.Screening;
 using GSC.Data.Dto.SupplyManagement;
 using GSC.Data.Entities.Attendance;
 using GSC.Data.Entities.Configuration;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
 using GSC.Respository.Configuration;
 using GSC.Shared;
 using GSC.Shared.Email;
+using GSC.Shared.Extension;
 using GSC.Shared.Generic;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -1184,6 +1186,48 @@ namespace GSC.Respository.EmailSender
 
             body = Regex.Replace(body, "##DATE##", ScheduleStartDate.ToString(), RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>DATE</strong>##", "<strong>" + ScheduleStartDate + "</strong>", RegexOptions.IgnoreCase);
+
+            return body;
+        }
+        public void SendMailCtmsApproval(CtmsApprovalWorkFlowDetail ctmsApprovalWorkFlowDetail, bool ifPlanApproval)
+        {
+            var userName = _jwtTokenAccesser.UserName;
+            var roleName = _jwtTokenAccesser.RoleName;
+            var emailMessage = ConfigureEmail("CtmsApproval", userName);
+            emailMessage.SendTo = ctmsApprovalWorkFlowDetail.Users.Email;
+            emailMessage.MessageBody =  ReplaceBodyCtmsApproval(ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.EmailTemplate, userName, roleName, ctmsApprovalWorkFlowDetail);
+            emailMessage.Subject = ReplaceSubjectForCtmsApproval(emailMessage.Subject, userName, ctmsApprovalWorkFlowDetail, ifPlanApproval);
+            _emailService.SendMail(emailMessage);
+        }
+        private string ReplaceBodyCtmsApproval(string body, string userName, string roleName, CtmsApprovalWorkFlowDetail ctmsApprovalWorkFlowDetail)
+        {
+            body = Regex.Replace(body, "##USERNAME##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>USERNAME</strong>##", "<strong>" + userName + "</strong>", RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##STUDYCODE##", ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.Project.ProjectCode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##STUDYCODE##</strong>##", "<strong>" + ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.Project.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##TRIGGERTYPE##", ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.TriggerType.GetDescription(), RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##TRIGGERTYPE##</strong>##", "<strong>" + ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.Project.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##ROLE##", roleName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##ROLE##</strong>##", "<strong>" + roleName + "</strong>", RegexOptions.IgnoreCase);
+
+            return body;
+        }
+        private string ReplaceSubjectForCtmsApproval(string body, string userName,  CtmsApprovalWorkFlowDetail ctmsApprovalWorkFlowDetail, bool ifPlanApproval) { 
+
+            body = Regex.Replace(body, "##IFAPPROVAL##", ifPlanApproval ? "Approval": "Not Approval", RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>IFAPPROVAL</strong>##", "<strong>" + (ifPlanApproval ? "Approval" : "Not Approval") + "</strong>", RegexOptions.IgnoreCase);
+        
+            body = Regex.Replace(body, "##USERNAME##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>USERNAME</strong>##", "<strong>" + userName + "</strong>", RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##TRIGGERTYPE##", ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.TriggerType.GetDescription(), RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>TRIGGERTYPE</strong>##", "<strong>" + ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.TriggerType.GetDescription() + "</strong>", RegexOptions.IgnoreCase);
+
+            body = Regex.Replace(body, "##STUDYCODE##", ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.Project.ProjectCode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##<strong>STUDYCODE</strong>##", "<strong>" + ctmsApprovalWorkFlowDetail.ctmsApprovalWorkFlow.Project.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
 
             return body;
         }

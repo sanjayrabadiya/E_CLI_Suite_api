@@ -515,6 +515,7 @@ namespace GSC.Domain.Context
         public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
         public DbSet<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetail { get; set; }
         public DbSet<PaymentMilestonePassThroughDetail> PaymentMilestonePassThroughDetail { get; set; }
-
+        public DbSet<CtmsApprovalWorkFlow> CtmsApprovalWorkFlow { get; set; }
+        public DbSet<CtmsApprovalWorkFlowDetail> CtmsApprovalWorkFlowDetail { get; set; }
     }
 }

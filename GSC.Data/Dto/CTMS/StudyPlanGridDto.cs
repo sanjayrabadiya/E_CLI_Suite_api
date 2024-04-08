@@ -14,5 +14,8 @@ namespace GSC.Data.Dto.CTMS
         public string GlobalCurrencySymbol { get; set; }
         public decimal? TotalCost { get; set; }
         public decimal? TotalFinalCost { get; set; }
+        public bool IfPlanApproval { get; set; }
+        public bool IfBudgetApproval { get; set; }
+        public bool IfApprovalWorkFlow { get; set; }
     }
 }

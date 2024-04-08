@@ -621,9 +621,8 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "startDate", DisplayName = "Planned Start Date" });
             _dictionaries.Add(new Dictionary { FieldName = "endtDate", DisplayName = "Planned End Date" });
             _dictionaries.Add(new Dictionary { FieldName = "planningType", DisplayName = "Planned Type" });
-
+            _dictionaries.Add(new Dictionary { FieldName = "IfPlanApproval", DisplayName = "if Plan Approval" });
+            _dictionaries.Add(new Dictionary { FieldName = "IfBudgetApproval", DisplayName = "if Budget Approval" });
         }
-
-
     }
 }
