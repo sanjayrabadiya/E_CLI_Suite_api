@@ -20,6 +20,8 @@ namespace GSC.Data.Dto.Screening
         public int? DesignOrder { get; set; }
         //NA report
         public bool IsNA { get; set; }
+
+        public bool IsPatientLevel { get; set; }
     }
 
     public class ScreeningTemplateTree
@@ -47,6 +49,8 @@ namespace GSC.Data.Dto.Screening
         public bool? IsHide { get; set; }
         //NA report
         public bool? IsNA { get; set; }
+
+        
     }
 
 

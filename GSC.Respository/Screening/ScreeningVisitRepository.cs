@@ -93,6 +93,7 @@ namespace GSC.Respository.Screening
                 VisitStatusName = !s.IsNA ? s.Status.GetDescription() : "Not Applicable",
                 ParentScreeningVisitId = s.ParentId,
                 IsVisitRepeated = s.ProjectDesignVisit.IsRepeated,
+                IsPatientLevel = s.ProjectDesignVisit.IsPatientLevel
             }).OrderBy(o => o.DesignOrder).ThenBy(t => t.VisitSeqNo).ToList();
 
             return result;

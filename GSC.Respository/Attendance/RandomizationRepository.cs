@@ -266,38 +266,36 @@ namespace GSC.Respository.Attendance
             }
             else
             {
-                if (randomization.DateOfScreening != null)
+                var result = _supplyManagementFectorRepository.ValidateSubjecWithFactor(randomization);
+                if (result != null)
                 {
-                    var result = _supplyManagementFectorRepository.ValidateSubjecWithFactor(randomization);
-                    if (result != null)
+                    if (!string.IsNullOrEmpty(result.ErrorMessage))
                     {
-                        if (!string.IsNullOrEmpty(result.ErrorMessage))
+                        randomizationNumberDto.ErrorMessage = result.ErrorMessage;
+                        return randomizationNumberDto;
+                    }
+                    if (!string.IsNullOrEmpty(result.Result))
+                    {
+                        randomizationNumberDto.ErrorMessage = result.Result;
+                        return randomizationNumberDto;
+                    }
+                    if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
+                    {
+                        randomizationNumberDto = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType, randomizationNumberDto, randomization, studydata.IsIWRS);
+                        if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
                         {
-                            randomizationNumberDto.ErrorMessage = result.ErrorMessage;
-                            return randomizationNumberDto;
-                        }
-                        if (!string.IsNullOrEmpty(result.Result))
-                        {
-                            randomizationNumberDto.ErrorMessage = result.Result;
-                            return randomizationNumberDto;
-                        }
-                        if (string.IsNullOrEmpty(result.ErrorMessage) || string.IsNullOrEmpty(result.Result))
-                        {
-                            randomizationNumberDto = GetRandNoIWRS(studydata.ProjectId, randomization.ProjectId, site.ManageSiteId, result.ProductType, randomizationNumberDto, randomization, studydata.IsIWRS);
-                            if (!string.IsNullOrEmpty(randomizationNumberDto.RandomizationNumber))
+                            if (!randomizationNumberDto.IsStaticRandomizationNo && !string.IsNullOrEmpty(randomizationNumberDto.PrefixRandomNo.Trim()))
                             {
-                                if (!randomizationNumberDto.IsStaticRandomizationNo && !string.IsNullOrEmpty(randomizationNumberDto.PrefixRandomNo.Trim()))
-                                {
-                                    randomizationNumberDto.RandomizationNumber = randomizationNumberDto.PrefixRandomNo.Trim() + randomizationNumberDto.RandomizationNumber;
-                                }
-                                if (randomizationNumberDto.IsStaticRandomizationNo)
-                                {
-                                    randomizationNumberDto.RandomizationNumber = randomizationNumberDto.DisplayRandomizationNumber;
-                                }
+                                randomizationNumberDto.RandomizationNumber = randomizationNumberDto.PrefixRandomNo.Trim() + randomizationNumberDto.RandomizationNumber;
+                            }
+                            if (randomizationNumberDto.IsStaticRandomizationNo)
+                            {
+                                randomizationNumberDto.RandomizationNumber = randomizationNumberDto.DisplayRandomizationNumber;
                             }
                         }
                     }
                 }
+
             }
             return randomizationNumberDto;
         }
@@ -1089,7 +1087,7 @@ namespace GSC.Respository.Attendance
                         data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId && x.DeletedDate == null
                        && (numerformate.PrefixRandomNo.Trim() + x.RandomizationNo.ToString()) == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();
                     }
-                    else if(setting.IsStaticRandomizationNo == true)
+                    else if (setting.IsStaticRandomizationNo == true)
                     {
                         data = _context.SupplyManagementUploadFileDetail.Where(x => x.SupplyManagementUploadFile.SiteId == obj.ProjectId && x.DeletedDate == null
                       && x.DisplayRandomizationNumber == obj.RandomizationNumber && x.SupplyManagementUploadFile.Status == LabManagementUploadStatus.Approve).FirstOrDefault();

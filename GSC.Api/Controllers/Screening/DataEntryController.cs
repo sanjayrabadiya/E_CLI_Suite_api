@@ -78,10 +78,10 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetTemplateForVisit/{screeningVisitId}/{templateStatus}")]
-        public IActionResult GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus)
+        [Route("GetTemplateForVisit/{screeningVisitId}/{templateStatus}/{projectId?}")]
+        public IActionResult GetTemplateForVisit(int screeningVisitId, ScreeningTemplateStatus templateStatus,int? projectId)
         {
-            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningVisitId, templateStatus));
+            return Ok(_dataEntryRespository.GetTemplateForVisit(screeningVisitId, templateStatus, projectId));
         }
 
         [HttpGet]
