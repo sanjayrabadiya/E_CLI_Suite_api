@@ -332,6 +332,13 @@ namespace GSC.Api.Controllers.Screening
             }
             return Ok(true);
         }
+
+        [HttpGet]
+        [Route("GetGenericSubjectByProjecId/{projectId}")]
+        public IActionResult GetGenericSubjectByProjecId(int projectId)
+        {
+            return Ok(_screeningEntryRepository.GetGenericSubjectByProjecId(projectId));
+        }
         // NA Report
     }
 }

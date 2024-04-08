@@ -758,5 +758,29 @@ namespace GSC.Respository.Screening
                 }).ToList();
             return data;
         }
+
+        public IList<DropDownDto> GetGenericSubjectByProjecId(int projectId)
+        {
+            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s => s.ParentProjectId).FirstOrDefault();
+            var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
+
+            return All.Where(a => a.Randomization.IsGeneric && a.DeletedDate == null && ParentProject != null ? a.ProjectId == projectId : sites.Contains(a.ProjectId))
+                .Select(x => new DropDownDto
+                {
+                    Id = x.Id,
+                    Value = x.RandomizationId != null
+                        ? Convert.ToString(x.Randomization.ScreeningNumber + " - " +
+                                           x.Randomization.Initial +
+                                           (x.Randomization.RandomizationNumber == null
+                                               ? ""
+                                               : " - " + x.Randomization.RandomizationNumber))
+                        : Convert.ToString(
+                            Convert.ToString(x.Attendance.ProjectSubject != null
+                                ? x.Attendance.ProjectSubject.Number
+                                : "") + " - " + x.Attendance.Volunteer.FullName),
+                    Code = "Screening"
+                }).Distinct().ToList();
+
+        }
     }
 }

@@ -28,5 +28,7 @@ namespace GSC.Respository.Screening
         List<VolunteerAttendanceDto> GetVolunteerByProjectId(int projectId);
         List<VolunteerAttendanceDto> GetVolunteerScreeningList(int projectId, int volunteerId);
         List<ProjectDropDown> GetParentProjectDropdown(bool isLock, bool isHardLock);
+
+        IList<DropDownDto> GetGenericSubjectByProjecId(int projectId);
     }
 }
