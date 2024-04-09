@@ -14,6 +14,7 @@ using GSC.Respository.Project.Workflow;
 using GSC.Respository.Screening;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Api.Controllers.Screening
 {
@@ -502,8 +503,13 @@ namespace GSC.Api.Controllers.Screening
                 
                 screeningVisitId = record.ScreeningVisitId;
             }
-            
-            var result = _screeningTemplateRepository.All.Any(x=>x.ScreeningVisitId == screeningVisitId && x.IsNA && x.DeletedDate==null);
+            _uow.Save();
+            //var result = _screeningTemplateRepository.All.Any(x=>x.ScreeningVisitId == screeningVisitId && x.IsNA && x.DeletedDate==null);
+
+            var result = !_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.Id == screeningVisitId
+                && x.DeletedDate == null
+                && !x.IsNA
+                );
 
             if (result)
             {
@@ -512,6 +518,10 @@ namespace GSC.Api.Controllers.Screening
                     return NotFound();
                 screeningVisit.IsNA = true;
                 _screeningVisitRepository.Update(screeningVisit);
+            }
+            else
+            {
+                _screeningVisitRepository.AutomaticStatusUpdateByNAReport(screeningTemplateId[0]);
             }
             _uow.Save();
             return Ok(true);

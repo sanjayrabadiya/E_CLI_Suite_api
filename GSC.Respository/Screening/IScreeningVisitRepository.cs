@@ -34,5 +34,6 @@ namespace GSC.Respository.Screening
         List<int> GetScreeningVisitList(int screeningEntryId);
         List<NAReportDto> NAReport(NAReportSearchDto filters);
         List<NAReportDto> AReport(NAReportSearchDto filters);
+        ScreeningVisitStatus? AutomaticStatusUpdateByNAReport(int screeningTemplateId);
     }
 }
