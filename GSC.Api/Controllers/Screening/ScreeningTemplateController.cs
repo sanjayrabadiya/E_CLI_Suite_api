@@ -518,6 +518,7 @@ namespace GSC.Api.Controllers.Screening
                     return NotFound();
                 screeningVisit.IsNA = true;
                 _screeningVisitRepository.Update(screeningVisit);
+                _screeningVisitRepository.AutomaticStatusUpdateByNAReport(screeningTemplateId[0]);
             }
             else
             {
