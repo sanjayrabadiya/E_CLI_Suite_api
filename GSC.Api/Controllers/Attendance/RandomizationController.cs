@@ -106,7 +106,12 @@ namespace GSC.Api.Controllers.Attendance
             var randomizations = _randomizationRepository.GetRandomizationList(projectId, isDeleted);
             return Ok(randomizations);
         }
-
+        [HttpGet("GetRandomizationById/{id}/{projectId}")]
+        public IActionResult GetRandomizationById(int id,int projectId)
+        {
+            var randomizations = _randomizationRepository.GetRandomizationById(id, projectId);
+            return Ok(randomizations.FirstOrDefault());
+        }
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] RandomizationDto randomizationDto)
         {
@@ -189,7 +194,7 @@ namespace GSC.Api.Controllers.Attendance
 
             }
 
-            return Ok();
+            return Ok(randomization);
         }
 
         [HttpPut]

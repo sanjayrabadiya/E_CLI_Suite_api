@@ -1362,7 +1362,34 @@ namespace GSC.Respository.Attendance
 
             return result;
         }
+        public List<RandomizationGridDto> GetRandomizationById(int id,int projectId)
+        {
+            var result = All.Where(x => x.Id == id).
+                  ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+            var rolelist = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
+            result.ForEach(x =>
+            {
+                x.PatientStatusName = x.PatientStatusId.GetDescription();
+                x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
+            });
 
+            var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
+            var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == project.Id && x.DeletedDate == null).FirstOrDefault();
+
+            result.ForEach(x =>
+            {
+                x.IsEicf = ProjectSettings?.IsEicf ?? false;
+                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Any(c => c.RandomizationId == x.Id) ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient) : false;
+                x.ParentProjectCode = project.ProjectCode;
+                x.ParentProjectId = project.Id;
+                var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
+                x.IsLocked = screeningtemplate.Count <= 0 || screeningtemplate.Exists(y => !y.IsLocked) ? false : true;
+                x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
+            });
+
+            return result;
+        }
         public string Duplicate(RandomizationDto objSave, int projectId)
         {
             if (All.Any(x =>

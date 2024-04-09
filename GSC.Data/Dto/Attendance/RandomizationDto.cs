@@ -153,6 +153,8 @@ namespace GSC.Data.Dto.Attendance
 
         public string Dosefactor { get; set; }
         public bool isDocumentUpload { get; set; }
+
+        public int ParentProjectId { get; set; }
     }
 
     public class RandomizationNumberDto

@@ -73,5 +73,7 @@ namespace GSC.Respository.Attendance
         List<ScreeningVisitForSubject> GetPatientVisitsForMobile();
 
         Task SendRandomizationThresholdEmailSchedule();
+
+        List<RandomizationGridDto> GetRandomizationById(int id, int projectId);
     }
 }
