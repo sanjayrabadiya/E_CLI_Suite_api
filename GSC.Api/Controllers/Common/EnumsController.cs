@@ -1223,5 +1223,18 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Value).ToList();
             return Ok(MilestoneType);
         }
+        [HttpGet]
+        [Route("GetTriggerTypeDropDown")]
+        public IActionResult GetTriggerTypeDropDown()
+        {
+            var centri = Enum.GetValues(typeof(TriggerType))
+                .Cast<TriggerType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
     }
 }

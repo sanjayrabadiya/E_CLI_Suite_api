@@ -77,7 +77,7 @@ namespace GSC.Data.Dto.Screening
         public Gender Gender { get; set; }
         public bool IsCompleteReview { get; set; }
         public bool? IsHide { get; set; }
-
+        public bool IsNA { get; set; }
     }
 
     public class ScreeningTemplateRepeat

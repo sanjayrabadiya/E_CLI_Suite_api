@@ -334,10 +334,29 @@ namespace GSC.Api.Controllers.Screening
         }
 
         [HttpGet]
-        [Route("GetGenericSubjectByProjecId/{projectId}")]
-        public IActionResult GetGenericSubjectByProjecId(int projectId)
+        [Route("GetAReportData")]
+        public IActionResult GetAReportData([FromQuery] NAReportSearchDto filters)
         {
-            return Ok(_screeningEntryRepository.GetGenericSubjectByProjecId(projectId));
+            if (filters.SiteId <= 0) return BadRequest();
+
+            var reportDto = _screeningVisitRepository.AReport(filters);
+
+            return Ok(reportDto);
+        }
+
+        [HttpPost("SetStatusA")]
+        public ActionResult SetStatusA([FromBody] List<int> screeningTemplateId)
+        {
+            foreach (var item in screeningTemplateId)
+            {
+                var record = _screeningVisitRepository.Find(item);
+                if (record == null)
+                    return NotFound();
+                record.IsNA = false;
+                _screeningVisitRepository.Update(record);
+                _uow.Save();
+            }
+            return Ok();
         }
         // NA Report
     }

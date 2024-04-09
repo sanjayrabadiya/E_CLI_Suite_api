@@ -350,7 +350,7 @@ namespace GSC.Respository.Screening
 
         public void PatientStatus(int screeningEntryId)
         {
-            var visitStatus = All.Where(x => x.ScreeningEntryId == screeningEntryId).GroupBy(t => t.Status).Select(r => r.Key).ToList();
+            var visitStatus = All.Where(x => x.ScreeningEntryId == screeningEntryId && !x.IsNA).GroupBy(t => t.Status).Select(r => r.Key).ToList();
             var patientStatus = ScreeningPatientStatus.OnTrial;
 
 
@@ -399,8 +399,12 @@ namespace GSC.Respository.Screening
 
             ScreeningVisitStatus? visitStatus = ScreeningVisitStatus.InProgress;
 
-            if (screeningTemplate.Status >= ScreeningTemplateStatus.Submitted && !_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
-                && x.ScreeningVisitId == screeningTemplate.ScreeningVisitId && !x.IsDisable && x.Status < ScreeningTemplateStatus.Submitted))
+            if (screeningTemplate.Status >= ScreeningTemplateStatus.Submitted 
+                && !_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
+                && x.ScreeningVisitId == screeningTemplate.ScreeningVisitId && !x.IsDisable && x.Status < ScreeningTemplateStatus.Submitted
+                && !x.IsNA
+                )
+                )
             {
                     statusDate = _jwtTokenAccesser.GetClientDate();
                     visitStatus = ScreeningVisitStatus.Completed;
@@ -561,6 +565,98 @@ namespace GSC.Respository.Screening
                       Initial = x.ScreeningEntry.Randomization.Initial
                   }).ToList();
 
+        }
+
+        public List<NAReportDto> AReport(NAReportSearchDto filters)
+        {
+            return All.Include(x => x.ScreeningEntry)
+                  .ThenInclude(x => x.Randomization)
+                  .Where(x => x.ScreeningEntry.ProjectId == filters.SiteId
+               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
+               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignVisitId))
+               && x.IsNA)
+                  .Select(x => new NAReportDto
+                  {
+                      ScreeningTemplateId = x.Id,
+                      Visit = x.ScreeningVisitName,
+                      VisitStatus = x.Status.GetDescription(),
+                      ScreeningNo = x.ScreeningEntry.Randomization.ScreeningNumber,
+                      RandomizationNumber = x.ScreeningEntry.Randomization.RandomizationNumber,
+                      Initial = x.ScreeningEntry.Randomization.Initial
+                  }).ToList();
+
+        }
+
+
+        // Status update by Not Applicable template status
+        public ScreeningVisitStatus? AutomaticStatusUpdateByNAReport(int screeningTemplateId)
+        {
+            var screeningTemplate = _screeningTemplateRepository.All.AsNoTracking().Where(x => x.Id == screeningTemplateId).Select(t => new
+            {
+                t.ProjectDesignTemplate.ProjectDesignVisitId,
+                t.ScreeningVisitId,
+                t.Status,
+                t.ScreeningVisit.ScreeningEntryId,
+                VisitStatus = t.ScreeningVisit.Status,
+
+            }).FirstOrDefault();
+
+            if (screeningTemplate == null) return null;
+
+            if (screeningTemplate.VisitStatus == ScreeningVisitStatus.Missed ||
+            screeningTemplate.VisitStatus == ScreeningVisitStatus.OnHold)
+                return screeningTemplate.VisitStatus;
+
+            var designVisitStatus = _projectDesignVisitStatusRepository.All.Where(x => x.DeletedDate == null
+                && x.ProjectDesignVisitId == screeningTemplate.ProjectDesignVisitId &&
+                (x.VisitStatusId == ScreeningVisitStatus.ScreeningFailure || x.VisitStatusId == ScreeningVisitStatus.Withdrawal)).Select(
+                t => new { t.ProjectDesignVariableId, t.VisitStatusId }).ToList();
+
+
+            DateTime? statusDate = _jwtTokenAccesser.GetClientDate();
+
+            ScreeningVisitStatus? visitStatus = ScreeningVisitStatus.InProgress;
+
+            if (!_screeningTemplateRepository.All.AsNoTracking().Any(x => x.ScreeningVisit.ScreeningEntryId == screeningTemplate.ScreeningEntryId
+                && x.ScreeningVisitId == screeningTemplate.ScreeningVisitId && !x.IsDisable && x.Status < ScreeningTemplateStatus.Submitted
+                && !x.IsNA
+                )
+                )
+            {
+                statusDate = _jwtTokenAccesser.GetClientDate();
+                visitStatus = ScreeningVisitStatus.Completed;
+            }
+
+            designVisitStatus.ForEach(x =>
+            {
+                var screeningValue = _screeningTemplateValueRepository.All.Where(t => t.ProjectDesignVariableId == x.ProjectDesignVariableId
+                      && t.ScreeningTemplate.ScreeningVisitId == screeningTemplate.ScreeningVisitId).Select(r => r.Value).FirstOrDefault();
+
+                if (!string.IsNullOrEmpty(screeningValue))
+                {
+                    DateTime convertDte;
+                    var isSucess = DateTime.TryParse(screeningValue, out convertDte);
+
+                    if (isSucess)
+                    {
+                        statusDate = convertDte;
+                        visitStatus = x.VisitStatusId;
+                    }
+                }
+            });
+
+
+            if (visitStatus != null && statusDate != null && screeningTemplate.VisitStatus != visitStatus)
+            {
+                StatusUpdate(new ScreeningVisitHistoryDto
+                {
+                    VisitStatusId = (ScreeningVisitStatus)visitStatus,
+                    ScreeningVisitId = screeningTemplate.ScreeningVisitId,
+                    StatusDate = statusDate
+                });
+            }
+
+            return visitStatus;
         }
     }
 }

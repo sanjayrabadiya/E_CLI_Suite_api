@@ -1220,4 +1220,9 @@ namespace GSC.Helper
         [Description("Site")] Site = 2,
       
     }
+    public enum TriggerType : short
+    {
+        [Description("Study Plan")] StudyPlanApproval = 1,
+        [Description("Budget Management")] BudgetManagementApproved = 2
+    }
 }

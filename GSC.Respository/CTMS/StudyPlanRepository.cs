@@ -6,6 +6,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
+using GSC.Respository.EmailSender;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -24,10 +25,11 @@ namespace GSC.Respository.CTMS
         private readonly IHolidayMasterRepository _holidayMasterRepository;
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
 
         public StudyPlanRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IProjectRightRepository projectRightRepository) : base(context)
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IProjectRightRepository projectRightRepository, IEmailSenderRespository emailSenderRespository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -35,6 +37,7 @@ namespace GSC.Respository.CTMS
             _holidayMasterRepository = holidayMasterRepository;
             _weekEndMasterRepository = weekEndMasterRepository;
             _projectRightRepository = projectRightRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
         public List<StudyPlanGridDto> GetStudyplanList(bool isDeleted)
@@ -49,8 +52,19 @@ namespace GSC.Respository.CTMS
             var StudyplanData1 = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).ToList();
             TotalCostStudyUpdate(StudyplanData1);
 
-            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
+            
+           var studyPlanGridDto= All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
             ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
+
+            //CtmsApprovalWorkFlow
+            var user = _context.CtmsApprovalWorkFlowDetail.
+                Include(i => i.ctmsApprovalWorkFlow).
+                Where(w => w.DeletedBy == null && w.ctmsApprovalWorkFlow.DeletedBy == null && (w.ctmsApprovalWorkFlow.TriggerType == TriggerType.StudyPlanApproval || w.ctmsApprovalWorkFlow.TriggerType == TriggerType.BudgetManagementApproved) && projectList.Contains(w.ctmsApprovalWorkFlow.ProjectId)
+                && w.UserId == _jwtTokenAccesser.UserId && w.ctmsApprovalWorkFlow.RoleId == _jwtTokenAccesser.RoleId).ToList();
+
+            studyPlanGridDto.ForEach(x => x.IfApprovalWorkFlow = user.Select(s => s.ctmsApprovalWorkFlow.ProjectId).Contains(x.ProjectId));          
+
+            return studyPlanGridDto;
         }
         public void TotalCostStudyUpdate(List<StudyPlan> StudyPlan)
         {
@@ -59,8 +73,10 @@ namespace GSC.Respository.CTMS
                 decimal? TotalResourceCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == i.Id && s.DeletedBy == null).Sum(d => d.TotalCost);
                 decimal? TotalPatientCost = _context.PatientCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalCost);
                 decimal? TotalPassThroughCost = _context.PassThroughCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.Total);
+                decimal? TotalFinalCost = _context.BudgetPaymentFinalCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalTotalAmount);
 
                 i.TotalCost = TotalResourceCost + TotalPatientCost + TotalPassThroughCost;
+                i.TotalFinalCost = TotalFinalCost;
                 _context.StudyPlan.UpdateRange(i);
                 _context.Save();
             });
@@ -329,7 +345,56 @@ namespace GSC.Respository.CTMS
 
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
+            return "";
+        }
+        public bool UpdateApprovalPlan(int id, bool ifPlanApproval)
+        {
+            var data = All.Where(s => s.DeletedBy == null && s.Id == id).FirstOrDefault();
+            if (data != null)
+            {
+                data.IfPlanApproval = !ifPlanApproval;
+                _context.StudyPlan.Update(data);
+                _context.Save();
+                return data.IfPlanApproval;
+            }
+            return false;
 
+        }
+        //Add by Mitul on 06-12-2023 get History in AuditTrail Deleted=Revoke And Added,Modified=Gran
+        public List<ApprovalPlanHistory> GetApprovalPlanHistory(int id,string columnName)
+        {
+
+            var result = _context.AuditTrail.Where(x => x.RecordId == id && x.TableName == "StudyPlan" && x.ColumnName == columnName)
+               .Select(x => new ApprovalPlanHistory
+               {
+                   Id = x.Id,
+                   TableName = x.TableName,
+                   RecordId = x.RecordId,
+                   IsApproval = x.NewValue != "No",
+                   ReasonOth = x.ReasonOth,
+                   ReasonName = x.Reason,
+                   ApprovalOn = x.CreatedDate,
+                   ApprovalBy = x.User.UserName,
+                   ApprovalRole = x.UserRole,
+                   TimeZone = x.TimeZone,
+                   IpAddress = x.IpAddress
+               }).OrderBy(r=>r.Id).ToList();
+
+            return result;
+        }
+        public string SendMail(int id, bool ifPlanApproval, TriggerType triggerType)
+        {
+            var StudyPlan = _context.StudyPlan.Where(w => w.Id == id && w.DeletedBy == null).FirstOrDefault();
+            if (StudyPlan != null)
+            {
+                var CtmsApprovalWorkFlowDetail = _context.CtmsApprovalWorkFlowDetail.Include(j => j.Users).Include(i => i.ctmsApprovalWorkFlow).ThenInclude(p=>p.Project).
+                    Where(w => w.ctmsApprovalWorkFlow.ProjectId == StudyPlan.ProjectId && w.ctmsApprovalWorkFlow.TriggerType == triggerType && w.DeletedBy == null).ToList();
+
+                CtmsApprovalWorkFlowDetail.ForEach(i => {
+
+                    _emailSenderRespository.SendMailCtmsApproval(i, ifPlanApproval);
+                });
+            }
             return "";
         }
     }

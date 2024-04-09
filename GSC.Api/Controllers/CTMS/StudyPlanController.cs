@@ -8,6 +8,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -178,6 +179,34 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
+        [HttpGet("UpdateApprovalPlan/{id}/{ifPlanApproval}")]
+        public ActionResult UpdateApprovalPlan(int id, bool ifPlanApproval)
+        {
+            var studyplan = _studyPlanRepository.Find(id);
+            studyplan.IfPlanApproval = !ifPlanApproval;
+            _studyPlanRepository.Update(studyplan);
+            if (_uow.Save() <= 0) return Ok(new Exception("Study plan is failed on save."));
+            _studyPlanRepository.SendMail(id, studyplan.IfPlanApproval, TriggerType.StudyPlanApproval);
+            return Ok(studyplan.IfPlanApproval);
+        }
 
+        [HttpGet("UpdateApprovalBudget/{id}/{ifBudgetApproval}")]
+        public ActionResult UpdateApprovalBudget(int id, bool ifBudgetApproval)
+        {
+            var studyplan = _studyPlanRepository.Find(id);
+            studyplan.IfBudgetApproval = !ifBudgetApproval;
+            _studyPlanRepository.Update(studyplan);
+            if (_uow.Save() <= 0) return Ok(new Exception("Study BudgetApproval is failed on save."));
+            _studyPlanRepository.SendMail(id, studyplan.IfBudgetApproval, TriggerType.BudgetManagementApproved);
+            return Ok(studyplan.IfBudgetApproval);
+        }
+
+        [HttpGet("GetApprovalPlanHistory/{id}/{columnName}")]
+        public IActionResult GetApprovalPlanHistory(int id, string columnName)
+        {
+            if (id <= 0) return BadRequest();
+            var result = _studyPlanRepository.GetApprovalPlanHistory(id, columnName);
+            return Ok(result);
+        }
     }
 }

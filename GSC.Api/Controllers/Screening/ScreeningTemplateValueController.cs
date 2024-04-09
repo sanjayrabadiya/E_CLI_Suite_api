@@ -147,7 +147,6 @@ namespace GSC.Api.Controllers.Screening
                 screeningTemplate.Status = Helper.ScreeningTemplateStatus.InProcess;
                 screeningTemplate.IsDisable = false;
                 screeningTemplate.IsHide = false;
-                screeningTemplate.IsNA = false;
                 _screeningTemplateRepository.Update(screeningTemplate);
 
                 var screeningVisit = _screeningVisitRepository.Find(screeningTemplate.ScreeningVisitId);
