@@ -131,7 +131,7 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
-            var filteredValues = variableDto.Values
+            variableDto.Values
                  .Where(s => s.VariableId == 0)
                  .Select(s =>
                  {
@@ -140,7 +140,7 @@ namespace GSC.Api.Controllers.Master
                      return s;
                  }).ToList();
 
-            var variable = _mapper.Map<Variable>(filteredValues);
+            var variable = _mapper.Map<Variable>(variableDto);
             var validate = _variableRepository.Duplicate(variable);
             if (!string.IsNullOrEmpty(validate))
             {
