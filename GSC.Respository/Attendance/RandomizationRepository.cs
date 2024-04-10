@@ -1362,7 +1362,7 @@ namespace GSC.Respository.Attendance
 
             return result;
         }
-        public List<RandomizationGridDto> GetRandomizationById(int id,int projectId)
+        public List<RandomizationGridDto> GetRandomizationById(int id, int projectId)
         {
             var result = All.Where(x => x.Id == id).
                   ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
@@ -1379,6 +1379,15 @@ namespace GSC.Respository.Attendance
 
             result.ForEach(x =>
             {
+                if (x.ProjectId > 0)
+                {
+                    var project = _context.Project.Find(x.ProjectId);
+                    if (project != null)
+                    {
+                        x.IsTestSite = project.IsTestSite;
+                    }
+
+                }
                 x.IsEicf = ProjectSettings?.IsEicf ?? false;
                 x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Any(c => c.RandomizationId == x.Id) ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient) : false;
                 x.ParentProjectCode = project.ProjectCode;

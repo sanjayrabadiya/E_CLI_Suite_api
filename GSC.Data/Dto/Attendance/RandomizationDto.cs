@@ -155,6 +155,10 @@ namespace GSC.Data.Dto.Attendance
         public bool isDocumentUpload { get; set; }
 
         public int ParentProjectId { get; set; }
+
+        public int ProjectId { get; set; }
+
+        public bool IsTestSite { get; set; }
     }
 
     public class RandomizationNumberDto
