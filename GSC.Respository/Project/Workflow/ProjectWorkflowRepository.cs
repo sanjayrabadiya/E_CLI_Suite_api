@@ -50,7 +50,7 @@ namespace GSC.Respository.Project.Workflow
         public short GetVisitLevel(int projectDesignVisitId, int projectDesignId, short levelNo)
         {
 
-            var result = _context.WorkflowVisit.Where(x => x.IsIndependent && x.ProjectDesignVisitId == projectDesignVisitId
+            var result = _context.WorkflowVisit.Where(x => !x.IsIndependent && x.ProjectDesignVisitId == projectDesignVisitId
             && x.DeletedDate == null && x.ProjectWorkflowLevel.LevelNo > levelNo).Min(a => (short?)a.ProjectWorkflowLevel.LevelNo) ?? 0;
 
             if (result == 0)
@@ -65,7 +65,7 @@ namespace GSC.Respository.Project.Workflow
             var result = _context.WorkflowTemplate.Where(x => x.ProjectDesignTemplateId == projectDesignTemplateId
            && x.DeletedDate == null).Select(r => r.LevelNo).ToList();
 
-            if (!result.Any())
+            if (result.Count() == 0)
                 return 0;
 
             var level = result.Where(x => x > (int)levelNo).Min(a => a);
@@ -181,9 +181,9 @@ namespace GSC.Respository.Project.Workflow
             };
         }
 
-        public bool IsElectronicsSignatureComplete(int ProjectDesignId)
+        public bool IsElectronicsSignatureComplete(int projectDesignId)
         {
-            var IsElectronicsSignature = _context.ElectronicSignature.Where(x => x.ProjectDesignId == ProjectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
+            var IsElectronicsSignature = _context.ElectronicSignature.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).FirstOrDefault()?.IsCompleteWorkflow;
             if (IsElectronicsSignature == null)
             {
                 IsElectronicsSignature = false;
