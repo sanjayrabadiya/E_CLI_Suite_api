@@ -23,10 +23,12 @@ namespace GSC.Respository.CTMS
         }
         public List<BudgetPaymentFinalCostGridDto> GetBudgetPaymentFinalCostList(int projectId, bool isdelete)
         {
-             var data = All.Where(x => (isdelete ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId).
-                   ProjectTo<BudgetPaymentFinalCostGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            data[0].GlobleCurrencySymbol = _context.StudyPlan.Include(s => s.Currency).Where(s => s.DeletedBy == null && s.ProjectId == projectId).Select(d => d.Currency.CurrencySymbol).FirstOrDefault();
-
+            var data = All.Where(x => (isdelete ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId).
+                  ProjectTo<BudgetPaymentFinalCostGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+            if (data.Count > 0)
+            {
+                data[0].GlobleCurrencySymbol = _context.StudyPlan.Include(s => s.Currency).Where(s => s.DeletedBy == null && s.ProjectId == projectId).Select(d => d.Currency.CurrencySymbol).FirstOrDefault();
+            }
             return data;
         }
 
