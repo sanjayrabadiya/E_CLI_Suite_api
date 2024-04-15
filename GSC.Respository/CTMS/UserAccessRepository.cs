@@ -181,7 +181,7 @@ namespace GSC.Respository.CTMS
         {
             var projectRightData = _context.ProjectRight.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.role.Id == _jwtTokenAccesser.RoleId && s.CreatedBy == _jwtTokenAccesser.UserId && s.DeletedBy == null && s.ProjectId == projectId).FirstOrDefault();
             var userRoleData = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
-            var ctmsOnData = _context.ProjectSettings.Include(d => d.Project).Where(s => s.DeletedBy == null && s.IsCtms == isCtms && s.ProjectId == projectRightData.ProjectId).FirstOrDefault();
+            var ctmsOnData = _context.ProjectSettings.Include(d => d.Project).Where(s => s.DeletedBy == null && s.IsCtms == isCtms && projectRightData != null && s.ProjectId == projectRightData.ProjectId).FirstOrDefault();
             var userAccessData = new UserAccess();
             if (isCtms)
             {
@@ -193,7 +193,7 @@ namespace GSC.Respository.CTMS
             }
             else
             {
-                userAccessData = _context.UserAccess.Where(s => s.ProjectId == ctmsOnData.ProjectId && s.ParentProjectId == ctmsOnData.ProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
+                userAccessData = _context.UserAccess.Where(s => ctmsOnData != null && s.ProjectId == ctmsOnData.ProjectId && s.ParentProjectId == ctmsOnData.ProjectId && s.UserRoleId == userRoleData && s.DeletedBy == null).FirstOrDefault();
                 if (userAccessData != null)
                 {
                     userAccessData.DeletedBy = _jwtTokenAccesser.UserId;
