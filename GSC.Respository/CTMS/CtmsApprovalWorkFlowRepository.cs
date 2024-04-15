@@ -89,7 +89,7 @@ namespace GSC.Respository.CTMS
         {
             if (obj.Id > 0)
             {
-                var data = _context.CtmsApprovalWorkFlow.Where(x => x.Id != obj.Id && x.ProjectId == obj.ProjectId && x.DeletedDate == null && x.RoleId == obj.RoleId).FirstOrDefault();
+                var data = _context.CtmsApprovalWorkFlow.Where(x => x.Id != obj.Id && x.ProjectId == obj.ProjectId && x.DeletedDate == null && x.SecurityRoleId == obj.RoleId).FirstOrDefault();
                 if (data != null)
                 {
                     return "already assigned for this role!";
@@ -97,7 +97,7 @@ namespace GSC.Respository.CTMS
             }
             else
             {
-                var data = _context.CtmsApprovalWorkFlow.Where(x => x.ProjectId == obj.ProjectId && x.DeletedDate == null && x.RoleId == obj.RoleId && x.TriggerType == obj.TriggerType).FirstOrDefault();
+                var data = _context.CtmsApprovalWorkFlow.Where(x => x.ProjectId == obj.ProjectId && x.DeletedDate == null && x.SecurityRoleId == obj.RoleId && x.TriggerType == obj.TriggerType).FirstOrDefault();
                 if (data != null)
                 {
                     return "already assigned for this role!";

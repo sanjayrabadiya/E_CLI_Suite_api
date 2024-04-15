@@ -60,7 +60,7 @@ namespace GSC.Respository.CTMS
             var user = _context.CtmsApprovalWorkFlowDetail.
                 Include(i => i.ctmsApprovalWorkFlow).
                 Where(w => w.DeletedBy == null && w.ctmsApprovalWorkFlow.DeletedBy == null && (w.ctmsApprovalWorkFlow.TriggerType == TriggerType.StudyPlanApproval || w.ctmsApprovalWorkFlow.TriggerType == TriggerType.BudgetManagementApproved) && projectList.Contains(w.ctmsApprovalWorkFlow.ProjectId)
-                && w.UserId == _jwtTokenAccesser.UserId && w.ctmsApprovalWorkFlow.RoleId == _jwtTokenAccesser.RoleId).ToList();
+                && w.UserId == _jwtTokenAccesser.UserId && w.ctmsApprovalWorkFlow.SecurityRoleId == _jwtTokenAccesser.RoleId).ToList();
 
             studyPlanGridDto.ForEach(x => x.IfApprovalWorkFlow = user.Select(s => s.ctmsApprovalWorkFlow.ProjectId).Contains(x.ProjectId));          
 

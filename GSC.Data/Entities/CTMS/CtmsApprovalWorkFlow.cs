@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 namespace GSC.Data.Entities.CTMS
 {
@@ -10,7 +11,8 @@ namespace GSC.Data.Entities.CTMS
         public string EmailTemplate { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
-        public int RoleId { get; set; }
+        public int SecurityRoleId { get; set; }
         public Master.Project Project { get; set; }
+        public SecurityRole SecurityRole { get; set; }
     }
 }
