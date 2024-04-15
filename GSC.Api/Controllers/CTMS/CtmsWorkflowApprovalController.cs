@@ -6,9 +6,11 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Master;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Quartz.Xml.JobSchedulingData20;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -39,6 +41,13 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(approvalDto);
         }
 
+        [HttpGet]
+        [Route("GetRolUserTree/{projectId}/{triggerType}")]
+        public IActionResult GetRolUserTree(int projectId, TriggerType triggerType)
+        {
+            if (projectId <= 0) return BadRequest();
+            return Ok(_ctmsWorkflowApprovalRepository.GetProjectRightByProjectId(projectId, triggerType));
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] IList<CtmsWorkflowApprovalDto> approversDto)
