@@ -464,5 +464,6 @@ namespace GSC.Domain.Context
         DbSet<CtmsApprovalWorkFlow> CtmsApprovalWorkFlow { get; set; }
         DbSet<CtmsApprovalWorkFlowDetail> CtmsApprovalWorkFlowDetail { get; set; }
         DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
-    }
+        DbSet<StudyPlanTaskComment> StudyPlanTaskComment { get; set; }
+        }
 }
