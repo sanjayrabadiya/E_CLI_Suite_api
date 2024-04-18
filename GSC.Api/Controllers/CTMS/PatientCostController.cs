@@ -51,6 +51,13 @@ namespace GSC.Api.Controllers.CTMS
             var studyplan = _patientCostRepository.GetPatientCostGrid(isDeleted, studyId);
             return Ok(studyplan);
         }
+        [HttpGet]
+        [Route("GetPatientCostCurrencyGrid/{isDeleted:bool?}/{studyId:int}")]
+        public IActionResult GetPatientCostCurrencyGrid(bool isDeleted, int studyId)
+        {
+            var studyplan = _patientCostRepository.GetPatientCostCurrencyGrid(isDeleted, studyId);
+            return Ok(studyplan);
+        }
 
         [HttpPost]
         public IActionResult Post([FromBody] List<ProcedureVisitdadaDto> procedureVisitdadaDto)
@@ -136,7 +143,13 @@ namespace GSC.Api.Controllers.CTMS
                 _uow.Save();
                 return Ok();
             }
-               
+        }
+        [HttpGet]
+        [Route("AddPatientCount/{studyId:int}/{currencyId:int}/{patientCount:int}")]
+        public IActionResult AddPatientCount( int studyId, int currencyId, int patientCount)
+        {
+            var studyplan = _patientCostRepository.AddPatientCount( studyId, currencyId, patientCount);
+            return Ok(studyplan);
         }
     }
 }

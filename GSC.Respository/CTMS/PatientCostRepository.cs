@@ -170,10 +170,13 @@ namespace GSC.Respository.CTMS
                 ProjectId = t.ProjectId,
                 ProcedureId = t.ProcedureId,
                 ProcedureName = t.Procedure.Name,
+                CurrencyId = t.Procedure.CurrencyId,
                 CurrencyType = t.Procedure.Currency.CurrencyName + "-" + t.Procedure.Currency.CurrencySymbol,
                 Rate = t.Rate,
                 CurrencyRate = t.CurrencyRate.LocalCurrencyRate,
-                CurrencySymbol = t.Currency.CurrencySymbol
+                CurrencySymbol = t.Currency.CurrencySymbol,
+                LocalCurrencySymbol = t.Procedure.Currency.CurrencySymbol,
+                PatientCount = 1
             }).Distinct().ToList();
 
             foreach (var item in PatientCostProced)
@@ -184,10 +187,57 @@ namespace GSC.Respository.CTMS
                     VisitId = t.ProjectDesignVisitId,
                     VisitName = t.ProjectDesignVisitId != null ? t.ProjectDesignVisit.DisplayName : t.VisitName,
                     FinalCost = t.FinalCost,
+                    LocalFinalCost = t.Cost * t.Rate,
                 }).ToList();
                 item.VisitGridDatas = PatientCostVisit;
             }
             return PatientCostProced;
+        }
+
+        public List<PatientCostGridData> GetPatientCostCurrencyGrid(bool isDeleted, int studyId)
+        {
+            var patientcostproced = new List<PatientCostGridData>();
+            var patientcostprocedTemp = new List<PatientCostGridData>();
+            var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x=> x.DeletedBy == null && x.ProjectId == studyId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 1  ).Select(val => val.Key).ToList();
+           for (var i = 0; i < duplicates.Count; i++)
+            {
+                patientcostprocedTemp = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == studyId && x.ProcedureId != null && x.Procedure.CurrencyId == duplicates[i]).
+                Select(t => new PatientCostGridData
+                {
+                    ProcedureId = t.ProcedureId,
+                    CurrencyId = t.Procedure.CurrencyId,
+                    CurrencyType = t.Procedure.Currency.CurrencyName + "-" + t.Procedure.Currency.CurrencySymbol,
+                    CurrencyRate = t.CurrencyRate.LocalCurrencyRate,
+                    CurrencySymbol = t.Currency.CurrencySymbol,
+                    LocalCurrencySymbol = t.Procedure.Currency.CurrencySymbol,
+                    PatientCount = t.PatientCount
+                }).Distinct().ToList();
+
+                var PatientCostVisit = _context.PatientCost.Include(s => s.ProjectDesignVisit).
+                Where(x => patientcostprocedTemp.Select(r => r.ProcedureId).Contains(x.ProcedureId) && x.ProjectId == studyId && x.DeletedBy == null).
+                GroupBy(g => g.ProjectDesignVisitId)
+                .Select(t => new VisitGridData
+                {
+                    VisitId = t.Key,
+                    VisitName = t.Select(r => r.ProjectDesignVisit.DisplayName).FirstOrDefault(),
+                    FinalCost = t.Sum(r => r.FinalCost),
+                    LocalFinalCost = t.Sum(r => r.Cost * r.Rate)
+                }).ToList();
+                patientcostproced.Add(patientcostprocedTemp.FirstOrDefault());
+                patientcostproced[i].VisitGridDatas = PatientCostVisit;
+            }
+            return patientcostproced;
+        }
+
+        public bool AddPatientCount(int studyId, int currencyId, int patientCount)
+        {
+            var data = _context.PatientCost.Include(i => i.Procedure).Where(w => w.DeletedBy == null && w.ProjectId == studyId && w.Procedure.CurrencyId == currencyId && w.ProcedureId != null).ToList();
+            data.ForEach(x => {
+                x.PatientCount = patientCount;
+                _context.PatientCost.Update(x);
+                _context.Save();
+            });
+            return true;
         }
         public string Duplicate(List<ProcedureVisitdadaDto> ProcedureVisitdadaDto)
         {

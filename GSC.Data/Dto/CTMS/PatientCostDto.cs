@@ -27,10 +27,13 @@ namespace GSC.Data.Dto.CTMS
         public int? ProjectId { get; set; }
         public int? ProcedureId { get; set; }
         public string ProcedureName { get; set; }
+        public int? CurrencyId { get; set; }
         public string CurrencyType { get; set; }
         public decimal? Rate { get; set; }
         public decimal? CurrencyRate { get; set; }
         public string CurrencySymbol { get; set; }
+        public string LocalCurrencySymbol { get; set; }
+        public int PatientCount { get; set; }
         public List<VisitGridData> VisitGridDatas { get; set; }
     }
     public class VisitGridData
@@ -38,5 +41,6 @@ namespace GSC.Data.Dto.CTMS
         public int? VisitId { get; set; }
         public string VisitName { get; set; }
         public decimal? FinalCost { get; set; }
+        public decimal? LocalFinalCost { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.CTMS
 
         [Required(ErrorMessage = "Percentage is required.")]
         public decimal Percentage { get; set; }
+        public decimal? PercentageValue { get; set; }
         [Required(ErrorMessage = "FinalTotalAmount is required.")]
         public decimal FinalTotalAmount { get; set; }
         public string IpAddress { get; set; }
@@ -32,6 +33,7 @@ namespace GSC.Data.Dto.CTMS
         public string MilestoneTypeName { get; set; }
         public decimal? TotalAmount { get; set; }
         public decimal? Percentage { get; set; }
+        public decimal? PercentageValue { get; set; }
         public decimal? FinalTotalAmount { get; set;}
         public string GlobleCurrencySymbol { get; set; }
     }
