@@ -16,8 +16,8 @@ namespace GSC.Data.Dto.CTMS
         [Required(ErrorMessage = "End Date is required.")]
         public DateTime EndDate { get; set; }
         public int? CurrencyId {  get; set; }
-        public bool IfPlanApproval { get; set; }
-        public bool IfBudgetApproval { get; set; }
+        public bool IsPlanApproval { get; set; }
+        public bool IsBudgetApproval { get; set; }
         public List<CurrencyRateDto> CurrencyRateList { get; set; }
     }
     public class CurrencyRateDto

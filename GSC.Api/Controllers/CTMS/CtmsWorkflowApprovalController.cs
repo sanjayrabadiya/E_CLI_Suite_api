@@ -24,12 +24,17 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly ICtmsWorkflowApprovalRepository _ctmsWorkflowApprovalRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IStudyPlanRepository _studyPlanRepository;
 
-        public CtmsWorkflowApprovalController(IUnitOfWork uow, IMapper mapper, ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository)
+        public CtmsWorkflowApprovalController(IUnitOfWork uow, IMapper mapper,
+            ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository, IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _ctmsWorkflowApprovalRepository = ctmsWorkflowApprovalRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _studyPlanRepository = studyPlanRepository;
         }
 
         [HttpGet("{id}")]
@@ -49,8 +54,8 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(_ctmsWorkflowApprovalRepository.GetProjectRightByProjectId(projectId, triggerType));
         }
 
-        [HttpPost]
-        public IActionResult Post([FromBody] IList<CtmsWorkflowApprovalDto> approversDto)
+        [HttpPost("SaveApprovalRequest")]
+        public IActionResult SaveApprovalRequest([FromBody] IList<CtmsWorkflowApprovalDto> approversDto)
         {
             if (approversDto.Count <= 0)
             {
@@ -60,6 +65,7 @@ namespace GSC.Api.Controllers.CTMS
             foreach (var approverDto in approversDto)
             {
                 approverDto.Id = 0;
+                approverDto.SenderId = _jwtTokenAccesser.UserId;
                 approverDto.SendDate = DateTime.Now;
                 var approver = _mapper.Map<CtmsWorkflowApproval>(approverDto);
                 _ctmsWorkflowApprovalRepository.Add(approver);
@@ -75,10 +81,19 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             approverDto.Id = 0;
             approverDto.SendDate = DateTime.Now;
+            approverDto.ApproverComment = "";
+            approverDto.IsApprove = null;
+            approverDto.ActionDate = null;
+            approverDto.SenderId = _jwtTokenAccesser.UserId;
+            var lastRecord = _ctmsWorkflowApprovalRepository.Find(approverDto.CtmsWorkflowApprovalId ?? 0);
+            approverDto.CtmsWorkflowApprovalId = null;
             var approver = _mapper.Map<CtmsWorkflowApproval>(approverDto);
             _ctmsWorkflowApprovalRepository.Add(approver);
             var result = _uow.Save();
-            if (result > 0)
+            lastRecord.CtmsWorkflowApprovalId = approver.Id;
+            _ctmsWorkflowApprovalRepository.Update(lastRecord);
+            _uow.Save();
+            if (result <= 0)
             {
                 ModelState.AddModelError("Message", "Error to save");
                 return BadRequest(ModelState);
@@ -100,20 +115,35 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", "Updating Ctms Workflow Approval failed on save.");
                 return BadRequest(ModelState);
             }
+
+
+            var allApprove = _ctmsWorkflowApprovalRepository.GetApprovalStatus(approverDto.StudyPlanId, approverDto.ProjectId);
+            if (allApprove)
+            {
+                var studyPlan = _studyPlanRepository.Find(approverDto.StudyPlanId);
+                if (approverDto.TriggerType == TriggerType.BudgetManagementApproved)
+                {
+                    studyPlan.IsBudgetApproval = true;
+                }
+
+                _studyPlanRepository.Update(studyPlan);
+                _uow.Save();
+            }
+
             return Ok(approver.Id);
         }
 
-        [HttpGet("GetApprovalHistoryBySender/{studyPlanId}/{projectId}")]
-        public IActionResult GetApprovalHistoryBySender(int studyPlanId, int projectId)
+        [HttpGet("GetApprovalHistoryBySender/{studyPlanId}/{projectId}/{triggerType}")]
+        public IActionResult GetApprovalHistoryBySender(int studyPlanId, int projectId, TriggerType triggerType)
         {
-            var history = _ctmsWorkflowApprovalRepository.GetApprovalBySender(studyPlanId, projectId);
+            var history = _ctmsWorkflowApprovalRepository.GetApprovalBySender(studyPlanId, projectId, triggerType);
             return Ok(history);
         }
 
-        [HttpGet("GetApprovalHistoryByApprover/{studyPlanId}/{projectId}")]
-        public IActionResult GetApprovalHistoryByApprover(int studyPlanId, int projectId)
+        [HttpGet("GetApprovalHistoryByApprover/{studyPlanId}/{projectId}/{triggerType}")]
+        public IActionResult GetApprovalHistoryByApprover(int studyPlanId, int projectId, TriggerType triggerType)
         {
-            var history = _ctmsWorkflowApprovalRepository.GetApprovalByApprover(studyPlanId, projectId);
+            var history = _ctmsWorkflowApprovalRepository.GetApprovalByApprover(studyPlanId, projectId, triggerType);
             return Ok(history);
         }
 
@@ -121,6 +151,13 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetApprovalStatus(int studyPlanId, int projectId)
         {
             var status = _ctmsWorkflowApprovalRepository.GetApprovalStatus(studyPlanId, projectId);
+            return Ok(status);
+        }
+
+        [HttpGet("CheckIsSender/{studyPlanId}/{projectId}/{triggerType}")]
+        public IActionResult CheckIsSender(int studyPlanId, int projectId, TriggerType triggerType)
+        {
+            var status = _ctmsWorkflowApprovalRepository.CheckSender(studyPlanId, projectId, triggerType);
             return Ok(status);
         }
 

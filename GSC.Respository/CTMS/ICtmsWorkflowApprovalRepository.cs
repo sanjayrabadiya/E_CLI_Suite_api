@@ -10,9 +10,10 @@ namespace GSC.Respository.CTMS
 {
     public interface ICtmsWorkflowApprovalRepository : IGenericRepository<CtmsWorkflowApproval>
     {
-        List<CtmsWorkflowApprovalDto> GetApprovalBySender(int studyPlanId, int projectId);
-        List<CtmsWorkflowApprovalDto> GetApprovalByApprover(int studyPlanId, int projectId);
+        List<CtmsWorkflowApprovalGridDto> GetApprovalBySender(int studyPlanId, int projectId, TriggerType triggerType);
+        List<CtmsWorkflowApprovalGridDto> GetApprovalByApprover(int studyPlanId, int projectId, TriggerType triggerType);
         bool GetApprovalStatus(int studyPlanId, int projectId);
         List<ProjectRightDto> GetProjectRightByProjectId(int projectId, TriggerType triggerType);
+        bool CheckSender(int studyPlanId, int projectId, TriggerType triggerType);
     }
 }
