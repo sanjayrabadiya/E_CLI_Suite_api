@@ -2,9 +2,10 @@
 using GSC.Common.Common;
 using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
+using System.Collections.Generic;
 namespace GSC.Data.Entities.CTMS
 {
-    public class CtmsApprovalWorkFlow : BaseEntity, ICommonAduit
+    public class CtmsApprovalRoles : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
         public TriggerType TriggerType { get; set; }

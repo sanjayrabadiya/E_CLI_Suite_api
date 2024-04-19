@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GSC.Common.Base;
 using GSC.Common.Common;
 using GSC.Data.Entities.Master;
+using GSC.Data.Entities.UserMgt;
 using GSC.Helper;
 
 namespace GSC.Data.Entities.CTMS
@@ -26,5 +27,8 @@ namespace GSC.Data.Entities.CTMS
         public string ApproverComment { get; set; }
         public StudyPlan StudyPlan { get; set; }
         public Data.Entities.Master.Project Project { get; set; }
+        public User Sender { get; set; }
+        public User User { get; set; }
+        public SecurityRole Role { get; set; }
     }
 }

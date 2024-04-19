@@ -26,8 +26,8 @@ namespace GSC.Data.Entities.CTMS
         public int? CurrencyId { get; set; } // Global Currency
         public decimal? TotalCost { get; set; }
         public decimal? TotalFinalCost { get; set; }
-        public bool IfPlanApproval { get; set; }
-        public bool IfBudgetApproval { get; set; }
+        public bool IsPlanApproval { get; set; }
+        public bool IsBudgetApproval { get; set; }
         public Master.Project Project { get; set; }
         public Currency Currency { get; set; }
     }

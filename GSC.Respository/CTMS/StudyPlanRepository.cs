@@ -52,17 +52,16 @@ namespace GSC.Respository.CTMS
             var StudyplanData1 = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).ToList();
             TotalCostStudyUpdate(StudyplanData1);
 
-            
-           var studyPlanGridDto= All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
-            ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
 
-            //CtmsApprovalWorkFlow
-            var user = _context.CtmsApprovalWorkFlowDetail.
-                Include(i => i.ctmsApprovalWorkFlow).
-                Where(w => w.DeletedBy == null && w.ctmsApprovalWorkFlow.DeletedBy == null && (w.ctmsApprovalWorkFlow.TriggerType == TriggerType.StudyPlanApproval || w.ctmsApprovalWorkFlow.TriggerType == TriggerType.BudgetManagementApproved) && projectList.Contains(w.ctmsApprovalWorkFlow.ProjectId)
-                && w.UserId == _jwtTokenAccesser.UserId && w.ctmsApprovalWorkFlow.SecurityRoleId == _jwtTokenAccesser.RoleId).ToList();
+            var studyPlanGridDto = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
+             ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
 
-            studyPlanGridDto.ForEach(x => x.IfApprovalWorkFlow = user.Select(s => s.ctmsApprovalWorkFlow.ProjectId).Contains(x.ProjectId));          
+
+
+            //studyPlanGridDto.ForEach(x => x.IfApprovalWorkFlow = _context.CtmsApprovalWorkFlowDetail.
+            //    Include(i => i.ctmsApprovalWorkFlow).Any(s => s.ctmsApprovalWorkFlow.DeletedDate == null &&
+            //    s.DeletedDate == null && s.ctmsApprovalWorkFlow.ProjectId == x.ProjectId && s.UserId == _jwtTokenAccesser.UserId
+            //    && s.ctmsApprovalWorkFlow.SecurityRoleId == _jwtTokenAccesser.RoleId && s.ctmsApprovalWorkFlow.TriggerType == triggerType));
 
             return studyPlanGridDto;
         }
@@ -91,7 +90,7 @@ namespace GSC.Respository.CTMS
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
-            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(d=>d.ParentProjectId).FirstOrDefault();
+            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(d => d.ParentProjectId).FirstOrDefault();
 
             var tasklist = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.DeletedDate == null && x.TaskMaster.TaskTemplateId == studyplan.TaskTemplateId
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
@@ -282,7 +281,7 @@ namespace GSC.Respository.CTMS
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
 
-            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(s=>s.ParentProjectId).FirstOrDefault();
+            var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(s => s.ParentProjectId).FirstOrDefault();
 
             var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
@@ -352,16 +351,16 @@ namespace GSC.Respository.CTMS
             var data = All.Where(s => s.DeletedBy == null && s.Id == id).FirstOrDefault();
             if (data != null)
             {
-                data.IfPlanApproval = !ifPlanApproval;
+                data.IsBudgetApproval = !ifPlanApproval;
                 _context.StudyPlan.Update(data);
                 _context.Save();
-                return data.IfPlanApproval;
+                return data.IsBudgetApproval;
             }
             return false;
 
         }
         //Add by Mitul on 06-12-2023 get History in AuditTrail Deleted=Revoke And Added,Modified=Gran
-        public List<ApprovalPlanHistory> GetApprovalPlanHistory(int id,string columnName)
+        public List<ApprovalPlanHistory> GetApprovalPlanHistory(int id, string columnName)
         {
 
             var result = _context.AuditTrail.Where(x => x.RecordId == id && x.TableName == "StudyPlan" && x.ColumnName == columnName)
@@ -378,7 +377,7 @@ namespace GSC.Respository.CTMS
                    ApprovalRole = x.UserRole,
                    TimeZone = x.TimeZone,
                    IpAddress = x.IpAddress
-               }).OrderBy(r=>r.Id).ToList();
+               }).OrderBy(r => r.Id).ToList();
 
             return result;
         }
@@ -387,10 +386,11 @@ namespace GSC.Respository.CTMS
             var StudyPlan = _context.StudyPlan.Where(w => w.Id == id && w.DeletedBy == null).FirstOrDefault();
             if (StudyPlan != null)
             {
-                var CtmsApprovalWorkFlowDetail = _context.CtmsApprovalWorkFlowDetail.Include(j => j.Users).Include(i => i.ctmsApprovalWorkFlow).ThenInclude(p=>p.Project).
-                    Where(w => w.ctmsApprovalWorkFlow.ProjectId == StudyPlan.ProjectId && w.ctmsApprovalWorkFlow.TriggerType == triggerType && w.DeletedBy == null).ToList();
+                var CtmsApprovalWorkFlowDetail = _context.CtmsApprovalUsers.Include(j => j.Users).Include(i => i.CtmsApprovalRoles).ThenInclude(p => p.Project).
+                    Where(w => w.CtmsApprovalRoles.ProjectId == StudyPlan.ProjectId && w.CtmsApprovalRoles.TriggerType == triggerType && w.DeletedBy == null).ToList();
 
-                CtmsApprovalWorkFlowDetail.ForEach(i => {
+                CtmsApprovalWorkFlowDetail.ForEach(i =>
+                {
 
                     _emailSenderRespository.SendMailCtmsApproval(i, ifPlanApproval);
                 });

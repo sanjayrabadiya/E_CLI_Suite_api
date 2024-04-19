@@ -431,7 +431,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPassThroughCostRepository, PassThroughCostRepository>();
             services.AddScoped<IPaymentMilestoneRepository, PaymentMilestoneRepository>();
             services.AddScoped<IBudgetPaymentFinalCostRepository, BudgetPaymentFinalCostRepository>();
-            services.AddScoped<ICtmsApprovalWorkFlowRepository, CtmsApprovalWorkFlowRepository>();
+            services.AddScoped<ICtmsApprovalRolesRepository, CtmsApprovalRolesRepository>();
             services.AddScoped<ICtmsWorkflowApprovalRepository, CtmsWorkflowApprovalRepository>();
         }
     }
