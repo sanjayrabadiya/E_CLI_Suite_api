@@ -63,4 +63,9 @@ namespace GSC.Data.Dto.CTMS
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
     }
+    public class StudyPlanTaskCommentDto
+    {
+        public int studyPlanTaskId { get; set; }
+        public string comment { get; set; }
+    }
 }

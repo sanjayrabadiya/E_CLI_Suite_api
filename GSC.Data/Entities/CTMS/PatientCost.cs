@@ -17,6 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public decimal? FinalCost { get; set; }
         public int? CurrencyId { get; set; }
         public bool IfPull { get; set; }
+        public int PatientCount { get; set; }
         public Master.Project Project { get; set; }
         public Procedure Procedure { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }

@@ -9,6 +9,7 @@ namespace GSC.Data.Entities.CTMS
         
         public decimal TotalAmount { get; set; }
         public decimal Percentage { get; set; }
+        public decimal? PercentageValue { get; set; }
         public decimal FinalTotalAmount { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
