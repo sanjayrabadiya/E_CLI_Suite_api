@@ -1212,23 +1212,38 @@ namespace GSC.Api.Controllers.Common
             return Ok(BudgetFlgType);
         }
         [HttpGet]
-        [Route("GetPaymentMilestoneType")]
-        public IActionResult GetPaymentMilestoneType()
-        {
-            var MilestoneType = Enum.GetValues(typeof(MilestoneType))
-                .Cast<MilestoneType>().Select(e => new DropDownEnum
-                {
-                    Id = Convert.ToInt16(e),
-                    Value = e.GetDescription()
-                }).OrderBy(o => o.Value).ToList();
-            return Ok(MilestoneType);
-        }
-        [HttpGet]
         [Route("GetTriggerTypeDropDown")]
         public IActionResult GetTriggerTypeDropDown()
         {
             var centri = Enum.GetValues(typeof(TriggerType))
                 .Cast<TriggerType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
+
+        [HttpGet]
+        [Route("GetPaymentTypeResourceDropDown")]
+        public IActionResult GetPaymentTypeResourceDropDown()
+        {
+            var centri = Enum.GetValues(typeof(PaymentTypeResource))
+                .Cast<PaymentTypeResource>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
+        [HttpGet]
+        [Route("GetPaymentTypePatientDropDown")]
+        public IActionResult GetPaymentTypePatientDropDown()
+        {
+            var centri = Enum.GetValues(typeof(PaymentTypePatient))
+                .Cast<PaymentTypePatient>().Select(e => new DropDownEnum
                 {
                     Id = Convert.ToInt16(e),
                     Value = e.GetDescription()

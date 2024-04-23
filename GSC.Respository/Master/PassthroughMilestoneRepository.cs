@@ -16,14 +16,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
-    public class PaymentMilestoneRepository : GenericRespository<PaymentMilestone>, IPaymentMilestoneRepository
+    public class PassthroughMilestoneRepository : GenericRespository<PassthroughMilestone>, IPassthroughMilestoneRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
-        public PaymentMilestoneRepository(IGSCContext context,
+        public PassthroughMilestoneRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper, IProjectRepository projectRepository, IProjectRightRepository projectRightRepository)
             : base(context)
@@ -35,29 +35,29 @@ namespace GSC.Respository.Master
             _projectRightRepository = projectRightRepository;
         }
 
-        public IList<PaymentMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
+        public IList<PassthroughMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
         {
-            var PaymentMilestoneData = new List<PaymentMilestoneGridDto>();
+            var PaymentMilestoneData = new List<PassthroughMilestoneGridDto>();
 
             if (parentProjectId != 0 && siteId == 0 && countryId == 0)
             {
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == parentProjectId)).
-                             ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                             ProjectTo<PassthroughMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
             else if (parentProjectId != 0 && siteId != 0 && countryId == 0)
             {
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.SiteId == siteId).
-                             ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                             ProjectTo<PassthroughMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
             else if(parentProjectId != 0 && siteId == 0 && countryId != 0)
             {
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.CountryId == countryId).
-                             ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                             ProjectTo<PassthroughMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
             else
             {
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.CountryId == countryId && x.SiteId == siteId).
-                            ProjectTo<PaymentMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                            ProjectTo<PassthroughMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
 
             PaymentMilestoneData.ForEach(x =>
@@ -66,7 +66,7 @@ namespace GSC.Respository.Master
             });
             return PaymentMilestoneData;
         }
-        public string DuplicatePaymentMilestone(PaymentMilestone paymentMilestone)
+        public string DuplicatePaymentMilestone(PassthroughMilestone paymentMilestone)
         {
             return "";
         }
@@ -106,44 +106,23 @@ namespace GSC.Respository.Master
             return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null)).OrderByDescending(x => x.Id)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
-        public decimal GetEstimatedMilestoneAmount(PaymentMilestoneDto paymentMilestoneDto)
+        public decimal GetEstimatedMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto)
         {
             decimal EstimatedTotal = 0;
-            if (paymentMilestoneDto.MilestoneType == MilestoneType.ResourceCost && paymentMilestoneDto.StudyPlanTaskIds != null)
-            {
-                foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
-                {
-                    var studyPlanTaskData = _context.StudyPlanTask.Where(s => (s.Id == item || s.DependentTaskId == item) && s.DeletedBy == null).ToList();
-                    foreach (var item2 in studyPlanTaskData)
-                    {
-                        EstimatedTotal += _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == item2.Id && s.DeletedBy == null).Sum(d => d.ConvertTotalCost).GetValueOrDefault();
-                    }
-                }
-            }
-            else if (paymentMilestoneDto.MilestoneType == MilestoneType.PatientCost && paymentMilestoneDto.PatientCostIds != null)
-            {
-                foreach (var visit in paymentMilestoneDto.PatientCostIds)
-                {
-                    EstimatedTotal += _context.PatientCost.Where(s => s.Id == visit && s.DeletedBy == null).Sum(d => d.FinalCost).GetValueOrDefault();
-                }
-            }
-            else if (paymentMilestoneDto.MilestoneType == MilestoneType.PassThroughCost && paymentMilestoneDto.PassThroughCostIds != null)
-            {
                 foreach (var PassThro in paymentMilestoneDto.PassThroughCostIds)
                 {
                     EstimatedTotal += _context.PassThroughCost.Where(s => s.Id == PassThro && s.DeletedBy == null).Sum(d => d.Total).GetValueOrDefault();
                 }
-            }
             return EstimatedTotal;
         }
         //resourch
-        public void AddPaymentMilestoneTaskDetail(PaymentMilestoneDto paymentMilestoneDto)
+        public void AddPaymentMilestoneTaskDetail(PassthroughMilestoneDto paymentMilestoneDto)
         {
             foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
             {
                 var paymentMilestoneTaskDetail = new PaymentMilestoneTaskDetail();
                 paymentMilestoneTaskDetail.Id = 0;
-                paymentMilestoneTaskDetail.PaymentMilestoneId = paymentMilestoneDto.Id;
+                paymentMilestoneTaskDetail.ResourceMilestoneId = paymentMilestoneDto.Id;
                 paymentMilestoneTaskDetail.StudyPlanTaskId = item;
                 _context.PaymentMilestoneTaskDetail.Add(paymentMilestoneTaskDetail);
                 _context.Save();
@@ -151,7 +130,7 @@ namespace GSC.Respository.Master
         }
         public void DeletePaymentMilestoneTaskDetail(int Id)
         {
-            var paymentMilestoneTaskDetail = _context.PaymentMilestoneTaskDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy == null).ToList();
+            var paymentMilestoneTaskDetail = _context.PaymentMilestoneTaskDetail.Where(s => s.ResourceMilestoneId == Id && s.DeletedBy == null).ToList();
             paymentMilestoneTaskDetail.ForEach(s =>
             {
                 s.DeletedDate = DateTime.UtcNow;
@@ -162,7 +141,7 @@ namespace GSC.Respository.Master
         }
         public void ActivePaymentMilestoneTaskDetail(int Id)
         {
-            var paymentMilestoneTaskDetail = _context.PaymentMilestoneTaskDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy != null).ToList();
+            var paymentMilestoneTaskDetail = _context.PaymentMilestoneTaskDetail.Where(s => s.ResourceMilestoneId == Id && s.DeletedBy != null).ToList();
             paymentMilestoneTaskDetail.ForEach(s =>
             {
                 s.DeletedDate = null;
@@ -172,13 +151,13 @@ namespace GSC.Respository.Master
             });
         }
         //visit
-        public void AddPaymentMilestoneVisitDetail(PaymentMilestoneDto paymentMilestoneDto)
+        public void AddPaymentMilestoneVisitDetail(PassthroughMilestoneDto paymentMilestoneDto)
         {
             foreach (var item in paymentMilestoneDto.PatientCostIds)
             {
                 var paymentMilestoneVisitDetail = new PaymentMilestoneVisitDetail();
                 paymentMilestoneVisitDetail.Id = 0;
-                paymentMilestoneVisitDetail.PaymentMilestoneId = paymentMilestoneDto.Id;
+                paymentMilestoneVisitDetail.PatientMilestoneId = paymentMilestoneDto.Id;
                 paymentMilestoneVisitDetail.PatientCostId = item;
                 _context.PaymentMilestoneVisitDetail.Add(paymentMilestoneVisitDetail);
                 _context.Save();
@@ -186,7 +165,7 @@ namespace GSC.Respository.Master
         }
         public void DeletePaymentMilestoneVisitDetail(int Id)
         {
-            var paymentMilestoneVisitDetail = _context.PaymentMilestoneVisitDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy == null).ToList();
+            var paymentMilestoneVisitDetail = _context.PaymentMilestoneVisitDetail.Where(s => s.PatientMilestoneId == Id && s.DeletedBy == null).ToList();
             paymentMilestoneVisitDetail.ForEach(s =>
             {
                 s.DeletedDate = DateTime.UtcNow;
@@ -197,7 +176,7 @@ namespace GSC.Respository.Master
         }
         public void ActivePaymentMilestoneVisitDetail(int Id)
         {
-            var paymentMilestoneVisitDetail = _context.PaymentMilestoneVisitDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy != null).ToList();
+            var paymentMilestoneVisitDetail = _context.PaymentMilestoneVisitDetail.Where(s => s.PatientMilestoneId == Id && s.DeletedBy != null).ToList();
             paymentMilestoneVisitDetail.ForEach(s =>
             {
                 s.DeletedDate = null;
@@ -207,13 +186,13 @@ namespace GSC.Respository.Master
             });
         }
         //Pass Through Cost
-        public void AddPaymentMilestonePassThroughCostDetail(PaymentMilestoneDto paymentMilestoneDto)
+        public void AddPaymentMilestonePassThroughCostDetail(PassthroughMilestoneDto paymentMilestoneDto)
         {
             foreach (var item in paymentMilestoneDto.PassThroughCostIds)
             {
                 var paymentMilestonePassThroughtDetail = new PaymentMilestonePassThroughDetail();
                 paymentMilestonePassThroughtDetail.Id = 0;
-                paymentMilestonePassThroughtDetail.PaymentMilestoneId = paymentMilestoneDto.Id;
+                paymentMilestonePassThroughtDetail.PassthroughMilestoneId = paymentMilestoneDto.Id;
                 paymentMilestonePassThroughtDetail.PassThroughCostId = item;
                 _context.PaymentMilestonePassThroughDetail.Add(paymentMilestonePassThroughtDetail);
                 _context.Save();
@@ -221,7 +200,7 @@ namespace GSC.Respository.Master
         }
         public void DeletePaymentMilestonePassThroughCostDetail(int Id)
         {
-            var paymentMilestonePassThroughDetail = _context.PaymentMilestonePassThroughDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy == null).ToList();
+            var paymentMilestonePassThroughDetail = _context.PaymentMilestonePassThroughDetail.Where(s => s.PassthroughMilestoneId == Id && s.DeletedBy == null).ToList();
             paymentMilestonePassThroughDetail.ForEach(s =>
             {
                 s.DeletedDate = DateTime.UtcNow;
@@ -232,7 +211,7 @@ namespace GSC.Respository.Master
         }
         public void ActivePaymentMilestonePassThroughCostDetail(int Id)
         {
-            var paymentMilestonePassThroughDetail = _context.PaymentMilestonePassThroughDetail.Where(s => s.PaymentMilestoneId == Id && s.DeletedBy != null).ToList();
+            var paymentMilestonePassThroughDetail = _context.PaymentMilestonePassThroughDetail.Where(s => s.PassthroughMilestoneId == Id && s.DeletedBy != null).ToList();
             paymentMilestonePassThroughDetail.ForEach(s =>
             {
                 s.DeletedDate = null;

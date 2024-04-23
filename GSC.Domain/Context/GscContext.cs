@@ -510,7 +510,9 @@ namespace GSC.Domain.Context
 
         public DbSet<SupplyManagementThresholdHistory> SupplyManagementThresholdHistory { get; set; }
         public DbSet<ProjectDesignTemplateSiteAccess> ProjectDesignTemplateSiteAccess { get; set; }
-        public DbSet<PaymentMilestone> PaymentMilestone { get; set; }
+        public DbSet<ResourceMilestone> ResourceMilestone { get; set; }
+        public DbSet<PatientMilestone> PatientMilestone { get; set; }
+        public DbSet<PassthroughMilestone> PassthroughMilestone { get; set; }
         public DbSet<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetail { get; set; }
         public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
         public DbSet<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetail { get; set; }

@@ -1,5 +1,4 @@
 ﻿using GSC.Data.Entities.Common;
-using GSC.Helper;
 using System.ComponentModel.DataAnnotations;
 namespace GSC.Data.Dto.CTMS
 {
@@ -7,9 +6,6 @@ namespace GSC.Data.Dto.CTMS
     {
         [Required(ErrorMessage = "Project is required.")]
         public int ProjectId { get; set; }
-
-        [Required(ErrorMessage = "MilestoneType is required.")]
-        public MilestoneType MilestoneType { get; set; }
 
         [Required(ErrorMessage = "TotalAmount is required.")]
         public decimal TotalAmount { get; set; }

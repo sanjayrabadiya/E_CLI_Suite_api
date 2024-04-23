@@ -5,12 +5,11 @@ using GSC.Helper;
 using System.Collections.Generic;
 namespace GSC.Data.Entities.CTMS
 {
-    public class PaymentMilestone : BaseEntity, ICommonAduit
+    public class PassthroughMilestone : BaseEntity, ICommonAduit
     {
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
         public int? CountryId { get; set; }
-        public MilestoneType MilestoneType { get; set; }
         public PaymentType PaymentType { get; set; }
         public int? PatientCount { get; set; }
         public int? PatientStatus { get; set; }
@@ -21,8 +20,8 @@ namespace GSC.Data.Entities.CTMS
         public bool IsSendBack { get; set; }
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
-        public List<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetails { get; set; } = null;
-        public List<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetails { get; set; } = null;
+        //public List<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetails { get; set; } = null;
+        //public List<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetails { get; set; } = null;
         public List<PaymentMilestonePassThroughDetail> PaymentMilestonePassThroughDetail { get; set; } = null;
     }
 }
