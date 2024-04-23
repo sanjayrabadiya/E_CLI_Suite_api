@@ -10,13 +10,13 @@ using Microsoft.AspNetCore.Mvc;
 namespace GSC.Api.Controllers.Master
 {
     [Route("api/[controller]")]
-    public class PaymentMilestoneController : BaseController
+    public class PatientMilestoneController : BaseController
     {
-        private readonly IPaymentMilestoneRepository _paymentMilestoneRepository;
+        private readonly IPatientMilestoneRepository _paymentMilestoneRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
 
-        public PaymentMilestoneController(IPaymentMilestoneRepository PaymentMilestoneRepository, IUnitOfWork uow, IMapper mapper)
+        public PatientMilestoneController(IPatientMilestoneRepository PaymentMilestoneRepository, IUnitOfWork uow, IMapper mapper)
         {
             _paymentMilestoneRepository = PaymentMilestoneRepository;
             _uow = uow;
@@ -24,19 +24,19 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetRevenueData/{parentProjectId:int}/{siteId:int?}/{countryId:int?}/{isDeleted:bool?}")]
-        public IActionResult GetRevenueData(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
+        [Route("GetPatientMilestoneList/{parentProjectId:int}/{isDeleted:bool?}")]
+        public IActionResult GetPatientMilestoneList(int parentProjectId, bool isDeleted)
         {
-            var paymentMilestone = _paymentMilestoneRepository.GetPaymentMilestoneList(parentProjectId, siteId, countryId, isDeleted);
+            var paymentMilestone = _paymentMilestoneRepository.GetPaymentMilestoneList(parentProjectId, isDeleted);
             return Ok(paymentMilestone);
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] PaymentMilestoneDto paymentMilestoneDto)
+        public IActionResult Post([FromBody] PatientMilestoneDto paymentMilestoneDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             paymentMilestoneDto.Id = 0;
-            var paymentMilestone = _mapper.Map<PaymentMilestone>(paymentMilestoneDto);
+            var paymentMilestone = _mapper.Map<PatientMilestone>(paymentMilestoneDto);
 
             var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(paymentMilestone);
             if (!string.IsNullOrEmpty(validate))
@@ -52,14 +52,9 @@ namespace GSC.Api.Controllers.Master
             }
             paymentMilestoneDto.Id = paymentMilestone.Id;
 
-            if (paymentMilestoneDto.StudyPlanTaskIds != null)
-                _paymentMilestoneRepository.AddPaymentMilestoneTaskDetail(paymentMilestoneDto);
-
             if (paymentMilestoneDto.PatientCostIds != null)
                 _paymentMilestoneRepository.AddPaymentMilestoneVisitDetail(paymentMilestoneDto);
 
-            if (paymentMilestoneDto.PassThroughCostIds != null)
-                _paymentMilestoneRepository.AddPaymentMilestonePassThroughCostDetail(paymentMilestoneDto);
 
             return Ok(paymentMilestone.Id);
         }
@@ -67,9 +62,7 @@ namespace GSC.Api.Controllers.Master
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _paymentMilestoneRepository.DeletePaymentMilestoneTaskDetail(id);
             _paymentMilestoneRepository.DeletePaymentMilestoneVisitDetail(id);
-            _paymentMilestoneRepository.DeletePaymentMilestonePassThroughCostDetail(id);
 
             var record = _paymentMilestoneRepository.Find(id);
 
@@ -85,9 +78,7 @@ namespace GSC.Api.Controllers.Master
         [HttpPatch("{id}")]
         public IActionResult Active(int id)
         {
-            _paymentMilestoneRepository.ActivePaymentMilestoneTaskDetail(id);
             _paymentMilestoneRepository.ActivePaymentMilestoneVisitDetail(id);
-            _paymentMilestoneRepository.ActivePaymentMilestonePassThroughCostDetail(id);
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -106,8 +97,8 @@ namespace GSC.Api.Controllers.Master
             return Ok(studyplan);
         }
 
-        [HttpPost("GetEstimatedMilestoneAmount")]
-        public IActionResult GetEstimatedMilestoneAmount([FromBody] PaymentMilestoneDto paymentMilestoneDto)
+        [HttpPost("GetVisitMilestoneAmount")]
+        public IActionResult GetVisitMilestoneAmount([FromBody] PatientMilestoneDto paymentMilestoneDto)
         {
             var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(paymentMilestoneDto);
             return Ok(studyplan);
@@ -121,10 +112,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetVisitDropDown/{parentProjectId:int}/{procedureId:int}")]
-        public IActionResult GetVisitDropDown(int parentProjectId, int procedureId)
+        [Route("GetVisitDropDown/{parentProjectId:int}")]
+        public IActionResult GetVisitDropDown(int parentProjectId)
         {
-            return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId, procedureId));
+            return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId));
         }
         [HttpGet]
         [Route("GetPassThroughCostActivity/{projectId:int}")]

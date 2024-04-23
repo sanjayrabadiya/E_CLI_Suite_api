@@ -118,7 +118,7 @@ namespace GSC.Api.Controllers.Master
 
             if (projectDto.ParentProjectId > 0 && !projectDto.IsTestSite)
             {
-                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && x.IsTestSite).ToList().Count > 0)
+                if (_projectRepository.All.Where(x => x.ManageSiteId == projectDto.ManageSiteId && x.ParentProjectId == projectDto.ParentProjectId && x.DeletedDate == null && !x.IsTestSite).ToList().Count > 0)
                 {
                     ModelState.AddModelError("Message", "This site is already exist, please select other site.");
                     return BadRequest(ModelState);

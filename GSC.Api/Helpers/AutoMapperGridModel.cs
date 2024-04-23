@@ -838,17 +838,21 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.GlobleCurrencyId, x => x.MapFrom(a => a.CurrencyRate.GlobalCurrencyId))
                 .ForMember(x => x.LocalCurrencySymbol, x => x.MapFrom(a => a.CurrencyRate.Currency.CurrencySymbol))
                 .ReverseMap();
-            CreateMap<PaymentMilestone, PaymentMilestoneGridDto>()
+            CreateMap<ResourceMilestone, ResourceMilestoneGridDto>()
               .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-               .ForMember(x => x.MilestoneType, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
-               .ForMember(x => x.PaymentType, x => x.MapFrom(a => a.PaymentType.GetDescription()))
+               .ForMember(x => x.PaymentTypeResource, x => x.MapFrom(a => a.PaymentTypeResource.GetDescription()))
                .ForMember(x => x.StudyPlanTasks, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneTaskDetails.Select(s => s.StudyPlanTask.TaskName).ToList())))
-               .ForMember(x => x.PatientCostVisits, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneVisitDetails.Select(s => s.PatientCost.ProjectDesignVisit.DisplayName).ToList())))
-               .ForMember(x => x.PassThroughCostCountry, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestonePassThroughDetail.Select(s => s.PassThroughCost.Country.CountryName).ToList())))
               .ReverseMap();
+            CreateMap<PatientMilestone, PatientMilestoneGridDto>()
+                    .ForMember(x => x.PatientCostVisits, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneVisitDetails.Select(s => s.PatientCost.ProjectDesignVisit.DisplayName).ToList())))
+                    .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+                    .ForMember(x => x.PaymentTypePatient, x => x.MapFrom(a => a.PaymentTypePatient.GetDescription()))
+                    .ReverseMap();
+            CreateMap<PassthroughMilestone, PassthroughMilestoneGridDto>()
+                   .ForMember(x => x.PassThroughCostCountry, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestonePassThroughDetail.Select(s => s.PassThroughCost.Country.CountryName).ToList())))
+                  .ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
-                .ForMember(x => x.MilestoneTypeName, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
             .ReverseMap();
             CreateMap<CtmsApprovalWorkFlow, CtmsApprovalWorkFlowGridDto>()
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))

@@ -81,9 +81,11 @@ namespace GSC.Respository.CTMS
 
         public string Duplicate(BudgetPaymentFinalCostDto budgetPaymentFinalCostDto)
         {
-            return All.Any(x => x.Id != budgetPaymentFinalCostDto.Id && x.MilestoneType == budgetPaymentFinalCostDto.MilestoneType && x.ProjectId == budgetPaymentFinalCostDto.ProjectId && x.DeletedDate == null)
-                ? "Duplicate Pass Final Cost Type :" + budgetPaymentFinalCostDto.MilestoneType
-                : "";
+            //return All.Any(x => x.Id != budgetPaymentFinalCostDto.Id && x.MilestoneType == budgetPaymentFinalCostDto.MilestoneType && x.ProjectId == budgetPaymentFinalCostDto.ProjectId && x.DeletedDate == null)
+            //    ? "Duplicate Pass Final Cost Type :" + budgetPaymentFinalCostDto.MilestoneType
+            //    : "";
+
+            return "";
         }
     }
 }

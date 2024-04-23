@@ -429,7 +429,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPatientCostRepository, PatientCostRepository>();
             services.AddScoped<IPassThroughCostActivityRepository, PassThroughCostActivityRepository>();
             services.AddScoped<IPassThroughCostRepository, PassThroughCostRepository>();
-            services.AddScoped<IPaymentMilestoneRepository, PaymentMilestoneRepository>();
+            services.AddScoped<IResourceMilestoneRepository, ResourceMilestoneRepository>();
+            services.AddScoped<IPatientMilestoneRepository, PatientMilestoneRepository>();
+            services.AddScoped<IPassthroughMilestoneRepository, PassthroughMilestoneRepository>();
             services.AddScoped<IBudgetPaymentFinalCostRepository, BudgetPaymentFinalCostRepository>();
             services.AddScoped<ICtmsApprovalWorkFlowRepository, CtmsApprovalWorkFlowRepository>();
             services.AddScoped<ICtmsWorkflowApprovalRepository, CtmsWorkflowApprovalRepository>();

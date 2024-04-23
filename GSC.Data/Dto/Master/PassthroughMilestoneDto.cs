@@ -4,14 +4,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
 {
-    public class PaymentMilestoneDto : BaseDto
+    public class PassthroughMilestoneDto : BaseDto
     {
         [Required(ErrorMessage = "Project is required.")]
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
         public int? CountryId { get; set; }
         [Required]
-        public MilestoneType MilestoneType { get; set; }
         public PaymentType PaymentType { get; set; }
         public decimal? EstimatedRevenue { get; set; }
         public decimal? TotalRevenue { get; set; }
@@ -24,7 +23,7 @@ namespace GSC.Data.Dto.Master
         public int[] PatientCostIds { get; set; }
         public int[] PassThroughCostIds { get; set; }
     }
-    public class PaymentMilestoneGridDto : BaseAuditDto
+    public class PassthroughMilestoneGridDto : BaseAuditDto
     {
         public string ProjectName { get; set; }
         public int? SiteId { get; set; }
