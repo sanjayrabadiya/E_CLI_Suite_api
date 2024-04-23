@@ -364,8 +364,10 @@ namespace GSC.Respository.EditCheckImpact
             if (!string.IsNullOrEmpty(from.InputValue) && !string.IsNullOrEmpty(to.InputValue))
             {
                 targetResult.IsValid = true;
-                DateTime startDate = DateTime.ParseExact(from.InputValue, "MM/dd/yyyy HH:mm:ss", null);
-                DateTime endDate = DateTime.ParseExact(to.InputValue, "MM/dd/yyyy HH:mm:ss", null);
+                //DateTime startDate = DateTime.ParseExact(from.InputValue, "MM/dd/yyyy HH:mm:ss", null);
+                //DateTime endDate = DateTime.ParseExact(to.InputValue, "MM/dd/yyyy HH:mm:ss", null);
+                DateTime startDate = DateTime.ParseExact((DateTime.Parse(from.InputValue).ToString("MM/dd/yyyy HH:mm:ss")), "MM/dd/yyyy HH:mm:ss", null);
+                DateTime endDate = DateTime.ParseExact((DateTime.Parse(to.InputValue).ToString("MM/dd/yyyy HH:mm:ss")), "MM/dd/yyyy HH:mm:ss", null);
 
                 targetResult.ResultMessage = $"{startDate.ToString("dd-MMM-yyyy")} {"-"} {endDate.ToString("dd-MMM-yyyy")}";
                 decimal ruleResult = 0;

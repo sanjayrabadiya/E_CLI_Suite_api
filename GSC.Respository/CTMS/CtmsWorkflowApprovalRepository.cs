@@ -29,17 +29,23 @@ namespace GSC.Respository.CTMS
             _jwtTokenAccesser = jwtTokenAccesser;
         }
 
-        public List<CtmsWorkflowApprovalDto> GetApprovalBySender(int studyPlanId, int projectId)
+        public List<CtmsWorkflowApprovalGridDto> GetApprovalBySender(int studyPlanId, int projectId, TriggerType triggerType)
         {
-            var ctmsWorkflows = All.Where(x => x.SenderId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.ProjectId == projectId && x.StudyPlanId == studyPlanId)
-                 .ProjectTo<CtmsWorkflowApprovalDto>(_mapper.ConfigurationProvider).ToList();
+            var ctmsWorkflows = All.Where(x => x.SenderId == _jwtTokenAccesser.UserId && x.DeletedDate == null && x.ProjectId == projectId && x.StudyPlanId == studyPlanId && x.TriggerType == triggerType)
+                 .ProjectTo<CtmsWorkflowApprovalGridDto>(_mapper.ConfigurationProvider).ToList();
+
+            ctmsWorkflows.ForEach(x =>
+            {
+                x.HasChild = x.CtmsWorkflowApprovalId != null;
+            });
+
             return ctmsWorkflows;
         }
 
-        public List<CtmsWorkflowApprovalDto> GetApprovalByApprover(int studyPlanId, int projectId)
+        public List<CtmsWorkflowApprovalGridDto> GetApprovalByApprover(int studyPlanId, int projectId, TriggerType triggerType)
         {
-            var ctmsWorkflows = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null && x.ProjectId == projectId && x.StudyPlanId == studyPlanId)
-                 .ProjectTo<CtmsWorkflowApprovalDto>(_mapper.ConfigurationProvider).ToList();
+            var ctmsWorkflows = All.Where(x => x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null && x.ProjectId == projectId && x.StudyPlanId == studyPlanId && x.TriggerType == triggerType)
+                 .ProjectTo<CtmsWorkflowApprovalGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return ctmsWorkflows;
         }
 
@@ -49,15 +55,22 @@ namespace GSC.Respository.CTMS
                 .GroupBy(x => x.UserId).All(m => m.Any(c => c.IsApprove == true));
             return status;
         }
+
+        public bool CheckSender(int studyPlanId, int projectId, TriggerType triggerType)
+        {
+            var status = All.Any(x => x.DeletedDate == null && x.ProjectId == projectId && x
+            .StudyPlanId == studyPlanId && x.SenderId == _jwtTokenAccesser.UserId && x.TriggerType == triggerType);
+            return status;
+        }
         public List<ProjectRightDto> GetProjectRightByProjectId(int projectId, TriggerType triggerType)
         {
-
-            var roles = _context.CtmsApprovalWorkFlow.Include(i => i.SecurityRole).Where(x => x.DeletedDate == null && x.SecurityRole.Id != 2 && x.ProjectId == projectId && x.TriggerType == triggerType).
+            var roles = _context.CtmsApprovalRoles.Include(i => i.SecurityRole).Where(x => x.DeletedDate == null && x.SecurityRole.Id != 2
+            && x.ProjectId == projectId && x.TriggerType == triggerType).
                 Select(c => new ProjectRightDto
                 {
                     RoleId = c.SecurityRole.Id,
                     Name = c.SecurityRole.RoleName,
-                    users = _context.CtmsApprovalWorkFlowDetail.Include(i => i.Users).Where(a => a.CtmsApprovalWorkFlowId == c.Id && a.Users.DeletedDate == null
+                    users = _context.CtmsApprovalUsers.Include(i => i.Users).Where(a => a.CtmsApprovalRolesId == c.Id && a.Users.DeletedDate == null
                                                                           && a.DeletedDate == null).Select(r =>
                         new ProjectRightDto
                         {

@@ -10,12 +10,13 @@ using GSC.Helper;
 
 namespace GSC.Data.Entities.CTMS
 {
-    public class StudyPlanTaskComment : BaseEntity, ICommonAduit
+    public class CtmsStudyPlanTaskComment : BaseEntity, ICommonAduit
     {
-        public int StudyPlanTaskId { get; set; }
+        public int CtmsWorkflowApprovalId { get; set; }
         public string Comment { get; set; }
+        public string ReplyComment { get; set; }
+        public bool IsReply { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
-        public StudyPlanTask StudyPlanTask { get; set; }
     }
 }

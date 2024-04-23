@@ -433,7 +433,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPatientMilestoneRepository, PatientMilestoneRepository>();
             services.AddScoped<IPassthroughMilestoneRepository, PassthroughMilestoneRepository>();
             services.AddScoped<IBudgetPaymentFinalCostRepository, BudgetPaymentFinalCostRepository>();
-            services.AddScoped<ICtmsApprovalWorkFlowRepository, CtmsApprovalWorkFlowRepository>();
+            services.AddScoped<ICtmsApprovalRolesRepository, CtmsApprovalRolesRepository>();
             services.AddScoped<ICtmsWorkflowApprovalRepository, CtmsWorkflowApprovalRepository>();
         }
     }

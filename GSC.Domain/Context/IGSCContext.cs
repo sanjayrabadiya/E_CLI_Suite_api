@@ -463,9 +463,9 @@ namespace GSC.Domain.Context
         DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
         DbSet<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetail { get; set; }
         DbSet<PaymentMilestonePassThroughDetail> PaymentMilestonePassThroughDetail { get; set; }
-        DbSet<CtmsApprovalWorkFlow> CtmsApprovalWorkFlow { get; set; }
-        DbSet<CtmsApprovalWorkFlowDetail> CtmsApprovalWorkFlowDetail { get; set; }
+        DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
+        DbSet<CtmsApprovalUsers> CtmsApprovalUsers { get; set; }
         DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
-        DbSet<StudyPlanTaskComment> StudyPlanTaskComment { get; set; }
+        DbSet<CtmsStudyPlanTaskComment> StudyPlanTaskComment { get; set; }
         }
 }
