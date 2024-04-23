@@ -174,5 +174,19 @@ namespace GSC.Api.Controllers.CTMS
 
             return Ok();
         }
+
+        [HttpGet("GetApproverNewComment/{triggerType}")]
+        public IActionResult GetApproverNewComment(TriggerType triggerType)
+        {
+            var result = _ctmsWorkflowApprovalRepository.GetApproverNewComment(triggerType);
+            return Ok(result);
+        }
+
+        [HttpGet("GetSenderNewComment/{triggerType}")]
+        public IActionResult GetSenderNewComment(TriggerType triggerType)
+        {
+            var result = _ctmsWorkflowApprovalRepository.GetSenderNewComment(triggerType);
+            return Ok(result);
+        }
     }
 }

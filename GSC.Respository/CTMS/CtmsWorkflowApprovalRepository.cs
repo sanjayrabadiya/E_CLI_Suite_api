@@ -83,5 +83,60 @@ namespace GSC.Respository.CTMS
 
             return roles.Where(x => x.users.Count != 0).ToList();
         }
+
+        public List<CtmsWorkflowApprovalGridDto> GetApproverNewComment(TriggerType triggerType)
+        {
+            var approverDtos = All.Where(x => x.DeletedDate == null && x.IsApprove == null && string.IsNullOrEmpty(x.ApproverComment) && x.TriggerType == triggerType && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId)
+                .ProjectTo<CtmsWorkflowApprovalGridDto>(_mapper.ConfigurationProvider).ToList();
+
+            return approverDtos;
+        }
+
+        public List<CtmsWorkflowApprovalGridDto> GetSenderNewComment(TriggerType triggerType)
+        {
+            var approverDtos = All.Where(x => x.DeletedDate == null && x.IsApprove == false && x.TriggerType == triggerType && x.SenderId == _jwtTokenAccesser.UserId)
+                .ProjectTo<CtmsWorkflowApprovalGridDto>(_mapper.ConfigurationProvider).ToList();
+
+            return approverDtos;
+        }
+
+
+        public List<DashboardDto> GetCtmsApprovalMyTask(int projectId)
+        {
+            var myTaskList= new List<DashboardDto>();
+            var ctmsMyTasks = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.SenderId == _jwtTokenAccesser.UserId && x.IsApprove == false)
+                .Select(s => new DashboardDto
+                {
+                    Id = s.Id,
+                    TaskInformation = $"Sender Comment : {s.SenderComment}, Approver Comment:{s.ApproverComment}",
+                    ExtraData = s.StudyPlanId,
+                    CreatedDate = s.SendDate,
+                    CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
+                    Module = "CTMS",
+                    DataType = s.TriggerType.ToString(),
+                    ControlType = DashboardMyTaskType.CTMSApprovalSystem
+                }).ToList();
+
+
+
+            var ctmsMyTasksApprover = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId && x.IsApprove == false)
+                .Select(s => new DashboardDto
+                {
+                    Id = s.Id,
+                    TaskInformation = $"Sender Comment : {s.SenderComment}, Approver Comment:{s.ApproverComment}",
+                    ExtraData = s.StudyPlanId,
+                    CreatedDate = s.SendDate,
+                    CreatedByUser = _context.Users.Where(x => x.Id == s.UserId).FirstOrDefault().UserName,
+                    Module = "CTMS",
+                    DataType = s.TriggerType.GetDescription(),
+                    ControlType = DashboardMyTaskType.CTMSApprovalSystem
+                }).ToList();
+
+            myTaskList.AddRange(ctmsMyTasks);
+            myTaskList.AddRange(ctmsMyTasksApprover);
+
+            return myTaskList;
+
+        }
     }
 }
