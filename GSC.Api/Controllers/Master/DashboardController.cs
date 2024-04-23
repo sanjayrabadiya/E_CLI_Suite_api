@@ -25,6 +25,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IAEReportingRepository _aEReportingRepository;
         private readonly IProjectDocumentReviewRepository _projectDocumentReviewRepository;
         private readonly IDashboardRepository _dashboardRepository;
+        private readonly ICtmsWorkflowApprovalRepository _ctmsWorkflowApprovalRepository;
 
         public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
@@ -35,7 +36,8 @@ namespace GSC.Api.Controllers.Master
             IAEReportingRepository aEReportingRepository,
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
             IDashboardRepository dashboardRepository,
-            ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository
+            ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
+            ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository
             )
         {
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
@@ -47,6 +49,7 @@ namespace GSC.Api.Controllers.Master
             _projectDocumentReviewRepository = projectDocumentReviewRepository;
             _dashboardRepository = dashboardRepository;
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
+            _ctmsWorkflowApprovalRepository = ctmsWorkflowApprovalRepository;
         }
 
         #region Dashboard Overview Code
@@ -91,6 +94,7 @@ namespace GSC.Api.Controllers.Master
             objdashboard.MyTaskList.AddRange(_aEReportingRepository.GetAEReportingMyTaskList(ProjectId, (int)(SiteId != null ? SiteId : ProjectId)));
             objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));
             objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendBackTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));
+            objdashboard.MyTaskList.AddRange(_ctmsWorkflowApprovalRepository.GetCtmsApprovalMyTask(ProjectId));
             return Ok(objdashboard);
         }
 

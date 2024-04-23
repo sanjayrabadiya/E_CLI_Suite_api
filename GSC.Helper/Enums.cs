@@ -869,6 +869,7 @@ namespace GSC.Helper
         [Description("ManageMonitoringReportSendData")] ManageMonitoringReportSendData = 8,
         [Description("ManageMonitoringReportSendBackData")] ManageMonitoringReportSendBackData = 9,
         [Description("EAdverseEvent")] EAdverseEvent = 10,
+        [Description("CTMSApprovalSystem")] CTMSApprovalSystem = 11
     }
 
     public enum ScaleType : short
