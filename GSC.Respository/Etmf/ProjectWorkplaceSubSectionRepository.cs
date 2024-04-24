@@ -58,7 +58,8 @@ namespace GSC.Respository.Etmf
                             ZonName = etmfZone.ZonName,
                             ProjectId = workdetail.ProjectId,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
-                            ChildName = GetChildName(workdetail.WorkPlaceFolderId, country.CountryName, site.ProjectCode, site.ProjectName),
+                            ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             ProjectName = project.ProjectCode.Replace("/", "")
 
                         }).FirstOrDefault();
@@ -82,22 +83,6 @@ namespace GSC.Respository.Etmf
                 System.IO.Directory.CreateDirectory(Path.Combine(filePath));
 
             return data;
-        }
-
-        public string GetChildName(int workPlaceFolderId, string countryName, string projectCode, string projectName)
-        {
-            if (workPlaceFolderId == 1)
-            {
-                return countryName;
-            }
-            else if (workPlaceFolderId == 2)
-            {
-                return $"{projectCode} - {projectName}";
-            }
-            else
-            {
-                return null;
-            }
         }
 
         public EtmfProjectWorkPlaceDto updateSectionDetailFolder(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto)
