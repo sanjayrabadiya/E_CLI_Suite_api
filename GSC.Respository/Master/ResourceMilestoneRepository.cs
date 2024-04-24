@@ -9,7 +9,6 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
-using GSC.Helper;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -103,7 +102,10 @@ namespace GSC.Respository.Master
                 studyPlan = _context.StudyPlan.Where(x => x.ProjectId == parentProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
             }
 
-            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null)).OrderByDescending(x => x.Id)
+            //Onetime Task Seleect then not get in list 
+            var PaymentMilestoneTask = _context.PaymentMilestoneTaskDetail.Include(i=>i.ResourceMilestone).Where(w=> studyPlan.Select(f => f.ProjectId).Contains(w.ResourceMilestone.ProjectId) && w.DeletedBy == null).ToList();
+            
+            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null) && ! PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto)
@@ -122,7 +124,6 @@ namespace GSC.Respository.Master
             }
             return EstimatedTotal;
         }
-        //resourch
         public void AddPaymentMilestoneTaskDetail(ResourceMilestoneDto paymentMilestoneDto)
         {
             foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
@@ -157,35 +158,20 @@ namespace GSC.Respository.Master
                 _context.Save();
             });
         }
+        public BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId)
+        {
+            var siteIds = _context.Project.Where(s => s.DeletedDate == null && s.ParentProjectId == projectId).Select(s => s.Id).ToList();
+            BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
 
-        public List<DropDownProcedureDto> GetParentProjectDropDown(int parentProjectId)
-        {
-            return _context.PatientCost.Include(s => s.Procedure).Where(d => d.ProjectId == parentProjectId && d.ProcedureId != null && d.DeletedBy == null)
-                 .Select(c => new DropDownProcedureDto
-                 {
-                     Id = c.Procedure.Id,
-                     Value = c.Procedure.Name,
-                 }).Distinct().ToList();
-        }
-        public List<DropDownDto> GetVisitDropDown(int parentProjectId, int procedureId)
-        {
-            var data = _context.PatientCost.Include(s => s.ProjectDesignVisit).Where(d => d.ProjectId == parentProjectId && d.ProcedureId == procedureId && d.ProcedureId != null && d.DeletedBy == null)
-                  .Select(c => new DropDownDto
-                  {
-                      Id = c.Id,
-                      Value = c.ProjectDesignVisit.DisplayName,
-                  }).ToList();
-            return data;
-        }
-        public List<DropDownDto> GetPassThroughCostActivity(int projectId)
-        {
-            var data = _context.PassThroughCost.Include(s => s.PassThroughCostActivity).Include(s => s.Country).Where(d => d.ProjectId == projectId && d.DeletedBy == null)
-                  .Select(c => new DropDownDto
-                  {
-                      Id = c.Id,
-                      Value = c.PassThroughCostActivity.ActivityName,
-                      ExtraData = c.Country.CountryName
-                  }).ToList();
+            var resourcecost = _context.StudyPlanResource.
+                                Include(s => s.StudyPlanTask).
+                                ThenInclude(s => s.StudyPlan)
+                                .Where(s => s.DeletedBy == null && s.StudyPlanTask.StudyPlan.ProjectId == projectId || siteIds.Contains(s.StudyPlanTask.StudyPlan.ProjectId)).Sum(s => s.ConvertTotalCost);
+            
+            //one time Add Paybal Amount id diduct in main total
+            var resourcePaybalAmount = _context.ResourceMilestone.Where(w => w.DeletedDate == null && w.ProjectId == projectId).Sum(s => s.PaybalAmount);
+            data.ProfessionalCostAmount = Convert.ToDecimal(resourcecost - resourcePaybalAmount);
+
             return data;
         }
     }

@@ -1225,9 +1225,15 @@ namespace GSC.Helper
         [Description("Tasks")] Tasks = 1,
         [Description("lumpsum / Advanced ")] lumpsum = 2
     }
+    public enum MilestoneType : short
+    {
+        [Description("Resource Cost")] ResourceCost = 1,
+        [Description("Patient Cost")] PatientCost = 2,
+        [Description("PassThrough Cost")] PassThroughCost = 3
+    }
     public enum PaymentTypePatient : short
     {
         [Description("Visits")] Tasks = 1,
-        [Description("lumpsum / Advanced ")] lumpsum = 2
+        [Description("lumpsum / Advanced")] lumpsum = 2
     }
 }

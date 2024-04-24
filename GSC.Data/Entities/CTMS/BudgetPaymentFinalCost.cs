@@ -1,11 +1,12 @@
 ﻿using GSC.Common.Base;
+using GSC.Helper;
 
 namespace GSC.Data.Entities.CTMS
 {
     public class BudgetPaymentFinalCost : BaseEntity
     {
         public int ProjectId { get; set; }
-        
+        public MilestoneType MilestoneType { get; set; }
         public decimal TotalAmount { get; set; }
         public decimal Percentage { get; set; }
         public decimal? PercentageValue { get; set; }

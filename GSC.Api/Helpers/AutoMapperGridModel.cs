@@ -853,7 +853,9 @@ namespace GSC.Api.Helpers
                    .ForMember(x => x.PassThroughCostCountry, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestonePassThroughDetail.Select(s => s.PassThroughCost.Country.CountryName).ToList())))
                   .ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
+                .ForMember(x => x.MilestoneTypeName, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
             .ReverseMap();
+
             CreateMap<CtmsApprovalRoles, CtmsApprovalRolesGridDto>()
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
              .ForMember(x => x.TriggerTypeName, x => x.MapFrom(a => a.TriggerType.GetDescription()))

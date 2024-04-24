@@ -1,5 +1,4 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -21,6 +20,15 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository = PaymentMilestoneRepository;
             _uow = uow;
             _mapper = mapper;
+        }
+
+        [HttpGet]
+        [Route("GetFinalPatienTotal/{ProjectId}")]
+        public IActionResult GetFinalPatienTotal(int ProjectId)
+        {
+            if (ProjectId <= 0) return BadRequest();
+            var ctmsActionPoint = _paymentMilestoneRepository.GetFinalPatienTotal(ProjectId);
+            return Ok(ctmsActionPoint);
         }
 
         [HttpGet]
@@ -89,14 +97,6 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
-        [HttpGet]
-        [Route("GetTaskListforMilestone/{parentProjectId:int}/{siteId:int?}/{countryId:int?}")]
-        public IActionResult GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
-        {
-            var studyplan = _paymentMilestoneRepository.GetTaskListforMilestone(parentProjectId, siteId, countryId);
-            return Ok(studyplan);
-        }
-
         [HttpPost("GetVisitMilestoneAmount")]
         public IActionResult GetVisitMilestoneAmount([FromBody] PatientMilestoneDto paymentMilestoneDto)
         {
@@ -105,23 +105,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetProcedureDropDown/{parentProjectId:int}")]
-        public IActionResult GetProcedureDropDown(int parentProjectId)
-        {
-            return Ok(_paymentMilestoneRepository.GetParentProjectDropDown(parentProjectId));
-        }
-
-        [HttpGet]
         [Route("GetVisitDropDown/{parentProjectId:int}")]
         public IActionResult GetVisitDropDown(int parentProjectId)
         {
             return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId));
-        }
-        [HttpGet]
-        [Route("GetPassThroughCostActivity/{projectId:int}")]
-        public IActionResult GetPassThroughCostActivity( int projectId)
-        {
-            return Ok(_paymentMilestoneRepository.GetPassThroughCostActivity(projectId));
         }
     }
 }

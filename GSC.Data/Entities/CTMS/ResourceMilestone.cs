@@ -2,6 +2,7 @@
 using GSC.Common.Common;
 using GSC.Data.Entities.Location;
 using GSC.Helper;
+using System;
 using System.Collections.Generic;
 namespace GSC.Data.Entities.CTMS
 {
@@ -16,6 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public decimal? ResourceTotal { get; set; }
+        public DateTime? DueDate { get; set; }
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
         public List<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetails { get; set; } = null;
