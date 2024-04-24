@@ -107,7 +107,8 @@ namespace GSC.Respository.Etmf
                             ProjectWorkplaceZoneId = workzone.Id,
                             ZonName = etmfZone.ZonName,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
-                            ChildName = GetChildName(workdetail.WorkPlaceFolderId, country.CountryName, site.ProjectCode, site.ProjectName),
+                            ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             ProjectName = project.ProjectCode.Replace("/", ""),
                             SubSectionName = subsection.SubSectionName
 
@@ -170,7 +171,8 @@ namespace GSC.Respository.Etmf
                             ProjectWorkplaceZoneId = workzone.Id,
                             ZonName = etmfZone.ZonName,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
-                            ChildName = GetChildName(workdetail.WorkPlaceFolderId, country.CountryName, site.ProjectCode, site.ProjectName),
+                            ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             ProjectName = project.ProjectCode.Replace("/", ""),
                             SubSectionName = subsection.SubSectionName
 
