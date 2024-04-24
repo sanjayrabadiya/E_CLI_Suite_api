@@ -96,7 +96,8 @@ namespace GSC.Respository.Etmf
                             Sectionname = etmfsection.SectionName,
                             Zonename = etmfZone.ZonName,
                             FolderType = workdetail.WorkPlaceFolderId,
-                            Sitename = GetSitename(workdetail.WorkPlaceFolderId, country.CountryName, site),
+                            Sitename = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             Projectname = project.ProjectCode.Replace("/", ""),
                             Artificatename = etmfartifact.ArtificateName,
                             DocumentName = artifactdoc.DocumentName,
@@ -119,22 +120,6 @@ namespace GSC.Respository.Etmf
             System.IO.File.Delete(Path.Combine(filePath));
 
             return id;
-        }
-
-        private string GetSitename(int workPlaceFolderId, string country, Data.Entities.Master.Project site)
-        {
-            if (workPlaceFolderId == 1)
-            {
-                return country;
-            }
-            else if (workPlaceFolderId == 2)
-            {
-                return $"{site.ProjectCode} - {site.ProjectName}";
-            }
-            else
-            {
-                return null;
-            }
         }
 
 
