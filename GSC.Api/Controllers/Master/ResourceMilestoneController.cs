@@ -1,5 +1,4 @@
-﻿using System;
-using AutoMapper;
+﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
@@ -21,6 +20,15 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository = PaymentMilestoneRepository;
             _uow = uow;
             _mapper = mapper;
+        }
+
+        [HttpGet]
+        [Route("GetFinalResourceTotal/{ProjectId}")]
+        public IActionResult GetFinalResourceTotal(int ProjectId)
+        {
+            if (ProjectId <= 0) return BadRequest();
+            var ctmsActionPoint = _paymentMilestoneRepository.GetFinalResourceTotal(ProjectId);
+            return Ok(ctmsActionPoint);
         }
 
         [HttpGet]
@@ -102,26 +110,6 @@ namespace GSC.Api.Controllers.Master
         {
             var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(paymentMilestoneDto);
             return Ok(studyplan);
-        }
-
-        [HttpGet]
-        [Route("GetProcedureDropDown/{parentProjectId:int}")]
-        public IActionResult GetProcedureDropDown(int parentProjectId)
-        {
-            return Ok(_paymentMilestoneRepository.GetParentProjectDropDown(parentProjectId));
-        }
-
-        [HttpGet]
-        [Route("GetVisitDropDown/{parentProjectId:int}/{procedureId:int}")]
-        public IActionResult GetVisitDropDown(int parentProjectId, int procedureId)
-        {
-            return Ok(_paymentMilestoneRepository.GetVisitDropDown(parentProjectId, procedureId));
-        }
-        [HttpGet]
-        [Route("GetPassThroughCostActivity/{projectId:int}")]
-        public IActionResult GetPassThroughCostActivity( int projectId)
-        {
-            return Ok(_paymentMilestoneRepository.GetPassThroughCostActivity(projectId));
         }
     }
 }

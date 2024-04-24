@@ -16,7 +16,6 @@ namespace GSC.Data.Entities.CTMS
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
         public Master.Project Project { get; set; }
-
         public List<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetails { get; set; } = null;
 
     }

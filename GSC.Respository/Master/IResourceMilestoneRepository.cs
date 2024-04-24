@@ -15,10 +15,7 @@ namespace GSC.Respository.Master
         void AddPaymentMilestoneTaskDetail(ResourceMilestoneDto paymentMilestoneDto);
         void DeletePaymentMilestoneTaskDetail(int Id);
         void ActivePaymentMilestoneTaskDetail(int Id);
-
-        List<DropDownProcedureDto> GetParentProjectDropDown( int parentProjectId);
-        List<DropDownDto> GetVisitDropDown(int parentProjectId, int procedureId);
-        List<DropDownDto> GetPassThroughCostActivity(int projectId);
+        BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId);
        
     }
 }
