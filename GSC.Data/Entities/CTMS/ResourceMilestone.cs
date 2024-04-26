@@ -18,6 +18,7 @@ namespace GSC.Data.Entities.CTMS
         public decimal? PaybalAmount { get; set; }
         public decimal? ResourceTotal { get; set; }
         public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
         public List<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetails { get; set; } = null;

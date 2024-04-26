@@ -17,6 +17,7 @@ namespace GSC.Data.Dto.Master
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
         public decimal? ResourceTotal { get; set; }
         public int[] StudyPlanTaskIds { get; set; }
 
@@ -33,6 +34,7 @@ namespace GSC.Data.Dto.Master
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
         public string StudyPlanTasks { get; set; }
 
     }

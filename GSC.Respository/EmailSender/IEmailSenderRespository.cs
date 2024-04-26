@@ -67,5 +67,6 @@ namespace GSC.Respository.EmailSender
         void SendEmailOfReviewDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate);
         void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate);
         void SendMailCtmsApproval(CtmsApprovalUsers ctmsApprovalWorkFlowDetail, bool ifPlanApproval);
+        void SendDueResourceMilestoneEmail(ResourceMilestone resourceMilestone);
     }
 }

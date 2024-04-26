@@ -8,22 +8,14 @@ namespace GSC.Respository.Master
 {
     public interface IPassthroughMilestoneRepository : IGenericRepository<PassthroughMilestone>
     {
-        IList<PassthroughMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted);
+        IList<PassthroughMilestoneGridDto> GetPassthroughMilestoneList(int parentProjectId, bool isDeleted);
         string DuplicatePaymentMilestone(PassthroughMilestone paymentMilestone);
-        List<DropDownDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId);
-        decimal GetEstimatedMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto);
-        void AddPaymentMilestoneTaskDetail(PassthroughMilestoneDto paymentMilestoneDto);
-        void DeletePaymentMilestoneTaskDetail(int Id);
-        void ActivePaymentMilestoneTaskDetail(int Id);
-        void AddPaymentMilestoneVisitDetail(PassthroughMilestoneDto paymentMilestoneDto);
-        void DeletePaymentMilestoneVisitDetail(int Id);
-        void ActivePaymentMilestoneVisitDetail(int Id);
+        decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto); 
         void AddPaymentMilestonePassThroughCostDetail(PassthroughMilestoneDto paymentMilestoneDto);
         void DeletePaymentMilestonePassThroughCostDetail(int Id);
         void ActivePaymentMilestonePassThroughCostDetail(int Id);
-        List<DropDownProcedureDto> GetParentProjectDropDown( int parentProjectId);
-        List<DropDownDto> GetVisitDropDown(int parentProjectId, int procedureId);
         List<DropDownDto> GetPassThroughCostActivity(int projectId);
-       
+        BudgetPaymentFinalCostDto GetFinalPassthroughTotal(int projectId);
+
     }
 }

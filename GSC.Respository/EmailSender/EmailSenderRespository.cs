@@ -132,7 +132,13 @@ namespace GSC.Respository.EmailSender
             _emailService.SendMail(emailMessage);
         }
 
-
+        public void SendDueResourceMilestoneEmail(ResourceMilestone resourceMilestone)
+        {
+            var emailMessage = ConfigureEmail("ResourceMilestonDue", "");
+            emailMessage.SendTo = "mitulvaghasiya0@gmail.com";
+            emailMessage.MessageBody = ReplaceBodyForCTMSfDueDate(emailMessage.MessageBody,resourceMilestone);
+            _emailService.SendMail(emailMessage);
+        }
 
         public void SendEmailOfApproveDue(string toMail, string userName, string documentName, string ArtificateName, string ProjectName, DateTime? dueDate)
         {
@@ -502,6 +508,15 @@ namespace GSC.Respository.EmailSender
             body = Regex.Replace(body, "##TaskName##", "e-TMF Due", RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##DocumentName##", documentName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##Dueon##", dueDate?.ToString("dd-MMM-yyyy"), RegexOptions.IgnoreCase);
+
+            return body;
+        }
+        private string ReplaceBodyForCTMSfDueDate(string body, ResourceMilestone resourceMilestone)
+        {
+            //body = Regex.Replace(body, "##StudyCode##", projectName, RegexOptions.IgnoreCase);
+            //body = Regex.Replace(body, "##TaskName##", "e-TMF Due", RegexOptions.IgnoreCase);
+            //body = Regex.Replace(body, "##DocumentName##", documentName, RegexOptions.IgnoreCase);
+            //body = Regex.Replace(body, "##Dueon##", dueDate?.ToString("dd-MMM-yyyy"), RegexOptions.IgnoreCase);
 
             return body;
         }
