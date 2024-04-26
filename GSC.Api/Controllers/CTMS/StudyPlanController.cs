@@ -173,6 +173,11 @@ namespace GSC.Api.Controllers.CTMS
                         data.DeletedDate = null;
                         _studyPlanRepository.Active(data);
                     }
+                    else
+                    {
+                        ModelState.AddModelError("Message", validatecode);
+                        return BadRequest(ModelState);
+                    }
                 }
             }
             _uow.Save();

@@ -6,6 +6,7 @@ using GSC.Domain.Context;
 using GSC.Respository.Attendance;
 using GSC.Respository.Etmf;
 using GSC.Respository.LogReport;
+using GSC.Respository.Master;
 using GSC.Respository.SupplyManagement;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +28,7 @@ namespace GSC.Api.Controllers.Master
         private readonly ISupplyManagementShipmentRepository _supplyManagementShipmentRepository;
         private readonly IVerificationApprovalTemplateRepository _verificationApprovalTemplateRepository;
         private readonly IRandomizationRepository _randomizationRepository;
+        private readonly IResourceMilestoneRepository _resourceMilestoneRepository;
         public QuartzJobController(IUserLoginReportRespository userLoginReportRepository, IProjectWorkplaceArtificateDocumentReviewRepository projectWorkplaceArtificateDocumentReviewRepository,
             IProjectSubSecArtificateDocumentReviewRepository projectSubSecArtificateDocumentReviewRepository,
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
@@ -35,7 +37,8 @@ namespace GSC.Api.Controllers.Master
             ISupplyManagementShipmentRepository supplyManagementShipmentRepository,
             IGSCContext context,
             IVerificationApprovalTemplateRepository verificationApprovalTemplateRepository,
-            IRandomizationRepository randomizationRepository)
+            IRandomizationRepository randomizationRepository,
+            IResourceMilestoneRepository resourceMilestoneRepository)
         {
             _projectWorkplaceArtificateDocumentReviewRepository = projectWorkplaceArtificateDocumentReviewRepository;
             _projectSubSecArtificateDocumentReviewRepository = projectSubSecArtificateDocumentReviewRepository;
@@ -47,6 +50,7 @@ namespace GSC.Api.Controllers.Master
             _context = context;
             _verificationApprovalTemplateRepository = verificationApprovalTemplateRepository;
             _randomizationRepository = randomizationRepository;
+            _resourceMilestoneRepository = resourceMilestoneRepository;
 
         }
 
@@ -99,6 +103,26 @@ namespace GSC.Api.Controllers.Master
                 Log.Error("Error in Scheduler IWRS ", ex);
             }
             return Ok();
+        }
+
+        [HttpPost]
+        [Route("CTMSJob")]
+        [AllowAnonymous]
+        public async System.Threading.Tasks.Task<IActionResult> CTMSJob([FromBody] ProjectRemoveDataDto obj)
+        {
+            ProjectRemoveDataSuccess response = new ProjectRemoveDataSuccess();
+            try
+            {
+                _userLoginReportRepository.SetDbConnection(obj.ConnectionString);
+                await _resourceMilestoneRepository.SendDueResourceMilestoneEmail();
+                response.IsSuccess = true;
+            }
+            catch (Exception ex)
+            {
+                response.IsSuccess = false;
+                Log.Error("Error in Scheduler CTMS ", ex);
+            }
+            return Ok(response);
         }
     }
 }

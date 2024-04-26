@@ -16,6 +16,7 @@ namespace GSC.Data.Dto.Master
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
         public int[] PatientCostIds { get; set; }
     }
     public class PatientMilestoneGridDto : BaseAuditDto
@@ -27,6 +28,7 @@ namespace GSC.Data.Dto.Master
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
         public string PatientCostVisits { get; set; }
 
     }

@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Entities.Common;
 using GSC.Helper;
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
@@ -8,37 +9,26 @@ namespace GSC.Data.Dto.Master
     {
         [Required(ErrorMessage = "Project is required.")]
         public int ProjectId { get; set; }
-        public int? SiteId { get; set; }
-        public int? CountryId { get; set; }
-        [Required]
-        public PaymentType PaymentType { get; set; }
-        public decimal? EstimatedRevenue { get; set; }
-        public decimal? TotalRevenue { get; set; }
-        public decimal? TotalPerPatient { get; set; }
-        public bool? IsApproved { get; set; }
-        public bool? IsSendBack { get; set; }
-        public int? PatientCount { get; set; }
-        public int? PatientStatus { get; set; }
-        public int[] StudyPlanTaskIds { get; set; }
-        public int[] PatientCostIds { get; set; }
+        public PaymentTypePassThrough PaymentTypePassThrough { get; set; }
+        public decimal? PassThroughTotal { get; set; }
+        public decimal? PassThroughActivityTotal { get; set; }
+        public decimal? Percentage { get; set; }
+        public decimal? PaybalAmount { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
         public int[] PassThroughCostIds { get; set; }
     }
     public class PassthroughMilestoneGridDto : BaseAuditDto
     {
         public string ProjectName { get; set; }
-        public int? SiteId { get; set; }
-        public string SitedName { get; set; }
-        public string CountryName { get; set; }
-        public string MilestoneType { get; set; }
-        public string PaymentType { get; set; }
-        public decimal? EstimatedRevenue { get; set; }
-        public decimal? TotalRevenue { get; set; }
-        public decimal? TotalPerPatient { get; set; }
-        public string StudyPlanTasks { get; set; }
-        public int? PatientCount { get; set; }
-        public string PatientStatus { get; set; }
-        public string PatientCostVisits { get; set; }
+        public string PaymentTypePassThrough { get; set; }
+        public decimal? PassThroughTotal { get; set; }
+        public decimal? PassThroughActivityTotal { get; set; }
+        public decimal? Percentage { get; set; }
+        public decimal? PaybalAmount { get; set; }
         public string PassThroughCostCountry { get; set; }
+        public DateTime? DueDate { get; set; }
+        public string Remark { get; set; }
 
     }
 }

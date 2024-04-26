@@ -3,8 +3,11 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
+using GSC.Domain.Context;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
+using System.Linq;
+
 
 namespace GSC.Api.Controllers.Master
 {
@@ -14,12 +17,15 @@ namespace GSC.Api.Controllers.Master
         private readonly IResourceMilestoneRepository _paymentMilestoneRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IGSCContext _context;
 
-        public ResourceMilestoneController(IResourceMilestoneRepository PaymentMilestoneRepository, IUnitOfWork uow, IMapper mapper)
+        public ResourceMilestoneController(IGSCContext context, IResourceMilestoneRepository PaymentMilestoneRepository, IUnitOfWork uow, IMapper mapper)
+            
         {
             _paymentMilestoneRepository = PaymentMilestoneRepository;
             _uow = uow;
             _mapper = mapper;
+            _context = context;
         }
 
         [HttpGet]
@@ -44,6 +50,13 @@ namespace GSC.Api.Controllers.Master
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             paymentMilestoneDto.Id = 0;
+            //fiend max date for selected tasks list
+            if(paymentMilestoneDto.StudyPlanTaskIds != null)
+            {
+                paymentMilestoneDto.DueDate = _context.StudyPlanTask.Where(w => paymentMilestoneDto.StudyPlanTaskIds.Contains(w.Id) && w.EndDate != null).Max(s => s.EndDate);
+            }
+               
+
             var paymentMilestone = _mapper.Map<ResourceMilestone>(paymentMilestoneDto);
 
             var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(paymentMilestone);

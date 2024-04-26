@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
@@ -16,6 +17,6 @@ namespace GSC.Respository.Master
         void DeletePaymentMilestoneTaskDetail(int Id);
         void ActivePaymentMilestoneTaskDetail(int Id);
         BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId);
-       
+        Task SendDueResourceMilestoneEmail();
     }
 }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Dynamic.Core;
+using System.Threading.Tasks;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
 using GSC.Common.GenericRespository;
@@ -9,6 +10,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Respository.EmailSender;
 using GSC.Respository.ProjectRight;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
@@ -22,9 +24,10 @@ namespace GSC.Respository.Master
         private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IEmailSenderRespository _emailSenderRespository;
         public ResourceMilestoneRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IProjectRepository projectRepository, IProjectRightRepository projectRightRepository)
+            IMapper mapper, IProjectRepository projectRepository, IProjectRightRepository projectRightRepository, IEmailSenderRespository emailSenderRespository)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
@@ -32,6 +35,7 @@ namespace GSC.Respository.Master
             _projectRepository = projectRepository;
             _context = context;
             _projectRightRepository = projectRightRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
         public IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
@@ -48,7 +52,7 @@ namespace GSC.Respository.Master
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.SiteId == siteId).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
-            else if(parentProjectId != 0 && siteId == 0 && countryId != 0)
+            else if (parentProjectId != 0 && siteId == 0 && countryId != 0)
             {
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.CountryId == countryId).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
@@ -103,9 +107,9 @@ namespace GSC.Respository.Master
             }
 
             //Onetime Task Seleect then not get in list 
-            var PaymentMilestoneTask = _context.PaymentMilestoneTaskDetail.Include(i=>i.ResourceMilestone).Where(w=> studyPlan.Select(f => f.ProjectId).Contains(w.ResourceMilestone.ProjectId) && w.DeletedBy == null).ToList();
-            
-            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null) && ! PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id)
+            var PaymentMilestoneTask = _context.PaymentMilestoneTaskDetail.Include(i => i.ResourceMilestone).Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ResourceMilestone.ProjectId) && w.DeletedBy == null).ToList();
+
+            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null) && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto)
@@ -167,12 +171,22 @@ namespace GSC.Respository.Master
                                 Include(s => s.StudyPlanTask).
                                 ThenInclude(s => s.StudyPlan)
                                 .Where(s => s.DeletedBy == null && s.StudyPlanTask.StudyPlan.ProjectId == projectId || siteIds.Contains(s.StudyPlanTask.StudyPlan.ProjectId)).Sum(s => s.ConvertTotalCost);
-            
+
             //one time Add Paybal Amount id diduct in main total
             var resourcePaybalAmount = _context.ResourceMilestone.Where(w => w.DeletedDate == null && w.ProjectId == projectId).Sum(s => s.PaybalAmount);
             data.ProfessionalCostAmount = Convert.ToDecimal(resourcecost - resourcePaybalAmount);
 
             return data;
+        }
+
+        public async Task SendDueResourceMilestoneEmail()
+        {
+            var dueDates = await All.Where(x => x.DeletedDate == null && x.DueDate != null && x.DueDate.Value.Date >= DateTime.Now.Date).ToListAsync();
+
+            foreach (var due in dueDates)
+            {
+                _emailSenderRespository.SendDueResourceMilestoneEmail(due);
+            }
         }
     }
 }

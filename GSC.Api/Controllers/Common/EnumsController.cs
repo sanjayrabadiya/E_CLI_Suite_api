@@ -1263,5 +1263,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+        [HttpGet]
+        [Route("GetPaymentTypePassThroughDropDown")]
+        public IActionResult GetPaymentTypePassThroughDropDown()
+        {
+            var centri = Enum.GetValues(typeof(PaymentTypePassThrough))
+                .Cast<PaymentTypePassThrough>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
     }
 }
