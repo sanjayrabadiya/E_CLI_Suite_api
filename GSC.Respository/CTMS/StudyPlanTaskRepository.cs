@@ -623,12 +623,13 @@ namespace GSC.Respository.CTMS
                     data.StartDate = TaskMaster.StartDate;
                     data.EndDate = TaskMaster.EndDate;
                     data.TaskTemplateId = TaskMaster.TaskTemplateId;
-                }
-                data.Id = 0;
-                data.ProjectId = ProjectId;
-                _context.StudyPlan.Add(data);
-                _context.Save();
-                result.StudyPlanId = data.Id;
+
+                    data.Id = 0;
+                    data.ProjectId = ProjectId;
+                    _context.StudyPlan.Add(data);
+                    _context.Save();
+                    result.StudyPlanId = data.Id;
+                }            
             }
 
             return result;
