@@ -316,7 +316,7 @@ namespace GSC.Api.Helpers
             CreateMap<AdverseEventSettings, AdverseEventSettingsDto>().ReverseMap();
             CreateMap<EtmfUserPermission, EtmfUserPermissionDto>().ReverseMap();
             CreateMap<PhaseManagement, PhaseManagementDto>().ReverseMap();
-            
+
 
             CreateMap<ProjectDesignVariableEncryptRole, ProjectDesignVariableEncryptRoleDto>().ReverseMap();
             CreateMap<ProjectDesingTemplateRestriction, ProjectDesingTemplateRestrictionDto>().ReverseMap();
@@ -517,6 +517,7 @@ namespace GSC.Api.Helpers
             CreateMap<PatientMilestone, PatientMilestoneDto>().ReverseMap();
             CreateMap<PassthroughMilestone, PassthroughMilestoneDto>().ReverseMap();
             CreateMap<CtmsWorkflowApproval, CtmsWorkflowApprovalDto>().ReverseMap();
+            CreateMap<CtmsStudyPlanTaskComment, CtmsStudyPlanTaskCommentDto>().ReverseMap();
         }
     }
 }
