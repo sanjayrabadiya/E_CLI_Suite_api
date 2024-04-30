@@ -13,10 +13,14 @@ namespace GSC.Data.Entities.CTMS
     public class CtmsStudyPlanTaskComment : BaseEntity, ICommonAduit
     {
         public int CtmsWorkflowApprovalId { get; set; }
+        public int StudyPlanTaskId { get; set; }
         public string Comment { get; set; }
         public string ReplyComment { get; set; }
         public bool IsReply { get; set; }
+        public bool FinalReply { get; set; }
         public string IpAddress { get; set; }
         public string TimeZone { get; set; }
+
+        public CtmsWorkflowApproval CtmsWorkflowApproval { get; set; }
     }
 }

@@ -10,10 +10,11 @@ using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
-using Quartz.Xml.JobSchedulingData20;
+using System.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq.Dynamic.Core;
 
 
 namespace GSC.Api.Controllers.CTMS
@@ -24,17 +25,20 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly ICtmsWorkflowApprovalRepository _ctmsWorkflowApprovalRepository;
+        private readonly ICtmsStudyPlanTaskCommentRepository _ctmsStudyPlanTaskCommentRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IStudyPlanRepository _studyPlanRepository;
 
         public CtmsWorkflowApprovalController(IUnitOfWork uow, IMapper mapper,
-            ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository, IJwtTokenAccesser jwtTokenAccesser, IStudyPlanRepository studyPlanRepository)
+            ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository, IJwtTokenAccesser
+            jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, ICtmsStudyPlanTaskCommentRepository ctmsStudyPlanTaskCommentRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _ctmsWorkflowApprovalRepository = ctmsWorkflowApprovalRepository;
             _jwtTokenAccesser = jwtTokenAccesser;
             _studyPlanRepository = studyPlanRepository;
+            _ctmsStudyPlanTaskCommentRepository = ctmsStudyPlanTaskCommentRepository;
         }
 
         [HttpGet("{id}")]
@@ -92,6 +96,17 @@ namespace GSC.Api.Controllers.CTMS
             var result = _uow.Save();
             lastRecord.CtmsWorkflowApprovalId = approver.Id;
             _ctmsWorkflowApprovalRepository.Update(lastRecord);
+
+            if (approverDto.TriggerType == TriggerType.StudyPlanApproval)
+            {
+                var taskComments = _ctmsStudyPlanTaskCommentRepository.All.Where(x => x.CtmsWorkflowApprovalId == lastRecord.Id && x.DeletedDate == null && !x.FinalReply).ToList();
+                taskComments.ForEach(l =>
+                {
+                    l.FinalReply = true;
+                    _ctmsStudyPlanTaskCommentRepository.Update(l);
+                });
+            }
+
             _uow.Save();
             if (result <= 0)
             {
@@ -116,14 +131,18 @@ namespace GSC.Api.Controllers.CTMS
                 return BadRequest(ModelState);
             }
 
-
-            var allApprove = _ctmsWorkflowApprovalRepository.GetApprovalStatus(approverDto.StudyPlanId, approverDto.ProjectId);
+            var allApprove = _ctmsWorkflowApprovalRepository.GetApprovalStatus(approverDto.StudyPlanId, approverDto.ProjectId, approverDto.TriggerType);
             if (allApprove)
             {
                 var studyPlan = _studyPlanRepository.Find(approverDto.StudyPlanId);
                 if (approverDto.TriggerType == TriggerType.BudgetManagementApproved)
                 {
                     studyPlan.IsBudgetApproval = true;
+                }
+
+                if (approverDto.TriggerType == TriggerType.StudyPlanApproval)
+                {
+                    studyPlan.IsPlanApproval = true;
                 }
 
                 _studyPlanRepository.Update(studyPlan);
@@ -147,12 +166,12 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(history);
         }
 
-        [HttpGet("GetApprovalStatus/{studyPlanId}/{projectId}")]
-        public IActionResult GetApprovalStatus(int studyPlanId, int projectId)
-        {
-            var status = _ctmsWorkflowApprovalRepository.GetApprovalStatus(studyPlanId, projectId);
-            return Ok(status);
-        }
+        //[HttpGet("GetApprovalStatus/{studyPlanId}/{projectId}")]
+        //public IActionResult GetApprovalStatus(int studyPlanId, int projectId)
+        //{
+        //    var status = _ctmsWorkflowApprovalRepository.GetApprovalStatus(studyPlanId, projectId);
+        //    return Ok(status);
+        //}
 
         [HttpGet("CheckIsSender/{studyPlanId}/{projectId}/{triggerType}")]
         public IActionResult CheckIsSender(int studyPlanId, int projectId, TriggerType triggerType)
@@ -186,6 +205,27 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetSenderNewComment(TriggerType triggerType)
         {
             var result = _ctmsWorkflowApprovalRepository.GetSenderNewComment(triggerType);
+            return Ok(result);
+        }
+
+        [HttpGet("GetApprovalUsers/{studyPlanId}")]
+        public IActionResult GetApprovalUsers(int studyPlanId)
+        {
+            var result = _ctmsWorkflowApprovalRepository.GetApprovalUsers(studyPlanId);
+            return Ok(result);
+        }
+
+        [HttpGet("CheckNewComment/{studyPlanId}/{projectId}/{triggerType}")]
+        public IActionResult CheckNewComment(int studyPlanId, int projectId, TriggerType triggerType)
+        {
+            var result = _ctmsWorkflowApprovalRepository.IsNewComment(studyPlanId, projectId, triggerType);
+            return Ok(result);
+        }
+
+        [HttpGet("CheckCommentReply/{studyPlanId}/{projectId}/{userId}/{roleId}/{triggerType}")]
+        public IActionResult CheckCommentReply(int studyPlanId, int projectId, int userId, int roleId, TriggerType triggerType)
+        {
+            var result = _ctmsWorkflowApprovalRepository.IsCommentReply(studyPlanId, projectId, userId, roleId, triggerType);
             return Ok(result);
         }
     }

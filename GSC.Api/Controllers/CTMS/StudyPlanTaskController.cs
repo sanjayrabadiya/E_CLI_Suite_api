@@ -310,38 +310,5 @@ namespace GSC.Api.Controllers.CTMS
         {
             return Ok(_studyPlanTaskRepository.GetDesignationStdDropDown(studyplanId));
         }
-
-        //[HttpGet("GetCommentList/{isDeleted:bool?}/{studyPlanTaskId}")]
-        //public IActionResult GetCommentList(bool isDeleted, int studyPlanTaskId)
-        //{
-        //    var task = _context.StudyPlanTaskComment.Where(w=>w.StudyPlanTaskId== studyPlanTaskId && w.DeletedDate==null).ToList();
-        //    return Ok(task);
-        //}
-
-        //[HttpPut("AddComment")]
-        //public IActionResult AddComment([FromBody] StudyPlanTaskCommentDto data)
-        //{
-        //    if (data.studyPlanTaskId <= 0) return BadRequest();
-        //        var studyPlanTaskComment = _mapper.Map<StudyPlanTaskComment>(data);
-        //        studyPlanTaskComment.IpAddress = _jwtTokenAccesser.IpAddress;
-        //        studyPlanTaskComment.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
-        //        _context.StudyPlanTaskComment.Add(studyPlanTaskComment);
-        //        _uow.Save();
-  
-        //    return Ok(data);
-        //}
-
-        //[HttpPatch("PatchComment/{id}")]
-        //public ActionResult PatchComment(int id)
-        //{
-        //    var record = _context.StudyPlanTaskComment.Find(id);
-        //    if (record == null) return NotFound();
-        //    var tastMaster = _mapper.Map<StudyPlanTaskComment>(record);
-        //    tastMaster.DeletedDate = DateTime.UtcNow;
-        //    tastMaster.DeletedBy = _jwtTokenAccesser.UserId;
-        //    _context.StudyPlanTaskComment.Update(tastMaster);
-        //    _uow.Save();
-        //    return Ok();
-        //}
     }
 }
