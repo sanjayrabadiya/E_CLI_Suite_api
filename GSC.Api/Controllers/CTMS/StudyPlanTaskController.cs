@@ -153,12 +153,13 @@ namespace GSC.Api.Controllers.CTMS
             return Ok();
         }
 
-        [HttpGet("ConverttoMileStone/{id}")]
-        public IActionResult ConverttoMileStone(int id)
+        [HttpGet("ConverttoMileStone/{id:int}/{isPaymentMileStone:bool?}")]
+        public IActionResult ConverttoMileStone(int id, bool? isPaymentMileStone)
         {
             if (id <= 0) return BadRequest();
             var milestonetask = _studyPlanTaskRepository.Find(id);
             milestonetask.isMileStone = true;
+            milestonetask.IsPaymentMileStone = isPaymentMileStone;
             milestonetask.EndDate = milestonetask.StartDate;
             milestonetask.Duration = 0;
             _studyPlanTaskRepository.Update(milestonetask);
