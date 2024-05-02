@@ -2,6 +2,7 @@
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 using System.Collections.Generic;
 
 namespace GSC.Respository.CTMS
@@ -15,5 +16,6 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetRoleCtmsRights(int projectId);
         List<DropDownDto> GetUserCtmsRights(int roleId, int projectId);
         void DeleteChildWorkflowEmailUser(CtmsApprovalRolesDto obj, int id);
+        bool CheckIsApprover(int projectId, TriggerType triggerType);
     }
 }

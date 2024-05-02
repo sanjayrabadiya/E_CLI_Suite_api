@@ -5,6 +5,8 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
+using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +17,14 @@ namespace GSC.Respository.CTMS
     {
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public CtmsApprovalRolesRepository(IGSCContext context,
-            IMapper mapper) : base(context)
+            IMapper mapper, IJwtTokenAccesser jwtTokenAccesser) : base(context)
         {
             _mapper = mapper;
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
         public List<CtmsApprovalRolesGridDto> GetCtmsApprovalWorkFlowList(int projectId, bool isDeleted)
         {
@@ -109,11 +113,18 @@ namespace GSC.Respository.CTMS
         {
 
             var projectrights = _context.UserAccess.Include(s => s.UserRole).ThenInclude(d => d.User).
-                   Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId && w.UserRole.SecurityRole.Id == roleId).
+                   Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId && w.UserRole.SecurityRole.Id == roleId && w.UserRole.UserId != _jwtTokenAccesser.UserId).
                    Select(x => new DropDownDto { Id = x.UserRole.User.Id, Value = x.UserRole.User.UserName }).Distinct().ToList();
 
             return projectrights;
 
+        }
+
+        public bool CheckIsApprover(int projectId,TriggerType triggerType)
+        {
+            var isPresent = _context.CtmsApprovalUsers.Any(x => x.DeletedDate == null && x.CtmsApprovalRoles.ProjectId == projectId
+            && x.CtmsApprovalRoles.TriggerType == triggerType && x.UserId == _jwtTokenAccesser.UserId);
+            return isPresent;
         }
     }
 }

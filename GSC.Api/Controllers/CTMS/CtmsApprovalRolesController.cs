@@ -9,6 +9,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.SupplyManagement;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
@@ -163,6 +164,13 @@ namespace GSC.Api.Controllers.CTMS
         {
             var rights = _ctmsApprovalRolesRepository.GetUserCtmsRights(roleId, projectId);
             return Ok(rights);
+        }
+
+        [HttpGet("CheckApprover/{projectId}/{triggerType}")]
+        public IActionResult CheckApprover(int projectId, TriggerType triggerType)
+        {
+            var isPresent = _ctmsApprovalRolesRepository.CheckIsApprover(projectId, triggerType);
+            return Ok(isPresent);
         }
     }
 }
