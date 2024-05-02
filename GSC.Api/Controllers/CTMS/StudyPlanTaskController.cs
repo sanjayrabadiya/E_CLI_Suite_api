@@ -6,6 +6,7 @@ using GSC.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Location;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Configuration;
@@ -215,19 +216,19 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(studyplan);
         }
 
-        [Route("GetDocChart/{projectId}")]
+        [Route("GetDocChart/{projectId}/{countryId:int?}")]
         [HttpGet]
-        public IActionResult GetDocChart(int projectId)
+        public IActionResult GetDocChart(int projectId, int? countryId)
         {
-            var result = _studyPlanTaskRepository.GetDocChart(projectId);
+            var result = _studyPlanTaskRepository.GetDocChart(projectId, countryId);
             return Ok(result);
         }
 
-        [Route("GetChartReport/{projectId}/{chartType:int?}")]
+        [Route("GetChartReport/{projectId}/{chartType:int?}/{countryId:int?}")]
         [HttpGet]
-        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType)
+        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType,int? countryId)
         {
-            var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType);
+            var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType, countryId);
             return Ok(report);
         }
         [HttpPut("AddPreApproval")]

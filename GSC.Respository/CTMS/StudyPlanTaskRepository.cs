@@ -640,11 +640,11 @@ namespace GSC.Respository.CTMS
             return result;
         }
 
-        public StudyPlanTaskChartDto GetDocChart(int projectId)
+        public StudyPlanTaskChartDto GetDocChart(int projectId, int? countryId)
         {
             StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
 
-            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null).ToList();
+            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null && x.IsCountry == countryId > 0).ToList();
 
             var TodayDate = DateTime.Now;
             result.All = StudyPlanTask.Count;
@@ -684,10 +684,10 @@ namespace GSC.Respository.CTMS
             return result;
         }
 
-        public List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType)
+        public List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType, int? countryId)
         {
             var TodayDate = DateTime.Now;
-            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null).ToList();
+            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.IsCountry== countryId > 0 && x.DeletedDate == null).ToList();
 
             var data = new List<StudyPlanTask>();
 
