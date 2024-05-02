@@ -45,4 +45,12 @@ namespace GSC.Data.Dto.CTMS
         public string ProjectName { get; set; }
         public bool HasChild { get; set; }
     }
+
+    public class ApprovalUser
+    {
+        public int StudyPlanTaskId { get; set; }
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+        public string Username { get; set; }
+    }
 }

@@ -58,7 +58,8 @@ namespace GSC.Respository.Etmf
                             ZonName = etmfZone.ZonName,
                             ProjectId = workdetail.ProjectId,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
-                            ChildName = GetChildName(workdetail.WorkPlaceFolderId, country.CountryName, site.ProjectCode, site.ProjectName),
+                            ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             ProjectName = project.ProjectCode.Replace("/", "")
 
                         }).FirstOrDefault();
@@ -84,22 +85,6 @@ namespace GSC.Respository.Etmf
             return data;
         }
 
-        public string GetChildName(int workPlaceFolderId, string countryName, string projectCode, string projectName)
-        {
-            if (workPlaceFolderId == 1)
-            {
-                return countryName;
-            }
-            else if (workPlaceFolderId == 2)
-            {
-                return $"{projectCode} - {projectName}";
-            }
-            else
-            {
-                return null;
-            }
-        }
-
         public EtmfProjectWorkPlaceDto updateSectionDetailFolder(EtmfProjectWorkPlaceDto projectWorkplaceSubSectionDto)
         {
             var data = (from subsection in _context.EtmfProjectWorkPlace.Where(x => x.Id == projectWorkplaceSubSectionDto.Id)
@@ -122,7 +107,8 @@ namespace GSC.Respository.Etmf
                             ProjectWorkplaceZoneId = workzone.Id,
                             ZonName = etmfZone.ZonName,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
-                            ChildName = GetChildName(workdetail.WorkPlaceFolderId, country.CountryName, site.ProjectCode, site.ProjectName),
+                            ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             ProjectName = project.ProjectCode.Replace("/", ""),
                             SubSectionName = subsection.SubSectionName
 
@@ -185,7 +171,8 @@ namespace GSC.Respository.Etmf
                             ProjectWorkplaceZoneId = workzone.Id,
                             ZonName = etmfZone.ZonName,
                             WorkPlaceFolderId = workdetail.WorkPlaceFolderId,
-                            ChildName = GetChildName(workdetail.WorkPlaceFolderId, country.CountryName, site.ProjectCode, site.ProjectName),
+                            ChildName = workdetail.WorkPlaceFolderId == 1 ? country.CountryName :
+                                        workdetail.WorkPlaceFolderId == 2 ? site.ProjectCode + " - " + site.ProjectName : null,
                             ProjectName = project.ProjectCode.Replace("/", ""),
                             SubSectionName = subsection.SubSectionName
 

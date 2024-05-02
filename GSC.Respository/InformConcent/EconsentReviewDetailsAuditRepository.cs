@@ -46,27 +46,27 @@ namespace GSC.Respository.InformConcent
         {
 
             var resultdetails = All.Where(y => y.EconsentReviewDetails.EconsentSetup.ProjectId == details.ParentProjectId
-             && (details.ProjectId <= 0 || y.EconsentReviewDetails.Randomization.ProjectId == details.ProjectId)
-             && (details.DocumentId <= 0 || y.EconsentReviewDetails.EconsentSetup.Id == details.DocumentId)
-             && (details.ActionId <= 0 || y.Activity == details.ActionId)
-             && (details.PatientStatusId <= 0 || y.PateientStatus == details.PatientStatusId)
-             && (details.SubjectIds.Any(x => x.Id == y.EconsentReviewDetails.RandomizationId))
-             ).Select(x => new EconsentReviewDetailsAuditGridDto
-             {
-                 Key = x.EconsentReviewDetails.Randomization.Id,
-                 StudyCode = x.EconsentReviewDetails.EconsentSetup.Project.ProjectCode,
-                 SiteCode = x.EconsentReviewDetails.Randomization.Project.ProjectCode,
-                 DocumentName = x.EconsentReviewDetails.EconsentSetup.DocumentName,
-                 ScreeningNumber = x.EconsentReviewDetails.Randomization.ScreeningNumber,
-                 RandomizationNumber = x.EconsentReviewDetails.Randomization.RandomizationNumber,
-                 Initial = x.EconsentReviewDetails.Randomization.Initial,
-                 Version = x.EconsentReviewDetails.EconsentSetup.Version,
-                 LanguageName = x.EconsentReviewDetails.EconsentSetup.Language.LanguageName,
-                 Activity = x.Activity.GetDescription(),
-                 PatientStatus = x.PateientStatus.GetDescription(),
-                 CreatedByUser = x.CreatedByUser.UserName,
-                 CreatedDate = x.CreatedDate
-             }).ToList();
+            && (details.ProjectId > 0 ? y.EconsentReviewDetails.Randomization.ProjectId == details.ProjectId : true)
+            && (details.DocumentId > 0 ? y.EconsentReviewDetails.EconsentSetup.Id == details.DocumentId : true)
+            && (details.ActionId > 0 ? y.Activity == details.ActionId : true)
+            && (details.PatientStatusId > 0 ? y.PateientStatus == details.PatientStatusId : true)
+            && (details.SubjectIds.Count() > 0 ? details.SubjectIds.Select(x => x.Id).Contains(y.EconsentReviewDetails.RandomizationId) : true)
+            ).Select(x => new EconsentReviewDetailsAuditGridDto
+            {
+                Key = x.EconsentReviewDetails.Randomization.Id,
+                StudyCode = x.EconsentReviewDetails.EconsentSetup.Project.ProjectCode,
+                SiteCode = x.EconsentReviewDetails.Randomization.Project.ProjectCode,
+                DocumentName = x.EconsentReviewDetails.EconsentSetup.DocumentName,
+                ScreeningNumber = x.EconsentReviewDetails.Randomization.ScreeningNumber,
+                RandomizationNumber = x.EconsentReviewDetails.Randomization.RandomizationNumber,
+                Initial = x.EconsentReviewDetails.Randomization.Initial,
+                Version = x.EconsentReviewDetails.EconsentSetup.Version,
+                LanguageName = x.EconsentReviewDetails.EconsentSetup.Language.LanguageName,
+                Activity = x.Activity.GetDescription(),
+                PatientStatus = x.PateientStatus.GetDescription(),
+                CreatedByUser = x.CreatedByUser.UserName,
+                CreatedDate = x.CreatedDate
+            }).ToList();
             JobMonitoring jobMonitoring = new JobMonitoring();
             jobMonitoring.JobName = JobNameType.ICFDetailReport;
             jobMonitoring.JobDescription = details.ParentProjectId;

@@ -520,7 +520,6 @@ namespace GSC.Domain.Context
         public DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
         public DbSet<CtmsApprovalUsers> CtmsApprovalUsers { get; set; }
         public DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
-        public DbSet<CtmsStudyPlanTaskComment> StudyPlanTaskComment { get; set; }
         public DbSet<CtmsStudyPlanTaskComment> CtmsStudyPlanTaskComment { get; set; }
     }
 }

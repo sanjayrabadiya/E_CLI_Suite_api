@@ -876,6 +876,27 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.CtmsApprovalRoles.Project.ProjectCode))
            .ForMember(x => x.RoleName, x => x.MapFrom(a => a.CtmsApprovalRoles.SecurityRole.RoleName))
            .ReverseMap();
+
+
+            CreateMap<CtmsStudyPlanTaskComment, CtmsStudyPlanTaskCommentGridDto>()
+            .ForMember(x => x.RoleId, x => x.MapFrom(a => a.CtmsWorkflowApproval.RoleId))
+            .ForMember(x => x.ApproverRole, x => x.MapFrom(a => a.CtmsWorkflowApproval.Role.RoleName))
+            .ForMember(x => x.SendDate, x => x.MapFrom(a => a.CtmsWorkflowApproval.SendDate))
+            .ForMember(x => x.ActionDate, x => x.MapFrom(a => a.CtmsWorkflowApproval.ActionDate))
+            .ForMember(x => x.IsApprove, x => x.MapFrom(a => a.CtmsWorkflowApproval.IsApprove))
+            .ForMember(x => x.ApproverName, x => x.MapFrom(a => a.CtmsWorkflowApproval.User.UserName))
+            .ForMember(x => x.SenderId, x => x.MapFrom(a => a.CtmsWorkflowApproval.SenderId))
+            .ForMember(x => x.SenderName, x => x.MapFrom(a => a.CtmsWorkflowApproval.Sender.UserName))
+            .ForMember(x => x.ChildId, x => x.MapFrom(a => a.CtmsWorkflowApproval.CtmsWorkflowApprovalId))
+            .ReverseMap();
+
+
+            CreateMap<CtmsWorkflowApprovalGridDto, CtmsStudyPlanTaskCommentGridDto>()
+           .ForMember(x => x.ChildId, x => x.MapFrom(a => a.CtmsWorkflowApprovalId))
+           .ForMember(x => x.Id, x => x.MapFrom(a => 0))
+           .ForMember(x => x.HasChild, x => x.MapFrom(a => (a.CtmsWorkflowApprovalId != null)))
+           .ForMember(x => x.CtmsWorkflowApprovalId, x => x.MapFrom(a => (a.Id)))
+           .ReverseMap();
         }
     }
 }

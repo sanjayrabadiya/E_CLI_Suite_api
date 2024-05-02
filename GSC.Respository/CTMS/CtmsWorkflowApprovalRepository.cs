@@ -49,9 +49,9 @@ namespace GSC.Respository.CTMS
             return ctmsWorkflows;
         }
 
-        public bool GetApprovalStatus(int studyPlanId, int projectId)
+        public bool GetApprovalStatus(int studyPlanId, int projectId, TriggerType triggerType)
         {
-            var status = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.StudyPlanId == studyPlanId)
+            var status = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.StudyPlanId == studyPlanId && x.TriggerType == triggerType)
                 .GroupBy(x => x.UserId).All(m => m.Any(c => c.IsApprove == true));
             return status;
         }
@@ -77,7 +77,7 @@ namespace GSC.Respository.CTMS
                             RoleId = c.SecurityRole.Id,
                             UserId = r.UserId,
                             Name = r.Users.UserName,
-                            IsSelected = All.Any(b => b.ProjectId == projectId && b.RoleId == c.SecurityRoleId && b.UserId == r.UserId && b.DeletedDate == null)
+                            IsSelected = All.Any(b => b.ProjectId == projectId && b.RoleId == c.SecurityRoleId && b.UserId == r.UserId && b.DeletedDate == null && b.TriggerType == triggerType)
                         }).Where(x => !x.IsSelected).ToList()
                 }).ToList();
 
@@ -103,7 +103,7 @@ namespace GSC.Respository.CTMS
 
         public List<DashboardDto> GetCtmsApprovalMyTask(int projectId)
         {
-            var myTaskList= new List<DashboardDto>();
+            var myTaskList = new List<DashboardDto>();
             var ctmsMyTasks = All.Where(x => x.DeletedDate == null && x.ProjectId == projectId && x.SenderId == _jwtTokenAccesser.UserId && x.IsApprove == false)
                 .Select(s => new DashboardDto
                 {
@@ -137,6 +137,44 @@ namespace GSC.Respository.CTMS
 
             return myTaskList;
 
+        }
+
+        public List<ApprovalUser> GetApprovalUsers(int studyPlanId)
+        {
+            var users = All.Where(x => x.DeletedDate == null && x.StudyPlanId == studyPlanId)
+                .GroupBy(g => g.UserId).Select(s => new ApprovalUser
+                {
+                    StudyPlanTaskId = 0,
+                    UserId = s.Key,
+                    RoleId = s.First().RoleId,
+                    Username = $"{s.First().User.FirstName} {s.First().User.LastName}"
+                }).ToList();
+
+            return users;
+        }
+
+        public bool IsNewComment(int studyPlanId, int projectId, TriggerType triggerType)
+        {
+            var isComment = All.Any(x => x.DeletedDate == null
+            && x.StudyPlanId == studyPlanId
+            && x.ProjectId == projectId
+            && x.UserId == _jwtTokenAccesser.UserId
+            && x.RoleId == _jwtTokenAccesser.RoleId
+            && x.TriggerType == triggerType && x.IsApprove == null);
+
+            return isComment;
+        }
+
+        public bool IsCommentReply(int studyPlanId, int projectId, int userId, int roleId, TriggerType triggerType)
+        {
+            var isComment = All.Any(x => x.DeletedDate == null
+            && x.StudyPlanId == studyPlanId
+            && x.ProjectId == projectId
+            && x.UserId == userId
+            && x.RoleId == roleId
+            && x.TriggerType == triggerType && x.IsApprove == false);
+
+            return isComment;
         }
     }
 }
