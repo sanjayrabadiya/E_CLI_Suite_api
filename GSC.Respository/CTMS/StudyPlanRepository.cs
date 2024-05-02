@@ -109,7 +109,9 @@ namespace GSC.Respository.CTMS
                     DependentTaskId = t.TaskMaster.DependentTaskId,
                     ActivityType = t.TaskMaster.ActivityType,
                     OffSet = t.TaskMaster.OffSet,
-                    RefrenceType = t.RefrenceType
+                    RefrenceType = t.RefrenceType,
+                    IsCountry = t.RefrenceType == RefrenceType.Country
+
                 }).ToList();
 
             tasklist.ForEach(t =>
@@ -300,7 +302,8 @@ namespace GSC.Respository.CTMS
                     DependentTaskId = t.TaskMaster.DependentTaskId,
                     ActivityType = t.TaskMaster.ActivityType,
                     OffSet = t.TaskMaster.OffSet,
-                    RefrenceType = t.RefrenceType
+                    RefrenceType = t.RefrenceType,
+                    IsCountry = t.RefrenceType == RefrenceType.Country
                 }).ToList();
 
             tasklist.ForEach(t =>
@@ -322,7 +325,8 @@ namespace GSC.Respository.CTMS
                     DependentTaskId = t.TaskMaster.DependentTaskId,
                     ActivityType = t.TaskMaster.ActivityType,
                     OffSet = t.TaskMaster.OffSet,
-                    RefrenceType = t.RefrenceType
+                    RefrenceType = t.RefrenceType,
+                    IsCountry = t.RefrenceType == RefrenceType.Country
                 }).ToList();
 
                 var data = UpdateDependentTaskDate(t, ref tasklist1);

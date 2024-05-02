@@ -46,10 +46,11 @@ namespace GSC.Respository.CTMS
         public StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, int countryId)
         {
             var result = new StudyPlanTaskGridDto();
-
+      
             var TodayDate = DateTime.Now;
             if (countryId > 0)
             {
+                bool issite = true;
                 var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ProjectId
                                                           && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
                                                           && a.UserId == _jwtTokenAccesser.UserId
@@ -60,15 +61,19 @@ namespace GSC.Respository.CTMS
                                                           && x.DeletedDate == null).ToList();
 
                 if (projectIds.Count == 0)
+                {
+                    issite = false;
                     projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
-                                                         _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-                                                        && a.UserId == _jwtTokenAccesser.UserId
-                                                        && a.RoleId == _jwtTokenAccesser.RoleId
-                                                        && a.DeletedDate == null
-                                                         && a.RollbackReason == null)
-                                                        && x.ManageSite.City.State.CountryId == countryId
-                                                        && x.Id == ProjectId
-                                                        && x.DeletedDate == null).ToList();
+                                     _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+                                    && a.UserId == _jwtTokenAccesser.UserId
+                                    && a.RoleId == _jwtTokenAccesser.RoleId
+                                    && a.DeletedDate == null
+                                     && a.RollbackReason == null)
+                                    && x.ManageSite.City.State.CountryId == countryId
+                                    && x.Id == ProjectId
+                                    && x.DeletedDate == null).ToList();
+                }
+
 
                 var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
@@ -80,10 +85,10 @@ namespace GSC.Respository.CTMS
                     result.StudyPlanId = StudyPlanId;
 
 
-                        var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
+                        var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.IsCountry == (countryId > 0 && issite)).OrderBy(x => x.TaskOrder).
                          ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                        var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == 0).OrderBy(x => x.TaskOrder).
+                        var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == 0 && x.IsCountry == (countryId > 0 && issite)).OrderBy(x => x.TaskOrder).
                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                         if (tasklist.Exists(x => TodayDate < x.StartDate))
@@ -140,10 +145,10 @@ namespace GSC.Respository.CTMS
 
                 if (studyplan != null)
                 {
-                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
+                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.IsCountry == false).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0).OrderBy(x => x.TaskOrder).
+                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0 && x.IsCountry == false).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                     if (tasklist.Exists(x => TodayDate < x.StartDate))
