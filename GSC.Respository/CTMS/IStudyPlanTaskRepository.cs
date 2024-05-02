@@ -3,6 +3,7 @@ using GSC.Data.Dto.Audit;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Location;
 using GSC.Helper;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,8 @@ namespace GSC.Respository.CTMS
         List<StudyPlanTask> Save(StudyPlanTask taskData);
         List<AuditTrailDto> GetStudyPlanTaskHistory(int id);
         StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId);
-        StudyPlanTaskChartDto GetDocChart(int projectId);
-        List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType);
+        StudyPlanTaskChartDto GetDocChart(int projectId, int? countryId);
+        List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType, int? countryId);
         List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search);
         List<DropDownDto> GetRollDropDown(int studyplanId);
         List<DropDownDto> GetUserDropDown(int studyplanId);
