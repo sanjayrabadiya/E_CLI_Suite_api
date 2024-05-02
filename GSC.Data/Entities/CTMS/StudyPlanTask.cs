@@ -39,5 +39,6 @@ namespace GSC.Data.Entities.CTMS
         public string DocumentPath { get; set; }
         public decimal? Percentage { get; set; }
         public decimal? TotalCost { get; set; }
+        public bool? IsCountry { get; set; }
     }
 }
