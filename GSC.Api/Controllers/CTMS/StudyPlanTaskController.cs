@@ -67,6 +67,7 @@ namespace GSC.Api.Controllers.CTMS
             tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
             tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
+            tastMaster.IsCountry= taskmasterDto.RefrenceType == RefrenceType.Country;
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
@@ -238,11 +239,18 @@ namespace GSC.Api.Controllers.CTMS
             var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == data.Id && x.DependentTaskId == null) || (x.Id == data.DependentTaskId && x.DependentTaskId == data.Id)).ToList();
             foreach (var item in task)
             {
-                var tastMaster = _mapper.Map<StudyPlanTask>(item);
-                tastMaster.PreApprovalStatus = data.PreApprovalStatus;
-                _studyPlanTaskRepository.Update(tastMaster);
-                _uow.Save();
-
+                if (item.PreApprovalStatus == true)
+                {
+                    ModelState.AddModelError("Message", "This Task All Ready PreApproval");
+                    return BadRequest(ModelState);
+                }
+                else
+                {
+                    var tastMaster = _mapper.Map<StudyPlanTask>(item);
+                    tastMaster.PreApprovalStatus = data.PreApprovalStatus;
+                    _studyPlanTaskRepository.Update(tastMaster);
+                    _uow.Save();
+                }
             }
             return Ok(data);
         }

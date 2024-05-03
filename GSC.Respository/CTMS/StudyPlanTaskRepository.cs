@@ -643,7 +643,6 @@ namespace GSC.Respository.CTMS
         public StudyPlanTaskChartDto GetDocChart(int projectId, int? countryId)
         {
             StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
-
             var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null && x.IsCountry == countryId > 0).ToList();
 
             var TodayDate = DateTime.Now;

@@ -286,7 +286,7 @@ namespace GSC.Respository.CTMS
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(s => s.ParentProjectId).FirstOrDefault();
 
             var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
             : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
                 .Select(t => new StudyPlanTask
                 {
@@ -309,7 +309,7 @@ namespace GSC.Respository.CTMS
             tasklist.ForEach(t =>
             {
                 var tasklist1 = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == t.DependentTaskId
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Study
+            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
             : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
                 .Select(t => new StudyPlanTask
                 {
