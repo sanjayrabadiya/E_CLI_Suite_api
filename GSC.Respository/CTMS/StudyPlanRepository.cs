@@ -94,7 +94,7 @@ namespace GSC.Respository.CTMS
 
             var tasklist = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.DeletedDate == null && x.TaskMaster.TaskTemplateId == studyplan.TaskTemplateId
             && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites))
+            : x.RefrenceType == RefrenceType.Sites))
                 .Select(t => new StudyPlanTask
                 {
                     StudyPlanId = studyplan.Id,
@@ -121,7 +121,7 @@ namespace GSC.Respository.CTMS
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
-                    t.Parent = t;
+                    //t.Parent = t;
                     t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
@@ -285,70 +285,53 @@ namespace GSC.Respository.CTMS
 
             var ParentProject = _context.Project.Where(x => x.Id == studyplan.ProjectId).Select(s => s.ParentProjectId).FirstOrDefault();
 
-            var tasklist = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == id
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
-                .Select(t => new StudyPlanTask
-                {
-                    StudyPlanId = studyplan.Id,
-                    TaskId = t.TaskMaster.Id,
-                    TaskName = t.TaskMaster.TaskName,
-                    ParentId = t.TaskMaster.ParentId,
-                    isMileStone = t.TaskMaster.IsMileStone,
-                    TaskOrder = t.TaskMaster.TaskOrder,
-                    Duration = t.TaskMaster.Duration,
-                    StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
-                    DependentTaskId = t.TaskMaster.DependentTaskId,
-                    ActivityType = t.TaskMaster.ActivityType,
-                    OffSet = t.TaskMaster.OffSet,
-                    RefrenceType = t.RefrenceType,
-                    IsCountry = t.RefrenceType == RefrenceType.Country
-                }).ToList();
+            var tasklist = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.DeletedDate == null && x.TaskMaster.TaskTemplateId == studyplan.TaskTemplateId
+                      && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
+                      : x.RefrenceType == RefrenceType.Sites))
+                          .Select(t => new StudyPlanTask
+                          {
+                              StudyPlanId = studyplan.Id,
+                              TaskId = t.TaskMaster.Id,
+                              TaskName = t.TaskMaster.TaskName,
+                              ParentId = t.TaskMaster.ParentId,
+                              isMileStone = t.TaskMaster.IsMileStone,
+                              TaskOrder = t.TaskMaster.TaskOrder,
+                              Duration = t.TaskMaster.Duration,
+                              StartDate = studyplan.StartDate,
+                              EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
+                              DependentTaskId = t.TaskMaster.DependentTaskId,
+                              ActivityType = t.TaskMaster.ActivityType,
+                              OffSet = t.TaskMaster.OffSet,
+                              RefrenceType = t.RefrenceType,
+                              IsCountry = t.RefrenceType == RefrenceType.Country
+
+                          }).ToList();
 
             tasklist.ForEach(t =>
             {
-                var tasklist1 = _context.RefrenceTypes.Include(x => x.TaskMaster).Where(x => x.TaskMaster.DeletedDate == null && x.TaskMaster.Id == t.DependentTaskId
-            && (ParentProject == null ? x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Study
-            : x.RefrenceType == RefrenceType.Country || x.RefrenceType == RefrenceType.Sites) && x.DeletedBy == null)
-                .Select(t => new StudyPlanTask
-                {
-                    StudyPlanId = studyplan.Id,
-                    TaskId = t.TaskMaster.Id,
-                    TaskName = t.TaskMaster.TaskName,
-                    ParentId = t.TaskMaster.ParentId,
-                    isMileStone = t.TaskMaster.IsMileStone,
-                    TaskOrder = t.TaskMaster.TaskOrder,
-                    Duration = t.TaskMaster.Duration,
-                    StartDate = studyplan.StartDate,
-                    EndDate = WorkingDayHelper.AddBusinessDays(studyplan.StartDate, t.TaskMaster.Duration > 0 ? t.TaskMaster.Duration - 1 : 0),
-                    DependentTaskId = t.TaskMaster.DependentTaskId,
-                    ActivityType = t.TaskMaster.ActivityType,
-                    OffSet = t.TaskMaster.OffSet,
-                    RefrenceType = t.RefrenceType,
-                    IsCountry = t.RefrenceType == RefrenceType.Country
-                }).ToList();
-
-                var data = UpdateDependentTaskDate(t, ref tasklist1);
+                var data = UpdateDependentTaskDate(t, ref tasklist);
                 if (data != null)
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
-                    t.Parent = t;
-                    t.DependentTask = tasklist1.Find(d => d.TaskId == t.DependentTaskId);
+                    //t.Parent = t;
+                    t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
 
                 if (t.ParentId > 0)
                 {
-                    t.Parent = tasklist1.Find(x => x.TaskId == t.ParentId);
+                    t.Parent = tasklist.Find(x => x.TaskId == t.ParentId);
                     t.ParentId = null;
                 }
             });
 
             _context.StudyPlanTask.AddRange(tasklist);
             _context.Save();
+
+
             return "";
+
         }
         public bool UpdateApprovalPlan(int id, bool ifPlanApproval)
         {

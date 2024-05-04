@@ -48,95 +48,8 @@ namespace GSC.Respository.CTMS
             var result = new StudyPlanTaskGridDto();
       
             var TodayDate = DateTime.Now;
-            if (countryId > 0)
-            {
-                bool issite = true;
-                var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == ProjectId
-                                                          && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-                                                          && a.UserId == _jwtTokenAccesser.UserId
-                                                          && a.RoleId == _jwtTokenAccesser.RoleId
-                                                          && a.DeletedDate == null
-                                                          && a.RollbackReason == null)
-                                                          && x.ManageSite.City.State.CountryId == countryId
-                                                          && x.DeletedDate == null).ToList();
-
-                if (projectIds.Count == 0)
-                {
-                    issite = false;
-                    projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
-                                     _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-                                    && a.UserId == _jwtTokenAccesser.UserId
-                                    && a.RoleId == _jwtTokenAccesser.RoleId
-                                    && a.DeletedDate == null
-                                     && a.RollbackReason == null)
-                                    && x.ManageSite.City.State.CountryId == countryId
-                                    && x.Id == ProjectId
-                                    && x.DeletedDate == null).ToList();
-                }
-
-
-                var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-
-                foreach (var item in studyplans)
-                {
-                    result.StartDate = item?.StartDate;
-                    result.EndDate = item?.EndDate;
-                    result.EndDateDay = item?.EndDate;
-                    result.StudyPlanId = StudyPlanId;
-
-
-                        var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.IsCountry == (countryId > 0 && issite)).OrderBy(x => x.TaskOrder).
-                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-
-                        var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == 0 && x.IsCountry == (countryId > 0 && issite)).OrderBy(x => x.TaskOrder).
-                        ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-
-                        if (tasklist.Exists(x => TodayDate < x.StartDate))
-                            tasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
-
-                        if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                            tasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
-
-                        if (tasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
-                            tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
-
-                        if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
-                            tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
-
-                        if (tasklist.Exists(x => x.EndDate < x.ActualEndDate))
-                            tasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
-
-                        result.StudyPlanTask = tasklist;
-                        result.StudyPlanTaskTemp = tasklistResource;
-
-                        //sub task wise grid disply Add by mitul on 09-01-2024
-                        result.StudyPlanTask.ForEach(s =>
-                        {
-                            var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id && x.ParentId == s.Id).OrderBy(x => x.TaskOrder).
-                                ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-
-                            if (subtasklist.Exists(x => TodayDate < x.StartDate))
-                                subtasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
-
-                            if (subtasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                                subtasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
-
-                            if (subtasklist.Exists(x => x.StartDate < TodayDate && x.ActualStartDate == null))
-                                subtasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
-
-                            if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null))
-                                subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
-
-                            if (subtasklist.Exists(x => x.EndDate < x.ActualEndDate))
-                                subtasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
-
-                            s.Subtasks = subtasklist;
-                        });
-                    
-                }
-            }
-            else
-            {
+        
+       
                 var studyplan = _context.StudyPlan.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
                 result.StartDate = studyplan?.StartDate;
                 result.EndDate = studyplan?.EndDate;
@@ -145,10 +58,10 @@ namespace GSC.Respository.CTMS
 
                 if (studyplan != null)
                 {
-                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.IsCountry == false).OrderBy(x => x.TaskOrder).
+                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.IsCountry == countryId > 0).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0 && x.IsCountry == false).OrderBy(x => x.TaskOrder).
+                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0 && x.IsCountry == countryId > 0).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                     if (tasklist.Exists(x => TodayDate < x.StartDate))
@@ -193,7 +106,7 @@ namespace GSC.Respository.CTMS
                         s.Subtasks = subtasklist;
                     });
                 }
-            }
+         
             //Add by mitul task was Resource Add
             if (result.StudyPlanTaskTemp != null)
                 foreach (var item in result.StudyPlanTaskTemp)
