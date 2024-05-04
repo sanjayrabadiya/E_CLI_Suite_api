@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Office2010.ExcelAc;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
@@ -13,8 +12,9 @@ using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq.Dynamic.Core;
+using GSC.Respository.EmailSender;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace GSC.Api.Controllers.CTMS
@@ -28,10 +28,13 @@ namespace GSC.Api.Controllers.CTMS
         private readonly ICtmsStudyPlanTaskCommentRepository _ctmsStudyPlanTaskCommentRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IStudyPlanRepository _studyPlanRepository;
+        private readonly IEmailSenderRespository _emailSenderRespository;
 
         public CtmsWorkflowApprovalController(IUnitOfWork uow, IMapper mapper,
             ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository, IJwtTokenAccesser
-            jwtTokenAccesser, IStudyPlanRepository studyPlanRepository, ICtmsStudyPlanTaskCommentRepository ctmsStudyPlanTaskCommentRepository)
+            jwtTokenAccesser, IStudyPlanRepository studyPlanRepository,
+            ICtmsStudyPlanTaskCommentRepository ctmsStudyPlanTaskCommentRepository,
+            IEmailSenderRespository emailSenderRespository)
         {
             _uow = uow;
             _mapper = mapper;
@@ -39,6 +42,7 @@ namespace GSC.Api.Controllers.CTMS
             _jwtTokenAccesser = jwtTokenAccesser;
             _studyPlanRepository = studyPlanRepository;
             _ctmsStudyPlanTaskCommentRepository = ctmsStudyPlanTaskCommentRepository;
+            _emailSenderRespository = emailSenderRespository;
         }
 
         [HttpGet("{id}")]
@@ -73,8 +77,16 @@ namespace GSC.Api.Controllers.CTMS
                 approverDto.SendDate = DateTime.Now;
                 var approver = _mapper.Map<CtmsWorkflowApproval>(approverDto);
                 _ctmsWorkflowApprovalRepository.Add(approver);
-                _uow.Save();
             }
+
+            _uow.Save();
+
+            var userIds = approversDto.Select(x => x.UserId).ToList();
+
+            var approverDetails = _ctmsWorkflowApprovalRepository.All.Where(x => x.StudyPlanId == approversDto.First().StudyPlanId
+            && x.ProjectId == approversDto.First().ProjectId && x.DeletedDate == null
+            && x.TriggerType == approversDto.First().TriggerType && userIds.Contains(x.UserId)).Include(i => i.User).Include(i => i.Project).ToList();
+            _emailSenderRespository.SendCtmsApprovalEmail(approverDetails);
 
             return Ok(approversDto.Count);
         }
@@ -113,6 +125,13 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", "Error to save");
                 return BadRequest(ModelState);
             }
+
+            var approverDetails = _ctmsWorkflowApprovalRepository.All.Where(x => x.Id == approver.Id
+            && x.StudyPlanId == approver.StudyPlanId && x.ProjectId == approver.ProjectId).Include(i => i.User).Include(i => i.Project).ToList();
+
+            if (approverDetails.Any())
+                _emailSenderRespository.SendCtmsApprovalEmail(approverDetails);
+
             return Ok(result);
         }
 
@@ -147,6 +166,23 @@ namespace GSC.Api.Controllers.CTMS
 
                 _studyPlanRepository.Update(studyPlan);
                 _uow.Save();
+
+
+            }
+
+
+
+            var approverDetails = _ctmsWorkflowApprovalRepository.All.Where(x => x.Id == approver.Id
+          && x.StudyPlanId == approver.StudyPlanId && x.ProjectId == approver.ProjectId).Include(i => i.User).Include(i => i.Sender)
+          .Include(i => i.Project).ToList();
+
+
+            if (approverDetails.Any())
+            {
+                if (approver.IsApprove == false)
+                    _emailSenderRespository.SendCtmsReciverEmail(approverDetails);
+                else
+                    _emailSenderRespository.SendCtmsApprovedEmail(approverDetails);
             }
 
             return Ok(approver.Id);

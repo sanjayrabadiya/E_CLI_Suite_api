@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Wordprocessing;
 using GSC.Common.GenericRespository;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.LabManagement;
@@ -136,7 +137,7 @@ namespace GSC.Respository.EmailSender
         {
             var emailMessage = ConfigureEmail("ResourceMilestonDue", "");
             emailMessage.SendTo = "mitulvaghasiya0@gmail.com";
-            emailMessage.MessageBody = ReplaceBodyForCTMSfDueDate(emailMessage.MessageBody,resourceMilestone);
+            emailMessage.MessageBody = ReplaceBodyForCTMSfDueDate(emailMessage.MessageBody, resourceMilestone);
             _emailService.SendMail(emailMessage);
         }
 
@@ -1210,7 +1211,7 @@ namespace GSC.Respository.EmailSender
             var roleName = _jwtTokenAccesser.RoleName;
             var emailMessage = ConfigureEmail("CtmsApproval", userName);
             emailMessage.SendTo = ctmsApprovalWorkFlowDetail.Users.Email;
-            emailMessage.MessageBody =  ReplaceBodyCtmsApproval(ctmsApprovalWorkFlowDetail.CtmsApprovalRoles.EmailTemplate, userName, roleName, ctmsApprovalWorkFlowDetail);
+            emailMessage.MessageBody = ReplaceBodyCtmsApproval(ctmsApprovalWorkFlowDetail.CtmsApprovalRoles.EmailTemplate, userName, roleName, ctmsApprovalWorkFlowDetail);
             emailMessage.Subject = ReplaceSubjectForCtmsApproval(emailMessage.Subject, userName, ctmsApprovalWorkFlowDetail, ifPlanApproval);
             _emailService.SendMail(emailMessage);
         }
@@ -1230,11 +1231,12 @@ namespace GSC.Respository.EmailSender
 
             return body;
         }
-        private string ReplaceSubjectForCtmsApproval(string body, string userName,  CtmsApprovalUsers ctmsApprovalWorkFlowDetail, bool ifPlanApproval) { 
+        private string ReplaceSubjectForCtmsApproval(string body, string userName, CtmsApprovalUsers ctmsApprovalWorkFlowDetail, bool ifPlanApproval)
+        {
 
-            body = Regex.Replace(body, "##IFAPPROVAL##", ifPlanApproval ? "Approval": "Not Approval", RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##IFAPPROVAL##", ifPlanApproval ? "Approval" : "Not Approval", RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>IFAPPROVAL</strong>##", "<strong>" + (ifPlanApproval ? "Approval" : "Not Approval") + "</strong>", RegexOptions.IgnoreCase);
-        
+
             body = Regex.Replace(body, "##USERNAME##", userName, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>USERNAME</strong>##", "<strong>" + userName + "</strong>", RegexOptions.IgnoreCase);
 
@@ -1244,6 +1246,69 @@ namespace GSC.Respository.EmailSender
             body = Regex.Replace(body, "##STUDYCODE##", ctmsApprovalWorkFlowDetail.CtmsApprovalRoles.Project.ProjectCode, RegexOptions.IgnoreCase);
             body = Regex.Replace(body, "##<strong>STUDYCODE</strong>##", "<strong>" + ctmsApprovalWorkFlowDetail.CtmsApprovalRoles.Project.ProjectCode + "</strong>", RegexOptions.IgnoreCase);
 
+            return body;
+        }
+
+        public void SendCtmsApprovalEmail(List<CtmsWorkflowApproval> ctmsWorkflowApprovals)
+        {
+            foreach (var approver in ctmsWorkflowApprovals)
+            {
+                var emailMessage = ConfigureEmail("CtmsSendForApproval", approver.User.UserName);
+                emailMessage.SendTo = approver.User.Email;
+                emailMessage.Subject = ReplaceCtmsApprovalSubject(emailMessage.Subject, approver.Project.ProjectCode);
+                emailMessage.MessageBody = ReplaceCtmsApprovalBody(emailMessage.MessageBody, approver.User.FirstName + " " + approver.User.LastName, approver.Project.ProjectCode, approver.SenderComment, approver.TriggerType.GetDescription());
+                _emailService.SendMail(emailMessage);
+            }
+        }
+
+        public void SendCtmsReciverEmail(List<CtmsWorkflowApproval> ctmsWorkflowApprovals)
+        {
+            foreach (var approver in ctmsWorkflowApprovals)
+            {
+                var emailMessage = ConfigureEmail("CtmsRecivedForApproval", approver.Sender.UserName);
+                emailMessage.SendTo = approver.Sender.Email;
+                emailMessage.Subject = ReplaceCtmsApprovalSubject(emailMessage.Subject, approver.Project.ProjectCode);
+                emailMessage.MessageBody = ReplaceCtmsReciverBody(emailMessage.MessageBody, approver.Sender.FirstName + " " + approver.Sender.LastName, approver.Project.ProjectCode, approver.ApproverComment, approver.TriggerType.GetDescription(), approver.User.FirstName + " " + approver.User.LastName);
+                _emailService.SendMail(emailMessage);
+            }
+        }
+
+        public void SendCtmsApprovedEmail(List<CtmsWorkflowApproval> ctmsWorkflowApprovals)
+        {
+            foreach (var approver in ctmsWorkflowApprovals)
+            {
+                var emailMessage = ConfigureEmail("CtmsApproved", approver.Sender.UserName);
+                emailMessage.SendTo = approver.Sender.Email;
+                emailMessage.Subject = ReplaceCtmsApprovalSubject(emailMessage.Subject, approver.Project.ProjectCode);
+                emailMessage.MessageBody = ReplaceCtmsReciverBody(emailMessage.MessageBody, approver.Sender.FirstName + " " + approver.Sender.LastName, approver.Project.ProjectCode, approver.ApproverComment, approver.TriggerType.GetDescription(), approver.User.FirstName + " " + approver.User.LastName);
+                _emailService.SendMail(emailMessage);
+            }
+        }
+
+        private string ReplaceCtmsApprovalBody(string body, string userName, string studyCode, string message, string triggerType)
+        {
+            body = Regex.Replace(body, "##USERNAME##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##STUDYCODE##", studyCode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##TRIGGERTYPE##", triggerType, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##MESSAGE##", message, RegexOptions.IgnoreCase);
+
+            return body;
+        }
+
+        private string ReplaceCtmsReciverBody(string body, string userName, string studyCode,
+            string message, string triggerType, string senderUserName)
+        {
+            body = Regex.Replace(body, "##USERNAME##", userName, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##STUDYCODE##", studyCode, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##TRIGGERTYPE##", triggerType, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##MESSAGE##", message, RegexOptions.IgnoreCase);
+            body = Regex.Replace(body, "##APPROVERNAME##", senderUserName, RegexOptions.IgnoreCase);
+            return body;
+        }
+
+        private string ReplaceCtmsApprovalSubject(string body, string studyCode)
+        {
+            body = Regex.Replace(body, "##STUDYCODE##", studyCode, RegexOptions.IgnoreCase);
             return body;
         }
     }
