@@ -97,7 +97,7 @@ namespace GSC.Respository.CTMS
                 for (int i = 0; i < taskmasterDto.RefrenceTypes.Count; i++)
                 {
                     RefrenceTypes item = taskmasterDto.RefrenceTypes[i];
-                    if (sitedata == null && (item.RefrenceType == Helper.RefrenceType.Sites || item.RefrenceType == Helper.RefrenceType.Country))
+                    if (sitedata == null && (item.RefrenceType == Helper.RefrenceType.Sites ))
                     {
                         var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == projectid).ToList();
                         sites.ForEach(s =>
@@ -110,7 +110,7 @@ namespace GSC.Respository.CTMS
                             lstStudyPlan.Add(data);
                         });
                     }
-                    else if (sitedata != null && (item.RefrenceType == Helper.RefrenceType.Sites || item.RefrenceType == Helper.RefrenceType.Country))
+                    else if (sitedata != null && (item.RefrenceType == Helper.RefrenceType.Sites ))
                     {
                         var sites = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId != null).ToList();
                         sites.ForEach(s =>
@@ -124,7 +124,7 @@ namespace GSC.Respository.CTMS
                             lstStudyPlan.Add(data);
                         });
                     }
-                    else if (item.RefrenceType == Helper.RefrenceType.Study)
+                    else if (item.RefrenceType == Helper.RefrenceType.Study || item.RefrenceType == Helper.RefrenceType.Country)
                     {
                         var sites = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId == null).ToList();
                         sites.ForEach(s =>
