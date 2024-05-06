@@ -163,7 +163,7 @@ namespace GSC.Api.Controllers.CTMS
             var AllProject = _context.Project.Where(x => x.DeletedDate == null && (x.ParentProjectId == record.ProjectId || x.Id == record.ProjectId)).ToList();
             foreach (var item in AllProject)
             {
-                var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate != null && x.ProjectId == item.Id).FirstOrDefault();
+                var data = _studyPlanRepository.FindByInclude(x => x.DeletedDate != null && x.ProjectId == item.Id && x.Id == id).FirstOrDefault();
                 if (data != null)
                 {
                     var validatecode = _studyPlanRepository.Duplicate(data);
