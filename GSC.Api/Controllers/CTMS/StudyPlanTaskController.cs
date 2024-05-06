@@ -237,6 +237,8 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (data.Id <= 0) return BadRequest();
             var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == data.Id && x.DependentTaskId == null) || (x.Id == data.DependentTaskId && x.DependentTaskId == data.Id)).ToList();
+            if(task.Count>0)
+            {     
             foreach (var item in task)
             {
                 if (item.PreApprovalStatus == true)
@@ -251,6 +253,12 @@ namespace GSC.Api.Controllers.CTMS
                     _studyPlanTaskRepository.Update(tastMaster);
                     _uow.Save();
                 }
+            }
+            }
+            else
+            {
+                ModelState.AddModelError("Message", "All Ready PreApproval Dependent Task.");
+                return BadRequest(ModelState);
             }
             return Ok(data);
         }
