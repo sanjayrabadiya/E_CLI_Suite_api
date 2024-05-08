@@ -109,7 +109,7 @@ namespace GSC.Respository.Master
             //Onetime Task Seleect then not get in list 
             var PaymentMilestoneTask = _context.PaymentMilestoneTaskDetail.Include(i => i.ResourceMilestone).Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ResourceMilestone.ProjectId) && w.DeletedBy == null).ToList();
 
-            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.isMileStone || x.DependentTaskId == null) && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id)
+            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.IsPaymentMileStone || x.DependentTaskId == null) && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
         public decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto)

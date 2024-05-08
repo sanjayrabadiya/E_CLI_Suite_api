@@ -156,7 +156,7 @@ namespace GSC.Api.Controllers.CTMS
         }
 
         [HttpGet("ConverttoMileStone/{id:int}/{isPaymentMileStone:bool?}")]
-        public IActionResult ConverttoMileStone(int id, bool? isPaymentMileStone)
+        public IActionResult ConverttoMileStone(int id, bool isPaymentMileStone)
         {
             if (id <= 0) return BadRequest();
             var milestonetask = _studyPlanTaskRepository.Find(id);
