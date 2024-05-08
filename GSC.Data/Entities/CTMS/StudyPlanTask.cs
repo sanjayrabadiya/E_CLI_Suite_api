@@ -13,7 +13,7 @@ namespace GSC.Data.Entities.CTMS
         public string TaskName { get; set; }
         public int? ParentId { get; set; }
         public bool isMileStone { get; set; }
-        public bool? IsPaymentMileStone { get; set; }
+        public bool IsPaymentMileStone { get; set; }
         public int Duration { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
