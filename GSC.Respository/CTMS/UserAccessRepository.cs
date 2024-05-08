@@ -280,7 +280,11 @@ namespace GSC.Respository.CTMS
         }
         public List<DropDownDto> GetRollUserDropDown()
         {
-            var data = _context.UserRole.Where(x => x.DeletedBy == null && x.User.DeletedBy == null && x.SecurityRole.DeletedBy == null)
+            var rolePermissionIds = _context.RolePermission.Where(x => x.ScreenCode == "mnu_ctms"
+            && x.DeletedDate == null && x.IsView && x.IsEdit).Select(s => s.UserRoleId).ToList();
+
+
+            var data = _context.UserRole.Where(x => x.DeletedBy == null && x.User.DeletedBy == null && x.SecurityRole.DeletedBy == null && rolePermissionIds.Contains(x.SecurityRole.Id))
                              .Select(c => new DropDownDto { Id = c.Id, Value = c.User.FirstName + ' ' + c.User.LastName, ExtraData = c.SecurityRole.RoleName, IsDeleted = c.DeletedDate != null })
                              .OrderBy(o => o.Value).ToList();
             return data;
