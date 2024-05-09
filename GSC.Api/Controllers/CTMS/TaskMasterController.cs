@@ -71,7 +71,8 @@ namespace GSC.Api.Controllers.CTMS
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Task failed on save."));
             taskmasterDto.Id = tastMaster.Id;
             _taskMasterRepository.AddRefrenceTypes(taskmasterDto);
-            _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
+            //this comment not remove add by mitul on 0805-2024
+            //_taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(tastMaster.Id);
         }
 
@@ -90,7 +91,8 @@ namespace GSC.Api.Controllers.CTMS
             UpdateRefrenceTypes(taskmaster);
             _taskMasterRepository.Update(taskmaster);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
-            _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
+            //this comment not remove add by mitul on 0805-2024
+            // _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(taskmaster.Id);
         }
 
