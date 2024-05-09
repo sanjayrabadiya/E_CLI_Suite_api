@@ -239,20 +239,17 @@ namespace GSC.Api.Controllers.CTMS
             var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == data.Id && x.DependentTaskId == null) || (x.Id == data.DependentTaskId && x.DependentTaskId == data.Id)).ToList();
             if(task.Count>0)
             {     
-            foreach (var item in task)
-            {
-                if (item.PreApprovalStatus == true)
+                if(task.Exists(s=>s.Id==data.DependentTaskId))
                 {
                     ModelState.AddModelError("Message", "This Task All Ready PreApproval");
                     return BadRequest(ModelState);
                 }
-                else
-                {
+            foreach (var item in task)
+            {
                     var tastMaster = _mapper.Map<StudyPlanTask>(item);
                     tastMaster.PreApprovalStatus = data.PreApprovalStatus;
                     _studyPlanTaskRepository.Update(tastMaster);
-                    _uow.Save();
-                }
+                    _uow.Save(); 
             }
             }
             else
