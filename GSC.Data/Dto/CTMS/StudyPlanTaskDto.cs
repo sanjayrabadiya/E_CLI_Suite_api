@@ -44,6 +44,8 @@ namespace GSC.Data.Dto.CTMS
         public string ApprovalStatus { get; set; }
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
+        public string TaskDocumentFileName { get; set; }
+        public string TaskDocumentFilePath { get; set; }
         public string Site { get; set; }
         public decimal? Percentage { get; set; }
         public string GlobalCurrencySymbol { get; set; }
