@@ -67,7 +67,7 @@ namespace GSC.Api.Controllers.CTMS
             tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
             tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
-            tastMaster.IsCountry= taskmasterDto.RefrenceType == RefrenceType.Country;
+            tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
@@ -227,7 +227,7 @@ namespace GSC.Api.Controllers.CTMS
 
         [Route("GetChartReport/{projectId}/{chartType:int?}/{countryId:int?}")]
         [HttpGet]
-        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType,int? countryId)
+        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType, int? countryId)
         {
             var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType, countryId);
             return Ok(report);
@@ -237,20 +237,20 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (data.Id <= 0) return BadRequest();
             var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == data.Id && x.DependentTaskId == null) || (x.Id == data.DependentTaskId && x.DependentTaskId == data.Id)).ToList();
-            if(task.Count>0)
-            {     
-                if(task.Exists(s=>s.Id==data.DependentTaskId))
+            if (task.Count > 0)
+            {
+                if (task.Exists(s => s.Id == data.DependentTaskId))
                 {
                     ModelState.AddModelError("Message", "This Task All Ready PreApproval");
                     return BadRequest(ModelState);
                 }
-            foreach (var item in task)
-            {
+                foreach (var item in task)
+                {
                     var tastMaster = _mapper.Map<StudyPlanTask>(item);
                     tastMaster.PreApprovalStatus = data.PreApprovalStatus;
                     _studyPlanTaskRepository.Update(tastMaster);
-                    _uow.Save(); 
-            }
+                    _uow.Save();
+                }
             }
             else
             {
@@ -262,7 +262,7 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("GetPreApprovalList/{isDeleted:bool?}/{studyPlanTaskId}")]
         public IActionResult GetPreApprovalList(bool isDeleted, int studyPlanTaskId)
         {
-            var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == studyPlanTaskId && x.PreApprovalStatus == true) || (x.DependentTaskId == studyPlanTaskId && x.PreApprovalStatus == true)).ToList();
+            var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == studyPlanTaskId && x.PreApprovalStatus == true) || (x.DependentTaskId == studyPlanTaskId && x.PreApprovalStatus == true) && (x.DeletedBy == null)).ToList();
             return Ok(task);
         }
 
