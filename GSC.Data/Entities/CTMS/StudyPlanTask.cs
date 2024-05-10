@@ -37,6 +37,8 @@ namespace GSC.Data.Entities.CTMS
         public bool? ApprovalStatus { get; set; }
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
+        public string TaskDocumentFileName { get; set; }
+        public string TaskDocumentFilePath { get; set; }
         public decimal? Percentage { get; set; }
         public decimal? TotalCost { get; set; }
         public bool IsCountry { get; set; }

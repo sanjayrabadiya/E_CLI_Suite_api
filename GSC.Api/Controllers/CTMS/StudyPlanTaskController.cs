@@ -98,10 +98,10 @@ namespace GSC.Api.Controllers.CTMS
 
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
             var document = _studyPlanTaskRepository.Find(taskmasterDto.Id);
-            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.DocumentPath);
-            if (taskmasterDto.FileModel?.Base64?.Length > 0)
+            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.TaskDocumentFilePath);
+            if (taskmasterDto.TaskDocumentFileModel?.Base64?.Length > 0)
             {
-                tastMaster.DocumentPath = DocumentService.SaveUploadDocument(taskmasterDto.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+                tastMaster.TaskDocumentFilePath = DocumentService.SaveUploadDocument(taskmasterDto.TaskDocumentFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
             }
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
@@ -150,6 +150,15 @@ namespace GSC.Api.Controllers.CTMS
                 _studyPlanTaskRepository.Delete(task);
             }
             _studyPlanTaskRepository.Delete(record.Id);
+
+
+            var childTaskList = _studyPlanTaskRepository.All.Where(x => x.DeletedDate == null && x.DependentTaskId == id);
+            foreach (var childTask in childTaskList)
+            {
+                childTask.DependentTaskId = null;
+                _studyPlanTaskRepository.Update(childTask);
+            }
+
             _uow.Save();
             _studyPlanTaskRepository.UpdateTaskOrderSequence(record.StudyPlanId);
             return Ok();
@@ -324,6 +333,13 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult getDesignationStdDropDown(int studyplanId)
         {
             return Ok(_studyPlanTaskRepository.GetDesignationStdDropDown(studyplanId));
+        }
+
+        [HttpGet]
+        [Route("GetSubTaskList/{parentTaskId}")]
+        public IActionResult GetSubTaskList(int parentTaskId)
+        {
+            return Ok(_studyPlanTaskRepository.GetSubTaskList(parentTaskId));
         }
     }
 }

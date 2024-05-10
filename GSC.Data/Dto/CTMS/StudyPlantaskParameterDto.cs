@@ -34,6 +34,9 @@ namespace GSC.Data.Dto.CTMS
         public FileModel FileModel { get; set; }
         public string FileName { get; set; }
         public string DocumentPath { get; set; }
+        public FileModel TaskDocumentFileModel { get; set; }
+        public string TaskDocumentFileName { get; set; }
+        public string TaskDocumentFilePath { get; set; }
         public decimal? Percentage { get; set; }
     }
     public class DependentTaskParameterDto : BaseDto
