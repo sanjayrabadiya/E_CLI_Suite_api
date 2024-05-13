@@ -2,6 +2,7 @@
 using GSC.Data.Dto.Report;
 using GSC.Respository.Screening;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace GSC.Api.Controllers.Report
 {
@@ -17,11 +18,11 @@ namespace GSC.Api.Controllers.Report
 
         [HttpPost]
         [Route("GetProjectDatabaseEntries")]
-        public IActionResult GetProjectDatabaseEntries([FromBody] ProjectDatabaseSearchDto filters)
+        public async Task<IActionResult> GetProjectDatabaseEntries([FromBody] ProjectDatabaseSearchDto filters)
         {
             if (filters.ProjectId.Length <= 0) return BadRequest();
 
-            _screeningTemplateValueRepository.GetProjectDatabaseEntries(filters);
+            await _screeningTemplateValueRepository.GetProjectDatabaseEntries(filters);
             return Ok();
         }
     }

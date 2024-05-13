@@ -24,6 +24,10 @@ namespace GSC.Common.GenericRespository
             this.Context.SetDBConnection(connectionString);
         }
 
+        public void SetConnectionTimeOut(int timeoutinSeconds)
+        {
+            this.Context.SetConnectionTimeOut(timeoutinSeconds);
+        }
         public IQueryable<TC> All => Context.Set<TC>();
 
         public virtual void Add(TC entity)

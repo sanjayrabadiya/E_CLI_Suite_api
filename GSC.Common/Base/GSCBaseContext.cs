@@ -34,7 +34,7 @@ namespace GSC.Common.Base
 
             SetAuditInformation();
             var audits = _commonSharedService.AuditTracker.GetAuditTracker(GetAuditTracker(), this);
-            var result =  base.SaveChangesAsync(cancellationToken);
+            var result = base.SaveChangesAsync(cancellationToken);
             AduitSave(audits);
             return result;
         }
@@ -97,6 +97,12 @@ namespace GSC.Common.Base
         public string GetConnectionString()
         {
             return this.Database.GetConnectionString();
+        }
+
+        public void SetConnectionTimeOut(int timeoutinSeconds)
+        {
+            this.Database.AutoTransactionsEnabled = false;
+            this.Database.SetCommandTimeout(timeoutinSeconds);
         }
 
         public IQueryable<TEntity> FromSql<TEntity>(string sql, params object[] parameters) where TEntity : class => Set<TEntity>().FromSqlRaw(sql, parameters);

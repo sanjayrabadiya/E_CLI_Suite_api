@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using GSC.Data.Entities.Common;
 using GSC.Helper;
 using GSC.Shared.Extension;
@@ -47,8 +48,8 @@ namespace GSC.Data.Dto.Report
         public List<ProjectDatabaseDto> LstProjectDataBase { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseVisit { get; set; }
         public List<ProjectDatabaseDto> LstProjectDataBaseitems { get; set; }
-        public string VariableChildValue { get; set; }
         public string VariableCode { get; set; }
+        public string VariableChildValue { get; set; }
     }
 
     public class ProjectDatabaseDomainDto
@@ -208,5 +209,12 @@ namespace GSC.Data.Dto.Report
         public string Visit { get; set; }
         public int FirstCell { get; set; }
         public int LastCell { get; set; }
+    }
+
+    public class ReportProjectDesignValue
+    {
+        [Key]
+        public int Id { get; set; }
+        public string Value { get; set; }
     }
 }

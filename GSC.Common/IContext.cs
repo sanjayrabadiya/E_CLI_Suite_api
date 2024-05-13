@@ -29,5 +29,6 @@ namespace GSC.Common
         void DetachAllEntities();
         DbSet<AuditTrail> AuditTrail { get; set; }
         string GetConnectionString();
+        void SetConnectionTimeOut(int timeoutinSeconds);
     }
 }
