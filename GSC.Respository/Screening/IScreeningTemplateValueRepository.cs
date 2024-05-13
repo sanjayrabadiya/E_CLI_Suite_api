@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Report;
@@ -20,7 +21,7 @@ namespace GSC.Respository.Screening
         bool IsFitness(int screeningTemplateId);
         bool IsDiscontinued(int screeningTemplateId);
 
-        void GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
+        Task GetProjectDatabaseEntries(ProjectDatabaseSearchDto filters);
         List<TemplateTotalQueryDto> GetQueryStatusBySubject(int screeningEntryId);
 
         List<VariableQueryDto> GetTemplateQueryList(int screeningTemplateId);
