@@ -33,5 +33,6 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetDesignationStdDropDown(int studyplanId);
         List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId);
         List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId);
+        ParentTaskDate GetChildStartEndDate(int parentTaskId);
     }
 }

@@ -55,6 +55,13 @@ namespace GSC.Api.Controllers.CTMS
             if (id <= 0) return BadRequest();
             var task = _studyPlanTaskRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
             var taskDto = _mapper.Map<StudyPlanTaskDto>(task);
+
+            var taskDate = _studyPlanTaskRepository.GetChildStartEndDate(id);
+            if (taskDate != null)
+            {
+                taskDto.ActualStartDate = taskDate.StartDate;
+                taskDto.ActualEndDate = taskDate.EndDate;
+            }
             return Ok(taskDto);
         }
 
