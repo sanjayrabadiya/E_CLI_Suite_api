@@ -88,6 +88,14 @@ namespace GSC.Respository.CTMS
                     var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == s.Id).OrderBy(x => x.TaskOrder).
                         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
+                    if (subtasklist.Any())
+                    {
+                        s.ActualStartDate = subtasklist.Min(s => s.StartDate);
+                        s.ActualEndDate = subtasklist.Max(s => s.EndDate);
+                        s.IsParentTask = true;
+                    }
+
+
                     if (subtasklist.Exists(x => TodayDate < x.StartDate))
                         subtasklist.Where(x => TodayDate < x.StartDate).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
@@ -103,6 +111,8 @@ namespace GSC.Respository.CTMS
                     if (subtasklist.Exists(x => x.EndDate < x.ActualEndDate))
                         subtasklist.Where(x => x.EndDate < x.ActualEndDate).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
+
+                    
                     s.Subtasks = subtasklist;
                 });
             }
@@ -891,11 +901,33 @@ namespace GSC.Respository.CTMS
 
         public List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId)
         {
-            var taskList = All.Where(x => x.DeletedDate == null 
+            var taskList = All.Where(x => x.DeletedDate == null
             && (x.DependentTaskId == parentTaskId || x.ParentId == parentTaskId))
                 .ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
             return taskList;
+        }
+
+        public ParentTaskDate GetChildStartEndDate(int parentTaskId)
+        {
+            var taskDateList = All.Where(x => x.DeletedDate == null
+            && x.ParentId == parentTaskId);
+
+            if (taskDateList.Any())
+            {
+                var minDate = taskDateList.Min(s => s.StartDate);
+                var maxDate = taskDateList.Max(s => s.EndDate);
+
+                var objDate = new ParentTaskDate
+                {
+                    StartDate = minDate,
+                    EndDate= maxDate
+                };
+
+                return objDate;
+            }
+
+            return null;
         }
     }
 }

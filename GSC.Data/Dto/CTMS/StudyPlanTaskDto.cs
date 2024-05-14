@@ -56,6 +56,7 @@ namespace GSC.Data.Dto.CTMS
         public List<StudyPlanTaskDto> Subtasks { get; set; }
         public List<ResourceTypeGridDto> TaskResource { get; set; }
         public string RefrenceTypeName { get; set; }
+        public bool IsParentTask { get; set; }
     }
 
     public class StudyPlanTaskChartDto
@@ -92,5 +93,11 @@ namespace GSC.Data.Dto.CTMS
         public int? DesignationId { get; set; }
         public bool? ResourceNotAdded { get; set; }
         public bool? ResourceAdded { get; set; }
+    }
+
+    public class ParentTaskDate
+    {
+        public DateTime StartDate { get; set; }
+        public DateTime EndDate { get; set; }
     }
 }
