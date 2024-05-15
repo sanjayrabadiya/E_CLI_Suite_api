@@ -1241,4 +1241,12 @@ namespace GSC.Helper
         [Description("Activity")] Activity = 1,
         [Description("lumpsum / Advanced")] lumpsum = 2
     }
+
+    public enum CtmsStudyTaskFilter : short
+    {
+        [Description("All")] All = 1,
+        [Description("Study")] Study = 2,
+        [Description("Country")] Country = 3,
+        [Description("Site")] Site = 4
+    }
 }

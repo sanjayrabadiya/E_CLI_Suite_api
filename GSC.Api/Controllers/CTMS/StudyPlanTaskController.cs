@@ -42,10 +42,10 @@ namespace GSC.Api.Controllers.CTMS
             _uploadSettingRepository = uploadSettingRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}/{countryId:int}")]
-        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId, int countryId)
+        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}/{filterId:int}")]
+        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterId)
         {
-            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId, countryId);
+            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId, filterId);
             return Ok(studyplan);
         }
 
