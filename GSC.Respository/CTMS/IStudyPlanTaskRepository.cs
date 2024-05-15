@@ -12,7 +12,7 @@ namespace GSC.Respository.CTMS
 {
     public interface IStudyPlanTaskRepository : IGenericRepository<StudyPlanTask>
     {
-        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, int countryId);
+        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType);
         int UpdateTaskOrder(StudyPlantaskParameterDto taskmasterDto);
         string ValidateTask(StudyPlanTask taskmasterDto);
         void UpdateParentDate(int? ParentId);

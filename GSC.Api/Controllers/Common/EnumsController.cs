@@ -1276,5 +1276,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+        [HttpGet]
+        [Route("GetCtmsStudyTaskFilterDropdown")]
+        public IActionResult GetCtmsStudyTaskFilterDropdown()
+        {
+            var centri = Enum.GetValues(typeof(CtmsStudyTaskFilter))
+                .Cast<CtmsStudyTaskFilter>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
     }
 }
