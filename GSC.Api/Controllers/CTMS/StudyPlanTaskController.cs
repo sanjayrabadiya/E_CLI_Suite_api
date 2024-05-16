@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
@@ -12,8 +13,10 @@ using GSC.Helper;
 using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
 using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -233,11 +236,11 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(studyplan);
         }
 
-        [Route("GetDocChart/{projectId}/{countryId:int?}")]
+        [Route("GetDocChart/{projectId}/{filterId:int}")]
         [HttpGet]
-        public IActionResult GetDocChart(int projectId, int? countryId)
+        public IActionResult GetDocChart(int projectId, CtmsStudyTaskFilter filterId)
         {
-            var result = _studyPlanTaskRepository.GetDocChart(projectId, countryId);
+            var result = _studyPlanTaskRepository.GetDocChart(projectId, filterId);
             return Ok(result);
         }
 
@@ -347,6 +350,20 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult GetSubTaskList(int parentTaskId)
         {
             return Ok(_studyPlanTaskRepository.GetSubTaskList(parentTaskId));
+        }
+
+        [HttpGet]
+        [Route("DownloadDocument/{id}")]
+        public IActionResult DownloadDocument(int id)
+        {
+            var file = _studyPlanTaskRepository.Find(id);
+            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(),
+                file.TaskDocumentFilePath);
+            if (System.IO.File.Exists(filepath))
+            {
+                return File(System.IO.File.OpenRead(filepath), ObjectExtensions.GetMIMEType(file.TaskDocumentFileName), file.TaskDocumentFileName);
+            }
+            return NotFound();
         }
     }
 }

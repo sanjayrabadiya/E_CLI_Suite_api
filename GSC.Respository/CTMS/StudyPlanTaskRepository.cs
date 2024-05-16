@@ -587,10 +587,33 @@ namespace GSC.Respository.CTMS
             return result;
         }
 
-        public StudyPlanTaskChartDto GetDocChart(int projectId, int? countryId)
+        public StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType)
         {
             StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
-            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && x.StudyPlan.ProjectId == projectId && x.DeletedDate == null && x.IsCountry == countryId > 0).ToList();
+
+
+            var studyIds = new List<int>();
+
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == projectId
+                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
+            {
+                studyIds.AddRange(ids);
+                studyIds.Add(projectId);
+            }
+            if (filterType == CtmsStudyTaskFilter.Site)
+            {
+                studyIds.AddRange(ids);
+            }
+
+            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null
+            && (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.StudyPlan.ProjectId) :
+                x.StudyPlan.ProjectId == projectId) && x.DeletedDate == null
+                && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).ToList();
 
             var TodayDate = DateTime.Now;
             result.All = StudyPlanTask.Count;
