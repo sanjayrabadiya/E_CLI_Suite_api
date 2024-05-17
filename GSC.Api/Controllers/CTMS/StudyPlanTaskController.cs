@@ -244,11 +244,11 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(result);
         }
 
-        [Route("GetChartReport/{projectId}/{chartType:int?}/{countryId:int?}")]
+        [Route("GetChartReport/{projectId}/{chartType:int?}/{filterId:int}")]
         [HttpGet]
-        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType, int? countryId)
+        public IActionResult GetChartReport(int projectId, CtmsChartType? chartType, CtmsStudyTaskFilter filterId)
         {
-            var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType, countryId);
+            var report = _studyPlanTaskRepository.GetChartReport(projectId, chartType, filterId);
             return Ok(report);
         }
         [HttpPut("AddPreApproval")]

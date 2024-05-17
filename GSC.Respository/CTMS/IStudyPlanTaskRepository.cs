@@ -26,7 +26,7 @@ namespace GSC.Respository.CTMS
         List<AuditTrailDto> GetStudyPlanTaskHistory(int id);
         StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId);
         StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType);
-        List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType, int? countryId);
+        List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType, CtmsStudyTaskFilter filterType);
         List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search);
         List<DropDownDto> GetRollDropDown(int studyplanId);
         List<DropDownDto> GetUserDropDown(int studyplanId);
