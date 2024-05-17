@@ -68,7 +68,7 @@ namespace GSC.Respository.Project.Workflow
             if (result.Count() == 0)
                 return 0;
 
-            var level = result.Where(x => x > (int)levelNo).Min(a => a);
+            var level = result.Where(x => x > (int)levelNo).Select(b => b).DefaultIfEmpty().Min();
 
             if (level == 0)
                 return (short)(GetMaxWorkFlowLevel(projectDesignId) + 1);
