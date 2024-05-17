@@ -68,7 +68,7 @@ namespace GSC.Api
 
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2VlhhQlJCfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTX5Wd0JjWH1WcX1WTmhV");
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2VlhhQlJCfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTX5Wd0JjWHtedXRURWRa");
 
             if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
@@ -93,7 +93,7 @@ namespace GSC.Api
             {
                 e.MapControllers();
             });
-            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2VlhhQlJCfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTX5Wd0JjWH1WcX1WTmhV");
+            Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Mgo+DSMBMAY9C3t2VlhhQlJCfV5AQmBIYVp/TGpJfl96cVxMZVVBJAtUQF1hTX5Wd0JjWHtedXRURWRa");
         }
 
 
