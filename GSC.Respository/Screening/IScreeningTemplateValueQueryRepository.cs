@@ -44,5 +44,6 @@ namespace GSC.Respository.Screening
         void Save(ScreeningTemplateValueQuery screeningTemplateValueQuery);
 
         IList<QueryManagementDto> GetScreeningQueryEntries(ScreeningQuerySearchDto filters);
+        string GetLatestValue(int screeningTemplateValueId);
     }
 }
