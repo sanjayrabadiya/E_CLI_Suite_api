@@ -91,7 +91,7 @@ namespace GSC.Respository.EditCheckImpact
 
                 if ((isQuery && x.ValidateType == EditCheckValidateType.Failed && reference != null) && (x.ScreeningTemplate != null && x.ScreeningTemplate.Status > ScreeningTemplateStatus.Pending))
                 {
-                    x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message);
+                    x.HasQueries = SystemQuery(x.ScreeningTemplate.Id, x.ProjectDesignVariableId, x.AutoNumber, x.Message, x.Value);
                 }
 
                 if (x.Operator != null && (x.Operator == ProjectScheduleOperator.Equal || x.Operator == ProjectScheduleOperator.Plus))
@@ -409,7 +409,7 @@ namespace GSC.Respository.EditCheckImpact
             }
         }
 
-        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message)
+        bool SystemQuery(int screeningTemplateId, int projectDesignVariableId, string autoNumber, string message, string oriDate)
         {
             var screeningTemplateValue = _screeningTemplateValueRepository.All.AsNoTracking().Where
             (t => t.ScreeningTemplateId == screeningTemplateId
@@ -422,6 +422,9 @@ namespace GSC.Respository.EditCheckImpact
 
                 var screeningTemplate = All.AsNoTracking().Where(x => x.Id == screeningTemplateId).FirstOrDefault();
                 if ((int)screeningTemplate.Status < 3)
+                    return false;
+
+                if (oriDate.Equals(screeningTemplateValue.Value))
                     return false;
 
 
