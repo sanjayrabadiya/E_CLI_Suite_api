@@ -117,6 +117,8 @@ namespace GSC.Respository.CTMS
                 {
                     s.ActualStartDate = subtasklist.Min(s => s.StartDate);
                     s.ActualEndDate = subtasklist.Max(s => s.EndDate);
+                    s.StartDate = subtasklist.Min(s => s.StartDate);
+                    s.EndDate = subtasklist.Max(s => s.EndDate);
                     s.IsParentTask = true;
                 }
 

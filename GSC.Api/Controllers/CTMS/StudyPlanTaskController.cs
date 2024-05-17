@@ -64,6 +64,8 @@ namespace GSC.Api.Controllers.CTMS
             {
                 taskDto.ActualStartDate = taskDate.StartDate;
                 taskDto.ActualEndDate = taskDate.EndDate;
+                taskDto.StartDate = taskDate.StartDate;
+                taskDto.EndDate = taskDate.EndDate;
             }
             return Ok(taskDto);
         }
