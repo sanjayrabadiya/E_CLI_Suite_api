@@ -115,10 +115,8 @@ namespace GSC.Respository.CTMS
 
                 if (subtasklist.Any())
                 {
-                    s.ActualStartDate = subtasklist.Min(s => s.StartDate);
-                    s.ActualEndDate = subtasklist.Max(s => s.EndDate);
-                    s.StartDate = subtasklist.Min(s => s.StartDate);
-                    s.EndDate = subtasklist.Max(s => s.EndDate);
+                    s.ActualStartDate = subtasklist.Min(s => s.ActualStartDate);
+                    s.ActualEndDate = subtasklist.Max(s => s.ActualEndDate);
                     s.IsParentTask = true;
                 }
 
@@ -964,8 +962,8 @@ namespace GSC.Respository.CTMS
 
             if (taskDateList.Any())
             {
-                var minDate = taskDateList.Min(s => s.StartDate);
-                var maxDate = taskDateList.Max(s => s.EndDate);
+                var minDate = taskDateList.Min(s => s.ActualStartDate);
+                var maxDate = taskDateList.Max(s => s.ActualEndDate);
 
                 var objDate = new ParentTaskDate
                 {

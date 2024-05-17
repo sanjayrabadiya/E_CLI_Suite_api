@@ -97,7 +97,7 @@ namespace GSC.Data.Dto.CTMS
 
     public class ParentTaskDate
     {
-        public DateTime StartDate { get; set; }
-        public DateTime EndDate { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 }
