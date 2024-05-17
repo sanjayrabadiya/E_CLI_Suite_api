@@ -89,7 +89,7 @@ namespace GSC.Respository.Screening
             if (screeningTemplateValueQuery.QueryStatus != QueryStatus.Open && screeningTemplateValueQuery.QueryStatus != QueryStatus.SelfCorrection)
             {
                 var lastQuery = All.Where(x => x.ScreeningTemplateValueId == screeningTemplateValueQuery.ScreeningTemplateValueId).OrderByDescending(t => t.Id).FirstOrDefault();
-                if(lastQuery!=null)
+                if (lastQuery != null)
                 {
                     screeningTemplateValueQuery.QueryParentId = lastQuery.Id;
                     screeningTemplateValueQuery.PreviousQueryDate = lastQuery.CreatedDate;
@@ -571,7 +571,7 @@ namespace GSC.Respository.Screening
 
         public IList<QueryManagementDto> GetGenerateQueryBy(int projectId)
         {
-            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s=>s.ParentProjectId).FirstOrDefault();
+            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s => s.ParentProjectId).FirstOrDefault();
             var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
 
             var queryData = (from query in _context.ScreeningTemplateValueQuery.Include(x => x.ScreeningTemplateValue).ThenInclude(x => x.ScreeningTemplate)
@@ -594,7 +594,7 @@ namespace GSC.Respository.Screening
 
         public IList<DropDownDto> GetDataEntryBy(int projectId)
         {
-            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s=>s.ParentProjectId).FirstOrDefault();
+            var ParentProject = _context.Project.Where(x => x.Id == projectId).Select(s => s.ParentProjectId).FirstOrDefault();
             var sites = _context.Project.Where(x => x.ParentProjectId == projectId).Select(x => x.Id).ToList();
 
             var dataEntryBy = _context.ScreeningTemplateValue.Include(x => x.ScreeningTemplate).ThenInclude(x => x.ScreeningVisit)
@@ -946,6 +946,15 @@ namespace GSC.Respository.Screening
 
 
 
+        }
+
+        public string GetLatestValue(int screeningTemplateValueId)
+        {
+            return All.Where(x => x.ScreeningTemplateValueId == screeningTemplateValueId && x.QueryStatus != QueryStatus.Open).Select(c => new
+            {
+                c.Id,
+                c.Value
+            }).OrderByDescending(a => a.Id).FirstOrDefault()?.Value;
         }
 
 
