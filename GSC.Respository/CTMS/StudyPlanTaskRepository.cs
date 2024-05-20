@@ -112,12 +112,36 @@ namespace GSC.Respository.CTMS
             {
                 var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == s.StudyPlanId && x.ParentId == s.Id).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-
                 if (subtasklist.Any())
                 {
+                    var saveActualDate = s.ActualStartDate;
+                    var saveEndDate = s.ActualEndDate;
+
                     s.ActualStartDate = subtasklist.Min(s => s.ActualStartDate);
                     s.ActualEndDate = subtasklist.Max(s => s.ActualEndDate);
-                    s.IsParentTask = true;
+
+                    if (saveActualDate != s.ActualStartDate || saveEndDate != s.ActualEndDate)
+                    {
+                        var changeData = All.First(o => o.Id == s.Id);
+                        changeData.ActualStartDate = s.ActualStartDate;
+                        changeData.ActualEndDate = s.ActualEndDate;
+
+                        var countProgress = subtasklist.Count(c => c.ActualStartDate != null && c.ActualEndDate != null);
+                        if (countProgress == subtasklist.Count)
+                        {
+                            changeData.Progress = 100;
+                            s.Progress = 100;
+                        }
+                        else
+                        {
+                            changeData.Progress = 0;
+                            s.Progress = 0;
+                        }
+
+                        Update(changeData);
+                        _context.Save();
+                    }
+                    subtasklist.ForEach(s => s.IsParentTask = false);
                 }
 
                 if (subtasklist.Exists(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null))
@@ -135,7 +159,7 @@ namespace GSC.Respository.CTMS
                 if (subtasklist.Exists(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)))
                     subtasklist.Where(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
 
-
+                s.IsParentTask = true;
                 s.Subtasks = subtasklist;
             });
 
@@ -616,7 +640,8 @@ namespace GSC.Respository.CTMS
             var TodayDate = DateTime.Now;
             result.All = StudyPlanTask.Count;
 
-            foreach (var item in StudyPlanTask) { 
+            foreach (var item in StudyPlanTask)
+            {
 
                 if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null)
                 {
@@ -642,7 +667,7 @@ namespace GSC.Respository.CTMS
                 if ((item.EndDate < item.ActualEndDate) || (item.EndDate < TodayDate && item.ActualStartDate != null && item.ActualEndDate == null) || (item.EndDate < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null))
                 {
                     result.DeviatedDate = result.DeviatedDate + 1;
-               
+
                 }
             }
 
@@ -683,17 +708,17 @@ namespace GSC.Respository.CTMS
 
             foreach (var item in StudyPlanTask)
             {
-    
+
                 if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null && chartType == CtmsChartType.NotStarted)
                     data.Add(item);
                 if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null && chartType == CtmsChartType.OnGoingDate)
-                        data.Add(item);
+                    data.Add(item);
                 if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate == null && chartType == CtmsChartType.DueDate)
-                        data.Add(item);
-                if (item.ActualStartDate != null && item.ActualEndDate != null && item.StartDate<=item.ActualStartDate && item.EndDate>=item.ActualEndDate && chartType == CtmsChartType.Completed)
-                        data.Add(item);
+                    data.Add(item);
+                if (item.ActualStartDate != null && item.ActualEndDate != null && item.StartDate <= item.ActualStartDate && item.EndDate >= item.ActualEndDate && chartType == CtmsChartType.Completed)
+                    data.Add(item);
                 if (((item.EndDate < item.ActualEndDate) || (item.EndDate < TodayDate && item.ActualStartDate != null && item.ActualEndDate == null) || (item.EndDate < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null)) && (chartType == CtmsChartType.DeviatedDate))
-                        data.Add(item);
+                    data.Add(item);
             }
 
             return data.Select(x => new StudyPlanTaskChartReportDto
@@ -703,7 +728,7 @@ namespace GSC.Respository.CTMS
                 StartDate = x.StartDate,
                 EndDate = x.EndDate,
                 TaskName = x.TaskName,
-                NoOfDeviatedDay = chartType == CtmsChartType.DeviatedDate && x.ActualEndDate !=null ? (x.ActualEndDate - x.EndDate).Value.Days : 0,
+                NoOfDeviatedDay = chartType == CtmsChartType.DeviatedDate && x.ActualEndDate != null ? (x.ActualEndDate - x.EndDate).Value.Days : 0,
             }).ToList();
         }
 

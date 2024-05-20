@@ -186,6 +186,10 @@ namespace GSC.Api.Controllers.CTMS
             if (record == null)
                 return NotFound();
             _taskMasterRepository.Active(record);
+
+
+            var allChild = _taskMasterRepository.All.Where(x => x.DeletedDate != null && x.ParentId == record.Id).ToList();
+            allChild.ForEach(x => { _taskMasterRepository.Active(x); });
             _uow.Save();
 
             var refrenceType = _context.RefrenceTypes.Where(x => x.TaskMasterId == id && x.DeletedDate != null).ToList();
@@ -199,7 +203,7 @@ namespace GSC.Api.Controllers.CTMS
                     _uow.Save();
                 }
             });
-         
+
             return Ok();
         }
     }
