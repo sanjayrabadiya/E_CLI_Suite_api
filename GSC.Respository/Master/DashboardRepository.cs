@@ -1,8 +1,6 @@
-﻿using GSC.Data.Dto.Configuration;
-using GSC.Data.Dto.CTMS;
+﻿using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Dto.ProjectRight;
-using GSC.Data.Entities.Master;
 using GSC.Data.Entities.Project.StudyLevelFormSetup;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -14,11 +12,11 @@ using GSC.Respository.ProjectRight;
 using GSC.Respository.Screening;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
-using JWT.Builder;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic.Core;
 
 namespace GSC.Respository.Master
 {
@@ -1989,6 +1987,158 @@ namespace GSC.Respository.Master
                 }).ToList();
 
             return subjectList;
+        }
+        public dynamic GetCTMSProjectStatusChartDashboard(int projectId, CtmsStudyTaskFilter filterType)
+        {
+            var studyIds = new List<int>();
+            var TodayDate = DateTime.Now;
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                  (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                  && x.DeletedDate == null && x.ParentProjectId == projectId
+                  && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
+            {
+                studyIds.AddRange(ids);
+                studyIds.Add(projectId);
+            }
+            if (filterType == CtmsStudyTaskFilter.Site)
+            {
+                studyIds.AddRange(ids);
+            }
+            var StudyPlanTask = _context.StudyPlanTask.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.StudyPlan.ProjectId) :
+                x.StudyPlan.ProjectId == projectId) && x.DeletedDate == null && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).ToList();
+
+            var data = new List<StudyPlanTaskDto>();
+            foreach (var item in StudyPlanTask)
+            {
+                StudyPlanTaskDto s = new StudyPlanTaskDto();
+                if (item.ActualStartDate != null && item.ActualEndDate != null)
+                {
+                    s.Id = item.Id;
+                    s.Status = "Completed";
+                }
+                 
+                else if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null)
+                {
+                    s.Id = item.Id;
+                    s.Status = "On track";
+                }
+                else if (AddOffSetDays(item.EndDate, item.OffSet > 0 ? item.OffSet - 1 : 0) >= TodayDate && item.ActualStartDate == null && item.ActualEndDate == null)
+                {
+                    s.Id = item.Id;
+                    s.Status = "Off track but recoverabl";
+                }
+                else if (AddOffSetDays(item.EndDate, item.OffSet > 0 ? item.OffSet - 1 : 0) < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null )
+                {
+                    s.Id = item.Id;
+                    s.Status = "Off track required intervention";
+                }
+        
+
+                data.Add(s);
+            }
+            if (data.Count > 0)
+            {
+                var result = data.Where(w=>w.Status!=null)
+                .GroupBy(c => new { status = c.Status })
+                .Select(g => new
+                {
+                    Status = g.Key.status,
+                    Count = g.ToList().Count
+                }).ToList();
+
+                return result;
+            }
+            return null;
+        }
+
+        public List<StudyPlanTaskDto> GetCTMSProjectStatusGrid(int projectId, CtmsStudyTaskFilter filterType)
+        {
+            var studyIds = new List<int>();
+            var TodayDate = DateTime.Now;
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                  (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                  && x.DeletedDate == null && x.ParentProjectId == projectId
+                  && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
+            {
+                studyIds.AddRange(ids);
+                studyIds.Add(projectId);
+            }
+            if (filterType == CtmsStudyTaskFilter.Site)
+            {
+                studyIds.AddRange(ids);
+            }
+            var StudyPlanTask = _context.StudyPlanTask.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null && (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.StudyPlan.ProjectId) :
+                x.StudyPlan.ProjectId == projectId) && x.DeletedDate == null && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).ToList();
+
+            var data = new List<StudyPlanTaskDto>();
+            foreach (var item in StudyPlanTask)
+            {
+                StudyPlanTaskDto s = new StudyPlanTaskDto();
+ 
+                if (item.ActualStartDate != null && item.ActualEndDate != null)
+                {
+                    s.Id = item.Id;
+                    s.TaskName = item.TaskName;
+                    s.StartDate = item.StartDate;
+                    s.EndDate = item.EndDate;
+                    s.ActualStartDate = item.ActualStartDate;
+                    s.ActualEndDate = item.ActualEndDate;
+                    s.OffSet= item.OffSet;
+                    s.Status = "Completed";
+                }
+                else if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null)
+                {
+                    s.Id = item.Id;
+                    s.TaskName = item.TaskName;
+                    s.StartDate = item.StartDate;
+                    s.EndDate = item.EndDate;
+                    s.ActualStartDate = item.ActualStartDate;
+                    s.ActualEndDate = item.ActualEndDate;
+                    s.OffSet = item.OffSet;
+                    s.Status = "On track";
+                }
+                else if (AddOffSetDays(item.EndDate, item.OffSet > 0 ? item.OffSet - 1 : 0) >= TodayDate && item.ActualStartDate == null && item.ActualEndDate == null)
+                {
+                    s.Id = item.Id;
+                    s.TaskName = item.TaskName;
+                    s.StartDate = item.StartDate;
+                    s.EndDate = item.EndDate;
+                    s.ActualStartDate = item.ActualStartDate;
+                    s.ActualEndDate = item.ActualEndDate;
+                    s.OffSet = item.OffSet;
+                    s.Status = "Off track but recoverabl";
+                }
+                else if (AddOffSetDays(item.EndDate, item.OffSet > 0 ? item.OffSet - 1 : 0) < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null)
+                {
+                    s.Id = item.Id;
+                    s.TaskName = item.TaskName;
+                    s.StartDate = item.StartDate;
+                    s.EndDate = item.EndDate;
+                    s.ActualStartDate = item.ActualStartDate;
+                    s.ActualEndDate = item.ActualEndDate;
+                    s.OffSet = item.OffSet;
+                    s.Status = "Off track required intervention";
+                }
+                data.Add(s);
+            }
+            return data;
+        }
+        public static DateTime AddOffSetDays(DateTime current, int days)
+        {
+            var sign = Math.Sign(days);
+            var unsignedDays = Math.Abs(days);
+            current = current.AddDays(sign);
+            for (var i = 0; i < unsignedDays; i++)
+            {
+                current = current.AddDays(sign);
+            }
+            return current;
         }
     }
 }

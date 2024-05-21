@@ -1,5 +1,6 @@
 ﻿using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.ProjectRight;
+using GSC.Helper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -66,5 +67,7 @@ namespace GSC.Respository.Master
 
         dynamic GetSubjectStatusGraph(int projectId, int countryId, int siteId);
         dynamic GetDashboardSubjectList(int projectId, int countryId, int siteId);
+        dynamic GetCTMSProjectStatusChartDashboard(int projectId, CtmsStudyTaskFilter filterType);
+        List<StudyPlanTaskDto> GetCTMSProjectStatusGrid(int projectId, CtmsStudyTaskFilter filterType);
     }
 }

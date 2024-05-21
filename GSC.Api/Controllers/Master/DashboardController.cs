@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using GSC.Api.Controllers.Common;
 using GSC.Data.Dto.Master;
-using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.AdverseEvent;
 using GSC.Respository.CTMS;
 using GSC.Respository.Etmf;
@@ -458,6 +458,20 @@ namespace GSC.Api.Controllers.Master
         {
             var statusCount = _dashboardRepository.GetDashboardSubjectList(projectId, countryId, siteId);
             return Ok(statusCount);
+        }
+        [HttpGet]
+        [Route("GetCTMSProjectStatusChartDashboard/{ProjectId}/{filterType:int}")]
+        public IActionResult GetCTMSProjectStatusChartDashboard(int projectId, CtmsStudyTaskFilter filterType)
+        {
+            var queries = _dashboardRepository.GetCTMSProjectStatusChartDashboard(projectId,  filterType);
+            return Ok(queries);
+        }
+        [HttpGet]
+        [Route("GetCTMSProjectStatusGrid/{ProjectId}/{filterType:int}")]
+        public IActionResult GetCTMSProjectStatusGrid(int projectId, CtmsStudyTaskFilter filterType)
+        {
+            var queries = _dashboardRepository.GetCTMSProjectStatusGrid(projectId, filterType);
+            return Ok(queries);
         }
     }
 }
