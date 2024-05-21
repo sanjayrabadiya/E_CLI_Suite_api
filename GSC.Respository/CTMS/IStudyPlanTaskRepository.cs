@@ -34,5 +34,6 @@ namespace GSC.Respository.CTMS
         List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId);
         List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId);
         ParentTaskDate GetChildStartEndDate(int parentTaskId);
+        string AddSiteTask(StudyPlantaskParameterDto taskmasterDto);
     }
 }

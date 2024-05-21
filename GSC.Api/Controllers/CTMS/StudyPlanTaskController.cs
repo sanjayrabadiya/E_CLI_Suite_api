@@ -72,6 +72,19 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Post([FromBody] StudyPlantaskParameterDto taskmasterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            if (taskmasterDto.RefrenceType == RefrenceType.Sites)
+            {
+                var result = _studyPlanTaskRepository.AddSiteTask(taskmasterDto);
+                if (string.IsNullOrEmpty(result))
+                    return Ok(1);
+                else
+                {
+                    ModelState.AddModelError("Message", result);
+                    return BadRequest(ModelState);
+                }
+            }
+
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
             tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
@@ -121,6 +134,8 @@ namespace GSC.Api.Controllers.CTMS
             }
 
             var revertdata = _studyPlanTaskRepository.Find(taskmasterDto.Id);
+            tastMaster.StudyPlanId = revertdata.StudyPlanId;
+            tastMaster.ProjectId = revertdata.ProjectId;
             _studyPlanTaskRepository.Update(tastMaster);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task failed on save."));
@@ -132,6 +147,7 @@ namespace GSC.Api.Controllers.CTMS
                 _uow.Save();
                 return BadRequest(ModelState);
             }
+
             var project = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
             if (project != null)
             {
@@ -139,7 +155,6 @@ namespace GSC.Api.Controllers.CTMS
                 if (ParentProject != null)
                     _studyPlanRepository.PlanUpdate((int)(ParentProject.ParentProjectId != null ? ParentProject.ParentProjectId : project.ProjectId));
             }
-
             return Ok(tastMaster.Id);
         }
 
