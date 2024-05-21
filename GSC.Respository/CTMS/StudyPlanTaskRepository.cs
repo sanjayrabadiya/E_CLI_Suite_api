@@ -17,6 +17,7 @@ using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
 using GSC.Data.Dto.Master;
 using System.Linq.Dynamic.Core;
+using GSC.Data.Entities.Master;
 
 namespace GSC.Respository.CTMS
 {
@@ -119,28 +120,19 @@ namespace GSC.Respository.CTMS
 
                     s.ActualStartDate = subtasklist.Min(s => s.ActualStartDate);
                     s.ActualEndDate = subtasklist.Max(s => s.ActualEndDate);
-
+                    var changeData = All.First(o => o.Id == s.Id);
                     if (saveActualDate != s.ActualStartDate || saveEndDate != s.ActualEndDate)
                     {
-                        var changeData = All.First(o => o.Id == s.Id);
                         changeData.ActualStartDate = s.ActualStartDate;
                         changeData.ActualEndDate = s.ActualEndDate;
-
-                        var countProgress = subtasklist.Count(c => c.ActualStartDate != null && c.ActualEndDate != null);
-                        if (countProgress == subtasklist.Count)
-                        {
-                            changeData.Progress = 100;
-                            s.Progress = 100;
-                        }
-                        else
-                        {
-                            changeData.Progress = 0;
-                            s.Progress = 0;
-                        }
-
-                        Update(changeData);
-                        _context.Save();
                     }
+
+                    var countProgress = subtasklist.Average(a => a.Percentage);
+                    changeData.Percentage = (int)countProgress;
+                    s.Percentage = (int)countProgress;
+                    Update(changeData);
+                    _context.Save();
+
                     subtasklist.ForEach(s => s.IsParentTask = false);
                 }
 
@@ -1000,6 +992,46 @@ namespace GSC.Respository.CTMS
             }
 
             return null;
+        }
+
+        public string AddSiteTask(StudyPlantaskParameterDto taskmasterDto)
+        {
+            var project = _context.StudyPlan.First(x => x.Id == taskmasterDto.StudyPlanId);
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == project.ProjectId
+                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+            var studyPlans = _context.StudyPlan.Where(x => x.DeletedDate == null && ids.Contains(x.ProjectId)).ToList();
+
+            if (studyPlans.Count <= 0)
+            {
+                return "Site not found in this project";
+            }
+
+            foreach (var plan in studyPlans)
+            {
+                taskmasterDto.Id = 0;
+                var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
+                tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
+                tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
+                tastMaster.ProjectId = plan.ProjectId;
+                tastMaster.StudyPlanId = plan.Id;
+                tastMaster.TaskOrder = UpdateTaskOrder(taskmasterDto);
+                var data = UpdateDependentTaskDate(tastMaster);
+                if (data != null)
+                {
+                    tastMaster.StartDate = data.StartDate;
+                    tastMaster.EndDate = data.EndDate;
+                    tastMaster.Percentage = data.Percentage;
+                }
+                Add(tastMaster);
+                UpdateTaskOrderSequence(taskmasterDto.Id);
+            }
+
+            _context.Save();
+            return "";
         }
     }
 }
