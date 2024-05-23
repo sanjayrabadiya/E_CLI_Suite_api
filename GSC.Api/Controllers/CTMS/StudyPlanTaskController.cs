@@ -329,6 +329,7 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.DocumentPath = _uploadSettingRepository.GetWebDocumentUrl() + DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
             }
             tastMaster.ApprovalStatus = data.ApprovalStatus;
+            tastMaster.PreApprovalStatus = true;
             tastMaster.FileName = data.FileName;
             _studyPlanTaskRepository.Update(tastMaster);
             _uow.Save();
