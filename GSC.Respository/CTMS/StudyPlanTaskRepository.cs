@@ -70,18 +70,23 @@ namespace GSC.Respository.CTMS
             var studyplans = _context.StudyPlan.Where(x => (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.ProjectId) :
                 x.ProjectId == ProjectId) && x.DeletedDate == null).ToList();
 
+            var parentStudyPlan = _context.StudyPlan.FirstOrDefault(x => x.DeletedDate == null && x.Id == StudyPlanId);
+
+
             result.StudyPlanId = StudyPlanId;
             result.StudyPlanTask = new List<StudyPlanTaskDto>();
             result.StudyPlanTaskTemp = new List<StudyPlanTaskDto>();
 
+            if (parentStudyPlan != null)
+            {
+                result.StartDate = parentStudyPlan.StartDate;
+                result.EndDate = parentStudyPlan.EndDate;
+                result.EndDateDay = parentStudyPlan.EndDate;
+            }
             foreach (var studyplan in studyplans)
             {
                 if (studyplan != null)
                 {
-                    result.StartDate = studyplan?.StartDate;
-                    result.EndDate = studyplan?.EndDate;
-                    result.EndDateDay = studyplan?.EndDate;
-
                     var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
