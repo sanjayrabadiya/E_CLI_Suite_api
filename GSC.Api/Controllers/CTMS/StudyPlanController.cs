@@ -73,9 +73,9 @@ namespace GSC.Api.Controllers.CTMS
             var lstStudyPlan = new List<StudyPlanDto>();
             lstStudyPlan.Add(studyplanDto);
 
-            var TaskMaster = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.TaskMaster.TaskTemplateId == studyplanDto.TaskTemplateId && x.DeletedDate == null).Any(x => x.RefrenceType == Helper.RefrenceType.Sites);
-            if (TaskMaster)
-            {
+            //var TaskMaster = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.TaskMaster.TaskTemplateId == studyplanDto.TaskTemplateId && x.DeletedDate == null).Any(x => x.RefrenceType == Helper.RefrenceType.Sites);
+            //if (TaskMaster)
+            //{
                 var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == studyplanDto.ProjectId).ToList();
                 sites.ForEach(s =>
                 {
@@ -86,8 +86,8 @@ namespace GSC.Api.Controllers.CTMS
                     data.TaskTemplateId = studyplanDto.TaskTemplateId;
                     data.CurrencyId = studyplanDto.CurrencyId;
                     lstStudyPlan.Add(data);
-                });
-            }
+               });
+            //}
 
             foreach (var item in lstStudyPlan)
             {
