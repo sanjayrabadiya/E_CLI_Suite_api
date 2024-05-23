@@ -91,14 +91,14 @@ namespace GSC.Respository.CTMS
                     if (tasklist.Exists(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null))
                         tasklist.Where(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                        tasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
+                    if (tasklist.Exists(x =>x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate))
+                        tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate  ).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate == null))
                         tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null && x.StartDate <= x.ActualStartDate && x.EndDate >= x.ActualEndDate))
-                        tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null && x.StartDate <= x.ActualStartDate && x.EndDate >= x.ActualEndDate).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
+                    if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null && x.EndDate >= x.ActualEndDate))
+                        tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null && x.EndDate >= x.ActualEndDate).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)))
                         tasklist.Where(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
@@ -139,14 +139,14 @@ namespace GSC.Respository.CTMS
                 if (subtasklist.Exists(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null))
                     subtasklist.Where(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
-                if (subtasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null))
-                    subtasklist.Where(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate != null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
+                if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate))
+                    subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
                 if (subtasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate == null))
                     subtasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
 
-                if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null && x.StartDate <= x.ActualStartDate && x.EndDate >= x.ActualEndDate))
-                    subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null && x.StartDate <= x.ActualStartDate && x.EndDate >= x.ActualEndDate).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
+                if (subtasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate != null && x.EndDate >= x.ActualEndDate))
+                    subtasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate != null && x.EndDate >= x.ActualEndDate).Select(c => { c.Status = CtmsChartType.Completed.GetDescription(); return c; }).ToList();
 
                 if (subtasklist.Exists(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)))
                     subtasklist.Where(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
@@ -640,7 +640,7 @@ namespace GSC.Respository.CTMS
                     result.NotStartedDate = result.NotStartedDate + 1;
                     continue;
                 }
-                if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null)
+                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate)
                 {
                     result.OnGoingDate = result.OnGoingDate + 1;
                     continue;
@@ -650,7 +650,7 @@ namespace GSC.Respository.CTMS
                     result.DueDate = result.DueDate + 1;
                     continue;
                 }
-                if (item.ActualStartDate != null && item.ActualEndDate != null && item.StartDate <= item.ActualStartDate && item.EndDate >= item.ActualEndDate)
+                if (item.ActualStartDate != null && item.ActualEndDate != null && item.EndDate >= item.ActualEndDate)
                 {
                     result.Complete = result.Complete + 1;
                     continue;
@@ -703,11 +703,11 @@ namespace GSC.Respository.CTMS
 
                 if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null && chartType == CtmsChartType.NotStarted)
                     data.Add(item);
-                if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null && chartType == CtmsChartType.OnGoingDate)
+                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate && chartType == CtmsChartType.OnGoingDate)
                     data.Add(item);
                 if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate == null && chartType == CtmsChartType.DueDate)
                     data.Add(item);
-                if (item.ActualStartDate != null && item.ActualEndDate != null && item.StartDate <= item.ActualStartDate && item.EndDate >= item.ActualEndDate && chartType == CtmsChartType.Completed)
+                if (item.ActualStartDate != null && item.ActualEndDate != null && item.EndDate >= item.ActualEndDate && chartType == CtmsChartType.Completed)
                     data.Add(item);
                 if (((item.EndDate < item.ActualEndDate) || (item.EndDate < TodayDate && item.ActualStartDate != null && item.ActualEndDate == null) || (item.EndDate < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null)) && (chartType == CtmsChartType.DeviatedDate))
                     data.Add(item);
