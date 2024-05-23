@@ -90,7 +90,8 @@ namespace GSC.Respository.CTMS
                     var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0 && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).OrderBy(x => x.TaskOrder).
+                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0 && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country)))
+                        .Include(i => i.StudyPlan.Project).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                     if (tasklist.Exists(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null))
@@ -116,7 +117,7 @@ namespace GSC.Respository.CTMS
             //sub task wise grid disply Add by mitul on 09-01-2024
             result.StudyPlanTask.ForEach(s =>
             {
-                var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == s.StudyPlanId && x.ParentId == s.Id).OrderBy(x => x.TaskOrder).
+                var subtasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == s.StudyPlanId && x.ParentId == s.Id).Include(i => i.StudyPlan.Project).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 if (subtasklist.Any())
                 {
@@ -155,7 +156,6 @@ namespace GSC.Respository.CTMS
 
                 if (subtasklist.Exists(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)))
                     subtasklist.Where(x => (x.EndDate < x.ActualEndDate) || (x.EndDate < TodayDate && x.ActualStartDate != null && x.ActualEndDate == null) || (x.EndDate < TodayDate && x.ActualStartDate == null && x.ActualEndDate == null)).Select(c => { c.Status = CtmsChartType.DeviatedDate.GetDescription(); return c; }).ToList();
-
                 s.IsParentTask = true;
                 s.Subtasks = subtasklist;
             });
@@ -1019,7 +1019,7 @@ namespace GSC.Respository.CTMS
             {
                 taskmasterDto.Id = 0;
                 var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-                tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
+                //tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
                 tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
                 tastMaster.ProjectId = plan.ProjectId;
                 tastMaster.StudyPlanId = plan.Id;
