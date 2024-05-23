@@ -125,7 +125,7 @@ namespace GSC.Respository.SupplyManagement
             }
 
             // validate product type
-            var productType = validateProductType(dt, supplyManagementUploadFile.ProjectId);
+            var productType = validateProductType(dt, supplyManagementUploadFile.ProjectId, setting);
             if (productType != "")
                 return productType;
 
@@ -647,7 +647,7 @@ namespace GSC.Respository.SupplyManagement
             return "";
         }
 
-        public string validateProductType(DataTable dt, int ProjectId)
+        public string validateProductType(DataTable dt, int ProjectId, SupplyManagementKitNumberSettings setting)
         {
             var productTypes = _pharmacyStudyProductTypeRepository.All.Where(x => x.ProjectId == ProjectId && x.DeletedDate == null).
                 Select(a => new { ProductTypeCode = a.ProductType.ProductTypeCode.ToString().Trim() }).Distinct().ToList();
@@ -676,11 +676,38 @@ namespace GSC.Respository.SupplyManagement
                     if (!result)
                         return "Product code not match.";
 
-                    string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).ToArray();
-                    var cellResult = dataRow.ToList().TrueForAll(m => str1.Contains(m.Trim()));
+                    if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                    {
+                        string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).Skip(1).Skip(1).ToArray();
+                        var cellResult = dataRow.ToList().TrueForAll(m => str1.Contains(m.Trim()));
 
-                    if (!cellResult)
-                        return "Product code not match in cell.";
+                        if (!cellResult)
+                            return "Product code not match in cell.";
+                    }
+                    else if (!setting.IsUploadWithKit && setting.IsStaticRandomizationNo == true)
+                    {
+                        string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).Skip(1).ToArray();
+                        var cellResult = dataRow.ToList().TrueForAll(m => str1.Contains(m.Trim()));
+
+                        if (!cellResult)
+                            return "Product code not match in cell.";
+                    }
+                    else if (setting.IsUploadWithKit && setting.IsStaticRandomizationNo == false)
+                    {
+                        string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).Skip(1).ToArray();
+                        var cellResult = dataRow.ToList().TrueForAll(m => str1.Contains(m.Trim()));
+
+                        if (!cellResult)
+                            return "Product code not match in cell.";
+                    }
+                    else
+                    {
+                        string[] dataRow = dt.Rows[i].ItemArray.Select(x => x.ToString()).Skip(1).Skip(1).Skip(1).ToArray();
+                        var cellResult = dataRow.ToList().TrueForAll(m => str1.Contains(m.Trim()));
+
+                        if (!cellResult)
+                            return "Product code not match in cell.";
+                    }
                 }
 
             }
