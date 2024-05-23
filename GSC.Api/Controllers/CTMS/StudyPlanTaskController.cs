@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common;
@@ -87,10 +88,12 @@ namespace GSC.Api.Controllers.CTMS
 
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-            tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
+            //tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
             tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
+            var project = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).First();
+            tastMaster.ProjectId = project.Id;
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
@@ -102,7 +105,6 @@ namespace GSC.Api.Controllers.CTMS
             _uow.Save();
 
             _studyPlanTaskRepository.UpdateTaskOrderSequence(taskmasterDto.Id);
-            var project = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).FirstOrDefault();
             if (project != null)
             {
                 var ParentProject = _context.Project.Where(x => x.Id == project.ProjectId).FirstOrDefault();
