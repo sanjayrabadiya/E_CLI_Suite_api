@@ -86,9 +86,20 @@ namespace GSC.Api.Controllers.CTMS
                 }
             }
 
+            if (taskmasterDto.RefrenceType == RefrenceType.Country)
+            {
+                var result = _studyPlanTaskRepository.AddCountryTask(taskmasterDto);
+                if (string.IsNullOrEmpty(result))
+                    return Ok(1);
+                else
+                {
+                    ModelState.AddModelError("Message", result);
+                    return BadRequest(ModelState);
+                }
+            }
+
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-            //tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
             tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
@@ -100,7 +111,10 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.EndDate = data.EndDate;
                 tastMaster.Percentage = data.Percentage;
             }
-
+            if (taskmasterDto.TaskDocumentFileModel?.Base64?.Length > 0 && taskmasterDto.TaskDocumentFileModel?.Base64 != null)
+            {
+                tastMaster.TaskDocumentFilePath = DocumentService.SaveUploadDocument(taskmasterDto.TaskDocumentFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+            }
             _studyPlanTaskRepository.Add(tastMaster);
             _uow.Save();
 
@@ -121,21 +135,23 @@ namespace GSC.Api.Controllers.CTMS
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-            var document = _studyPlanTaskRepository.Find(taskmasterDto.Id);
-            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), document.TaskDocumentFilePath);
-            if (taskmasterDto.TaskDocumentFileModel?.Base64?.Length > 0)
-            {
-                tastMaster.TaskDocumentFilePath = DocumentService.SaveUploadDocument(taskmasterDto.TaskDocumentFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
-            }
+            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);          
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
                 tastMaster.EndDate = data.EndDate;
             }
-
             var revertdata = _studyPlanTaskRepository.Find(taskmasterDto.Id);
+            if (taskmasterDto.TaskDocumentFileModel?.Base64?.Length > 0 && taskmasterDto.TaskDocumentFileModel?.Base64 != null)
+            {
+                DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), revertdata.TaskDocumentFilePath);
+                tastMaster.TaskDocumentFilePath = DocumentService.SaveUploadDocument(taskmasterDto.TaskDocumentFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+            }
+            else
+            {
+                tastMaster.TaskDocumentFilePath = revertdata.TaskDocumentFilePath;
+            }
             tastMaster.StudyPlanId = revertdata.StudyPlanId;
             tastMaster.ProjectId = revertdata.ProjectId;
             _studyPlanTaskRepository.Update(tastMaster);
