@@ -35,5 +35,6 @@ namespace GSC.Respository.CTMS
         List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId);
         ParentTaskDate GetChildStartEndDate(int parentTaskId);
         string AddSiteTask(StudyPlantaskParameterDto taskmasterDto);
+        string AddCountryTask(StudyPlantaskParameterDto taskmasterDto);
     }
 }

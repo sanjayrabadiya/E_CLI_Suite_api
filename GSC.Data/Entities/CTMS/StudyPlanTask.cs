@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Location;
 using GSC.Helper;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -42,5 +43,7 @@ namespace GSC.Data.Entities.CTMS
         public decimal? Percentage { get; set; }
         public decimal? TotalCost { get; set; }
         public bool IsCountry { get; set; }
+        public int? CountryId { get; set; }
+        public Country Country { get; set; }
     }
 }
