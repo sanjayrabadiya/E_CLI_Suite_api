@@ -318,7 +318,7 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.EndDateDay, x => x.MapFrom(a => a.EndDate))
                            .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
                            .ForMember(x => x.DurationDay, x => x.MapFrom(a => a.Duration))
-                           .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectName))
+                           .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode))
                           .ReverseMap();
 
             CreateMap<StudyPlanTaskResource, StudyPlanTaskResourceGridDto>()
