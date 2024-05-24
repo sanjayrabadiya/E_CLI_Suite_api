@@ -645,7 +645,7 @@ namespace GSC.Respository.CTMS
                     result.NotStartedDate = result.NotStartedDate + 1;
                     continue;
                 }
-                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate)
+                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate && item.EndDate > TodayDate)
                 {
                     result.OnGoingDate = result.OnGoingDate + 1;
                     continue;
@@ -708,7 +708,7 @@ namespace GSC.Respository.CTMS
 
                 if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null && chartType == CtmsChartType.NotStarted)
                     data.Add(item);
-                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate && chartType == CtmsChartType.OnGoingDate)
+                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate &&  item.EndDate > TodayDate && chartType == CtmsChartType.OnGoingDate)
                     data.Add(item);
                 if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate == null && chartType == CtmsChartType.DueDate)
                     data.Add(item);
