@@ -17,7 +17,8 @@ using GSC.Respository.Master;
 using GSC.Respository.ProjectRight;
 using GSC.Data.Dto.Master;
 using System.Linq.Dynamic.Core;
-using GSC.Data.Entities.Master;
+using GSC.Shared.DocumentService;
+using GSC.Respository.Configuration;
 
 namespace GSC.Respository.CTMS
 {
@@ -30,10 +31,15 @@ namespace GSC.Respository.CTMS
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
         private readonly IProjectRepository _projectRepository;
         private readonly IProjectRightRepository _projectRightRepository;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public StudyPlanTaskRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, IWeekEndMasterRepository weekEndMasterRepository, IProjectRightRepository projectRightRepository, IProjectRepository projectRepository) : base(context)
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, 
+            IWeekEndMasterRepository weekEndMasterRepository, 
+            IProjectRightRepository projectRightRepository,
+            IProjectRepository projectRepository,
+             IUploadSettingRepository uploadSettingRepository) : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
@@ -42,6 +48,7 @@ namespace GSC.Respository.CTMS
             _holidayMasterRepository = holidayMasterRepository;
             _projectRightRepository = projectRightRepository;
             _weekEndMasterRepository = weekEndMasterRepository;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         public StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType)
@@ -97,8 +104,8 @@ namespace GSC.Respository.CTMS
                     if (tasklist.Exists(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null))
                         tasklist.Where(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null).Select(c => { c.Status = CtmsChartType.NotStarted.GetDescription(); return c; }).ToList();
 
-                    if (tasklist.Exists(x =>x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate))
-                        tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate  ).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
+                    if (tasklist.Exists(x => x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate))
+                        tasklist.Where(x => x.ActualStartDate != null && x.ActualEndDate == null && x.EndDate > x.ActualStartDate).Select(c => { c.Status = CtmsChartType.OnGoingDate.GetDescription(); return c; }).ToList();
 
                     if (tasklist.Exists(x => x.StartDate < TodayDate && x.EndDate > TodayDate && x.ActualStartDate == null))
                         tasklist.Where(x => x.StartDate < TodayDate && x.ActualStartDate == null).Select(c => { c.Status = CtmsChartType.DueDate.GetDescription(); return c; }).ToList();
@@ -1018,8 +1025,7 @@ namespace GSC.Respository.CTMS
             foreach (var plan in studyPlans)
             {
                 taskmasterDto.Id = 0;
-                var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-                //tastMaster.ApprovalStatus = tastMaster.ApprovalStatus == null ? false : tastMaster.ApprovalStatus;
+                var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);              
                 tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
                 tastMaster.ProjectId = plan.ProjectId;
                 tastMaster.StudyPlanId = plan.Id;
@@ -1030,6 +1036,64 @@ namespace GSC.Respository.CTMS
                     tastMaster.StartDate = data.StartDate;
                     tastMaster.EndDate = data.EndDate;
                     tastMaster.Percentage = data.Percentage;
+                }
+                if (taskmasterDto.TaskDocumentFileModel?.Base64?.Length > 0 && taskmasterDto.TaskDocumentFileModel?.Base64 != null)
+                {
+                    var backupModel = new FileModel()
+                    {
+                        Base64 = taskmasterDto.TaskDocumentFileModel.Base64,
+                        Extension = taskmasterDto.TaskDocumentFileModel.Extension
+                    };
+                    tastMaster.TaskDocumentFilePath = DocumentService.SaveUploadDocument(backupModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+                }
+                Add(tastMaster);
+                UpdateTaskOrderSequence(taskmasterDto.Id);
+            }
+
+            _context.Save();
+            return "";
+        }
+
+
+        public string AddCountryTask(StudyPlantaskParameterDto taskmasterDto)
+        {
+            var project = _context.StudyPlan.First(x => x.Id == taskmasterDto.StudyPlanId);
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var sites = _projectRepository.All.Where(x =>
+                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == project.ProjectId
+                     && projectList.Any(c => c == x.Id)).GroupBy(g => g.CountryId)
+                     .Select(s => s.First(x => x.CountryId == s.Key)).ToList();
+
+            if (sites.Count <= 0)
+            {
+                return "Site not found in this project";
+            }
+
+            foreach (var plan in sites)
+            {
+                taskmasterDto.Id = 0;
+                var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
+                tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
+                tastMaster.CountryId = plan.CountryId;
+                tastMaster.ProjectId = plan.Id;
+                tastMaster.StudyPlanId = taskmasterDto.StudyPlanId;
+                tastMaster.TaskOrder = UpdateTaskOrder(taskmasterDto);
+                var data = UpdateDependentTaskDate(tastMaster);
+                if (data != null)
+                {
+                    tastMaster.StartDate = data.StartDate;
+                    tastMaster.EndDate = data.EndDate;
+                    tastMaster.Percentage = data.Percentage;
+                }
+                if (taskmasterDto.TaskDocumentFileModel?.Base64?.Length > 0 && taskmasterDto.TaskDocumentFileModel?.Base64 != null)
+                {
+                    var backupModel = new FileModel()
+                    {
+                        Base64 = taskmasterDto.TaskDocumentFileModel.Base64,
+                        Extension = taskmasterDto.TaskDocumentFileModel.Extension
+                    };
+                    tastMaster.TaskDocumentFilePath = DocumentService.SaveUploadDocument(backupModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
                 }
                 Add(tastMaster);
                 UpdateTaskOrderSequence(taskmasterDto.Id);
