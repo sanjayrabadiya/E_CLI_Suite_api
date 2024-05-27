@@ -866,6 +866,7 @@ namespace GSC.Respository.CTMS
         }
         public List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId)
         {
+
             var result = new List<StudyPlanTaskDto>();
             if (countryId > 0)
             {
@@ -971,6 +972,10 @@ namespace GSC.Respository.CTMS
                }).ToList();
                 item.TaskResource = resourcelist;
             }
+
+            //Apply flitter display only Resource Added display
+            if (result != null)
+                result = result.Where(s => s.TaskResource.Count != 0).ToList();
             return result;
         }
 

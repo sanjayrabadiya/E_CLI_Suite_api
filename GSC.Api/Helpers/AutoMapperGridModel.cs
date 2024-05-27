@@ -319,7 +319,7 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
                            .ForMember(x => x.DurationDay, x => x.MapFrom(a => a.Duration))
                            .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-                           .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode != null ? a.StudyPlan.Project.ProjectCode : a.StudyPlan.Project.ManageSite.SiteName))
+                           .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode ?? a.StudyPlan.Project.ManageSite.SiteName))
                           .ReverseMap();
 
 
