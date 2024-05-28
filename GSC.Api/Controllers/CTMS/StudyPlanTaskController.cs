@@ -135,7 +135,7 @@ namespace GSC.Api.Controllers.CTMS
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);          
+            var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
@@ -154,6 +154,8 @@ namespace GSC.Api.Controllers.CTMS
             }
             tastMaster.StudyPlanId = revertdata.StudyPlanId;
             tastMaster.ProjectId = revertdata.ProjectId;
+            tastMaster.CountryId = revertdata.CountryId;
+            tastMaster.IsCountry = revertdata.IsCountry;
             _studyPlanTaskRepository.Update(tastMaster);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task failed on save."));
