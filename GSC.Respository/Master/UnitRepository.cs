@@ -49,7 +49,7 @@ namespace GSC.Respository.Master
         }
         public List<DropDownDto> GetUnitAsModule(string screenCode)
         { 
-           return _context.Unit.Include(s=>s.AppScreen).Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.AppScreen.ScreenCode == screenCode)
+           return _context.Unit.Include(s=>s.AppScreen).Where(x =>(x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)&& x.AppScreen.ScreenCode == screenCode && x.DeletedBy==null)
                   .Select(c => new DropDownDto { Id = c.Id, Value = c.UnitName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
     }

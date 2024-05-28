@@ -857,6 +857,7 @@ namespace GSC.Api.Helpers
                   .ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
                 .ForMember(x => x.MilestoneTypeName, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
+                .ForMember(x => x.MilestoneType, x => x.MapFrom(a => a.MilestoneType))
             .ReverseMap();
 
             CreateMap<CtmsApprovalRoles, CtmsApprovalRolesGridDto>()
