@@ -26,6 +26,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IProjectDocumentReviewRepository _projectDocumentReviewRepository;
         private readonly IDashboardRepository _dashboardRepository;
         private readonly ICtmsWorkflowApprovalRepository _ctmsWorkflowApprovalRepository;
+        private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
 
         public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
@@ -37,7 +38,8 @@ namespace GSC.Api.Controllers.Master
             IProjectDocumentReviewRepository projectDocumentReviewRepository,
             IDashboardRepository dashboardRepository,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
-            ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository
+            ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository,
+            IStudyPlanTaskRepository studyPlanTaskRepository
             )
         {
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
@@ -50,6 +52,7 @@ namespace GSC.Api.Controllers.Master
             _dashboardRepository = dashboardRepository;
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
             _ctmsWorkflowApprovalRepository = ctmsWorkflowApprovalRepository;
+            _studyPlanTaskRepository = studyPlanTaskRepository;
         }
 
         #region Dashboard Overview Code
@@ -95,6 +98,7 @@ namespace GSC.Api.Controllers.Master
             objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));
             objdashboard.MyTaskList.AddRange(_ctmsMonitoringReportReviewRepository.GetSendBackTemplateList(ProjectId, SiteId > 0 ? SiteId : 0));
             objdashboard.MyTaskList.AddRange(_ctmsWorkflowApprovalRepository.GetCtmsApprovalMyTask(ProjectId));
+            objdashboard.MyTaskList.AddRange(_studyPlanTaskRepository.GetCtmsMyTaskList(ProjectId));
             return Ok(objdashboard);
         }
 

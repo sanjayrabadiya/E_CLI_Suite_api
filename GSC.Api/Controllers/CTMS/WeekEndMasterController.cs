@@ -2,13 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
+using DocumentFormat.OpenXml.InkML;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
 using Microsoft.AspNetCore.Mvc;
+using Syncfusion.XlsIO.Implementation.XmlReaders;
+using static SkiaSharp.HarfBuzz.SKShaper;
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -86,6 +90,13 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Post([FromBody] List<WeekEndMasterDto> weekEndMasterDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            //Only Site Right Add but not Add study right this time check validation #1327
+            if (weekEndMasterDto[0].ProjectId != null && weekEndMasterDto[0].SiteId == null && _context.UserAccess.Where(x => x.ParentProjectId == weekEndMasterDto[0].ProjectId && x.ProjectId == weekEndMasterDto[0].ProjectId && x.DeletedBy == null).Count() == 0)
+            {
+                ModelState.AddModelError("Message", "You have only a site right. Not Study");
+                return BadRequest(ModelState);
+            }
             foreach (var item in weekEndMasterDto)
             {
                 item.Id = 0;
@@ -100,6 +111,13 @@ namespace GSC.Api.Controllers.CTMS
         [HttpPut]
         public IActionResult Put([FromBody] List<WeekEndMasterDto> weekEndMasterDto)
         {
+            //Only Site Right Add but not Add study right this time check validation #1327
+            if (weekEndMasterDto[0].ProjectId != null && weekEndMasterDto[0].SiteId == null && _context.UserAccess.Where(x => x.ParentProjectId == weekEndMasterDto[0].ProjectId && x.ProjectId == weekEndMasterDto[0].ProjectId && x.DeletedBy == null).Count() == 0)
+            {
+                ModelState.AddModelError("Message", "You have only a site right. Not Study");
+                return BadRequest(ModelState);
+            }
+
             foreach (var item in weekEndMasterDto)
             {
                 if (item.Id <= 0) return BadRequest();

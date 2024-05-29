@@ -46,10 +46,10 @@ namespace GSC.Api.Controllers.CTMS
             _uploadSettingRepository = uploadSettingRepository;
         }
 
-        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}/{filterId:int}")]
-        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterId)
+        [HttpGet("{isDeleted:bool?}/{StudyPlanId:int}/{ProjectId:int}/{filterId:int}/{countryId:int}/{siteId:int}")]
+        public IActionResult Get(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterId, int countryId, int siteId)
         {
-            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId, filterId);
+            var studyplan = _studyPlanTaskRepository.GetStudyPlanTaskList(isDeleted, StudyPlanId, ProjectId, filterId, siteId, countryId);
             return Ok(studyplan);
         }
 
@@ -154,8 +154,9 @@ namespace GSC.Api.Controllers.CTMS
             }
             tastMaster.StudyPlanId = revertdata.StudyPlanId;
             tastMaster.ProjectId = revertdata.ProjectId;
-            tastMaster.CountryId = revertdata.CountryId;
+
             tastMaster.IsCountry = revertdata.IsCountry;
+            tastMaster.CountryId = revertdata.CountryId;
             _studyPlanTaskRepository.Update(tastMaster);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task failed on save."));
@@ -400,6 +401,20 @@ namespace GSC.Api.Controllers.CTMS
                 return File(System.IO.File.OpenRead(filepath), ObjectExtensions.GetMIMEType(file.TaskDocumentFileName), file.TaskDocumentFileName);
             }
             return NotFound();
+        }
+
+        [HttpGet]
+        [Route("GetCountryDropdown/{parentId}")]
+        public IActionResult GetCountryDropdown(int parentId)
+        {
+            return Ok(_studyPlanTaskRepository.GetCountryDropDown(parentId));
+        }
+
+        [HttpGet]
+        [Route("GetSiteDropdown/{parentId}")]
+        public IActionResult GetSiteDropdown(int parentId)
+        {
+            return Ok(_studyPlanTaskRepository.GetSiteDropDown(parentId));
         }
     }
 }
