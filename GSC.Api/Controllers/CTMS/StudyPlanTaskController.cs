@@ -104,7 +104,7 @@ namespace GSC.Api.Controllers.CTMS
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
             var project = _context.StudyPlan.Where(x => x.Id == taskmasterDto.StudyPlanId).First();
-            tastMaster.ProjectId = project.Id;
+            tastMaster.ProjectId = project.ProjectId;
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
