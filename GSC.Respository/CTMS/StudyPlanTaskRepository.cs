@@ -35,8 +35,8 @@ namespace GSC.Respository.CTMS
 
         public StudyPlanTaskRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IHolidayMasterRepository holidayMasterRepository, 
-            IWeekEndMasterRepository weekEndMasterRepository, 
+            IMapper mapper, IHolidayMasterRepository holidayMasterRepository,
+            IWeekEndMasterRepository weekEndMasterRepository,
             IProjectRightRepository projectRightRepository,
             IProjectRepository projectRepository,
              IUploadSettingRepository uploadSettingRepository) : base(context)
@@ -51,7 +51,7 @@ namespace GSC.Respository.CTMS
             _uploadSettingRepository = uploadSettingRepository;
         }
 
-        public StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType)
+        public StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType, int siteId, int countryId)
         {
             var result = new StudyPlanTaskGridDto();
 
@@ -71,7 +71,10 @@ namespace GSC.Respository.CTMS
             }
             if (filterType == CtmsStudyTaskFilter.Site)
             {
-                studyIds.AddRange(ids);
+                if (siteId == 0)
+                    studyIds.AddRange(ids);
+                else
+                    studyIds.Add(siteId);
             }
 
             var studyplans = _context.StudyPlan.Where(x => (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.ProjectId) :
@@ -94,11 +97,15 @@ namespace GSC.Respository.CTMS
             {
                 if (studyplan != null)
                 {
-                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).OrderBy(x => x.TaskOrder).
+                    var tasklistResource = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+                    && x.StudyPlanId == studyplan.Id
+                    && (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry)).OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
-                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id && x.ParentId == 0 && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country)))
-                        .Include(i => i.StudyPlan.Project).OrderBy(x => x.TaskOrder).
+                    var tasklist = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null
+                    && x.StudyPlanId == studyplan.Id && x.ParentId == 0
+                    && (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry)).Include(i => i.StudyPlan.Project)
+                    .OrderBy(x => x.TaskOrder).
                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
 
                     if (tasklist.Exists(x => TodayDate < x.StartDate && x.ActualStartDate == null && x.ActualEndDate == null))
@@ -156,8 +163,8 @@ namespace GSC.Respository.CTMS
                     }
 
                     var countProgress = subtasklist.Average(a => a.Percentage);
-                    changeData.Percentage = (int)countProgress;
-                    s.Percentage = (int)countProgress;
+                    changeData.Percentage = (int)(countProgress ?? 0);
+                    s.Percentage = (int)(countProgress ?? 0);
                     Update(changeData);
                     _context.Save();
 
@@ -1045,7 +1052,7 @@ namespace GSC.Respository.CTMS
             foreach (var plan in studyPlans)
             {
                 taskmasterDto.Id = 0;
-                var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);              
+                var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
                 tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
                 tastMaster.ProjectId = plan.ProjectId;
                 tastMaster.StudyPlanId = plan.Id;
@@ -1121,6 +1128,66 @@ namespace GSC.Respository.CTMS
 
             _context.Save();
             return "";
+        }
+
+
+        public List<DropDownDto> GetCountryDropDown(int parentProjectId)
+        {
+            var studyPlan = _context.StudyPlan.FirstOrDefault(x => x.DeletedDate == null && x.ProjectId == parentProjectId);
+
+            var countrylist = All.Include(i => i.StudyPlan).Where(x => x.DeletedDate == null && x.CountryId != null && x.StudyPlanId == studyPlan.Id).Include(i => i.Country).GroupBy(g => g.CountryId)
+                .Select(c => new DropDownDto { Id = c.Key.Value, Value = c.First().Country.CountryName }).OrderBy(o => o.Value).ToList();
+
+            return countrylist;
+        }
+
+        public List<DropDownDto> GetSiteDropDown(int parentProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == parentProjectId
+                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+            return All.Where(x => x.DeletedDate == null && ids.Contains(x.StudyPlan.ProjectId)).Include(i => i.StudyPlan.Project).GroupBy(g => g.StudyPlan.ProjectId)
+                .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlan.Project.ProjectName }).OrderBy(o => o.Value).ToList();
+        }
+
+        public List<DashboardDto> GetCtmsMyTaskList(int ProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == ProjectId
+                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+            ids.Add(ProjectId);
+
+            var studyPlans = _context.StudyPlan.Where(x => x.DeletedDate == null && ids.Contains(x.ProjectId)).ToList();
+
+            var listDashboardMyTasks = new List<DashboardDto>();
+
+            foreach (var plan in studyPlans)
+            {
+                var TaskList = _context.StudyPlanResource.Where(x => x.DeletedDate == null && x.StudyPlanTask.StudyPlanId == plan.Id
+                && x.ResourceType.UserId == _jwtTokenAccesser.UserId && x.ResourceType.RoleId == _jwtTokenAccesser.RoleId
+                && x.ResourceType.ResourceTypes == ResourceTypeEnum.Manpower && x.StudyPlanTask.ActualEndDate == null).Include(i => i.StudyPlanTask)
+                 .Select(s => new DashboardDto
+                 {
+                     Id = s.StudyPlanTask.StudyPlanId,
+                     TaskInformation = s.StudyPlanTask.TaskName,
+                     ExtraData = s.StudyPlanTask.StudyPlan.IsPlanApproval,
+                     CreatedDate = s.CreatedDate,
+                     CreatedByUser = _context.Users.Where(x => x.Id == s.CreatedBy).FirstOrDefault().UserName,
+                     DueDate = s.StudyPlanTask.ActualStartDate,
+                     Module = "CTMS",
+                     ControlType = DashboardMyTaskType.CTMSMyTask,
+                     ActivityId = s.StudyPlanTask.StudyPlan.ProjectId
+                 }).OrderByDescending(x => x.CreatedDate).ToList();
+
+                listDashboardMyTasks.AddRange(TaskList);
+            }
+
+            return listDashboardMyTasks;
         }
     }
 }

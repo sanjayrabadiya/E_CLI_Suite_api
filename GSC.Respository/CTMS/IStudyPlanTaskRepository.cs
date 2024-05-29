@@ -12,7 +12,7 @@ namespace GSC.Respository.CTMS
 {
     public interface IStudyPlanTaskRepository : IGenericRepository<StudyPlanTask>
     {
-        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType);
+        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType, int siteId, int countryId);
         int UpdateTaskOrder(StudyPlantaskParameterDto taskmasterDto);
         string ValidateTask(StudyPlanTask taskmasterDto);
         void UpdateParentDate(int? ParentId);
@@ -36,5 +36,8 @@ namespace GSC.Respository.CTMS
         ParentTaskDate GetChildStartEndDate(int parentTaskId);
         string AddSiteTask(StudyPlantaskParameterDto taskmasterDto);
         string AddCountryTask(StudyPlantaskParameterDto taskmasterDto);
+        List<DropDownDto> GetCountryDropDown(int parentProjectId);
+        List<DropDownDto> GetSiteDropDown(int parentProjectId);
+        List<DashboardDto> GetCtmsMyTaskList(int ProjectId);
     }
 }
