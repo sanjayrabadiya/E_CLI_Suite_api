@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
@@ -51,6 +52,14 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             holidayDto.Id = 0;
+
+            //Only Site Right Add but not Add study right this time check validation #1327
+            if (holidayDto.ProjectId != null && holidayDto.SiteId == null && _context.UserAccess.Where(x => x.ParentProjectId == holidayDto.ProjectId && x.ProjectId == holidayDto.ProjectId && x.DeletedBy == null).Count() == 0)
+            {
+                ModelState.AddModelError("Message", "You have only a site right. Not Study");
+                return BadRequest(ModelState);
+            }
+
             var holiDay = _mapper.Map<HolidayMaster>(holidayDto);
 
             var validate = _holidayMasterRepository.DuplicateHoliday(holiDay);
@@ -70,6 +79,13 @@ namespace GSC.Api.Controllers.CTMS
             if (holidayDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+
+            //Only Site Right Add but not Add study right this time check validation #1327
+            if (holidayDto.ProjectId != null && holidayDto.SiteId == null && _context.UserAccess.Where(x => x.ParentProjectId == holidayDto.ProjectId && x.ProjectId == holidayDto.ProjectId && x.DeletedBy == null).Count() == 0)
+            {
+                ModelState.AddModelError("Message", "You have only a site right. Not Study");
+                return BadRequest(ModelState);
+            }
 
             var holiDay = _mapper.Map<HolidayMaster>(holidayDto);
             var validate = _holidayMasterRepository.DuplicateHoliday(holiDay);
