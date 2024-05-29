@@ -46,7 +46,12 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             procedureDtoDto.Id = 0;
             var procedure = _mapper.Map<Procedure>(procedureDtoDto);
-
+            var validatecode = _procedureRepository.Duplicate(procedure);
+            if (!string.IsNullOrEmpty(validatecode))
+            {
+                ModelState.AddModelError("Message", validatecode);
+                return BadRequest(ModelState);
+            }
             _procedureRepository.Add(procedure);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Procedure failed on save."));
             return Ok(procedure.Id);
@@ -60,6 +65,12 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var procedure = _mapper.Map<Procedure>(procedureDto);
+            var validatecode = _procedureRepository.Duplicate(procedure);
+            if (!string.IsNullOrEmpty(validatecode))
+            {
+                ModelState.AddModelError("Message", validatecode);
+                return BadRequest(ModelState);
+            }
 
             _procedureRepository.Update(procedure);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Procedure failed on save."));
@@ -84,6 +95,13 @@ namespace GSC.Api.Controllers.CTMS
         public ActionResult Active(int id)
         {
             var record = _procedureRepository.Find(id);
+
+            var validatecode = _procedureRepository.Duplicate(record);
+            if (!string.IsNullOrEmpty(validatecode))
+            {
+                ModelState.AddModelError("Message", validatecode);
+                return BadRequest(ModelState);
+            }
 
             if (record == null)
                 return NotFound();

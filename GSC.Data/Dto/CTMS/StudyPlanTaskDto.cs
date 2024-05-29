@@ -57,6 +57,7 @@ namespace GSC.Data.Dto.CTMS
         public List<ResourceTypeGridDto> TaskResource { get; set; }
         public string RefrenceTypeName { get; set; }
         public bool IsParentTask { get; set; }
+        public bool IsPaymentMileStone { get; set; }
     }
 
     public class StudyPlanTaskChartDto

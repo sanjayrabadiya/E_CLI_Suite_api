@@ -21,8 +21,8 @@ namespace GSC.Respository.CTMS
         }
         public string Duplicate(Procedure objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.Name == objSave.Name.Trim() && x.DeletedDate == null))
-                return "Duplicate Resource Code : " + objSave.Name;
+            if (All.Any(x => x.Id != objSave.Id && x.Name == objSave.Name.Trim() && x.UnitId==objSave.UnitId && x.CurrencyId== objSave.CurrencyId && x.DeletedDate == null))
+                return "Duplicate Procedure : " + objSave.Name;
 
             return "";
         }

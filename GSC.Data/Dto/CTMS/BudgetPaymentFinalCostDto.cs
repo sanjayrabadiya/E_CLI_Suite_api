@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System.ComponentModel.DataAnnotations;
 namespace GSC.Data.Dto.CTMS
 {
@@ -20,12 +21,14 @@ namespace GSC.Data.Dto.CTMS
         public decimal? ProfessionalCostAmount { get; set; }
         public decimal? PatientCostAmount { get; set; }
         public decimal? PassThroughCost { get; set; }
+        [Required(ErrorMessage = "MilestoneType is required.")]
+        public MilestoneType MilestoneType { get; set; }
     }
 
     public class BudgetPaymentFinalCostGridDto : BaseAuditDto
     {
         public int ProjectId { get; set; }
-        public string MilestoneType { get; set; }
+        public short MilestoneType { get; set; }
         public string MilestoneTypeName { get; set; }
         public decimal? TotalAmount { get; set; }
         public decimal? Percentage { get; set; }
