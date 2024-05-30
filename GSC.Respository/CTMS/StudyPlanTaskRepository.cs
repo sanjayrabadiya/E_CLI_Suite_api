@@ -147,18 +147,18 @@ namespace GSC.Respository.CTMS
                     s.EndDate = subtasklist.Max(s => s.EndDate);
 
                     var changeData = All.First(o => o.Id == s.Id);
-                    if (saveActualDate != s.ActualStartDate || saveActualEndDate != s.ActualEndDate )
+                    if (saveActualDate != s.ActualStartDate || saveActualEndDate != s.ActualEndDate)
                     {
                         changeData.ActualStartDate = s.ActualStartDate;
                         changeData.ActualEndDate = s.ActualEndDate;
                     }
 
-                    if(saveStartDate != s.StartDate || saveEndDat != s.EndDate)
+                    if (saveStartDate != s.StartDate || saveEndDat != s.EndDate)
                     {
                         changeData.StartDate = (DateTime)s.StartDate;
                         changeData.EndDate = (DateTime)s.EndDate;
                         DateTime d1 = (DateTime)s.StartDate;
-                        DateTime d2= (DateTime)s.EndDate;
+                        DateTime d2 = (DateTime)s.EndDate;
                         changeData.Duration = (d2 - d1).Days;
                     }
 
@@ -635,10 +635,9 @@ namespace GSC.Respository.CTMS
             return result;
         }
 
-        public StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType)
+        public StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType, int countryId, int siteId)
         {
             StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
-
 
             var studyIds = new List<int>();
 
@@ -655,13 +654,16 @@ namespace GSC.Respository.CTMS
             }
             if (filterType == CtmsStudyTaskFilter.Site)
             {
-                studyIds.AddRange(ids);
+                if (siteId == 0)
+                    studyIds.AddRange(ids);
+                else
+                    studyIds.Add(siteId);
             }
 
             var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null
             && (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.StudyPlan.ProjectId) :
                 x.StudyPlan.ProjectId == projectId) && x.DeletedDate == null
-                && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).ToList();
+               && (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry)).ToList();
 
             var TodayDate = DateTime.Now;
             result.All = StudyPlanTask.Count;
@@ -737,7 +739,7 @@ namespace GSC.Respository.CTMS
 
                 if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null && chartType == CtmsChartType.NotStarted)
                     data.Add(item);
-                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate &&  item.EndDate > TodayDate && chartType == CtmsChartType.OnGoingDate)
+                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate && item.EndDate > TodayDate && chartType == CtmsChartType.OnGoingDate)
                     data.Add(item);
                 if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate == null && chartType == CtmsChartType.DueDate)
                     data.Add(item);

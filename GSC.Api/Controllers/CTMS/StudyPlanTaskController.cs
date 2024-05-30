@@ -272,11 +272,11 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(studyplan);
         }
 
-        [Route("GetDocChart/{projectId}/{filterId:int}")]
+        [Route("GetDocChart/{projectId}/{filterId:int}/{countryId:int}/{siteId:int}")]
         [HttpGet]
-        public IActionResult GetDocChart(int projectId, CtmsStudyTaskFilter filterId)
+        public IActionResult GetDocChart(int projectId, CtmsStudyTaskFilter filterId, int countryId, int siteId)
         {
-            var result = _studyPlanTaskRepository.GetDocChart(projectId, filterId);
+            var result = _studyPlanTaskRepository.GetDocChart(projectId, filterId, countryId, siteId);
             return Ok(result);
         }
 
