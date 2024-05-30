@@ -110,6 +110,8 @@ namespace GSC.Respository.Screening
 
         public void GetDataEntryAuditReportHistory(ProjectDatabaseSearchDto filters)
         {
+            _context.SetConnectionTimeOut(2000);
+
             var query = All.AsQueryable();
 
             var sites = new List<int>();
