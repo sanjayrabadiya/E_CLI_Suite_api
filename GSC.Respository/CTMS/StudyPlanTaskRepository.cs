@@ -146,6 +146,10 @@ namespace GSC.Respository.CTMS
                     s.ActualEndDate = subtasklist.Max(s => s.ActualEndDate);
                     s.StartDate = subtasklist.Min(s => s.StartDate);
                     s.EndDate = subtasklist.Max(s => s.EndDate);
+                    s.EndDateDay = subtasklist.Max(s => s.EndDate);
+                    DateTime StartDate1 = (DateTime)s.StartDate;
+                    DateTime EndDate2 = (DateTime)s.EndDate;
+                    s.Duration = (EndDate2 - StartDate1).Days;
 
                     var changeData = All.First(o => o.Id == s.Id);
                     if (saveActualDate != s.ActualStartDate || saveActualEndDate != s.ActualEndDate)
@@ -1191,6 +1195,7 @@ namespace GSC.Respository.CTMS
                      && x.DeletedDate == null && x.ParentProjectId == parentProjectId
                      && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
 
+
             return All.Where(x => x.DeletedDate == null && ids.Contains(x.StudyPlan.ProjectId)).Include(i => i.StudyPlan.Project).GroupBy(g => g.StudyPlan.ProjectId)
                 .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlan.Project.ProjectCode ?? c.First().StudyPlan.Project.ManageSite.SiteName }).OrderBy(o => o.Value).ToList();
         }
@@ -1221,8 +1226,7 @@ namespace GSC.Respository.CTMS
                 .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlanTask.StudyPlan.Project.ProjectCode ?? c.First().StudyPlanTask.StudyPlan.Project.ManageSite.SiteName }).OrderBy(o => o.Value).ToList();
 
             return siteList;
-        }
-
+   }
         public List<DashboardDto> GetCtmsMyTaskList(int ProjectId)
         {
             var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();

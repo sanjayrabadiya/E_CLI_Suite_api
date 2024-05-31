@@ -17,6 +17,7 @@ using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace GSC.Api.Controllers.CTMS
@@ -57,7 +58,8 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var task = _studyPlanTaskRepository.FindByInclude(x => x.Id == id).FirstOrDefault();
+            var task = _context.StudyPlanTask.Include(s=>s.StudyPlan).ThenInclude(b=>b.Project).Include(c=>c.Country).Where(e=>e.Id == id && e.DeletedBy==null).FirstOrDefault();
+                /*_studyPlanTaskRepository.AllIncluding(s=>s.StudyPlan).in;*/
             var taskDto = _mapper.Map<StudyPlanTaskDto>(task);
 
             var taskDate = _studyPlanTaskRepository.GetChildStartEndDate(id);

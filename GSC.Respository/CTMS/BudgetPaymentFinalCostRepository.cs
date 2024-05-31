@@ -39,8 +39,8 @@ namespace GSC.Respository.CTMS
             BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
             var resourcecost = _context.StudyPlanResource.
                                 Include(s => s.StudyPlanTask).
-                                ThenInclude(s => s.StudyPlan)
-                                .Where(s => s.DeletedBy == null && s.StudyPlanTask.StudyPlan.ProjectId == projectId || siteIds.Contains(s.StudyPlanTask.StudyPlan.ProjectId)).Sum(s => s.ConvertTotalCost);
+                                ThenInclude(s => s.StudyPlan).
+                                Where(s => s.DeletedBy == null && s.StudyPlanTask.StudyPlan.DeletedBy == null && s.StudyPlanTask.DeletedBy == null && s.StudyPlanTask.StudyPlan.DeletedBy == null && (s.StudyPlanTask.StudyPlan.ProjectId == projectId || siteIds.Contains(s.StudyPlanTask.StudyPlan.ProjectId))).Sum(s => s.ConvertTotalCost);
             data.ProfessionalCostAmount = Convert.ToDecimal(resourcecost);
 
             //PatientCostVisit
