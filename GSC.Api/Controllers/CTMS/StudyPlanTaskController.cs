@@ -58,8 +58,8 @@ namespace GSC.Api.Controllers.CTMS
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var task = _context.StudyPlanTask.Include(s=>s.StudyPlan).ThenInclude(b=>b.Project).Include(c=>c.Country).Where(e=>e.Id == id && e.DeletedBy==null).FirstOrDefault();
-                /*_studyPlanTaskRepository.AllIncluding(s=>s.StudyPlan).in;*/
+            var task = _context.StudyPlanTask.Include(s => s.StudyPlan).ThenInclude(b => b.Project).Include(c => c.Country).Where(e => e.Id == id && e.DeletedBy == null).FirstOrDefault();
+            /*_studyPlanTaskRepository.AllIncluding(s=>s.StudyPlan).in;*/
             var taskDto = _mapper.Map<StudyPlanTaskDto>(task);
 
             var taskDate = _studyPlanTaskRepository.GetChildStartEndDate(id);
@@ -138,7 +138,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-            var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
+            var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);          
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;
@@ -156,9 +156,13 @@ namespace GSC.Api.Controllers.CTMS
             }
             tastMaster.StudyPlanId = revertdata.StudyPlanId;
             tastMaster.ProjectId = revertdata.ProjectId;
-
             tastMaster.IsCountry = revertdata.IsCountry;
             tastMaster.CountryId = revertdata.CountryId;
+            tastMaster.ApprovalStatus = revertdata.ApprovalStatus;
+            tastMaster.PreApprovalStatus = revertdata.PreApprovalStatus;
+            tastMaster.DocumentPath = revertdata.DocumentPath;
+            tastMaster.FileName = revertdata.FileName;
+
             _studyPlanTaskRepository.Update(tastMaster);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task failed on save."));
@@ -343,13 +347,12 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (data.Id <= 0) return BadRequest();
 
-            var record = _studyPlanTaskRepository.Find(data.Id);
-            var tastMaster = _mapper.Map<StudyPlanTask>(record);
-
-            DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), record.DocumentPath);
+            var tastMaster = _studyPlanTaskRepository.Find(data.Id);
+            //var tastMaster = _mapper.Map<StudyPlanTask>(record);
             if (data.FileModel?.Base64?.Length > 0)
             {
-                tastMaster.DocumentPath = _uploadSettingRepository.GetWebDocumentUrl() + DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
+                DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), tastMaster.DocumentPath);
+                tastMaster.DocumentPath = DocumentService.SaveUploadDocument(data.FileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "StudyPlanTask");
             }
             tastMaster.ApprovalStatus = data.ApprovalStatus;
             tastMaster.PreApprovalStatus = true;
@@ -401,6 +404,19 @@ namespace GSC.Api.Controllers.CTMS
             if (System.IO.File.Exists(filepath))
             {
                 return File(System.IO.File.OpenRead(filepath), ObjectExtensions.GetMIMEType(file.TaskDocumentFileName), file.TaskDocumentFileName);
+            }
+            return NotFound();
+        }
+
+        [HttpGet]
+        [Route("DownloadPreApproveDocument/{id}")]
+        public IActionResult DownloadPreApproveDocument(int id)
+        {
+            var file = _studyPlanTaskRepository.Find(id);
+            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), file.DocumentPath);
+            if (System.IO.File.Exists(filepath))
+            {
+                return File(System.IO.File.OpenRead(filepath), ObjectExtensions.GetMIMEType(file.FileName), file.FileName);
             }
             return NotFound();
         }
