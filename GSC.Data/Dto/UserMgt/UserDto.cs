@@ -110,4 +110,13 @@ namespace GSC.Data.Dto.UserMgt
         public string Token { get; set; }
         public DeviceType DeviceType { get; set; }
     }
+
+    public class UserUUIDDto : BaseAuditDto
+    {
+        public string UserName { get; set; }
+        public string UUID { get; set; }
+        public string Reason { get; set; }
+        public string ReasonOth { get; set; }
+        public bool IsActive { get; set; }
+    }
 }

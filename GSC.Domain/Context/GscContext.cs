@@ -25,6 +25,7 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
+using GSC.Data.Entities.License;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
 using GSC.Data.Entities.Master;
@@ -514,10 +515,9 @@ namespace GSC.Domain.Context
         public DbSet<PatientMilestone> PatientMilestone { get; set; }
         public DbSet<PassthroughMilestone> PassthroughMilestone { get; set; }
         public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
-        public DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
-        public DbSet<CtmsApprovalUsers> CtmsApprovalUsers { get; set; }
-        public DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
-        public DbSet<CtmsStudyPlanTaskComment> CtmsStudyPlanTaskComment { get; set; }
-        public DbSet<PaymentTerms> PaymentTerms { get; set; }
+        public DbSet<PaymentMilestoneVisitDetail> PaymentMilestoneVisitDetail { get; set; }
+        public DbSet<PaymentMilestonePassThroughDetail> PaymentMilestonePassThroughDetail { get; set; }
+        public DbSet<UserUUID> UserUUID { get; set; }
+        public DbSet<LiecenceObj> LiecenceObj { get; set; }
     }
 }
