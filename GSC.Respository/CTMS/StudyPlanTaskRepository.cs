@@ -149,7 +149,7 @@ namespace GSC.Respository.CTMS
                     s.EndDateDay = subtasklist.Max(s => s.EndDate);
                     DateTime StartDate1 = (DateTime)s.StartDate;
                     DateTime EndDate2 = (DateTime)s.EndDate;
-                    s.Duration = (EndDate2 - StartDate1).Days;
+                    s.DurationDay = (EndDate2.AddDays(1) - StartDate1).Days;
 
                     var changeData = All.First(o => o.Id == s.Id);
                     if (saveActualDate != s.ActualStartDate || saveActualEndDate != s.ActualEndDate)
@@ -164,7 +164,7 @@ namespace GSC.Respository.CTMS
                         changeData.EndDate = (DateTime)s.EndDate;
                         DateTime d1 = (DateTime)s.StartDate;
                         DateTime d2 = (DateTime)s.EndDate;
-                        changeData.Duration = (d2 - d1).Days;
+                        changeData.Duration = (d2.AddDays(1) - d1).Days;
                     }
 
                     var countProgress = subtasklist.Average(a => a.Percentage);
@@ -476,41 +476,42 @@ namespace GSC.Respository.CTMS
                     var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
                     if (task != null)
                     {
-                        StudyPlanTask.EndDate = task.EndDate;//WorkingDayHelper.AddBusinessDays(task.EndDate, StudyPlanTask.OffSet);
+                        StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, StudyPlanTask.OffSet);
                     }
-                    StudyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(StudyPlanTask.EndDate, StudyPlanTask.Duration > 0 ? (StudyPlanTask.Duration + StudyPlanTask.OffSet) - 1 : 0);
+                    StudyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(StudyPlanTask.EndDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
                 }
                 else if (StudyPlanTask.ActivityType == ActivityType.FS)
                 {
                     var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
                     if (task != null)
                     {
-                        StudyPlanTask.StartDate = WorkingDayHelper.GetNextWorkingDay(task.EndDate); //StudyPlanTask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, StudyPlanTask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), StudyPlanTask.OffSet);
+                        StudyPlanTask.StartDate = StudyPlanTask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, StudyPlanTask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), StudyPlanTask.OffSet);
                     }
-                    StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(StudyPlanTask.StartDate, StudyPlanTask.Duration > 0 ? (StudyPlanTask.Duration + StudyPlanTask.OffSet) - 1 : 0);
+                    StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(StudyPlanTask.StartDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
                 }
                 else if (StudyPlanTask.ActivityType == ActivityType.SF)
                 {
                     var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
                     if (task != null)
                     {
-                        StudyPlanTask.EndDate = WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate); //StudyPlanTask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, StudyPlanTask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), StudyPlanTask.OffSet);
+                        StudyPlanTask.EndDate = StudyPlanTask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, StudyPlanTask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), StudyPlanTask.OffSet);
                     }
-                    StudyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(StudyPlanTask.EndDate, StudyPlanTask.Duration > 0 ? (StudyPlanTask.Duration + StudyPlanTask.OffSet) - 1 : 0);
+                    StudyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(StudyPlanTask.EndDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
                 }
                 else if (StudyPlanTask.ActivityType == ActivityType.SS)
                 {
                     var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
                     if (task != null)
                     {
-                        StudyPlanTask.StartDate = task.StartDate;  //WorkingDayHelper.AddBusinessDays(task.StartDate, StudyPlanTask.OffSet);
+                        StudyPlanTask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, StudyPlanTask.OffSet);
                     }
-                    StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(StudyPlanTask.StartDate, StudyPlanTask.Duration > 0 ? (StudyPlanTask.Duration + StudyPlanTask.OffSet) - 1 : 0);
+                    StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(StudyPlanTask.StartDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
                 }
                 return StudyPlanTask;
             }
             return null;
         }
+
 
         private string UpdateDependentTaskDate1(int StudyPlanTaskId, ref List<StudyPlanTask> reftasklist)
         {
