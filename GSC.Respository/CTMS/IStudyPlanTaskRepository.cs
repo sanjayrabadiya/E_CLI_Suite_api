@@ -25,13 +25,13 @@ namespace GSC.Respository.CTMS
         List<StudyPlanTask> Save(StudyPlanTask taskData);
         List<AuditTrailDto> GetStudyPlanTaskHistory(int id);
         StudyPlanTaskGridDto GetStudyPlanDependentTaskList(int? StudyPlanTaskId, int ProjectId);
-        StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType);
+        StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType, int countryId, int siteId);
         List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType, CtmsStudyTaskFilter filterType);
         List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search);
         List<DropDownDto> GetRollDropDown(int studyplanId);
         List<DropDownDto> GetUserDropDown(int studyplanId);
         List<DropDownDto> GetDesignationStdDropDown(int studyplanId);
-        List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId);
+        List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
         List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId);
         ParentTaskDate GetChildStartEndDate(int parentTaskId);
         string AddSiteTask(StudyPlantaskParameterDto taskmasterDto);
@@ -39,5 +39,7 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetCountryDropDown(int parentProjectId);
         List<DropDownDto> GetSiteDropDown(int parentProjectId);
         List<DashboardDto> GetCtmsMyTaskList(int ProjectId);
+        List<DropDownDto> GetBudgetCountryDropDown(int parentProjectId);
+        List<DropDownDto> GetBudgetSiteDropDown(int parentProjectId);
     }
 }

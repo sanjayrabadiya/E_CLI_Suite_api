@@ -649,6 +649,7 @@ namespace GSC.Helper
         Above,
         Below,
         Child,
+        Milestone,
         None
     }
     public enum ActivityType : short
