@@ -73,7 +73,7 @@ namespace GSC.Respository.Master
         {
             return "";
         }
-        public List<DropDownDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
+        public List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
         {
             var studyPlan = new List<StudyPlan>();
 
@@ -109,8 +109,40 @@ namespace GSC.Respository.Master
             //Onetime Task Seleect then not get in list 
             var PaymentMilestoneTask = _context.PaymentMilestoneTaskDetail.Include(i => i.ResourceMilestone).Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ResourceMilestone.ProjectId) && w.DeletedBy == null).ToList();
 
-            return _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && (x.IsPaymentMileStone || x.DependentTaskId == null) && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id)
-                .Select(c => new DropDownDto { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+           var data = _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && x.IsPaymentMileStone && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id).ToList();
+            //.Select(c => new  { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+
+            var DropDownDto = new List<DropDownTaskListforMilestoneDto>();
+            data.ForEach(x => {
+               var DependentData=_context.StudyPlanTask.Where(s=>s.Id ==x.DependentTaskId && s.DeletedBy==null).FirstOrDefault();
+                DropDownTaskListforMilestoneDto d1 = new DropDownTaskListforMilestoneDto();
+                if (DependentData != null)
+                {
+                    d1.Id = x.Id;
+                    d1.Value = x.TaskName;
+                    d1.IsDeleted = x.DeletedDate != null;
+                    d1.DependetTaskName = DependentData.TaskName;
+                    d1.ScheduleStartDate = DependentData.StartDate;
+                    d1.ScheduleEndDate = DependentData.EndDate;
+                    d1.ActualStartDate = DependentData.ActualStartDate;
+                    d1.ActualEndDate = DependentData.ActualEndDate;
+                }
+                else
+                {
+                    d1.Id = x.Id;
+                    d1.Value = x.TaskName;
+                    d1.IsDeleted = x.DeletedDate != null;
+                    d1.DependetTaskName = x.TaskName;
+                    d1.ScheduleStartDate = x.StartDate;
+                    d1.ScheduleEndDate = x.EndDate;
+                    d1.ActualStartDate = x.ActualStartDate;
+                    d1.ActualEndDate = x.ActualEndDate;
+                }
+            
+                DropDownDto.Add(d1);
+            });
+
+            return DropDownDto;
         }
         public decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto)
         {

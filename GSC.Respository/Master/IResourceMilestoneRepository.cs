@@ -11,7 +11,7 @@ namespace GSC.Respository.Master
     {
         IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted);
         string DuplicatePaymentMilestone(ResourceMilestone paymentMilestone);
-        List<DropDownDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId);
+        List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId);
         decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto);
         void AddPaymentMilestoneTaskDetail(ResourceMilestoneDto paymentMilestoneDto);
         void DeletePaymentMilestoneTaskDetail(int Id);

@@ -1227,6 +1227,14 @@ namespace GSC.Helper
         [Description("Tasks")] Tasks = 1,
         [Description("lumpsum / Advanced ")] lumpsum = 2
     }
+    public enum DateTypeResource : short
+    {
+        [Description("Schedule Start Date")] ScheduleStartDate = 1,
+        [Description("Schedule End Date")] ScheduleEndDate = 2,
+        [Description("Actual Start Date")] ActualStartDate = 2,
+        [Description("Actual End Date")] ActualEndDate = 1,
+        
+    }
     public enum MilestoneType : short
     {
         [Description("Resource Cost")] ResourceCost = 1,

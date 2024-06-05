@@ -1289,5 +1289,19 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+
+        [HttpGet]
+        [Route("GetDateTypeResourceDropDown")]
+        public IActionResult GetDateTypeResourceDropDown()
+        {
+            var centri = Enum.GetValues(typeof(DateTypeResource))
+                .Cast<DateTypeResource>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
     }
 }
