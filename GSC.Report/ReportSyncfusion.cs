@@ -1,13 +1,9 @@
-﻿using BoldReports.Web;
-using BoldReports.Writer;
+﻿
 using GSC.Data.Dto.Common;
 using GSC.Data.Dto.Configuration;
 using GSC.Data.Dto.Etmf;
-using GSC.Data.Dto.Master;
 using GSC.Data.Dto.Project.Design;
-using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Report.Pdf;
-using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Report;
 using GSC.Data.Entities.Screening;
 using GSC.Domain.Context;
@@ -17,8 +13,6 @@ using GSC.Respository.Client;
 using GSC.Respository.Configuration;
 using GSC.Respository.EmailSender;
 using GSC.Respository.Etmf;
-using GSC.Respository.Project.Design;
-using GSC.Respository.Screening;
 using GSC.Respository.UserMgt;
 using GSC.Respository.Volunteer;
 using GSC.Shared.Extension;
@@ -31,17 +25,13 @@ using Syncfusion.Pdf;
 using Syncfusion.Pdf.Graphics;
 using Syncfusion.Pdf.Grid;
 using Syncfusion.Pdf.Interactive;
-using Syncfusion.Pdf.Parsing;
-using Syncfusion.Pdf.Tables;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace GSC.Report
 {
@@ -553,17 +543,17 @@ namespace GSC.Report
 
 
         //Report Generate
-        public string DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
+        public async Task<string> DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring)
         {
 
             var projectDetails = new List<DossierReportDto>();
             if (reportSetting.PdfStatus == DossierPdfStatus.Blank)
             {
-                projectDetails = _reportBaseRepository.GetBlankPdfData(reportSetting);
+                projectDetails = await _reportBaseRepository.GetBlankPdfDataAsync(reportSetting);
             }
             else
             {
-                projectDetails = _reportBaseRepository.GetDataPdfReport(reportSetting);
+                projectDetails = await _reportBaseRepository.GetDataPdfReportAsync(reportSetting);
                 if (projectDetails.Count == 0)
                     return "Data Entery is pending.";
             }

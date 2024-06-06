@@ -4,13 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace GSC.Report
 {
     public interface IReportSyncfusion
     {
         FileStreamResult GetProjectDesign(ReportSettingNew reportSetting);
-        string DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
+        Task<string> DossierPdfReportGenerate(ReportSettingNew reportSetting, JobMonitoring jobMonitoring);
         string ScreeningPdfReportGenerate(ScreeningReportSetting reportSetting, JobMonitoring jobMonitoring);
     }
 }

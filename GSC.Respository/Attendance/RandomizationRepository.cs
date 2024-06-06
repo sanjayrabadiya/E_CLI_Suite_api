@@ -1335,33 +1335,83 @@ namespace GSC.Respository.Attendance
             return randomizationNumberDto;
         }
 
+        //public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
+        //{
+        //    var result = All.Where(x => x.ProjectId == projectId && !x.IsGeneric && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
+        //          ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+        //    var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+        //    var rolelist = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
+        //    result.ForEach(x =>
+        //    {
+        //        x.PatientStatusName = x.PatientStatusId.GetDescription();
+        //        x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
+        //    });
+
+        //    var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
+        //    var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == project.Id && x.DeletedDate == null).FirstOrDefault();
+
+        //    result.ForEach(x =>
+        //    {
+        //        x.IsEicf = ProjectSettings?.IsEicf ?? false;
+        //        x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Any(c => c.RandomizationId == x.Id) ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient) : false;
+        //        x.ParentProjectCode = project.ProjectCode;
+        //        var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
+        //        x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
+        //        x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
+        //    });
+
+        //    return result;
+        //}
         public List<RandomizationGridDto> GetRandomizationList(int projectId, bool isDeleted)
         {
-            var result = All.Where(x => x.ProjectId == projectId && !x.IsGeneric && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null)).
-                  ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            var projectright = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
-            var rolelist = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true).Select(x => x.RoleId).ToList();
+            // Get the base query for randomization entries
+            var randomizationQuery = All.Where(x => x.ProjectId == projectId && !x.IsGeneric && (isDeleted ? x.DeletedDate != null : x.DeletedDate == null));
+
+            // Project to DTO and order by Id
+            var result = randomizationQuery
+                .ProjectTo<RandomizationGridDto>(_mapper.ConfigurationProvider)
+                .OrderByDescending(x => x.Id)
+                .ToList();
+
+            // Get the project rights and roles
+            var projectRight = _projectRightRepository.FindBy(x => x.ProjectId == projectId && x.UserId == _jwtTokenAccesser.UserId && x.RoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
+            var roleList = _context.SiteTeam.Where(x => x.ProjectId == projectId && x.DeletedDate == null && x.IsIcfApproval == true)
+                                            .Select(x => x.RoleId)
+                                            .ToList();
+
+            // Get the project and settings
+            var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
+            var projectSettings = _context.ProjectSettings.FirstOrDefault(x => x.ProjectId == project.Id && x.DeletedDate == null);
+
+            // Get all necessary data in advance to avoid querying in a loop
+            var econsentReviewDetails = _context.EconsentReviewDetails
+                .Where(c => result.Select(r => r.Id).Contains(c.RandomizationId))
+                .ToList();
+
+            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+                .Where(y => result.Select(r => r.Id).Contains((int)y.ScreeningVisit.ScreeningEntry.RandomizationId) && y.DeletedDate == null)
+                .ToList();
+
+            var idVerifications = _context.IDVerification
+                .Where(q => q.DeletedDate == null && result.Select(r => r.UserId).Contains(q.UserId))
+                .ToList();
+
             result.ForEach(x =>
             {
                 x.PatientStatusName = x.PatientStatusId.GetDescription();
-                x.IsShowEconsentIcon = (rolelist.Contains(_jwtTokenAccesser.RoleId) && projectright != null);
-            });
-
-            var project = _context.Project.Find(_context.Project.Find(projectId).ParentProjectId);
-            var ProjectSettings = _context.ProjectSettings.Where(x => x.ProjectId == project.Id && x.DeletedDate == null).FirstOrDefault();
-
-            result.ForEach(x =>
-            {
-                x.IsEicf = ProjectSettings?.IsEicf ?? false;
-                x.IsAllEconsentReviewed = _context.EconsentReviewDetails.Any(c => c.RandomizationId == x.Id) ? _context.EconsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient) : false;
+                x.IsShowEconsentIcon = (roleList.Contains(_jwtTokenAccesser.RoleId) && projectRight != null);
+                x.IsEicf = projectSettings?.IsEicf ?? false;
+                x.IsAllEconsentReviewed = econsentReviewDetails.Any(c => c.RandomizationId == x.Id) &&
+                                          econsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient);
                 x.ParentProjectCode = project.ProjectCode;
-                var screeningtemplate = _screeningTemplateRepository.FindByInclude(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id && y.DeletedDate == null).ToList();
-                x.IsLocked = screeningtemplate.Count() <= 0 || screeningtemplate.Any(y => y.IsLocked == false) ? false : true;
-                x.isDocumentUpload = _context.IDVerification.Any(q => q.DeletedDate == null && q.UserId == x.UserId);
+                var screeningTemplate = screeningTemplates.Where(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id).ToList();
+                x.IsLocked = screeningTemplate.Count() > 0 && screeningTemplate.All(y => y.IsLocked);
+                x.isDocumentUpload = idVerifications.Any(q => q.UserId == x.UserId);
             });
 
             return result;
         }
+
         public List<RandomizationGridDto> GetRandomizationById(int id, int projectId)
         {
             var result = All.Where(x => x.Id == id).
