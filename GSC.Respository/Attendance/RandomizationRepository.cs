@@ -1388,9 +1388,9 @@ namespace GSC.Respository.Attendance
                 .Where(c => result.Select(r => r.Id).Contains(c.RandomizationId))
                 .ToList();
 
-            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
-                .Where(y => result.Select(r => r.Id).Contains((int)y.ScreeningVisit.ScreeningEntry.RandomizationId) && y.DeletedDate == null)
-                .ToList();
+            //var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+            //    .Where(y => result.Select(r => r.Id).Contains((int)y.ScreeningVisit.ScreeningEntry.RandomizationId) && y.DeletedDate == null)
+            //    .ToList();
 
             var idVerifications = _context.IDVerification
                 .Where(q => q.DeletedDate == null && result.Select(r => r.UserId).Contains(q.UserId))
@@ -1404,8 +1404,8 @@ namespace GSC.Respository.Attendance
                 x.IsAllEconsentReviewed = econsentReviewDetails.Any(c => c.RandomizationId == x.Id) &&
                                           econsentReviewDetails.Where(c => c.RandomizationId == x.Id).All(z => z.IsReviewedByPatient);
                 x.ParentProjectCode = project.ProjectCode;
-                var screeningTemplate = screeningTemplates.Where(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id).ToList();
-                x.IsLocked = screeningTemplate.Count() > 0 && screeningTemplate.All(y => y.IsLocked);
+                //var screeningTemplate = screeningTemplates.Where(y => y.ScreeningVisit.ScreeningEntry.RandomizationId == x.Id).ToList();
+                //x.IsLocked = screeningTemplate.Count() > 0 && screeningTemplate.All(y => y.IsLocked);
                 x.isDocumentUpload = idVerifications.Any(q => q.UserId == x.UserId);
             });
 
@@ -1462,6 +1462,14 @@ namespace GSC.Respository.Attendance
                 x.DeletedDate == null))
             {
                 return "Duplicate Randomization Number : " + objSave.RandomizationNumber;
+            }
+
+            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+            .Where(y => (int)y.ScreeningVisit.ScreeningEntry.RandomizationId == objSave.Id)
+            .ToList();
+            if (screeningTemplates.Count() > 0 && screeningTemplates.All(y => y.IsLocked))
+            {
+                return "Patient status is locked!";
             }
 
             return "";

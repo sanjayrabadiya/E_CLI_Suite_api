@@ -11,11 +11,7 @@ using GSC.Respository.Attendance;
 using GSC.Respository.Project.Design;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
-using GSC.Respository.EmailSender;
-using Microsoft.Extensions.Configuration;
 using GSC.Data.Dto.UserMgt;
-using GSC.Shared.DocumentService;
-using GSC.Shared;
 using GSC.Shared.JWTAuth;
 using GSC.Shared.Security;
 using GSC.Shared.Generic;
@@ -23,7 +19,6 @@ using GSC.Respository.UserMgt;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
 using GSC.Shared.Configuration;
-using GSC.Data.Entities.UserMgt;
 using GSC.Data.Dto.Medra;
 using GSC.Domain.Context;
 using GSC.Respository.SupplyManagement;
@@ -92,6 +87,15 @@ namespace GSC.Api.Controllers.Attendance
                 .SingleOrDefault();
             if (randomization == null)
                 return BadRequest();
+
+            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+                .Where(y => (int)y.ScreeningVisit.ScreeningEntry.RandomizationId == id)
+                .ToList();
+            if (screeningTemplates.Count() > 0 && screeningTemplates.All(y => y.IsLocked))
+            {
+                ModelState.AddModelError("Message", "Patient status is locked!");
+                return BadRequest(ModelState);
+            }
 
             if (randomization.DateOfScreening != null && randomization.RandomizationNumber == null)
                 _randomizationRepository.SetFactorMappingData(randomization);
@@ -267,6 +271,15 @@ namespace GSC.Api.Controllers.Attendance
                 return BadRequest(ModelState);
             }
 
+            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+                           .Where(y => (int)y.ScreeningVisit.ScreeningEntry.RandomizationId == id)
+                           .ToList();
+            if (screeningTemplates.Count() > 0 && screeningTemplates.All(y => y.IsLocked))
+            {
+                ModelState.AddModelError("Message", "Patient status is locked!");
+                return BadRequest(ModelState);
+            }
+
             _randomizationRepository.Delete(id);
             _uow.Save();
             return Ok();
@@ -279,6 +292,16 @@ namespace GSC.Api.Controllers.Attendance
 
             if (record == null)
                 return NotFound();
+
+            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+                .Where(y => (int)y.ScreeningVisit.ScreeningEntry.RandomizationId == id)
+                .ToList();
+            if (screeningTemplates.Count() > 0 && screeningTemplates.All(y => y.IsLocked))
+            {
+                ModelState.AddModelError("Message", "Patient status is locked!");
+                return BadRequest(ModelState);
+            }
+
             _randomizationRepository.Active(record);
             _uow.Save();
             return Ok();
@@ -599,6 +622,20 @@ namespace GSC.Api.Controllers.Attendance
         {
             var data = _randomizationRepository.GetPatientVisitsForMobile();
             return Ok(data);
+        }
+
+        [HttpGet("GetTemplateLockedByRandomizationId/{id}")]
+        public IActionResult GetTemplateLockedByRandomizationId(int id)
+        {
+            var screeningTemplates = _context.ScreeningTemplate.Include(s => s.ScreeningVisit).ThenInclude(s => s.ScreeningEntry)
+                .Where(y => (int)y.ScreeningVisit.ScreeningEntry.RandomizationId == id)
+                .ToList();
+            if (screeningTemplates.Count() > 0 && screeningTemplates.All(y => y.IsLocked))
+            {
+                ModelState.AddModelError("Message", "Patient status is locked!");
+                return BadRequest(ModelState);
+            }
+            return Ok(true);
         }
     }
 }
