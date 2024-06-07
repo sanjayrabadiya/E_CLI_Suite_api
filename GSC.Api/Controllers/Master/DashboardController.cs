@@ -27,6 +27,7 @@ namespace GSC.Api.Controllers.Master
         private readonly IDashboardRepository _dashboardRepository;
         private readonly ICtmsWorkflowApprovalRepository _ctmsWorkflowApprovalRepository;
         private readonly IStudyPlanTaskRepository _studyPlanTaskRepository;
+        private readonly IResourceMilestoneRepository _resourceMilestoneRepository;
 
         public DashboardController(
             IProjectArtificateDocumentApproverRepository projectArtificateDocumentApproverRepository,
@@ -39,7 +40,8 @@ namespace GSC.Api.Controllers.Master
             IDashboardRepository dashboardRepository,
             ICtmsMonitoringReportReviewRepository ctmsMonitoringReportReviewRepository,
             ICtmsWorkflowApprovalRepository ctmsWorkflowApprovalRepository,
-            IStudyPlanTaskRepository studyPlanTaskRepository
+            IStudyPlanTaskRepository studyPlanTaskRepository,
+            IResourceMilestoneRepository resourceMilestoneRepository
             )
         {
             _projectArtificateDocumentApproverRepository = projectArtificateDocumentApproverRepository;
@@ -53,6 +55,7 @@ namespace GSC.Api.Controllers.Master
             _ctmsMonitoringReportReviewRepository = ctmsMonitoringReportReviewRepository;
             _ctmsWorkflowApprovalRepository = ctmsWorkflowApprovalRepository;
             _studyPlanTaskRepository = studyPlanTaskRepository;
+            _resourceMilestoneRepository = resourceMilestoneRepository;
         }
 
         #region Dashboard Overview Code
@@ -268,7 +271,7 @@ namespace GSC.Api.Controllers.Master
         }
         [HttpGet]
         [Route("GetCTMSMonitoringPlanDashboard/{ProjectId}/{countryId}/{SiteId}")]
-        public IActionResult GetCTMSMonitoringPlanDashboard(int projectId,int countryId, int siteId)
+        public IActionResult GetCTMSMonitoringPlanDashboard(int projectId, int countryId, int siteId)
         {
             var queries = _dashboardRepository.GetCTMSMonitoringPlanDashboard(projectId, countryId, siteId);
             return Ok(queries);
@@ -415,7 +418,7 @@ namespace GSC.Api.Controllers.Master
         {
             return Ok(_dashboardRepository.GetFactorDataReportDashbaord(projectId, countryId, siteId));
         }
-        
+
         [HttpGet]
         [Route("GetIMPShipmentDetailsData/{projectId}/{countryId}/{siteId}")]
         public IActionResult GetIMPShipmentDetailsData(int projectId, int countryId, int siteId)
@@ -467,7 +470,7 @@ namespace GSC.Api.Controllers.Master
         [Route("GetCTMSProjectStatusChartDashboard/{ProjectId}/{filterType:int}")]
         public IActionResult GetCTMSProjectStatusChartDashboard(int projectId, CtmsStudyTaskFilter filterType)
         {
-            var queries = _dashboardRepository.GetCTMSProjectStatusChartDashboard(projectId,  filterType);
+            var queries = _dashboardRepository.GetCTMSProjectStatusChartDashboard(projectId, filterType);
             return Ok(queries);
         }
         [HttpGet]
@@ -475,6 +478,22 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetCTMSProjectStatusGrid(int projectId, CtmsStudyTaskFilter filterType)
         {
             var queries = _dashboardRepository.GetCTMSProjectStatusGrid(projectId, filterType);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetCtmsTaskDuePayment/{parentProjectId}/{siteId}/{countryId}/{cTMSPaymentDue}")]
+        public IActionResult GetCtmsTaskDuePayment(int parentProjectId, int? siteId, int? countryId, CTMSPaymentDue cTMSPaymentDue)
+        {
+            var queries = _resourceMilestoneRepository.GetTaskPaymentDueList(parentProjectId, siteId, countryId, false, cTMSPaymentDue);
+            return Ok(queries);
+        }
+
+        [HttpGet]
+        [Route("GetCtmsTaskPayment")]
+        public IActionResult GetCtmsTaskPayment()
+        {
+            var queries = _resourceMilestoneRepository.GetTaskPaymentBudgetList();
             return Ok(queries);
         }
     }

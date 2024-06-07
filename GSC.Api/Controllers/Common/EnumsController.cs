@@ -1289,5 +1289,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+        [HttpGet]
+        [Route("GetCtmsDuePaymentDropdown")]
+        public IActionResult GetCtmsDuePaymentDropdown()
+        {
+            var data = Enum.GetValues(typeof(CTMSPaymentDue))
+                .Cast<CTMSPaymentDue>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(data);
+        }
     }
 }
