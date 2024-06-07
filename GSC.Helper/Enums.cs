@@ -1161,7 +1161,7 @@ namespace GSC.Helper
     public enum ResourceTypeEnum : short
     {
         [Description("Manpower")] Manpower = 1,
-        [Description("Material")] Material = 2,
+        [Description("Materials/Others")] Material = 2,
     }
     public enum SubResourceType : short
     {
@@ -1237,7 +1237,7 @@ namespace GSC.Helper
     }
     public enum MilestoneType : short
     {
-        [Description("Resource Cost")] ResourceCost = 1,
+        [Description("Professional Cost")] ResourceCost = 1,
         [Description("Patient Cost")] PatientCost = 2,
         [Description("PassThrough Cost")] PassThroughCost = 3
     }
