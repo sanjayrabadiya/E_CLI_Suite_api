@@ -38,7 +38,7 @@ namespace GSC.Data.Dto.CTMS
         public string TaskDocumentFileName { get; set; }
         public string TaskDocumentFilePath { get; set; }
         public decimal? Percentage { get; set; }
-        public bool IsPayment { get; set; }
+        public bool IsPaymentMileStone { get; set; }
         public decimal? TotalCost { get; set; }
     }
     public class DependentTaskParameterDto : BaseDto
