@@ -45,6 +45,5 @@ namespace GSC.Data.Entities.CTMS
         public bool IsCountry { get; set; }
         public int? CountryId { get; set; }
         public Country Country { get; set; }
-        public bool IsPayment { get; set; }
     }
 }

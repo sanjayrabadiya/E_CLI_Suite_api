@@ -929,90 +929,10 @@ namespace GSC.Respository.CTMS
                  ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 tasklist.ForEach(task =>
                 {
-                    task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";
-                    task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
-                    task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-                    task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
+                    task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";                 
                 });
                 result.AddRange(tasklist);
             }
-
-            //if (countryId > 0)
-            //{
-            //    var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == studyId
-            //                                              && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-            //                                              && a.UserId == _jwtTokenAccesser.UserId
-            //                                              && a.RoleId == _jwtTokenAccesser.RoleId
-            //                                              && a.DeletedDate == null
-            //                                              && a.RollbackReason == null)
-            //                                              && x.ManageSite.City.State.CountryId == countryId
-            //                                              && x.DeletedDate == null).ToList();
-
-            //    if (projectIds.Count == 0)
-            //        projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
-            //                                             _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-            //                                            && a.UserId == _jwtTokenAccesser.UserId
-            //                                            && a.RoleId == _jwtTokenAccesser.RoleId
-            //                                            && a.DeletedDate == null
-            //                                            && a.RollbackReason == null)
-            //                                            && x.ManageSite.City.State.CountryId == countryId
-            //                                            && x.Id == siteId
-            //                                            && x.DeletedDate == null).ToList();
-
-            //    var studyplans = _context.StudyPlan.Include(s => s.Currency).Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-
-            //    foreach (var item in studyplans)
-            //    {
-            //        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
-            //         ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-            //        tasklist.ForEach(task =>
-            //        {
-            //            task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";
-            //            task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
-            //            task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-            //            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
-            //        });
-            //        result = tasklist;
-            //    }
-
-            //}
-            //else if (siteId > 0)
-            //{
-            //    var studyplan = _context.StudyPlan.Include(s => s.Currency).Where(x => x.ProjectId == siteId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
-            //    if (studyplan != null)
-            //    {
-            //        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
-            //        ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-            //        tasklist.ForEach(task =>
-            //        {
-            //            task.GlobalCurrencySymbol = studyplan.Currency.CurrencySymbol;
-            //            task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
-            //            task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-            //            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
-            //        });
-
-            //        result = tasklist;
-            //    }
-            //}
-            //else
-            //{
-            //    var studyplan = _context.StudyPlan.Include(s => s.Currency).Where(x => x.ProjectId == studyId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
-            //    if (studyplan != null)
-            //    {
-            //        var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
-            //        ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-            //        tasklist.ForEach(task =>
-            //        {
-            //            task.GlobalCurrencySymbol = studyplan.Currency.CurrencySymbol;
-            //            task.StudayName = _context.Project.Where(s => s.Id == studyId && s.DeletedBy == null).Select(r => r.ProjectCode).FirstOrDefault();
-            //            task.CountryName = _context.Country.Where(s => s.Id == countryId && s.DeletedBy == null).Select(r => r.CountryName).FirstOrDefault();
-            //            task.SiteName = _context.Project.Where(s => s.Id == siteId && s.DeletedBy == null).Select(r => r.ProjectCode == null ? r.ManageSite.SiteName : r.ProjectCode).FirstOrDefault();
-            //        });
-
-            //        result = tasklist;
-            //    }
-            //}
-
             foreach (var item in result)
             {
                 var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Include(r => r.StudyPlanTask).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
