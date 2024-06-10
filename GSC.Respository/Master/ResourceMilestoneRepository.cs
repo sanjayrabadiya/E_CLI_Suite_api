@@ -107,10 +107,9 @@ namespace GSC.Respository.Master
             }
 
             //Onetime Task Seleect then not get in list 
-            var PaymentMilestoneTask = _context.PaymentMilestoneTaskDetail.Include(i => i.ResourceMilestone).Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ResourceMilestone.ProjectId) && w.DeletedBy == null).ToList();
+            var PaymentMilestoneTask = _context.ResourceMilestone.Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ProjectId) && w.DeletedBy == null).ToList();
 
            var data = _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && x.IsPaymentMileStone && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id).ToList();
-            //.Select(c => new  { Id = c.Id, Value = c.TaskName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
 
             var DropDownDto = new List<DropDownTaskListforMilestoneDto>();
             data.ForEach(x => {
@@ -143,34 +142,6 @@ namespace GSC.Respository.Master
             });
 
             return DropDownDto;
-        }
-        public decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto)
-        {
-            decimal EstimatedTotal = 0;
-            if (paymentMilestoneDto.StudyPlanTaskIds != null)
-            {
-                foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
-                {
-                    var studyPlanTaskData = _context.StudyPlanTask.Where(s => (s.Id == item || s.DependentTaskId == item) && s.DeletedBy == null).ToList();
-                    foreach (var item2 in studyPlanTaskData)
-                    {
-                        EstimatedTotal += _context.StudyPlanResource.Where(s => s.StudyPlanTaskId == item2.Id && s.DeletedBy == null).Sum(d => d.ConvertTotalCost).GetValueOrDefault();
-                    }
-                }
-            }
-            return EstimatedTotal;
-        }
-        public void AddPaymentMilestoneTaskDetail(ResourceMilestoneDto paymentMilestoneDto)
-        {
-            foreach (var item in paymentMilestoneDto.StudyPlanTaskIds)
-            {
-                var paymentMilestoneTaskDetail = new PaymentMilestoneTaskDetail();
-                paymentMilestoneTaskDetail.Id = 0;
-                paymentMilestoneTaskDetail.ResourceMilestoneId = paymentMilestoneDto.Id;
-                paymentMilestoneTaskDetail.StudyPlanTaskId = item;
-                _context.PaymentMilestoneTaskDetail.Add(paymentMilestoneTaskDetail);
-                _context.Save();
-            }
         }
         public void DeletePaymentMilestoneTaskDetail(int Id)
         {
