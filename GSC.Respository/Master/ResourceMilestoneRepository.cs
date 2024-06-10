@@ -10,8 +10,10 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.EmailSender;
 using GSC.Respository.ProjectRight;
+using GSC.Shared.Extension;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -190,6 +192,36 @@ namespace GSC.Respository.Master
             {
                 _emailSenderRespository.SendDueResourceMilestoneEmail(due);
             }
+        }
+
+        public IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue)
+        {          
+            var paymentMilestoneData = All.Where(x =>
+                (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) &&
+                x.ProjectId == parentProjectId &&
+                (siteId == 0 || x.SiteId == siteId) &&
+                (countryId == 0 || x.CountryId == countryId)).ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).AsEnumerable().Where(x => (x.DueDate != null ?
+                 (cTMSPaymentDue == CTMSPaymentDue.Due && x.DueDate.Value.Date <= DateTime.Now.Date) ||
+                 (cTMSPaymentDue == CTMSPaymentDue.CurrentDueDate && x.DueDate.Value.Date > DateTime.Now.Date && x.DueDate.Value.Date <= DateTime.Now.GetLastDateOfMonth().Date) ||
+                 (cTMSPaymentDue == CTMSPaymentDue.NextMonthDue && x.DueDate.Value.Date > DateTime.Now.AddMonths(1).GetFirstDateOfMonth().Date && x.DueDate.Value.Date <= DateTime.Now.AddMonths(1).GetLastDateOfMonth()) :
+                 false)).OrderByDescending(x => x.Id).ToList();
+
+            paymentMilestoneData.ForEach(x =>
+            {
+                x.SitedName = _context.Project
+                    .Include(s => s.ManageSite)
+                    .Where(w => w.Id == x.SiteId)
+                    .Select(d => d.ProjectCode ?? d.ManageSite.SiteName)
+                    .FirstOrDefault();
+            });
+
+            return paymentMilestoneData;
+        }
+
+        public IList<ResourceMilestoneGridDto> GetTaskPaymentBudgetList()
+        {
+            var paymentMilestoneData = All.Where(x => x.DeletedDate == null).ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).ToList();
+            return paymentMilestoneData;
         }
     }
 }
