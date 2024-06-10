@@ -1259,4 +1259,11 @@ namespace GSC.Helper
         [Description("Country")] Country = 3,
         [Description("Site")] Site = 4
     }
+
+    public enum CTMSPaymentDue : short
+    {
+        [Description("Due")] Due = 1,
+        [Description("Next Month Upcoming")] NextMonthDue = 2,
+        [Description("Current Due Date")] CurrentDueDate = 3
+    }
 }

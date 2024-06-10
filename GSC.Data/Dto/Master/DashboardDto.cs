@@ -97,4 +97,10 @@ namespace GSC.Data.Dto.Master
         public string Name { get; set; }
         public List<GraphModel> RecordCount { get; set; }
     }
+
+    public class CtmsTaskDue
+    {
+        public int Id { get; set; }
+        public string TaskName { get; set; }
+    }
 }
