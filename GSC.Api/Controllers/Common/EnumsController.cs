@@ -1238,19 +1238,6 @@ namespace GSC.Api.Controllers.Common
         }
 
         [HttpGet]
-        [Route("GetPaymentTypeResourceDropDown")]
-        public IActionResult GetPaymentTypeResourceDropDown()
-        {
-            var centri = Enum.GetValues(typeof(PaymentTypeResource))
-                .Cast<PaymentTypeResource>().Select(e => new DropDownEnum
-                {
-                    Id = Convert.ToInt16(e),
-                    Value = e.GetDescription()
-                }).OrderBy(o => o.Id).ToList();
-
-            return Ok(centri);
-        }
-        [HttpGet]
         [Route("GetPaymentTypePatientDropDown")]
         public IActionResult GetPaymentTypePatientDropDown()
         {

@@ -11,17 +11,18 @@ namespace GSC.Data.Entities.CTMS
         public int ProjectId { get; set; }
         public int? SiteId { get; set; }
         public int? CountryId { get; set; }
-        public PaymentTypeResource PaymentTypeResource { get; set; }
+        public int StudyPlanTaskId { get; set; }
+        public string DependentTask { get; set; }
+        public DateTypeResource DateTypeResource { get; set; }
+        public DateTime? DueDate { get; set; }
         public bool? PayAmountType { get; set; }
         public decimal? TasksTotalCost { get; set; }
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public decimal? ResourceTotal { get; set; }
-        public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
-        public List<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetails { get; set; } = null;
-
+        public StudyPlanTask StudyPlanTask { get; set; }
     }
 }

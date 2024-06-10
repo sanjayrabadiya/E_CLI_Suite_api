@@ -50,11 +50,6 @@ namespace GSC.Api.Controllers.Master
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             paymentMilestoneDto.Id = 0;
-            //fiend max date for selected tasks list
-            if(paymentMilestoneDto.StudyPlanTaskIds != null)
-            {
-                paymentMilestoneDto.DueDate = _context.StudyPlanTask.Where(w => paymentMilestoneDto.StudyPlanTaskIds.Contains(w.Id) && w.EndDate != null).Max(s => s.EndDate);
-            }
                
 
             var paymentMilestone = _mapper.Map<ResourceMilestone>(paymentMilestoneDto);
@@ -72,10 +67,6 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
             paymentMilestoneDto.Id = paymentMilestone.Id;
-
-            if (paymentMilestoneDto.StudyPlanTaskIds != null)
-                _paymentMilestoneRepository.AddPaymentMilestoneTaskDetail(paymentMilestoneDto);
-
             return Ok(paymentMilestone.Id);
         }
 
@@ -115,13 +106,6 @@ namespace GSC.Api.Controllers.Master
         public IActionResult GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
         {
             var studyplan = _paymentMilestoneRepository.GetTaskListforMilestone(parentProjectId, siteId, countryId);
-            return Ok(studyplan);
-        }
-
-        [HttpPost("GetEstimatedMilestoneAmount")]
-        public IActionResult GetEstimatedMilestoneAmount([FromBody] ResourceMilestoneDto paymentMilestoneDto)
-        {
-            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(paymentMilestoneDto);
             return Ok(studyplan);
         }
     }

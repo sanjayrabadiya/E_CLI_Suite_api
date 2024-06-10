@@ -846,8 +846,8 @@ namespace GSC.Api.Helpers
             CreateMap<ResourceMilestone, ResourceMilestoneGridDto>()
               .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-               .ForMember(x => x.PaymentTypeResource, x => x.MapFrom(a => a.PaymentTypeResource.GetDescription()))
-               .ForMember(x => x.StudyPlanTasks, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneTaskDetails.Select(s => s.StudyPlanTask.TaskName).ToList())))
+               .ForMember(x => x.DateTypeResource, x => x.MapFrom(a => a.DateTypeResource.GetDescription()))
+               .ForMember(x => x.StudyPlanTask, x => x.MapFrom(a => a.StudyPlanTask.TaskName))
               .ReverseMap();
             CreateMap<PatientMilestone, PatientMilestoneGridDto>()
                     .ForMember(x => x.PatientCostVisits, x => x.MapFrom(a => string.Join(", ", a.PaymentMilestoneVisitDetails.Select(s => s.PatientCost.ProjectDesignVisit.DisplayName).ToList())))
