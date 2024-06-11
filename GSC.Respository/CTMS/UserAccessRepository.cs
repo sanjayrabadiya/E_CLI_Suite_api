@@ -183,7 +183,7 @@ namespace GSC.Respository.CTMS
             var userRoleData = _context.UserRole.Where(s => s.UserId == _jwtTokenAccesser.UserId && s.UserRoleId == _jwtTokenAccesser.RoleId && s.DeletedBy == null).Select(r => r.Id).FirstOrDefault();
             var ctmsOnData = _context.ProjectSettings.Include(d => d.Project).Where(s => s.DeletedBy == null && s.IsCtms == isCtms && projectRightData != null && s.ProjectId == projectRightData.ProjectId).FirstOrDefault();
             var userAccessData = new UserAccess();
-            if (isCtms)
+            if (isCtms && ctmsOnData != null)
             {
                 userAccessData.Id = 0;
                 userAccessData.UserRoleId = userRoleData;

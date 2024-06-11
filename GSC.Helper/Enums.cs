@@ -1233,7 +1233,7 @@ namespace GSC.Helper
     }
     public enum MilestoneType : short
     {
-        [Description("Professional Cost")] ResourceCost = 1,
+        [Description("Professional Cost")] ProfessionalCost = 1,
         [Description("Patient Cost")] PatientCost = 2,
         [Description("PassThrough Cost")] PassThroughCost = 3
     }
