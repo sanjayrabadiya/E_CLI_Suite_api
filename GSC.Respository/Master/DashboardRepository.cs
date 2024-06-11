@@ -2092,8 +2092,10 @@ namespace GSC.Respository.Master
                     s.OffSet= item.OffSet;
                     s.Status = "Completed";
                 }
-                else if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null)
-                {
+               //add by mitul on 11/06/2024 ID: #1438
+               // else if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate != null && item.ActualEndDate == null)
+                else if (item.ActualStartDate != null && item.ActualEndDate == null)
+                        {
                     s.Id = item.Id;
                     s.TaskName = item.TaskName;
                     s.StartDate = item.StartDate;
