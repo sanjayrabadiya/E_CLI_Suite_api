@@ -746,6 +746,7 @@ namespace GSC.Respository.Screening
         // changes for dynamic column 04/06/2023
         public List<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
+            _context.SetConnectionTimeOut(2000);
             int parentprojectid = filters.ProjectId;
             int? siteId = filters.SiteId;
             var parentIds = new List<int>();
@@ -798,7 +799,8 @@ namespace GSC.Respository.Screening
                 ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignId
                 && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault(),
                 // added for dynamic column 04/06/2023
-                WorkFlowReviewList = GetList(r, workflowlevel.WorkFlowText)
+                WorkFlowReviewList = GetList(r, workflowlevel.WorkFlowText),
+                ScreeningTemplateReview = r.ScreeningTemplateReview
             }).ToList();
         }
         // added for dynamic column 04/06/2023

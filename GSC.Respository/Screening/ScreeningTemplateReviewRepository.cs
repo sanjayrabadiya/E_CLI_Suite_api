@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Report;
@@ -95,13 +96,14 @@ namespace GSC.Respository.Screening
 
         }
         // added for dynamic column 04/06/2023
-        public string ReviewerName(int LevelNo, int screeningtemplateId)
-        {
-            var result = All.Where(s => s.ScreeningTemplateId == screeningtemplateId && !s.IsRepeat && s.ReviewLevel == LevelNo).FirstOrDefault();
-            if (result != null)
-                return _context.Users.Find(result.CreatedBy).UserName;
-            return "";
-        }
+        // Comment by vipul on 10/06/2024
+        //public string ReviewerName(int LevelNo, int screeningtemplateId)
+        //{
+        //    var result = All.Where(s => s.ScreeningTemplateId == screeningtemplateId && !s.IsRepeat && s.ReviewLevel == LevelNo).Select(x => new { x.CreatedBy }).FirstOrDefault();
+        //    if (result != null)
+        //        return _context.Users.Find(result).UserName;
+        //    return "";
+        //}
 
         public List<ReviewDto> SetReviewHistory(List<ReviewDto> filters)
         {
@@ -112,8 +114,8 @@ namespace GSC.Respository.Screening
                 {
                     ReviewerRole = x.ReviewerRole,
                     LevelNo = x.LevelNo,
-                    ReviewerName = ReviewerName(x.LevelNo, item.ScreeningTemplateId),
-                    ReviewedDate = All.Where(s => s.ScreeningTemplateId == item.ScreeningTemplateId && !s.IsRepeat && s.ReviewLevel == x.LevelNo).FirstOrDefault()?.CreatedDate ?? null
+                    ReviewerName = item.ScreeningTemplateReview.Where(s => s.ScreeningTemplateId == item.ScreeningTemplateId && !s.IsRepeat && s.ReviewLevel == x.LevelNo).Select(x => _context.Users.Find(x.CreatedBy).UserName).FirstOrDefault(),
+                    ReviewedDate = item.ScreeningTemplateReview.Where(s => s.ScreeningTemplateId == item.ScreeningTemplateId && !s.IsRepeat && s.ReviewLevel == x.LevelNo).Select(x => x.CreatedDate).FirstOrDefault() ?? null
                 }).ToList();
 
                 result.Add(item);
