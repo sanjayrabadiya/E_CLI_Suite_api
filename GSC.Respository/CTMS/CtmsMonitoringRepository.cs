@@ -219,6 +219,8 @@ namespace GSC.Respository.CTMS
                     studyPlanTask.ActualStartDate = (DateTime)ctmsMonitoringDto.ActualStartDate;
                     studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
                 }
+                studyPlanTask.StudyPlan = null;
+                studyPlanTask.Country = null;
                 _context.StudyPlanTask.Add(studyPlanTask);
                 _context.Save();
             }
@@ -251,6 +253,8 @@ namespace GSC.Respository.CTMS
                     if (ctmsMonitoringDto.ActualEndDate != null)
                         studyPlanTask.ActualEndDate = (DateTime)ctmsMonitoringDto.ActualEndDate;
 
+                    studyPlanTask.StudyPlan = null;
+                    studyPlanTask.Country = null;
                     _context.StudyPlanTask.Add(studyPlanTask);
                     _context.Save();
                 }
