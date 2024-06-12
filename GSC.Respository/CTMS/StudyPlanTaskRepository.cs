@@ -929,7 +929,7 @@ namespace GSC.Respository.CTMS
                  ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 tasklist.ForEach(task =>
                 {
-                    task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";                 
+                    task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";
                 });
                 result.AddRange(tasklist);
             }
@@ -1144,10 +1144,10 @@ namespace GSC.Respository.CTMS
 
             var siteList = _context.StudyPlanResource.Include(x => x.ResourceType).Include(r => r.StudyPlanTask).Where(s => s.DeletedDate == null
             && ids.Contains(s.StudyPlanTask.StudyPlan.ProjectId)).Include(i => i.StudyPlanTask.StudyPlan.Project).GroupBy(g => g.StudyPlanTask.StudyPlan.ProjectId)
-                .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlanTask.StudyPlan.Project.ProjectCode ?? c.First().StudyPlanTask.StudyPlan.Project.ManageSite.SiteName }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlanTask.StudyPlan.Project.ManageSite.SiteName ?? c.First().StudyPlanTask.StudyPlan.Project.ProjectCode }).OrderBy(o => o.Value).ToList();
 
             return siteList;
-   }
+        }
         public List<DashboardDto> GetCtmsMyTaskList(int ProjectId)
         {
             var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
@@ -1183,7 +1183,7 @@ namespace GSC.Respository.CTMS
             }
 
             return listDashboardMyTasks;
-        }  
+        }
     }
 }
 

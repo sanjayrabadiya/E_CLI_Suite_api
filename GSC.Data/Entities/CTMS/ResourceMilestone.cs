@@ -13,7 +13,7 @@ namespace GSC.Data.Entities.CTMS
         public int? CountryId { get; set; }
         public int StudyPlanTaskId { get; set; }
         public string DependentTask { get; set; }
-        public DateTypeResource DateTypeResource { get; set; }
+        public DateTypeResource? DateTypeResource { get; set; }
         public DateTime? DueDate { get; set; }
         public bool? PayAmountType { get; set; }
         public decimal? TasksTotalCost { get; set; }
