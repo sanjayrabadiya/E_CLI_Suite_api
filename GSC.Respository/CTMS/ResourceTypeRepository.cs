@@ -97,5 +97,12 @@ namespace GSC.Respository.CTMS
             return _context.Currency.Where(x => x.DeletedBy == null)
                 .Select(c => new DropDownDto { Id = c.Id, Value = c.CurrencyName + "- " + c.CurrencySymbol + "    - " + c.Country.CountryName, IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
         }
+        public string ResourceWorking(int id)
+        {
+            var StudyPlanResourcedData = _context.StudyPlanResource.Include(i => i.StudyPlanTask).Where(s => s.ResourceTypeId == id && s.DeletedBy == null).FirstOrDefault();
+            if (StudyPlanResourcedData != null)
+                return "This Resource All Ready Working on this task : " + StudyPlanResourcedData.StudyPlanTask.TaskName;
+            return "";
+        }
     }
 }

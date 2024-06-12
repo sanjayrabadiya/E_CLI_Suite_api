@@ -836,6 +836,7 @@ namespace GSC.Api.Helpers
             CreateMap<PassThroughCost, PassThroughCostGridDto>()
                 .ForMember(x => x.PassThroughCostActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                 .ForMember(x => x.BudgetFlgType, x => x.MapFrom(a => a.BudgetFlgType))
                 .ForMember(x => x.BudgetFlgTypeName, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
                 .ForMember(x => x.UnitType, x => x.MapFrom(a => a.Unit.UnitName))
                 .ForMember(x => x.CurrencyRate, x => x.MapFrom(a => a.CurrencyRate.LocalCurrencyRate))

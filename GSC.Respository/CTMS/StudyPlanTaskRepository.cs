@@ -151,6 +151,19 @@ namespace GSC.Respository.CTMS
                     DateTime EndDate2 = (DateTime)s.EndDate;
                     s.DurationDay = (EndDate2.AddDays(1) - StartDate1).Days;
 
+                    //Auto Update Status As par child task
+                    if (TodayDate < s.StartDate && s.ActualStartDate == null && s.ActualEndDate == null)
+                        s.Status = CtmsChartType.NotStarted.GetDescription();
+                    else if (s.ActualStartDate != null && s.ActualEndDate == null && s.EndDate > s.ActualStartDate)
+                        s.Status = CtmsChartType.OnGoingDate.GetDescription();
+                    else if (s.StartDate < TodayDate && s.EndDate > TodayDate && s.ActualStartDate == null)
+                        s.Status = CtmsChartType.DueDate.GetDescription();
+                    else if (s.ActualStartDate != null && s.ActualEndDate != null && s.EndDate >= s.ActualEndDate)
+                        s.Status = CtmsChartType.Completed.GetDescription();
+                    else if ((s.EndDate < s.ActualEndDate) || (s.EndDate < TodayDate && s.ActualStartDate != null && s.ActualEndDate == null) || (s.EndDate < TodayDate && s.ActualStartDate == null && s.ActualEndDate == null))
+                        s.Status = CtmsChartType.DeviatedDate.GetDescription();
+
+
                     var changeData = All.First(o => o.Id == s.Id);
                     if (saveActualDate != s.ActualStartDate || saveActualEndDate != s.ActualEndDate)
                     {

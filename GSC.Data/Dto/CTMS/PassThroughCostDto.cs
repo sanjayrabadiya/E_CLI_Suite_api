@@ -1,5 +1,6 @@
 ﻿
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
@@ -45,7 +46,7 @@ namespace GSC.Data.Dto.CTMS
         public int GlobleCurrencyId { get; set; }
         public string GlobleCurrencySymbol { get; set; }
         public string LocalCurrencySymbol { get; set; }
-        public string BudgetFlgType { get; set; }
+        public BudgetFlgType BudgetFlgType { get; set; }
         public string BudgetFlgTypeName { get; set; }
         public int UnitId { get; set; }
         public string UnitType { get; set; }
