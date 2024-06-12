@@ -321,7 +321,8 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
                            .ForMember(x => x.StudayName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode))
                            .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode ?? a.StudyPlan.Project.ManageSite.SiteName))
-                           .ForMember(x => x.DependenceTaskName, x => x.MapFrom(a => a.TaskName + " - " +( a.IsCountry ? a.Country.CountryName : a.StudyPlan.Project.ProjectCode ?? a.StudyPlan.Project.ManageSite.SiteName)))
+                           .ForMember(x => x.Site, x => x.MapFrom(a => a.StudyPlan.Project.ManageSite.SiteName))
+                           .ForMember(x => x.DependenceTaskName, x => x.MapFrom(a => a.TaskName + " - " + (a.IsCountry ? a.Country.CountryName : a.StudyPlan.Project.ProjectCode ?? a.StudyPlan.Project.ManageSite.SiteName)))
                           .ReverseMap();
 
 
