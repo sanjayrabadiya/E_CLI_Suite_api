@@ -16,5 +16,6 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetNameOfMaterialDropDown(int resourceTypeID, int resourceSubTypeID);
         List<DropDownDto> GetRollUserDropDown(int designationID, int projectId);
         List<DropDownDto> GetCurrencyDropDown();
+        string ResourceWorking(int id);
     }
 }
