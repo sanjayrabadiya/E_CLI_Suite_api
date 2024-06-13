@@ -115,11 +115,7 @@ namespace GSC.Respository.Screening
                  PatientStatusName = !IsPatientLevel ? "NA" : t.PatientStatusId.GetDescription(),
                  RandomizationNumber = t.RandomizationNumber,
                  StudyVersion = t.StudyVersion ?? 1,
-                 IsEconsentCompleted = true,
-                 TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
-                 {
-                     LevelNo = x.LevelNo
-                 }).ToList()
+                 IsEconsentCompleted = true
              }).ToListAsync();
 
             var hideTemplateIds = await _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToListAsync();
@@ -127,8 +123,15 @@ namespace GSC.Respository.Screening
 
             siteAccessTemplates.AddRange(hideTemplateIds);
 
+            var tempTemplate = _screeningTemplateRepository.All.
+             Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId);
 
-            var templates = await _screeningTemplateRepository.All.
+            if (siteAccessTemplates.Count > 0)
+            {
+                tempTemplate = tempTemplate.Where(r => !siteAccessTemplates.Contains(r.ProjectDesignTemplateId));
+            }
+
+            var templates = await tempTemplate.
              Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId).
               GroupBy(c => new
               {
@@ -151,30 +154,8 @@ namespace GSC.Respository.Screening
                   TotalTemplate = t.Count()
               }).ToListAsync();
 
-            templates = templates.Where(r => !r.IsDisable && r.IsHide).ToList();
+            templates = templates.Where(r => !r.IsDisable && !r.IsHide).ToList();
             templates = templates.Where(r => !r.IsNA).ToList();
-
-            //tempTemplates = tempTemplates.Where(r => !hideTemplateIds.Contains(r.ProjectDesignTemplateId) && !r.IsNA).ToList();
-            //tempTemplates = tempTemplates.Where(r => !siteAccessTemplates.Contains(r.ProjectDesignTemplateId) && !r.IsNA).ToList();
-
-            //var templates = tempTemplates.
-            //    Where(r => !r.IsDisable && (r.IsHide == null || r.IsHide == false)).
-            //    GroupBy(c => new
-            //    {
-            //        c.ScreeningEntryId,
-            //        c.ScreeningVisitId,
-            //        c.ReviewLevel,
-            //        c.Status
-            //    }).Select(t => new
-            //    {
-            //        t.Key.ScreeningEntryId,
-            //        t.Key.Status,
-            //        t.Key.ScreeningVisitId,
-            //        t.Key.ReviewLevel,
-            //        TotalTemplate = t.Count()
-            //    }).ToList();
-
-
 
             var queries = await _screeningTemplateValueRepository.All.Where(r =>
             r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId == projectId &&
@@ -224,8 +205,6 @@ namespace GSC.Respository.Screening
             {
                 screeningData = screeningData.Where(s => !s.IsGeneric).ToList();
             }
-
-
             var visits = await _screeningVisitRepository.All.
                Where(r => r.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null).Select(a => new DataEntryVisitTemplateDto
                {
@@ -256,7 +235,15 @@ namespace GSC.Respository.Screening
             {
                 visits = visits.Where(s => s.IsPatientLevel).ToList();
             }
-            randomizationData.ForEach(r => r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList());
+
+            randomizationData.ForEach(r =>
+            {
+                r.Visit = projectDesignVisit.Where(t => (t.StudyVersion == null || t.StudyVersion <= r.StudyVersion) && (t.InActiveVersion == null || t.InActiveVersion > r.StudyVersion)).ToList();
+                r.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
+                {
+                    LevelNo = x.LevelNo
+                }).ToList();
+            });
 
             screeningData.ForEach(r =>
             {
