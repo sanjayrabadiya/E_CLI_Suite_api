@@ -16,7 +16,7 @@ namespace GSC.Data.Dto.Master
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
-        public int[] PassThroughCostIds { get; set; }
+        public int PassThroughCostActivityId { get; set; }
     }
     public class PassthroughMilestoneGridDto : BaseAuditDto
     {
@@ -26,7 +26,7 @@ namespace GSC.Data.Dto.Master
         public decimal? PassThroughActivityTotal { get; set; }
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
-        public string PassThroughCostCountry { get; set; }
+        public string PassThroughCostActivity { get; set; }
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
 

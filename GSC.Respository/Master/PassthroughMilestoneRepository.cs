@@ -19,27 +19,24 @@ namespace GSC.Respository.Master
     public class PassthroughMilestoneRepository : GenericRespository<PassthroughMilestone>, IPassthroughMilestoneRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        private readonly IProjectRepository _projectRepository;
-        private readonly IProjectRightRepository _projectRightRepository;
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         public PassthroughMilestoneRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
-            IMapper mapper, IProjectRepository projectRepository, IProjectRightRepository projectRightRepository)
+            IMapper mapper)
             : base(context)
         {
             _jwtTokenAccesser = jwtTokenAccesser;
             _mapper = mapper;
-            _projectRepository = projectRepository;
             _context = context;
-            _projectRightRepository = projectRightRepository;
         }
 
         public IList<PassthroughMilestoneGridDto> GetPassthroughMilestoneList(int parentProjectId, bool isDeleted)
         {
             var PaymentMilestoneData = new List<PassthroughMilestoneGridDto>();
 
-
+            PaymentMilestoneData = All.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).
+                        ProjectTo<PassthroughMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return PaymentMilestoneData;
         }
         public string DuplicatePaymentMilestone(PassthroughMilestone paymentMilestone)
@@ -47,54 +44,16 @@ namespace GSC.Respository.Master
             return "";
         }
         public decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto)
-        {
-            decimal EstimatedTotal = 0;
-                foreach (var PassThro in paymentMilestoneDto.PassThroughCostIds)
-                {
-                    EstimatedTotal += _context.PassThroughCost.Where(s => s.Id == PassThro && s.DeletedBy == null).Sum(d => d.Total).GetValueOrDefault();
-                }
-            return EstimatedTotal;
-        }
-        public void AddPaymentMilestonePassThroughCostDetail(PassthroughMilestoneDto paymentMilestoneDto)
-        {
-            foreach (var item in paymentMilestoneDto.PassThroughCostIds)
-            {
-                var paymentMilestonePassThroughtDetail = new PaymentMilestonePassThroughDetail();
-                paymentMilestonePassThroughtDetail.Id = 0;
-                paymentMilestonePassThroughtDetail.PassthroughMilestoneId = paymentMilestoneDto.Id;
-                paymentMilestonePassThroughtDetail.PassThroughCostId = item;
-                _context.PaymentMilestonePassThroughDetail.Add(paymentMilestonePassThroughtDetail);
-                _context.Save();
-            }
-        }
-        public void DeletePaymentMilestonePassThroughCostDetail(int Id)
-        {
-            var paymentMilestonePassThroughDetail = _context.PaymentMilestonePassThroughDetail.Where(s => s.PassthroughMilestoneId == Id && s.DeletedBy == null).ToList();
-            paymentMilestonePassThroughDetail.ForEach(s =>
-            {
-                s.DeletedDate = DateTime.UtcNow;
-                s.DeletedBy = _jwtTokenAccesser.UserId;
-                _context.PaymentMilestonePassThroughDetail.Update(s);
-                _context.Save();
-            });
-        }
-        public void ActivePaymentMilestonePassThroughCostDetail(int Id)
-        {
-            var paymentMilestonePassThroughDetail = _context.PaymentMilestonePassThroughDetail.Where(s => s.PassthroughMilestoneId == Id && s.DeletedBy != null).ToList();
-            paymentMilestonePassThroughDetail.ForEach(s =>
-            {
-                s.DeletedDate = null;
-                s.DeletedBy = null;
-                _context.PaymentMilestonePassThroughDetail.Update(s);
-                _context.Save();
-            });
+        {        
+                return _context.PassThroughCost.Where(s => s.PassThroughCostActivityId == paymentMilestoneDto.PassThroughCostActivityId && s.ProjectId == paymentMilestoneDto.ProjectId && s.DeletedBy == null).
+                        Sum(d => d.Total).GetValueOrDefault();     
         }
         public List<DropDownDto> GetPassThroughCostActivity(int projectId)
         {
             var data = _context.PassThroughCost.Include(s => s.PassThroughCostActivity).Include(s => s.Country).Where(d => d.ProjectId == projectId && d.DeletedBy == null)
                   .Select(c => new DropDownDto
                   {
-                      Id = c.Id,
+                      Id = c.PassThroughCostActivity.Id,
                       Value = c.PassThroughCostActivity.ActivityName,
                       ExtraData = c.Country.CountryName
                   }).ToList();

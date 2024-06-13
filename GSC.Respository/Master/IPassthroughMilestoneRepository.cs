@@ -10,10 +10,7 @@ namespace GSC.Respository.Master
     {
         IList<PassthroughMilestoneGridDto> GetPassthroughMilestoneList(int parentProjectId, bool isDeleted);
         string DuplicatePaymentMilestone(PassthroughMilestone paymentMilestone);
-        decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto); 
-        void AddPaymentMilestonePassThroughCostDetail(PassthroughMilestoneDto paymentMilestoneDto);
-        void DeletePaymentMilestonePassThroughCostDetail(int Id);
-        void ActivePaymentMilestonePassThroughCostDetail(int Id);
+        decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto);    
         List<DropDownDto> GetPassThroughCostActivity(int projectId);
         BudgetPaymentFinalCostDto GetFinalPassthroughTotal(int projectId);
 
