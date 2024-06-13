@@ -62,13 +62,9 @@ namespace GSC.Respository.Master
         public BudgetPaymentFinalCostDto GetFinalPassthroughTotal(int projectId)
         {
             BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
-
-            var resourcecost = _context.PassThroughCost.Where(s => s.DeletedBy == null && s.ProjectId == projectId ).Sum(s => s.Total);
-
             //one time Add Paybal Amount id diduct in main total
-            var resourcePaybalAmount = _context.PassthroughMilestone.Where(w => w.DeletedDate == null && w.ProjectId == projectId).Sum(s => s.PaybalAmount);
-            data.PassThroughCost = Convert.ToDecimal(resourcecost - resourcePaybalAmount);
-
+            var resourcePaybalAmount = _context.BudgetPaymentFinalCost.FirstOrDefault(x => x.ProjectId == projectId && x.DeletedDate == null && x.MilestoneType == MilestoneType.PassThroughCost);
+            data.PassThroughCost = resourcePaybalAmount?.FinalTotalAmount ?? 0;
             return data;
         }
     }
