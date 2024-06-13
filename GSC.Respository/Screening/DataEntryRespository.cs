@@ -125,39 +125,34 @@ namespace GSC.Respository.Screening
             var hideTemplateIds = await _projectDesingTemplateRestrictionRepository.All.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.IsHide && x.DeletedDate == null).Select(r => r.ProjectDesignTemplateId).ToListAsync();
             var siteAccessTemplates = await _context.ProjectDesignTemplateSiteAccess.Where(s => s.DeletedDate == null && s.ProjectId == projectId).Select(s => s.ProjectDesignTemplateId).ToListAsync();
 
+            siteAccessTemplates.AddRange(hideTemplateIds);
 
-            //var tempTemplates = await _screeningTemplateRepository.All.
-            //   Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null && !r.IsNA
-            //   && !r.IsDisable && (r.IsHide == null || r.IsHide == false)).Select(c => new
-            //   {
-            //       c.ScreeningVisit.ScreeningEntryId,
-            //       c.ScreeningVisitId,
-            //       c.ReviewLevel,
-            //       c.Status,
-            //       c.IsDisable,
-            //       c.IsHide,
-            //       c.IsLocked,
-            //       c.ProjectDesignTemplateId,
-            //       c.IsNA
-            //   }).ToListAsync();
 
             var templates = await _screeningTemplateRepository.All.
-             Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId && r.DeletedDate == null && !r.IsNA
-             && !r.IsDisable && (r.IsHide == null || r.IsHide == false)).
+             Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId).
               GroupBy(c => new
               {
                   c.ScreeningVisitId,
                   c.ReviewLevel,
                   c.Status,
-                  c.IsLocked
+                  c.IsLocked,
+                  c.IsNA,
+                  c.IsDisable,
+                  IsHide = c.IsHide == true
               }).Select(t => new
               {
                   t.Key.Status,
                   t.Key.ScreeningVisitId,
                   t.Key.ReviewLevel,
                   t.Key.IsLocked,
+                  t.Key.IsNA,
+                  t.Key.IsHide,
+                  t.Key.IsDisable,
                   TotalTemplate = t.Count()
               }).ToListAsync();
+
+            templates = templates.Where(r => !r.IsDisable && r.IsHide).ToList();
+            templates = templates.Where(r => !r.IsNA).ToList();
 
             //tempTemplates = tempTemplates.Where(r => !hideTemplateIds.Contains(r.ProjectDesignTemplateId) && !r.IsNA).ToList();
             //tempTemplates = tempTemplates.Where(r => !siteAccessTemplates.Contains(r.ProjectDesignTemplateId) && !r.IsNA).ToList();
@@ -187,7 +182,6 @@ namespace GSC.Respository.Screening
             r.ProjectDesignVariable.DeletedDate == null && r.DeletedDate == null).
                 GroupBy(c => new
                 {
-                    c.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
                     c.ScreeningTemplate.ScreeningVisitId,
                     c.AcknowledgeLevel,
                     c.UserRoleId,
@@ -195,7 +189,6 @@ namespace GSC.Respository.Screening
                     c.QueryStatus
                 }).Select(t => new
                 {
-                    t.Key.ScreeningEntryId,
                     t.Key.AcknowledgeLevel,
                     t.Key.ScreeningVisitId,
                     t.Key.ReviewLevel,
@@ -276,19 +269,19 @@ namespace GSC.Respository.Screening
                     v.NotStarted = templates.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.Pending).Sum(t => t.TotalTemplate);
                     v.InProgress = templates.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.Status == ScreeningTemplateStatus.InProcess).Sum(t => t.TotalTemplate);
 
-                    v.MyQuery = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && (
+                    v.MyQuery = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && (
                     x.AcknowledgeLevel == workflowlevel.LevelNo ||
                     ((x.QueryStatus == QueryStatus.Open || x.QueryStatus == QueryStatus.Reopened) && workflowlevel.LevelNo == 0 && workflowlevel.IsStartTemplate) ||
                     ((x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.Answered) && workflowlevel.LevelNo == 0 && x.UserRoleId == _jwtTokenAccesser.RoleId)
                     )).Sum(t => t.TotalQuery);
 
-                    v.ReOpen = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Reopened).Sum(t => t.TotalQuery);
-                    v.Open = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Open).Sum(t => t.TotalQuery);
-                    v.Answered = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Answered).Sum(t => t.TotalQuery);
-                    v.Resolved = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Resolved).Sum(t => t.TotalQuery);
+                    v.ReOpen = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Reopened).Sum(t => t.TotalQuery);
+                    v.Open = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Open).Sum(t => t.TotalQuery);
+                    v.Answered = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Answered).Sum(t => t.TotalQuery);
+                    v.Resolved = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.Resolved).Sum(t => t.TotalQuery);
                     //v.Closed = closeQueries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId).Sum(t => t.TotalQuery);
-                    v.SelfCorrection = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.SelfCorrection).Sum(t => t.TotalQuery);
-                    v.Acknowledge = queries.Where(x => x.ScreeningEntryId == r.ScreeningEntryId && x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel != x.ReviewLevel && (x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.SelfCorrection)).Sum(t => t.TotalQuery);
+                    v.SelfCorrection = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.QueryStatus == QueryStatus.SelfCorrection).Sum(t => t.TotalQuery);
+                    v.Acknowledge = queries.Where(x => x.ScreeningVisitId == v.ScreeningVisitId && x.AcknowledgeLevel != x.ReviewLevel && (x.QueryStatus == QueryStatus.Resolved || x.QueryStatus == QueryStatus.SelfCorrection)).Sum(t => t.TotalQuery);
                     v.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                     {
                         LevelNo = x.LevelNo,
