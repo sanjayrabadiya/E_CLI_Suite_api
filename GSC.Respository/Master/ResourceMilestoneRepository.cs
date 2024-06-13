@@ -111,11 +111,12 @@ namespace GSC.Respository.Master
             //Onetime Task Seleect then not get in list 
             var PaymentMilestoneTask = _context.ResourceMilestone.Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ProjectId) && w.DeletedBy == null).ToList();
 
-           var data = _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && x.IsPaymentMileStone && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id).ToList();
+            var data = _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && x.IsPaymentMileStone && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id).ToList();
 
             var DropDownDto = new List<DropDownTaskListforMilestoneDto>();
-            data.ForEach(x => {
-               var DependentData=_context.StudyPlanTask.Where(s=>s.Id ==x.DependentTaskId && s.DeletedBy==null).FirstOrDefault();
+            data.ForEach(x =>
+            {
+                var DependentData = _context.StudyPlanTask.Where(s => s.Id == x.DependentTaskId && s.DeletedBy == null).FirstOrDefault();
                 DropDownTaskListforMilestoneDto d1 = new DropDownTaskListforMilestoneDto();
                 if (DependentData != null)
                 {
@@ -139,7 +140,7 @@ namespace GSC.Respository.Master
                     d1.ActualStartDate = x.ActualStartDate;
                     d1.ActualEndDate = x.ActualEndDate;
                 }
-            
+
                 DropDownDto.Add(d1);
             });
 
@@ -169,18 +170,9 @@ namespace GSC.Respository.Master
         }
         public BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId)
         {
-            var siteIds = _context.Project.Where(s => s.DeletedDate == null && s.ParentProjectId == projectId).Select(s => s.Id).ToList();
             BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
-
-            var resourcecost = _context.StudyPlanResource.
-                                Include(s => s.StudyPlanTask).
-                                ThenInclude(s => s.StudyPlan)
-                                .Where(s => s.DeletedBy == null && s.StudyPlanTask.StudyPlan.ProjectId == projectId || siteIds.Contains(s.StudyPlanTask.StudyPlan.ProjectId)).Sum(s => s.ConvertTotalCost);
-
-            //one time Add Paybal Amount id diduct in main total
-            var resourcePaybalAmount = _context.ResourceMilestone.Where(w => w.DeletedDate == null && w.ProjectId == projectId).Sum(s => s.PaybalAmount);
-            data.ProfessionalCostAmount = Convert.ToDecimal(resourcecost - resourcePaybalAmount);
-
+            var paymentFinalCost = _context.BudgetPaymentFinalCost.FirstOrDefault(x => x.ProjectId == projectId && x.MilestoneType == MilestoneType.ProfessionalCost && x.DeletedDate == null);
+            data.ProfessionalCostAmount = paymentFinalCost?.FinalTotalAmount ?? 0;
             return data;
         }
 
@@ -195,7 +187,7 @@ namespace GSC.Respository.Master
         }
 
         public IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue)
-        {          
+        {
             var paymentMilestoneData = All.Where(x =>
                 (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) &&
                 x.ProjectId == parentProjectId &&

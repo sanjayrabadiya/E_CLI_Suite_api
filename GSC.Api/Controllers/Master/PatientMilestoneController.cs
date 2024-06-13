@@ -60,17 +60,12 @@ namespace GSC.Api.Controllers.Master
             }
             paymentMilestoneDto.Id = paymentMilestone.Id;
 
-            if (paymentMilestoneDto.PatientCostIds != null)
-                _paymentMilestoneRepository.AddPaymentMilestoneVisitDetail(paymentMilestoneDto);
-
-
             return Ok(paymentMilestone.Id);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _paymentMilestoneRepository.DeletePaymentMilestoneVisitDetail(id);
 
             var record = _paymentMilestoneRepository.Find(id);
 
@@ -86,7 +81,6 @@ namespace GSC.Api.Controllers.Master
         [HttpPatch("{id}")]
         public IActionResult Active(int id)
         {
-            _paymentMilestoneRepository.ActivePaymentMilestoneVisitDetail(id);
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -97,10 +91,10 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
-        [HttpPost("GetVisitMilestoneAmount")]
-        public IActionResult GetVisitMilestoneAmount([FromBody] PatientMilestoneDto paymentMilestoneDto)
+        [HttpGet("GetVisitMilestoneAmount/{visitId}")]
+        public IActionResult GetVisitMilestoneAmount(int visitId)
         {
-            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(paymentMilestoneDto);
+            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(visitId);
             return Ok(studyplan);
         }
 
