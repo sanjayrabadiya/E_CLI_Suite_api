@@ -82,7 +82,23 @@ namespace GSC.Respository.CTMS
         }
         public dynamic GetResourceInf(int studyPlantaskId, int resourceId)
         {
-            var studyPlanData = _context.StudyPlanTask.Include(x => x.StudyPlan).Where(s => s.Id == studyPlantaskId && s.DeletedBy == null).FirstOrDefault();
+            //var studyPlanData = _context.StudyPlanTask.Include(x => x.StudyPlan).Where(s => s.Id == studyPlantaskId && s.DeletedBy == null).FirstOrDefault();
+            //var ResourceType = _context.ResourceType.Include(s => s.Unit).Where(x => x.Id == resourceId && x.DeletedDate == null)
+            //   .Select(c => new ResourceTypeGridDto
+            //   {
+            //       Id = c.Id,
+            //       Unit = c.Unit.UnitName,
+            //       Cost = c.Cost,
+            //       NumberOfUnit = c.NumberOfUnit,
+            //       ResourceType = c.ResourceTypes.GetDescription(),
+            //       CurrencyType = c.Currency.CurrencyName + " - " + c.Currency.CurrencySymbol,
+            //       GlobalCurrency = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencyName + " - " + d.CurrencySymbol).FirstOrDefault(),
+            //       LocalCurrencySymbol = c.Currency.CurrencySymbol,
+            //       GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencySymbol).FirstOrDefault(),
+            //       LocalCurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r => r.LocalCurrencyRate).FirstOrDefault(),
+            //   }).FirstOrDefault();
+
+            var studyPlanData = _context.StudyPlan.Where(s => s.Id == studyPlantaskId && s.DeletedBy == null).FirstOrDefault();
             var ResourceType = _context.ResourceType.Include(s => s.Unit).Where(x => x.Id == resourceId && x.DeletedDate == null)
                .Select(c => new ResourceTypeGridDto
                {
@@ -92,10 +108,10 @@ namespace GSC.Respository.CTMS
                    NumberOfUnit = c.NumberOfUnit,
                    ResourceType = c.ResourceTypes.GetDescription(),
                    CurrencyType = c.Currency.CurrencyName + " - " + c.Currency.CurrencySymbol,
-                   GlobalCurrency = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencyName + " - " + d.CurrencySymbol).FirstOrDefault(),
+                   GlobalCurrency = _context.Currency.Where(s => s.Id == studyPlanData.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencyName + " - " + d.CurrencySymbol).FirstOrDefault(),
                    LocalCurrencySymbol = c.Currency.CurrencySymbol,
-                   GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.StudyPlan.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencySymbol).FirstOrDefault(),
-                   LocalCurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlanData.StudyPlanId && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r => r.LocalCurrencyRate).FirstOrDefault(),
+                   GlobalCurrencySymbol = _context.Currency.Where(s => s.Id == studyPlanData.CurrencyId && s.DeletedBy == null).Select(d => d.CurrencySymbol).FirstOrDefault(),
+                   LocalCurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == studyPlanData.Id && s.CurrencyId == c.CurrencyId && s.DeletedBy == null).Select(r => r.LocalCurrencyRate).FirstOrDefault(),
                }).FirstOrDefault();
 
             return ResourceType;
