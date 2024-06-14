@@ -307,9 +307,9 @@ namespace GSC.Api.Controllers.Screening
         }
 
         // NA Report for visit
-        [HttpGet]
+        [HttpPost]
         [Route("GetNAReportData")]
-        public IActionResult GetNAReportData([FromQuery] NAReportSearchDto filters)
+        public IActionResult GetNAReportData([FromBody] NAReportSearchDto filters)
         {
             if (filters.SiteId <= 0) return BadRequest();
 
@@ -333,9 +333,9 @@ namespace GSC.Api.Controllers.Screening
             return Ok(true);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetAReportData")]
-        public IActionResult GetAReportData([FromQuery] NAReportSearchDto filters)
+        public IActionResult GetAReportData([FromBody] NAReportSearchDto filters)
         {
             if (filters.SiteId <= 0) return BadRequest();
 

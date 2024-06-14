@@ -356,6 +356,7 @@ namespace GSC.Respository.Screening
 
             var result = _screeningTemplateRepository.All.Where(s => s.ScreeningVisitId == screeningVisitId
             && s.DeletedDate == null
+             && !s.IsNA
             && !restrictTemplates.Contains(s.ProjectDesignTemplateId)
             && s.Status == templateStatus && (s.IsHide == null || s.IsHide == false))
                  .Select(t => new DataEntryTemplateCountDisplayTree

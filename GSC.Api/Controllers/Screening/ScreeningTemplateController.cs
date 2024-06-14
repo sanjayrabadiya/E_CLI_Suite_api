@@ -478,9 +478,9 @@ namespace GSC.Api.Controllers.Screening
 
 
         //Na report for template
-        [HttpGet]
+        [HttpPost]
         [Route("GetNAReportData")]
-        public IActionResult GetNAReportData([FromQuery] NAReportSearchDto filters)
+        public IActionResult GetNAReportData([FromBody] NAReportSearchDto filters)
         {
             if (filters.SiteId <= 0) return BadRequest();
 
@@ -551,9 +551,9 @@ namespace GSC.Api.Controllers.Screening
             return Ok(_screeningTemplateRepository.GetSubjectDropDownForApplicable(ProjectId));
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetAReportData")]
-        public IActionResult GetAReportData([FromQuery] NAReportSearchDto filters)
+        public IActionResult GetAReportData([FromBody] NAReportSearchDto filters)
         {
             if (filters.SiteId <= 0) return BadRequest();
 

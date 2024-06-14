@@ -1631,9 +1631,9 @@ namespace GSC.Respository.Screening
                   .ThenInclude(x => x.ScreeningEntry)
                   .ThenInclude(x => x.Randomization)
                   .Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId
-               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
-               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
-               && (filters.TemplateIds == null || filters.TemplateIds.Contains(x.ProjectDesignTemplateId))
+               && (filters.SubjectIds.Length == 0 || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
+               && (filters.VisitIds.Length == 0 || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
+               && (filters.TemplateIds.Length == 0 || filters.TemplateIds.Contains(x.ProjectDesignTemplateId))
                && (x.ScreeningVisit.Status > ScreeningVisitStatus.NotStarted && x.ScreeningVisit.Status <= ScreeningVisitStatus.InProgress)
                && x.Status == ScreeningTemplateStatus.Pending 
                && !x.IsNA)
@@ -1728,9 +1728,9 @@ namespace GSC.Respository.Screening
                   .ThenInclude(x => x.ScreeningEntry)
                   .ThenInclude(x => x.Randomization)
                   .Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId
-               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
-               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
-               && (filters.TemplateIds == null || filters.TemplateIds.Contains(x.Id))
+               && (filters.SubjectIds.Length == 0 || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
+               && (filters.VisitIds.Length == 0 || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
+               && (filters.TemplateIds.Length == 0 || filters.TemplateIds.Contains(x.Id))
                && x.IsNA)
                   .Select(x => new NAReportDto
                   {
