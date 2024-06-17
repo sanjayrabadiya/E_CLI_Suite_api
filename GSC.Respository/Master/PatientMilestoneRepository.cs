@@ -9,6 +9,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Shared.JWTAuth;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,11 +44,17 @@ namespace GSC.Respository.Master
             return "";
         }
 
-        public decimal GetEstimatedMilestoneAmount(int visitId)
+        public List<decimal> GetEstimatedMilestoneAmount(int ParentProjectId, int visitId)
         {
-            decimal EstimatedTotal = 0;
-            EstimatedTotal = _context.PatientCost.Where(s => s.Id == visitId && s.DeletedBy == null).Sum(d => d.FinalCost).GetValueOrDefault();
-            return EstimatedTotal;
+            List<decimal> obj = new List<decimal>();
+
+            var EstimatedTotal = _context.PatientCost.Where(s => s.ProjectDesignVisitId == visitId && s.ProcedureId !=null && s.ProjectId== ParentProjectId && s.DeletedBy == null).Sum(d => d.FinalCost * d.PatientCount).GetValueOrDefault();
+            var TotalPatient = _context.PatientCost.Where(s => s.ProjectDesignVisitId == visitId && s.ProcedureId != null && s.ProjectId == ParentProjectId && s.DeletedBy == null).Sum(d => d.PatientCount);
+            
+            obj.Add(EstimatedTotal);
+            obj.Add(TotalPatient);
+
+            return obj;
         }
 
         public List<DropDownDto> GetVisitDropDown(int parentProjectId)
@@ -57,16 +64,20 @@ namespace GSC.Respository.Master
                   {
                       Id = c.Id,
                       Value = c.ProjectDesignVisit.DisplayName,
+                      ExtraData=c.ProjectDesignVisitId
+
                   }).Distinct().ToList();
             return data;
         }
 
-        public BudgetPaymentFinalCostDto GetFinalPatienTotal(int projectId)
+        public decimal GetFinalPatienTotal(int projectId)
         {
-            BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
-            var patientPaybalAmount = _context.BudgetPaymentFinalCost.FirstOrDefault(x => x.ProjectId == projectId && x.DeletedDate == null && x.MilestoneType == Helper.MilestoneType.PatientCost);
-            data.PatientCostAmount = patientPaybalAmount?.FinalTotalAmount ?? 0;
-            return data;
+            //first time Total get from Budget Payment FinalCost
+            decimal? paymentFinalCost = _context.PatientMilestone.Where(s => s.ProjectId == projectId && s.DeletedBy == null).OrderBy(s => s.Id).Select(r => r.visitTotal).LastOrDefault();
+            paymentFinalCost ??= _context.BudgetPaymentFinalCost.Where(x => x.ProjectId == projectId && x.MilestoneType == MilestoneType.PatientCost && x.DeletedDate == null).Select(s => s.FinalTotalAmount).FirstOrDefault();
+
+            return paymentFinalCost ?? 0;
+
         }
     }
 }

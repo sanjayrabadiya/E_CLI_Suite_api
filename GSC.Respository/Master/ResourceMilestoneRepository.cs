@@ -168,12 +168,13 @@ namespace GSC.Respository.Master
                 _context.Save();
             });
         }
-        public BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId)
+        public decimal GetFinalResourceTotal(int projectId)
         {
-            BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
-            var paymentFinalCost = _context.BudgetPaymentFinalCost.FirstOrDefault(x => x.ProjectId == projectId && x.MilestoneType == MilestoneType.ProfessionalCost && x.DeletedDate == null);
-            data.ProfessionalCostAmount = paymentFinalCost?.FinalTotalAmount ?? 0;
-            return data;
+            //first time Total get from Budget Payment FinalCost
+            decimal? paymentFinalCost = _context.ResourceMilestone.Where(s=>s.ProjectId== projectId && s.DeletedBy==null).OrderBy(s=>s.Id).Select(r=>r.ResourceTotal).LastOrDefault();
+            paymentFinalCost ??= _context.BudgetPaymentFinalCost.Where(x => x.ProjectId == projectId && x.MilestoneType == MilestoneType.ProfessionalCost && x.DeletedDate == null).Select(s=>s.FinalTotalAmount).FirstOrDefault();
+
+            return paymentFinalCost ?? 0;
         }
 
         public async Task SendDueResourceMilestoneEmail()

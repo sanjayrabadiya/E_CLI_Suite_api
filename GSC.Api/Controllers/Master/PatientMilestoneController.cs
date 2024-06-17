@@ -91,10 +91,10 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
-        [HttpGet("GetVisitMilestoneAmount/{visitId}")]
-        public IActionResult GetVisitMilestoneAmount(int visitId)
+        [HttpGet("GetVisitMilestoneAmount/{ParentProjectId:int}/{visitId}")]
+        public IActionResult GetVisitMilestoneAmount(int ParentProjectId,int visitId)
         {
-            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(visitId);
+            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(ParentProjectId,visitId);
             return Ok(studyplan);
         }
 

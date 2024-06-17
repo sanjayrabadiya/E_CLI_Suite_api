@@ -1239,7 +1239,7 @@ namespace GSC.Helper
     }
     public enum PaymentTypePatient : short
     {
-        [Description("Visits")] Tasks = 1,
+        [Description("Visit")] Tasks = 1,
         [Description("lumpsum / Advanced")] lumpsum = 2
     }
     public enum PaymentTypePassThrough : short

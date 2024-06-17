@@ -15,7 +15,7 @@ namespace GSC.Respository.Master
         List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId);
         void DeletePaymentMilestoneTaskDetail(int Id);
         void ActivePaymentMilestoneTaskDetail(int Id);
-        BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId);
+        decimal GetFinalResourceTotal(int projectId);
         Task SendDueResourceMilestoneEmail();
         IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue);
         IList<ResourceMilestoneGridDto> GetTaskPaymentBudgetList();

@@ -12,7 +12,7 @@ namespace GSC.Respository.Master
         string DuplicatePaymentMilestone(PassthroughMilestone paymentMilestone);
         decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto);    
         List<DropDownDto> GetPassThroughCostActivity(int projectId);
-        BudgetPaymentFinalCostDto GetFinalPassthroughTotal(int projectId);
+        decimal GetFinalPassthroughTotal(int projectId);
 
     }
 }
