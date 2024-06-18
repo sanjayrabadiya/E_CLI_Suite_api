@@ -1,5 +1,6 @@
 ﻿using GSC.Common.Base;
 using GSC.Common.Common;
+using GSC.Data.Entities.Project.Design;
 using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using System;
@@ -18,7 +19,7 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
         public Master.Project Project { get; set; }
-        public int? PatientCostId { get; set; }
-        public PatientCost PatientCost { get; set; }
+        public int? ProjectDesignVisitId { get; set; }
+        public ProjectDesignVisit ProjectDesignVisit { get; set; }
     }
 }

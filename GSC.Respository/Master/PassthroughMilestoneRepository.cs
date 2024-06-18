@@ -59,13 +59,24 @@ namespace GSC.Respository.Master
                   }).ToList();
             return data;
         }
-        public BudgetPaymentFinalCostDto GetFinalPassthroughTotal(int projectId)
+        public decimal GetFinalPassthroughTotal(int projectId)
         {
-            BudgetPaymentFinalCostDto data = new BudgetPaymentFinalCostDto();
-            //one time Add Paybal Amount id diduct in main total
-            var resourcePaybalAmount = _context.BudgetPaymentFinalCost.FirstOrDefault(x => x.ProjectId == projectId && x.DeletedDate == null && x.MilestoneType == MilestoneType.PassThroughCost);
-            data.PassThroughCost = resourcePaybalAmount?.FinalTotalAmount ?? 0;
-            return data;
+            //first time Total get from Budget Payment FinalCost
+            decimal? paymentFinalCost = _context.PassthroughMilestone.Where(s => s.ProjectId == projectId && s.DeletedBy == null).OrderBy(s => s.Id).Select(r => r.PassThroughTotal).LastOrDefault();
+            paymentFinalCost ??= _context.BudgetPaymentFinalCost.Where(x => x.ProjectId == projectId && x.MilestoneType == MilestoneType.PassThroughCost && x.DeletedDate == null).Select(s => s.FinalTotalAmount).FirstOrDefault();
+
+            return paymentFinalCost ?? 0;
+        }
+        public string UpdatePaybalAmount(PassthroughMilestone passthroughMilestone)
+        {
+            var passthroughMilestoneData = _context.PassthroughMilestone.Where(s => s.ProjectId == passthroughMilestone.ProjectId && s.DeletedBy == null).OrderBy(s => s.Id).LastOrDefault();
+            if (passthroughMilestoneData != null)
+            {
+                passthroughMilestoneData.PassThroughTotal += passthroughMilestoneData.PaybalAmount;
+                _context.PassthroughMilestone.Update(passthroughMilestoneData);
+                _context.Save();
+            }
+            return "";
         }
     }
 }

@@ -75,6 +75,9 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository.Delete(record);
             _uow.Save();
 
+            // delete ant task Add amount in total Amount #1550
+            _paymentMilestoneRepository.UpdatePaybalAmount(record);
+
             return Ok();
         }
 
@@ -83,6 +86,12 @@ namespace GSC.Api.Controllers.Master
         {
             var record = _paymentMilestoneRepository.Find(id);
 
+            var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             if (record == null)
                 return NotFound();
             _paymentMilestoneRepository.Active(record);
@@ -91,10 +100,10 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
-        [HttpGet("GetVisitMilestoneAmount/{visitId}")]
-        public IActionResult GetVisitMilestoneAmount(int visitId)
+        [HttpGet("GetVisitMilestoneAmount/{ParentProjectId:int}/{visitId}")]
+        public IActionResult GetVisitMilestoneAmount(int ParentProjectId,int visitId)
         {
-            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(visitId);
+            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(ParentProjectId,visitId);
             return Ok(studyplan);
         }
 

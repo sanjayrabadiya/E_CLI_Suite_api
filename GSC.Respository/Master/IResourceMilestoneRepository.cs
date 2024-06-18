@@ -10,14 +10,15 @@ namespace GSC.Respository.Master
 {
     public interface IResourceMilestoneRepository : IGenericRepository<ResourceMilestone>
     {
-        IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted);
+        IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
         string DuplicatePaymentMilestone(ResourceMilestone paymentMilestone);
-        List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId);
+        List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
         void DeletePaymentMilestoneTaskDetail(int Id);
         void ActivePaymentMilestoneTaskDetail(int Id);
-        BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId);
+        decimal GetFinalResourceTotal(int projectId);
         Task SendDueResourceMilestoneEmail();
         IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue);
         IList<ResourceMilestoneGridDto> GetTaskPaymentBudgetList();
+        string UpdatePaybalAmount(ResourceMilestone paymentMilestone);
     }
 }

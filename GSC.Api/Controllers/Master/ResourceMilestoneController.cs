@@ -4,6 +4,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Helper;
 using GSC.Respository.Master;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
@@ -38,10 +39,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetresourceMilestoneList/{parentProjectId:int}/{siteId:int?}/{countryId:int?}/{isDeleted:bool?}")]
-        public IActionResult GetresourceMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
+        [Route("GetresourceMilestoneList/{isDeleted:bool?}/{studyId:int}/{siteId:int}/{countryId:int}/{filter}")]
+        public IActionResult GetresourceMilestoneList(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filter)
         {
-            var paymentMilestone = _paymentMilestoneRepository.GetPaymentMilestoneList(parentProjectId, siteId, countryId, isDeleted);
+            var paymentMilestone = _paymentMilestoneRepository.GetPaymentMilestoneList(isDeleted, studyId, siteId, countryId, filter);
             return Ok(paymentMilestone);
         }
 
@@ -83,6 +84,8 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository.Delete(record);
             _uow.Save();
 
+            // delete ant task Add amount in total Amount #1550
+            _paymentMilestoneRepository.UpdatePaybalAmount(record);
             return Ok();
         }
 
@@ -102,10 +105,10 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpGet]
-        [Route("GetTaskListforMilestone/{parentProjectId:int}/{siteId:int?}/{countryId:int?}")]
-        public IActionResult GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
+        [Route("GetTaskListforMilestone/{studyId:int}/{siteId:int}/{countryId:int}/{filter}")]
+        public IActionResult GetTaskListforMilestone(int studyId, int siteId, int countryId, CtmsStudyTaskFilter filter)
         {
-            var studyplan = _paymentMilestoneRepository.GetTaskListforMilestone(parentProjectId, siteId, countryId);
+            var studyplan = _paymentMilestoneRepository.GetTaskListforMilestone(studyId, siteId, countryId, filter);
             return Ok(studyplan);
         }
     }

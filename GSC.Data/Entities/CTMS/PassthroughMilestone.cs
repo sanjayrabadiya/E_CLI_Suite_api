@@ -17,7 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
-        public int PassThroughCostActivityId { get; set; }
+        public int? PassThroughCostActivityId { get; set; }
         public Master.Project Project { get; set; }
         public PassThroughCostActivity PassThroughCostActivity { get; set; }
 

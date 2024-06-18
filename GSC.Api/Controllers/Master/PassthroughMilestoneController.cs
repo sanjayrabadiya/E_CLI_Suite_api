@@ -65,6 +65,8 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository.Delete(record);
             _uow.Save();
 
+            //Add by mitul-> delete ant task Add amount in total Amount #1550
+            _paymentMilestoneRepository.UpdatePaybalAmount(record);
             return Ok();
         }
 

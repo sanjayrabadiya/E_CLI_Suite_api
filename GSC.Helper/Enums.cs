@@ -1235,11 +1235,11 @@ namespace GSC.Helper
     {
         [Description("Professional Cost")] ProfessionalCost = 1,
         [Description("Patient Cost")] PatientCost = 2,
-        [Description("PassThrough Cost")] PassThroughCost = 3
+        [Description("Pass Through Cost")] PassThroughCost = 3
     }
     public enum PaymentTypePatient : short
     {
-        [Description("Visits")] Tasks = 1,
+        [Description("Visit")] Tasks = 1,
         [Description("lumpsum / Advanced")] lumpsum = 2
     }
     public enum PaymentTypePassThrough : short
