@@ -8,6 +8,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Project.Design;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Shared.JWTAuth;
@@ -41,6 +42,12 @@ namespace GSC.Respository.Master
 
         public string DuplicatePaymentMilestone(PatientMilestone paymentMilestone)
         {
+            if (All.Any(x =>
+                x.Id != paymentMilestone.Id && x.ProjectDesignVisitId == paymentMilestone.ProjectDesignVisitId &&
+                x.ProjectId == paymentMilestone.ProjectId && x.DeletedDate == null && x.ProjectDesignVisitId != null))
+            {
+                return "Duplicate Visit ";
+            }
             return "";
         }
 
@@ -49,10 +56,18 @@ namespace GSC.Respository.Master
             List<decimal> obj = new List<decimal>();
 
             var EstimatedTotal = _context.PatientCost.Where(s => s.ProjectDesignVisitId == visitId && s.ProcedureId !=null && s.ProjectId== ParentProjectId && s.DeletedBy == null).Sum(d => d.FinalCost * d.PatientCount).GetValueOrDefault();
-            var TotalPatient = _context.PatientCost.Where(s => s.ProjectDesignVisitId == visitId && s.ProcedureId != null && s.ProjectId == ParentProjectId && s.DeletedBy == null).Sum(d => d.PatientCount);
-            
+            var query = from pc in _context.PatientCost
+                        where pc.ProjectId == ParentProjectId
+                           && pc.ProjectDesignVisitId == visitId
+                           && pc.DeletedDate == null
+                           && pc.ProcedureId != null
+                        group pc by new { pc.CurrencyRateId, pc.PatientCount } into g
+                        select new
+                        {
+                            g.Key.PatientCount
+                        };
             obj.Add(EstimatedTotal);
-            obj.Add(TotalPatient);
+            obj.Add(query.Sum(s=>s.PatientCount));
 
             return obj;
         }
@@ -65,7 +80,7 @@ namespace GSC.Respository.Master
                       Id = c.Id,
                       Value = c.ProjectDesignVisit.DisplayName,
                       ExtraData=c.ProjectDesignVisitId
-
+                      
                   }).Distinct().ToList();
             return data;
         }
@@ -78,6 +93,16 @@ namespace GSC.Respository.Master
 
             return paymentFinalCost ?? 0;
 
+        }
+        public string UpdatePaybalAmount(PatientMilestone paymentMilestone)
+        {
+            var paymentMilestoneData= _context.PatientMilestone.Where(s=>s.ProjectId==paymentMilestone.ProjectId && s.DeletedBy == null).OrderBy(s => s.Id).LastOrDefault();
+            if(paymentMilestoneData != null) {
+            paymentMilestoneData.visitTotal += paymentMilestone.PaybalAmount;
+            _context.PatientMilestone.Update(paymentMilestoneData);
+            _context.Save();
+            }
+            return "";
         }
     }
 }

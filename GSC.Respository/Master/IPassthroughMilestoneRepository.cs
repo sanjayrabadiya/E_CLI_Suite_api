@@ -13,6 +13,7 @@ namespace GSC.Respository.Master
         decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto);    
         List<DropDownDto> GetPassThroughCostActivity(int projectId);
         decimal GetFinalPassthroughTotal(int projectId);
+        string UpdatePaybalAmount(PassthroughMilestone paymentMilestone);
 
     }
 }

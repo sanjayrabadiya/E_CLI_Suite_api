@@ -852,7 +852,7 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.StudyPlanTask, x => x.MapFrom(a => a.StudyPlanTask.TaskName))
               .ReverseMap();
             CreateMap<PatientMilestone, PatientMilestoneGridDto>()
-                    .ForMember(x => x.VisitName, x => x.MapFrom(a => a.PatientCost.ProjectDesignVisit.DisplayName))
+                    .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
                     .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
                     .ForMember(x => x.PaymentTypePatient, x => x.MapFrom(a => a.PaymentTypePatient.GetDescription()))
                     .ReverseMap();

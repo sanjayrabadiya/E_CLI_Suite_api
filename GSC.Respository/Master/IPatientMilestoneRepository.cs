@@ -12,6 +12,7 @@ namespace GSC.Respository.Master
         string DuplicatePaymentMilestone(PatientMilestone paymentMilestone);
         List<decimal> GetEstimatedMilestoneAmount(int ParentProjectId,int visitId);
         decimal GetFinalPatienTotal(int projectId);
-        List<DropDownDto> GetVisitDropDown(int parentProjectId);     
+        List<DropDownDto> GetVisitDropDown(int parentProjectId);
+        string UpdatePaybalAmount(PatientMilestone paymentMilestone);
     }
 }

@@ -16,8 +16,9 @@ namespace GSC.Data.Dto.Master
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
+        [StringLength(50, ErrorMessage = "Remark Maximum 50 characters exceeded")]
         public string Remark { get; set; }
-        public int? PatientCostId { get; set; }
+        public int? ProjectDesignVisitId { get; set; }
     }
     public class PatientMilestoneGridDto : BaseAuditDto
     {

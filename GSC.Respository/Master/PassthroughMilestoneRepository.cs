@@ -67,5 +67,16 @@ namespace GSC.Respository.Master
 
             return paymentFinalCost ?? 0;
         }
+        public string UpdatePaybalAmount(PassthroughMilestone passthroughMilestone)
+        {
+            var passthroughMilestoneData = _context.PassthroughMilestone.Where(s => s.ProjectId == passthroughMilestone.ProjectId && s.DeletedBy == null).OrderBy(s => s.Id).LastOrDefault();
+            if (passthroughMilestoneData != null)
+            {
+                passthroughMilestoneData.PassThroughTotal += passthroughMilestoneData.PaybalAmount;
+                _context.PassthroughMilestone.Update(passthroughMilestoneData);
+                _context.Save();
+            }
+            return "";
+        }
     }
 }

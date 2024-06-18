@@ -40,28 +40,28 @@ namespace GSC.Respository.Master
             _emailSenderRespository = emailSenderRespository;
         }
 
-        public IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted)
+        public IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType)
         {
             var PaymentMilestoneData = new List<ResourceMilestoneGridDto>();
 
-            if (parentProjectId != 0 && siteId == 0 && countryId == 0)
+            if (studyId != 0 && siteId == 0 && countryId == 0 && filterType == CtmsStudyTaskFilter.Study)
             {
-                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == parentProjectId)).
+                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == studyId) && x.SiteId==0 && x.CountryId==0).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
-            else if (parentProjectId != 0 && siteId != 0 && countryId == 0)
+            else if ((studyId != 0 && siteId != 0 && countryId == 0) ||( filterType == CtmsStudyTaskFilter.Site))
             {
-                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.SiteId == siteId).
+                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && ((x.ProjectId == studyId && x.SiteId == siteId && x.CountryId==0) || (x.SiteId != 0))).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
-            else if (parentProjectId != 0 && siteId == 0 && countryId != 0)
+            else if ((studyId != 0 && siteId == 0 && countryId != 0) || ( filterType == CtmsStudyTaskFilter.Country))
             {
-                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.CountryId == countryId).
+                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && ((x.ProjectId == studyId && x.CountryId == countryId && x.SiteId==0) || (x.CountryId != 0))).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
             else
             {
-                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId && x.CountryId == countryId && x.SiteId == siteId).
+                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == studyId).
                             ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
 
@@ -75,43 +75,40 @@ namespace GSC.Respository.Master
         {
             return "";
         }
-        public List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId)
+        public List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType)
         {
-            var studyPlan = new List<StudyPlan>();
 
-            if (countryId > 0)
+            var result = new List<StudyPlanTaskDto>();
+
+            var studyIds = new List<int>();
+
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == studyId
+                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
             {
-                var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == parentProjectId
-                                                          && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-                                                          && a.UserId == _jwtTokenAccesser.UserId
-                                                          && a.RoleId == _jwtTokenAccesser.RoleId
-                                                          && a.DeletedDate == null
-                                                          && a.RollbackReason == null)
-                                                          && x.ManageSite.City.State.CountryId == countryId
-                                                          && x.DeletedDate == null).ToList();
-
-                if (projectIds.Count == 0)
-                    projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
-                                                         _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-                                                        && a.UserId == _jwtTokenAccesser.UserId
-                                                        && a.RoleId == _jwtTokenAccesser.RoleId
-                                                        && a.DeletedDate == null
-                                                         && a.RollbackReason == null)
-                                                        && x.ManageSite.City.State.CountryId == countryId
-                                                        && x.Id == siteId
-                                                        && x.DeletedDate == null).ToList();
-
-                studyPlan = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+                studyIds.AddRange(ids);
+                studyIds.Add(studyId);
             }
-            else
+            if (filterType == CtmsStudyTaskFilter.Site)
             {
-                studyPlan = _context.StudyPlan.Where(x => x.ProjectId == parentProjectId && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
+                if (siteId == 0)
+                    studyIds.AddRange(ids);
+                else
+                    studyIds.Add(siteId);
             }
+
+            var studyplans = _context.StudyPlan.Include(s => s.Currency).Where(x => (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.ProjectId) :
+                x.ProjectId == studyId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
 
             //Onetime Task Seleect then not get in list 
-            var PaymentMilestoneTask = _context.ResourceMilestone.Where(w => studyPlan.Select(f => f.ProjectId).Contains(w.ProjectId) && w.DeletedBy == null).ToList();
+            var PaymentMilestoneTask = _context.ResourceMilestone.Where(w => studyplans.Select(f => f.ProjectId).Contains(w.ProjectId) && w.DeletedBy == null).ToList();
 
-            var data = _context.StudyPlanTask.Where(x => studyPlan.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && x.IsPaymentMileStone && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id).ToList();
+            var data = _context.StudyPlanTask.Where(x => studyplans.Select(f => f.Id).Contains(x.StudyPlanId) && x.DeletedDate == null && x.IsPaymentMileStone &&
+            (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry)
+            && !PaymentMilestoneTask.Select(f => f.StudyPlanTaskId).Contains(x.Id)).OrderByDescending(x => x.Id).ToList();
 
             var DropDownDto = new List<DropDownTaskListforMilestoneDto>();
             data.ForEach(x =>
@@ -215,6 +212,17 @@ namespace GSC.Respository.Master
         {
             var paymentMilestoneData = All.Where(x => x.DeletedDate == null).ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).ToList();
             return paymentMilestoneData;
+        }
+        public string UpdatePaybalAmount(ResourceMilestone paymentMilestone)
+        {
+            var resourceMilestoneData = _context.ResourceMilestone.Where(s => s.ProjectId == paymentMilestone.ProjectId && s.DeletedBy == null).OrderBy(s => s.Id).LastOrDefault();
+            if (resourceMilestoneData != null)
+            {
+                resourceMilestoneData.ResourceTotal += paymentMilestone.PaybalAmount;
+                _context.ResourceMilestone.Update(resourceMilestoneData);
+                _context.Save();
+            }
+            return "";
         }
     }
 }
