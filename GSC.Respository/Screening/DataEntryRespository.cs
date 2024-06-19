@@ -135,6 +135,7 @@ namespace GSC.Respository.Screening
              Where(r => r.ScreeningVisit.ScreeningEntry.ProjectId == projectId).
               GroupBy(c => new
               {
+                  c.ScreeningVisit.ScreeningEntryId,
                   c.ScreeningVisitId,
                   c.ReviewLevel,
                   c.Status,
@@ -144,6 +145,7 @@ namespace GSC.Respository.Screening
                   IsHide = c.IsHide == true
               }).Select(t => new
               {
+                  t.Key.ScreeningEntryId,
                   t.Key.Status,
                   t.Key.ScreeningVisitId,
                   t.Key.ReviewLevel,
@@ -225,7 +227,7 @@ namespace GSC.Respository.Screening
                    ScreeningEntryId = a.ScreeningEntryId,
                    IsPatientLevel = a.ProjectDesignVisit.IsPatientLevel,
                    IsNA = a.IsNA,
-               }).ToListAsync();
+               }).OrderBy(b => b.DesignOrder).ToListAsync();
 
             if (!IsPatientLevel && visits.Count > 0)
             {
@@ -248,7 +250,7 @@ namespace GSC.Respository.Screening
             screeningData.ForEach(r =>
             {
                 r.Visit = visits.Where(a => a.ScreeningEntryId == r.ScreeningEntryId &&
-                 (!a.IsSchedule || a.IsScheduleTerminate == true || a.VisitStatusId > (int)ScreeningVisitStatus.NotStarted)).ToList();
+                 (!a.IsSchedule || a.IsScheduleTerminate == true || a.VisitStatusId > (int)ScreeningVisitStatus.NotStarted)).OrderBy(t=>t.DesignOrder).ToList();
 
                 r.Visit.Where(x => x.VisitStatusId > 3).ToList().ForEach(v =>
                 {
@@ -289,8 +291,7 @@ namespace GSC.Respository.Screening
                 r.TemplateCount = result.WorkFlowText.Select(x => new WorkFlowTemplateCount
                 {
                     LevelNo = x.LevelNo,
-
-
+                    Count = templates.Where(a => a.ScreeningEntryId == r.ScreeningEntryId && a.ReviewLevel == x.LevelNo).Sum(t => t.TotalTemplate)
                 }).ToList();
             });
 
