@@ -41,6 +41,12 @@ namespace GSC.Respository.Master
         }
         public string DuplicatePaymentMilestone(PassthroughMilestone paymentMilestone)
         {
+            if (All.Any(x =>
+                x.Id != paymentMilestone.Id && x.PassThroughCostActivityId == paymentMilestone.PassThroughCostActivityId &&
+                x.ProjectId == paymentMilestone.ProjectId && x.DeletedDate == null && x.PassThroughCostActivityId != null))
+            {
+                return "Duplicate Visit ";
+            }
             return "";
         }
         public decimal GetPassthroughMilestoneAmount(PassthroughMilestoneDto paymentMilestoneDto)

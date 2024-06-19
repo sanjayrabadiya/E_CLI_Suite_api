@@ -13,8 +13,6 @@ namespace GSC.Respository.Master
         IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
         string DuplicatePaymentMilestone(ResourceMilestone paymentMilestone);
         List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
-        void DeletePaymentMilestoneTaskDetail(int Id);
-        void ActivePaymentMilestoneTaskDetail(int Id);
         decimal GetFinalResourceTotal(int projectId);
         Task SendDueResourceMilestoneEmail();
         IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue);

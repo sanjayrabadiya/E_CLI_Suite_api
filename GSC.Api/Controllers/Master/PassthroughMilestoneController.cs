@@ -74,7 +74,12 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Active(int id)
         {
             var record = _paymentMilestoneRepository.Find(id);
-
+            var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             if (record == null)
                 return NotFound();
             _paymentMilestoneRepository.Active(record);

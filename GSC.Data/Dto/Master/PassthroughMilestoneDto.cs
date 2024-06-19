@@ -15,7 +15,7 @@ namespace GSC.Data.Dto.Master
         public decimal? Percentage { get; set; }
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
-        [StringLength(50, ErrorMessage = "Remark Maximum 50 characters exceeded")]
+        [StringLength(300, ErrorMessage = "Remark Maximum 300 characters exceeded")]
         public string Remark { get; set; }
         public int? PassThroughCostActivityId { get; set; }
     }

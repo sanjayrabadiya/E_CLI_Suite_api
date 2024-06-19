@@ -44,20 +44,37 @@ namespace GSC.Respository.Master
         {
             var PaymentMilestoneData = new List<ResourceMilestoneGridDto>();
 
-            if (studyId != 0 && siteId == 0 && countryId == 0 && filterType == CtmsStudyTaskFilter.Study)
+            if (filterType == CtmsStudyTaskFilter.Study)
             {
                 PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == studyId) && x.SiteId==0 && x.CountryId==0).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             }
-            else if ((studyId != 0 && siteId != 0 && countryId == 0) ||( filterType == CtmsStudyTaskFilter.Site))
+            else if (filterType == CtmsStudyTaskFilter.Site)
             {
-                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && ((x.ProjectId == studyId && x.SiteId == siteId && x.CountryId==0) || (x.SiteId != 0))).
+                if (siteId != 0)
+                {
+                    PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == studyId && x.SiteId == siteId && x.CountryId == 0 ).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                }
+                else
+                {
+                    PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SiteId != 0).
+                                 ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                }
             }
-            else if ((studyId != 0 && siteId == 0 && countryId != 0) || ( filterType == CtmsStudyTaskFilter.Country))
+            else if ( filterType == CtmsStudyTaskFilter.Country)
             {
-                PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && ((x.ProjectId == studyId && x.CountryId == countryId && x.SiteId==0) || (x.CountryId != 0))).
+                if(countryId != 0) 
+                {
+                    PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == studyId && x.CountryId == countryId && x.SiteId == 0).
                              ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                }
+                else
+                {
+                    PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.CountryId != 0).
+                             ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                }
+                
             }
             else
             {
@@ -73,6 +90,12 @@ namespace GSC.Respository.Master
         }
         public string DuplicatePaymentMilestone(ResourceMilestone paymentMilestone)
         {
+            if (All.Any(x =>
+                x.Id != paymentMilestone.Id && x.StudyPlanTaskId == paymentMilestone.StudyPlanTaskId &&
+                x.ProjectId == paymentMilestone.ProjectId && x.DeletedDate == null && x.StudyPlanTaskId != null))
+            {
+                return "Duplicate Visit ";
+            }
             return "";
         }
         public List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType)
@@ -142,28 +165,6 @@ namespace GSC.Respository.Master
             });
 
             return DropDownDto;
-        }
-        public void DeletePaymentMilestoneTaskDetail(int Id)
-        {
-            var paymentMilestoneTaskDetail = _context.PaymentMilestoneTaskDetail.Where(s => s.ResourceMilestoneId == Id && s.DeletedBy == null).ToList();
-            paymentMilestoneTaskDetail.ForEach(s =>
-            {
-                s.DeletedDate = DateTime.UtcNow;
-                s.DeletedBy = _jwtTokenAccesser.UserId;
-                _context.PaymentMilestoneTaskDetail.Update(s);
-                _context.Save();
-            });
-        }
-        public void ActivePaymentMilestoneTaskDetail(int Id)
-        {
-            var paymentMilestoneTaskDetail = _context.PaymentMilestoneTaskDetail.Where(s => s.ResourceMilestoneId == Id && s.DeletedBy != null).ToList();
-            paymentMilestoneTaskDetail.ForEach(s =>
-            {
-                s.DeletedDate = null;
-                s.DeletedBy = null;
-                _context.PaymentMilestoneTaskDetail.Update(s);
-                _context.Save();
-            });
         }
         public decimal GetFinalResourceTotal(int projectId)
         {

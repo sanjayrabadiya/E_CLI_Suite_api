@@ -513,7 +513,6 @@ namespace GSC.Domain.Context
         public DbSet<ResourceMilestone> ResourceMilestone { get; set; }
         public DbSet<PatientMilestone> PatientMilestone { get; set; }
         public DbSet<PassthroughMilestone> PassthroughMilestone { get; set; }
-        public DbSet<PaymentMilestoneTaskDetail> PaymentMilestoneTaskDetail { get; set; }
         public DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
         public DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
         public DbSet<CtmsApprovalUsers> CtmsApprovalUsers { get; set; }
