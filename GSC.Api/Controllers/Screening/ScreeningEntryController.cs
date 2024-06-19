@@ -140,14 +140,14 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningEntry.Id);
         }
 
-        [HttpGet]
-        [Route("Progress/{screeningEntryId}/{screeningTemplateId}")]
-        public IActionResult Progress(int screeningEntryId, int screeningTemplateId)
-        {
-            var progress = _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplateId);
+        //[HttpGet]
+        //[Route("Progress/{screeningEntryId}/{screeningTemplateId}")]
+        //public IActionResult Progress(int screeningEntryId, int screeningTemplateId)
+        //{
+        //    var progress = _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplateId);
 
-            return Ok(progress);
-        }
+        //    return Ok(progress);
+        //}
 
         [HttpGet("AutoCompleteSearch")]
         public IActionResult AutoCompleteSearch(string searchText)

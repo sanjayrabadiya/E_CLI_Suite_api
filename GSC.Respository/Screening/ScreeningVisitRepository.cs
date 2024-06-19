@@ -178,8 +178,10 @@ namespace GSC.Respository.Screening
                     Update(screeningVisit);
                 }
                 _context.Save();
-                if (screeningTemplate != null)
-                    _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
+
+                // remove progress bar count
+                // if (screeningTemplate != null)
+                //    _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
             }
         }
 

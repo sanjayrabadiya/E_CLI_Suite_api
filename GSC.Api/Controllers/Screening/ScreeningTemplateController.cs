@@ -154,10 +154,11 @@ namespace GSC.Api.Controllers.Screening
                 t.ProjectDesignTemplateId
             }).FirstOrDefault();
 
-            if(tempValue != null)
-            {
-                _screeningProgress.GetScreeningProgress(tempValue.ScreeningEntryId, id);
-            }
+            // remove progress bar count
+            //if(tempValue != null)
+            //{
+            //    _screeningProgress.GetScreeningProgress(tempValue.ScreeningEntryId, id);
+            //}
             var result = _screeningVisitRepository.AutomaticStatusUpdate(id);
             _uow.Save();
             if (tempValue != null)
