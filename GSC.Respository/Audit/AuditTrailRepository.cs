@@ -101,7 +101,7 @@ namespace GSC.Respository.Audit
 
         public void SearchProjectDesign(ProjectDatabaseSearchDto search)
         {
-
+            _context.SetConnectionTimeOut(2000);
             var Project = _context.Project.Find(search.ParentProjectId);
             var designId = _context.ProjectDesign.Where(x => x.ProjectId == Project.Id).Select(x => x.Id).FirstOrDefault();
             var periodIds = _context.ProjectDesignPeriod.Where(t => t.ProjectDesignId == designId)
