@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 
 namespace GSC.Data.Dto.Master
 {
-    public class PaymentTypeDto : BaseDto
+    public class PaymentTermsDto : BaseDto
     {
-        public string Name { get; set; }
+        public int Terms { get; set; }
     }
 
-    public class PaymentTypeGridDto : BaseAuditDto
+    public class PaymentTermsGridDto : BaseAuditDto
     {
-        public string Name { get; set; }
+        public int Terms { get; set; }
     }
 }

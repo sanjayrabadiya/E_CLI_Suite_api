@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 
 namespace GSC.Respository.Master
 {
-    public class PaymentTypeRepository : GenericRespository<PaymentType>, IPaymentTypeRepository
+    public class PaymentTermsRepository : GenericRespository<PaymentTerms>, IPaymentTermsRepository
     {
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IMapper _mapper;
-        public PaymentTypeRepository(IGSCContext context,
+        public PaymentTermsRepository(IGSCContext context,
             IJwtTokenAccesser jwtTokenAccesser,
             IMapper mapper) : base(context)
         {
@@ -26,17 +26,17 @@ namespace GSC.Respository.Master
             _mapper = mapper;
         }
 
-        public string Duplicate(PaymentType objSave)
+        public string Duplicate(PaymentTerms objSave)
         {
-            if (All.Any(x => x.Id != objSave.Id && x.Name == objSave.Name.Trim() && x.DeletedDate == null))
-                return "Duplicate payment type name : " + objSave.Name;
+            if (All.Any(x => x.Id != objSave.Id && x.Terms == objSave.Terms && x.DeletedDate == null))
+                return "Duplicate payment terms : " + objSave.Terms;
             return "";
         }
 
-        public List<PaymentTypeGridDto> GetPaymentTypeList(bool isDeleted)
+        public List<PaymentTermsGridDto> GetPaymentTermsList(bool isDeleted)
         {
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
-                   ProjectTo<PaymentTypeGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                   ProjectTo<PaymentTermsGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
     }
 }

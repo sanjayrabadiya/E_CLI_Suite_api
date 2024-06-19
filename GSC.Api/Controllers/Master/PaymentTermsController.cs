@@ -9,16 +9,16 @@ using Microsoft.AspNetCore.Mvc;
 namespace GSC.Api.Controllers.Master
 {
     [Route("api/[controller]")]
-    public class PaymentTypeController : BaseController
+    public class PaymentTermsController : BaseController
     {
         private readonly IMapper _mapper;
-        private readonly IPaymentTypeRepository _paymentTypeRepository;
+        private readonly IPaymentTermsRepository _paymentTermsRepository;
         private readonly IUnitOfWork _uow;
 
-        public PaymentTypeController(IPaymentTypeRepository paymentTypeRepository,
+        public PaymentTermsController(IPaymentTermsRepository paymentTypeRepository,
             IUnitOfWork uow, IMapper mapper)
         {
-            _paymentTypeRepository = paymentTypeRepository;
+            _paymentTermsRepository = paymentTypeRepository;
             _uow = uow;
             _mapper = mapper;
         }
@@ -27,7 +27,7 @@ namespace GSC.Api.Controllers.Master
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
-            var paymentTypes = _paymentTypeRepository.GetPaymentTypeList(isDeleted);
+            var paymentTypes = _paymentTermsRepository.GetPaymentTermsList(isDeleted);
             return Ok(paymentTypes);
         }
 
@@ -36,26 +36,26 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Get(int id)
         {
             if (id <= 0) return BadRequest();
-            var paymentType = _paymentTypeRepository.Find(id);
-            var PaymentTypeDto = _mapper.Map<PaymentTypeDto>(paymentType);
-            return Ok(PaymentTypeDto);
+            var paymentType = _paymentTermsRepository.Find(id);
+            var PaymentTermsDto = _mapper.Map<PaymentTermsDto>(paymentType);
+            return Ok(PaymentTermsDto);
         }
 
 
         [HttpPost]
-        public IActionResult Post([FromBody] PaymentTypeDto PaymentTypeDto)
+        public IActionResult Post([FromBody] PaymentTermsDto PaymentTermsDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            PaymentTypeDto.Id = 0;
-            var paymentType = _mapper.Map<PaymentType>(PaymentTypeDto);
-            var validate = _paymentTypeRepository.Duplicate(paymentType);
+            PaymentTermsDto.Id = 0;
+            var paymentType = _mapper.Map<PaymentTerms>(PaymentTermsDto);
+            var validate = _paymentTermsRepository.Duplicate(paymentType);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _paymentTypeRepository.Add(paymentType);
+            _paymentTermsRepository.Add(paymentType);
             if (_uow.Save() <= 0)
             {
                 ModelState.AddModelError("Message", "Creating PaymentType failed on save.");
@@ -65,20 +65,20 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpPut]
-        public IActionResult Put([FromBody] PaymentTypeDto PaymentTypeDto)
+        public IActionResult Put([FromBody] PaymentTermsDto PaymentTermsDto)
         {
-            if (PaymentTypeDto.Id <= 0) return BadRequest();
+            if (PaymentTermsDto.Id <= 0) return BadRequest();
 
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            var paymentType = _mapper.Map<PaymentType>(PaymentTypeDto);
-            var validate = _paymentTypeRepository.Duplicate(paymentType);
+            var paymentType = _mapper.Map<PaymentTerms>(PaymentTermsDto);
+            var validate = _paymentTermsRepository.Duplicate(paymentType);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            _paymentTypeRepository.AddOrUpdate(paymentType);
+            _paymentTermsRepository.AddOrUpdate(paymentType);
 
             if (_uow.Save() <= 0)
             {
@@ -91,12 +91,12 @@ namespace GSC.Api.Controllers.Master
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
-            var record = _paymentTypeRepository.Find(id);
+            var record = _paymentTermsRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            _paymentTypeRepository.Delete(record);
+            _paymentTermsRepository.Delete(record);
             _uow.Save();
 
             return Ok();
@@ -105,19 +105,19 @@ namespace GSC.Api.Controllers.Master
         [HttpPatch("{id}")]
         public ActionResult Active(int id)
         {
-            var record = _paymentTypeRepository.Find(id);
+            var record = _paymentTermsRepository.Find(id);
 
             if (record == null)
                 return NotFound();
 
-            var validate = _paymentTypeRepository.Duplicate(record);
+            var validate = _paymentTermsRepository.Duplicate(record);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
 
-            _paymentTypeRepository.Active(record);
+            _paymentTermsRepository.Active(record);
             _uow.Save();
 
             return Ok();
