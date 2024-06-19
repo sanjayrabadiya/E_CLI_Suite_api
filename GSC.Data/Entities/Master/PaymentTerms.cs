@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace GSC.Data.Entities.Master
 {
-    public class PaymentType: BaseEntity, ICommonAduit
+    public class PaymentTerms: BaseEntity, ICommonAduit
     {
-        public string Name { get; set; }
+        public int Terms { get; set; }
     }
 }

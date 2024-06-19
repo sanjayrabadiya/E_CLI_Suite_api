@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 
 namespace GSC.Respository.Master
 {
-    public interface IPaymentTypeRepository : IGenericRepository<PaymentType>
+    public interface IPaymentTermsRepository : IGenericRepository<PaymentTerms>
     {
-        string Duplicate(PaymentType objSave);
-        List<PaymentTypeGridDto> GetPaymentTypeList(bool isDeleted);
+        string Duplicate(PaymentTerms objSave);
+        List<PaymentTermsGridDto> GetPaymentTermsList(bool isDeleted);
     }
 }
