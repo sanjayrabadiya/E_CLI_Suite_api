@@ -74,8 +74,6 @@ namespace GSC.Api.Controllers.Master
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _paymentMilestoneRepository.DeletePaymentMilestoneTaskDetail(id);
-
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -92,9 +90,13 @@ namespace GSC.Api.Controllers.Master
         [HttpPatch("{id}")]
         public IActionResult Active(int id)
         {
-            _paymentMilestoneRepository.ActivePaymentMilestoneTaskDetail(id);
-
             var record = _paymentMilestoneRepository.Find(id);
+            var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             if (record == null)
                 return NotFound();
