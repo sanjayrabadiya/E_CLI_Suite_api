@@ -905,6 +905,8 @@ namespace GSC.Api.Helpers
            .ForMember(x => x.HasChild, x => x.MapFrom(a => (a.CtmsWorkflowApprovalId != null)))
            .ForMember(x => x.CtmsWorkflowApprovalId, x => x.MapFrom(a => (a.Id)))
            .ReverseMap();
+
+            CreateMap<PaymentTerms, PaymentTermsGridDto>().ReverseMap();
         }
     }
 }
