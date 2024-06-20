@@ -113,5 +113,19 @@ namespace GSC.Api.Controllers.Master
             var studyplan = _paymentMilestoneRepository.GetTaskListforMilestone(studyId, siteId, countryId, filter);
             return Ok(studyplan);
         }
+
+        [HttpGet]
+        [Route("GetCountryDropdown/{parentId}")]
+        public IActionResult GetCountryDropdown(int parentId)
+        {
+            return Ok(_paymentMilestoneRepository.GetBudgetCountryDropDown(parentId));
+        }
+
+        [HttpGet]
+        [Route("GetSiteDropdown/{parentId}")]
+        public IActionResult GetSiteDropdown(int parentId)
+        {
+            return Ok(_paymentMilestoneRepository.GetBudgetSiteDropDown(parentId));
+        }
     }
 }
