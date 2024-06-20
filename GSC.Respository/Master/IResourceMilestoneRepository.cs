@@ -18,5 +18,7 @@ namespace GSC.Respository.Master
         IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue);
         IList<ResourceMilestoneGridDto> GetTaskPaymentBudgetList();
         string UpdatePaybalAmount(ResourceMilestone paymentMilestone);
+        List<DropDownDto> GetBudgetCountryDropDown(int parentProjectId);
+        List<DropDownDto> GetBudgetSiteDropDown(int parentProjectId);
     }
 }

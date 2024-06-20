@@ -45,7 +45,7 @@ namespace GSC.Respository.Master
                 x.Id != paymentMilestone.Id && x.PassThroughCostActivityId == paymentMilestone.PassThroughCostActivityId &&
                 x.ProjectId == paymentMilestone.ProjectId && x.DeletedDate == null && x.PassThroughCostActivityId != null))
             {
-                return "Duplicate Visit ";
+                return "Duplicate Activity ";
             }
             return "";
         }

@@ -225,5 +225,31 @@ namespace GSC.Respository.Master
             }
             return "";
         }
+
+        public List<DropDownDto> GetBudgetCountryDropDown(int parentProjectId)
+        {
+            var studyPlan = _context.StudyPlan.FirstOrDefault(x => x.DeletedDate == null && x.ProjectId == parentProjectId);
+            var countrylist = _context.StudyPlanTask.Where(s => s.DeletedDate == null
+            && s.CountryId != null && s.StudyPlanId == studyPlan.Id && s.IsPaymentMileStone).Include(i => i.Country).GroupBy(g => g.CountryId)
+                .Select(c => new DropDownDto { Id = c.Key.Value, Value = c.First().Country.CountryName }).OrderBy(o => o.Value).ToList();
+
+            return countrylist;
+        }
+
+        public List<DropDownDto> GetBudgetSiteDropDown(int parentProjectId)
+        {
+            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
+            var ids = _projectRepository.All.Where(x =>
+                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                     && x.DeletedDate == null && x.ParentProjectId == parentProjectId
+                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+
+
+            var siteList = _context.StudyPlanTask.Where(s => s.DeletedDate == null
+            && ids.Contains(s.StudyPlan.ProjectId) && s.IsPaymentMileStone).Include(i => i.StudyPlan.Project).GroupBy(g => g.StudyPlan.ProjectId)
+                .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlan.Project.ManageSite.SiteName ?? c.First().StudyPlan.Project.ProjectCode }).OrderBy(o => o.Value).ToList();
+
+            return siteList;
+        }
     }
 }
