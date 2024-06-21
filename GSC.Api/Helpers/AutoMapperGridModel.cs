@@ -46,6 +46,7 @@ using GSC.Data.Dto.LabReportManagement;
 using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.IDVerificationSystem;
 using GSC.Data.Dto.IDVerificationSystem;
+using GSC.Helper;
 
 namespace GSC.Api.Helpers
 {
@@ -858,6 +859,7 @@ namespace GSC.Api.Helpers
                     .ReverseMap();
             CreateMap<PassthroughMilestone, PassthroughMilestoneGridDto>()
                    .ForMember(x => x.PassThroughCostActivity, x => x.MapFrom(a =>a.PassThroughCostActivity.ActivityName))
+                    .ForMember(x => x.PaymentTypePassThrough, x => x.MapFrom(a => a.PaymentTypePassThrough.GetDescription()))
                   .ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
                 .ForMember(x => x.MilestoneTypeName, x => x.MapFrom(a => a.MilestoneType.GetDescription()))

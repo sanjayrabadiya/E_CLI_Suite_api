@@ -1240,12 +1240,12 @@ namespace GSC.Helper
     public enum PaymentTypePatient : short
     {
         [Description("Visit")] Tasks = 1,
-        [Description("lumpsum / Advanced")] lumpsum = 2
+        [Description("Lumpsum / Advanced")] lumpsum = 2
     }
     public enum PaymentTypePassThrough : short
     {
         [Description("Activity")] Activity = 1,
-        [Description("lumpsum / Advanced")] lumpsum = 2
+        [Description("Lumpsum / Advanced")] lumpsum = 2
     }
 
     public enum CtmsStudyTaskFilter : short
