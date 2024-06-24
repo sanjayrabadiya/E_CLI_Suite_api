@@ -1161,7 +1161,7 @@ namespace GSC.Helper
     public enum ResourceTypeEnum : short
     {
         [Description("Manpower")] Manpower = 1,
-        [Description("Material")] Material = 2,
+        [Description("Materials/Others")] Material = 2,
     }
     public enum SubResourceType : short
     {
@@ -1222,26 +1222,30 @@ namespace GSC.Helper
         [Description("Study Plan")] StudyPlanApproval = 1,
         [Description("Budget Management")] BudgetManagementApproved = 2
     }
-    public enum PaymentTypeResource : short
+
+    public enum DateTypeResource : short
     {
-        [Description("Tasks")] Tasks = 1,
-        [Description("lumpsum / Advanced ")] lumpsum = 2
+        [Description("Schedule Start Date")] ScheduleStartDate = 1,
+        [Description("Schedule End Date")] ScheduleEndDate = 2,
+        [Description("Actual Start Date")] ActualStartDate = 3,
+        [Description("Actual End Date")] ActualEndDate = 4,
+        
     }
     public enum MilestoneType : short
     {
-        [Description("Resource Cost")] ResourceCost = 1,
+        [Description("Professional Cost")] ProfessionalCost = 1,
         [Description("Patient Cost")] PatientCost = 2,
-        [Description("PassThrough Cost")] PassThroughCost = 3
+        [Description("Pass Through Cost")] PassThroughCost = 3
     }
     public enum PaymentTypePatient : short
     {
-        [Description("Visits")] Tasks = 1,
-        [Description("lumpsum / Advanced")] lumpsum = 2
+        [Description("Visit")] Tasks = 1,
+        [Description("Lumpsum / Advanced")] lumpsum = 2
     }
     public enum PaymentTypePassThrough : short
     {
         [Description("Activity")] Activity = 1,
-        [Description("lumpsum / Advanced")] lumpsum = 2
+        [Description("Lumpsum / Advanced")] lumpsum = 2
     }
 
     public enum CtmsStudyTaskFilter : short
@@ -1250,5 +1254,12 @@ namespace GSC.Helper
         [Description("Study")] Study = 2,
         [Description("Country")] Country = 3,
         [Description("Site")] Site = 4
+    }
+
+    public enum CTMSPaymentDue : short
+    {
+        [Description("Due")] Due = 1,
+        [Description("Next Month Upcoming")] NextMonthDue = 2,
+        [Description("Current Due Date")] CurrentDueDate = 3
     }
 }

@@ -4,19 +4,21 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
 
 namespace GSC.Respository.Master
 {
     public interface IResourceMilestoneRepository : IGenericRepository<ResourceMilestone>
     {
-        IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, int? siteId, int? countryId, bool isDeleted);
+        IList<ResourceMilestoneGridDto> GetPaymentMilestoneList(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
         string DuplicatePaymentMilestone(ResourceMilestone paymentMilestone);
-        List<DropDownDto> GetTaskListforMilestone(int parentProjectId, int? siteId, int? countryId);
-        decimal GetEstimatedMilestoneAmount(ResourceMilestoneDto paymentMilestoneDto);
-        void AddPaymentMilestoneTaskDetail(ResourceMilestoneDto paymentMilestoneDto);
-        void DeletePaymentMilestoneTaskDetail(int Id);
-        void ActivePaymentMilestoneTaskDetail(int Id);
-        BudgetPaymentFinalCostDto GetFinalResourceTotal(int projectId);
+        List<DropDownTaskListforMilestoneDto> GetTaskListforMilestone(int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
+        decimal GetFinalResourceTotal(int projectId);
         Task SendDueResourceMilestoneEmail();
+        IList<ResourceMilestoneGridDto> GetTaskPaymentDueList(int parentProjectId, int? siteId, int? countryId, bool isDeleted, CTMSPaymentDue cTMSPaymentDue);
+        IList<ResourceMilestoneGridDto> GetTaskPaymentBudgetList();
+        string UpdatePaybalAmount(ResourceMilestone paymentMilestone);
+        List<DropDownDto> GetBudgetCountryDropDown(int parentProjectId);
+        List<DropDownDto> GetBudgetSiteDropDown(int parentProjectId);
     }
 }

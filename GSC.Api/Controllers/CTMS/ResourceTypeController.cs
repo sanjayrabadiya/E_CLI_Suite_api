@@ -85,6 +85,14 @@ namespace GSC.Api.Controllers.CTMS
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {
+            //validation check Resource All Ready Working so not deleted
+            var validate = _resourcetypeRepository.ResourceWorking(id);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
             var record = _resourcetypeRepository.Find(id);
 
             if (record == null)

@@ -10,11 +10,9 @@ namespace GSC.Respository.Master
     {
         IList<PatientMilestoneGridDto> GetPaymentMilestoneList(int parentProjectId, bool isDeleted);
         string DuplicatePaymentMilestone(PatientMilestone paymentMilestone);
-        decimal GetEstimatedMilestoneAmount(PatientMilestoneDto paymentMilestoneDto);
-        void AddPaymentMilestoneVisitDetail(PatientMilestoneDto paymentMilestoneDto);
-        void DeletePaymentMilestoneVisitDetail(int Id);
-        void ActivePaymentMilestoneVisitDetail(int Id);
-        BudgetPaymentFinalCostDto GetFinalPatienTotal(int projectId);
-        List<DropDownDto> GetVisitDropDown(int parentProjectId);     
+        List<decimal> GetEstimatedMilestoneAmount(int ParentProjectId,int visitId);
+        decimal GetFinalPatienTotal(int projectId);
+        List<DropDownDto> GetVisitDropDown(int parentProjectId);
+        string UpdatePaybalAmount(PatientMilestone paymentMilestone);
     }
 }

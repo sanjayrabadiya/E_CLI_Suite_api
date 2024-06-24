@@ -37,7 +37,7 @@ namespace GSC.Respository.CTMS
         }
         public string Duplicate(PassThroughCostDto passThroughCostDto)
         {
-            if (All.Any(x => x.Id != passThroughCostDto.Id && x.PassThroughCostActivityId == passThroughCostDto.PassThroughCostActivityId && x.CountryId == passThroughCostDto.CountryId&& x.DeletedDate == null))
+            if (All.Any(x => x.Id != passThroughCostDto.Id && x.PassThroughCostActivityId == passThroughCostDto.PassThroughCostActivityId && x.CountryId == passThroughCostDto.CountryId&& x.DeletedDate == null && x.ProjectId == passThroughCostDto.ProjectId))
             {
                 return "Duplicate Pass Through Cost";
             }

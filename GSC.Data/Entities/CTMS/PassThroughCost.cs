@@ -10,8 +10,9 @@ namespace GSC.Data.Entities.CTMS
         public int ProjectId { get; set; }
         public int PassThroughCostActivityId { get; set; }
         public int CountryId { get; set; }
-        public int UnitId { get; set; }
-        public int NoOfUnit { get; set; }
+        public int? UnitId { get; set; }
+        public int? NoOfUnit { get; set; }
+        public int? NoOfPatient { get; set; }
         public decimal Rate { get; set; }
         public int Frequency { get; set; }
         public decimal? Total { get; set; }

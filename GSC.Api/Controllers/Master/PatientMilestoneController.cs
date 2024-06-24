@@ -60,17 +60,12 @@ namespace GSC.Api.Controllers.Master
             }
             paymentMilestoneDto.Id = paymentMilestone.Id;
 
-            if (paymentMilestoneDto.PatientCostIds != null)
-                _paymentMilestoneRepository.AddPaymentMilestoneVisitDetail(paymentMilestoneDto);
-
-
             return Ok(paymentMilestone.Id);
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _paymentMilestoneRepository.DeletePaymentMilestoneVisitDetail(id);
 
             var record = _paymentMilestoneRepository.Find(id);
 
@@ -80,15 +75,23 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository.Delete(record);
             _uow.Save();
 
+            // delete ant task Add amount in total Amount #1550
+            _paymentMilestoneRepository.UpdatePaybalAmount(record);
+
             return Ok();
         }
 
         [HttpPatch("{id}")]
         public IActionResult Active(int id)
         {
-            _paymentMilestoneRepository.ActivePaymentMilestoneVisitDetail(id);
             var record = _paymentMilestoneRepository.Find(id);
 
+            var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             if (record == null)
                 return NotFound();
             _paymentMilestoneRepository.Active(record);
@@ -97,10 +100,10 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
-        [HttpPost("GetVisitMilestoneAmount")]
-        public IActionResult GetVisitMilestoneAmount([FromBody] PatientMilestoneDto paymentMilestoneDto)
+        [HttpGet("GetVisitMilestoneAmount/{ParentProjectId:int}/{visitId}")]
+        public IActionResult GetVisitMilestoneAmount(int ParentProjectId,int visitId)
         {
-            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(paymentMilestoneDto);
+            var studyplan = _paymentMilestoneRepository.GetEstimatedMilestoneAmount(ParentProjectId,visitId);
             return Ok(studyplan);
         }
 

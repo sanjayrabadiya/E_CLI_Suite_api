@@ -78,4 +78,15 @@ namespace GSC.Data.Dto.Master
         public string Value { get; set; }
        
     }
+    public class DropDownTaskListforMilestoneDto : BaseDto
+    {
+        public string Value { get; set; }
+        public string Code { get; set; }
+        public string DependetTaskName { get; set; }
+        public object ScheduleStartDate { get; set; }
+        public object ScheduleEndDate { get; set; }
+        public object ActualStartDate { get; set; }
+        public object ActualEndDate { get; set; }
+        public bool InActive { get; set; }
+    }
 }

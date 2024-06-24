@@ -1,5 +1,6 @@
 ﻿
 using GSC.Data.Entities.Common;
+using GSC.Helper;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.CTMS
@@ -17,12 +18,9 @@ namespace GSC.Data.Dto.CTMS
 
         [Required(ErrorMessage = "Flg Type is required.")]
         public string BudgetFlgType { get; set; }
-
-        [Required(ErrorMessage = "Unit Type is required.")]
-        public int UnitId { get; set; }
-
-        [Required(ErrorMessage = "No Of Unit is required.")]
-        public int NoOfUnit { get; set; }
+        public int? UnitId { get; set; }
+        public int? NoOfUnit { get; set; }
+        public int? NoOfPatient { get; set; }
 
         [Required(ErrorMessage = "Rate is required.")]
         public decimal Rate { get; set; }
@@ -45,11 +43,12 @@ namespace GSC.Data.Dto.CTMS
         public int GlobleCurrencyId { get; set; }
         public string GlobleCurrencySymbol { get; set; }
         public string LocalCurrencySymbol { get; set; }
-        public string BudgetFlgType { get; set; }
+        public BudgetFlgType BudgetFlgType { get; set; }
         public string BudgetFlgTypeName { get; set; }
-        public int UnitId { get; set; }
+        public int? UnitId { get; set; }
         public string UnitType { get; set; }
-        public string NoOfUnit { get; set; }
+        public int? NoOfUnit { get; set; }
+        public int? NoOfPatient { get; set; }
         public string Rate { get; set; }
         public int Frequency { get; set; }
         public decimal? Total { get; set; }

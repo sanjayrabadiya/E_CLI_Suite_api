@@ -133,7 +133,7 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var taskResource = _studyPlanTaskResourceRepository.GetResourceInf(studyPlantaskId,resourceId);
+            var taskResource = _studyPlanTaskResourceRepository.GetResourceInf(studyplanId, resourceId);
             return Ok(taskResource);
         }
     }

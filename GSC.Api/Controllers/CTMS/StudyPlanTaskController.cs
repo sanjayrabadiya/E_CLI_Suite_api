@@ -76,7 +76,7 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
-            if (taskmasterDto.RefrenceType == RefrenceType.Sites)
+            if (taskmasterDto.RefrenceType == RefrenceType.Sites && taskmasterDto.Position == Position.None)
             {
                 var result = _studyPlanTaskRepository.AddSiteTask(taskmasterDto);
                 if (string.IsNullOrEmpty(result))
@@ -88,7 +88,7 @@ namespace GSC.Api.Controllers.CTMS
                 }
             }
 
-            if (taskmasterDto.RefrenceType == RefrenceType.Country)
+            if (taskmasterDto.RefrenceType == RefrenceType.Country && taskmasterDto.Position == Position.None)
             {
                 var result = _studyPlanTaskRepository.AddCountryTask(taskmasterDto);
                 if (string.IsNullOrEmpty(result))
@@ -138,7 +138,7 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
-            var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);          
+            var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             if (data != null)
             {
                 tastMaster.StartDate = data.StartDate;

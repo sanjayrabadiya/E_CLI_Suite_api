@@ -50,10 +50,6 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", "Creating Investigator PaymentMilestone failed on save.");
                 return BadRequest(ModelState);
             }
-            paymentMilestoneDto.Id = paymentMilestone.Id;
-
-            if (paymentMilestoneDto.PassThroughCostIds != null)
-                _paymentMilestoneRepository.AddPaymentMilestonePassThroughCostDetail(paymentMilestoneDto);
 
             return Ok(paymentMilestone.Id);
         }
@@ -61,8 +57,6 @@ namespace GSC.Api.Controllers.Master
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            _paymentMilestoneRepository.DeletePaymentMilestonePassThroughCostDetail(id);
-
             var record = _paymentMilestoneRepository.Find(id);
 
             if (record == null)
@@ -71,15 +65,21 @@ namespace GSC.Api.Controllers.Master
             _paymentMilestoneRepository.Delete(record);
             _uow.Save();
 
+            //Add by mitul-> delete ant task Add amount in total Amount #1550
+            _paymentMilestoneRepository.UpdatePaybalAmount(record);
             return Ok();
         }
 
         [HttpPatch("{id}")]
         public IActionResult Active(int id)
         {
-            _paymentMilestoneRepository.ActivePaymentMilestonePassThroughCostDetail(id);
             var record = _paymentMilestoneRepository.Find(id);
-
+            var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(record);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             if (record == null)
                 return NotFound();
             _paymentMilestoneRepository.Active(record);
