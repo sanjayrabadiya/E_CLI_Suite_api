@@ -853,7 +853,7 @@ namespace GSC.Respository.EmailSender
                 foreach (var item in toMails)
                 {
                     emailMessage.SendTo = item;
-                    _emailService.SendMail(emailMessage);
+                    _emailService.SendMailIWRS(emailMessage);
                 }
             }
         }
@@ -872,7 +872,7 @@ namespace GSC.Respository.EmailSender
                 foreach (var item in toMails)
                 {
                     emailMessage.SendTo = item;
-                    _emailService.SendMail(emailMessage);
+                    _emailService.SendMailIWRS(emailMessage);
                 }
             }
         }
