@@ -24,5 +24,6 @@ namespace GSC.Data.Entities.CTMS
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
         public StudyPlanTask StudyPlanTask { get; set; }
+        public List<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
     }
 }

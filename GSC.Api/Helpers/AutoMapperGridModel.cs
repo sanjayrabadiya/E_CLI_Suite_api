@@ -851,15 +851,19 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
                .ForMember(x => x.DateTypeResource, x => x.MapFrom(a => a.DateTypeResource.GetDescription()))
                .ForMember(x => x.StudyPlanTask, x => x.MapFrom(a => a.StudyPlanTask.TaskName))
+               .ForMember(x => x.IsInvoiceGenerated, x => x.MapFrom(a => a.ResourceMilestoneInvoice.Any(x => x.DeletedDate == null)))
               .ReverseMap();
             CreateMap<PatientMilestone, PatientMilestoneGridDto>()
                     .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
                     .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
                     .ForMember(x => x.PaymentTypePatient, x => x.MapFrom(a => a.PaymentTypePatient.GetDescription()))
+                    .ForMember(x => x.IsInvoiceGenerated, x => x.MapFrom(a => a.PatientMilestoneInvoice.Any(x => x.DeletedDate == null)))
                     .ReverseMap();
             CreateMap<PassthroughMilestone, PassthroughMilestoneGridDto>()
                    .ForMember(x => x.PassThroughCostActivity, x => x.MapFrom(a =>a.PassThroughCostActivity.ActivityName))
                     .ForMember(x => x.PaymentTypePassThrough, x => x.MapFrom(a => a.PaymentTypePassThrough.GetDescription()))
+                   .ForMember(x => x.PassThroughCostActivity, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+                   .ForMember(x => x.IsInvoiceGenerated, x => x.MapFrom(a => a.PassthroughMilestoneInvoice.Any(x => x.DeletedDate == null)))
                   .ReverseMap();
             CreateMap<BudgetPaymentFinalCost, BudgetPaymentFinalCostGridDto>()
                 .ForMember(x => x.MilestoneTypeName, x => x.MapFrom(a => a.MilestoneType.GetDescription()))
@@ -909,6 +913,10 @@ namespace GSC.Api.Helpers
            .ReverseMap();
 
             CreateMap<PaymentTerms, PaymentTermsGridDto>().ReverseMap();
+
+            CreateMap<PassthroughMilestoneInvoice, PassthroughMilestoneInvoiceGridDto>().ReverseMap();
+            CreateMap<PatientMilestoneInvoice, PatientMilestoneInvoiceGridDto>().ReverseMap();
+            CreateMap<ResourceMilestoneInvoice, ResourceMilestoneInvoiceGridDto>().ReverseMap();
         }
     }
 }
