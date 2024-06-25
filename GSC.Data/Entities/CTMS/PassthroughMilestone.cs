@@ -20,6 +20,7 @@ namespace GSC.Data.Entities.CTMS
         public int? PassThroughCostActivityId { get; set; }
         public Master.Project Project { get; set; }
         public PassThroughCostActivity PassThroughCostActivity { get; set; }
+        public List<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
 
     }
 }

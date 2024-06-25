@@ -48,6 +48,7 @@ using GSC.Respository.Project.StudyLevelFormSetup;
 using GSC.Respository.LabReportManagement;
 using GSC.Respository.IDVerificationSystem;
 using GSC.Respository.FirebaseNotification;
+using GSC.Data.Entities.CTMS;
 
 namespace GSC.Api.Helpers
 {
@@ -437,6 +438,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<ICtmsWorkflowApprovalRepository, CtmsWorkflowApprovalRepository>();
             services.AddScoped<ICtmsStudyPlanTaskCommentRepository, CtmsStudyPlanTaskCommentRepository>();
             services.AddScoped<IPaymentTermsRepository, PaymentTermsRepository>();
+            services.AddScoped<IPassthroughMilestoneInvoiceRepository, PassthroughMilestoneInvoiceRepository>();
+            services.AddScoped<IPatientMilestoneInvoiceRepository, PatientMilestoneInvoiceRepository>();
+            services.AddScoped<IResourceMilestoneInvoiceRepository, ResourceMilestoneInvoiceRepository>();
         }
     }
 }

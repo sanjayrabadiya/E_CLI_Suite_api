@@ -520,5 +520,8 @@ namespace GSC.Domain.Context
         public DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
         public DbSet<CtmsStudyPlanTaskComment> CtmsStudyPlanTaskComment { get; set; }
         public DbSet<PaymentTerms> PaymentTerms { get; set; }
+        public DbSet<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
+        public DbSet<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
+        public DbSet<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
     }
 }

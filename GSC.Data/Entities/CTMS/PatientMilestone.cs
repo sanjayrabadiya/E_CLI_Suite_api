@@ -21,5 +21,6 @@ namespace GSC.Data.Entities.CTMS
         public Master.Project Project { get; set; }
         public int? ProjectDesignVisitId { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
+        public List<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
     }
 }

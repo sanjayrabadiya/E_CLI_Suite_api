@@ -38,6 +38,7 @@ namespace GSC.Data.Dto.Master
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
         public string StudyPlanTask { get; set; }
+        public bool IsInvoiceGenerated { get; set; }
 
     }
 }
