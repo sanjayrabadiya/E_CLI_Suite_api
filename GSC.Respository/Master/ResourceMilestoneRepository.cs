@@ -194,7 +194,7 @@ namespace GSC.Respository.Master
                 (countryId == 0 || x.CountryId == countryId)).ProjectTo<ResourceMilestoneGridDto>(_mapper.ConfigurationProvider).AsEnumerable().Where(x => (x.DueDate != null ?
                  (cTMSPaymentDue == CTMSPaymentDue.Due && x.DueDate.Value.Date <= DateTime.Now.Date) ||
                  (cTMSPaymentDue == CTMSPaymentDue.CurrentDueDate && x.DueDate.Value.Date > DateTime.Now.Date && x.DueDate.Value.Date <= DateTime.Now.GetLastDateOfMonth().Date) ||
-                 (cTMSPaymentDue == CTMSPaymentDue.NextMonthDue && x.DueDate.Value.Date > DateTime.Now.AddMonths(1).GetFirstDateOfMonth().Date && x.DueDate.Value.Date <= DateTime.Now.AddMonths(1).GetLastDateOfMonth()) :
+                 (cTMSPaymentDue == CTMSPaymentDue.NextMonthDue && x.DueDate.Value.Date >= DateTime.Now.AddMonths(1).GetFirstDateOfMonth().Date && x.DueDate.Value.Date <= DateTime.Now.AddMonths(1).GetLastDateOfMonth()) :
                  false)).OrderByDescending(x => x.Id).ToList();
 
             paymentMilestoneData.ForEach(x =>
