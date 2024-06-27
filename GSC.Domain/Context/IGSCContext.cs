@@ -18,6 +18,7 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
+using GSC.Data.Entities.License;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
 using GSC.Data.Entities.Master;
@@ -468,5 +469,7 @@ namespace GSC.Domain.Context
         DbSet<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
         DbSet<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
         DbSet<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
+        DbSet<UserUUID> UserUUID { get; set; }
+        DbSet<LiecenceObj> LiecenceObj { get; set; }
     }
 }

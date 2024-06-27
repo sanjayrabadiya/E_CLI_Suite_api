@@ -178,8 +178,10 @@ namespace GSC.Respository.Screening
                     Update(screeningVisit);
                 }
                 _context.Save();
-                if (screeningTemplate != null)
-                    _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
+
+                // remove progress bar count
+                // if (screeningTemplate != null)
+                //    _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplate.Id);
             }
         }
 
@@ -552,8 +554,8 @@ namespace GSC.Respository.Screening
             return All.Include(x => x.ScreeningEntry)
                   .ThenInclude(x => x.Randomization)
                   .Where(x => x.ScreeningEntry.ProjectId == filters.SiteId
-               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
-               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignVisitId))
+               && (filters.SubjectIds.Length ==0 || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
+               && (filters.VisitIds.Length == 0 || filters.VisitIds.Contains(x.ProjectDesignVisitId))
                && x.Status == ScreeningVisitStatus.NotStarted && !x.IsNA)
                   .Select(x => new NAReportDto
                   {
@@ -572,8 +574,8 @@ namespace GSC.Respository.Screening
             return All.Include(x => x.ScreeningEntry)
                   .ThenInclude(x => x.Randomization)
                   .Where(x => x.ScreeningEntry.ProjectId == filters.SiteId
-               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
-               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignVisitId))
+               && (filters.SubjectIds.Length == 0 || filters.SubjectIds.Contains(x.ScreeningEntry.Id))
+               && (filters.VisitIds.Length == 0 || filters.VisitIds.Contains(x.ProjectDesignVisitId))
                && x.IsNA)
                   .Select(x => new NAReportDto
                   {

@@ -360,5 +360,22 @@ namespace GSC.Api.Controllers.UserMgt
             _userRepository.UpdateFirebaseToken(_jwtTokenAccesser.UserId, token);
             return Ok(1);
         }
+
+        [HttpPost("GetUUIDPatients")]
+        public IActionResult GetUUIDPatients([FromBody] PatientDto userDto)
+        {
+            return Ok(_userRepository.GetUUIDPatients(userDto));
+        }
+
+        [HttpPatch("ResetUUID/{id}")]
+        public IActionResult ResetUUID(int id)
+        {
+            var record = _userRepository.Find(id);
+
+            if (record == null)
+                return NotFound();
+            _userRepository.ResetUUID(id);
+            return Ok();
+        }
     }
 }
