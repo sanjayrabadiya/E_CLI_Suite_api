@@ -519,6 +519,7 @@ namespace GSC.Api.Helpers
             CreateMap<CtmsWorkflowApproval, CtmsWorkflowApprovalDto>().ReverseMap();
             CreateMap<CtmsStudyPlanTaskComment, CtmsStudyPlanTaskCommentDto>().ReverseMap();
             CreateMap<PaymentTerms, PaymentTermsDto>().ReverseMap();
+            CreateMap<SitePayment, SitePaymentDto>().ReverseMap();
         }
     }
 }

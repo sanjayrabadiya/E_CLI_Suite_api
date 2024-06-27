@@ -519,5 +519,6 @@ namespace GSC.Domain.Context
         public DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
         public DbSet<CtmsStudyPlanTaskComment> CtmsStudyPlanTaskComment { get; set; }
         public DbSet<PaymentTerms> PaymentTerms { get; set; }
+        public DbSet<SitePayment> SitePayment { get; set; }      
     }
 }
