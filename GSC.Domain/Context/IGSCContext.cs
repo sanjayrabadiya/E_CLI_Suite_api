@@ -468,5 +468,6 @@ namespace GSC.Domain.Context
         DbSet<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
         DbSet<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
         DbSet<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
+        DbSet<SitePayment> SitePayment { get; set; }
     }
 }

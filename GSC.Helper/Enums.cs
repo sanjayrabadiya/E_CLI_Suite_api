@@ -1262,4 +1262,9 @@ namespace GSC.Helper
         [Description("Next Month Upcoming")] NextMonthDue = 2,
         [Description("Current Due Date")] CurrentDueDate = 3
     }
+    public enum BudgetPaymentType : short
+    {
+        [Description("Patient")] Patient = 1,
+        [Description("Pass Through")] PassThrough = 2
+    }
 }
