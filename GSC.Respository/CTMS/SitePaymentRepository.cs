@@ -3,10 +3,12 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
+using DocumentFormat.OpenXml.Wordprocessing;
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using GSC.Shared.Extension;
 using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
@@ -28,19 +30,54 @@ namespace GSC.Respository.Master
 
             if (studyId != 0 && siteId != 0)
             {
-                SitePaymentData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == studyId) && x.SiteId == siteId).
-                             ProjectTo<SitePaymentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+               var sitePayment = _context.SitePayment
+                    .Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == studyId) && x.SiteId == siteId)
+                    .Select(sp => new SitePaymentGridDto
+                     {
+                         ProjectId = sp.ProjectId,
+                         ProjectName = sp.Project.ProjectName,
+                         SiteId = sp.SiteId,
+                         CountryId = sp.CountryId,
+                         CountryName = sp.Country.CountryName,
+                         BudgetPaymentTypeID = sp.BudgetPaymentType,
+                         BudgetPaymentType = sp.BudgetPaymentType.GetDescription()
+                     }).Distinct().ToList();
+
+                sitePayment.ForEach(x =>
+                {
+                    SitePaymentData.Add(x);
+                });
             }
-            else 
+            else
             {
-                SitePaymentData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == studyId)).
-                             ProjectTo<SitePaymentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+                var sitePayment = _context.SitePayment.
+                     Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (x.ProjectId == studyId))
+                    .Select(sp => new SitePaymentGridDto
+                    {
+                        ProjectId = sp.ProjectId,
+                        ProjectName = sp.Project.ProjectName,
+                        SiteId = sp.SiteId,
+                        CountryId = sp.CountryId,
+                        CountryName = sp.Country.CountryName,
+                        BudgetPaymentTypeID = sp.BudgetPaymentType,
+                        BudgetPaymentType = sp.BudgetPaymentType.GetDescription()
+                    }).Distinct().ToList();
+
+                sitePayment.ForEach(x =>
+                {
+                    SitePaymentData.Add(x);
+                });
             }
 
-            SitePaymentData.ForEach(x =>
-            {
-                x.SiteName = _context.Project.Include(s => s.ManageSite).Where(w => w.Id == x.SiteId).Select(d => d.ProjectCode == null ? d.ManageSite.SiteName : d.ProjectCode).FirstOrDefault();
-            });
+            foreach (var item in SitePaymentData)
+            { 
+                var sitePaymentChild = All.Where(s => (isDeleted ? s.DeletedDate != null : s.DeletedDate == null) && s.ProjectId == item.ProjectId && s.SiteId == item.SiteId && s.CountryId == item.CountryId && s.BudgetPaymentType == item.BudgetPaymentTypeID).
+                             ProjectTo<SitePaymentGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+                item.SiteName = _context.Project.Include(s => s.ManageSite).Where(w => w.Id == item.SiteId).Select(d => d.ProjectCode == null ? d.ManageSite.SiteName : d.ProjectCode).FirstOrDefault();
+
+                item.SitePaymentChildGridDto = sitePaymentChild;
+            }
             return SitePaymentData;
         }
         public List<DropDownDto> GetVisitDropDown(int parentProjectId, int siteId)

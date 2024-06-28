@@ -17,6 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public int? NoOfPatient { get; set; }    
         public int? PassThroughCostActivityId { get; set; }
         public decimal? PassThroughTotalRate { get; set; }
+        public BudgetFlgType? BudgetFlgType { get; set; }
         public int? UnitId { get; set; }
         public int? NoOfUnitPatient { get; set; }
         public int? Frequency { get; set; }

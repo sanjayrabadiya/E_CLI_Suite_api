@@ -38,18 +38,20 @@ namespace GSC.Data.Dto.Master
         public string SiteName { get; set; }
         public int? CountryId { get; set; }
         public string CountryName { get; set; }
+        public BudgetPaymentType BudgetPaymentTypeID { get; set; }
         public string BudgetPaymentType { get; set; }
         public string Visit { get; set; }
         public decimal? VisitTotal { get; set; }
         public int? NoOfPatient { get; set; }
         public string Activity { get; set; }
         public decimal? PassThroughTotalRate { get; set; }
+        public string BudgetFlgType { get; set; }
         public string UnitName { get; set; }
         public int? NoOfUnitPatient { get; set; }
         public int? Frequency { get; set; }
         public decimal? PayableAmount { get; set; }
         public string Remark { get; set; }
-        //public List<SitePaymentGridDto?> SitePaymentChildGridDto { get; set; }
+        public List<SitePaymentGridDto>? SitePaymentChildGridDto { get; set; }
 
     }
 }
