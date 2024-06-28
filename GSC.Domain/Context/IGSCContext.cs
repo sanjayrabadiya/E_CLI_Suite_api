@@ -469,11 +469,6 @@ namespace GSC.Domain.Context
         DbSet<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
         DbSet<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
         DbSet<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
-        DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
-        DbSet<CtmsApprovalUsers> CtmsApprovalUsers { get; set; }
-        DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
-        DbSet<CtmsStudyPlanTaskComment> CtmsStudyPlanTaskComment { get; set; }
-        DbSet<PaymentTerms> PaymentTerms { get; set; }
         DbSet<UserUUID> UserUUID { get; set; }
         DbSet<LiecenceObj> LiecenceObj { get; set; }
     }
