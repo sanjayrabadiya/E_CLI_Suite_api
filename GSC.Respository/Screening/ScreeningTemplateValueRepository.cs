@@ -1515,5 +1515,28 @@ namespace GSC.Respository.Screening
             }
             _context.Save();
         }
+
+        public bool CheckOldValue(string originalString, CollectionSources? collectionSource)
+        {
+            if (collectionSource == CollectionSources.Table)
+            {
+                string[] parts = originalString.Split('_');
+                if (parts.Length >= 3)
+                {
+                    // Remove the last two elements
+                    string modifiedString = string.Join("_", parts.Take(parts.Length - 2));
+                    if (modifiedString.Trim().Length == 0)
+                        return false;
+                    return true;
+                }
+                return false;
+            }
+            else
+            {
+                if (String.IsNullOrWhiteSpace(originalString))
+                    return false;
+                return true;
+            }
+        }
     }
 }
