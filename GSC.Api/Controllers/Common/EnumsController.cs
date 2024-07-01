@@ -1303,5 +1303,18 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(data);
         }
+        [HttpGet]
+        [Route("GetBudgetPaymentTypeDataListDropDown")]
+        public IActionResult GetBudgetPaymentTypeDataListDropDown()
+        {
+            var centri = Enum.GetValues(typeof(BudgetPaymentType))
+                .Cast<BudgetPaymentType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
+        }
     }
 }

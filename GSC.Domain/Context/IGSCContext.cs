@@ -471,5 +471,6 @@ namespace GSC.Domain.Context
         DbSet<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
         DbSet<UserUUID> UserUUID { get; set; }
         DbSet<LiecenceObj> LiecenceObj { get; set; }
+        DbSet<SitePayment> SitePayment { get; set; }
     }
 }

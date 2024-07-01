@@ -917,6 +917,16 @@ namespace GSC.Api.Helpers
             CreateMap<PassthroughMilestoneInvoice, PassthroughMilestoneInvoiceGridDto>().ReverseMap();
             CreateMap<PatientMilestoneInvoice, PatientMilestoneInvoiceGridDto>().ReverseMap();
             CreateMap<ResourceMilestoneInvoice, ResourceMilestoneInvoiceGridDto>().ReverseMap();
+           CreateMap<SitePayment, SitePaymentGridDto>()
+                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                .ForMember(x => x.BudgetPaymentType, x => x.MapFrom(a => a.BudgetPaymentType.GetDescription()))
+                .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+                .ForMember(x => x.Activity, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+                .ForMember(x => x.BudgetFlgType, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
+                .ForMember(x => x.UnitName, x => x.MapFrom(a => a.Unit.UnitName))
+                
+        .ReverseMap();
         }
     }
 }
