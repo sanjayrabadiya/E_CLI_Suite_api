@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GSC.Data.Entities.Common;
+using GSC.Data.Entities.Screening;
 using GSC.Helper;
 using GSC.Shared.Extension;
 
@@ -41,6 +42,7 @@ namespace GSC.Data.Dto.Report
         public DateTime? ReviewedOn { get; set; }
         // added for dynamic column 04/06/2023
         public List<WorkFlowReview> WorkFlowReviewList { get; set; }
+        public List<ScreeningTemplateReview> ScreeningTemplateReview { get; set; }
     }
     // added for dynamic column 04/06/2023
     public class WorkFlowReview

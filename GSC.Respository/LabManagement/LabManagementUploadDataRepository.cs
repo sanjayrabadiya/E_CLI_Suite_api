@@ -308,8 +308,8 @@ namespace GSC.Respository.LabManagement
                                             Note = "Added by Lab management"
                                         };
                                         _screeningTemplateValueAuditRepository.Save(aduit);
-
-                                        _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
+                                        // remove progress bar count
+                                        // _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
 
                                     }
                                 }
@@ -352,7 +352,8 @@ namespace GSC.Respository.LabManagement
                                     };
                                     _screeningTemplateValueAuditRepository.Save(aduit);
 
-                                    _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
+                                    // remove progress bar count 
+                                    // _screeningProgress.GetScreeningProgress(_context.ScreeningEntry.Where(x => x.Randomization.ScreeningNumber == r.ScreeningNo).Select(x => x.Id).FirstOrDefault(), obj.ScreeningTemplateId);
 
                                     // send email to user
                                     if (r.AbnoramalFlag.ToString().ToLower() != "n" && r.AbnoramalFlag != ""
