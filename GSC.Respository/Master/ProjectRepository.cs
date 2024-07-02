@@ -28,6 +28,8 @@ using GSC.Shared.Extension;
 using GSC.Data.Entities.Project.Generalconfig;
 using GSC.Data.Entities.Attendance;
 using System.Text;
+using GSC.Data.Entities.License;
+using Newtonsoft.Json;
 
 namespace GSC.Respository.Master
 {
@@ -1598,5 +1600,66 @@ namespace GSC.Respository.Master
             }
         }
 
+        public List<ProjectDropDown> GetParentStaticProjectDropDownWithLicense()
+        {
+            //var projectList = _projectRightRepository.GetProjectRightIdList();
+            var projectList = _projectRightRepository.GetParentProjectRightIdList();
+
+            if (projectList == null || projectList.Count == 0) return null;
+
+            // get study  rights from license object
+            var licenseStudy = ValidateStudyRights();
+
+            return All.Where(x =>
+                    (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                    && licenseStudy.ToList().Contains(x.ProjectCode.ToLower())
+                    && x.ParentProjectId == null && x.IsStatic == true
+                    && x.ProjectCode != null
+                    && projectList.Contains(x.Id))
+                .Select(c => new ProjectDropDown
+                {
+                    Id = c.Id,
+                    Value = c.ProjectCode,
+                    Code = c.ProjectCode,
+                    IsStatic = c.IsStatic,
+                    IsSendEmail = c.IsSendEmail,
+                    IsSendSMS = c.IsSendSMS,
+                    ParentProjectId = c.ParentProjectId ?? c.Id,
+                    IsDeleted = c.DeletedDate != null
+                    // add where condition for bypass delete study on 07/06/2023 by vipul
+                }).Where(q => q.IsDeleted == false).Distinct().OrderBy(o => o.Value).ToList();
+        }
+
+        //Validate study rigths
+        public List<string> ValidateStudyRights()
+        {
+            List<string> strobj = new List<string>();
+            try
+            {
+                var licenseobj = _context.LiecenceObj.FirstOrDefault();
+                if (licenseobj != null)
+                {
+                    var license = JsonConvert.DeserializeObject<LiecenceObject>(licenseobj.Object);
+                    if (license.StudyLevel.Count() > 0)
+                    {
+                        var study = license.StudyLevel.ToList();
+
+                        foreach (var item in study)
+                        {
+                            if (item != null)
+                                strobj.Add(item.StudyCode);
+                        }
+                        return strobj;
+                    }
+                    return null;
+                }
+                return null;
+            }
+            catch (System.Exception ex)
+            {
+                return null;
+            }
+
+        }
     }
 }
