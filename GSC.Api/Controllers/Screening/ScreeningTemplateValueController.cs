@@ -192,14 +192,16 @@ namespace GSC.Api.Controllers.Screening
 
             var screeningTemplateValue = _mapper.Map<ScreeningTemplateValue>(screeningTemplateValueDto);
 
+            var checkTable = _screeningTemplateValueRepository.CheckOldValue(screeningTemplateValueDto.OldValue, screeningTemplateValueDto.CollectionSource);
+
             var aduit = new ScreeningTemplateValueAudit
             {
                 ScreeningTemplateValueId = screeningTemplateValue.Id,
                 Value = value,
                 Note = screeningTemplateValueDto.IsDeleted ? "Clear Data" : null,
                 OldValue = screeningTemplateValueDto.OldValue,
-                ReasonOth = _jwtTokenAccesser.RoleId == 2 ? null : _jwtTokenAccesser.GetHeader("audit-reason-oth"),
-                ReasonId = _jwtTokenAccesser.RoleId == 2 ? null : int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"))
+                ReasonOth = checkTable ? _jwtTokenAccesser.RoleId == 2 ? null : _jwtTokenAccesser.GetHeader("audit-reason-oth") : null,
+                ReasonId = checkTable && _jwtTokenAccesser.GetHeader("audit-reason-id") != null ? _jwtTokenAccesser.RoleId == 2 ? null : int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id")) : null
             };
             _screeningTemplateValueAuditRepository.Save(aduit);
 
