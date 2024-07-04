@@ -442,6 +442,9 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPatientMilestoneInvoiceRepository, PatientMilestoneInvoiceRepository>();
             services.AddScoped<IResourceMilestoneInvoiceRepository, ResourceMilestoneInvoiceRepository>();
             services.AddScoped<ISitePaymentRepository, SitePaymentRepository>();
+            services.AddScoped<ISiteContractRepository, SiteContractRepository>();
+            services.AddScoped<IPatientSiteContractRepository, PatientSiteContractRepository>();
+            services.AddScoped<IPassthroughSiteContractRepository, PassthroughSiteContractRepository>();
         }
     }
 }

@@ -198,7 +198,7 @@ namespace GSC.Respository.CTMS
         {
             var patientcostproced = new List<PatientCostGridData>();
             var patientcostprocedTemp = new List<PatientCostGridData>();
-            var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x=> x.DeletedBy == null && x.ProjectId == studyId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 1  ).Select(val => val.Key).ToList();
+            var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x=> x.DeletedBy == null && x.ProjectId == studyId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 0  ).Select(val => val.Key).ToList();
            for (var i = 0; i < duplicates.Count; i++)
             {
                 patientcostprocedTemp = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == studyId && x.ProcedureId != null && x.Procedure.CurrencyId == duplicates[i]).
