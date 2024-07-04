@@ -3,8 +3,14 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
+using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -14,13 +20,17 @@ namespace GSC.Api.Controllers.Master
         private readonly IMapper _mapper;
         private readonly IPatientMilestoneInvoiceRepository _patientMilestoneInvoiceRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public PatientMilestoneInvoiceController(IPatientMilestoneInvoiceRepository patientMilestoneInvoiceRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository)
         {
             _patientMilestoneInvoiceRepository = patientMilestoneInvoiceRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         // GET: api/<controller>
@@ -61,6 +71,13 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", "Creating Patient Milestone Invoice failed on save.");
                 return BadRequest(ModelState);
             }
+
+            if (patientMilestoneInvoiceDto.File?.Base64?.Length > 0 && patientMilestoneInvoiceDto.File?.Base64 != null)
+            {
+                patientMilestoneInvoice.FilePath = DocumentService.SaveUploadDocument(patientMilestoneInvoiceDto.File, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "PatientMilestoneInvoice");
+            }
+
+            _uow.Save();
             return Ok(patientMilestoneInvoice.Id);
         }
 
@@ -78,6 +95,12 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+
+            if (patientMilestoneInvoiceDto.File?.Base64?.Length > 0 && patientMilestoneInvoiceDto.File?.Base64 != null)
+            {
+                patientMilestoneInvoice.FilePath = DocumentService.SaveUploadDocument(patientMilestoneInvoiceDto.File, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "PatientMilestoneInvoice");
+            }
+
             _patientMilestoneInvoiceRepository.AddOrUpdate(patientMilestoneInvoice);
 
             if (_uow.Save() <= 0)
@@ -128,6 +151,19 @@ namespace GSC.Api.Controllers.Master
         {
             var record = _patientMilestoneInvoiceRepository.GetPatientMilestoneInvoiceById(milestoneId);
             return Ok(record);
+        }
+
+        [HttpGet]
+        [Route("DownloadDocument/{id}")]
+        public IActionResult DownloadDocument(int id)
+        {
+            var file = _patientMilestoneInvoiceRepository.Find(id);
+            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), file.FilePath);
+            if (System.IO.File.Exists(filepath))
+            {
+                return File(System.IO.File.OpenRead(filepath), ObjectExtensions.GetMIMEType(file.FileName), file.FileName);
+            }
+            return NotFound();
         }
     }
 }
