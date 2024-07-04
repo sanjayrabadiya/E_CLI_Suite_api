@@ -17,5 +17,7 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? PaymentDueDate { get; set; }
         public string PaymentDescription { get; set; }
         public bool IsPaymentRecived { get; set; }
+        public string FilePath { get; set; }
+        public string FileName { get; set; }
     }
 }

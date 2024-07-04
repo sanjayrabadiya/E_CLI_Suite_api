@@ -1,4 +1,5 @@
 ﻿using GSC.Data.Entities.Common;
+using GSC.Shared.DocumentService;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,9 @@ namespace GSC.Data.Dto.CTMS
         public DateTime? PaymentDueDate { get; set; }
         public string PaymentDescription { get; set; }
         public bool IsPaymentRecived { get; set; }
+        public FileModel File { get; set; }
+        public string FilePath { get; set; }
+        public string FileName { get; set; }
     }
 
     public class PassthroughMilestoneInvoiceGridDto : BaseAuditDto

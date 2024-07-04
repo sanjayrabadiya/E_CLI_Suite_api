@@ -3,9 +3,15 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Helper;
+using GSC.Respository.Configuration;
 using GSC.Respository.CTMS;
+using GSC.Shared.DocumentService;
+using GSC.Shared.Extension;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 
 namespace GSC.Api.Controllers.Master
 {
@@ -15,13 +21,17 @@ namespace GSC.Api.Controllers.Master
         private readonly IMapper _mapper;
         private readonly IResourceMilestoneInvoiceRepository _resourceMilestoneInvoiceRepository;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
+        private readonly IUploadSettingRepository _uploadSettingRepository;
 
         public ResourceMilestoneInvoiceController(IResourceMilestoneInvoiceRepository resourceMilestoneInvoiceRepository,
-            IUnitOfWork uow, IMapper mapper)
+            IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository)
         {
             _resourceMilestoneInvoiceRepository = resourceMilestoneInvoiceRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
+            _uploadSettingRepository = uploadSettingRepository;
         }
 
         // GET: api/<controller>
@@ -62,6 +72,14 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", "Creating Resource Milestone Invoice failed on save.");
                 return BadRequest(ModelState);
             }
+
+            if (resourceMilestoneInvoiceDto.File?.Base64?.Length > 0 && resourceMilestoneInvoiceDto.File?.Base64 != null)
+            {
+                resourceMilestoneInvoice.FilePath = DocumentService.SaveUploadDocument(resourceMilestoneInvoiceDto.File, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "ResourceMilestoneInvoice");
+            }
+
+            _uow.Save();
+
             return Ok(resourceMilestoneInvoice.Id);
         }
 
@@ -79,6 +97,12 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+
+            if (resourceMilestoneInvoiceDto.File?.Base64?.Length > 0 && resourceMilestoneInvoiceDto.File?.Base64 != null)
+            {
+                resourceMilestoneInvoice.FilePath = DocumentService.SaveUploadDocument(resourceMilestoneInvoiceDto.File, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "ResourceMilestoneInvoice");
+            }
+
             _resourceMilestoneInvoiceRepository.AddOrUpdate(resourceMilestoneInvoice);
 
             if (_uow.Save() <= 0)
@@ -129,6 +153,19 @@ namespace GSC.Api.Controllers.Master
         {
             var record = _resourceMilestoneInvoiceRepository.GetResourceMilestoneInvoiceById(milestoneId);
             return Ok(record);
+        }
+
+        [HttpGet]
+        [Route("DownloadDocument/{id}")]
+        public IActionResult DownloadDocument(int id)
+        {
+            var file = _resourceMilestoneInvoiceRepository.Find(id);
+            var filepath = Path.Combine(_uploadSettingRepository.GetDocumentPath(), file.FilePath);
+            if (System.IO.File.Exists(filepath))
+            {
+                return File(System.IO.File.OpenRead(filepath), ObjectExtensions.GetMIMEType(file.FileName), file.FileName);
+            }
+            return NotFound();
         }
     }
 }
