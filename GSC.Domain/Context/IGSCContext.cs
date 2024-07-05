@@ -472,5 +472,8 @@ namespace GSC.Domain.Context
         DbSet<UserUUID> UserUUID { get; set; }
         DbSet<LiecenceObj> LiecenceObj { get; set; }
         DbSet<SitePayment> SitePayment { get; set; }
+        DbSet<SiteContract> SiteContract { get; set; }
+        DbSet<PatientSiteContract> PatientSiteContract { get; set; }
+        DbSet<PassthroughSiteContract> PassthroughSiteContract { get; set; }
     }
 }

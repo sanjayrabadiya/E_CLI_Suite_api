@@ -523,6 +523,9 @@ namespace GSC.Api.Helpers
             CreateMap<PatientMilestoneInvoice, PatientMilestoneInvoiceDto>().ReverseMap();
             CreateMap<ResourceMilestoneInvoice, ResourceMilestoneInvoiceDto>().ReverseMap();
             CreateMap<SitePayment, SitePaymentDto>().ReverseMap();
+            CreateMap<SiteContract, SiteContractDto>().ReverseMap();
+            CreateMap<PatientSiteContract, PatientSiteContractDto>().ReverseMap();
+            CreateMap<PassthroughSiteContract, PassthroughSiteContractDto>().ReverseMap();
         }
     }
 }

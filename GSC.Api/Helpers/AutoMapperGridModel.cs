@@ -927,6 +927,21 @@ namespace GSC.Api.Helpers
                 .ForMember(x => x.UnitName, x => x.MapFrom(a => a.Unit.UnitName))
                 
         .ReverseMap();
+
+        CreateMap<SiteContract, SiteContractGridDto>()
+           .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+           .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+        .ReverseMap();
+
+        CreateMap<PatientSiteContract, PatientSiteContractGridDto>()
+           .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+           .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
+        .ReverseMap();
+
+        CreateMap<PassthroughSiteContract, PassthroughSiteContractGridDto>()
+           .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+           .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
+        .ReverseMap();
         }
     }
 }
