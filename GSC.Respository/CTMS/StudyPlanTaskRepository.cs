@@ -1069,8 +1069,10 @@ namespace GSC.Respository.CTMS
             var sites = _projectRepository.All.Where(x =>
                      (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
                      && x.DeletedDate == null && x.ParentProjectId == project.ProjectId
-                     && projectList.Any(c => c == x.Id)).GroupBy(g => g.CountryId)
-                     .Select(s => s.First(x => x.CountryId == s.Key)).ToList();
+                     && projectList.Any(c => c == x.Id))
+                     .Include(i => i.ManageSite.City.State)
+                     .GroupBy(g => g.ManageSite.City.State.CountryId)
+                     .Select(s => s.First(x => x.ManageSite.City.State.CountryId == s.Key)).ToList();
 
             if (sites.Count <= 0)
             {
@@ -1082,7 +1084,7 @@ namespace GSC.Respository.CTMS
                 taskmasterDto.Id = 0;
                 var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
                 tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
-                tastMaster.CountryId = plan.CountryId;
+                tastMaster.CountryId = plan.ManageSite.City.State.CountryId;
                 tastMaster.ProjectId = plan.Id;
                 tastMaster.StudyPlanId = taskmasterDto.StudyPlanId;
                 tastMaster.TaskOrder = UpdateTaskOrder(taskmasterDto);
