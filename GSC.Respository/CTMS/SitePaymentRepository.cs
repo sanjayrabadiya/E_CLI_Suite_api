@@ -55,7 +55,7 @@ namespace GSC.Respository.Master
                     .Select(sp => new SitePaymentGridDto
                     {
                         ProjectId = sp.ProjectId,
-                        ProjectName = sp.Project.ProjectName,
+                        ProjectName = sp.Project.ProjectCode,
                         SiteId = sp.SiteId,
                         CountryId = sp.CountryId,
                         CountryName = sp.Country.CountryName,
