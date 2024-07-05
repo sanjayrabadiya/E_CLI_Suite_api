@@ -403,6 +403,7 @@ namespace GSC.Api.Controllers.Volunteer
             return Ok(_volunteerRepository.GetVolunteerDropDown());
         }
 
+        [HttpGet]
         public dynamic GetIdentification(dynamic obj, bool isFromAdd)
         {
             int iIndex = 0;
