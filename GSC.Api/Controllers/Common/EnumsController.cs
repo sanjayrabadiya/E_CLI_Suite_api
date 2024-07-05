@@ -1224,6 +1224,8 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+
+        [HttpGet]
         [Route("GetPaymentMilestoneType")]
         public IActionResult GetPaymentMilestoneType()
         {
