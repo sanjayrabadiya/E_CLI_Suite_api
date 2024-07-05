@@ -358,6 +358,8 @@ namespace GSC.Api.Controllers.Screening
             }
             return Ok();
         }
+
+        [HttpGet]
         [Route("GetGenericSubjectByProjecId/{projectId}")]
         public IActionResult GetGenericSubjectByProjecId(int projectId)
         {
