@@ -7,6 +7,7 @@ namespace GSC.Respository.Master
 {
     public interface IPatientSiteContractRepository : IGenericRepository<PatientSiteContract>
     {
+        string Duplicate(PatientSiteContractDto SiteContractDto);
         IList<PatientSiteContractGridDto> GetPatientSiteContractList(bool isDeleted, int siteContractId);
     }
 }

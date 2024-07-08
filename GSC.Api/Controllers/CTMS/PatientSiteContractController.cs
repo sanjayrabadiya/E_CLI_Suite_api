@@ -48,6 +48,12 @@ namespace GSC.Api.Controllers.Master
             patientSiteContractDto.Id = 0;
 
             var patientSiteContract = _mapper.Map<PatientSiteContract>(patientSiteContractDto);
+            var validate = _patientSiteContractRepository.Duplicate(patientSiteContractDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _patientSiteContractRepository.Add(patientSiteContract);
             if (_uow.Save() <= 0)
             {
