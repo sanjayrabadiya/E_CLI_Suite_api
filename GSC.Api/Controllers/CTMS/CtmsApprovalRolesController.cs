@@ -88,12 +88,6 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var ctmsApprovalWorkFlow = _mapper.Map<CtmsApprovalRoles>(ctmsApprovalWorkFlowDto);
-            //var validate = _ctmsApprovalRolesRepository.Duplicate(ctmsApprovalWorkFlowDto);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
 
             ctmsApprovalWorkFlow.IpAddress = _jwtTokenAccesser.IpAddress;
             ctmsApprovalWorkFlow.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
