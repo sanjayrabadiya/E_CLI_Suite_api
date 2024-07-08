@@ -59,7 +59,6 @@ namespace GSC.Api.Controllers.CTMS
         {
             if (id <= 0) return BadRequest();
             var task = _context.StudyPlanTask.Include(s => s.StudyPlan).ThenInclude(b => b.Project).Include(c => c.Country).Where(e => e.Id == id && e.DeletedBy == null).FirstOrDefault();
-            /*_studyPlanTaskRepository.AllIncluding(s=>s.StudyPlan).in;*/
             var taskDto = _mapper.Map<StudyPlanTaskDto>(task);
 
             var taskDate = _studyPlanTaskRepository.GetChildStartEndDate(id);
@@ -300,11 +299,6 @@ namespace GSC.Api.Controllers.CTMS
             var task = _studyPlanTaskRepository.FindByInclude(x => (x.Id == data.Id && x.DependentTaskId == null) || (x.Id == data.DependentTaskId && x.DependentTaskId == data.Id)).ToList();
             if (task.Count > 0)
             {
-                //if (task.Exists(s => s.Id == data.DependentTaskId))
-                //{
-                //    ModelState.AddModelError("Message", "This Task All Ready PreApproval");
-                //    return BadRequest(ModelState);
-                //}
                 foreach (var item in task)
                 {
                     var tastMaster = _mapper.Map<StudyPlanTask>(item);
@@ -348,7 +342,6 @@ namespace GSC.Api.Controllers.CTMS
             if (data.Id <= 0) return BadRequest();
 
             var tastMaster = _studyPlanTaskRepository.Find(data.Id);
-            //var tastMaster = _mapper.Map<StudyPlanTask>(record);
             if (data.FileModel?.Base64?.Length > 0)
             {
                 DocumentService.RemoveFile(_uploadSettingRepository.GetDocumentPath(), tastMaster.DocumentPath);

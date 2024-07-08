@@ -72,22 +72,17 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var lstStudyPlan = new List<StudyPlanDto>();
             lstStudyPlan.Add(studyplanDto);
-
-            //var TaskMaster = _context.RefrenceTypes.Include(d => d.TaskMaster).Where(x => x.TaskMaster.TaskTemplateId == studyplanDto.TaskTemplateId && x.DeletedDate == null).Any(x => x.RefrenceType == Helper.RefrenceType.Sites);
-            //if (TaskMaster)
-            //{
-                var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == studyplanDto.ProjectId).ToList();
-                sites.ForEach(s =>
-                {
-                    var data = new StudyPlanDto();
-                    data.StartDate = studyplanDto.StartDate;
-                    data.EndDate = studyplanDto.EndDate;
-                    data.ProjectId = s.Id;
-                    data.TaskTemplateId = studyplanDto.TaskTemplateId;
-                    data.CurrencyId = studyplanDto.CurrencyId;
-                    lstStudyPlan.Add(data);
-               });
-            //}
+            var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == studyplanDto.ProjectId).ToList();
+            sites.ForEach(s =>
+            {
+                var data = new StudyPlanDto();
+                data.StartDate = studyplanDto.StartDate;
+                data.EndDate = studyplanDto.EndDate;
+                data.ProjectId = s.Id;
+                data.TaskTemplateId = studyplanDto.TaskTemplateId;
+                data.CurrencyId = studyplanDto.CurrencyId;
+                lstStudyPlan.Add(data);
+            });
 
             foreach (var item in lstStudyPlan)
             {
