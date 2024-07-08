@@ -26,5 +26,14 @@ namespace GSC.Respository.Master
             return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SiteContractId == siteContractId).
                  ProjectTo<PatientSiteContractGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+        public string Duplicate(PatientSiteContractDto patientSiteContractDto)
+        {
+            if (All.Any(x => x.Id != patientSiteContractDto.Id && x.SiteContractId == patientSiteContractDto.SiteContractId && x.ProjectDesignVisitId == patientSiteContractDto.ProjectDesignVisitId && x.DeletedDate == null))
+            {
+                return "Duplicate Vitis";
+            }
+            return "";
+
+        }
     }
 }

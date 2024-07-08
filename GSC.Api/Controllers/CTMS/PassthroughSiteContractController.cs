@@ -49,6 +49,12 @@ namespace GSC.Api.Controllers.Master
             SiteContractDto.Id = 0;
 
             var siteContract = _mapper.Map<PassthroughSiteContract>(SiteContractDto);
+            var validate = _passthroughSiteContractRepository.Duplicate(SiteContractDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _passthroughSiteContractRepository.Add(siteContract);
             if (_uow.Save() <= 0)
             {

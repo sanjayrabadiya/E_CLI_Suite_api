@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using GSC.Common.GenericRespository;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 
@@ -12,5 +13,6 @@ namespace GSC.Respository.Master
         List<decimal> GetVisitAmount(int parentProjectId, int siteId, int visitId);
         List<DropDownDto> GetPassThroughCostActivity(int projectId, int siteId);
         List<decimal> GetPassthroughTotalAmount(int parentProjectId, int siteId, int passThroughCostActivityId);
+        string Duplicate(SitePaymentDto sitePaymentDto);
     }
 }
