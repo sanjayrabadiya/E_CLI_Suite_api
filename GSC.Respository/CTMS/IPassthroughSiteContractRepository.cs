@@ -8,5 +8,6 @@ namespace GSC.Respository.Master
     public interface IPassthroughSiteContractRepository : IGenericRepository<PassthroughSiteContract>
     {
         IList<PassthroughSiteContractGridDto> GetPassthroughSiteContractList(bool isDeleted, int siteContractId);
+        string Duplicate(PassthroughSiteContractDto PassthroughSiteContractDto);
     }
 }

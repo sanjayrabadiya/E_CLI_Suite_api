@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
+using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Respository.Master;
@@ -72,6 +73,12 @@ namespace GSC.Api.Controllers.Master
             paymentMilestoneDto.Id = 0;
 
             var paymentMilestone = _mapper.Map<SitePayment>(paymentMilestoneDto);
+            var validate = _sitePaymentRepository.Duplicate(paymentMilestoneDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
             _sitePaymentRepository.Add(paymentMilestone);
             if (_uow.Save() <= 0)
             {

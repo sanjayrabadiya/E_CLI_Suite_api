@@ -26,5 +26,13 @@ namespace GSC.Respository.Master
             return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.SiteContractId == siteContractId).
                 ProjectTo<PassthroughSiteContractGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+        public string Duplicate(PassthroughSiteContractDto passthroughSiteContractDto)
+        {
+            if (All.Any(x => x.Id != passthroughSiteContractDto.Id && x.SiteContractId == passthroughSiteContractDto.SiteContractId && x.PassThroughCostActivityId == passthroughSiteContractDto.PassThroughCostActivityId && x.DeletedDate == null))
+            {
+                return "Duplicate Pass Through";
+            }
+            return "";
+        }
     }
 }

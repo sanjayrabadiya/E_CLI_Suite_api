@@ -57,6 +57,13 @@ namespace GSC.Api.Controllers.Master
             SiteContractDto.Id = 0;
 
             var siteContract = _mapper.Map<SiteContract>(SiteContractDto);
+            var validate = _siteContractRepository.Duplicate(SiteContractDto);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
+
             if (SiteContractDto.ContractFileModel?.Base64?.Length > 0 && SiteContractDto.ContractFileModel?.Base64 != null)
             {
                 siteContract.ContractDocumentPath = DocumentService.SaveUploadDocument(SiteContractDto.ContractFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "SiteContract");
