@@ -48,7 +48,6 @@ namespace GSC.Respository.CTMS
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             var ctmsProjectList = _context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
 
-            //Update main Total from ResourceCost + PatientCost + PassThroughCost
             var StudyplanData1 = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).ToList();
             TotalCostStudyUpdate(StudyplanData1);
 
@@ -56,12 +55,6 @@ namespace GSC.Respository.CTMS
             var studyPlanGridDto = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).
              ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
 
-
-
-            //studyPlanGridDto.ForEach(x => x.IfApprovalWorkFlow = _context.CtmsApprovalWorkFlowDetail.
-            //    Include(i => i.ctmsApprovalWorkFlow).Any(s => s.ctmsApprovalWorkFlow.DeletedDate == null &&
-            //    s.DeletedDate == null && s.ctmsApprovalWorkFlow.ProjectId == x.ProjectId && s.UserId == _jwtTokenAccesser.UserId
-            //    && s.ctmsApprovalWorkFlow.SecurityRoleId == _jwtTokenAccesser.RoleId && s.ctmsApprovalWorkFlow.TriggerType == triggerType));
 
             return studyPlanGridDto;
         }
@@ -121,7 +114,6 @@ namespace GSC.Respository.CTMS
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
-                    //t.Parent = t;
                     t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
@@ -314,7 +306,6 @@ namespace GSC.Respository.CTMS
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
-                    //t.Parent = t;
                     t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }

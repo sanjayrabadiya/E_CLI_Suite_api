@@ -202,13 +202,6 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(history);
         }
 
-        //[HttpGet("GetApprovalStatus/{studyPlanId}/{projectId}")]
-        //public IActionResult GetApprovalStatus(int studyPlanId, int projectId)
-        //{
-        //    var status = _ctmsWorkflowApprovalRepository.GetApprovalStatus(studyPlanId, projectId);
-        //    return Ok(status);
-        //}
-
         [HttpGet("CheckIsSender/{studyPlanId}/{projectId}/{triggerType}")]
         public IActionResult CheckIsSender(int studyPlanId, int projectId, TriggerType triggerType)
         {
