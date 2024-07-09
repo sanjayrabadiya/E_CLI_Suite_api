@@ -106,12 +106,13 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Active(int id)
         {
             var record = _sitePaymentRepository.Find(id);
-            //var validate = _paymentMilestoneRepository.DuplicatePaymentMilestone(record);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
+            var paymentMilestone = _mapper.Map<SitePaymentDto>(record);
+            var validate = _sitePaymentRepository.Duplicate(paymentMilestone);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             if (record == null)
                 return NotFound();

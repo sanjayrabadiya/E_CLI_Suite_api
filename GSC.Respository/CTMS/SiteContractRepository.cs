@@ -42,9 +42,9 @@ namespace GSC.Respository.Master
             }
             return SiteContractGridData;
         }
-        public string Duplicate(SiteContractDto siteContractDto)
+        public string Duplicate(SiteContractDto SiteContractDto)
         {
-            if (All.Any(x => x.Id != siteContractDto.Id && x.ProjectId == siteContractDto.ProjectId && x.SiteId == siteContractDto.SiteId && x.ContractCode == siteContractDto.ContractCode && x.DeletedDate == null))
+            if (All.Any(x =>( x.Id != SiteContractDto.Id && x.ProjectId == SiteContractDto.ProjectId && x.SiteId == SiteContractDto.SiteId && x.DeletedDate == null) ||( x.ContractCode == SiteContractDto.ContractCode)))
             {
                 return "Duplicate this Site Contract";
             }
