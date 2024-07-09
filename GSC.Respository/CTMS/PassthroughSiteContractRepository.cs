@@ -7,6 +7,7 @@ using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace GSC.Respository.Master
 {
@@ -33,6 +34,21 @@ namespace GSC.Respository.Master
                 return "Duplicate Pass Through";
             }
             return "";
+        }
+
+        public List<decimal> GetPassthroughTotalAmount(int parentProjectId, int siteId, int passThroughCostActivityId)
+        {
+            List<decimal> obj = new List<decimal>();
+            var siteCountryId = _context.Project.Include(m => m.ManageSite).
+              Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+
+            var PassThroughCost = _context.PassThroughCost.Where(s => s.PassThroughCostActivityId == passThroughCostActivityId && s.ProjectId == parentProjectId && s.CountryId == siteCountryId && s.DeletedBy == null).
+                       Sum(d => d.CurrencyRate.LocalCurrencyRate * d.Rate).GetValueOrDefault();
+
+            obj.Add(PassThroughCost);
+            obj.Add(siteCountryId);
+
+            return obj;
         }
     }
 }
