@@ -81,14 +81,19 @@ namespace GSC.Api.Controllers.Master
         [HttpPut]
         public IActionResult Put([FromBody] SiteContractDto SiteContractDto)
         {
-                var Id = SiteContractDto.Id;
-                if (Id <= 0) return BadRequest();
-                if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-                var task = _siteContractRepository.Find(Id);
-                var taskmaster = _mapper.Map<SiteContract>(task);
-                _siteContractRepository.Update(taskmaster);
-                if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
-                return Ok(taskmaster.Id);
+            var Id = SiteContractDto.Id;
+            if (Id <= 0) return BadRequest();
+            if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
+            //var task = _siteContractRepository.Find(Id);
+            var taskmaster = _mapper.Map<SiteContract>(SiteContractDto);
+            if (SiteContractDto.ContractFileModel?.Base64?.Length > 0 && SiteContractDto.ContractFileModel?.Base64 != null)
+            {
+                taskmaster.ContractDocumentPath = DocumentService.SaveUploadDocument(SiteContractDto.ContractFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "SiteContract");
+            }
+
+            _siteContractRepository.Update(taskmaster);
+            if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
+            return Ok(taskmaster.Id);
         }
 
         [HttpDelete("{id}")]
@@ -108,6 +113,13 @@ namespace GSC.Api.Controllers.Master
         public IActionResult Active(int id)
         {
             var record = _siteContractRepository.Find(id);
+            var siteContract = _mapper.Map<SiteContractDto>(record);
+            var validate = _siteContractRepository.Duplicate(siteContract);
+            if (!string.IsNullOrEmpty(validate))
+            {
+                ModelState.AddModelError("Message", validate);
+                return BadRequest(ModelState);
+            }
 
             if (record == null)
                 return NotFound();
