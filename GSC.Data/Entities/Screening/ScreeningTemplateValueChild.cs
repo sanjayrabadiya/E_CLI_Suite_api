@@ -10,5 +10,6 @@ namespace GSC.Data.Entities.Screening
         public string Value { get; set; }
         public short? LevelNo { get; set; }
         public ProjectDesignVariableValue ProjectDesignVariableValue { get; set; }
+        public ScreeningTemplateValue ScreeningTemplateValue { get; set; }
     }
 }
