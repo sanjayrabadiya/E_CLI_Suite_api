@@ -63,6 +63,37 @@ namespace GSC.Data.Dto.Report
         public List<ProjectDatabaseInitialDto> LstProjectDataBase { get; set; }
     }
 
+    public class ProjectDatabaseTableDto
+    {
+        public string DomainName { get; set; }
+        public string VariableName { get; set; }
+        public string DomainCode { get; set; }
+        public List<ProjectDatabaseTableValueDto> LstVariable { get; set; }
+        public string TableHeader { get; set; }
+    }
+
+    public class level
+    {
+        public short? maxno { get; set; }
+        public string initial { get; set; }
+    }
+
+        public class ProjectDatabaseTableValueDto
+    {
+        public short? LevelNo { get; set; }
+        public string Value { get; set; }
+        public string ProjectCode { get; set; } 
+        public string ProjectName { get; set; }
+        public string Initial { get; set; }
+        public string SubjectNo { get; set; }
+        public string RandomizationNumber { get; set; }
+        public string Visit { get; set; }
+        public int DesignOrder { get; set; }
+        public string TemplateName { get; set; }
+        public short? MaxLevelNo { get; set; }
+        public TableCollectionSource? CollectionSource { get; set; }
+    }
+
     public class ProjectDatabaseVariableDto
     {
         public string VariableCode { get; set; }
@@ -199,6 +230,7 @@ namespace GSC.Data.Dto.Report
     public class CommonDto
     {
         public List<ProjectDatabaseDomainDto> Dbds { get; set; }
+        public List<ProjectDatabaseTableDto> Table { get; set; }
         public List<MeddraDetails> Meddra { get; set; }
     }
 
