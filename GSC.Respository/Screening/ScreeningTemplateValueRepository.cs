@@ -28,6 +28,8 @@ using System.IO;
 using System.Linq;
 using Serilog;
 using System.Threading.Tasks;
+using GSC.Data.Entities.Master;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace GSC.Respository.Screening
 {
@@ -442,6 +444,8 @@ namespace GSC.Respository.Screening
 
             var ProjectCode = _context.Project.Find(filters.ParentProjectId).ProjectCode;
             var sites = new List<int>();
+
+            // Filter for study and site
             if (filters.SiteId != null)
             {
                 sites = _context.Project.Where(x => x.Id == filters.SiteId).Select(x => x.Id).ToList();
@@ -456,6 +460,8 @@ namespace GSC.Respository.Screening
                     && projectList.Any(c => c == x.Id)).Select(y => y.Id).ToList();
 
             }
+
+            // GET General Setting for Date formating
             var GeneralSettings = _appSettingRepository.Get<GeneralSettingsDto>(_jwtTokenAccesser.CompanyId);
             GeneralSettings.TimeFormat = GeneralSettings.TimeFormat.Replace("a", "tt");
 
@@ -476,6 +482,8 @@ namespace GSC.Respository.Screening
 
             Log.Error($"Start DBDS project code {ProjectCode} {DateTime.Now}");
 
+
+            // Get All study variable collection value data
             var variableValues = _context.ProjectDesignVariableValue.
                 Where(r => r.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.ProjectDesignPeriod.ProjectDesign.ProjectId == filters.ParentProjectId
                 && r.DeletedDate == null && r.ProjectDesignVariable.DeletedDate == null && r.ProjectDesignVariable.ProjectDesignTemplate.DeletedDate == null &&
@@ -488,6 +496,7 @@ namespace GSC.Respository.Screening
                     Value = r.ValueName
                 }).ToList();
 
+            // Filter for DBDS Report
             if (filters.FilterId == DBDSReportFilter.DBDS || filters.FilterId == null)
             {
 
@@ -495,6 +504,7 @@ namespace GSC.Respository.Screening
 
                 List<ProjectDatabaseDto> result = new List<ProjectDatabaseDto>();
 
+                var TableData = await GetSiteTableData(filters, ProjectCode, variableValues.ToArray(), sites);
                 result = await GetSiteData(filters, ProjectCode, variableValues.ToArray(), sites);
 
 
@@ -568,11 +578,13 @@ namespace GSC.Respository.Screening
                 Log.Error($"GroupBy DBDSReport sites  time {DateTime.Now}");
 
                 MainData.Dbds = grpquery;
+                MainData.Table = TableData;
 
                 #endregion
 
             }
 
+            // Filter for MedDRA Report
             if (filters.FilterId == DBDSReportFilter.MedDRA || filters.FilterId == null)
             {
                 Log.Error($"Start Meddra sites  time {DateTime.Now}");
@@ -942,6 +954,103 @@ namespace GSC.Respository.Screening
                     });
                 }
 
+                if (MainData.Table != null)
+                {
+                    var domainwise = MainData.Table.GroupBy(d => d.DomainName).ToList();
+
+                    domainwise.ForEach(domain =>
+                    {
+
+                        var cellno = 8;
+
+                        var listvariable = new List<ProjectDatabaseTableValueDto>();
+
+                        worksheet = workbook.Worksheets.Add(domain.Key + "_T");
+                        worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
+                        worksheet.Cell(1, 1).Value = "STUDY CODE";
+                        worksheet.Cell(1, 2).Value = "SITE CODE";
+                        worksheet.Cell(1, 3).Value = "SCRNUM";
+                        worksheet.Cell(1, 4).Value = "RANDNUM";
+                        worksheet.Cell(1, 5).Value = "INITIAL";
+                        worksheet.Cell(1, 6).Value = "VISIT";
+                        worksheet.Cell(2, 1).Value = "Study Code";
+                        worksheet.Cell(2, 2).Value = "Site Code";
+                        worksheet.Cell(2, 3).Value = "Screening No";
+                        worksheet.Cell(2, 4).Value = "Enrollment No";
+                        worksheet.Cell(2, 5).Value = "Patient Initial";
+                        worksheet.Cell(2, 6).Value = "Visit";
+                        worksheet.Cell(2, 7).Value = "Panel Name";
+
+                        var tableList = MainData.Table.Where(x => x.DomainName == domain.Key).ToList();
+
+                        tableList.ForEach(d =>
+                        {
+                            listvariable.AddRange(d.LstVariable);
+
+                            var jj = 3;
+                            var dd = listvariable.GroupBy(x => x.Initial).ToList();
+                            foreach (var b in dd.ToList())
+                            {
+                                var maxloop = b.Max(x => x.MaxLevelNo);
+
+                                for (int i = 0; i < maxloop; i++)
+                                {
+                                    worksheet.Row(jj).Cell(1).SetValue(b.FirstOrDefault().ProjectCode);
+                                    worksheet.Row(jj).Cell(2).SetValue(b.FirstOrDefault().ProjectName);
+                                    worksheet.Row(jj).Cell(3).SetValue(b.FirstOrDefault().SubjectNo);
+                                    worksheet.Row(jj).Cell(4).SetValue(b.FirstOrDefault().RandomizationNumber);
+                                    worksheet.Row(jj).Cell(5).SetValue(b.FirstOrDefault().Initial);
+                                    worksheet.Row(jj).Cell(6).SetValue(b.FirstOrDefault().Visit);
+                                    worksheet.Row(jj).Cell(7).SetValue(b.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
+                                    jj++;
+                                }
+                            };
+
+                            worksheet.Cell(1, cellno).Value = d.VariableName;
+                            worksheet.Cell(2, cellno).Value = d.TableHeader;
+                            cellno++;
+                        });
+
+                        tableList.ForEach(data =>
+                        {
+                            var sss = data.TableHeader;
+                            data.LstVariable.ForEach(db =>
+                            {
+                                var column = worksheet.Column(5).CellsUsed().Where(y => y.Value.ToString() == db.Initial).ToList().FirstOrDefault().Address.RowNumber;
+                                var row = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == sss).ToList().FirstOrDefault().Address.ColumnNumber;
+                                var level = column + (int)db.LevelNo - 1;
+
+
+                                if (db.CollectionSource == TableCollectionSource.DateTime)
+                                {
+                                    DateTime dDate;
+                                    var variablevalueformat = db.Value;
+                                    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                    worksheet.Row(level).Cell(row).SetValue(dt);
+                                }
+                                else if (db.CollectionSource == TableCollectionSource.Date)
+                                {
+                                    DateTime dDate;
+                                    var variablevalueformat = db.Value;
+                                    string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                    worksheet.Row(level).Cell(row).SetValue(dt);
+                                }
+                                else if (db.CollectionSource == TableCollectionSource.Time)
+                                {
+                                    DateTime dDate;
+                                    var variablevalueformat = db.Value;
+                                    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                    worksheet.Row(level).Cell(row).SetValue(dt);
+                                }
+                                else
+                                {
+                                    worksheet.Row(level).Cell(row).SetValue(db.Value);
+                                }
+                            });
+                        });
+                    });
+                }
+
                 Log.Error($"Start Patient MedDRA Loop {DateTime.Now}");
 
                 if (filters.FilterId == DBDSReportFilter.MedDRA || filters.FilterId == null)
@@ -1047,7 +1156,7 @@ namespace GSC.Respository.Screening
                     });
                 }
 
-                string path = Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.DBDSReport.ToString());
+                string path = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.DBDSReport.ToString());
                 if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
@@ -1061,12 +1170,12 @@ namespace GSC.Respository.Screening
 
                     stream.Position = 0;
                     var FileName = filters.ExcelFormat ? "DBDS_" + DateTime.Now.Ticks + ".xlsx" : "DBDS_" + DateTime.Now.Ticks + ".csv";
-                    var FilePath = Path.Combine(path, FileName);
+                    var FilePath = System.IO.Path.Combine(path, FileName);
                     workbook.SaveAs(FilePath);
 
                     #region Update Job Status
                     var documentUrl = _uploadSettingRepository.GetWebDocumentUrl();
-                    string savepath = Path.Combine(documentUrl, FolderType.DBDSReport.ToString());
+                    string savepath = System.IO.Path.Combine(documentUrl, FolderType.DBDSReport.ToString());
                     jobMonitoring.CompletedTime = _jwtTokenAccesser.GetClientDate();
                     jobMonitoring.JobStatus = JobStatusType.Completed;
                     jobMonitoring.FolderPath = savepath;
@@ -1079,7 +1188,7 @@ namespace GSC.Respository.Screening
                     #region EmailSend
                     var user = _userRepository.Find(_jwtTokenAccesser.UserId);
                     var ProjectName = _context.Project.Find(filters.SelectedProject).ProjectCode + "-" + _context.Project.Find(filters.SelectedProject).ProjectName;
-                    string pathofdoc = Path.Combine(savepath, FileName);
+                    string pathofdoc = System.IO.Path.Combine(savepath, FileName);
                     var linkOfDoc = "<a href='" + pathofdoc + "'>Click Here</a>";
                     _emailSenderRespository.SendDBDSGeneratedEMail(user.Email, _jwtTokenAccesser.UserName, ProjectName, linkOfDoc);
                     #endregion
@@ -1094,6 +1203,7 @@ namespace GSC.Respository.Screening
 
             var tempValue = _context.ScreeningTemplateValue.AsNoTracking().Where(r => sitesIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId));
 
+            #region filters periods subject template visit domain
             if (filters.PeriodIds != null && filters.PeriodIds.Count() > 0)
             {
                 tempValue = tempValue.Where(r => filters.PeriodIds.Contains(r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId));
@@ -1119,11 +1229,13 @@ namespace GSC.Respository.Screening
                 tempValue = tempValue.Where(r => filters.DomainIds.Contains(r.ScreeningTemplate.ProjectDesignTemplate.DomainId));
             }
 
+            #endregion filters
+
             tempValue = tempValue.Where(r => r.DeletedDate == null && r.ScreeningTemplate.DeletedDate == null && r.ScreeningTemplate.ScreeningVisit.DeletedDate == null
                 && r.ScreeningTemplate.ScreeningVisit.ScreeningEntry.DeletedDate == null &&
-                r.ProjectDesignVariable.DeletedDate == null);
+                r.ProjectDesignVariable.DeletedDate == null && r.ProjectDesignVariable.CollectionSource != CollectionSources.Table);
 
-            var result = await tempValue.Select(x => new ProjectDatabaseDto
+            var result = await tempValue.Where(x => x.ProjectDesignVariable.CollectionSource != CollectionSources.Table).Select(x => new ProjectDatabaseDto
             {
                 ScreeningEntryId = x.ScreeningTemplate.ScreeningVisit.ScreeningEntryId,
                 ScreeningTemplateId = x.ScreeningTemplate.Id,
@@ -1549,5 +1661,94 @@ namespace GSC.Respository.Screening
                 return true;
             }
         }
+
+
+        private async Task<List<ProjectDatabaseTableDto>> GetSiteTableData(ProjectDatabaseSearchDto filters, string ProjectCode, ReportProjectDesignValue[] valueList, List<int> sitesIds)
+        {
+
+            var tempValue = _context.ScreeningTemplateValueChild.Include(s => s.ScreeningTemplateValue).AsNoTracking().Where(r => sitesIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource == CollectionSources.Table);
+
+            #region filters periods subject template visit domain
+            if (filters.PeriodIds != null && filters.PeriodIds.Count() > 0)
+            {
+                tempValue = tempValue.Where(r => filters.PeriodIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectDesignPeriodId));
+            }
+
+            if (filters.SubjectIds != null && filters.SubjectIds.Count() > 0)
+            {
+                tempValue = tempValue.Where(r => filters.SubjectIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Id));
+            }
+
+            if (filters.TemplateIds != null && filters.TemplateIds.Count() > 0)
+            {
+                tempValue = tempValue.Where(r => filters.TemplateIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId));
+            }
+
+            if (filters.VisitIds != null && filters.VisitIds.Count() > 0)
+            {
+                tempValue = tempValue.Where(r => filters.VisitIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ProjectDesignVisitId));
+            }
+
+            if (filters.DomainIds != null && filters.DomainIds.Count() > 0)
+            {
+                tempValue = tempValue.Where(r => filters.DomainIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DomainId));
+            }
+
+            #endregion filters
+
+            tempValue = tempValue.Where(r => r.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.DeletedDate == null
+                && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.DeletedDate == null &&
+                r.ProjectDesignVariableValue.DeletedDate == null && r.ProjectDesignVariableValue.ProjectDesignVariable.DeletedDate == null
+                && r.ProjectDesignVariableValue.ProjectDesignVariable.CollectionSource == CollectionSources.Table)
+                .Include(x => x.ScreeningTemplateValue)
+                .ThenInclude(x => x.ScreeningTemplate)
+                .ThenInclude(x => x.ProjectDesignTemplate)
+                .ThenInclude(x => x.Domain)
+                .Include(x => x.ScreeningTemplateValue)
+                .ThenInclude(x => x.ScreeningTemplate)
+                .ThenInclude(x => x.ScreeningVisit)
+                .ThenInclude(x => x.ScreeningEntry)
+                .ThenInclude(x => x.Randomization)
+                .ThenInclude(x => x.Project)
+                .Include(x => x.ProjectDesignVariableValue)
+                .ThenInclude(x => x.ProjectDesignVariable)
+                .ThenInclude(x => x.ProjectDesignTemplate)
+                .ThenInclude(x => x.ProjectDesignVisit);
+
+            var rrr = tempValue.ToList().GroupBy(x => new
+            {
+                x.ProjectDesignVariableValueId,
+                x.ProjectDesignVariableValue.ValueName,
+                x.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
+                x.ProjectDesignVariableValue.ProjectDesignVariable.VariableCode,
+                x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainCode
+            }).ToList()
+                .Select(y => new ProjectDatabaseTableDto
+                {
+                    TableHeader = y.Key.VariableCode + "_" + y.Key.ValueName,
+                    VariableName = y.Key.VariableName,
+                    DomainName = y.Key.DomainCode,
+                    LstVariable = y.OrderBy(s => s.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId).Select(v =>
+                            new ProjectDatabaseTableValueDto
+                            {
+                                ProjectCode = ProjectCode,
+                                ProjectName = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Project.ProjectCode,
+                                LevelNo = v.LevelNo,
+                                Value = v.Value,
+                                Initial = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial,
+                                SubjectNo = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                                RandomizationNumber = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                                Visit = v.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
+                                       Convert.ToString(v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
+                                DesignOrder = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
+                                TemplateName = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.TemplateName,
+                                MaxLevelNo = y.Where(r => r.ScreeningTemplateValueId == v.ScreeningTemplateValueId).Max(z => z.LevelNo),
+                                CollectionSource = v.ProjectDesignVariableValue.TableCollectionSource
+                            }).OrderBy(x => x.SubjectNo).ThenBy(x => x.LevelNo).ToList(),
+                }).ToList();
+
+            return rrr;
+        }
+
     }
 }
