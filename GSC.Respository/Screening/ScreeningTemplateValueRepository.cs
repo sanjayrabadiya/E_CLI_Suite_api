@@ -1004,6 +1004,25 @@ namespace GSC.Respository.Screening
                                     worksheet.Row(jj).Cell(7).SetValue(b.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
                                     jj++;
                                 }
+
+                                //var visitGroup = b.GroupBy(v => v.Visit).ToList();
+
+                                //foreach (var item in visitGroup)
+                                //{
+                                //var maxloop = item.Max(x => x.MaxLevelNo);
+
+                                //    for (int i = 0; i < maxloop; i++)
+                                //    {
+                                //        worksheet.Row(jj).Cell(1).SetValue(item.FirstOrDefault().ProjectCode);
+                                //        worksheet.Row(jj).Cell(2).SetValue(item.FirstOrDefault().ProjectName);
+                                //        worksheet.Row(jj).Cell(3).SetValue(item.FirstOrDefault().SubjectNo);
+                                //        worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
+                                //        worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
+                                //        worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
+                                //        worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
+                                //        jj++;
+                                //    }
+                                //}
                             };
 
                             worksheet.Cell(1, cellno).Value = d.VariableName;
@@ -1696,7 +1715,8 @@ namespace GSC.Respository.Screening
 
             #endregion filters
 
-            tempValue = tempValue.Where(r => r.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.DeletedDate == null
+            tempValue = tempValue.Where(r => r.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.DeletedDate == null
+                && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.DeletedDate == null
                 && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.DeletedDate == null &&
                 r.ProjectDesignVariableValue.DeletedDate == null && r.ProjectDesignVariableValue.ProjectDesignVariable.DeletedDate == null
                 && r.ProjectDesignVariableValue.ProjectDesignVariable.CollectionSource == CollectionSources.Table)
@@ -1715,14 +1735,15 @@ namespace GSC.Respository.Screening
                 .ThenInclude(x => x.ProjectDesignTemplate)
                 .ThenInclude(x => x.ProjectDesignVisit);
 
-            var rrr = tempValue.ToList().GroupBy(x => new
-            {
-                x.ProjectDesignVariableValueId,
-                x.ProjectDesignVariableValue.ValueName,
-                x.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
-                x.ProjectDesignVariableValue.ProjectDesignVariable.VariableCode,
-                x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainCode
-            }).ToList()
+            var rrr = tempValue.ToList().OrderBy(x => x.ProjectDesignVariableValue.ProjectDesignVariableId).ThenBy(x => x.ProjectDesignVariableValueId)
+                .GroupBy(x => new
+                {
+                    x.ProjectDesignVariableValueId,
+                    x.ProjectDesignVariableValue.ValueName,
+                    x.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
+                    x.ProjectDesignVariableValue.ProjectDesignVariable.VariableCode,
+                    x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainCode
+                }).ToList()
                 .Select(y => new ProjectDatabaseTableDto
                 {
                     TableHeader = y.Key.VariableCode + "_" + y.Key.ValueName,
