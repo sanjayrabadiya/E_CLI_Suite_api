@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         string Duplicate(PatientSiteContractDto SiteContractDto);
         IList<PatientSiteContractGridDto> GetPatientSiteContractList(bool isDeleted, int siteContractId);
+        List<decimal> GetVisitAmount(int parentProjectId, int siteId, int visitId);
     }
 }
