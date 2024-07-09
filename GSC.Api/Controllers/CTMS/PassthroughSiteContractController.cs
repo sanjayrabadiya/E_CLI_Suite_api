@@ -104,6 +104,13 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
+        [HttpGet("GetPassthroughTotalAmount/{parentProjectId:int}/{siteId:int}/{passThroughCostActivityId}")]
+        public IActionResult GetPassthroughTotalAmount(int parentProjectId, int siteId, int passThroughCostActivityId)
+        {
+            var studyplan = _passthroughSiteContractRepository.GetPassthroughTotalAmount(parentProjectId, siteId, passThroughCostActivityId);
+            return Ok(studyplan);
+        }
+
         #endregion
 
     }

@@ -102,6 +102,13 @@ namespace GSC.Api.Controllers.Master
             return Ok();
         }
 
+        [HttpGet("GetVisitAmount/{parentProjectId:int}/{siteId:int}/{visitId}")]
+        public IActionResult GetVisitAmount(int parentProjectId, int siteId, int visitId)
+        {
+            var studyplan = _patientSiteContractRepository.GetVisitAmount(parentProjectId, siteId, visitId);
+            return Ok(studyplan);
+        }
+
         #endregion
     }
 }

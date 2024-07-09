@@ -9,5 +9,6 @@ namespace GSC.Respository.Master
     {
         IList<PassthroughSiteContractGridDto> GetPassthroughSiteContractList(bool isDeleted, int siteContractId);
         string Duplicate(PassthroughSiteContractDto PassthroughSiteContractDto);
+        List<decimal> GetPassthroughTotalAmount(int parentProjectId, int siteId, int passThroughCostActivityId);
     }
 }
