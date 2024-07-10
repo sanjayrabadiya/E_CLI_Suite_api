@@ -5,6 +5,7 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Helper;
 using GSC.Respository.Configuration;
+using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
@@ -20,13 +21,17 @@ namespace GSC.Api.Controllers.Master
     public class SiteContractController : BaseController
     {
         private readonly ISiteContractRepository _siteContractRepository;
+        private readonly IPatientSiteContractRepository _PatientSiteContractRepository;
+        private readonly IPassthroughSiteContractRepository _PassthroughSiteContractRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public SiteContractController(ISiteContractRepository SiteContractRepository, IUnitOfWork uow, IMapper mapper, IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser)
+        public SiteContractController(IPatientSiteContractRepository PatientSiteContractRepository, IPassthroughSiteContractRepository PassthroughSiteContractRepository, ISiteContractRepository SiteContractRepository, IUnitOfWork uow, IMapper mapper, IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser)
         {
             _siteContractRepository = SiteContractRepository;
+            _PatientSiteContractRepository = PatientSiteContractRepository;
+            _PassthroughSiteContractRepository = PassthroughSiteContractRepository;
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
@@ -102,6 +107,21 @@ namespace GSC.Api.Controllers.Master
             var record = _siteContractRepository.Find(id);
             if (record == null)
                 return NotFound();
+            //Delete PatientSite Contract
+            var patientSiteContract = _PatientSiteContractRepository.FindBy(x => x.SiteContractId == id);
+            foreach (var task in patientSiteContract)
+            {
+                _PatientSiteContractRepository.Delete(task);
+                _uow.Save();
+            }
+
+            //Delete Pass through Site Contract
+            var pssthroughSiteContract = _PassthroughSiteContractRepository.FindBy(x => x.SiteContractId == id);
+            foreach (var task in pssthroughSiteContract)
+            {
+                _PassthroughSiteContractRepository.Delete(task);
+                _uow.Save();
+            }
 
             _siteContractRepository.Delete(record);
             _uow.Save();
@@ -121,6 +141,21 @@ namespace GSC.Api.Controllers.Master
                 return BadRequest(ModelState);
             }
 
+            //Active PatientSite Contract
+            var patientSiteContract = _PatientSiteContractRepository.FindBy(x => x.SiteContractId == id);
+            foreach (var task in patientSiteContract)
+            {
+                _PatientSiteContractRepository.Active(task);
+                _uow.Save();
+            }
+
+            //Active Pass through Site Contract
+            var pssthroughSiteContract = _PassthroughSiteContractRepository.FindBy(x => x.SiteContractId == id);
+            foreach (var task in pssthroughSiteContract)
+            {
+                _PassthroughSiteContractRepository.Active(task);
+                _uow.Save();
+            }
             if (record == null)
                 return NotFound();
             _siteContractRepository.Active(record);
