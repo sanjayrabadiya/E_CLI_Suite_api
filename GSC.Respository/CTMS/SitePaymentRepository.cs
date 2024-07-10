@@ -3,9 +3,7 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using AutoMapper;
 using AutoMapper.QueryableExtensions;
-using DocumentFormat.OpenXml.Wordprocessing;
 using GSC.Common.GenericRespository;
-using GSC.Data.Dto.CTMS;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
@@ -100,27 +98,15 @@ namespace GSC.Respository.Master
         }
         public List<decimal> GetVisitAmount(int parentProjectId, int siteId,int visitId)
         {
-            //List<decimal> obj = new List<decimal>();
-            //var siteCountryId = _context.Project.Include(m => m.ManageSite).
-            //    Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
-
-            //var EstimatedTotal = _context.PatientCost.
-            //                    Where(s => s.ProjectDesignVisitId == visitId && s.ProcedureId != null && s.ProjectId == parentProjectId && s.DeletedBy == null && s.Procedure.Currency.CountryId == siteCountryId).
-            //                    Sum(d => d.Rate * d.Cost).GetValueOrDefault();
-
-            //obj.Add(EstimatedTotal);
-            //obj.Add(siteCountryId);
-
             List<decimal> obj = new List<decimal>();
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
                 Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
 
             var EstimatedTotal = _context.PatientSiteContract.Include(i=>i.SiteContract).
-                Where(w=>w.ProjectDesignVisitId== visitId && w.DeletedBy==null && w.SiteContract.ProjectId == parentProjectId && w.SiteContract.SiteId == siteId).Select(s=>s.PayableTotal).FirstOrDefault();
+                Where(w=>w.ProjectDesignVisitId== visitId && w.DeletedBy==null && w.SiteContract.DeletedBy==null && w.SiteContract.ProjectId == parentProjectId && w.SiteContract.SiteId == siteId).Select(s=>s.PayableTotal).FirstOrDefault();
 
             obj.Add(EstimatedTotal);
             obj.Add(siteCountryId);
-
 
             return obj;
         }
@@ -148,7 +134,7 @@ namespace GSC.Respository.Master
               Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
 
             var PassThroughCost = _context.PassthroughSiteContract.Include(i => i.SiteContract).
-                Where(w => w.PassThroughCostActivityId == passThroughCostActivityId && w.DeletedBy == null && w.SiteContract.ProjectId == parentProjectId && w.SiteContract.SiteId == siteId).Select(s => s.PayableTotal).FirstOrDefault();
+                Where(w => w.PassThroughCostActivityId == passThroughCostActivityId && w.DeletedBy == null && w.SiteContract.DeletedBy == null && w.SiteContract.ProjectId == parentProjectId && w.SiteContract.SiteId == siteId).Select(s => s.PayableTotal).FirstOrDefault();
 
 
             obj.Add(PassThroughCost);
@@ -156,7 +142,6 @@ namespace GSC.Respository.Master
 
             return obj;
         }
-
         public string Duplicate(SitePaymentDto sitePaymentDto)
         {
             if (All.Any(x => x.Id != sitePaymentDto.Id && x.ProjectId == sitePaymentDto.ProjectId && x.SiteId == sitePaymentDto.SiteId && x.ProjectDesignVisitId== sitePaymentDto.ProjectDesignVisitId && x.DeletedDate == null))

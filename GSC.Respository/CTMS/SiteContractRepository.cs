@@ -44,7 +44,7 @@ namespace GSC.Respository.Master
         }
         public string Duplicate(SiteContractDto SiteContractDto)
         {
-            if (All.Any(x =>( x.Id != SiteContractDto.Id && x.ProjectId == SiteContractDto.ProjectId && x.SiteId == SiteContractDto.SiteId && x.DeletedDate == null) ||( x.ContractCode == SiteContractDto.ContractCode)))
+            if (All.Any(x =>( x.Id != SiteContractDto.Id && x.ProjectId == SiteContractDto.ProjectId && x.SiteId == SiteContractDto.SiteId && x.DeletedDate == null) ||( x.ContractCode == SiteContractDto.ContractCode && x.DeletedDate == null)))
             {
                 return "Duplicate this Site Contract";
             }
