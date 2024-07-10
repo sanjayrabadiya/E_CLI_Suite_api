@@ -991,42 +991,33 @@ namespace GSC.Respository.Screening
                             var dd = listvariable.GroupBy(x => x.Initial).ToList();
                             foreach (var b in dd.ToList())
                             {
-                                var maxloop = b.Max(x => x.MaxLevelNo);
+                                var visitGroup = b.GroupBy(v => v.Visit).ToList();
 
-                                for (int i = 0; i < maxloop; i++)
+                                foreach (var item in visitGroup)
                                 {
-                                    worksheet.Row(jj).Cell(1).SetValue(b.FirstOrDefault().ProjectCode);
-                                    worksheet.Row(jj).Cell(2).SetValue(b.FirstOrDefault().ProjectName);
-                                    worksheet.Row(jj).Cell(3).SetValue(b.FirstOrDefault().SubjectNo);
-                                    worksheet.Row(jj).Cell(4).SetValue(b.FirstOrDefault().RandomizationNumber);
-                                    worksheet.Row(jj).Cell(5).SetValue(b.FirstOrDefault().Initial);
-                                    worksheet.Row(jj).Cell(6).SetValue(b.FirstOrDefault().Visit);
-                                    worksheet.Row(jj).Cell(7).SetValue(b.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
-                                    jj++;
+                                    var maxloop = item.Max(x => x.MaxLevelNo);
+
+                                    for (int i = 0; i < maxloop; i++)
+                                    {
+                                        worksheet.Row(jj).Cell(1).SetValue(item.FirstOrDefault().ProjectCode);
+                                        worksheet.Row(jj).Cell(2).SetValue(item.FirstOrDefault().ProjectName);
+                                        worksheet.Row(jj).Cell(3).SetValue(item.FirstOrDefault().SubjectNo);
+                                        worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
+                                        worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
+                                        worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
+                                        worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
+                                        jj++;
+                                    }
                                 }
 
-                                //var visitGroup = b.GroupBy(v => v.Visit).ToList();
+                                var sf = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == d.TableHeader).ToList().Select(x => x.Address.ColumnNumber);
+                                if (sf.Count() == 0)
+                                {
+                                    worksheet.Cell(1, cellno).Value = d.VariableName;
+                                    worksheet.Cell(2, cellno).Value = d.TableHeader;
+                                }
 
-                                //foreach (var item in visitGroup)
-                                //{
-                                //var maxloop = item.Max(x => x.MaxLevelNo);
-
-                                //    for (int i = 0; i < maxloop; i++)
-                                //    {
-                                //        worksheet.Row(jj).Cell(1).SetValue(item.FirstOrDefault().ProjectCode);
-                                //        worksheet.Row(jj).Cell(2).SetValue(item.FirstOrDefault().ProjectName);
-                                //        worksheet.Row(jj).Cell(3).SetValue(item.FirstOrDefault().SubjectNo);
-                                //        worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
-                                //        worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
-                                //        worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
-                                //        worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
-                                //        jj++;
-                                //    }
-                                //}
                             };
-
-                            worksheet.Cell(1, cellno).Value = d.VariableName;
-                            worksheet.Cell(2, cellno).Value = d.TableHeader;
                             cellno++;
                         });
 
@@ -1037,7 +1028,11 @@ namespace GSC.Respository.Screening
                             {
                                 var column = worksheet.Column(5).CellsUsed().Where(y => y.Value.ToString() == db.Initial).ToList().FirstOrDefault().Address.RowNumber;
                                 var row = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == sss).ToList().FirstOrDefault().Address.ColumnNumber;
-                                var level = column + (int)db.LevelNo - 1;
+                                var visit = worksheet.Column(6).CellsUsed().Where(y => y.Value.ToString() == db.Visit).ToList().Select(x => x.Address.RowNumber);
+                                var initial = worksheet.Column(5).CellsUsed().Where(y => y.Value.ToString() == db.Initial).ToList().Select(x => x.Address.RowNumber);
+                                var abs = visit.Intersect(initial).FirstOrDefault();
+
+                                var level = abs + (int)db.LevelNo - 1;
 
 
                                 if (db.CollectionSource == TableCollectionSource.DateTime)
