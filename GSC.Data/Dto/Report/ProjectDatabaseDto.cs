@@ -92,6 +92,9 @@ namespace GSC.Data.Dto.Report
         public string TemplateName { get; set; }
         public short? MaxLevelNo { get; set; }
         public TableCollectionSource? CollectionSource { get; set; }
+        public int? ScreeningTemplateParentId { get; set; }
+        public int ScreeningTemplateId { get; set; }
+        public int? RepeatSeqNo { get; set; }
     }
 
     public class ProjectDatabaseVariableDto
