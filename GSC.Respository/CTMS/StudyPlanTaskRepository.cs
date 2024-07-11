@@ -99,7 +99,7 @@ namespace GSC.Respository.CTMS
                 .Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) &&
                             x.DeletedDate == null &&
                             x.ParentProjectId == projectId &&
-                            projectList.Contains(x.Id))
+                            projectList.Any(c => c == x.Id))
                 .Select(s => s.Id)
                 .ToList();
 
@@ -408,58 +408,46 @@ namespace GSC.Respository.CTMS
             }
         }
 
-        private void UpdateDependentTaskDate(int StudyPlanTaskId)
+        private void UpdateDependentTaskDate(int studyPlanTaskId)
         {
-            var dependenttask = All.Where(x => x.Id == StudyPlanTaskId).FirstOrDefault();
-            if (dependenttask != null)
+            var dependentTask = All.FirstOrDefault(x => x.Id == studyPlanTaskId);
+            if (dependentTask == null) return;
+
+            var mainTask = All.FirstOrDefault(x => x.Id == dependentTask.Id && x.DeletedDate == null);
+            if (mainTask == null) return;
+
+            var task = All.FirstOrDefault(x => x.Id == dependentTask.DependentTaskId);
+            if (task == null) return;
+
+            switch (dependentTask.ActivityType)
             {
-                var maintask = All.Where(x => x.Id == dependenttask.Id && x.DeletedDate == null).FirstOrDefault();
-                if (maintask != null)
-                {
-                    if (dependenttask.ActivityType == ActivityType.FF)
-                    {
-                        var task = All.Where(x => x.Id == dependenttask.DependentTaskId).FirstOrDefault();
-                        if (task != null)
-                        {
-                            maintask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, dependenttask.OffSet);
-                        }
-                        maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                        Update(maintask);
-                    }
-                    else if (dependenttask.ActivityType == ActivityType.FS)
-                    {
-                        var task = All.Where(x => x.Id == dependenttask.DependentTaskId).FirstOrDefault();
-                        if (task != null)
-                        {
-                            maintask.StartDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, dependenttask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), dependenttask.OffSet);
-                        }
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                        Update(maintask);
-                    }
-                    else if (dependenttask.ActivityType == ActivityType.SF)
-                    {
-                        var task = All.Where(x => x.Id == dependenttask.DependentTaskId).FirstOrDefault();
-                        if (task != null)
-                        {
-                            maintask.EndDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, dependenttask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), dependenttask.OffSet);
-                        }
-                        maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                        Update(maintask);
-                    }
-                    else if (dependenttask.ActivityType == ActivityType.SS)
-                    {
-                        var task = All.Where(x => x.Id == dependenttask.DependentTaskId).FirstOrDefault();
-                        if (task != null)
-                        {
-                            maintask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, dependenttask.OffSet);
-                        }
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                        Update(maintask);
-                    }
-                }
+                case ActivityType.FF:
+                    mainTask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, dependentTask.OffSet);
+                    break;
+                case ActivityType.FS:
+                    mainTask.StartDate = WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), dependentTask.OffSet);
+                    break;
+                case ActivityType.SF:
+                    mainTask.EndDate = WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), dependentTask.OffSet);
+                    break;
+                case ActivityType.SS:
+                    mainTask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, dependentTask.OffSet);
+                    break;
             }
+
+            if (dependentTask.ActivityType == ActivityType.FF || dependentTask.ActivityType == ActivityType.SF)
+            {
+                mainTask.StartDate = WorkingDayHelper.SubtractBusinessDays(mainTask.EndDate, mainTask.Duration > 0 ? mainTask.Duration - 1 : 0);
+            }
+            else
+            {
+                mainTask.EndDate = WorkingDayHelper.AddBusinessDays(mainTask.StartDate, mainTask.Duration > 0 ? mainTask.Duration - 1 : 0);
+            }
+
+            Update(mainTask);
             _context.Save();
         }
+
 
         public void UpdateTaskOrderSequence(int StudyPlanId)
         {
@@ -509,111 +497,126 @@ namespace GSC.Respository.CTMS
             _context.Save();
             return "";
         }
-
-        public StudyPlanTask UpdateDependentTaskDate(StudyPlanTask StudyPlanTask)
+        public StudyPlanTask UpdateDependentTaskDate(StudyPlanTask studyPlanTask)
         {
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == StudyPlanTask.StudyPlanId).Select(s => s.ProjectId).FirstOrDefault();
-            var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
+            int projectId = _context.StudyPlan
+                                    .Where(x => x.Id == studyPlanTask.StudyPlanId)
+                                    .Select(s => s.ProjectId)
+                                    .FirstOrDefault();
+            var holidayList = _holidayMasterRepository.GetHolidayList(projectId);
+            var weekendList = _weekEndMasterRepository.GetWorkingDayList(projectId);
 
-            WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
+            WorkingDayHelper.InitholidayDate(holidayList, weekendList);
 
-            if (StudyPlanTask.DependentTaskId > 0)
+            if (studyPlanTask.DependentTaskId <= 0) return null;
+
+            var dependentTask = All.FirstOrDefault(x => x.Id == studyPlanTask.DependentTaskId);
+            if (dependentTask == null) return null;
+
+            switch (studyPlanTask.ActivityType)
             {
-                if (StudyPlanTask.ActivityType == ActivityType.FF)
-                {
-                    var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
-                    if (task != null)
-                    {
-                        StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, StudyPlanTask.OffSet);
-                    }
-                    StudyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(StudyPlanTask.EndDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
-                }
-                else if (StudyPlanTask.ActivityType == ActivityType.FS)
-                {
-                    var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
-                    if (task != null)
-                    {
-                        StudyPlanTask.StartDate = StudyPlanTask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, StudyPlanTask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), StudyPlanTask.OffSet);
-                    }
-                    StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(StudyPlanTask.StartDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
-                }
-                else if (StudyPlanTask.ActivityType == ActivityType.SF)
-                {
-                    var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
-                    if (task != null)
-                    {
-                        StudyPlanTask.EndDate = StudyPlanTask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, StudyPlanTask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), StudyPlanTask.OffSet);
-                    }
-                    StudyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(StudyPlanTask.EndDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
-                }
-                else if (StudyPlanTask.ActivityType == ActivityType.SS)
-                {
-                    var task = All.Where(x => x.Id == StudyPlanTask.DependentTaskId).FirstOrDefault();
-                    if (task != null)
-                    {
-                        StudyPlanTask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, StudyPlanTask.OffSet);
-                    }
-                    StudyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(StudyPlanTask.StartDate, StudyPlanTask.Duration > 0 ? StudyPlanTask.Duration - 1 : 0);
-                }
-                return StudyPlanTask;
+                case ActivityType.FF:
+                    studyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(dependentTask.EndDate, studyPlanTask.OffSet);
+                    break;
+                case ActivityType.FS:
+                    studyPlanTask.StartDate = studyPlanTask.isMileStone
+                        ? WorkingDayHelper.AddBusinessDays(dependentTask.EndDate, studyPlanTask.OffSet)
+                        : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(dependentTask.EndDate), studyPlanTask.OffSet);
+                    break;
+                case ActivityType.SF:
+                    studyPlanTask.EndDate = studyPlanTask.isMileStone
+                        ? WorkingDayHelper.AddBusinessDays(dependentTask.StartDate, studyPlanTask.OffSet)
+                        : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(dependentTask.StartDate), studyPlanTask.OffSet);
+                    break;
+                case ActivityType.SS:
+                    studyPlanTask.StartDate = WorkingDayHelper.AddBusinessDays(dependentTask.StartDate, studyPlanTask.OffSet);
+                    break;
             }
-            return null;
+
+            if (studyPlanTask.ActivityType == ActivityType.FF || studyPlanTask.ActivityType == ActivityType.SF)
+            {
+                studyPlanTask.StartDate = WorkingDayHelper.SubtractBusinessDays(studyPlanTask.EndDate, studyPlanTask.Duration > 0 ? studyPlanTask.Duration - 1 : 0);
+            }
+            else
+            {
+                studyPlanTask.EndDate = WorkingDayHelper.AddBusinessDays(studyPlanTask.StartDate, studyPlanTask.Duration > 0 ? studyPlanTask.Duration - 1 : 0);
+            }
+
+            return studyPlanTask;
         }
 
 
-        private string UpdateDependentTaskDate1(int StudyPlanTaskId, ref List<StudyPlanTask> reftasklist)
+        private string UpdateDependentTaskDate1(int studyPlanTaskId, ref List<StudyPlanTask> taskList)
         {
-            int studyPlanId = reftasklist.Select(s => s.StudyPlanId).FirstOrDefault();
-            int ProjectId = _context.StudyPlan.Where(x => x.Id == studyPlanId).Select(s => s.ProjectId).FirstOrDefault();
-            var holidaylist = _holidayMasterRepository.GetHolidayList(ProjectId);
-            var weekendlist = _weekEndMasterRepository.GetWorkingDayList(ProjectId);
+            int studyPlanId = taskList.Select(s => s.StudyPlanId).FirstOrDefault();
+            int projectId = GetProjectId(studyPlanId);
 
-            WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
+            InitializeWorkingDayHelper(projectId);
 
-            var maintask = reftasklist.Find(x => x.Id == StudyPlanTaskId && x.DeletedDate == null);
-            if (maintask != null)
-            {
-                if (maintask.ActivityType == ActivityType.FF)
-                {
-                    var task = reftasklist.Find(x => x.Id == maintask.DependentTaskId);
-                    if (task != null)
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet);
-                    maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
+            var mainTask = GetMainTask(studyPlanTaskId, taskList);
+            if (mainTask == null) return "";
 
-                    Update(maintask);
-                }
-                else if (maintask.ActivityType == ActivityType.FS)
-                {
-                    var task = reftasklist.Find(x => x.Id == maintask.DependentTaskId);
-                    if (task != null)
-                        maintask.StartDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), maintask.OffSet);
-                    maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
+            var dependentTask = GetDependentTask(mainTask, taskList);
+            if (dependentTask == null) return "";
 
-                    Update(maintask);
-                }
-                else if (maintask.ActivityType == ActivityType.SF)
-                {
-                    var task = reftasklist.Find(x => x.Id == maintask.DependentTaskId);
-                    if (task != null)
-                        maintask.EndDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), maintask.OffSet);
-                    maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-
-                    Update(maintask);
-                }
-                else if (maintask.ActivityType == ActivityType.SS)
-                {
-                    var task = reftasklist.Find(x => x.Id == maintask.DependentTaskId);
-                    if (task != null)
-                        maintask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet);
-                    maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-
-                    Update(maintask);
-                }
-            }
+            UpdateTaskDates(mainTask, dependentTask);
+            Update(mainTask);
 
             return "";
         }
+
+        private int GetProjectId(int studyPlanId)
+        {
+            return _context.StudyPlan
+                           .Where(x => x.Id == studyPlanId)
+                           .Select(s => s.ProjectId)
+                           .FirstOrDefault();
+        }
+
+        private void InitializeWorkingDayHelper(int projectId)
+        {
+            var holidayList = _holidayMasterRepository.GetHolidayList(projectId);
+            var weekendList = _weekEndMasterRepository.GetWorkingDayList(projectId);
+            WorkingDayHelper.InitholidayDate(holidayList, weekendList);
+        }
+
+        private StudyPlanTask GetMainTask(int studyPlanTaskId, List<StudyPlanTask> taskList)
+        {
+            return taskList.Find(x => x.Id == studyPlanTaskId && x.DeletedDate == null);
+        }
+
+        private StudyPlanTask GetDependentTask(StudyPlanTask mainTask, List<StudyPlanTask> taskList)
+        {
+            return taskList.Find(x => x.Id == mainTask.DependentTaskId);
+        }
+
+        private void UpdateTaskDates(StudyPlanTask mainTask, StudyPlanTask dependentTask)
+        {
+            switch (mainTask.ActivityType)
+            {
+                case ActivityType.FF:
+                    mainTask.EndDate = WorkingDayHelper.AddBusinessDays(dependentTask.EndDate, mainTask.OffSet);
+                    mainTask.StartDate = WorkingDayHelper.SubtractBusinessDays(mainTask.EndDate, mainTask.Duration > 0 ? mainTask.Duration - 1 : 0);
+                    break;
+                case ActivityType.FS:
+                    mainTask.StartDate = mainTask.isMileStone
+                        ? WorkingDayHelper.AddBusinessDays(dependentTask.EndDate, mainTask.OffSet)
+                        : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(dependentTask.EndDate), mainTask.OffSet);
+                    mainTask.EndDate = WorkingDayHelper.AddBusinessDays(mainTask.StartDate, mainTask.Duration > 0 ? mainTask.Duration - 1 : 0);
+                    break;
+                case ActivityType.SF:
+                    mainTask.EndDate = mainTask.isMileStone
+                        ? WorkingDayHelper.AddBusinessDays(dependentTask.StartDate, mainTask.OffSet)
+                        : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(dependentTask.StartDate), mainTask.OffSet);
+                    mainTask.StartDate = WorkingDayHelper.SubtractBusinessDays(mainTask.EndDate, mainTask.Duration > 0 ? mainTask.Duration - 1 : 0);
+                    break;
+                case ActivityType.SS:
+                    mainTask.StartDate = WorkingDayHelper.AddBusinessDays(dependentTask.StartDate, mainTask.OffSet);
+                    mainTask.EndDate = WorkingDayHelper.AddBusinessDays(mainTask.StartDate, mainTask.Duration > 0 ? mainTask.Duration - 1 : 0);
+                    break;
+            }
+        }
+
 
         public DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto)
         {
@@ -689,122 +692,139 @@ namespace GSC.Respository.CTMS
 
             return result;
         }
-
+        
+        // Get document chart code start
         public StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType, int countryId, int siteId)
         {
-            StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
+            var result = new StudyPlanTaskChartDto();
+            var studyIds = GetStudyIds(projectId, filterType, siteId);
 
-            var studyIds = new List<int>();
+            var studyPlanTasks = GetStudyPlanTasks(filterType, countryId, projectId, studyIds);
+            result.All = studyPlanTasks.Count;
 
-            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
-            var ids = _projectRepository.All.Where(x =>
-                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                     && x.DeletedDate == null && x.ParentProjectId == projectId
-                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+            var todayDate = DateTime.Now;
 
-            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
+            foreach (var item in studyPlanTasks)
             {
-                studyIds.AddRange(ids);
-                studyIds.Add(projectId);
-            }
-            if (filterType == CtmsStudyTaskFilter.Site)
-            {
-                if (siteId == 0)
-                    studyIds.AddRange(ids);
-                else
-                    studyIds.Add(siteId);
-            }
-
-            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null
-            && (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.StudyPlan.ProjectId) :
-                x.StudyPlan.ProjectId == projectId) && x.DeletedDate == null
-               && (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry)).ToList();
-
-            var TodayDate = DateTime.Now;
-            result.All = StudyPlanTask.Count;
-
-            foreach (var item in StudyPlanTask)
-            {
-
-                if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null)
-                {
-                    result.NotStartedDate = result.NotStartedDate + 1;
-                    continue;
-                }
-                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate && item.EndDate > TodayDate)
-                {
-                    result.OnGoingDate = result.OnGoingDate + 1;
-                    continue;
-                }
-                if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate == null)
-                {
-                    result.DueDate = result.DueDate + 1;
-                    continue;
-                }
-                if (item.ActualStartDate != null && item.ActualEndDate != null && item.EndDate >= item.ActualEndDate)
-                {
-                    result.Complete = result.Complete + 1;
-                    continue;
-                }
-
-                if ((item.EndDate < item.ActualEndDate) || (item.EndDate < TodayDate && item.ActualStartDate != null && item.ActualEndDate == null) || (item.EndDate < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null))
-                {
-                    result.DeviatedDate = result.DeviatedDate + 1;
-
-                }
+                UpdateChartDto(item, todayDate, result);
             }
 
             return result;
         }
 
+        private List<StudyPlanTask> GetStudyPlanTasks(CtmsStudyTaskFilter filterType, int countryId, int projectId, List<int> studyIds)
+        {
+            return All.Include(x => x.StudyPlan)
+                .Where(x => x.StudyPlan.DeletedDate == null
+                            && (filterType != CtmsStudyTaskFilter.Study
+                                ? studyIds.Contains(x.StudyPlan.ProjectId)
+                                : x.StudyPlan.ProjectId == projectId)
+                            && x.DeletedDate == null
+                            && (filterType == CtmsStudyTaskFilter.Country
+                                ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId
+                                : filterType == CtmsStudyTaskFilter.All || !x.IsCountry))
+                .ToList();
+        }
+
+        private void UpdateChartDto(StudyPlanTask item, DateTime todayDate, StudyPlanTaskChartDto result)
+        {
+            if (IsNotStarted(item, todayDate))
+            {
+                result.NotStartedDate += 1;
+                return;
+            }
+            if (IsOnGoing(item, todayDate))
+            {
+                result.OnGoingDate += 1;
+                return;
+            }
+            if (IsDue(item, todayDate))
+            {
+                result.DueDate += 1;
+                return;
+            }
+            if (IsComplete(item))
+            {
+                result.Complete += 1;
+                return;
+            }
+            if (IsDeviated(item, todayDate))
+            {
+                result.DeviatedDate += 1;
+            }
+        }
+
+        private bool IsNotStarted(StudyPlanTask item, DateTime todayDate)
+        {
+            return todayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null;
+        }
+
+        private bool IsOnGoing(StudyPlanTask item, DateTime todayDate)
+        {
+            return item.ActualStartDate != null && item.ActualEndDate == null
+                   && item.EndDate > item.ActualStartDate && item.EndDate > todayDate;
+        }
+
+        private bool IsDue(StudyPlanTask item, DateTime todayDate)
+        {
+            return item.StartDate < todayDate && item.EndDate > todayDate && item.ActualStartDate == null;
+        }
+
+        private bool IsComplete(StudyPlanTask item)
+        {
+            return item.ActualStartDate != null && item.ActualEndDate != null && item.EndDate >= item.ActualEndDate;
+        }
+
+        private bool IsDeviated(StudyPlanTask item, DateTime todayDate)
+        {
+            return item.EndDate < item.ActualEndDate
+                   || (item.EndDate < todayDate && item.ActualStartDate != null && item.ActualEndDate == null)
+                   || (item.EndDate < todayDate && item.ActualStartDate == null && item.ActualEndDate == null);
+        }
+
+        // Document chat code end
+
+        // Chart report code start
         public List<StudyPlanTaskChartReportDto> GetChartReport(int projectId, CtmsChartType? chartType, CtmsStudyTaskFilter filterType)
         {
-            StudyPlanTaskChartDto result = new StudyPlanTaskChartDto();
+            var studyIds = GetStudyIds(projectId, filterType, 0);
+            var studyPlanTasks = GetStudyPlanTasks(filterType, projectId, studyIds);
 
+            var todayDate = DateTime.Now;
+            var filteredTasks = FilterTasksByChartType(studyPlanTasks, chartType, todayDate);
 
-            var studyIds = new List<int>();
+            return CreateReportDtos(filteredTasks, chartType);
+        }
 
-            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
-            var ids = _projectRepository.All.Where(x =>
-                     (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                     && x.DeletedDate == null && x.ParentProjectId == projectId
-                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
+        private List<StudyPlanTask> GetStudyPlanTasks(CtmsStudyTaskFilter filterType, int projectId, List<int> studyIds)
+        {
+            return All.Include(x => x.StudyPlan)
+                .Where(x => x.StudyPlan.DeletedDate == null
+                            && (filterType != CtmsStudyTaskFilter.Study
+                                ? studyIds.Contains(x.StudyPlan.ProjectId)
+                                : x.StudyPlan.ProjectId == projectId)
+                            && x.DeletedDate == null
+                            && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country)))
+                .ToList();
+        }
 
-            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
-            {
-                studyIds.AddRange(ids);
-                studyIds.Add(projectId);
-            }
-            if (filterType == CtmsStudyTaskFilter.Site)
-            {
-                studyIds.AddRange(ids);
-            }
+        private List<StudyPlanTask> FilterTasksByChartType(List<StudyPlanTask> tasks, CtmsChartType? chartType, DateTime todayDate)
+        {
+            return tasks.Where(item => IsTaskMatchingChartType(item, chartType, todayDate)).ToList();
+        }
 
-            var StudyPlanTask = All.Include(x => x.StudyPlan).Where(x => x.StudyPlan.DeletedDate == null
-            && (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.StudyPlan.ProjectId) :
-                x.StudyPlan.ProjectId == projectId) && x.DeletedDate == null
-                && (filterType == CtmsStudyTaskFilter.All || x.IsCountry == (filterType == CtmsStudyTaskFilter.Country))).ToList();
+        private bool IsTaskMatchingChartType(StudyPlanTask item, CtmsChartType? chartType, DateTime todayDate)
+        {
+            return (chartType == CtmsChartType.NotStarted && IsNotStarted(item, todayDate)) ||
+                   (chartType == CtmsChartType.OnGoingDate && IsOnGoing(item, todayDate)) ||
+                   (chartType == CtmsChartType.DueDate && IsDue(item, todayDate)) ||
+                   (chartType == CtmsChartType.Completed && IsComplete(item)) ||
+                   (chartType == CtmsChartType.DeviatedDate && IsDeviated(item, todayDate));
+        }
 
-            var TodayDate = DateTime.Now;
-            result.All = StudyPlanTask.Count;
-            var data = new List<StudyPlanTask>();
-
-            foreach (var item in StudyPlanTask)
-            {
-
-                if (TodayDate < item.StartDate && item.ActualStartDate == null && item.ActualEndDate == null && chartType == CtmsChartType.NotStarted)
-                    data.Add(item);
-                if (item.ActualStartDate != null && item.ActualEndDate == null && item.EndDate > item.ActualStartDate && item.EndDate > TodayDate && chartType == CtmsChartType.OnGoingDate)
-                    data.Add(item);
-                if (item.StartDate < TodayDate && item.EndDate > TodayDate && item.ActualStartDate == null && chartType == CtmsChartType.DueDate)
-                    data.Add(item);
-                if (item.ActualStartDate != null && item.ActualEndDate != null && item.EndDate >= item.ActualEndDate && chartType == CtmsChartType.Completed)
-                    data.Add(item);
-                if (((item.EndDate < item.ActualEndDate) || (item.EndDate < TodayDate && item.ActualStartDate != null && item.ActualEndDate == null) || (item.EndDate < TodayDate && item.ActualStartDate == null && item.ActualEndDate == null)) && (chartType == CtmsChartType.DeviatedDate))
-                    data.Add(item);
-            }
-
-            return data.Select(x => new StudyPlanTaskChartReportDto
+        private List<StudyPlanTaskChartReportDto> CreateReportDtos(List<StudyPlanTask> tasks, CtmsChartType? chartType)
+        {
+            return tasks.Select(x => new StudyPlanTaskChartReportDto
             {
                 Id = x.Id,
                 Duration = x.Duration,
@@ -815,96 +835,170 @@ namespace GSC.Respository.CTMS
             }).ToList();
         }
 
-        public List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search)
-        {
-            var result = new List<StudyPlanTaskDto>();
-            if (search.countryId > 0)
-            {
-                var projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x => x.ParentProjectId == search.siteId
-                                                          && _projectRightRepository.All.Any(a => a.ProjectId == x.Id
-                                                          && a.UserId == _jwtTokenAccesser.UserId
-                                                          && a.RoleId == _jwtTokenAccesser.RoleId
-                                                          && a.DeletedDate == null
-                                                          && a.RollbackReason == null)
-                                                          && x.ManageSite.City.State.CountryId == search.countryId
-                                                          && x.DeletedDate == null).ToList();
+        // Chart report code end
 
-                if (projectIds.Count == 0)
-                    projectIds = _projectRepository.All.Include(x => x.ManageSite).Where(x =>
-                                                         _projectRightRepository.All.Any(a => a.ProjectId == x.Id
+        // Resource Management search code start
+        private bool IsValidProject(Data.Entities.Master.Project project)
+        {
+            return _projectRightRepository.All.Any(a => a.ProjectId == project.Id
                                                         && a.UserId == _jwtTokenAccesser.UserId
                                                         && a.RoleId == _jwtTokenAccesser.RoleId
                                                         && a.DeletedDate == null
-                                                        && a.RollbackReason == null)
-                                                        && x.ManageSite.City.State.CountryId == search.countryId
-                                                        && x.Id == search.siteId
-                                                        && x.DeletedDate == null).ToList();
-
-                var studyplans = _context.StudyPlan.Where(x => projectIds.Select(f => f.Id).Contains(x.ProjectId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-                foreach (var item in studyplans)
-                {
-                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id).OrderBy(x => x.TaskOrder).
-                     ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-                    result = tasklist;
-                }
-            }
-            else
+                                                        && a.RollbackReason == null);
+        }
+        private void PopulateTaskResources(List<StudyPlanTaskDto> tasks)
+        {
+            foreach (var item in tasks)
             {
-                var studyplan = _context.StudyPlan.Where(x => x.ProjectId == search.siteId && x.DeletedDate == null).OrderByDescending(x => x.Id).LastOrDefault();
-                if (studyplan != null)
-                {
-                    var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == studyplan.Id).OrderBy(x => x.TaskOrder).
-                    ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
-                    result = tasklist;
-                }
-            }
+                var resourceList = _context.StudyPlanResource.Include(x => x.ResourceType)
+                    .Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
+                    .Select(x => new ResourceTypeGridDto
+                    {
+                        Id = x.Id,
+                        TaskId = item.Id,
+                        ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+                        ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+                        Role = x.ResourceType.Role.RoleName,
+                        User = x.ResourceType.User.UserName,
+                        Designation = x.ResourceType.Designation.NameOFDesignation,
+                        YersOfExperience = x.ResourceType.Designation.YersOfExperience,
+                        NameOfMaterial = x.ResourceType.NameOfMaterial,
+                        CreatedDate = x.CreatedDate,
+                        CreatedByUser = x.CreatedByUser.UserName
+                    })
+                    .ToList();
 
-            foreach (var item in result)
-            {
-                var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
-               .Select(x => new ResourceTypeGridDto
-               {
-                   Id = x.Id,
-                   TaskId = item.Id,
-                   ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
-                   ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
-                   Role = x.ResourceType.Role.RoleName,
-                   User = x.ResourceType.User.UserName,
-                   Designation = x.ResourceType.Designation.NameOFDesignation,
-                   YersOfExperience = x.ResourceType.Designation.YersOfExperience,
-                   NameOfMaterial = x.ResourceType.NameOfMaterial,
-                   CreatedDate = x.CreatedDate,
-                   CreatedByUser = x.CreatedByUser.UserName
-               }).ToList();
-                item.TaskResource = resourcelist;
+                item.TaskResource = resourceList;
             }
+        }
 
-            //Apply Filter
+        private void ApplyFilters(ref List<StudyPlanTaskDto> tasks, ResourceMgmtFilterDto search)
+        {
             if (search.ResourceId.HasValue)
-                result = result.Where(s => s.TaskResource
-                .Exists(x => x.ResourceType == (search.ResourceId == (int)ResourceTypeEnum.Manpower ? ResourceTypeEnum.Manpower.GetDescription() : ResourceTypeEnum.Material.GetDescription()))).ToList();
+            {
+                var resourceType = GetResourceTypeDescription(search.ResourceId.Value);
+                tasks = tasks.Where(s => s.TaskResource.Any(x => x.ResourceType == resourceType)).ToList();
+            }
 
             if (search.ResourceSubId.HasValue)
-                result = result.Where(s => s.TaskResource
-                .Exists(x => x.ResourceSubType == GetResourceType(search.ResourceSubId))).ToList();
+            {
+                var resourceSubType = GetResourceType(search.ResourceSubId);
+                tasks = tasks.Where(s => s.TaskResource.Any(x => x.ResourceSubType == resourceSubType)).ToList();
+            }
 
             if (search.RoleId.HasValue)
-                result = result.Where(s => s.TaskResource.Exists(x => x.Role == _context.SecurityRole.Where(s => s.Id == search.RoleId).Select(x => x.RoleName).FirstOrDefault())).ToList();
+            {
+                var roleName = _context.SecurityRole.Where(s => s.Id == search.RoleId).Select(x => x.RoleName).FirstOrDefault();
+                tasks = tasks.Where(s => s.TaskResource.Any(x => x.Role == roleName)).ToList();
+            }
 
             if (search.UserId.HasValue)
-                result = result.Where(s => s.TaskResource.Exists(x => x.User == _context.Users.Where(s => s.Id == search.UserId).Select(x => x.UserName).FirstOrDefault())).ToList();
+            {
+                var userName = _context.Users.Where(s => s.Id == search.UserId).Select(x => x.UserName).FirstOrDefault();
+                tasks = tasks.Where(s => s.TaskResource.Any(x => x.User == userName)).ToList();
+            }
 
             if (search.DesignationId.HasValue)
-                result = result.Where(s => s.TaskResource.Exists(x => x.Designation == _context.Designation.Where(s => s.Id == search.DesignationId).Select(x => x.NameOFDesignation).FirstOrDefault())).ToList();
+            {
+                var designationName = _context.Designation.Where(s => s.Id == search.DesignationId).Select(x => x.NameOFDesignation).FirstOrDefault();
+                tasks = tasks.Where(s => s.TaskResource.Any(x => x.Designation == designationName)).ToList();
+            }
 
             if (search.ResourceNotAdded == true)
-                result = result.Where(s => s.TaskResource.Count == 0).ToList();
+            {
+                tasks = tasks.Where(s => !s.TaskResource.Any()).ToList();
+            }
 
             if (search.ResourceAdded == true)
-                result = result.Where(s => s.TaskResource.Count != 0).ToList();
+            {
+                tasks = tasks.Where(s => s.TaskResource.Any()).ToList();
+            }
+        }
+
+        private string GetResourceTypeDescription(int resourceId)
+        {
+            return resourceId == (int)ResourceTypeEnum.Manpower
+                ? ResourceTypeEnum.Manpower.GetDescription()
+                : ResourceTypeEnum.Material.GetDescription();
+        }
+
+
+        private List<int> GetProjectIds(ResourceMgmtFilterDto search)
+        {
+            if (search.countryId <= 0)
+            {
+                return new List<int>();
+            }
+
+            var projectIds = _projectRepository.All
+                .Include(x => x.ManageSite)
+                .Where(x => x.ParentProjectId == search.siteId
+                            && IsValidProject(x)
+                            && x.ManageSite.City.State.CountryId == search.countryId
+                            && x.DeletedDate == null)
+                .Select(s => s.Id)
+                .ToList();
+
+            if (!projectIds.Any())
+            {
+                projectIds = _projectRepository.All
+                    .Include(x => x.ManageSite)
+                    .Where(x => IsValidProject(x)
+                                && x.ManageSite.City.State.CountryId == search.countryId
+                                && x.Id == search.siteId
+                                && x.DeletedDate == null)
+                    .Select(s => s.Id)
+                    .ToList();
+            }
+
+            return projectIds;
+        }
+
+        private List<StudyPlanTaskDto> GetStudyPlanTasks(List<StudyPlan> studyPlans)
+        {
+            return studyPlans.SelectMany(item => All
+                .Where(x => x.DeletedDate == null && x.StudyPlanId == item.Id)
+                .OrderBy(x => x.TaskOrder)
+                .ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider)
+                .ToList())
+                .ToList();
+        }
+
+        public List<StudyPlanTaskDto> ResourceMgmtSearch(ResourceMgmtFilterDto search)
+        {
+            var result = new List<StudyPlanTaskDto>();
+
+            var projectIds = GetProjectIds(search);
+
+            if (projectIds.Any())
+            {
+                var studyPlans = _context.StudyPlan
+                    .Where(x => projectIds.Contains(x.ProjectId) && x.DeletedDate == null)
+                    .OrderByDescending(x => x.Id)
+                    .ToList();
+
+                result = GetStudyPlanTasks(studyPlans);
+            }
+            else if (search.countryId <= 0)
+            {
+                var studyPlan = _context.StudyPlan
+                    .Where(x => x.ProjectId == search.siteId && x.DeletedDate == null)
+                    .OrderByDescending(x => x.Id)
+                    .LastOrDefault();
+
+                if (studyPlan != null)
+                {
+                    result = GetStudyPlanTasks(new List<StudyPlan> { studyPlan });
+                }
+            }
+
+            PopulateTaskResources(result);
+            ApplyFilters(ref result, search);
 
             return result;
         }
+
+        // Resource Management search code end
         public string GetResourceType(int? ResourceSubId)
         {
             if (ResourceSubId == (int)SubResourceType.Permanent)
@@ -943,79 +1037,93 @@ namespace GSC.Respository.CTMS
 
             return data;
         }
-        public List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType)
+
+        // Get Budget Planer Code Start
+
+        public List<StudyPlanTaskDto> GetBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType)
+        {         
+            var studyIds = GetStudyIds(studyId, filterType, siteId);
+
+            var studyPlans = GetStudyPlans(studyIds, studyId, filterType);
+
+            var result = GetStudyPlanTasks(studyPlans, filterType, countryId);
+
+            PopulateTaskResourcesForBudgetPlaner(result);
+
+            return result.Where(s => s.TaskResource.Count != 0).ToList();
+        }
+        private List<StudyPlan> GetStudyPlans(List<int> studyIds, int studyId, CtmsStudyTaskFilter filterType)
         {
+            return _context.StudyPlan
+                .Include(s => s.Currency)
+                .Where(x => (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.ProjectId) : x.ProjectId == studyId)
+                            && x.DeletedDate == null)
+                .OrderByDescending(x => x.Id)
+                .ToList();
+        }
 
-            var result = new List<StudyPlanTaskDto>();
-
-            var studyIds = new List<int>();
-
-            var projectList = _projectRightRepository.GetProjectChildCTMSRightIdList();
-            var ids = _projectRepository.All.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
-                     && x.DeletedDate == null && x.ParentProjectId == studyId
-                     && projectList.Any(c => c == x.Id)).Select(s => s.Id).ToList();
-
-            if (filterType == CtmsStudyTaskFilter.All || filterType == CtmsStudyTaskFilter.Country)
+        private List<StudyPlanTaskDto> GetStudyPlanTasks(List<StudyPlan> studyPlans, CtmsStudyTaskFilter filterType, int countryId)
+        {
+            return studyPlans.SelectMany(item =>
             {
-                studyIds.AddRange(ids);
-                studyIds.Add(studyId);
-            }
-            if (filterType == CtmsStudyTaskFilter.Site)
-            {
-                if (siteId == 0)
-                    studyIds.AddRange(ids);
-                else
-                    studyIds.Add(siteId);
-            }
+                var tasklist = All
+                    .Where(x => x.DeletedDate == null && x.StudyPlanId == item.Id
+                                && (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry))
+                    .OrderBy(x => x.TaskOrder)
+                    .ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider)
+                    .ToList();
 
-            var studyplans = _context.StudyPlan.Include(s => s.Currency).Where(x => (filterType != CtmsStudyTaskFilter.Study ? studyIds.Contains(x.ProjectId) :
-                x.ProjectId == studyId) && x.DeletedDate == null).OrderByDescending(x => x.Id).ToList();
-
-            foreach (var item in studyplans)
-            {
-                var tasklist = All.Where(x => false ? x.DeletedDate != null : x.DeletedDate == null && x.StudyPlanId == item.Id
-                  && (filterType == CtmsStudyTaskFilter.Country ? countryId <= 0 ? x.IsCountry : x.CountryId == countryId : filterType == CtmsStudyTaskFilter.All || !x.IsCountry)).OrderBy(x => x.TaskOrder).
-                 ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider).ToList();
                 tasklist.ForEach(task =>
                 {
                     task.GlobalCurrencySymbol = item.Currency != null ? item.Currency.CurrencySymbol : "$";
                 });
-                result.AddRange(tasklist);
-            }
-            foreach (var item in result)
+
+                return tasklist;
+            }).ToList();
+        }
+
+        private void PopulateTaskResourcesForBudgetPlaner(List<StudyPlanTaskDto> tasks)
+        {
+            foreach (var item in tasks)
             {
-                var resourcelist = _context.StudyPlanResource.Include(x => x.ResourceType).Include(r => r.StudyPlanTask).Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
-               .Select(x => new ResourceTypeGridDto
-               {
-                   Id = x.Id,
-                   TaskId = item.Id,
-                   ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
-                   ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
-                   Role = x.ResourceType.Role.RoleName,
-                   User = x.ResourceType.User.UserName,
-                   Designation = x.ResourceType.Designation.NameOFDesignation,
-                   YersOfExperience = x.ResourceType.Designation.YersOfExperience,
-                   NameOfMaterial = x.ResourceType.NameOfMaterial,
-                   Unit = x.ResourceType.Unit.UnitName,
-                   NumberOfUnit = x.NoOfUnit,
-                   Cost = x.ResourceType.Cost,
-                   TotalCost = x.TotalCost,
-                   ConvertTotalCost = x.ConvertTotalCost,
-                   CurrencyType = x.ResourceType.Currency.CurrencySymbol + " - " + x.ResourceType.Currency.CurrencyName,
-                   GlobalCurrencySymbol = x.StudyPlanTask.StudyPlan.Currency.CurrencySymbol,
-                   LocalCurrencySymbol = x.ResourceType.Currency.CurrencySymbol,
-                   CreatedDate = x.CreatedDate,
-                   CreatedByUser = x.CreatedByUser.UserName,
-                   LocalCurrencyRate = _context.CurrencyRate.Where(s => s.StudyPlanId == x.StudyPlanTask.StudyPlanId && s.CurrencyId == x.ResourceType.CurrencyId && s.DeletedBy == null).Select(t => t.LocalCurrencyRate).FirstOrDefault(),
-               }).ToList();
+                var resourcelist = _context.StudyPlanResource
+                    .Include(x => x.ResourceType)
+                    .Include(r => r.StudyPlanTask)
+                    .Where(s => s.DeletedDate == null && s.StudyPlanTaskId == item.Id)
+                    .Select(x => new ResourceTypeGridDto
+                    {
+                        Id = x.Id,
+                        TaskId = item.Id,
+                        ResourceType = x.ResourceType.ResourceTypes.GetDescription(),
+                        ResourceSubType = x.ResourceType.ResourceSubType.GetDescription(),
+                        Role = x.ResourceType.Role.RoleName,
+                        User = x.ResourceType.User.UserName,
+                        Designation = x.ResourceType.Designation.NameOFDesignation,
+                        YersOfExperience = x.ResourceType.Designation.YersOfExperience,
+                        NameOfMaterial = x.ResourceType.NameOfMaterial,
+                        Unit = x.ResourceType.Unit.UnitName,
+                        NumberOfUnit = x.NoOfUnit,
+                        Cost = x.ResourceType.Cost,
+                        TotalCost = x.TotalCost,
+                        ConvertTotalCost = x.ConvertTotalCost,
+                        CurrencyType = $"{x.ResourceType.Currency.CurrencySymbol} - {x.ResourceType.Currency.CurrencyName}",
+                        GlobalCurrencySymbol = x.StudyPlanTask.StudyPlan.Currency.CurrencySymbol,
+                        LocalCurrencySymbol = x.ResourceType.Currency.CurrencySymbol,
+                        CreatedDate = x.CreatedDate,
+                        CreatedByUser = x.CreatedByUser.UserName,
+                        LocalCurrencyRate = _context.CurrencyRate
+                            .Where(s => s.StudyPlanId == x.StudyPlanTask.StudyPlanId && s.CurrencyId == x.ResourceType.CurrencyId && s.DeletedBy == null)
+                            .Select(t => t.LocalCurrencyRate)
+                            .FirstOrDefault()
+                    })
+                    .ToList();
+
                 item.TaskResource = resourcelist;
             }
-
-            //Apply flitter display only Resource Added display
-            if (result != null)
-                result = result.Where(s => s.TaskResource.Count != 0).ToList();
-            return result;
         }
+
+
+        // Get Budget Planer Code End      
 
 
         public List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId)

@@ -16,8 +16,8 @@ namespace GSC.Respository.CTMS
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
         private readonly IStudyPlanRepository _studyPlanRepository;
-        public TaskMasterRepository(IGSCContext context,
-            IMapper mapper, IStudyPlanRepository studyPlanRepository) : base(context)
+
+        public TaskMasterRepository(IGSCContext context, IMapper mapper, IStudyPlanRepository studyPlanRepository) : base(context)
         {
             _mapper = mapper;
             _context = context;
@@ -26,42 +26,46 @@ namespace GSC.Respository.CTMS
 
         public List<TaskMasterGridDto> GetTasklist(bool isDeleted, int templateId)
         {
-            return All.Where(x => (isDeleted ? (x.DeletedDate != null) : (x.DeletedDate == null)) && (x.TaskTemplateId == templateId)).OrderBy(x => x.TaskOrder).
-                   ProjectTo<TaskMasterGridDto>(_mapper.ConfigurationProvider).ToList();
+            return All
+                .Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.TaskTemplateId == templateId)
+                .OrderBy(x => x.TaskOrder)
+                .ProjectTo<TaskMasterGridDto>(_mapper.ConfigurationProvider)
+                .ToList();
         }
+
         public int UpdateTaskOrder(TaskmasterDto taskmasterDto)
         {
+            var data = All
+                .Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null)
+                .ToList();
+
             if (taskmasterDto.Position == "above")
             {
-                var data = All.Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.TaskOrder >= taskmasterDto.TaskOrder && x.DeletedDate == null).ToList();
-                foreach (var item in data)
+                foreach (var item in data.Where(x => x.TaskOrder >= taskmasterDto.TaskOrder))
                 {
-                    item.TaskOrder = ++item.TaskOrder;
+                    item.TaskOrder++;
                     Update(item);
                 }
                 return taskmasterDto.TaskOrder;
             }
+
             if (taskmasterDto.Position == "below")
             {
-                var data = All.Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.TaskOrder > taskmasterDto.TaskOrder && x.DeletedDate == null).ToList();
-                foreach (var item in data)
+                foreach (var item in data.Where(x => x.TaskOrder > taskmasterDto.TaskOrder))
                 {
-                    item.TaskOrder = ++item.TaskOrder;
+                    item.TaskOrder++;
                     Update(item);
                 }
-                return ++taskmasterDto.TaskOrder;
-            }
-            else
-            {
-                var count = All.Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null).Count();
-                return count;
+                return taskmasterDto.TaskOrder + 1;
             }
 
+            return data.Count;
         }
 
         public List<AuditTrailDto> GetTaskHistory(int id)
         {
-            var result = _context.AuditTrail.Where(x => x.RecordId == id && x.TableName == "TaskMaster" && x.Action == "Modified")
+            return _context.AuditTrail
+                .Where(x => x.RecordId == id && x.TableName == "TaskMaster" && x.Action == "Modified")
                 .Select(x => new AuditTrailDto
                 {
                     Id = x.Id,
@@ -80,99 +84,131 @@ namespace GSC.Respository.CTMS
                     IpAddress = x.IpAddress,
                     TimeZone = x.TimeZone
                 }).ToList();
-
-            return result;
         }
+
         public string AddTaskToSTudyPlan(TaskmasterDto taskmasterDto)
         {
             RemoveStudyPlanTask(taskmasterDto);
 
-            string str = string.Empty;
             var lstStudyPlan = new List<StudyPlanDto>();
-            var TaskMaster = _context.StudyPlan.Include(x => x.Project).Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null).ToList();
-            if (TaskMaster.Count > 0)
+            var taskMasters = _context.StudyPlan
+                .Include(x => x.Project)
+                .Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null)
+                .ToList();
+
+            if (taskMasters.Any())
             {
-                var projectid = TaskMaster.Where(x => x.Project.ParentProjectId == null).Select(x => x.Project.Id).FirstOrDefault();
-                var sitedata = TaskMaster.Find(x => x.Project.ParentProjectId != null);
-                for (int i = 0; i < taskmasterDto.RefrenceTypes.Count; i++)
+                var projectId = taskMasters.FirstOrDefault(x => x.Project.ParentProjectId == null)?.Project.Id;
+                var siteData = taskMasters.FirstOrDefault(x => x.Project.ParentProjectId != null);
+
+                foreach (var item in taskmasterDto.RefrenceTypes)
                 {
-                    RefrenceTypes item = taskmasterDto.RefrenceTypes[i];
-                    if (sitedata == null && (item.RefrenceType == Helper.RefrenceType.Sites ))
+                    if (item.RefrenceType == Helper.RefrenceType.Sites)
                     {
-                        var sites = _context.Project.Where(x => x.DeletedDate == null && x.ParentProjectId == projectid).ToList();
-                        sites.ForEach(s =>
-                        {
-                            var data = new StudyPlanDto();
-                            data.StartDate = TaskMaster.Select(s=>s.StartDate).FirstOrDefault();
-                            data.EndDate = TaskMaster.Select(s => s.EndDate).FirstOrDefault();
-                            data.ProjectId = s.Id;
-                            data.TaskTemplateId = taskmasterDto.TaskTemplateId;
-                            lstStudyPlan.Add(data);
-                        });
-                    }
-                    else if (sitedata != null && (item.RefrenceType == Helper.RefrenceType.Sites ))
-                    {
-                        var sites = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId != null).ToList();
-                        sites.ForEach(s =>
-                        {
-                            var data = new StudyPlanDto();
-                            data.Id = s.Id;
-                            data.StartDate = s.StartDate;
-                            data.EndDate = s.EndDate;
-                            data.ProjectId = s.ProjectId;
-                            data.TaskTemplateId = taskmasterDto.TaskTemplateId;
-                            lstStudyPlan.Add(data);
-                        });
+                        AddSitesToStudyPlan(taskmasterDto, lstStudyPlan, projectId, siteData, taskMasters);
                     }
                     else if (item.RefrenceType == Helper.RefrenceType.Study || item.RefrenceType == Helper.RefrenceType.Country)
                     {
-                        var sites = TaskMaster.Where(x => x.DeletedDate == null && x.Project.ParentProjectId == null).ToList();
-                        sites.ForEach(s =>
-                        {
-                            var data = new StudyPlanDto();
-                            data.Id = s.Id;
-                            data.StartDate = s.StartDate;
-                            data.EndDate = s.EndDate;
-                            data.ProjectId = s.ProjectId;
-                            data.TaskTemplateId = taskmasterDto.TaskTemplateId;
-                            lstStudyPlan.Add(data);
-                        });
+                        AddStudyOrCountryToStudyPlan(taskmasterDto, lstStudyPlan, taskMasters);
                     }
                 }
 
-                if (lstStudyPlan.Count > 0)
-                {
-                    foreach (var item in lstStudyPlan)
-                    {
-                        var studyplan = _mapper.Map<StudyPlan>(item);
-                        var data = _context.StudyPlan.Where(x => x.ProjectId == item.ProjectId && x.DeletedDate == null).FirstOrDefault();
-                        if (data == null)
-                        {
-                            _studyPlanRepository.Add(studyplan);
-                            _context.Save();
-                        }
-                        else
-                        {
-                            var TaskMasterdata = _context.StudyPlan.Include(x => x.Project).Where(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null && x.ProjectId == item.ProjectId).FirstOrDefault();
-                            if (TaskMasterdata != null)
-                            {
-                                studyplan.Id = TaskMasterdata.Id;
-                            }
-                        }
-                        if (studyplan.Id > 0)
-                            str = _studyPlanRepository.ImportTaskMasterDataFromTaskMaster(studyplan, taskmasterDto.Id);
-                    }
-                }
-
+                return SaveStudyPlans(lstStudyPlan, taskmasterDto);
             }
-            return str;
+
+            return string.Empty;
         }
+
+        private void AddSitesToStudyPlan(TaskmasterDto taskmasterDto, List<StudyPlanDto> lstStudyPlan, int? projectId, StudyPlan siteData, List<StudyPlan> taskMasters)
+        {
+            if (siteData == null)
+            {
+                var sites = _context.Project
+                    .Where(x => x.DeletedDate == null && x.ParentProjectId == projectId)
+                    .ToList();
+
+                foreach (var site in sites)
+                {
+                    lstStudyPlan.Add(new StudyPlanDto
+                    {
+                        StartDate = taskMasters.First().StartDate,
+                        EndDate = taskMasters.First().EndDate,
+                        ProjectId = site.Id,
+                        TaskTemplateId = taskmasterDto.TaskTemplateId
+                    });
+                }
+            }
+            else
+            {
+                foreach (var site in taskMasters.Where(x => x.Project.ParentProjectId != null))
+                {
+                    lstStudyPlan.Add(new StudyPlanDto
+                    {
+                        Id = site.Id,
+                        StartDate = site.StartDate,
+                        EndDate = site.EndDate,
+                        ProjectId = site.ProjectId,
+                        TaskTemplateId = taskmasterDto.TaskTemplateId
+                    });
+                }
+            }
+        }
+
+        private void AddStudyOrCountryToStudyPlan(TaskmasterDto taskmasterDto, List<StudyPlanDto> lstStudyPlan, List<StudyPlan> taskMasters)
+        {
+            foreach (var taskMaster in taskMasters.Where(x => x.Project.ParentProjectId == null))
+            {
+                lstStudyPlan.Add(new StudyPlanDto
+                {
+                    Id = taskMaster.Id,
+                    StartDate = taskMaster.StartDate,
+                    EndDate = taskMaster.EndDate,
+                    ProjectId = taskMaster.ProjectId,
+                    TaskTemplateId = taskmasterDto.TaskTemplateId
+                });
+            }
+        }
+
+        private string SaveStudyPlans(List<StudyPlanDto> lstStudyPlan, TaskmasterDto taskmasterDto)
+        {
+            foreach (var item in lstStudyPlan)
+            {
+                var studyPlan = _mapper.Map<StudyPlan>(item);
+                var existingPlan = _context.StudyPlan
+                    .FirstOrDefault(x => x.ProjectId == item.ProjectId && x.DeletedDate == null);
+
+                if (existingPlan == null)
+                {
+                    _studyPlanRepository.Add(studyPlan);
+                    _context.Save();
+                }
+                else
+                {
+                    var taskMasterData = _context.StudyPlan
+                        .Include(x => x.Project)
+                        .FirstOrDefault(x => x.TaskTemplateId == taskmasterDto.TaskTemplateId && x.DeletedDate == null && x.ProjectId == item.ProjectId);
+
+                    if (taskMasterData != null)
+                    {
+                        studyPlan.Id = taskMasterData.Id;
+                    }
+                }
+
+                if (studyPlan.Id > 0)
+                {
+                    return _studyPlanRepository.ImportTaskMasterDataFromTaskMaster(studyPlan, taskmasterDto.Id);
+                }
+            }
+
+            return string.Empty;
+        }
+
         public void RemoveStudyPlanTask(TaskmasterDto taskmasterDto)
         {
-            var task = _context.StudyPlanTask.Where(x => x.TaskId == taskmasterDto.Id).ToList();
-            if (task.Count > 0)
+            var tasks = _context.StudyPlanTask.Where(x => x.TaskId == taskmasterDto.Id).ToList();
+            if (tasks.Any())
             {
-                _context.StudyPlanTask.RemoveRange(task);
+                _context.StudyPlanTask.RemoveRange(tasks);
                 _context.Save();
             }
         }

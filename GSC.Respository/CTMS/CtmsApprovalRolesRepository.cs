@@ -28,14 +28,14 @@ namespace GSC.Respository.CTMS
         }
         public List<CtmsApprovalRolesGridDto> GetCtmsApprovalWorkFlowList(int projectId, bool isDeleted)
         {
-            var data = All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.ProjectId == projectId).
+            var data = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId).
                     ProjectTo<CtmsApprovalRolesGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return data;
         }
 
         public List<CtmsApprovalUsersGridDto> GetCtmsApprovalWorkFlowDetailsList(int projectId, bool isDeleted)
         {
-            var data = _context.CtmsApprovalUsers.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null && x.CtmsApprovalRoles.ProjectId == projectId).
+            var data = _context.CtmsApprovalUsers.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.CtmsApprovalRoles.ProjectId == projectId).
                     ProjectTo<CtmsApprovalUsersGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return data;
         }

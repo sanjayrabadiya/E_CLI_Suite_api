@@ -10,11 +10,11 @@ namespace GSC.Respository.CTMS
     {
         string Duplicate(UserAccessDto userAccessDto);
         List<UserAccessGridDto> GetUserAccessList(bool isDeleted, int studyId, int siteId);
-        void AddSiteUserAccesse(UserAccessDto userAccessDto);
-        List<DropDownDto> GetRollUserDropDown();
+        void AddSiteUserAccess(UserAccessDto userAccessDto);
+        List<DropDownDto> GetRoleUserDropDown();
         void AddProjectRight(int projectId, bool isCtms);
-        void AddProjectSiteRight(int ParentProjectId, int projectId);
-        List<UserAccess> getActive(UserAccessDto userAccessDto);
+        void AddProjectSiteRight(int parentProjectId, int projectId);
+        List<UserAccess> GetActive(UserAccessDto userAccessDto);
         List<UserAccessHistoryDto> GetUserAccessHistory(int id);
     }
 }

@@ -37,9 +37,9 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-            var ActiveData = _userAccessRepository.getActive(userAccessDto);
+            var ActiveData = _userAccessRepository.GetActive(userAccessDto);
             if (ActiveData.Count == 0)
-                _userAccessRepository.AddSiteUserAccesse(userAccessDto);
+                _userAccessRepository.AddSiteUserAccess(userAccessDto);
 
             return Ok(true);
         }
@@ -62,7 +62,7 @@ namespace GSC.Api.Controllers.CTMS
         [Route("GetRollUserDropDown")]
         public IActionResult GetRollUserDropDown()
         {
-            return Ok(_userAccessRepository.GetRollUserDropDown());
+            return Ok(_userAccessRepository.GetRoleUserDropDown());
         }
 
         [HttpGet("GetUserAccessHistory/{id}")]
