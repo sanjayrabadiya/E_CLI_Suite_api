@@ -6,8 +6,8 @@ namespace GSC.Respository.CTMS
 {
     public interface ICtmsMonitoringReportRepository : IGenericRepository<CtmsMonitoringReport>
     {
-        CtmsMonitoringReportFormDto GetCtmsMonitoringReportVariableValue(CtmsMonitoringReportFormDto designTemplateDto, int CtmsMonitoringReportId);
+        CtmsMonitoringReportFormDto GetCtmsMonitoringReportVariableValue(CtmsMonitoringReportFormDto designTemplateDto, int ctmsMonitoringReportId);
         CtmsMonitoringReportBasic GetFormBasic(int ManageMonitoringReportId);
-        string GetMonitoringFormApprovedOrNOt(int projectId, int siteId, int tabNumber);
+        string GetMonitoringFormApprovedOrNot(int projectId, int siteId, int tabNumber);
     }
 }
