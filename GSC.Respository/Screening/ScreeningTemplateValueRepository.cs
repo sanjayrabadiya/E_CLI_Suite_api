@@ -982,7 +982,7 @@ namespace GSC.Respository.Screening
                         worksheet.Cell(2, 7).Value = "Panel Name";
 
                         var tableList = MainData.Table.Where(x => x.DomainName == domain.Key).ToList();
-
+                        int flag = 0;
                         tableList.ForEach(d =>
                         {
                             listvariable.AddRange(d.LstVariable);
@@ -1008,7 +1008,7 @@ namespace GSC.Respository.Screening
                                         worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
                                         worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
                                         worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
-                                        worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + ". " + item.FirstOrDefault().TemplateName);
+                                        worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
 
                                         // for repeat template
                                         var repeatorder = 1;
@@ -1023,7 +1023,7 @@ namespace GSC.Respository.Screening
                                                 worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
                                                 worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
                                                 worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
-                                                worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + "." + repeatorder + " " + item.ToList()[repeatorder].TemplateName);
+                                                worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + "." + repeatorder + " " + item.FirstOrDefault().TemplateName);
                                                 repeatorder++;
                                             }
                                         }
@@ -1036,12 +1036,18 @@ namespace GSC.Respository.Screening
                                 var sf = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == d.TableHeader).ToList().Select(x => x.Address.ColumnNumber);
                                 if (sf.Count() == 0)
                                 {
+                                    flag = 0;
                                     worksheet.Cell(1, cellno).Value = d.VariableName;
                                     worksheet.Cell(2, cellno).Value = d.TableHeader;
                                 }
+                                else
+                                {
+                                    flag = 1;
+                                }
 
                             };
-                            cellno++;
+                            if (flag == 0 || domainwise.Count() > 1)
+                                cellno++;
                         });
 
                         tableList.ForEach(data =>
@@ -1055,7 +1061,7 @@ namespace GSC.Respository.Screening
                                 var row = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == sss).ToList().FirstOrDefault().Address.ColumnNumber;
                                 var visit = worksheet.Column(6).CellsUsed().Where(y => y.Value.ToString() == db.Visit).ToList().Select(x => x.Address.RowNumber);
                                 var initial = worksheet.Column(5).CellsUsed().Where(y => y.Value.ToString() == db.Initial).ToList().Select(x => x.Address.RowNumber);
-                               // var template = worksheet.Column(7).CellsUsed().Where(y => y.Value.ToString() == db.TemplateName).ToList().Select(x => x.Address.RowNumber);
+                                // var template = worksheet.Column(7).CellsUsed().Where(y => y.Value.ToString() == db.TemplateName).ToList().Select(x => x.Address.RowNumber);
 
                                 var abs = visit.Intersect(initial).FirstOrDefault();
 
@@ -1074,10 +1080,10 @@ namespace GSC.Respository.Screening
                                         var repeat = new RepeatTemplateDto();
                                         repeat.TemplateId = db.ScreeningTemplateId;
                                         repeat.Parent = parent;
-                                        repeat.Row = level + 1;
+                                        repeat.Row = level + (int)db.RepeatSeqNo;
                                         repeatdata.Add(repeat);
 
-                                        level = level + 1;
+                                        level = level + (int)db.RepeatSeqNo;
                                     }
                                 }
 
@@ -1819,7 +1825,7 @@ namespace GSC.Respository.Screening
                                 Initial = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial,
                                 SubjectNo = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
                                 RandomizationNumber = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
-                                Visit = v.ProjectDesignVariableValue.ProjectDesignVariable.ProjectDesignTemplate.ProjectDesignVisit.DisplayName +
+                                Visit = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                                        Convert.ToString(v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
                                 DesignOrder = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
                                 TemplateName = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName,
