@@ -943,6 +943,8 @@ namespace GSC.Api.Helpers
                .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
                .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
             .ReverseMap();
+
+            CreateMap<ContractTemplateFormat, ContractTemplateFormatGridDto>().ReverseMap();
         }
     }
 }

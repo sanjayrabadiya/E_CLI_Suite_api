@@ -99,6 +99,7 @@ namespace GSC.Api.Controllers.Master
             _studyPlanTaskResourceRepository.Delete(record);
             _uow.Save();
 
+            _studyPlanTaskResourceRepository.TotalCostUpdate(record);
             return Ok();
         }
 
