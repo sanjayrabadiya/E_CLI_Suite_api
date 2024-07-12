@@ -130,7 +130,7 @@ namespace GSC.Respository.CTMS
 
         private List<StudyPlanTaskDto> GetTasks(bool isDeleted, int studyPlanId, CtmsStudyTaskFilter filterType, int countryId)
         {
-            return All
+            var taskList = All
                 .Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) &&
                             x.StudyPlanId == studyPlanId &&
                             (filterType == CtmsStudyTaskFilter.Country ? (countryId <= 0 ? x.IsCountry : x.CountryId == countryId) : filterType == CtmsStudyTaskFilter.All || !x.IsCountry))
@@ -138,6 +138,16 @@ namespace GSC.Respository.CTMS
                 .OrderBy(x => x.TaskOrder)
                 .ProjectTo<StudyPlanTaskDto>(_mapper.ConfigurationProvider)
                 .ToList();
+
+            taskList.ForEach(x =>
+            {
+                if (x.ParentProjectId != null)
+                {
+                    x.StudayName = _context.Project.First(y => y.Id == x.ParentProjectId && x.DeletedDate == null)?.ProjectCode ?? "";
+                }
+            });
+
+            return taskList;
         }
 
         private List<StudyPlanTaskDto> GetTasksResource(bool isDeleted, int studyPlanId, CtmsStudyTaskFilter filterType, int countryId)
@@ -692,7 +702,7 @@ namespace GSC.Respository.CTMS
 
             return result;
         }
-        
+
         // Get document chart code start
         public StudyPlanTaskChartDto GetDocChart(int projectId, CtmsStudyTaskFilter filterType, int countryId, int siteId)
         {
@@ -1041,7 +1051,7 @@ namespace GSC.Respository.CTMS
         // Get Budget Planer Code Start
 
         public List<StudyPlanTaskDto> GetBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType)
-        {         
+        {
             var studyIds = GetStudyIds(studyId, filterType, siteId);
 
             var studyPlans = GetStudyPlans(studyIds, studyId, filterType);
@@ -1277,7 +1287,7 @@ namespace GSC.Respository.CTMS
 
 
             return All.Where(x => x.DeletedDate == null && ids.Contains(x.StudyPlan.ProjectId)).Include(i => i.StudyPlan.Project).GroupBy(g => g.StudyPlan.ProjectId)
-                .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlan.Project.ProjectCode ?? c.First().StudyPlan.Project.ManageSite.SiteName }).OrderBy(o => o.Value).ToList();
+                .Select(c => new DropDownDto { Id = c.Key, Value = c.First().StudyPlan.Project.ManageSite.SiteName }).OrderBy(o => o.Value).ToList();
         }
 
         public List<DropDownDto> GetBudgetCountryDropDown(int parentProjectId)

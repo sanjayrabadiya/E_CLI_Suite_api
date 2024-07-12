@@ -320,8 +320,9 @@ namespace GSC.Api.Helpers
                            .ForMember(x => x.StartDateDay, x => x.MapFrom(a => a.StartDate))
                            .ForMember(x => x.DurationDay, x => x.MapFrom(a => a.Duration))
                            .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                           .ForMember(x => x.ParentProjectId, x => x.MapFrom(a => a.StudyPlan.Project.ParentProjectId))
                            .ForMember(x => x.StudayName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode))
-                           .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ProjectCode ?? a.StudyPlan.Project.ManageSite.SiteName))
+                           .ForMember(x => x.SiteName, x => x.MapFrom(a => a.StudyPlan.Project.ManageSite.SiteName))
                            .ForMember(x => x.Site, x => x.MapFrom(a => a.StudyPlan.Project.ManageSite.SiteName))
                            .ForMember(x => x.DependenceTaskName, x => x.MapFrom(a => a.TaskName + " - " + (a.IsCountry ? a.Country.CountryName : a.StudyPlan.Project.ProjectCode ?? a.StudyPlan.Project.ManageSite.SiteName)))
                           .ReverseMap();
@@ -860,7 +861,7 @@ namespace GSC.Api.Helpers
                     .ForMember(x => x.IsInvoiceGenerated, x => x.MapFrom(a => a.PatientMilestoneInvoice.Any(x => x.DeletedDate == null)))
                     .ReverseMap();
             CreateMap<PassthroughMilestone, PassthroughMilestoneGridDto>()
-                   .ForMember(x => x.PassThroughCostActivity, x => x.MapFrom(a =>a.PassThroughCostActivity.ActivityName))
+                   .ForMember(x => x.PassThroughCostActivity, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
                     .ForMember(x => x.PaymentTypePassThrough, x => x.MapFrom(a => a.PaymentTypePassThrough.GetDescription()))
                    .ForMember(x => x.PassThroughCostActivity, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
                    .ForMember(x => x.IsInvoiceGenerated, x => x.MapFrom(a => a.PassthroughMilestoneInvoice.Any(x => x.DeletedDate == null)))
@@ -917,31 +918,31 @@ namespace GSC.Api.Helpers
             CreateMap<PassthroughMilestoneInvoice, PassthroughMilestoneInvoiceGridDto>().ReverseMap();
             CreateMap<PatientMilestoneInvoice, PatientMilestoneInvoiceGridDto>().ReverseMap();
             CreateMap<ResourceMilestoneInvoice, ResourceMilestoneInvoiceGridDto>().ReverseMap();
-           CreateMap<SitePayment, SitePaymentGridDto>()
-                .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
-                .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-                .ForMember(x => x.BudgetPaymentType, x => x.MapFrom(a => a.BudgetPaymentType.GetDescription()))
-                .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
-                .ForMember(x => x.Activity, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
-                .ForMember(x => x.BudgetFlgType, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
-                .ForMember(x => x.UnitName, x => x.MapFrom(a => a.Unit.UnitName))
-                
-        .ReverseMap();
+            CreateMap<SitePayment, SitePaymentGridDto>()
+                 .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+                 .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+                 .ForMember(x => x.BudgetPaymentType, x => x.MapFrom(a => a.BudgetPaymentType.GetDescription()))
+                 .ForMember(x => x.Visit, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+                 .ForMember(x => x.Activity, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+                 .ForMember(x => x.BudgetFlgType, x => x.MapFrom(a => a.BudgetFlgType.GetDescription()))
+                 .ForMember(x => x.UnitName, x => x.MapFrom(a => a.Unit.UnitName))
 
-        CreateMap<SiteContract, SiteContractGridDto>()
-           .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
-           .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
-        .ReverseMap();
+         .ReverseMap();
 
-        CreateMap<PatientSiteContract, PatientSiteContractGridDto>()
-           .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
-           .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
-        .ReverseMap();
+            CreateMap<SiteContract, SiteContractGridDto>()
+               .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+               .ForMember(x => x.CountryName, x => x.MapFrom(a => a.Country.CountryName))
+            .ReverseMap();
 
-        CreateMap<PassthroughSiteContract, PassthroughSiteContractGridDto>()
-           .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
-           .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
-        .ReverseMap();
+            CreateMap<PatientSiteContract, PatientSiteContractGridDto>()
+               .ForMember(x => x.VisitName, x => x.MapFrom(a => a.ProjectDesignVisit.DisplayName))
+               .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
+            .ReverseMap();
+
+            CreateMap<PassthroughSiteContract, PassthroughSiteContractGridDto>()
+               .ForMember(x => x.ActivityName, x => x.MapFrom(a => a.PassThroughCostActivity.ActivityName))
+               .ForMember(x => x.ContractCode, x => x.MapFrom(a => a.SiteContract.ContractCode))
+            .ReverseMap();
         }
     }
 }
