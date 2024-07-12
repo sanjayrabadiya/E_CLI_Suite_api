@@ -195,49 +195,50 @@ namespace GSC.Respository.CTMS
         #endregion
         private StudyPlanTask UpdateDependentTaskDate(StudyPlanTask maintask, ref List<StudyPlanTask> tasklist)
         {
-            if (maintask.DependentTaskId > 0)
-            {
-                if (maintask.ActivityType == ActivityType.FF)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet);
-                        maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                else if (maintask.ActivityType == ActivityType.FS)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.StartDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), maintask.OffSet);
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                else if (maintask.ActivityType == ActivityType.SF)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.EndDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), maintask.OffSet);
-                        maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                else if (maintask.ActivityType == ActivityType.SS)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet);
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                return maintask;
-            }
-            return null;
-        }
+            if (maintask.DependentTaskId <= 0) return null;
 
+            var dependentTask = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
+            if (dependentTask == null) return null;
+
+            DateTime CalculateStartDate(DateTime baseDate, int duration)
+            {
+                return WorkingDayHelper.SubtractBusinessDays(baseDate, duration > 0 ? duration - 1 : 0);
+            }
+
+            DateTime CalculateEndDate(DateTime baseDate, int offset)
+            {
+                return WorkingDayHelper.AddBusinessDays(baseDate, offset);
+            }
+
+            switch (maintask.ActivityType)
+            {
+                case ActivityType.FF:
+                    maintask.EndDate = CalculateEndDate(dependentTask.EndDate, maintask.OffSet);
+                    maintask.StartDate = CalculateStartDate(maintask.EndDate, maintask.Duration);
+                    break;
+
+                case ActivityType.FS:
+                    maintask.StartDate = maintask.isMileStone
+                        ? CalculateEndDate(dependentTask.EndDate, maintask.OffSet)
+                        : CalculateEndDate(WorkingDayHelper.GetNextWorkingDay(dependentTask.EndDate), maintask.OffSet);
+                    maintask.EndDate = CalculateEndDate(maintask.StartDate, maintask.Duration - 1);
+                    break;
+
+                case ActivityType.SF:
+                    maintask.EndDate = maintask.isMileStone
+                        ? CalculateEndDate(dependentTask.StartDate, maintask.OffSet)
+                        : CalculateEndDate(WorkingDayHelper.GetNextSubstarctWorkingDay(dependentTask.StartDate), maintask.OffSet);
+                    maintask.StartDate = CalculateStartDate(maintask.EndDate, maintask.Duration);
+                    break;
+
+                case ActivityType.SS:
+                    maintask.StartDate = CalculateEndDate(dependentTask.StartDate, maintask.OffSet);
+                    maintask.EndDate = CalculateEndDate(maintask.StartDate, maintask.Duration - 1);
+                    break;
+            }
+
+            return maintask;
+        }
         public string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist, StudyPlan studyplan)
         {
             if (taskmasterDto.StartDate >= studyplan.StartDate && taskmasterDto.StartDate <= studyplan.EndDate

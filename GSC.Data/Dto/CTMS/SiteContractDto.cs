@@ -1,8 +1,5 @@
-﻿using GSC.Data.Dto.CTMS;
-using GSC.Data.Entities.Common;
-using GSC.Helper;
+﻿using GSC.Data.Entities.Common;
 using GSC.Shared.DocumentService;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace GSC.Data.Dto.Master
@@ -21,7 +18,9 @@ namespace GSC.Data.Dto.Master
         public string ContractFileName { get; set; }
         public string ContractDocumentPath { get; set; }
         public FileModel ContractFileModel { get; set; }
-
+        public bool IsDocument { get; set; }
+        public int? ContractTemplateFormatId { get; set; }
+        public string FormatBody { get; set; }
     }
     public class SiteContractGridDto : BaseAuditDto
     {

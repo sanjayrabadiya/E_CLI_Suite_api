@@ -5,7 +5,6 @@ using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
 using GSC.Helper;
 using GSC.Respository.Configuration;
-using GSC.Respository.CTMS;
 using GSC.Respository.Master;
 using GSC.Shared.DocumentService;
 using GSC.Shared.Extension;
@@ -23,15 +22,17 @@ namespace GSC.Api.Controllers.Master
         private readonly ISiteContractRepository _siteContractRepository;
         private readonly IPatientSiteContractRepository _PatientSiteContractRepository;
         private readonly IPassthroughSiteContractRepository _PassthroughSiteContractRepository;
+        private readonly IContractTemplateFormatRepository _contractTemplateFormatRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
-        public SiteContractController(IPatientSiteContractRepository PatientSiteContractRepository, IPassthroughSiteContractRepository PassthroughSiteContractRepository, ISiteContractRepository SiteContractRepository, IUnitOfWork uow, IMapper mapper, IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser)
+        public SiteContractController(IContractTemplateFormatRepository contractTemplateFormatRepository, IPatientSiteContractRepository PatientSiteContractRepository, IPassthroughSiteContractRepository PassthroughSiteContractRepository, ISiteContractRepository SiteContractRepository, IUnitOfWork uow, IMapper mapper, IUploadSettingRepository uploadSettingRepository, IJwtTokenAccesser jwtTokenAccesser)
         {
             _siteContractRepository = SiteContractRepository;
             _PatientSiteContractRepository = PatientSiteContractRepository;
             _PassthroughSiteContractRepository = PassthroughSiteContractRepository;
+            _contractTemplateFormatRepository = contractTemplateFormatRepository;
             _uow = uow;
             _mapper = mapper;
             _uploadSettingRepository = uploadSettingRepository;
@@ -56,31 +57,42 @@ namespace GSC.Api.Controllers.Master
         }
 
         [HttpPost]
-        public IActionResult Post([FromBody] SiteContractDto SiteContractDto)
+        public IActionResult Post([FromBody] SiteContractDto siteContractDto)
         {
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            SiteContractDto.Id = 0;
+            siteContractDto.Id = 0;
 
-            var siteContract = _mapper.Map<SiteContract>(SiteContractDto);
-            var validate = _siteContractRepository.Duplicate(SiteContractDto);
+            
+            var validate = _siteContractRepository.Duplicate(siteContractDto);
             if (!string.IsNullOrEmpty(validate))
             {
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
-            if (SiteContractDto.ContractFileModel?.Base64?.Length > 0 && SiteContractDto.ContractFileModel?.Base64 != null)
+            if (!siteContractDto.IsDocument)
             {
-                siteContract.ContractDocumentPath = DocumentService.SaveUploadDocument(SiteContractDto.ContractFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "SiteContract");
+                var contractTemplateFormate = _contractTemplateFormatRepository.Find((int)siteContractDto.ContractTemplateFormatId);
+
+                _siteContractRepository.CreateContractTemplateFormat(contractTemplateFormate, siteContractDto);
             }
+            else
+            {
+                if (siteContractDto.ContractFileModel?.Base64?.Length > 0 && siteContractDto.ContractFileModel?.Base64 != null)
+                {
+                    siteContractDto.ContractDocumentPath = DocumentService.SaveUploadDocument(siteContractDto.ContractFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "SiteContract");
+                }
+            }
+
+            var siteContract = _mapper.Map<SiteContract>(siteContractDto);
+
             _siteContractRepository.Add(siteContract);
             if (_uow.Save() <= 0)
             {
                 ModelState.AddModelError("Message", "Creating Site Contract failed on save.");
                 return BadRequest(ModelState);
             }
-            SiteContractDto.Id = siteContract.Id;
-            return Ok(SiteContractDto.Id);
+            siteContractDto.Id = siteContract.Id;
+            return Ok(siteContractDto.Id);
         }
 
         [HttpPut]
@@ -89,7 +101,6 @@ namespace GSC.Api.Controllers.Master
             var Id = SiteContractDto.Id;
             if (Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
-            //var task = _siteContractRepository.Find(Id);
             var taskmaster = _mapper.Map<SiteContract>(SiteContractDto);
             if (SiteContractDto.ContractFileModel?.Base64?.Length > 0 && SiteContractDto.ContractFileModel?.Base64 != null)
             {
