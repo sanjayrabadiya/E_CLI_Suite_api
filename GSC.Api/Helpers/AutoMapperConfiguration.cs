@@ -526,6 +526,7 @@ namespace GSC.Api.Helpers
             CreateMap<SiteContract, SiteContractDto>().ReverseMap();
             CreateMap<PatientSiteContract, PatientSiteContractDto>().ReverseMap();
             CreateMap<PassthroughSiteContract, PassthroughSiteContractDto>().ReverseMap();
+            CreateMap<ContractTemplateFormat, ContractTemplateFormatDto>().ReverseMap();
         }
     }
 }

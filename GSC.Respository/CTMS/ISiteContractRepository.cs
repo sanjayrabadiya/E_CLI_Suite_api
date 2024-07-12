@@ -2,6 +2,7 @@
 using GSC.Common.GenericRespository;
 using GSC.Data.Dto.Master;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Master;
 
 namespace GSC.Respository.Master
 {
@@ -9,5 +10,6 @@ namespace GSC.Respository.Master
     {
         string Duplicate(SiteContractDto SiteContractDto);
         IList<SiteContractGridDto> GetSiteContractList(bool isDeleted, int studyId, int siteId);
+        void CreateContractTemplateFormat(ContractTemplateFormat contractTemplateFormat, SiteContractDto siteContractDto);
     }
 }
