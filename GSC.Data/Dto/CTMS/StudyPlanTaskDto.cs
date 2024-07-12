@@ -59,7 +59,7 @@ namespace GSC.Data.Dto.CTMS
         public bool IsParentTask { get; set; }
         public bool IsPaymentMileStone { get; set; }
         public string DependenceTaskName { get; set; }
-
+        public int? ParentProjectId { get; set; }
     }
 
     public class StudyPlanTaskChartDto
