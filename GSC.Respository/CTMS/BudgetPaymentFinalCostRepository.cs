@@ -47,7 +47,7 @@ namespace GSC.Respository.CTMS
             decimal? totalFinalCost = 0;
             decimal? total = 0;
             var patientcostprocedTemp = new List<PatientCostGridData>();
-            var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == projectId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 1).Select(val => val.Key).ToList();
+            var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == projectId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 0).Select(val => val.Key).ToList();
             for (var i = 0; i < duplicates.Count; i++)
             {
                 patientcostprocedTemp = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == projectId && x.ProcedureId != null && x.Procedure.CurrencyId == duplicates[i]).
