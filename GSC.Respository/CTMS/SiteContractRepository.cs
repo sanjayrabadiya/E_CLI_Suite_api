@@ -27,7 +27,6 @@ namespace GSC.Respository.Master
         private readonly IMapper _mapper;
         private readonly IGSCContext _context;
 
-        public SiteContractRepository(IGSCContext context, IMapper mapper)
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
         private readonly IUploadSettingRepository _uploadSettingRepository;
         public SiteContractRepository(IGSCContext context, IJwtTokenAccesser jwtTokenAccesser, IUploadSettingRepository uploadSettingRepository,
