@@ -62,8 +62,35 @@ namespace GSC.Respository.CTMS
         {
             StudyPlan.ForEach(i =>
             {
+                //PatientCostVisit Total with PatientCount
+                decimal? totalFinalCost = 0;
+                decimal? total = 0;
+                var patientcostprocedTemp = new List<PatientCostGridData>();
+                var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == i.ProjectId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 0).Select(val => val.Key).ToList();
+                for (var k = 0; k < duplicates.Count; k++)
+                {
+                    patientcostprocedTemp = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == i.ProjectId && x.ProcedureId != null && x.Procedure.CurrencyId == duplicates[k]).
+                    Select(t => new PatientCostGridData
+                    {
+                        ProcedureId = t.ProcedureId,
+                        PatientCount = t.PatientCount
+                    }).Distinct().ToList();
+
+                    var PatientCostVisit = _context.PatientCost.Include(s => s.ProjectDesignVisit).
+                        Where(x => patientcostprocedTemp.Select(r => r.ProcedureId).Contains(x.ProcedureId) && x.ProjectId == i.ProjectId && x.DeletedBy == null).
+                        GroupBy(g => g.ProjectDesignVisitId)
+                        .Select(t => new VisitGridData
+                        {
+                            FinalCost = t.Sum(r => r.FinalCost)
+                        }).ToList();
+                    totalFinalCost = 0;
+                    PatientCostVisit.ForEach(s => {
+                        totalFinalCost += s.FinalCost;
+                    });
+                    total += totalFinalCost * patientcostprocedTemp.Select(s => s.PatientCount).FirstOrDefault();
+                }
                 decimal? TotalResourceCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == i.Id && s.DeletedBy == null).Sum(d => d.TotalCost);
-                decimal? TotalPatientCost = _context.PatientCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalCost);
+                decimal? TotalPatientCost = Convert.ToDecimal(total);
                 decimal? TotalPassThroughCost = _context.PassThroughCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.Total);
                 decimal? TotalFinalCost = _context.BudgetPaymentFinalCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalTotalAmount);
 
