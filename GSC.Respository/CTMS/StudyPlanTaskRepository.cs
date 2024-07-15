@@ -132,7 +132,7 @@ namespace GSC.Respository.CTMS
         {
             var taskList = All
                 .Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) &&
-                            x.StudyPlanId == studyPlanId &&
+                            x.StudyPlanId == studyPlanId && (x.ParentId == null || x.ParentId == 0) &&
                             (filterType == CtmsStudyTaskFilter.Country ? (countryId <= 0 ? x.IsCountry : x.CountryId == countryId) : filterType == CtmsStudyTaskFilter.All || !x.IsCountry))
                 .Include(i => i.StudyPlan.Project)
                 .OrderBy(x => x.TaskOrder)
