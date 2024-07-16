@@ -21,6 +21,7 @@ namespace GSC.Data.Dto.Master
         public bool IsDocument { get; set; }
         public int? ContractTemplateFormatId { get; set; }
         public string FormatBody { get; set; }
+        public bool? IsApproved { get; set; }
     }
     public class SiteContractGridDto : BaseAuditDto
     {
@@ -34,5 +35,6 @@ namespace GSC.Data.Dto.Master
         public string Remark { get; set; }
         public string ContractFileName { get; set; }
         public string ContractDocumentPath { get; set; }
+        public bool? IsApproved { get; set; }
     }
 }

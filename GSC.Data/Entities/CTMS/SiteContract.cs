@@ -20,5 +20,6 @@ namespace GSC.Data.Entities.CTMS
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
         public ContractTemplateFormat ContractTemplateFormat { get; set; }
+        public bool? IsApproved { get; set; }
     }
 }

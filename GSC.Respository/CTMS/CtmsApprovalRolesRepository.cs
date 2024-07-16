@@ -19,50 +19,49 @@ namespace GSC.Respository.CTMS
         private readonly IGSCContext _context;
         private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public CtmsApprovalRolesRepository(IGSCContext context,
-            IMapper mapper, IJwtTokenAccesser jwtTokenAccesser) : base(context)
+        public CtmsApprovalRolesRepository(IGSCContext context, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
+            : base(context)
         {
             _mapper = mapper;
             _context = context;
             _jwtTokenAccesser = jwtTokenAccesser;
         }
+
         public List<CtmsApprovalRolesGridDto> GetCtmsApprovalWorkFlowList(int projectId, bool isDeleted)
         {
-            var data = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId).
-                    ProjectTo<CtmsApprovalRolesGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            return data;
+            return All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == projectId)
+                      .ProjectTo<CtmsApprovalRolesGridDto>(_mapper.ConfigurationProvider)
+                      .OrderByDescending(x => x.Id)
+                      .ToList();
         }
 
         public List<CtmsApprovalUsersGridDto> GetCtmsApprovalWorkFlowDetailsList(int projectId, bool isDeleted)
         {
-            var data = _context.CtmsApprovalUsers.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.CtmsApprovalRoles.ProjectId == projectId).
-                    ProjectTo<CtmsApprovalUsersGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
-            return data;
+            return _context.CtmsApprovalUsers
+                           .Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.CtmsApprovalRoles.ProjectId == projectId)
+                           .ProjectTo<CtmsApprovalUsersGridDto>(_mapper.ConfigurationProvider)
+                           .OrderByDescending(x => x.Id)
+                           .ToList();
         }
+
         public void ChildUserApprovalAdd(CtmsApprovalRolesDto obj, int id)
         {
-            if (obj.CtmsApprovalUsers.Count > 0)
+            var newUsers = obj.CtmsApprovalUsers
+                              .Select(s => s.UserId)
+                              .Where(item => !_context.CtmsApprovalUsers.Any(x => x.CtmsApprovalRolesId == id && x.DeletedDate == null && x.UserId == item))
+                              .Select(item => new CtmsApprovalUsers { UserId = item, CtmsApprovalRolesId = id });
+
+            if (newUsers.Any())
             {
-                foreach (var item in obj.CtmsApprovalUsers.Select(s => s.UserId))
-                {
-                    var data = _context.CtmsApprovalUsers.Any(x => x.CtmsApprovalRolesId == id
-                    && x.DeletedDate == null && x.UserId == item);
-                    if (!data)
-                    {
-                        CtmsApprovalUsers detail = new CtmsApprovalUsers();
-                        detail.UserId = item;
-                        detail.CtmsApprovalRolesId = id;
-                        _context.CtmsApprovalUsers.Add(detail);
-                        _context.Save();
-                    }
-                }
+                _context.CtmsApprovalUsers.AddRange(newUsers);
+                _context.Save();
             }
         }
 
-        public void DeleteChildWorkflowEmailUser(CtmsApprovalRolesDto obj, int id)
+        public void DeleteChildWorkflowEmailUser(int id)
         {
             var list = _context.CtmsApprovalUsers.Where(s => s.DeletedDate == null && s.CtmsApprovalRolesId == id).ToList();
-            if (list.Count > 0)
+            if (list.Any())
             {
                 _context.CtmsApprovalUsers.RemoveRange(list);
                 _context.Save();
@@ -71,60 +70,56 @@ namespace GSC.Respository.CTMS
 
         public string Duplicate(CtmsApprovalRolesDto obj)
         {
-            if (obj.Id > 0)
-            {
-                foreach (var item in obj.CtmsApprovalUsers)
-                {
-                    var checkExist = _context.CtmsApprovalUsers.Include(x => x.CtmsApprovalRoles)
-                        .Any(c => c.Id != obj.Id && c.UserId == item.UserId && c.CtmsApprovalRoles.SecurityRoleId == obj.SecurityRoleId
-                        && c.CtmsApprovalRoles.ProjectId == obj.ProjectId && c.DeletedDate == null && c.CtmsApprovalRoles.DeletedDate == null && c.CtmsApprovalRoles.TriggerType == obj.TriggerType);
+            var isDuplicate = obj.CtmsApprovalUsers
+                                 .Any(item => _context.CtmsApprovalUsers
+                                                    .Include(x => x.CtmsApprovalRoles)
+                                                    .Any(c => c.Id != obj.Id && c.UserId == item.UserId && c.CtmsApprovalRoles.SecurityRoleId == obj.SecurityRoleId
+                                                         && c.CtmsApprovalRoles.ProjectId == obj.ProjectId && c.DeletedDate == null
+                                                         && c.CtmsApprovalRoles.DeletedDate == null && c.CtmsApprovalRoles.TriggerType == obj.TriggerType));
 
-                    if (checkExist)
-                    {
-                        return "already assigned for this role!";
-                    }
-                }
-            }
-            else
-            {
-                foreach (var item in obj.CtmsApprovalUsers)
-                {
-                    var checkExist = _context.CtmsApprovalUsers.Include(x => x.CtmsApprovalRoles)
-                        .Any(c => c.UserId == item.UserId && c.CtmsApprovalRoles.SecurityRoleId == obj.SecurityRoleId
-                        && c.CtmsApprovalRoles.ProjectId == obj.ProjectId && c.DeletedDate == null && c.CtmsApprovalRoles.DeletedDate == null && c.CtmsApprovalRoles.TriggerType == obj.TriggerType);
-
-                    if (checkExist)
-                    {
-                        return "already assigned for this role!";
-                    }
-                }
-            }
-            return "";
+            return isDuplicate ? "already assigned for this role!" : "";
         }
 
         public List<DropDownDto> GetRoleCtmsRights(int projectId)
         {
-            var projectrights = _context.UserAccess.Include(s => s.UserRole).ThenInclude(d => d.SecurityRole).Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId).
-                        Select(x => new DropDownDto { Id = x.UserRole.SecurityRole.Id, Value = x.UserRole.SecurityRole.RoleName }).Distinct().ToList();
-
-            return projectrights;
+            return _context.UserAccess.Include(s => s.UserRole).ThenInclude(d => d.SecurityRole)
+                                      .Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId)
+                                      .Select(x => new DropDownDto { Id = x.UserRole.SecurityRole.Id, Value = x.UserRole.SecurityRole.RoleName })
+                                      .Distinct()
+                                      .ToList();
         }
+
         public List<DropDownDto> GetUserCtmsRights(int roleId, int projectId)
         {
-
-            var projectrights = _context.UserAccess.Include(s => s.UserRole).ThenInclude(d => d.User).
-                   Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId && w.UserRole.SecurityRole.Id == roleId && w.UserRole.UserId != _jwtTokenAccesser.UserId).
-                   Select(x => new DropDownDto { Id = x.UserRole.User.Id, Value = x.UserRole.User.UserName }).Distinct().ToList();
-
-            return projectrights;
-
+            return _context.UserAccess.Include(s => s.UserRole).ThenInclude(d => d.User)
+                                      .Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId
+                                            && w.UserRole.SecurityRole.Id == roleId && w.UserRole.UserId != _jwtTokenAccesser.UserId)
+                                      .Select(x => new DropDownDto { Id = x.UserRole.User.Id, Value = x.UserRole.User.UserName })
+                                      .Distinct()
+                                      .ToList();
         }
 
-        public bool CheckIsApprover(int projectId,TriggerType triggerType)
+        public bool CheckIsApprover(int projectId, TriggerType triggerType)
         {
-            var isPresent = _context.CtmsApprovalUsers.Any(x => x.DeletedDate == null && x.CtmsApprovalRoles.ProjectId == projectId
-            && x.CtmsApprovalRoles.TriggerType == triggerType && x.UserId == _jwtTokenAccesser.UserId);
-            return isPresent;
+            return _context.CtmsApprovalUsers
+                           .Any(x => x.DeletedDate == null && x.CtmsApprovalRoles.ProjectId == projectId
+                                  && x.CtmsApprovalRoles.TriggerType == triggerType && x.UserId == _jwtTokenAccesser.UserId);
+        }
+
+        public bool CheckIsApproverForSiteContract(int projectId, int siteId, TriggerType triggerType)
+        {
+            return _context.CtmsApprovalUsers
+                           .Any(x => x.DeletedDate == null && x.CtmsApprovalRoles.ProjectId == projectId && x.CtmsApprovalRoles.SiteId == siteId
+                                  && x.CtmsApprovalRoles.TriggerType == triggerType && x.UserId == _jwtTokenAccesser.UserId);
+        }
+
+        public List<DropDownDto> GetSiteList(int projectId)
+        {
+            return _context.UserAccess.Where(w => w.DeletedDate == null && w.ParentProjectId == projectId && w.ParentProjectId != w.ProjectId
+                                            && w.UserRole.SecurityRole.Id == _jwtTokenAccesser.RoleId && w.UserRole.UserId == _jwtTokenAccesser.UserId)
+                                      .Select(x => new DropDownDto { Id = x.ProjectId, Value = x.Project.ManageSite.SiteName })
+                                      .Distinct()
+                                      .ToList();
         }
     }
 }
