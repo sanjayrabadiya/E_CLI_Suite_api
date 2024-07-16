@@ -15,7 +15,9 @@ namespace GSC.Respository.CTMS
         string Duplicate(CtmsApprovalRolesDto obj);
         List<DropDownDto> GetRoleCtmsRights(int projectId);
         List<DropDownDto> GetUserCtmsRights(int roleId, int projectId);
-        void DeleteChildWorkflowEmailUser(CtmsApprovalRolesDto obj, int id);
+        void DeleteChildWorkflowEmailUser(int id);
         bool CheckIsApprover(int projectId, TriggerType triggerType);
+        List<DropDownDto> GetSiteList(int projectId);
+        bool CheckIsApproverForSiteContract(int projectId, int siteId, TriggerType triggerType);
     }
 }

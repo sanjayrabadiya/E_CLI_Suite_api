@@ -874,8 +874,9 @@ namespace GSC.Api.Helpers
             CreateMap<CtmsApprovalRoles, CtmsApprovalRolesGridDto>()
              .ForMember(x => x.ProjectCode, x => x.MapFrom(a => a.Project.ProjectCode))
              .ForMember(x => x.TriggerTypeName, x => x.MapFrom(a => a.TriggerType.GetDescription()))
-              .ForMember(x => x.RoleName, x => x.MapFrom(a => a.SecurityRole.RoleName))
-               .ForMember(x => x.CtmsApprovalRolesId, x => x.MapFrom(a => a.Id))
+             .ForMember(x => x.RoleName, x => x.MapFrom(a => a.SecurityRole.RoleName))
+             .ForMember(x => x.CtmsApprovalRolesId, x => x.MapFrom(a => a.Id))
+             .ForMember(x => x.SiteName, x => x.MapFrom(a => a.Site.ManageSite.SiteName))
              .ReverseMap();
 
             CreateMap<CtmsWorkflowApproval, CtmsWorkflowApprovalGridDto>()
@@ -884,6 +885,13 @@ namespace GSC.Api.Helpers
             .ForMember(x => x.ApproverName, x => x.MapFrom(a => a.User.UserName))
             .ForMember(x => x.ApproverRole, x => x.MapFrom(a => a.Role.RoleName))
             .ReverseMap();
+
+            CreateMap<CtmsSiteContractWorkflowApproval, CtmsSiteContractWorkflowApprovalGridDto>()
+         .ForMember(x => x.ProjectName, x => x.MapFrom(a => a.Project.ProjectCode))
+         .ForMember(x => x.SenderName, x => x.MapFrom(a => a.Sender.UserName))
+         .ForMember(x => x.ApproverName, x => x.MapFrom(a => a.User.UserName))
+         .ForMember(x => x.ApproverRole, x => x.MapFrom(a => a.Role.RoleName))
+         .ReverseMap();
 
             CreateMap<CtmsApprovalUsers, CtmsApprovalUsersGridDto>()
            .ForMember(x => x.UserName, x => x.MapFrom(a => a.Users.UserName))

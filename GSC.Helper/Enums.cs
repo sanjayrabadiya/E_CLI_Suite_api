@@ -1215,12 +1215,13 @@ namespace GSC.Helper
     {
         [Description("Study")] Study = 1,
         [Description("Site")] Site = 2,
-      
+
     }
     public enum TriggerType : short
     {
         [Description("Study Plan")] StudyPlanApproval = 1,
-        [Description("Budget Management")] BudgetManagementApproved = 2
+        [Description("Budget Management")] BudgetManagementApproved = 2,
+        [Description("Site Contract")] SiteContractApproval = 3
     }
 
     public enum DateTypeResource : short
@@ -1229,7 +1230,7 @@ namespace GSC.Helper
         [Description("Schedule End Date")] ScheduleEndDate = 2,
         [Description("Actual Start Date")] ActualStartDate = 3,
         [Description("Actual End Date")] ActualEndDate = 4,
-        
+
     }
     public enum MilestoneType : short
     {

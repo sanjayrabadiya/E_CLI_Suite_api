@@ -71,5 +71,9 @@ namespace GSC.Respository.EmailSender
         void SendCtmsApprovalEmail(List<CtmsWorkflowApproval> ctmsWorkflowApprovals);
         void SendCtmsReciverEmail(List<CtmsWorkflowApproval> ctmsWorkflowApprovals);
         void SendCtmsApprovedEmail(List<CtmsWorkflowApproval> ctmsWorkflowApprovals);
+
+        void SendCtmsSiteContractApprovalEmail(List<CtmsSiteContractWorkflowApproval> ctmsWorkflowApprovals);
+        void SendCtmsSiteContractReciverEmail(List<CtmsSiteContractWorkflowApproval> ctmsWorkflowApprovals);
+        void SendCtmsSiteContractApprovedEmail(List<CtmsSiteContractWorkflowApproval> ctmsWorkflowApprovals);
     }
 }
