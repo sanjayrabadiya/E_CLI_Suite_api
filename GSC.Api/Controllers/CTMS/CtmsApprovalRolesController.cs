@@ -94,7 +94,7 @@ namespace GSC.Api.Controllers.CTMS
             _ctmsApprovalRolesRepository.Update(ctmsApprovalWorkFlow);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Updating shipment apporval study product type failed on save."));
-            _ctmsApprovalRolesRepository.DeleteChildWorkflowEmailUser(ctmsApprovalWorkFlowDto, ctmsApprovalWorkFlow.Id);
+            _ctmsApprovalRolesRepository.DeleteChildWorkflowEmailUser(ctmsApprovalWorkFlow.Id);
             _ctmsApprovalRolesRepository.ChildUserApprovalAdd(ctmsApprovalWorkFlowDto, ctmsApprovalWorkFlow.Id);
             return Ok(ctmsApprovalWorkFlow.Id);
         }
@@ -165,6 +165,20 @@ namespace GSC.Api.Controllers.CTMS
         {
             var isPresent = _ctmsApprovalRolesRepository.CheckIsApprover(projectId, triggerType);
             return Ok(isPresent);
+        }
+
+        [HttpGet("CheckIsApproverForSiteContract/{projectId}/{siteId}/{triggerType}")]
+        public IActionResult CheckIsApproverForSiteContract(int projectId, int siteId, TriggerType triggerType)
+        {
+            var isPresent = _ctmsApprovalRolesRepository.CheckIsApproverForSiteContract(projectId, siteId, triggerType);
+            return Ok(isPresent);
+        }
+
+        [HttpGet("GetSiteList/{projectId}")]
+        public IActionResult GetSiteList(int projectId)
+        {
+            var siteList = _ctmsApprovalRolesRepository.GetSiteList(projectId);
+            return Ok(siteList);
         }
     }
 }

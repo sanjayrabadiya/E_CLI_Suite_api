@@ -476,5 +476,6 @@ namespace GSC.Domain.Context
         DbSet<PatientSiteContract> PatientSiteContract { get; set; }
         DbSet<PassthroughSiteContract> PassthroughSiteContract { get; set; }
         DbSet<ContractTemplateFormat> ContractTemplateFormat { get; set; }
+        DbSet<CtmsSiteContractWorkflowApproval> CtmsSiteContractWorkflowApproval { get; set; }
     }
 }

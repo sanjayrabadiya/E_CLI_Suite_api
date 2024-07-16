@@ -446,6 +446,7 @@ namespace GSC.Api.Helpers
             services.AddScoped<IPatientSiteContractRepository, PatientSiteContractRepository>();
             services.AddScoped<IPassthroughSiteContractRepository, PassthroughSiteContractRepository>();
             services.AddScoped<IContractTemplateFormatRepository, ContractTemplateFormatRepository>();
+            services.AddScoped<ICtmsSiteContractWorkflowApprovalRepository, CtmsSiteContractWorkflowApprovalRepository>();
         }
     }
 }
