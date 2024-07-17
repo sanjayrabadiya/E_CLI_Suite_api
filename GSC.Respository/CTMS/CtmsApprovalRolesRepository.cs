@@ -89,10 +89,10 @@ namespace GSC.Respository.CTMS
                                       .ToList();
         }
 
-        public List<DropDownDto> GetUserCtmsRights(int roleId, int projectId)
+        public List<DropDownDto> GetUserCtmsRights(int roleId, int projectId, int siteId)
         {
             return _context.UserAccess.Include(s => s.UserRole).ThenInclude(d => d.User)
-                                      .Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && w.ProjectId == projectId
+                                      .Where(w => w.DeletedBy == null && w.ParentProjectId == projectId && (siteId > 0 ? w.ProjectId == siteId : w.ProjectId == projectId)
                                             && w.UserRole.SecurityRole.Id == roleId && w.UserRole.UserId != _jwtTokenAccesser.UserId)
                                       .Select(x => new DropDownDto { Id = x.UserRole.User.Id, Value = x.UserRole.User.UserName })
                                       .Distinct()
@@ -115,7 +115,7 @@ namespace GSC.Respository.CTMS
 
         public List<DropDownDto> GetSiteList(int projectId)
         {
-            return _context.UserAccess.Where(w => w.DeletedDate == null && w.ParentProjectId == projectId && w.ParentProjectId != w.ProjectId
+            return _context.UserAccess.Where(w => w.DeletedDate == null && w.ParentProjectId == projectId && w.ParentProjectId != w.ProjectId && w.Project.DeletedDate == null
                                             && w.UserRole.SecurityRole.Id == _jwtTokenAccesser.RoleId && w.UserRole.UserId == _jwtTokenAccesser.UserId)
                                       .Select(x => new DropDownDto { Id = x.ProjectId, Value = x.Project.ManageSite.SiteName })
                                       .Distinct()
