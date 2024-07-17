@@ -30,6 +30,7 @@ using Serilog;
 using System.Threading.Tasks;
 using GSC.Data.Entities.Master;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace GSC.Respository.Screening
 {
@@ -504,7 +505,7 @@ namespace GSC.Respository.Screening
 
                 List<ProjectDatabaseDto> result = new List<ProjectDatabaseDto>();
 
-                var TableData = await GetSiteTableData(filters, ProjectCode, variableValues.ToArray(), sites);
+
                 result = await GetSiteData(filters, ProjectCode, variableValues.ToArray(), sites);
 
 
@@ -578,6 +579,9 @@ namespace GSC.Respository.Screening
                 Log.Error($"GroupBy DBDSReport sites  time {DateTime.Now}");
 
                 MainData.Dbds = grpquery;
+
+                var TableData = await GetSiteTableDataNew(filters, ProjectCode, sites);
+
                 MainData.Table = TableData;
 
                 #endregion
@@ -956,183 +960,165 @@ namespace GSC.Respository.Screening
 
                 if (MainData.Table != null)
                 {
-                    var domainwise = MainData.Table.GroupBy(d => d.DomainName).ToList();
-
-                    domainwise.ForEach(domain =>
+                    try
                     {
-
-                        var cellno = 8;
-
-                        var listvariable = new List<ProjectDatabaseTableValueDto>();
-
-                        worksheet = workbook.Worksheets.Add(domain.Key + "_T");
-                        worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
-                        worksheet.Cell(1, 1).Value = "STUDY CODE";
-                        worksheet.Cell(1, 2).Value = "SITE CODE";
-                        worksheet.Cell(1, 3).Value = "SCRNUM";
-                        worksheet.Cell(1, 4).Value = "RANDNUM";
-                        worksheet.Cell(1, 5).Value = "INITIAL";
-                        worksheet.Cell(1, 6).Value = "VISIT";
-                        worksheet.Cell(2, 1).Value = "Study Code";
-                        worksheet.Cell(2, 2).Value = "Site Code";
-                        worksheet.Cell(2, 3).Value = "Screening No";
-                        worksheet.Cell(2, 4).Value = "Enrollment No";
-                        worksheet.Cell(2, 5).Value = "Patient Initial";
-                        worksheet.Cell(2, 6).Value = "Visit";
-                        worksheet.Cell(2, 7).Value = "Panel Name";
-
-                        var tableList = MainData.Table.Where(x => x.DomainName == domain.Key).ToList();
-                        int flag = 0;
-                        tableList.ForEach(d =>
+                        var domainwise = MainData.Table.GroupBy(d => d.DomainCode).Select(c => c.Key).ToList();
+                        domainwise.ForEach(domain =>
                         {
-                            listvariable.AddRange(d.LstVariable);
+                            var dt = new System.Data.DataTable();
 
-                            var jj = 3;
-                            var dd = listvariable.GroupBy(x => x.Initial).ToList();
-                            foreach (var b in dd.ToList())
+                            dt.Columns.Add("StudyCode", typeof(string));
+                            dt.Columns.Add("Sitecode", typeof(string));
+                            dt.Columns.Add("Scrnum", typeof(string));
+                            dt.Columns.Add("Randnum", typeof(string));
+                            dt.Columns.Add("Initial", typeof(string));
+                            dt.Columns.Add("Visit", typeof(string));
+                            dt.Columns.Add("TemplateName", typeof(string));
+
+                            var domainData = MainData.Table.Where(r => r.DomainCode == domain).ToList();
+
+
+                            var runtimeCols = domainData.GroupBy(c => new
                             {
-                                var visitGroup = b.GroupBy(v => v.Visit).ToList();
-
-                                foreach (var item in visitGroup)
-                                {
-                                    var maxloop = item.Max(x => x.MaxLevelNo);
-
-                                    for (int i = 0; i < maxloop; i++)
-                                    {
-                                        // for repeat template
-                                        var repeatlength = item.Where(m => m.ScreeningTemplateParentId != null).ToList().GroupBy(x => x.ScreeningTemplateId).ToList().Count;
-
-                                        worksheet.Row(jj).Cell(1).SetValue(item.FirstOrDefault().ProjectCode);
-                                        worksheet.Row(jj).Cell(2).SetValue(item.FirstOrDefault().ProjectName);
-                                        worksheet.Row(jj).Cell(3).SetValue(item.FirstOrDefault().SubjectNo);
-                                        worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
-                                        worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
-                                        worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
-                                        worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + ". " + b.FirstOrDefault().TemplateName);
-
-                                        // for repeat template
-                                        var repeatorder = 1;
-                                        if (repeatlength > 0)
-                                        {
-                                            for (var m = 0; m < repeatlength; m++)
-                                            {
-                                                jj++;
-                                                worksheet.Row(jj).Cell(1).SetValue(item.FirstOrDefault().ProjectCode);
-                                                worksheet.Row(jj).Cell(2).SetValue(item.FirstOrDefault().ProjectName);
-                                                worksheet.Row(jj).Cell(3).SetValue(item.FirstOrDefault().SubjectNo);
-                                                worksheet.Row(jj).Cell(4).SetValue(item.FirstOrDefault().RandomizationNumber);
-                                                worksheet.Row(jj).Cell(5).SetValue(item.FirstOrDefault().Initial);
-                                                worksheet.Row(jj).Cell(6).SetValue(item.FirstOrDefault().Visit);
-                                                worksheet.Row(jj).Cell(7).SetValue(item.FirstOrDefault().DesignOrder + "." + repeatorder + " " + item.FirstOrDefault().TemplateName);
-                                                repeatorder++;
-                                            }
-                                        }
-
-
-                                        jj++;
-                                    }
-                                }
-
-                                var sf = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == d.TableHeader).ToList().Select(x => x.Address.ColumnNumber);
-                                if (sf.Count() == 0)
-                                {
-                                    flag = 0;
-                                    worksheet.Cell(1, cellno).Value = d.VariableName;
-                                    worksheet.Cell(2, cellno).Value = d.TableHeader;
-                                }
-                                else
-                                {
-                                    flag = 1;
-                                }
-
-                            };
-                            if (flag == 0 || domainwise.Count() > 1)
-                                cellno++;
-                        });
-
-                        tableList.ForEach(data =>
-                        {
-                            var sss = data.TableHeader;
-                            data.LstVariable.ForEach(db =>
+                                c.ProjectDesignTemplateId,
+                                c.VariableName,
+                                c.VariableCode,
+                            }).Select(b => new
                             {
-                                var parent = db.ScreeningTemplateParentId;
+                                b.Key.ProjectDesignTemplateId,
+                                b.Key.VariableCode,
+                                b.Key.VariableName
+                            }).ToList();
 
-                                var column = worksheet.Column(5).CellsUsed().Where(y => y.Value.ToString() == db.Initial).ToList().FirstOrDefault().Address.RowNumber;
-                                var row = worksheet.Row(2).CellsUsed().Where(y => y.Value.ToString() == sss).ToList().FirstOrDefault().Address.ColumnNumber;
-                                var visit = worksheet.Column(6).CellsUsed().Where(y => y.Value.ToString() == db.Visit).ToList().Select(x => x.Address.RowNumber);
-                                var initial = worksheet.Column(5).CellsUsed().Where(y => y.Value.ToString() == db.Initial).ToList().Select(x => x.Address.RowNumber);
-                                // var template = worksheet.Column(7).CellsUsed().Where(y => y.Value.ToString() == db.TemplateName).ToList().Select(x => x.Address.RowNumber);
+                            var variableCodes = runtimeCols.Select(r => r.VariableCode).Distinct().ToList();
 
-                                var abs = visit.Intersect(initial).FirstOrDefault();
-
-                                var level = abs + (int)db.LevelNo - 1;
-
-                                // for repeat template
-                                if (parent != null)
-                                {
-                                    var findparent = repeatdata.Find(x => x.Parent == parent && x.TemplateId == db.ScreeningTemplateId);
-                                    if (findparent != null)
-                                    {
-                                        level = findparent.Row;
-                                    }
-                                    else
-                                    {
-                                        var repeat = new RepeatTemplateDto();
-                                        repeat.TemplateId = db.ScreeningTemplateId;
-                                        repeat.Parent = parent;
-                                        repeat.Row = level + (int)db.RepeatSeqNo;
-                                        repeatdata.Add(repeat);
-
-                                        level = level + (int)db.RepeatSeqNo;
-                                    }
-                                }
-
-
-
-                                if (db.CollectionSource == TableCollectionSource.DateTime)
-                                {
-                                    DateTime dDate;
-                                    var variablevalueformat = db.Value;
-                                    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
-                                    worksheet.Row(level).Cell(row).SetValue(dt);
-                                }
-                                else if (db.CollectionSource == TableCollectionSource.Date)
-                                {
-                                    DateTime dDate;
-                                    var variablevalueformat = db.Value;
-                                    string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                                    worksheet.Row(level).Cell(row).SetValue(dt);
-                                }
-                                else if (db.CollectionSource == TableCollectionSource.Time)
-                                {
-                                    DateTime dDate;
-                                    var variablevalueformat = db.Value;
-                                    var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
-                                    worksheet.Row(level).Cell(row).SetValue(dt);
-                                }
-                                else
-                                {
-                                    worksheet.Row(level).Cell(row).SetValue(db.Value);
-                                }
+                            variableCodes.ForEach(x =>
+                            {
+                                dt.Columns.Add(x.ToString());
                             });
+
+
+                            var subjectData = domainData.GroupBy(r => new
+                            {
+                                r.SubjectNo,
+                                r.Initial,
+                                r.Visit,
+                                r.ScreeningVisitId,
+                                r.ScreeningTemplateId,
+                                r.RandomizationNumber,
+                                r.TemplateName,
+                                r.SiteCode,
+                                r.StudyCode,
+                                r.LevelNo
+                            }).Select(c => new
+                            {
+                                c.Key.Initial,
+                                c.Key.Visit,
+                                c.Key.ScreeningVisitId,
+                                c.Key.ScreeningTemplateId,
+                                c.Key.RandomizationNumber,
+                                c.Key.TemplateName,
+                                c.Key.SiteCode,
+                                c.Key.StudyCode,
+                                c.Key.SubjectNo,
+                                c.Key.LevelNo
+                            }).ToList();
+
+                            subjectData.OrderBy(x=>x.SubjectNo).ToList().ForEach(r =>
+                            {
+                                System.Data.DataRow dr = dt.NewRow();
+                                dr["StudyCode"] = r.StudyCode;
+                                dr["Sitecode"] = r.SiteCode;
+                                dr["Scrnum"] = r.SubjectNo;
+                                dr["Randnum"] = r.RandomizationNumber;
+                                dr["Initial"] = r.Initial;
+                                dr["Visit"] = r.Visit;
+                                dr["TemplateName"] = r.TemplateName;
+
+                                runtimeCols.ForEach(x =>
+                                {
+                                    var valueData = MainData.Table.Where(c => c.ScreeningTemplateId == r.ScreeningTemplateId && c.LevelNo == r.LevelNo && c.VariableCode == x.VariableCode).Select(b =>
+                                    new { b.Value, b.CollectionSource }).FirstOrDefault();
+
+                                    if (valueData != null && !string.IsNullOrEmpty(valueData.Value))
+                                    {
+                                        if (valueData.CollectionSource == TableCollectionSource.DateTime)
+                                        {
+                                            DateTime dDate;
+                                            var variablevalueformat = valueData.Value;
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat + ' ' + GeneralSettings.TimeFormat) : variablevalueformat : "";
+                                            dr[x.VariableCode] = dt;
+                                        }
+                                        else if (valueData.CollectionSource == TableCollectionSource.Date)
+                                        {
+                                            DateTime dDate;
+                                            var variablevalueformat = valueData.Value;
+                                            string dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.DateFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                            dr[x.VariableCode] = dt;
+                                        }
+                                        else if (valueData.CollectionSource == TableCollectionSource.Time)
+                                        {
+                                            DateTime dDate;
+                                            var variablevalueformat = valueData.Value;
+                                            var dt = !string.IsNullOrEmpty(variablevalueformat) ? DateTime.TryParse(variablevalueformat, out dDate) ? DateTime.Parse(variablevalueformat).ToString(GeneralSettings.TimeFormat, CultureInfo.InvariantCulture) : variablevalueformat : "";
+                                            dr[x.VariableCode] = dt;
+                                        }
+                                        else
+                                            dr[x.VariableCode] = valueData.Value;
+                                    }
+
+                                });
+
+                                dt.Rows.Add(dr);
+                            });
+
+                            worksheet = workbook.Worksheets.Add(dt, domain + "_T");
+
+                            worksheet.Tables.FirstOrDefault().Theme = XLTableTheme.None; //works with manully added tables, datatables
+                            worksheet.Rows(1,1).Style.Fill.BackgroundColor = XLColor.LightGray;
+
+                            // Insert a new row at the first position (index 1)
+                            var firstRow = worksheet.Row(1);
+                            firstRow.InsertRowsAbove(1);
+
+                            // manual dataentry
+                            worksheet.Rows(1, 2).Style.Fill.BackgroundColor = XLColor.LightGray;
+                            worksheet.Cell(1, 1).Value = "STUDY CODE";
+                            worksheet.Cell(1, 2).Value = "SITE CODE";
+                            worksheet.Cell(1, 3).Value = "SCRNUM";
+                            worksheet.Cell(1, 4).Value = "RANDNUM";
+                            worksheet.Cell(1, 5).Value = "INITIAL";
+                            worksheet.Cell(1, 6).Value = "VISIT";
+
+                            worksheet.Cell(2, 1).Value = "Study Code";
+                            worksheet.Cell(2, 2).Value = "Site Code";
+                            worksheet.Cell(2, 3).Value = "Screening No";
+                            worksheet.Cell(2, 4).Value = "Enrollment No";
+                            worksheet.Cell(2, 5).Value = "Patient Initial";
+                            worksheet.Cell(2, 6).Value = "Visit";
+                            worksheet.Cell(2, 7).Value = "Panel Name";
+
+
                         });
-                    });
 
+                        // arrange sheet order 
 
-                    // arrange sheet order 
+                        // Get the list of sheet names
+                        var sheetNames = workbook.Worksheets.Select(sheet => sheet.Name).ToList();
 
-                    // Get the list of sheet names
-                    var sheetNames = workbook.Worksheets.Select(sheet => sheet.Name).ToList();
+                        // Sort sheet names alphabetically
+                        sheetNames.Sort();
 
-                    // Sort sheet names alphabetically
-                    sheetNames.Sort();
-
-                    // Reorder the sheets in the workbook
-                    for (int i = 0; i < sheetNames.Count; i++)
-                    {
-                        workbook.Worksheet(sheetNames[i]).Position = i + 1;
+                        // Reorder the sheets in the workbook
+                        for (int i = 0; i < sheetNames.Count; i++)
+                        {
+                            workbook.Worksheet(sheetNames[i]).Position = i + 1;
+                        }
                     }
-
+                    catch (Exception ex)
+                    {
+                        Log.Error(ex, "Table Print Of Dbds");
+                    }
 
                 }
 
@@ -1242,7 +1228,7 @@ namespace GSC.Respository.Screening
                 }
 
                 string path = System.IO.Path.Combine(_uploadSettingRepository.GetDocumentPath(), FolderType.DBDSReport.ToString());
-                if (!Directory.Exists(path))
+                    if (!Directory.Exists(path))
                 {
                     Directory.CreateDirectory(path);
                 }
@@ -1747,11 +1733,10 @@ namespace GSC.Respository.Screening
             }
         }
 
-
-        private async Task<List<ProjectDatabaseTableDto>> GetSiteTableData(ProjectDatabaseSearchDto filters, string ProjectCode, ReportProjectDesignValue[] valueList, List<int> sitesIds)
+        private async Task<List<ProjectDatabaseTableValueDto>> GetSiteTableDataNew(ProjectDatabaseSearchDto filters, string ProjectCode, List<int> sitesIds)
         {
 
-            var tempValue = _context.ScreeningTemplateValueChild.Include(s => s.ScreeningTemplateValue).AsNoTracking().Where(r => sitesIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId) && r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource == CollectionSources.Table);
+            var tempValue = _context.ScreeningTemplateValueChild.AsNoTracking().Where(r => sitesIds.Contains(r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.ProjectId));
 
             #region filters periods subject template visit domain
             if (filters.PeriodIds != null && filters.PeriodIds.Count() > 0)
@@ -1781,66 +1766,50 @@ namespace GSC.Respository.Screening
 
             #endregion filters
 
-            tempValue = tempValue.Where(r => r.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.DeletedDate == null
-                && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.DeletedDate == null
+            tempValue = tempValue.Where(r => r.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.DeletedDate == null && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.DeletedDate == null
                 && r.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.DeletedDate == null &&
-                r.ProjectDesignVariableValue.DeletedDate == null && r.ProjectDesignVariableValue.ProjectDesignVariable.DeletedDate == null
-                && r.ProjectDesignVariableValue.ProjectDesignVariable.CollectionSource == CollectionSources.Table)
-                .Include(x => x.ScreeningTemplateValue)
-                .ThenInclude(x => x.ScreeningTemplate)
-                .ThenInclude(x => x.ProjectDesignTemplate)
-                .ThenInclude(x => x.Domain)
-                .Include(x => x.ScreeningTemplateValue)
-                .ThenInclude(x => x.ScreeningTemplate)
-                .ThenInclude(x => x.ScreeningVisit)
-                .ThenInclude(x => x.ScreeningEntry)
-                .ThenInclude(x => x.Randomization)
-                .ThenInclude(x => x.Project)
-                .Include(x => x.ProjectDesignVariableValue)
-                .ThenInclude(x => x.ProjectDesignVariable)
-                .ThenInclude(x => x.ProjectDesignTemplate)
-                .ThenInclude(x => x.ProjectDesignVisit);
+                r.ScreeningTemplateValue.ProjectDesignVariable.DeletedDate == null
+                && r.ScreeningTemplateValue.ProjectDesignVariable.CollectionSource == CollectionSources.Table);
 
-            var rrr = tempValue.ToList().OrderBy(x => x.ProjectDesignVariableValue.ProjectDesignVariableId).ThenBy(x => x.ProjectDesignVariableValueId)
-                .GroupBy(x => new
+            var result = await tempValue.OrderBy(x=>x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId)
+                .ThenBy(x=>x.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.Id)
+                .ThenBy(x=>x.ScreeningTemplateValue)
+                .ThenBy(x=>x.LevelNo)
+                .Select(v => new ProjectDatabaseTableValueDto
                 {
-                    x.ProjectDesignVariableValueId,
-                    x.ProjectDesignVariableValue.ValueName,
-                    x.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
-                    x.ProjectDesignVariableValue.ProjectDesignVariable.VariableCode,
-                    x.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainCode
-                }).ToList()
-                .Select(y => new ProjectDatabaseTableDto
-                {
-                    TableHeader = y.Key.VariableCode + "_" + y.Key.ValueName,
-                    VariableName = y.Key.VariableName,
-                    DomainName = y.Key.DomainCode,
-                    LstVariable = y.OrderBy(s => s.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntryId).Select(v =>
-                            new ProjectDatabaseTableValueDto
-                            {
-                                ProjectCode = ProjectCode,
-                                ProjectName = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Project.ProjectCode,
-                                LevelNo = v.LevelNo,
-                                Value = v.Value,
-                                Initial = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial,
-                                SubjectNo = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
-                                RandomizationNumber = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
-                                Visit = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
+                    SiteCode = ProjectCode,
+                    StudyCode = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Project.ProjectCode,
+                    LevelNo = v.LevelNo,
+                    Value = v.Value,
+                    Initial = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.Initial,
+                    SubjectNo = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.ScreeningNumber,
+                    RandomizationNumber = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningEntry.Randomization.RandomizationNumber,
+                    Visit = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.ScreeningVisitName +
                                        Convert.ToString(v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber == null ? "" : "_" + v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisit.RepeatedVisitNumber),
-                                DesignOrder = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
-                                TemplateName = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName,
-                                MaxLevelNo = y.Where(r => r.ScreeningTemplateValueId == v.ScreeningTemplateValueId).Max(z => z.LevelNo),
-                                CollectionSource = v.ProjectDesignVariableValue.TableCollectionSource,
+                    DesignOrder = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.DesignOrder,
+                    TemplateName = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningTemplateName +
+                                       Convert.ToString(v.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo == null ? "" : "_" + v.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo),
+                    //MaxLevelNo = y.Where(r => r.ScreeningTemplateValueId == v.ScreeningTemplateValueId).Max(z => z.LevelNo),
+                    CollectionSource = v.ProjectDesignVariableValue.TableCollectionSource,
 
-                                ScreeningTemplateId = v.ScreeningTemplateValue.ScreeningTemplate.Id,
-                                RepeatSeqNo = v.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo,
-                                ScreeningTemplateParentId = v.ScreeningTemplateValue.ScreeningTemplate.ParentId,
+                    ScreeningTemplateId = v.ScreeningTemplateValue.ScreeningTemplate.Id,
+                    RepeatSeqNo = v.ScreeningTemplateValue.ScreeningTemplate.RepeatSeqNo,
+                    ScreeningTemplateParentId = v.ScreeningTemplateValue.ScreeningTemplate.ParentId,
+                    DomainCode = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainCode,
+                    DomainName = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplate.Domain.DomainName,
+                    ScreeningVisitId = v.ScreeningTemplateValue.ScreeningTemplate.ScreeningVisitId,
+                    ProjectDesignTemplateId = v.ScreeningTemplateValue.ScreeningTemplate.ProjectDesignTemplateId,
+                    ProjectDesignVariableId = v.ProjectDesignVariableValue.ProjectDesignVariableId,
+                    ProjectDesignVariableValueId = v.ProjectDesignVariableValue.Id,
+                    VariableName = v.ProjectDesignVariableValue.ProjectDesignVariable.VariableName,
+                    VariableCode = v.ProjectDesignVariableValue.ProjectDesignVariable.VariableCode + "_" + v.ProjectDesignVariableValue.ValueName,
+                }).ToListAsync();
 
-                            }).OrderBy(x => x.SubjectNo).ThenBy(x => x.LevelNo).ToList(),
-                }).ToList();
+            result = result.OrderBy(x => x.ProjectDesignVariableId).ThenBy(x => x.ProjectDesignVariableValueId).ToList();
 
-            return rrr;
+            return result;
         }
+
 
     }
 }
