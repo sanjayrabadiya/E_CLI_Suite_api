@@ -153,10 +153,10 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(rights);
         }
 
-        [HttpGet("GetUserCtmsRights/{roleId}/{projectId}")]
-        public IActionResult GetRoleUserShipmentApproval(int roleId, int projectId)
+        [HttpGet("GetUserCtmsRights/{roleId}/{projectId}/{siteId}")]
+        public IActionResult GetRoleUserShipmentApproval(int roleId, int projectId, int siteId)
         {
-            var rights = _ctmsApprovalRolesRepository.GetUserCtmsRights(roleId, projectId);
+            var rights = _ctmsApprovalRolesRepository.GetUserCtmsRights(roleId, projectId, siteId);
             return Ok(rights);
         }
 
