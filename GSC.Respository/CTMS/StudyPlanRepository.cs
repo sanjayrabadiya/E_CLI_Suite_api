@@ -84,7 +84,8 @@ namespace GSC.Respository.CTMS
                             FinalCost = t.Sum(r => r.FinalCost)
                         }).ToList();
                     totalFinalCost = 0;
-                    PatientCostVisit.ForEach(s => {
+                    PatientCostVisit.ForEach(s =>
+                    {
                         totalFinalCost += s.FinalCost;
                     });
                     total += totalFinalCost * patientcostprocedTemp.Select(s => s.PatientCount).FirstOrDefault();
@@ -105,7 +106,6 @@ namespace GSC.Respository.CTMS
 
         public string ImportTaskMasterData(StudyPlan studyplan)
         {
-
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
@@ -131,8 +131,43 @@ namespace GSC.Respository.CTMS
                     OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType,
                     IsCountry = t.RefrenceType == RefrenceType.Country
-
                 }).ToList();
+
+            if (tasklist.Any(x => x.IsCountry))
+            {
+                var countryTasks = tasklist.Where(x => x.IsCountry).ToList();
+                tasklist.RemoveAll(r => r.IsCountry);
+                countryTasks.ForEach(t =>
+                {
+                    var countryTaskList = _context.Project.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                        && x.DeletedDate == null && x.ParentProjectId == studyplan.ProjectId)
+                        .Include(i => i.ManageSite.City.State)
+                        .GroupBy(g => g.ManageSite.City.State.CountryId)
+                        .Select(s => s.First(x => x.ManageSite.City.State.CountryId == s.Key)).AsEnumerable()
+                        .Select(c => new StudyPlanTask
+                        {
+                            StudyPlanId = t.StudyPlanId,
+                            TaskId = t.TaskId,
+                            TaskName = t.TaskName,
+                            ParentId = t.ParentId,
+                            isMileStone = t.isMileStone,
+                            TaskOrder = t.TaskOrder,
+                            Duration = t.Duration,
+                            StartDate = studyplan.StartDate,
+                            EndDate = t.EndDate,
+                            DependentTaskId = t.DependentTaskId,
+                            ActivityType = t.ActivityType,
+                            OffSet = t.OffSet,
+                            RefrenceType = t.RefrenceType,
+                            IsCountry = true,
+                            CountryId = c.ManageSite.City.State.CountryId,
+                            ProjectId = c.Id
+                        }).ToList();
+
+                    tasklist.AddRange(countryTaskList);
+                });
+            }
 
             tasklist.ForEach(t =>
             {
