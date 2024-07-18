@@ -6,6 +6,7 @@ using GSC.Respository.CTMS;
 using GSC.Data.Entities.CTMS;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -15,14 +16,16 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IProcedureRepository _procedureRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public ProcedureController(IProcedureRepository procedureRepository,
+        public ProcedureController(IProcedureRepository procedureRepository, IJwtTokenAccesser jwtTokenAccesser,
 
             IUnitOfWork uow, IMapper mapper)
         {
             _procedureRepository = procedureRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
@@ -52,6 +55,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validatecode);
                 return BadRequest(ModelState);
             }
+            procedure.IpAddress = _jwtTokenAccesser.IpAddress;
+            procedure.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _procedureRepository.Add(procedure);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Procedure failed on save."));
             return Ok(procedure.Id);
@@ -71,7 +76,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validatecode);
                 return BadRequest(ModelState);
             }
-
+            procedure.IpAddress = _jwtTokenAccesser.IpAddress;
+            procedure.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _procedureRepository.Update(procedure);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Procedure failed on save."));
             return Ok(procedure.Id);

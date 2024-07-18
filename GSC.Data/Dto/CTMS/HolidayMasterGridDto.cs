@@ -10,5 +10,7 @@ namespace GSC.Data.Dto.CTMS
         public DateTime FromDate { get; set; }
         public DateTime ToDate { get; set; }
         public bool IsSite { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

@@ -65,6 +65,8 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.Duration = 0;
                 tastMaster.IsMileStone = true;
             }
+            tastMaster.IpAddress = _jwtTokenAccesser.IpAddress;
+            tastMaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             tastMaster.TaskOrder = _taskMasterRepository.UpdateTaskOrder(taskmasterDto);
             _taskMasterRepository.Add(tastMaster);
 
@@ -86,6 +88,8 @@ namespace GSC.Api.Controllers.CTMS
                 taskmaster.Duration = 0;
                 taskmaster.IsMileStone = true;
             }
+            taskmaster.IpAddress = _jwtTokenAccesser.IpAddress;
+            taskmaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             UpdateRefrenceTypes(taskmaster);
             _taskMasterRepository.Update(taskmaster);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));

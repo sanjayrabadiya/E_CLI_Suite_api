@@ -22,5 +22,7 @@ namespace GSC.Data.Dto.CTMS
         public string AllWeekOff { get; set; }
         public string Frequency { get; set; }
         public bool IsSite { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

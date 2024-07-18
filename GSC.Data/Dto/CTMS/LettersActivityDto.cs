@@ -39,6 +39,8 @@ namespace GSC.Data.Dto.CTMS
         public string Email { get; set; }
         public string UserIntigration { get; set; }
         public string FilePath { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
     public class LettersActivityDateDropDown : BaseDto
     {

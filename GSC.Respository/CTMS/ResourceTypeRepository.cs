@@ -31,10 +31,22 @@ namespace GSC.Respository.CTMS
 
         public List<ResourceTypeGridDto> GetResourceTypeList(bool isDeleted)
         {
-            return All.Where(x => x.DeletedDate != null == isDeleted)
+            var resourcetype= All.Where(x => x.DeletedDate != null == isDeleted)
                       .ProjectTo<ResourceTypeGridDto>(_mapper.ConfigurationProvider)
                       .OrderByDescending(x => x.Id)
                       .ToList();
+            resourcetype.ForEach(x =>
+            {
+                x.User = x.ResourceType == "Material" ? "NA" : x.User;
+                x.Designation = x.Designation == null ? "NA" : x.Designation;
+                x.YersOfExperience = x.YersOfExperience == null ? "NA" : x.YersOfExperience;
+                x.Role = x.Role == null ? "NA" : x.Role;
+                x.User = x.Role == null ? "NA" : x.Role;
+                x.NameOfMaterial = x.NameOfMaterial == "" ? "NA" : x.NameOfMaterial;
+                x.OwnerName = x.OwnerName == "" ? "NA" : x.NameOfMaterial;
+            }
+            );
+            return resourcetype;
         }
 
         public List<DropDownDto> GetUnitTypeDropDown()
