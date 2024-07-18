@@ -101,6 +101,14 @@ namespace GSC.Api.Controllers.CTMS
 
             taskmasterDto.Id = 0;
             var tastMaster = _mapper.Map<StudyPlanTask>(taskmasterDto);
+            if (taskmasterDto.RefrenceType == RefrenceType.Country && taskmasterDto.Position == Position.Child)
+            {
+                var parentTask = _studyPlanTaskRepository.Find(taskmasterDto.ParentId ?? 0);
+                if (parentTask != null)
+                {
+                    tastMaster.CountryId = parentTask.CountryId;
+                }
+            }
             tastMaster.TaskOrder = _studyPlanTaskRepository.UpdateTaskOrder(taskmasterDto);
             var data = _studyPlanTaskRepository.UpdateDependentTaskDate(tastMaster);
             tastMaster.IsCountry = taskmasterDto.RefrenceType == RefrenceType.Country;
