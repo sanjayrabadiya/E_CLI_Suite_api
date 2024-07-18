@@ -12,5 +12,7 @@ namespace GSC.Data.Dto.CTMS
     public class PassThroughCostActivityGridDto : BaseAuditDto
     {
         public string ActivityName { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

@@ -55,5 +55,7 @@ namespace GSC.Data.Dto.CTMS
         public bool? Thursday { get; set; }
         public bool? Friday { get; set; }
         public bool? Saturday { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

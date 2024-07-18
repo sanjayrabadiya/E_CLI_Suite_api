@@ -14,6 +14,8 @@ namespace GSC.Data.Entities.CTMS
         public bool IsMileStone { get; set; }
         public int Duration { get; set; }
         public int? DependentTaskId { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public ActivityType? ActivityType { get; set; }
         public int OffSet { get; set; }
         public List<RefrenceTypes> RefrenceTypes { get; set; } = null;

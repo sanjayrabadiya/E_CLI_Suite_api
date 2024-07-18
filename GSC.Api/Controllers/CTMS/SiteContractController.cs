@@ -84,7 +84,8 @@ namespace GSC.Api.Controllers.Master
             }
 
             var siteContract = _mapper.Map<SiteContract>(siteContractDto);
-
+            siteContract.IpAddress = _jwtTokenAccesser.IpAddress;
+            siteContract.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _siteContractRepository.Add(siteContract);
             if (_uow.Save() <= 0)
             {
@@ -106,6 +107,8 @@ namespace GSC.Api.Controllers.Master
             {
                 taskmaster.ContractDocumentPath = DocumentService.SaveUploadDocument(SiteContractDto.ContractFileModel, _uploadSettingRepository.GetDocumentPath(), _jwtTokenAccesser.CompanyId.ToString(), FolderType.Ctms, "SiteContract");
             }
+            taskmaster.IpAddress = _jwtTokenAccesser.IpAddress;
+            taskmaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
             _siteContractRepository.Update(taskmaster);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));

@@ -14,5 +14,7 @@ namespace GSC.Data.Dto.CTMS
         public string RefrenceType { get; set; }
         public string RefrenceTypes { get; set; }
         public string ActivityType { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

@@ -23,6 +23,8 @@ namespace GSC.Data.Entities.CTMS
         public string NameOfMaterial { get; set; }
         public string OwnerName { get; set; }
         public string ContractorName { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public SecurityRole Role { get; set; }
         public User User { get; set; }
         public Unit Unit { get; set; }

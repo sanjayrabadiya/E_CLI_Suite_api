@@ -34,5 +34,7 @@ namespace GSC.Data.Dto.Master
         public string Remark { get; set; }
         public string ContractFileName { get; set; }
         public string ContractDocumentPath { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }
