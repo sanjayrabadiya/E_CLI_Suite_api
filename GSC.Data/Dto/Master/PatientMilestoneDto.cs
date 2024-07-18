@@ -33,5 +33,7 @@ namespace GSC.Data.Dto.Master
         public string PatientCostVisits { get; set; }
         public string VisitName { get; set; }
         public bool IsInvoiceGenerated { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

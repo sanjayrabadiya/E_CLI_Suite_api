@@ -2,8 +2,10 @@
 using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.Master;
+using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Master;
 using GSC.Respository.Master;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Master
@@ -14,13 +16,15 @@ namespace GSC.Api.Controllers.Master
         private readonly IContractTemplateFormatRepository _contractTemplateFormatRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public ContractTemplateFormatController(IContractTemplateFormatRepository contractTemplateFormatRepository,
+        public ContractTemplateFormatController(IContractTemplateFormatRepository contractTemplateFormatRepository, IJwtTokenAccesser jwtTokenAccesser,
             IUnitOfWork uow, IMapper mapper)
         {
             _contractTemplateFormatRepository = contractTemplateFormatRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -52,6 +56,8 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            ContractTemplateFormat.IpAddress = _jwtTokenAccesser.IpAddress;
+            ContractTemplateFormat.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _contractTemplateFormatRepository.Add(ContractTemplateFormat);
             if (_uow.Save() <= 0)
             {
@@ -75,6 +81,8 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            ContractTemplateFormat.IpAddress = _jwtTokenAccesser.IpAddress;
+            ContractTemplateFormat.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _contractTemplateFormatRepository.Update(ContractTemplateFormat);
             if (_uow.Save() <= 0)
             {

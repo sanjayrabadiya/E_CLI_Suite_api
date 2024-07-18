@@ -15,6 +15,8 @@ namespace GSC.Data.Entities.CTMS
         public string FilePath { get; set; }
         public string AttachmentPath { get; set; }
         public string LetterBody { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public Master.Project Project { get; set; }
         public CtmsActivity Activity { get; set; }
         public LettersFormate LettersFormate { get; set; }

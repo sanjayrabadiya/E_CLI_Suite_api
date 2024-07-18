@@ -48,6 +48,8 @@ namespace GSC.Data.Dto.CTMS
         public string GlobalCurrencySymbol { get; set; }
         public int? UserId { get; set; }
         public int? SecurityRoleId { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
     public class ResourceByEdit
     {

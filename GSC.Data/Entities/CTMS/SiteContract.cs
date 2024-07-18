@@ -16,7 +16,8 @@ namespace GSC.Data.Entities.CTMS
         public bool? IsDocument { get; set; }
         public int? ContractTemplateFormatId { get; set; }
         public string FormatBody { get; set; }
-
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public Master.Project Project { get; set; }
         public Country Country { get; set; }
         public ContractTemplateFormat ContractTemplateFormat { get; set; }

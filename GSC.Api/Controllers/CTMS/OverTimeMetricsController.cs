@@ -5,6 +5,7 @@ using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Respository.CTMS;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -16,13 +17,15 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IOverTimeMetricsRepository _overTimeMetricsRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public OverTimeMetricsController(IUnitOfWork uow, IMapper mapper,
+        public OverTimeMetricsController(IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser,
             IOverTimeMetricsRepository overTimeMasterRepository)
         {
             _uow = uow;
             _mapper = mapper;
             _overTimeMetricsRepository = overTimeMasterRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}/{metricsId}/{projectId}/{countryId}/{siteId}")]
@@ -56,6 +59,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", PlanCheck);
                 return BadRequest(ModelState);
             }
+            taskMaster.IpAddress = _jwtTokenAccesser.IpAddress;
+            taskMaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
             taskMaster.Id = 0;
             taskMaster.If_Active = true;
@@ -82,6 +87,8 @@ namespace GSC.Api.Controllers.CTMS
                 if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
                 var task = _overTimeMetricsRepository.Find(Id);
                 var taskmaster = _mapper.Map<OverTimeMetrics>(task);
+                taskmaster.IpAddress = _jwtTokenAccesser.IpAddress;
+                taskmaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 taskmaster.If_Active = false;
                 _overTimeMetricsRepository.Update(taskmaster);
                 if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
