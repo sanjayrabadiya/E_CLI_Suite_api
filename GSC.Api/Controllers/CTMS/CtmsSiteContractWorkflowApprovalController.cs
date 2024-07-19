@@ -122,7 +122,18 @@ namespace GSC.Api.Controllers.CTMS
                 UpdateSiteContractApprovalStatus(approverDto.SiteContractId);
             }
 
-            NotifyApprovers(new List<CtmsSiteContractWorkflowApprovalDto> { approverDto });
+            var approverDetails = _ctmsWorkflowApprovalRepository.All.Where(x => x.Id == approver.Id
+                           && x.SiteContractId == approver.SiteContractId && x.ProjectId == approver.ProjectId).Include(i => i.User).Include(i => i.Sender)
+                           .Include(i => i.Project).ToList();
+
+
+            if (approverDetails.Any())
+            {
+                if (approver.IsApprove == false)
+                    _emailSenderRespository.SendCtmsSiteContractReciverEmail(approverDetails);
+                else
+                    _emailSenderRespository.SendCtmsSiteContractApprovedEmail(approverDetails);
+            }
             return Ok(approver.Id);
         }
 

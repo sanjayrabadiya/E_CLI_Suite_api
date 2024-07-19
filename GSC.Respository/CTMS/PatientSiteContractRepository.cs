@@ -41,7 +41,7 @@ namespace GSC.Respository.Master
         {
             List<decimal> obj = new List<decimal>();
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
-                Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+                Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.ManageSite.City.State.CountryId).FirstOrDefault();
 
             var EstimatedTotal = _context.PatientCost.
                                 Where(s => s.ProjectDesignVisitId == visitId && s.ProcedureId != null && s.ProjectId == parentProjectId && s.DeletedBy == null && s.Procedure.Currency.CountryId == siteCountryId).
