@@ -209,5 +209,18 @@ namespace GSC.Api.Controllers.CTMS
             var result = _studyPlanRepository.GetApprovalPlanHistory(id, columnName);
             return Ok(result);
         }
+
+        [HttpGet("PullSites/{projectId}")]
+        public IActionResult PullSites(int projectId)
+        {
+            var result = _studyPlanRepository.PullSite(projectId);
+            if (!string.IsNullOrEmpty(result))
+            {
+                ModelState.AddModelError("Message", result);
+                return BadRequest(ModelState);
+            }
+
+            return Ok("");
+        }
     }
 }
