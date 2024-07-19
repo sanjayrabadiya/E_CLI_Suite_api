@@ -19,5 +19,6 @@ namespace GSC.Respository.CTMS
         bool UpdateApprovalPlan(int id, bool ifPlanApproval);
         List<ApprovalPlanHistory> GetApprovalPlanHistory(int id, string columnName);
         string SendMail(int id, bool ifPlanApproval, TriggerType triggerType);
+        string PullSite(int projectId);
     }
 }
