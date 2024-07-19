@@ -438,5 +438,40 @@ namespace GSC.Respository.CTMS
             }
             return "";
         }
+
+
+        public string PullSite(int projectId)
+        {
+            var sites = _context.Project.Where(x => x.DeletedDate == null
+            && x.ParentProjectId == projectId
+            && !All.Any(a => a.DeletedDate == null && a.ProjectId == x.Id)).ToList();
+
+            if (!sites.Any())
+            {
+                return "Latest site not found";
+            }
+
+            var studyplanDto = All.FirstOrDefault(x => x.DeletedDate == null && x.ProjectId == projectId);
+            if (studyplanDto != null)
+            {
+                foreach (var s in sites)
+                {
+                    var data = new StudyPlan();
+                    data.StartDate = studyplanDto.StartDate;
+                    data.EndDate = studyplanDto.EndDate;
+                    data.ProjectId = s.Id;
+                    data.TaskTemplateId = studyplanDto.TaskTemplateId;
+                    data.CurrencyId = studyplanDto.CurrencyId;
+                    var validatecode = Duplicate(data);
+                    if (!string.IsNullOrEmpty(validatecode))
+                    {
+                        return validatecode;
+                    }
+                    Add(data);
+                    if (_context.Save() <= 0) return "Study plan is failed on save.";
+                }
+            }
+            return "";
+        }
     }
 }
