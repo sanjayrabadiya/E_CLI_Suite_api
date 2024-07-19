@@ -83,7 +83,7 @@ namespace GSC.Respository.Master
         {
             //Site->Country To get Visit #Add by mitul on ID: 1621
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
-                Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+                Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.ManageSite.City.State.CountryId).FirstOrDefault();
 
             var data = _context.PatientCost.Include(s => s.ProjectDesignVisit).
                 Where(d => d.ProjectId == parentProjectId && d.ProcedureId != null && d.DeletedBy == null && d.Procedure.Currency.CountryId == siteCountryId)
@@ -100,7 +100,7 @@ namespace GSC.Respository.Master
         {
             List<decimal> obj = new List<decimal>();
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
-                Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+                Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.ManageSite.City.State.CountryId).FirstOrDefault();
 
             var EstimatedTotal = _context.PatientSiteContract.Include(i=>i.SiteContract).
                 Where(w=>w.ProjectDesignVisitId== visitId && w.DeletedBy==null && w.SiteContract.DeletedBy==null && w.SiteContract.ProjectId == parentProjectId && w.SiteContract.SiteId == siteId).Select(s=>s.PayableTotal).FirstOrDefault();
@@ -116,7 +116,7 @@ namespace GSC.Respository.Master
             //Site->Country To get Activite #Add by mitul on ID: 1621
 
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
-                Where(w => w.Id == siteId && w.ParentProjectId == projectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+                Where(w => w.Id == siteId && w.ParentProjectId == projectId && w.DeletedBy == null).Select(x => x.ManageSite.City.State.CountryId).FirstOrDefault();
 
             var data = _context.PassThroughCost.Include(s => s.PassThroughCostActivity).Include(s => s.Country).Where(d => d.ProjectId == projectId && d.CountryId == siteCountryId && d.DeletedBy == null)
                   .Select(c => new DropDownDto
@@ -131,7 +131,7 @@ namespace GSC.Respository.Master
         {
             List<decimal> obj = new List<decimal>();
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
-              Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+              Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.ManageSite.City.State.CountryId).FirstOrDefault();
 
             var PassThroughCost = _context.PassthroughSiteContract.Include(i => i.SiteContract).
                 Where(w => w.PassThroughCostActivityId == passThroughCostActivityId && w.DeletedBy == null && w.SiteContract.DeletedBy == null && w.SiteContract.ProjectId == parentProjectId && w.SiteContract.SiteId == siteId).Select(s => s.PayableTotal).FirstOrDefault();

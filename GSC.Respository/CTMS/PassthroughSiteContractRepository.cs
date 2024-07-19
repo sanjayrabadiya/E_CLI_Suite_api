@@ -40,7 +40,7 @@ namespace GSC.Respository.Master
         {
             List<decimal> obj = new List<decimal>();
             var siteCountryId = _context.Project.Include(m => m.ManageSite).
-              Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.CountryId).FirstOrDefault();
+              Where(w => w.Id == siteId && w.ParentProjectId == parentProjectId && w.DeletedBy == null).Select(x => x.ManageSite.City.State.CountryId).FirstOrDefault();
 
             var PassThroughCost = _context.PassThroughCost.Where(s => s.PassThroughCostActivityId == passThroughCostActivityId && s.ProjectId == parentProjectId && s.CountryId == siteCountryId && s.DeletedBy == null).
                        Sum(d => d.CurrencyRate.LocalCurrencyRate * d.Rate).GetValueOrDefault();
