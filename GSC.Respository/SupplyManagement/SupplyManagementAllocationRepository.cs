@@ -179,7 +179,8 @@ namespace GSC.Respository.SupplyManagement
         public bool CheckRandomizationAssign(SupplyManagementAllocation obj)
         {
 
-            var randomization = _context.Randomization.Include(x => x.Project).Where(x => x.Project.ParentProjectId == obj.ProjectId && x.RandomizationNumber != null).FirstOrDefault();
+            var randomization = _context.Randomization.Include(x => x.Project).Where(x => x.Project.ParentProjectId == obj.ProjectId && x.RandomizationNumber != null
+            && !x.Project.IsTestSite).FirstOrDefault();
             if (randomization != null)
                 return false;
 

@@ -922,7 +922,7 @@ namespace GSC.Respository.SupplyManagement
         public bool CheckfactorrandomizationStarted(int projectId)
         {
             var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == projectId
-            && x.RandomizationNumber != null).FirstOrDefault();
+            && x.RandomizationNumber != null && !x.Project.IsTestSite).FirstOrDefault();
 
             if (randomization != null)
             {

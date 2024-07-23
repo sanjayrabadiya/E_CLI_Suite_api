@@ -144,7 +144,7 @@ namespace GSC.Respository.SupplyManagement
         {
             var SupplyManagementFector = _context.SupplyManagementFector.Where(x => x.Id == id).FirstOrDefault();
             var randomization = _context.Randomization.Where(x => x.Project.ParentProjectId == SupplyManagementFector.ProjectId
-            && x.RandomizationNumber != null).FirstOrDefault();
+            && x.RandomizationNumber != null && !x.Project.IsTestSite).FirstOrDefault();
 
             if (randomization != null)
             {
