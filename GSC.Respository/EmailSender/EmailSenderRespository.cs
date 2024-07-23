@@ -1311,5 +1311,43 @@ namespace GSC.Respository.EmailSender
             body = Regex.Replace(body, "##STUDYCODE##", studyCode, RegexOptions.IgnoreCase);
             return body;
         }
+
+
+
+        public void SendCtmsSiteContractApprovalEmail(List<CtmsSiteContractWorkflowApproval> ctmsWorkflowApprovals)
+        {
+            foreach (var approver in ctmsWorkflowApprovals)
+            {
+                var emailMessage = ConfigureEmail("CtmsSendForApproval", approver.User.UserName);
+                emailMessage.SendTo = approver.User.Email;
+                emailMessage.Subject = ReplaceCtmsApprovalSubject(emailMessage.Subject, approver.Project.ProjectCode);
+                emailMessage.MessageBody = ReplaceCtmsApprovalBody(emailMessage.MessageBody, approver.User.FirstName + " " + approver.User.LastName, approver.Project.ProjectCode, approver.SenderComment, approver.TriggerType.GetDescription());
+                _emailService.SendMail(emailMessage);
+            }
+        }
+
+        public void SendCtmsSiteContractReciverEmail(List<CtmsSiteContractWorkflowApproval> ctmsWorkflowApprovals)
+        {
+            foreach (var approver in ctmsWorkflowApprovals)
+            {
+                var emailMessage = ConfigureEmail("CtmsRecivedForApproval", approver.Sender.UserName);
+                emailMessage.SendTo = approver.Sender.Email;
+                emailMessage.Subject = ReplaceCtmsApprovalSubject(emailMessage.Subject, approver.Project.ProjectCode);
+                emailMessage.MessageBody = ReplaceCtmsReciverBody(emailMessage.MessageBody, approver.Sender.FirstName + " " + approver.Sender.LastName, approver.Project.ProjectCode, approver.ApproverComment, approver.TriggerType.GetDescription(), approver.User.FirstName + " " + approver.User.LastName);
+                _emailService.SendMail(emailMessage);
+            }
+        }
+
+        public void SendCtmsSiteContractApprovedEmail(List<CtmsSiteContractWorkflowApproval> ctmsWorkflowApprovals)
+        {
+            foreach (var approver in ctmsWorkflowApprovals)
+            {
+                var emailMessage = ConfigureEmail("CtmsApproved", approver.Sender.UserName);
+                emailMessage.SendTo = approver.Sender.Email;
+                emailMessage.Subject = ReplaceCtmsApprovalSubject(emailMessage.Subject, approver.Project.ProjectCode);
+                emailMessage.MessageBody = ReplaceCtmsReciverBody(emailMessage.MessageBody, approver.Sender.FirstName + " " + approver.Sender.LastName, approver.Project.ProjectCode, approver.ApproverComment, approver.TriggerType.GetDescription(), approver.User.FirstName + " " + approver.User.LastName);
+                _emailService.SendMail(emailMessage);
+            }
+        }
     }
 }

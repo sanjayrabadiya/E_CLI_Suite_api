@@ -38,5 +38,11 @@ namespace GSC.Respository.Master
             return All.Where(x => isDeleted ? x.DeletedDate != null : x.DeletedDate == null).
                    ProjectTo<PaymentTermsGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
         }
+
+        public List<DropDownDto> GetPaymentTermsDropDown()
+        {
+            return All.Where(x =>x.DeletedDate==null)
+                .Select(c => new DropDownDto { Id = c.Id, Value = c.Terms.ToString(), IsDeleted = c.DeletedDate != null }).OrderBy(o => o.Value).ToList();
+        }
     }
 }

@@ -179,5 +179,48 @@ namespace GSC.Respository.UserMgt
             Update(user);
             _context.Save();
         }
+
+        public List<UserUUIDDto> GetUUIDPatients(PatientDto userDto)
+        {
+            var Users = _context.Randomization.Where(x => x.ProjectId == userDto.ProjectId).Select(x => x.UserId).ToList();
+            var userList = All.Where(x => (userDto.IsDeleted ? x.DeletedDate != null : x.DeletedDate == null) && (Users.Contains(x.Id))).
+                   ProjectTo<UserGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
+
+            List<UserUUIDDto> UUIDuserList = new List<UserUUIDDto>();
+            foreach (var item in userList)
+            {
+
+                var UUIDUser = _context.UserUUID.Where(x => x.UserId == item.Id && x.UUID != "").ToList();
+                foreach (var item1 in UUIDUser)
+                {
+                    UserUUIDDto obj = new UserUUIDDto();
+                    obj.Id = item1.UserId;
+                    obj.UUID = item1.UUID;
+                    obj.Reason = item1.ReasonId == null ? "" : _context.AuditReason.Find(item1.ReasonId).ReasonName;
+                    obj.ReasonOth = item1.ReasonOth;
+                    obj.IsActive = item1.Active;
+                    obj.UserName = item.UserName;
+                    obj.ModifiedByUser = item1.ModifiedBy == null ? "" : _context.Users.Find(item1.ModifiedBy).UserName;
+                    obj.ModifiedDate = item1.ModifiedDate;
+                    UUIDuserList.Add(obj);
+                }
+            }
+
+            return UUIDuserList;
+        }
+
+        public void ResetUUID(int userId)
+        {
+            var user = _context.UserUUID.Where(x => x.UserId == userId && x.Active).ToList();
+
+            foreach (var item in user)
+            {
+                item.Active = false;
+                item.ReasonOth = _jwtTokenAccesser.GetHeader("audit-reason-oth");
+                item.ReasonId = int.Parse(_jwtTokenAccesser.GetHeader("audit-reason-id"));
+                _context.UserUUID.Update(item);
+            }
+            _context.Save();
+        }
     }
 }

@@ -5,6 +5,7 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
 using GSC.Shared.JWTAuth;
@@ -55,6 +56,8 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             WorkingDay.Id = 0;
             var WorkingDaydata = _mapper.Map<WorkingDay>(WorkingDay);
+            WorkingDaydata.IpAddress = _jwtTokenAccesser.IpAddress;
+            WorkingDaydata.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _workingDayRepository.Add(WorkingDaydata);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Holiday failed on save."));
             WorkingDay.Id = WorkingDaydata.Id;
@@ -68,6 +71,8 @@ namespace GSC.Api.Controllers.CTMS
             if (WorkingDay.Id <= 0) return BadRequest();
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
             var WorkingDaydata = _mapper.Map<WorkingDay>(WorkingDay);
+            WorkingDaydata.IpAddress = _jwtTokenAccesser.IpAddress;
+            WorkingDaydata.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             UpdateSiteType(WorkingDaydata);
             _workingDayRepository.Update(WorkingDaydata);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating holiday failed on save."));

@@ -1224,6 +1224,8 @@ namespace GSC.Api.Controllers.Common
 
             return Ok(centri);
         }
+
+        [HttpGet]
         [Route("GetPaymentMilestoneType")]
         public IActionResult GetPaymentMilestoneType()
         {
@@ -1302,6 +1304,19 @@ namespace GSC.Api.Controllers.Common
                 }).OrderBy(o => o.Id).ToList();
 
             return Ok(data);
+        }
+        [HttpGet]
+        [Route("GetBudgetPaymentTypeDataListDropDown")]
+        public IActionResult GetBudgetPaymentTypeDataListDropDown()
+        {
+            var centri = Enum.GetValues(typeof(BudgetPaymentType))
+                .Cast<BudgetPaymentType>().Select(e => new DropDownEnum
+                {
+                    Id = Convert.ToInt16(e),
+                    Value = e.GetDescription()
+                }).OrderBy(o => o.Id).ToList();
+
+            return Ok(centri);
         }
     }
 }

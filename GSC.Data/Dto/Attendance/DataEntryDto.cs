@@ -100,6 +100,17 @@ namespace GSC.Data.Dto.Attendance
 
         public bool IsPatientLevel { get; set; }
         public bool IsNA { get; set; }
+
+        public List<TemplateData> Templates { get; set; }
+    }
+
+    public class TemplateData
+    {
+        public ScreeningTemplateStatus Status { get; set; }
+        public short? ReviewLevel { get; set; }
+        public int Total { get; set; }
+        public bool IsLock { get; set; }
+
     }
 
     public class DataEntryTemplateCountDisplayDto

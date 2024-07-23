@@ -12,14 +12,14 @@ namespace GSC.Respository.CTMS
 {
     public interface IStudyPlanTaskRepository : IGenericRepository<StudyPlanTask>
     {
-        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int StudyPlanId, int ProjectId, CtmsStudyTaskFilter filterType, int siteId, int countryId);
+        StudyPlanTaskGridDto GetStudyPlanTaskList(bool isDeleted, int studyPlanId, int projectId, CtmsStudyTaskFilter filterType, int siteId, int countryId);
         int UpdateTaskOrder(StudyPlantaskParameterDto taskmasterDto);
         string ValidateTask(StudyPlanTask taskmasterDto);
         void UpdateParentDate(int? ParentId);
         void InsertDependentTask(List<DependentTaskParameterDto> dependentTasks, int StudyPlanTaskId);
         void UpdateTaskOrderSequence(int StudyPlanId);
         string UpdateDependentTask(int StudyPlanTaskId);
-        StudyPlanTask UpdateDependentTaskDate(StudyPlanTask StudyPlanTask);
+        StudyPlanTask UpdateDependentTaskDate(StudyPlanTask studyPlanTask);
         DateTime GetNextWorkingDate(NextWorkingDateParameterDto parameterDto);
         string ValidateweekEnd(NextWorkingDateParameterDto parameterDto);
         List<StudyPlanTask> Save(StudyPlanTask taskData);
@@ -31,7 +31,7 @@ namespace GSC.Respository.CTMS
         List<DropDownDto> GetRollDropDown(int studyplanId);
         List<DropDownDto> GetUserDropDown(int studyplanId);
         List<DropDownDto> GetDesignationStdDropDown(int studyplanId);
-        List<StudyPlanTaskDto> getBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
+        List<StudyPlanTaskDto> GetBudgetPlaner(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filterType);
         List<StudyPlanTaskDto> GetSubTaskList(int parentTaskId);
         ParentTaskDate GetChildStartEndDate(int parentTaskId);
         string AddSiteTask(StudyPlantaskParameterDto taskmasterDto);

@@ -18,8 +18,11 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
         public int? PassThroughCostActivityId { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public Master.Project Project { get; set; }
         public PassThroughCostActivity PassThroughCostActivity { get; set; }
+        public List<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
 
     }
 }

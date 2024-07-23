@@ -6,6 +6,8 @@ using GSC.Respository.CTMS;
 using GSC.Data.Entities.CTMS;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using GSC.Shared.JWTAuth;
+using ServiceStack;
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -15,21 +17,23 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IResourceTypeRepository _resourcetypeRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public ResourceTypeController(IResourceTypeRepository resourcetypeRepository,
+        public ResourceTypeController(IResourceTypeRepository resourcetypeRepository, IJwtTokenAccesser jwtTokenAccesser,
 
             IUnitOfWork uow, IMapper mapper)
         {
             _resourcetypeRepository = resourcetypeRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
         // GET: api/<controller>
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
         {
             var resourcetype = _resourcetypeRepository.GetResourceTypeList(isDeleted);
-            resourcetype.ForEach(x => x.User = x.ResourceType == "Material" ? null : x.User);
+           
             return Ok(resourcetype);
         }
 
@@ -54,7 +58,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
-
+            ResourceType.IpAddress = _jwtTokenAccesser.IpAddress;
+            ResourceType.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _resourcetypeRepository.Add(ResourceType);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating ResourceType failed on save."));
             return Ok(ResourceType.Id);
@@ -74,6 +79,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            resourcetype.IpAddress = _jwtTokenAccesser.IpAddress;
+            resourcetype.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
             /* Added by swati for effective Date on 02-06-2019 */
             _resourcetypeRepository.AddOrUpdate(resourcetype);

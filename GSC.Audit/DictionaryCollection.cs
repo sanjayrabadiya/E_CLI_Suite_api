@@ -623,6 +623,9 @@ namespace GSC.Audit
             _dictionaries.Add(new Dictionary { FieldName = "planningType", DisplayName = "Planned Type" });
             _dictionaries.Add(new Dictionary { FieldName = "IfPlanApproval", DisplayName = "if Plan Approval" });
             _dictionaries.Add(new Dictionary { FieldName = "IfBudgetApproval", DisplayName = "if Budget Approval" });
+
+            //Payment Terms Master
+            _dictionaries.Add(new Dictionary { FieldName = "Terms", DisplayName = "Terms" });
         }
     }
 }

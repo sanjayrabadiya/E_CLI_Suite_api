@@ -18,6 +18,8 @@ namespace GSC.Data.Dto.CTMS
         public string Unit { get; set; }
         public decimal? CostPerUnit { get; set; }
         public string CurrencyType { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
     public class DropDownProcedureDto
     {

@@ -122,5 +122,13 @@ namespace GSC.Api.Controllers.Master
 
             return Ok();
         }
+
+
+        [HttpGet]
+        [Route("GetPaymentTermsDropDown")]
+        public IActionResult GetPaymentTermsDropDown()
+        {
+            return Ok(_paymentTermsRepository.GetPaymentTermsDropDown());
+        }
     }
 }

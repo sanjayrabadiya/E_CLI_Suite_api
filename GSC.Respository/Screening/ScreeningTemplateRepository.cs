@@ -124,10 +124,11 @@ namespace GSC.Respository.Screening
             return _screeningTemplateValueChildRepository.All.AsNoTracking().Where(t => t.ScreeningTemplateValueId == ScreeningTemplateValueId && t.DeletedDate == null).ToList();
         }
 
-        private List<ProjectDesignVariableValue> GetProjectDesignVariableValue(int ProjectDesignVariableId)
-        {
-            return _projectDesignVariableValueRepository.All.AsNoTracking().Where(t => t.ProjectDesignVariableId == ProjectDesignVariableId && t.DeletedDate == null).ToList();
-        }
+        // Remove by vipul no reference found 02/07/2024
+        //private List<ProjectDesignVariableValue> GetProjectDesignVariableValue(int ProjectDesignVariableId)
+        //{
+        //    return _projectDesignVariableValueRepository.All.AsNoTracking().Where(t => t.ProjectDesignVariableId == ProjectDesignVariableId && t.DeletedDate == null).ToList();
+        //}
 
         public DesignScreeningTemplateDto GetScreeningTemplate(DesignScreeningTemplateDto designTemplateDto, int screeningTemplateId)
         {
@@ -746,6 +747,7 @@ namespace GSC.Respository.Screening
         // changes for dynamic column 04/06/2023
         public List<ReviewDto> GetReviewReportList(ReviewSearchDto filters)
         {
+            _context.SetConnectionTimeOut(2000);
             int parentprojectid = filters.ProjectId;
             int? siteId = filters.SiteId;
             var parentIds = new List<int>();
@@ -798,7 +800,8 @@ namespace GSC.Respository.Screening
                 ReviewLevelName = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflow.ProjectDesignId == r.ScreeningVisit.ScreeningEntry.ProjectDesignId
                 && x.LevelNo == r.ReviewLevel && x.DeletedDate == null).Select(t => t.SecurityRole.RoleShortName).FirstOrDefault(),
                 // added for dynamic column 04/06/2023
-                WorkFlowReviewList = GetList(r, workflowlevel.WorkFlowText)
+                WorkFlowReviewList = GetList(r, workflowlevel.WorkFlowText),
+                ScreeningTemplateReview = r.ScreeningTemplateReview
             }).ToList();
         }
         // added for dynamic column 04/06/2023
@@ -1629,9 +1632,9 @@ namespace GSC.Respository.Screening
                   .ThenInclude(x => x.ScreeningEntry)
                   .ThenInclude(x => x.Randomization)
                   .Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId
-               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
-               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
-               && (filters.TemplateIds == null || filters.TemplateIds.Contains(x.ProjectDesignTemplateId))
+               && (filters.SubjectIds.Length == 0 || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
+               && (filters.VisitIds.Length == 0 || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
+               && (filters.TemplateIds.Length == 0 || filters.TemplateIds.Contains(x.ProjectDesignTemplateId))
                && (x.ScreeningVisit.Status > ScreeningVisitStatus.NotStarted && x.ScreeningVisit.Status <= ScreeningVisitStatus.InProgress)
                && x.Status == ScreeningTemplateStatus.Pending 
                && !x.IsNA)
@@ -1726,9 +1729,9 @@ namespace GSC.Respository.Screening
                   .ThenInclude(x => x.ScreeningEntry)
                   .ThenInclude(x => x.Randomization)
                   .Where(x => x.ScreeningVisit.ScreeningEntry.ProjectId == filters.SiteId
-               && (filters.SubjectIds == null || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
-               && (filters.VisitIds == null || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
-               && (filters.TemplateIds == null || filters.TemplateIds.Contains(x.Id))
+               && (filters.SubjectIds.Length == 0 || filters.SubjectIds.Contains(x.ScreeningVisit.ScreeningEntry.Id))
+               && (filters.VisitIds.Length == 0 || filters.VisitIds.Contains(x.ProjectDesignTemplate.ProjectDesignVisitId))
+               && (filters.TemplateIds.Length == 0 || filters.TemplateIds.Contains(x.Id))
                && x.IsNA)
                   .Select(x => new NAReportDto
                   {

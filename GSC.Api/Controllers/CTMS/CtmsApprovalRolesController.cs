@@ -88,19 +88,13 @@ namespace GSC.Api.Controllers.CTMS
             if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
             var ctmsApprovalWorkFlow = _mapper.Map<CtmsApprovalRoles>(ctmsApprovalWorkFlowDto);
-            //var validate = _ctmsApprovalRolesRepository.Duplicate(ctmsApprovalWorkFlowDto);
-            //if (!string.IsNullOrEmpty(validate))
-            //{
-            //    ModelState.AddModelError("Message", validate);
-            //    return BadRequest(ModelState);
-            //}
 
             ctmsApprovalWorkFlow.IpAddress = _jwtTokenAccesser.IpAddress;
             ctmsApprovalWorkFlow.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _ctmsApprovalRolesRepository.Update(ctmsApprovalWorkFlow);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Updating shipment apporval study product type failed on save."));
-            _ctmsApprovalRolesRepository.DeleteChildWorkflowEmailUser(ctmsApprovalWorkFlowDto, ctmsApprovalWorkFlow.Id);
+            _ctmsApprovalRolesRepository.DeleteChildWorkflowEmailUser(ctmsApprovalWorkFlow.Id);
             _ctmsApprovalRolesRepository.ChildUserApprovalAdd(ctmsApprovalWorkFlowDto, ctmsApprovalWorkFlow.Id);
             return Ok(ctmsApprovalWorkFlow.Id);
         }
@@ -159,10 +153,10 @@ namespace GSC.Api.Controllers.CTMS
             return Ok(rights);
         }
 
-        [HttpGet("GetUserCtmsRights/{roleId}/{projectId}")]
-        public IActionResult GetRoleUserShipmentApproval(int roleId, int projectId)
+        [HttpGet("GetUserCtmsRights/{roleId}/{projectId}/{siteId}")]
+        public IActionResult GetRoleUserShipmentApproval(int roleId, int projectId, int siteId)
         {
-            var rights = _ctmsApprovalRolesRepository.GetUserCtmsRights(roleId, projectId);
+            var rights = _ctmsApprovalRolesRepository.GetUserCtmsRights(roleId, projectId, siteId);
             return Ok(rights);
         }
 
@@ -171,6 +165,20 @@ namespace GSC.Api.Controllers.CTMS
         {
             var isPresent = _ctmsApprovalRolesRepository.CheckIsApprover(projectId, triggerType);
             return Ok(isPresent);
+        }
+
+        [HttpGet("CheckIsApproverForSiteContract/{projectId}/{siteId}/{triggerType}")]
+        public IActionResult CheckIsApproverForSiteContract(int projectId, int siteId, TriggerType triggerType)
+        {
+            var isPresent = _ctmsApprovalRolesRepository.CheckIsApproverForSiteContract(projectId, siteId, triggerType);
+            return Ok(isPresent);
+        }
+
+        [HttpGet("GetSiteList/{projectId}")]
+        public IActionResult GetSiteList(int projectId)
+        {
+            var siteList = _ctmsApprovalRolesRepository.GetSiteList(projectId);
+            return Ok(siteList);
         }
     }
 }
