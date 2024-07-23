@@ -48,7 +48,6 @@ namespace GSC.Respository.CTMS
             var projectsctms = _context.ProjectSettings.Where(x => x.IsCtms && x.DeletedDate == null && projectList.Contains(x.ProjectId)).Select(x => x.ProjectId).ToList();
             var ctmsProjectList = _context.Project.Where(x => (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId) && x.ProjectCode != null && projectsctms.Any(c => c == x.Id)).ToList();
 
-            //Update main Total from ResourceCost + PatientCost + PassThroughCost
             var StudyplanData1 = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.Project.ParentProjectId == null && ctmsProjectList.Select(c => c.Id).Contains(x.ProjectId)).OrderByDescending(x => x.Id).ToList();
             TotalCostStudyUpdate(StudyplanData1);
 
@@ -57,20 +56,42 @@ namespace GSC.Respository.CTMS
              ProjectTo<StudyPlanGridDto>(_mapper.ConfigurationProvider).ToList();
 
 
-
-            //studyPlanGridDto.ForEach(x => x.IfApprovalWorkFlow = _context.CtmsApprovalWorkFlowDetail.
-            //    Include(i => i.ctmsApprovalWorkFlow).Any(s => s.ctmsApprovalWorkFlow.DeletedDate == null &&
-            //    s.DeletedDate == null && s.ctmsApprovalWorkFlow.ProjectId == x.ProjectId && s.UserId == _jwtTokenAccesser.UserId
-            //    && s.ctmsApprovalWorkFlow.SecurityRoleId == _jwtTokenAccesser.RoleId && s.ctmsApprovalWorkFlow.TriggerType == triggerType));
-
             return studyPlanGridDto;
         }
         public void TotalCostStudyUpdate(List<StudyPlan> StudyPlan)
         {
             StudyPlan.ForEach(i =>
             {
+                //PatientCostVisit Total with PatientCount
+                decimal? totalFinalCost = 0;
+                decimal? total = 0;
+                var patientcostprocedTemp = new List<PatientCostGridData>();
+                var duplicates = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == i.ProjectId && x.ProcedureId != null).GroupBy(i => i.Procedure.CurrencyId).Where(x => x.Count() > 0).Select(val => val.Key).ToList();
+                for (var k = 0; k < duplicates.Count; k++)
+                {
+                    patientcostprocedTemp = _context.PatientCost.Include(s => s.Procedure).Where(x => x.DeletedBy == null && x.ProjectId == i.ProjectId && x.ProcedureId != null && x.Procedure.CurrencyId == duplicates[k]).
+                    Select(t => new PatientCostGridData
+                    {
+                        ProcedureId = t.ProcedureId,
+                        PatientCount = t.PatientCount
+                    }).Distinct().ToList();
+
+                    var PatientCostVisit = _context.PatientCost.Include(s => s.ProjectDesignVisit).
+                        Where(x => patientcostprocedTemp.Select(r => r.ProcedureId).Contains(x.ProcedureId) && x.ProjectId == i.ProjectId && x.DeletedBy == null).
+                        GroupBy(g => g.ProjectDesignVisitId)
+                        .Select(t => new VisitGridData
+                        {
+                            FinalCost = t.Sum(r => r.FinalCost)
+                        }).ToList();
+                    totalFinalCost = 0;
+                    PatientCostVisit.ForEach(s =>
+                    {
+                        totalFinalCost += s.FinalCost;
+                    });
+                    total += totalFinalCost * patientcostprocedTemp.Select(s => s.PatientCount).FirstOrDefault();
+                }
                 decimal? TotalResourceCost = _context.StudyPlanTask.Where(s => s.StudyPlanId == i.Id && s.DeletedBy == null).Sum(d => d.TotalCost);
-                decimal? TotalPatientCost = _context.PatientCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalCost);
+                decimal? TotalPatientCost = Convert.ToDecimal(total);
                 decimal? TotalPassThroughCost = _context.PassThroughCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.Total);
                 decimal? TotalFinalCost = _context.BudgetPaymentFinalCost.Where(s => s.ProjectId == i.ProjectId && s.DeletedBy == null).Sum(d => d.FinalTotalAmount);
 
@@ -85,7 +106,6 @@ namespace GSC.Respository.CTMS
 
         public string ImportTaskMasterData(StudyPlan studyplan)
         {
-
             var holidaylist = _holidayMasterRepository.GetHolidayList(studyplan.ProjectId);
             var weekendlist = _weekEndMasterRepository.GetWorkingDayList(studyplan.ProjectId);
             WorkingDayHelper.InitholidayDate(holidaylist, weekendlist);
@@ -111,8 +131,43 @@ namespace GSC.Respository.CTMS
                     OffSet = t.TaskMaster.OffSet,
                     RefrenceType = t.RefrenceType,
                     IsCountry = t.RefrenceType == RefrenceType.Country
-
                 }).ToList();
+
+            if (tasklist.Any(x => x.IsCountry))
+            {
+                var countryTasks = tasklist.Where(x => x.IsCountry).ToList();
+                tasklist.RemoveAll(r => r.IsCountry);
+                countryTasks.ForEach(t =>
+                {
+                    var countryTaskList = _context.Project.Where(x =>
+                        (x.CompanyId == null || x.CompanyId == _jwtTokenAccesser.CompanyId)
+                        && x.DeletedDate == null && x.ParentProjectId == studyplan.ProjectId)
+                        .Include(i => i.ManageSite.City.State)
+                        .GroupBy(g => g.ManageSite.City.State.CountryId)
+                        .Select(s => s.First(x => x.ManageSite.City.State.CountryId == s.Key)).AsEnumerable()
+                        .Select(c => new StudyPlanTask
+                        {
+                            StudyPlanId = t.StudyPlanId,
+                            TaskId = t.TaskId,
+                            TaskName = t.TaskName,
+                            ParentId = t.ParentId,
+                            isMileStone = t.isMileStone,
+                            TaskOrder = t.TaskOrder,
+                            Duration = t.Duration,
+                            StartDate = studyplan.StartDate,
+                            EndDate = t.EndDate,
+                            DependentTaskId = t.DependentTaskId,
+                            ActivityType = t.ActivityType,
+                            OffSet = t.OffSet,
+                            RefrenceType = t.RefrenceType,
+                            IsCountry = true,
+                            CountryId = c.ManageSite.City.State.CountryId,
+                            ProjectId = c.Id
+                        }).ToList();
+
+                    tasklist.AddRange(countryTaskList);
+                });
+            }
 
             tasklist.ForEach(t =>
             {
@@ -121,7 +176,6 @@ namespace GSC.Respository.CTMS
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
-                    //t.Parent = t;
                     t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
@@ -203,49 +257,50 @@ namespace GSC.Respository.CTMS
         #endregion
         private StudyPlanTask UpdateDependentTaskDate(StudyPlanTask maintask, ref List<StudyPlanTask> tasklist)
         {
-            if (maintask.DependentTaskId > 0)
-            {
-                if (maintask.ActivityType == ActivityType.FF)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet);
-                        maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                else if (maintask.ActivityType == ActivityType.FS)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.StartDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.EndDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextWorkingDay(task.EndDate), maintask.OffSet);
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                else if (maintask.ActivityType == ActivityType.SF)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.EndDate = maintask.isMileStone ? WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet) : WorkingDayHelper.AddBusinessDays(WorkingDayHelper.GetNextSubstarctWorkingDay(task.StartDate), maintask.OffSet);
-                        maintask.StartDate = WorkingDayHelper.SubtractBusinessDays(maintask.EndDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                else if (maintask.ActivityType == ActivityType.SS)
-                {
-                    var task = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
-                    if (task != null)
-                    {
-                        maintask.StartDate = WorkingDayHelper.AddBusinessDays(task.StartDate, maintask.OffSet);
-                        maintask.EndDate = WorkingDayHelper.AddBusinessDays(maintask.StartDate, maintask.Duration > 0 ? maintask.Duration - 1 : 0);
-                    }
-                }
-                return maintask;
-            }
-            return null;
-        }
+            if (maintask.DependentTaskId <= 0) return null;
 
+            var dependentTask = tasklist.Find(x => x.TaskId == maintask.DependentTaskId);
+            if (dependentTask == null) return null;
+
+            DateTime CalculateStartDate(DateTime baseDate, int duration)
+            {
+                return WorkingDayHelper.SubtractBusinessDays(baseDate, duration > 0 ? duration - 1 : 0);
+            }
+
+            DateTime CalculateEndDate(DateTime baseDate, int offset)
+            {
+                return WorkingDayHelper.AddBusinessDays(baseDate, offset);
+            }
+
+            switch (maintask.ActivityType)
+            {
+                case ActivityType.FF:
+                    maintask.EndDate = CalculateEndDate(dependentTask.EndDate, maintask.OffSet);
+                    maintask.StartDate = CalculateStartDate(maintask.EndDate, maintask.Duration);
+                    break;
+
+                case ActivityType.FS:
+                    maintask.StartDate = maintask.isMileStone
+                        ? CalculateEndDate(dependentTask.EndDate, maintask.OffSet)
+                        : CalculateEndDate(WorkingDayHelper.GetNextWorkingDay(dependentTask.EndDate), maintask.OffSet);
+                    maintask.EndDate = CalculateEndDate(maintask.StartDate, maintask.Duration - 1);
+                    break;
+
+                case ActivityType.SF:
+                    maintask.EndDate = maintask.isMileStone
+                        ? CalculateEndDate(dependentTask.StartDate, maintask.OffSet)
+                        : CalculateEndDate(WorkingDayHelper.GetNextSubstarctWorkingDay(dependentTask.StartDate), maintask.OffSet);
+                    maintask.StartDate = CalculateStartDate(maintask.EndDate, maintask.Duration);
+                    break;
+
+                case ActivityType.SS:
+                    maintask.StartDate = CalculateEndDate(dependentTask.StartDate, maintask.OffSet);
+                    maintask.EndDate = CalculateEndDate(maintask.StartDate, maintask.Duration - 1);
+                    break;
+            }
+
+            return maintask;
+        }
         public string ValidateTask(StudyPlanTask taskmasterDto, List<StudyPlanTask> tasklist, StudyPlan studyplan)
         {
             if (taskmasterDto.StartDate >= studyplan.StartDate && taskmasterDto.StartDate <= studyplan.EndDate
@@ -314,7 +369,6 @@ namespace GSC.Respository.CTMS
                 {
                     t.StartDate = data.StartDate;
                     t.EndDate = data.EndDate;
-                    //t.Parent = t;
                     t.DependentTask = tasklist.Find(d => d.TaskId == t.DependentTaskId);
                     t.DependentTaskId = null;
                 }
@@ -381,6 +435,41 @@ namespace GSC.Respository.CTMS
 
                     _emailSenderRespository.SendMailCtmsApproval(i, ifPlanApproval);
                 });
+            }
+            return "";
+        }
+
+
+        public string PullSite(int projectId)
+        {
+            var sites = _context.Project.Where(x => x.DeletedDate == null
+            && x.ParentProjectId == projectId
+            && !All.Any(a => a.DeletedDate == null && a.ProjectId == x.Id)).ToList();
+
+            if (!sites.Any())
+            {
+                return "Latest site not found";
+            }
+
+            var studyplanDto = All.FirstOrDefault(x => x.DeletedDate == null && x.ProjectId == projectId);
+            if (studyplanDto != null)
+            {
+                foreach (var s in sites)
+                {
+                    var data = new StudyPlan();
+                    data.StartDate = studyplanDto.StartDate;
+                    data.EndDate = studyplanDto.EndDate;
+                    data.ProjectId = s.Id;
+                    data.TaskTemplateId = studyplanDto.TaskTemplateId;
+                    data.CurrencyId = studyplanDto.CurrencyId;
+                    var validatecode = Duplicate(data);
+                    if (!string.IsNullOrEmpty(validatecode))
+                    {
+                        return validatecode;
+                    }
+                    Add(data);
+                    if (_context.Save() <= 0) return "Study plan is failed on save.";
+                }
             }
             return "";
         }

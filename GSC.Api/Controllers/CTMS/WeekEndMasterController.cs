@@ -10,6 +10,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Data.Entities.Master;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using Syncfusion.XlsIO.Implementation.XmlReaders;
 using static SkiaSharp.HarfBuzz.SKShaper;
@@ -24,14 +25,16 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IWeekEndMasterRepository _weekEndMasterRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public WeekEndMasterController(IUnitOfWork uow, IMapper mapper,
-        IGSCContext context, IWeekEndMasterRepository weekEndMasterRepository)
+        IGSCContext context, IWeekEndMasterRepository weekEndMasterRepository, IJwtTokenAccesser jwtTokenAccesser)
         {
             _uow = uow;
             _mapper = mapper;
             _context = context;
             _weekEndMasterRepository = weekEndMasterRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -101,6 +104,8 @@ namespace GSC.Api.Controllers.CTMS
             {
                 item.Id = 0;
                 var weekend = _mapper.Map<WeekEndMaster>(item);
+                weekend.IpAddress = _jwtTokenAccesser.IpAddress;
+                weekend.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
                 _weekEndMasterRepository.Add(weekend);
             }
@@ -124,7 +129,8 @@ namespace GSC.Api.Controllers.CTMS
                 if (!ModelState.IsValid) return new UnprocessableEntityObjectResult(ModelState);
 
                 var weekend = _mapper.Map<WeekEndMaster>(item);
-
+                weekend.IpAddress = _jwtTokenAccesser.IpAddress;
+                weekend.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
                 _weekEndMasterRepository.Update(weekend);
             }
             if (_uow.Save() <= 0) return Ok(new Exception("Weekend is failed on save."));

@@ -5,6 +5,7 @@ using GSC.Data.Dto.Project.Design;
 using GSC.Data.Dto.Report;
 using GSC.Data.Dto.Screening;
 using GSC.Data.Entities.Screening;
+using GSC.Helper;
 
 namespace GSC.Respository.Screening
 {
@@ -35,5 +36,7 @@ namespace GSC.Respository.Screening
         bool IsEligible(int VolunteerId);
 
         void UpdateDefaultValueForDosing(IList<DesignScreeningVariableDto> variableList, int screeningTemplateId, bool IsDosing);
+
+        bool CheckOldValue(string originalString, CollectionSources? collectionSource);
     }
 }

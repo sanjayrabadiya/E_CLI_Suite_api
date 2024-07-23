@@ -6,6 +6,7 @@ using GSC.Respository.CTMS;
 using GSC.Data.Entities.CTMS;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using GSC.Shared.JWTAuth;
 
 namespace GSC.Api.Controllers.CTMS
 {
@@ -15,14 +16,16 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IPassThroughCostActivityRepository _passThroughCostActivityRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public PassThroughCostActivityController(IPassThroughCostActivityRepository passThroughCostActivityRepository,
+        public PassThroughCostActivityController(IPassThroughCostActivityRepository passThroughCostActivityRepository, IJwtTokenAccesser jwtTokenAccesser,
 
             IUnitOfWork uow, IMapper mapper)
         {
             _passThroughCostActivityRepository = passThroughCostActivityRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
         [HttpGet("{isDeleted:bool?}")]
         public IActionResult Get(bool isDeleted)
@@ -52,6 +55,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            PassThroughCostActivity.IpAddress = _jwtTokenAccesser.IpAddress;
+            PassThroughCostActivity.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
             _passThroughCostActivityRepository.Add(PassThroughCostActivity);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Pass Through Cost Activity failed on save."));
@@ -72,6 +77,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            PassThroughCostActivity.IpAddress = _jwtTokenAccesser.IpAddress;
+            PassThroughCostActivity.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _passThroughCostActivityRepository.Update(PassThroughCostActivity);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Pass Through Cost Activity failed on save."));
             return Ok(PassThroughCostActivity.Id);

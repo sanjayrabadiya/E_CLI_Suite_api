@@ -140,14 +140,14 @@ namespace GSC.Api.Controllers.Screening
             return Ok(screeningEntry.Id);
         }
 
-        [HttpGet]
-        [Route("Progress/{screeningEntryId}/{screeningTemplateId}")]
-        public IActionResult Progress(int screeningEntryId, int screeningTemplateId)
-        {
-            var progress = _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplateId);
+        //[HttpGet]
+        //[Route("Progress/{screeningEntryId}/{screeningTemplateId}")]
+        //public IActionResult Progress(int screeningEntryId, int screeningTemplateId)
+        //{
+        //    var progress = _screeningProgress.GetScreeningProgress(screeningEntryId, screeningTemplateId);
 
-            return Ok(progress);
-        }
+        //    return Ok(progress);
+        //}
 
         [HttpGet("AutoCompleteSearch")]
         public IActionResult AutoCompleteSearch(string searchText)
@@ -307,9 +307,9 @@ namespace GSC.Api.Controllers.Screening
         }
 
         // NA Report for visit
-        [HttpGet]
+        [HttpPost]
         [Route("GetNAReportData")]
-        public IActionResult GetNAReportData([FromQuery] NAReportSearchDto filters)
+        public IActionResult GetNAReportData([FromBody] NAReportSearchDto filters)
         {
             if (filters.SiteId <= 0) return BadRequest();
 
@@ -333,9 +333,9 @@ namespace GSC.Api.Controllers.Screening
             return Ok(true);
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetAReportData")]
-        public IActionResult GetAReportData([FromQuery] NAReportSearchDto filters)
+        public IActionResult GetAReportData([FromBody] NAReportSearchDto filters)
         {
             if (filters.SiteId <= 0) return BadRequest();
 
@@ -358,6 +358,8 @@ namespace GSC.Api.Controllers.Screening
             }
             return Ok();
         }
+
+        [HttpGet]
         [Route("GetGenericSubjectByProjecId/{projectId}")]
         public IActionResult GetGenericSubjectByProjecId(int projectId)
         {

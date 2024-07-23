@@ -4,7 +4,9 @@ using GSC.Api.Controllers.Common;
 using GSC.Common.UnitOfWork;
 using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
+using GSC.Data.Entities.Master;
 using GSC.Respository.Master;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.Master
@@ -16,8 +18,9 @@ namespace GSC.Api.Controllers.Master
         private readonly ILettersFormateRepository _lettersFormateRepository;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public LettersActivityController(ILettersActivityRepository lettersActivityRepository,
+        public LettersActivityController(ILettersActivityRepository lettersActivityRepository, IJwtTokenAccesser jwtTokenAccesser,
             ILettersFormateRepository lettersFormateRepository,
             IUnitOfWork uow, IMapper mapper)
         {
@@ -25,6 +28,7 @@ namespace GSC.Api.Controllers.Master
             _lettersFormateRepository = lettersFormateRepository;
             _uow = uow;
             _mapper = mapper;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}/{projectId:int?}")]
@@ -54,7 +58,8 @@ namespace GSC.Api.Controllers.Master
 
             lettersActivityDto.Id = 0;
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
-
+            lettersActivity.IpAddress = _jwtTokenAccesser.IpAddress;
+            lettersActivity.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _lettersActivityRepository.Add(lettersActivity);
             if (_uow.Save() <= 0) return Ok(new Exception("letters Formate failed on save."));
             return Ok(lettersActivity.Id);
@@ -69,6 +74,8 @@ namespace GSC.Api.Controllers.Master
             _lettersActivityRepository.updateLettersEmail(lettersActivityDto);
 
             var lettersActivity = _mapper.Map<LettersActivity>(lettersActivityDto);
+            lettersActivity.IpAddress = _jwtTokenAccesser.IpAddress;
+            lettersActivity.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _lettersActivityRepository.Update(lettersActivity);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating letters Formate failed on save."));
             return Ok(lettersActivity.Id);

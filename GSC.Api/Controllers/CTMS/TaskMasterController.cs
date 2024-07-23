@@ -65,14 +65,14 @@ namespace GSC.Api.Controllers.CTMS
                 tastMaster.Duration = 0;
                 tastMaster.IsMileStone = true;
             }
+            tastMaster.IpAddress = _jwtTokenAccesser.IpAddress;
+            tastMaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             tastMaster.TaskOrder = _taskMasterRepository.UpdateTaskOrder(taskmasterDto);
             _taskMasterRepository.Add(tastMaster);
 
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Task failed on save."));
             taskmasterDto.Id = tastMaster.Id;
             _taskMasterRepository.AddRefrenceTypes(taskmasterDto);
-            //this comment not remove add by mitul on 0805-2024
-            //_taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(tastMaster.Id);
         }
 
@@ -88,11 +88,11 @@ namespace GSC.Api.Controllers.CTMS
                 taskmaster.Duration = 0;
                 taskmaster.IsMileStone = true;
             }
+            taskmaster.IpAddress = _jwtTokenAccesser.IpAddress;
+            taskmaster.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             UpdateRefrenceTypes(taskmaster);
             _taskMasterRepository.Update(taskmaster);
             if (_uow.Save() <= 0) return Ok(new Exception("Updating Task Master failed on save."));
-            //this comment not remove add by mitul on 0805-2024
-            // _taskMasterRepository.AddTaskToSTudyPlan(taskmasterDto);
             return Ok(taskmaster.Id);
         }
 

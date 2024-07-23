@@ -13,5 +13,6 @@ namespace GSC.Respository.Master
     {
         string Duplicate(PaymentTerms objSave);
         List<PaymentTermsGridDto> GetPaymentTermsList(bool isDeleted);
+        List<DropDownDto> GetPaymentTermsDropDown();
     }
 }

@@ -18,6 +18,7 @@ using GSC.Data.Entities.InformConcent;
 using GSC.Data.Entities.LabManagement;
 using GSC.Data.Entities.LabReportManagement;
 using GSC.Data.Entities.LanguageSetup;
+using GSC.Data.Entities.License;
 using GSC.Data.Entities.Location;
 using GSC.Data.Entities.LogReport;
 using GSC.Data.Entities.Master;
@@ -460,10 +461,21 @@ namespace GSC.Domain.Context
         DbSet<PatientMilestone> PatientMilestone { get; set; }
         DbSet<PassthroughMilestone> PassthroughMilestone { get; set; }
         DbSet<BudgetPaymentFinalCost> BudgetPaymentFinalCost { get; set; }
-         DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
+        DbSet<CtmsApprovalRoles> CtmsApprovalRoles { get; set; }
         DbSet<CtmsApprovalUsers> CtmsApprovalUsers { get; set; }
         DbSet<CtmsWorkflowApproval> CtmsWorkflowApproval { get; set; }
         DbSet<CtmsStudyPlanTaskComment> CtmsStudyPlanTaskComment { get; set; }
         DbSet<PaymentTerms> PaymentTerms { get; set; }
+        DbSet<PassthroughMilestoneInvoice> PassthroughMilestoneInvoice { get; set; }
+        DbSet<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
+        DbSet<ResourceMilestoneInvoice> ResourceMilestoneInvoice { get; set; }
+        DbSet<UserUUID> UserUUID { get; set; }
+        DbSet<LiecenceObj> LiecenceObj { get; set; }
+        DbSet<SitePayment> SitePayment { get; set; }
+        DbSet<SiteContract> SiteContract { get; set; }
+        DbSet<PatientSiteContract> PatientSiteContract { get; set; }
+        DbSet<PassthroughSiteContract> PassthroughSiteContract { get; set; }
+        DbSet<ContractTemplateFormat> ContractTemplateFormat { get; set; }
+        DbSet<CtmsSiteContractWorkflowApproval> CtmsSiteContractWorkflowApproval { get; set; }
     }
 }

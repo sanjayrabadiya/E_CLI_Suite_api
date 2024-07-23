@@ -97,7 +97,8 @@ namespace GSC.Respository.Project.EditCheck
         public List<EditCheckVisit> GetProjectDesignVisitIds(int projectDesignId)
         {
             var result = All.Where(x => x.EditCheck.ProjectDesignId == projectDesignId
-              && x.CheckBy == EditCheckRuleBy.ByVisit && x.IsTarget).
+              && x.CheckBy == EditCheckRuleBy.ByVisit && x.IsTarget && x.DeletedDate == null
+              && x.EditCheck.DeletedDate == null).
                  Select(r => new EditCheckVisit
                  {
                      ProjectDesignVisitId = r.ProjectDesignVisitId,

@@ -92,10 +92,31 @@ namespace GSC.Respository.Project.Workflow
         public WorkFlowLevelDto GetProjectWorkLevel(int projectDesignId)
         {
             short levelNo = -1;
-            var projectWork = FindBy(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).Select(t => new
+            var projectWork = All.Where(x => x.ProjectDesignId == projectDesignId && x.DeletedDate == null).Select(t => new
             {
                 t.Id,
-                t.IsVisitBase
+                t.IsVisitBase,
+                Levels = t.Levels.Where(e => e.DeletedDate == null).Select(r => new
+                {
+                    LevelNo = r.LevelNo,
+                    RoleName = r.SecurityRole.RoleShortName,
+                    r.IsWorkFlowBreak,
+                    r.SecurityRoleId,
+                    r.IsDataEntryUser,
+                    r.IsGenerateQuery,
+                    r.IsStartTemplate,
+                    r.IsElectricSignature,
+                    r.IsLock,
+                    r.IsNoCRF
+                }).ToList(),
+                Independents = t.Independents.Where(b => b.DeletedDate == null).Select(u => new
+                {
+                    u.SecurityRoleId,
+                    u.IsStartTemplate,
+                    u.IsDataEntryUser,
+                    u.IsGenerateQuery
+
+                }).ToList()
             }).FirstOrDefault();
 
             var workFlowText = new List<WorkFlowText>();
@@ -112,20 +133,15 @@ namespace GSC.Respository.Project.Workflow
                     SelfCorrection = false
                 };
 
-            var projectWorkflowLevel = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWork.Id
-                                                                      && x.DeletedDate == null).ToList();
 
-            workFlowText = _context.ProjectWorkflowLevel.Where(x => x.ProjectWorkflowId == projectWork.Id && x.DeletedDate == null).Select(r => new WorkFlowText
+            workFlowText = projectWork.Levels.Select(r => new WorkFlowText
             {
                 LevelNo = r.LevelNo,
-                RoleName = r.SecurityRole.RoleShortName
+                RoleName = r.RoleName
             }).ToList();
 
 
-            var independent = _context.ProjectWorkflowIndependent.Where(x => x.ProjectWorkflowId == projectWork.Id
-                                                                                      && x.SecurityRoleId ==
-                                                                                      _jwtTokenAccesser.RoleId
-                                                                                      && x.DeletedDate == null).FirstOrDefault();
+            var independent = projectWork.Independents.Where(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId).FirstOrDefault();
 
             levelNo = 0;
             if (independent != null)
@@ -134,16 +150,16 @@ namespace GSC.Respository.Project.Workflow
                     IsLock = false,
                     WorkFlowText = workFlowText,
                     IsStartTemplate = independent.IsStartTemplate,
-                    IsWorkFlowBreak = projectWorkflowLevel.Exists(t => t.IsWorkFlowBreak),
+                    IsWorkFlowBreak = projectWork.Levels.Any(t => t.IsWorkFlowBreak),
                     LevelNo = levelNo,
                     SelfCorrection = independent.IsDataEntryUser,
                     IsGenerateQuery = independent.IsGenerateQuery,
                     IsVisitBase = projectWork.IsVisitBase ?? false
                 };
 
-            var level = projectWorkflowLevel.Find(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId && x.DeletedDate == null);
+            var level = projectWork.Levels.FirstOrDefault(x => x.SecurityRoleId == _jwtTokenAccesser.RoleId);
 
-            var totalLevels = projectWorkflowLevel.Select(c => c.LevelNo).ToList();
+            var totalLevels = projectWork.Levels.Select(c => c.LevelNo).ToList();
 
             int totalLevel = 0;
             if (totalLevels.Count > 0)
@@ -158,7 +174,7 @@ namespace GSC.Respository.Project.Workflow
                     WorkFlowText = workFlowText,
                     TotalLevel = totalLevel,
                     IsStartTemplate = level.IsStartTemplate,
-                    IsWorkFlowBreak = projectWorkflowLevel.Exists(t => t.IsWorkFlowBreak),
+                    IsWorkFlowBreak = projectWork.Levels.Any(t => t.IsWorkFlowBreak),
                     LevelNo = level.LevelNo,
                     SelfCorrection = level.IsDataEntryUser,
                     IsGenerateQuery = level.IsGenerateQuery,
@@ -174,7 +190,7 @@ namespace GSC.Respository.Project.Workflow
                 IsLock = false,
                 IsStartTemplate = true,
                 WorkFlowText = workFlowText,
-                IsWorkFlowBreak = projectWorkflowLevel.Exists(t => t.IsWorkFlowBreak),
+                IsWorkFlowBreak = projectWork.Levels.Any(t => t.IsWorkFlowBreak),
                 LevelNo = levelNo,
                 SelfCorrection = false,
                 IsVisitBase = projectWork.IsVisitBase ?? false

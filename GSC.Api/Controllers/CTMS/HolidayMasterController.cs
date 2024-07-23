@@ -7,6 +7,7 @@ using GSC.Data.Dto.CTMS;
 using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Respository.CTMS;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 
 namespace GSC.Api.Controllers.CTMS
@@ -18,14 +19,16 @@ namespace GSC.Api.Controllers.CTMS
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
         private readonly IHolidayMasterRepository _holidayMasterRepository;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
         public HolidayMasterController(IUnitOfWork uow, IMapper mapper,
-          IGSCContext context, IHolidayMasterRepository holidayMasterRepository)
+          IGSCContext context, IHolidayMasterRepository holidayMasterRepository, IJwtTokenAccesser jwtTokenAccesser)
         {
             _uow = uow;
             _mapper = mapper;
             _context = context;
             _holidayMasterRepository = holidayMasterRepository;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet("{isDeleted:bool?}")]
@@ -68,6 +71,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            holiDay.IpAddress = _jwtTokenAccesser.IpAddress;
+            holiDay.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _holidayMasterRepository.Add(holiDay);
             if (_uow.Save() <= 0) return Ok(new Exception("Creating Holiday failed on save."));
             return Ok(holiDay.Id);
@@ -94,6 +99,8 @@ namespace GSC.Api.Controllers.CTMS
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            holiDay.IpAddress = _jwtTokenAccesser.IpAddress;
+            holiDay.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
 
             _holidayMasterRepository.Update(holiDay);
 

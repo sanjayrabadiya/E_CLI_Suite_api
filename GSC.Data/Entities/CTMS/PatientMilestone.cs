@@ -18,8 +18,11 @@ namespace GSC.Data.Entities.CTMS
         public decimal? PaybalAmount { get; set; }
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public Master.Project Project { get; set; }
         public int? ProjectDesignVisitId { get; set; }
         public ProjectDesignVisit ProjectDesignVisit { get; set; }
+        public List<PatientMilestoneInvoice> PatientMilestoneInvoice { get; set; }
     }
 }

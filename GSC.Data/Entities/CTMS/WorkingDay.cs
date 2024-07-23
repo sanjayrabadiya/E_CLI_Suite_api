@@ -38,6 +38,8 @@ namespace GSC.Data.Entities.CTMS
         public DateTime? SatEndTime { get; set; }
         public string SatTotalHour { get; set; }
         public string  TotalHour { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
         public List<SiteTypes> siteTypes { get; set; } = null;
     }
 }

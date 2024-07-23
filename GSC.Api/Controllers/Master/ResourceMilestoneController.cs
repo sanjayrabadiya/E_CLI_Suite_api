@@ -6,6 +6,7 @@ using GSC.Data.Entities.CTMS;
 using GSC.Domain.Context;
 using GSC.Helper;
 using GSC.Respository.Master;
+using GSC.Shared.JWTAuth;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 
@@ -19,14 +20,16 @@ namespace GSC.Api.Controllers.Master
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _uow;
         private readonly IGSCContext _context;
+        private readonly IJwtTokenAccesser _jwtTokenAccesser;
 
-        public ResourceMilestoneController(IGSCContext context, IResourceMilestoneRepository PaymentMilestoneRepository, IUnitOfWork uow, IMapper mapper)
+        public ResourceMilestoneController(IGSCContext context, IResourceMilestoneRepository PaymentMilestoneRepository, IUnitOfWork uow, IMapper mapper, IJwtTokenAccesser jwtTokenAccesser)
             
         {
             _paymentMilestoneRepository = PaymentMilestoneRepository;
             _uow = uow;
             _mapper = mapper;
             _context = context;
+            _jwtTokenAccesser = jwtTokenAccesser;
         }
 
         [HttpGet]
@@ -61,6 +64,8 @@ namespace GSC.Api.Controllers.Master
                 ModelState.AddModelError("Message", validate);
                 return BadRequest(ModelState);
             }
+            paymentMilestone.IpAddress = _jwtTokenAccesser.IpAddress;
+            paymentMilestone.TimeZone = _jwtTokenAccesser.GetHeader("clientTimeZone");
             _paymentMilestoneRepository.Add(paymentMilestone);
             if (_uow.Save() <= 0)
             {

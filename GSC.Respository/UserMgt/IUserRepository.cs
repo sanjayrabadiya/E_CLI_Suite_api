@@ -20,6 +20,7 @@ namespace GSC.Respository.UserMgt
         LoginResponseDto GetLoginDetails();
         Task<UserLockedGridDto> GetLockedUsers();
         void UpdateFirebaseToken(int userId, UserFirebaseToken token);
-
+        List<UserUUIDDto> GetUUIDPatients(PatientDto userDto);
+        void ResetUUID(int userId);
     }
 }

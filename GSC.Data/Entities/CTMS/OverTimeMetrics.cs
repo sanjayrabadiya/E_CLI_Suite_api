@@ -18,5 +18,7 @@ namespace GSC.Data.Entities.CTMS
         public int? ActualPlannedno { get; set; }
         public Master.Project Project { get; set; }
         public PlanningType PlanningType { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
     }
 }

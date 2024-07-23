@@ -73,5 +73,6 @@ namespace GSC.Respository.Master
         IList<DropDownDto> GetSitesByTemplateId(int templateId);
 
         void AddDefaultRandomizationEntry(Data.Entities.Master.Project project);
+        List<ProjectDropDown> GetParentStaticProjectDropDownWithLicense();
     }
 }

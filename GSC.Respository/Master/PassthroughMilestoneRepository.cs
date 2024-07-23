@@ -35,7 +35,7 @@ namespace GSC.Respository.Master
         {
             var PaymentMilestoneData = new List<PassthroughMilestoneGridDto>();
 
-            PaymentMilestoneData = All.Where(x => x.DeletedDate == null && x.ProjectId == parentProjectId).
+            PaymentMilestoneData = All.Where(x => (isDeleted ? x.DeletedDate != null : x.DeletedDate == null) && x.ProjectId == parentProjectId).
                         ProjectTo<PassthroughMilestoneGridDto>(_mapper.ConfigurationProvider).OrderByDescending(x => x.Id).ToList();
             return PaymentMilestoneData;
         }

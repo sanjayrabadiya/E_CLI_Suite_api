@@ -743,5 +743,12 @@ namespace GSC.Api.Controllers.Master
             var sites = _projectRepository.GetSitesByTemplateId(templateId);
             return Ok(sites);
         }
+
+        [HttpGet]
+        [Route("GetUUIDParentProjectDropDown")]
+        public IActionResult GetUUIDParentProjectDropDown()
+        {
+            return Ok(_projectRepository.GetParentStaticProjectDropDownWithLicense());
+        }
     }
 }

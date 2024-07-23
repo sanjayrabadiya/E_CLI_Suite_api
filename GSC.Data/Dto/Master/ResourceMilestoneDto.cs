@@ -38,6 +38,9 @@ namespace GSC.Data.Dto.Master
         public DateTime? DueDate { get; set; }
         public string Remark { get; set; }
         public string StudyPlanTask { get; set; }
+        public bool IsInvoiceGenerated { get; set; }
+        public string IpAddress { get; set; }
+        public string TimeZone { get; set; }
 
     }
 }

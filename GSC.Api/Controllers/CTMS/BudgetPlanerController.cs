@@ -18,7 +18,7 @@ namespace GSC.Api.Controllers.CTMS
         [HttpGet("{isDeleted:bool?}/{studyId:int}/{siteId:int}/{countryId:int}/{filter}")]
         public IActionResult Get(bool isDeleted, int studyId, int siteId, int countryId, CtmsStudyTaskFilter filter)
         {
-            var studyplan = _studyPlanTaskRepository.getBudgetPlaner(isDeleted, studyId, siteId, countryId, filter);
+            var studyplan = _studyPlanTaskRepository.GetBudgetPlaner(isDeleted, studyId, siteId, countryId, filter);
             return Ok(studyplan);
         }
 

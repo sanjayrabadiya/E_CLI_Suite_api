@@ -47,7 +47,7 @@ namespace GSC.Api.Controllers.Master
         {
             if (projectId <= 0) return BadRequest();
 
-            var result = _ctmsMonitoringReportRepository.GetMonitoringFormApprovedOrNOt(projectId, siteId, tabNumber);
+            var result = _ctmsMonitoringReportRepository.GetMonitoringFormApprovedOrNot(projectId, siteId, tabNumber);
             if (!string.IsNullOrEmpty(result))
             {
                 ModelState.AddModelError("Message", result);
